@@ -51,8 +51,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="m-4">
-    <p class="">{{ leagueName }}</p>
+  <div class="container mx-auto">
+    <h2 class="text-3xl font-extrabold dark:text-white my-4">
+      {{ leagueName }}
+    </h2>
+
     <Table :users="leagueUsers" :rosters="leagueRosters" />
   </div>
 </template>
