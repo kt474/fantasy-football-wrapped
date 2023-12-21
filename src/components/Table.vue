@@ -10,16 +10,18 @@ const tableData = computed(() => {
     ...a,
     ...props.rosters.find((b: any) => b.id === a.id),
   }));
-  return combined.sort((a: any, b: any) => {
+  const res = combined.sort((a: any, b: any) => {
     if (a.wins !== b.wins) {
       return b.wins - a.wins;
     }
     return b.pointsFor - a.pointsFor;
   });
+  return res;
 });
 </script>
 <template>
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <h2 class="text-2xl font-bold dark:text-white mb-4">Power Rankings</h2>
     <table
       class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
     >

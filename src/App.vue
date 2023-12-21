@@ -1,62 +1,29 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import Table from "./components/Table.vue";
-
+import { getLeague, getRosters, getUsers, getMatchup } from "./api";
 const leagueName = ref("");
 const leagueRosters = ref([]);
 const leagueUsers = ref([]);
-
-const getLeague = async () => {
-  const response = await fetch(
-    "https://api.sleeper.app/v1/league/992195707941212160"
-  );
-  const league = await response.json();
-  leagueName.value = league.name;
-};
-const getRosters = async () => {
-  const response = await fetch(
-    "https://api.sleeper.app/v1/league/992195707941212160/rosters"
-  );
-  const rosters = await response.json();
-  const result = rosters.map((roster: any) => {
-    return {
-      id: roster["owner_id"],
-      pointsFor: roster["settings"]["fpts"],
-      pointsAgainst: roster["settings"]["fpts_against"],
-      wins: roster["settings"]["wins"],
-      losses: roster["settings"]["losses"],
-    };
-  });
-  leagueRosters.value = result;
-};
-const getUsers = async () => {
-  const response = await fetch(
-    "https://api.sleeper.app/v1/league/992195707941212160/users"
-  );
-  const users = await response.json();
-  const result = users.map((user: any) => {
-    return {
-      id: user["user_id"],
-      name: user["metadata"]["team_name"] || user["display_name"],
-    };
-  });
-  leagueUsers.value = result;
-};
+const leagueMatchups = ref([]);
 
 onMounted(async () => {
-  await getLeague();
-  await getRosters();
-  await getUsers();
+  leagueName.value = await getLeague();
+  leagueRosters.value = await getRosters();
+  leagueUsers.value = await getUsers();
+  leagueMatchups.value = await getMatchup(1);
 });
 </script>
 
 <template>
-  <div class="container mx-auto">
-    <h2 class="text-3xl font-extrabold dark:text-white my-4">
-      {{ leagueName }}
-    </h2>
+  <div class="">
+    <div class="container mx-auto">
+      <h2 class="text-3xl font-bold dark:text-white my-4">
+        {{ leagueName }}
+      </h2>
 
-    <Table :users="leagueUsers" :rosters="leagueRosters" />
+      <Table :users="leagueUsers" :rosters="leagueRosters" />
+    </div>
   </div>
 </template>
 
