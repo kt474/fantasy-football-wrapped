@@ -2,7 +2,7 @@
 import { groupBy, flatten } from "lodash";
 import { onMounted, ref, computed } from "vue";
 import Table from "./components/Table.vue";
-import { getLeague, getRosters, getUsers, getMatchup } from "./api";
+import { getLeague, getRosters, getUsers, getMatchup } from "./api/api";
 const leagueInfo = ref({ name: "", regularSeasonLength: 0 });
 const leagueRosters = ref([]);
 const leagueUsers = ref([]);
