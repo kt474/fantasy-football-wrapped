@@ -1,5 +1,4 @@
 <script setup lang="ts">
-//@ts-ignore
 import { groupBy, flatten } from "lodash";
 import { onMounted, ref, computed } from "vue";
 import Table from "./components/Table.vue";

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-//@ts-ignore
-import { mean, max, min } from "lodash";
+import { mean, max, min, zip } from "lodash";
 import { computed, ref } from "vue";
 const tableOrder = ref("wins");
 const props = defineProps<{
@@ -22,6 +21,7 @@ const originalData = computed(() => {
   combinedPoints.forEach((value: any) => {
     value["rating"] = powerRanking(
       mean(value.points),
+      // @ts-ignore
       max(value.points),
       min(value.points),
       value.wins / (value.wins + value.losses)
@@ -64,11 +64,33 @@ const powerRanking = (
   lowScore: number,
   winPercentage: number
 ) => {
-  return (
-    (avgScore * 6 + (highScore + lowScore) * 2 + winPercentage * 400) /
-    10
-  ).toFixed(2);
+  return Number(
+    (
+      (avgScore * 6 + (highScore + lowScore) * 2 + winPercentage * 400) /
+      10
+    ).toFixed(2)
+  );
 };
+
+const median = (arr: number[]): number | undefined => {
+  if (!arr.length) return undefined;
+  const s = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+};
+
+const medianScores = computed(() => {
+  const arr: any = [];
+  tableData.value.forEach((value: any) => {
+    arr.push(value.points);
+  });
+  const zipped = zip(...arr);
+  const medians: number[] = [];
+  zipped.forEach((value: any) => {
+    medians.push(Number(median(value)?.toFixed(2)));
+  });
+  return medians;
+});
 </script>
 <template>
   <h2 class="text-2xl font-bold dark:text-white mb-4">Power Rankings</h2>
@@ -177,4 +199,12 @@ const powerRanking = (
       </tbody>
     </table>
   </div>
+  <p class="my-2 text-sm">
+    Rating equation is from
+    <a
+      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+      href="http://www.okiraqi.org/opr.html"
+      >http://www.okiraqi.org/opr.html</a
+    >
+  </p>
 </template>
