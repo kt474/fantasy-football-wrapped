@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "flowbite": "^2.2.1",
+    "lodash": "^4.17.21",
     "vue": "^3.3.11"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@vitejs/plugin-vue": "^4.5.2",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",

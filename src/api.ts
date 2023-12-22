@@ -3,7 +3,10 @@ export const getLeague = async () => {
     "https://api.sleeper.app/v1/league/992195707941212160"
   );
   const league = await response.json();
-  return league["name"];
+  return {
+    name: league["name"],
+    regularSeasonLength: league["settings"]["playoff_week_start"] - 1,
+  };
 };
 
 export const getRosters = async () => {
@@ -43,6 +46,11 @@ export const getMatchup = async (week: number) => {
     `https://api.sleeper.app/v1/league/992195707941212160/matchups/${week}`
   );
   const matchup = await response.json();
-  console.log(matchup);
-  return matchup;
+  const result = matchup.map((matchup: any) => {
+    return {
+      rosterId: matchup["roster_id"],
+      points: matchup["points"],
+    };
+  });
+  return result;
 };
