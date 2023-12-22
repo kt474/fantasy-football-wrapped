@@ -2,7 +2,7 @@
 //@ts-ignore
 import { mean, max, min } from "lodash";
 import { computed, ref } from "vue";
-const tableOrder = ref("");
+const tableOrder = ref("wins");
 const props = defineProps<{
   users: Array<object>;
   rosters: Array<object>;
@@ -37,26 +37,25 @@ const originalData = computed(() => {
 
 const tableData: any = computed(() => {
   if (tableOrder.value === "wins") {
-    return tableData.value.sort((a: any, b: any) => {
+    return originalData.value.sort((a: any, b: any) => {
       if (a.wins !== b.wins) {
         return b.wins - a.wins;
       }
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "points") {
-    return tableData.value.sort((a: any, b: any) => {
+    return originalData.value.sort((a: any, b: any) => {
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "pointsAgainst") {
-    return tableData.value.sort((a: any, b: any) => {
+    return originalData.value.sort((a: any, b: any) => {
       return b.pointsAgainst - a.pointsAgainst;
     });
   } else if (tableOrder.value === "rating") {
-    return tableData.value.sort((a: any, b: any) => {
+    return originalData.value.sort((a: any, b: any) => {
       return b.rating - a.rating;
     });
   }
-  return originalData.value;
 });
 
 const powerRanking = (
@@ -88,6 +87,7 @@ const powerRanking = (
               <a class="cursor-pointer" @click="tableOrder = 'wins'"
                 ><svg
                   class="w-3 h-3 ms-1.5"
+                  :class="{ 'fill-blue-500': tableOrder == 'wins' }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -105,6 +105,7 @@ const powerRanking = (
               <a class="cursor-pointer" @click="tableOrder = 'points'"
                 ><svg
                   class="w-3 h-3 ms-1.5"
+                  :class="{ 'fill-blue-500': tableOrder == 'points' }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -122,6 +123,7 @@ const powerRanking = (
               <a class="cursor-pointer" @click="tableOrder = 'pointsAgainst'"
                 ><svg
                   class="w-3 h-3 ms-1.5"
+                  :class="{ 'fill-blue-500': tableOrder == 'pointsAgainst' }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -139,6 +141,7 @@ const powerRanking = (
               <a class="cursor-pointer" @click="tableOrder = 'rating'"
                 ><svg
                   class="w-3 h-3 ms-1.5"
+                  :class="{ 'fill-blue-500': tableOrder == 'rating' }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
