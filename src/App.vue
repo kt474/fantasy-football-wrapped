@@ -48,7 +48,6 @@ const getWeeklyPoints = async () => {
     );
     allTeams.push(Object.values(consolidatedObject)[0]);
   });
-
   return allTeams;
 };
 </script>
@@ -58,8 +57,11 @@ const getWeeklyPoints = async () => {
     <h2 class="text-3xl font-bold dark:text-white my-4">
       {{ leagueInfo["name"] }}
     </h2>
-
-    <Table :users="leagueUsers" :rosters="leagueRosters" />
+    <Table
+      :users="leagueUsers"
+      :rosters="leagueRosters"
+      :points="weeklyPoints"
+    />
   </div>
 </template>
 
