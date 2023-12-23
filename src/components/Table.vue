@@ -1,6 +1,7 @@
 <script setup lang="ts">
 //@ts-ignore
-import { mean, max, min, zip, countBy } from "lodash";
+import { mean, max, min, zip, countBy, maxBy, minBy } from "lodash";
+import { getPowerRanking, getMedian } from "../api/helper";
 import { computed, ref } from "vue";
 const tableOrder = ref("wins");
 const props = defineProps<{
@@ -20,7 +21,7 @@ const originalData = computed(() => {
   }));
 
   combinedPoints.forEach((value: any) => {
-    value["rating"] = powerRanking(
+    value["rating"] = getPowerRanking(
       mean(value.points),
       // @ts-ignore
       max(value.points),
@@ -36,7 +37,7 @@ const originalData = computed(() => {
   const zipped = zip(...pointsArr);
   const medians: number[] = [];
   zipped.forEach((value: any) => {
-    medians.push(Number(median(value)?.toFixed(2)));
+    medians.push(Number(getMedian(value)?.toFixed(2)));
   });
 
   combinedPoints.forEach((value: any) => {
@@ -86,26 +87,38 @@ const tableData: any = computed(() => {
   }
 });
 
-const powerRanking = (
-  avgScore: number,
-  highScore: number,
-  lowScore: number,
-  winPercentage: number
-) => {
-  return Number(
-    (
-      (avgScore * 6 + (highScore + lowScore) * 2 + winPercentage * 400) /
-      10
-    ).toFixed(2)
-  );
-};
+const mostWins = computed(() => {
+  return maxBy(originalData.value, "wins")?.wins;
+});
 
-const median = (arr: number[]): number | undefined => {
-  if (!arr.length) return undefined;
-  const s = [...arr].sort((a, b) => a - b);
-  const mid = Math.floor(s.length / 2);
-  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-};
+const mostLosses = computed(() => {
+  return maxBy(originalData.value, "losses")?.losses;
+});
+
+const mostPoints = computed(() => {
+  return maxBy(originalData.value, "pointsFor")?.pointsFor;
+});
+const leastPoints = computed(() => {
+  return minBy(originalData.value, "pointsFor")?.pointsFor;
+});
+const mostPointsAgainst = computed(() => {
+  return maxBy(originalData.value, "pointsAgainst")?.pointsAgainst;
+});
+const leastPointsAgainst = computed(() => {
+  return minBy(originalData.value, "pointsAgainst")?.pointsAgainst;
+});
+const highestRating = computed(() => {
+  return maxBy(originalData.value, "rating")?.rating;
+});
+const lowestRating = computed(() => {
+  return minBy(originalData.value, "rating")?.rating;
+});
+const mostMedianWins = computed(() => {
+  return maxBy(originalData.value, "winsWithMedian")?.winsWithMedian;
+});
+const mostMedianLosses = computed(() => {
+  return maxBy(originalData.value, "lossesWithMedian")?.lossesWithMedian;
+});
 </script>
 <template>
   <h2 class="text-2xl font-bold dark:text-white mb-4">Power Rankings</h2>
@@ -222,13 +235,53 @@ const median = (arr: number[]): number | undefined => {
           >
             {{ item.name }}
           </th>
-          <td class="px-6 py-4">{{ item.wins }} - {{ item.losses }}</td>
-          <td class="px-6 py-4">{{ item.pointsFor }}</td>
-          <td class="px-6 py-4">{{ item.pointsAgainst }}</td>
-          <td class="px-6 py-4">
+          <td
+            class="px-6 py-4"
+            :class="{
+              'text-blue-500 font-semibold': item.wins === mostWins,
+              'text-red-500 font-semibold': item.losses === mostLosses,
+            }"
+          >
+            {{ item.wins }} - {{ item.losses }}
+          </td>
+          <td
+            class="px-6 py-4"
+            :class="{
+              'text-blue-500 font-semibold': item.pointsFor === mostPoints,
+              'text-red-500 font-semibold': item.pointsFor === leastPoints,
+            }"
+          >
+            {{ item.pointsFor }}
+          </td>
+          <td
+            class="px-6 py-4"
+            :class="{
+              'text-blue-500 font-semibold':
+                item.pointsAgainst === mostPointsAgainst,
+              'text-red-500 font-semibold':
+                item.pointsAgainst === leastPointsAgainst,
+            }"
+          >
+            {{ item.pointsAgainst }}
+          </td>
+          <td
+            class="px-6 py-4"
+            :class="{
+              'text-blue-500 font-semibold': item.rating === highestRating,
+              'text-red-500 font-semibold': item.rating === lowestRating,
+            }"
+          >
             {{ item.rating }}
           </td>
-          <td class="px-6 py-4">
+          <td
+            class="px-6 py-4"
+            :class="{
+              'text-blue-500 font-semibold':
+                item.winsWithMedian === mostMedianWins,
+              'text-red-500 font-semibold':
+                item.lossesWithMedian === mostMedianLosses,
+            }"
+          >
             {{ item.winsWithMedian }} - {{ item.lossesWithMedian }}
           </td>
         </tr>
