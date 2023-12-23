@@ -90,11 +90,9 @@ const tableData: any = computed(() => {
 const mostWins = computed(() => {
   return maxBy(originalData.value, "wins")?.wins;
 });
-
 const mostLosses = computed(() => {
   return maxBy(originalData.value, "losses")?.losses;
 });
-
 const mostPoints = computed(() => {
   return maxBy(originalData.value, "pointsFor")?.pointsFor;
 });
@@ -121,8 +119,8 @@ const mostMedianLosses = computed(() => {
 });
 </script>
 <template>
-  <h2 class="text-2xl font-bold dark:text-white mb-4">Power Rankings</h2>
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+  <h2 class="text-xl font-semibold dark:text-white mx-4">Power Rankings</h2>
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg mx-4">
     <table
       class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
     >
@@ -291,13 +289,4 @@ const mostMedianLosses = computed(() => {
       </tbody>
     </table>
   </div>
-  <p class="my-3 text-sm">
-    Rating equation is from
-    <a
-      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-      href="http://www.okiraqi.org/opr.html"
-      target="_blank"
-      >http://www.okiraqi.org/opr.html</a
-    >
-  </p>
 </template>

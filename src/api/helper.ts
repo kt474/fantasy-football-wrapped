@@ -1,3 +1,4 @@
+// helper methods
 export const getPowerRanking = (
   avgScore: number,
   highScore: number,

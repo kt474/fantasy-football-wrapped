@@ -3,6 +3,8 @@
 import { groupBy, flatten } from "lodash";
 import { onMounted, ref, computed } from "vue";
 import Table from "./components/Table.vue";
+import Header from "./components/Header.vue";
+import Footer from "./components/Footer.vue";
 import { getLeague, getRosters, getUsers, getMatchup } from "./api/api";
 const leagueInfo = ref({ name: "", regularSeasonLength: 0 });
 const leagueRosters = ref([]);
@@ -53,15 +55,19 @@ const getWeeklyPoints = async () => {
 </script>
 
 <template>
-  <div class="container mx-auto">
-    <h2 class="text-3xl font-bold dark:text-white my-4">
-      {{ leagueInfo["name"] }}
-    </h2>
-    <Table
-      :users="leagueUsers"
-      :rosters="leagueRosters"
-      :points="weeklyPoints"
-    />
+  <div class="bg-slate-50">
+    <div class="container mx-auto">
+      <Header />
+      <h2 class="text-2xl font-semibold dark:text-white m-4">
+        {{ leagueInfo["name"] }}
+      </h2>
+      <Table
+        :users="leagueUsers"
+        :rosters="leagueRosters"
+        :points="weeklyPoints"
+      />
+      <Footer />
+    </div>
   </div>
 </template>
 
