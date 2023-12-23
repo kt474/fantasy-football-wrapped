@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { mean, max, min, zip } from "lodash";
+//@ts-ignore
+import { mean, max, min, zip, countBy } from "lodash";
 import { computed, ref } from "vue";
 const tableOrder = ref("wins");
 const props = defineProps<{
@@ -27,14 +28,34 @@ const originalData = computed(() => {
       value.wins / (value.wins + value.losses)
     );
   });
-  return combinedPoints.sort((a: any, b: any) => {
+
+  const pointsArr: any = [];
+  combinedPoints.forEach((value: any) => {
+    pointsArr.push(value.points);
+  });
+  const zipped = zip(...pointsArr);
+  const medians: number[] = [];
+  zipped.forEach((value: any) => {
+    medians.push(Number(median(value)?.toFixed(2)));
+  });
+
+  combinedPoints.forEach((value: any) => {
+    const pairs = zip(value.points, medians);
+    const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
+    value["winsWithMedian"] = counts[true] + value.wins;
+    value["lossesWithMedian"] = counts[false] + value.losses;
+  });
+
+  const result = combinedPoints.sort((a: any, b: any) => {
     if (a.wins !== b.wins) {
       return b.wins - a.wins;
     }
     return b.pointsFor - a.pointsFor;
   });
+  return result;
 });
 
+// sorted version of originalData
 const tableData: any = computed(() => {
   if (tableOrder.value === "wins") {
     return originalData.value.sort((a: any, b: any) => {
@@ -54,6 +75,13 @@ const tableData: any = computed(() => {
   } else if (tableOrder.value === "rating") {
     return originalData.value.sort((a: any, b: any) => {
       return b.rating - a.rating;
+    });
+  } else if (tableOrder.value === "medianRecord") {
+    return originalData.value.sort((a: any, b: any) => {
+      if (a.winsWithMedian !== b.winsWithMedian) {
+        return b.winsWithMedian - a.winsWithMedian;
+      }
+      return b.pointsFor - a.pointsFor;
     });
   }
 });
@@ -78,19 +106,6 @@ const median = (arr: number[]): number | undefined => {
   const mid = Math.floor(s.length / 2);
   return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
 };
-
-const medianScores = computed(() => {
-  const arr: any = [];
-  tableData.value.forEach((value: any) => {
-    arr.push(value.points);
-  });
-  const zipped = zip(...arr);
-  const medians: number[] = [];
-  zipped.forEach((value: any) => {
-    medians.push(Number(median(value)?.toFixed(2)));
-  });
-  return medians;
-});
 </script>
 <template>
   <h2 class="text-2xl font-bold dark:text-white mb-4">Power Rankings</h2>
@@ -175,6 +190,24 @@ const medianScores = computed(() => {
               ></a>
             </div>
           </th>
+          <th scope="col" class="px-6 py-3">
+            <div class="flex items-center">
+              Median Record
+              <a class="cursor-pointer" @click="tableOrder = 'medianRecord'"
+                ><svg
+                  class="w-3 h-3 ms-1.5"
+                  :class="{ 'fill-blue-500': tableOrder == 'medianRecord' }"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  /></svg
+              ></a>
+            </div>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -195,11 +228,14 @@ const medianScores = computed(() => {
           <td class="px-6 py-4">
             {{ item.rating }}
           </td>
+          <td class="px-6 py-4">
+            {{ item.winsWithMedian }} - {{ item.lossesWithMedian }}
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
-  <p class="my-2 text-sm">
+  <p class="my-3 text-sm">
     Rating equation is from
     <a
       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
