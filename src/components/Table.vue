@@ -135,7 +135,9 @@ const mostMedianLosses = computed(() => {
               <a class="cursor-pointer" @click="tableOrder = 'wins'"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
-                  :class="{ 'fill-slate-600': tableOrder == 'wins' }"
+                  :class="{
+                    'fill-slate-600 dark:fill-slate-50': tableOrder == 'wins',
+                  }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -153,7 +155,9 @@ const mostMedianLosses = computed(() => {
               <a class="cursor-pointer" @click="tableOrder = 'points'"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
-                  :class="{ 'fill-slate-600': tableOrder == 'points' }"
+                  :class="{
+                    'fill-slate-600 dark:fill-slate-50': tableOrder == 'points',
+                  }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -171,7 +175,10 @@ const mostMedianLosses = computed(() => {
               <a class="cursor-pointer" @click="tableOrder = 'pointsAgainst'"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
-                  :class="{ 'fill-slate-600': tableOrder == 'pointsAgainst' }"
+                  :class="{
+                    'fill-slate-600 dark:fill-slate-50':
+                      tableOrder == 'pointsAgainst',
+                  }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -189,7 +196,9 @@ const mostMedianLosses = computed(() => {
               <a class="cursor-pointer" @click="tableOrder = 'rating'"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
-                  :class="{ 'fill-slate-600': tableOrder == 'rating' }"
+                  :class="{
+                    'fill-slate-600 dark:fill-slate-50': tableOrder == 'rating',
+                  }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -207,7 +216,10 @@ const mostMedianLosses = computed(() => {
               <a class="cursor-pointer" @click="tableOrder = 'medianRecord'"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
-                  :class="{ 'fill-slate-600': tableOrder == 'medianRecord' }"
+                  :class="{
+                    'fill-slate-600 dark:fill-slate-50':
+                      tableOrder == 'medianRecord',
+                  }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"

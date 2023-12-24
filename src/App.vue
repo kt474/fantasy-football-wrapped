@@ -6,16 +6,22 @@ import Table from "./components/Table.vue";
 import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
 import { getLeague, getRosters, getUsers, getMatchup } from "./api/api";
+import { useStore } from "./store/store";
 const leagueInfo = ref({ name: "", regularSeasonLength: 0 });
 const leagueRosters = ref([]);
 const leagueUsers = ref([]);
 const weeklyPoints: any = ref([]);
+const store = useStore();
 
 onMounted(async () => {
   leagueInfo.value = await getLeague();
   leagueRosters.value = await getRosters();
   leagueUsers.value = await getUsers();
   weeklyPoints.value = await getWeeklyPoints();
+});
+
+const darkMode = computed(() => {
+  return store.darkMode;
 });
 
 const regularSeasonLength = computed(() => {
@@ -55,18 +61,20 @@ const getWeeklyPoints = async () => {
 </script>
 
 <template>
-  <div class="bg-slate-50">
-    <div class="container mx-auto">
-      <Header />
-      <h2 class="text-2xl font-semibold dark:text-white m-4">
-        {{ leagueInfo["name"] }}
-      </h2>
-      <Table
-        :users="leagueUsers"
-        :rosters="leagueRosters"
-        :points="weeklyPoints"
-      />
-      <Footer />
+  <div :class="{ dark: darkMode }">
+    <div class="bg-slate-50 dark:bg-slate-800">
+      <div class="container mx-auto">
+        <Header />
+        <h2 class="text-2xl font-semibold dark:text-white m-4">
+          {{ leagueInfo["name"] }}
+        </h2>
+        <Table
+          :users="leagueUsers"
+          :rosters="leagueRosters"
+          :points="weeklyPoints"
+        />
+        <Footer />
+      </div>
     </div>
   </div>
 </template>
