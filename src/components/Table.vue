@@ -119,7 +119,6 @@ const mostMedianLosses = computed(() => {
 });
 </script>
 <template>
-  <h2 class="text-xl font-semibold dark:text-white mx-4">Power Rankings</h2>
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg mx-4">
     <table
       class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"

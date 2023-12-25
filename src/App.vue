@@ -1,10 +1,11 @@
 <script setup lang="ts">
 //@ts-ignore
 import { groupBy, flatten } from "lodash";
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import Table from "./components/Table.vue";
 import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
+import Input from "./components/Input.vue";
 import { getLeague, getRosters, getUsers, getMatchup } from "./api/api";
 import { useStore } from "./store/store";
 const leagueInfo = ref({ name: "", regularSeasonLength: 0 });
@@ -14,10 +15,10 @@ const weeklyPoints: any = ref([]);
 const store = useStore();
 
 onMounted(async () => {
-  leagueInfo.value = await getLeague();
-  leagueRosters.value = await getRosters();
-  leagueUsers.value = await getUsers();
-  weeklyPoints.value = await getWeeklyPoints();
+  if (localStorage.leagueId) {
+    store.updateLeagueId(localStorage.leagueId);
+    await getAllData();
+  }
 });
 
 const darkMode = computed(() => {
@@ -28,10 +29,29 @@ const regularSeasonLength = computed(() => {
   return leagueInfo.value.regularSeasonLength;
 });
 
+const leagueId = computed(() => {
+  return store.leagueId;
+});
+
+watch(
+  () => leagueId.value,
+  async () => {
+    await getAllData();
+  }
+);
+
+const getAllData = async () => {
+  //@ts-ignore TODO fix this
+  leagueInfo.value = await getLeague(leagueId.value);
+  leagueRosters.value = await getRosters(leagueId.value);
+  leagueUsers.value = await getUsers(leagueId.value);
+  weeklyPoints.value = await getWeeklyPoints();
+};
+
 const getWeeklyPoints = async () => {
   const allMatchups = [];
   for (let i: number = 0; i < regularSeasonLength.value; i++) {
-    const singleWeek = await getMatchup(i + 1);
+    const singleWeek = await getMatchup(i + 1, leagueId.value);
     allMatchups.push(singleWeek);
   }
 
@@ -65,7 +85,8 @@ const getWeeklyPoints = async () => {
     <div class="bg-slate-50 dark:bg-slate-800">
       <div class="container mx-auto">
         <Header />
-        <h2 class="text-2xl font-semibold dark:text-white m-4">
+        <Input />
+        <h2 class="text-2xl font-medium dark:text-white m-4">
           {{ leagueInfo["name"] }}
         </h2>
         <Table

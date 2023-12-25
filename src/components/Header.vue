@@ -57,7 +57,7 @@ const setColorMode = () => {
             class="text-white bg-blue-200 hover:bg-blue-300 focus:ring focus:outline-none focus:ring-blue-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           >
             <svg
-              class="w-4 h-4 text-gray-800 dark:text-white"
+              class="w-5 h-5 text-gray-800 dark:text-white"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -86,7 +86,7 @@ const setColorMode = () => {
               class="text-white bg-blue-200 hover:bg-blue-300 focus:ring focus:outline-none focus:ring-blue-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
             >
               <svg
-                class="w-4 h-4 text-gray-800 dark:text-white"
+                class="w-5 h-5 text-gray-800 dark:text-white"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -117,7 +117,7 @@ const setColorMode = () => {
           >
             <svg
               v-if="darkMode"
-              class="w-4 h-4 text-gray-800 dark:text-white"
+              class="w-5 h-5 text-gray-800 dark:text-white"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"

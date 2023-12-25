@@ -1,9 +1,9 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="text-xs m-4 pb-4 dark:text-white">
+  <div class="text-xs m-4 pb-4 mt-8 dark:text-white">
     <p>
-      Rating equation is from
+      Rating formula is from
       <a
         class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
         href="http://www.okiraqi.org/opr.html"

@@ -1,17 +1,24 @@
-export const getLeague = async () => {
-  const response = await fetch(
-    "https://api.sleeper.app/v1/league/992195707941212160"
-  );
-  const league = await response.json();
-  return {
-    name: league["name"],
-    regularSeasonLength: league["settings"]["playoff_week_start"] - 1,
-  };
+export const getLeague = async (leagueId: string) => {
+  try {
+    const response = await fetch(
+      `https://api.sleeper.app/v1/league/${leagueId}`
+    );
+    if (response.status === 404) {
+      return { name: "", regularSeasonLength: 0 };
+    }
+    const league = await response.json();
+    return {
+      name: league["name"],
+      regularSeasonLength: league["settings"]["playoff_week_start"] - 1,
+    };
+  } catch (error) {
+    return error;
+  }
 };
 
-export const getRosters = async () => {
+export const getRosters = async (leagueId: string) => {
   const response = await fetch(
-    "https://api.sleeper.app/v1/league/992195707941212160/rosters"
+    `https://api.sleeper.app/v1/league/${leagueId}/rosters`
   );
   const rosters = await response.json();
   const result = rosters.map((roster: any) => {
@@ -27,9 +34,9 @@ export const getRosters = async () => {
   return result;
 };
 
-export const getUsers = async () => {
+export const getUsers = async (leagueId: string) => {
   const response = await fetch(
-    "https://api.sleeper.app/v1/league/992195707941212160/users"
+    `https://api.sleeper.app/v1/league/${leagueId}/users`
   );
   const users = await response.json();
   const result = users.map((user: any) => {
@@ -41,9 +48,9 @@ export const getUsers = async () => {
   return result;
 };
 
-export const getMatchup = async (week: number) => {
+export const getMatchup = async (week: number, leagueId: string) => {
   const response = await fetch(
-    `https://api.sleeper.app/v1/league/992195707941212160/matchups/${week}`
+    `https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`
   );
   const matchup = await response.json();
   const result = matchup.map((matchup: any) => {
