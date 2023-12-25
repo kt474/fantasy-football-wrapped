@@ -32,7 +32,7 @@ const onSubmit = async () => {
         <label
           for="platform-menu"
           class="block mb-2 text-lg font-medium text-gray-900 dark:text-white"
-          >Select a platform</label
+          >Platform</label
         >
         <select
           id="platform-menu"

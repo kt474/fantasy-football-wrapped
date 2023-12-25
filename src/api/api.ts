@@ -43,6 +43,7 @@ export const getUsers = async (leagueId: string) => {
     return {
       id: user["user_id"],
       name: user["metadata"]["team_name"] || user["display_name"],
+      avatar: user["avatar"],
     };
   });
   return result;
@@ -60,4 +61,10 @@ export const getMatchup = async (week: number, leagueId: string) => {
     };
   });
   return result;
+};
+
+export const getAvatar = async (avatarId: string) => {
+  const response = await fetch(`https://sleepercdn.com/avatars/${avatarId}`);
+  const avatar = await response.blob();
+  return URL.createObjectURL(avatar);
 };

@@ -20,16 +20,6 @@ const originalData = computed(() => {
     ...props.points.find((b: any) => b.rosterId === a.rosterId),
   }));
 
-  combinedPoints.forEach((value: any) => {
-    value["rating"] = getPowerRanking(
-      mean(value.points),
-      // @ts-ignore
-      max(value.points),
-      min(value.points),
-      value.wins / (value.wins + value.losses)
-    );
-  });
-
   const pointsArr: any = [];
   combinedPoints.forEach((value: any) => {
     pointsArr.push(value.points);
@@ -45,6 +35,12 @@ const originalData = computed(() => {
     const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
     value["winsWithMedian"] = counts[true] + value.wins;
     value["lossesWithMedian"] = counts[false] + value.losses;
+    value["rating"] = getPowerRanking(
+      mean(value.points),
+      max(value.points),
+      min(value.points),
+      value.wins / (value.wins + value.losses)
+    );
   });
 
   const result = combinedPoints.sort((a: any, b: any) => {
@@ -242,8 +238,25 @@ const mostMedianLosses = computed(() => {
             scope="row"
             class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
           >
-            <div class="flex">
-              <p>{{ index + 1 }}.&nbsp;&nbsp;</p>
+            <div class="flex items-center">
+              <img
+                v-if="item.avatar"
+                class="rounded-full w-8 h-8"
+                :src="item.avatarImg"
+              />
+              <svg
+                v-else
+                class="w-8 h-8 text-gray-800 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <p class="ml-2">{{ index + 1 }}.&nbsp;</p>
               <p>{{ item.name }}</p>
             </div>
           </th>

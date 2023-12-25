@@ -6,7 +6,13 @@ import Table from "./components/Table.vue";
 import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
 import Input from "./components/Input.vue";
-import { getLeague, getRosters, getUsers, getMatchup } from "./api/api";
+import {
+  getLeague,
+  getRosters,
+  getUsers,
+  getMatchup,
+  getAvatar,
+} from "./api/api";
 import { useStore } from "./store/store";
 const leagueInfo = ref({ name: "", regularSeasonLength: 0 });
 const leagueRosters = ref([]);
@@ -46,6 +52,11 @@ const getAllData = async () => {
   leagueRosters.value = await getRosters(leagueId.value);
   leagueUsers.value = await getUsers(leagueId.value);
   weeklyPoints.value = await getWeeklyPoints();
+  leagueUsers.value.forEach(async (user: any) => {
+    if (user["avatar"] !== null) {
+      user["avatarImg"] = await getAvatar(user["avatar"]);
+    }
+  });
 };
 
 const getWeeklyPoints = async () => {
