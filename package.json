@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.1.1",
     "flowbite": "^2.2.1",
     "lodash": "^4.17.21",
     "pinia": "^2.1.7",

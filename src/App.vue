@@ -14,6 +14,7 @@ import {
   getAvatar,
 } from "./api/api";
 import { useStore } from "./store/store";
+import { inject } from "@vercel/analytics";
 const leagueInfo = ref({ name: "", regularSeasonLength: 0 });
 const leagueRosters = ref([]);
 const leagueUsers = ref([]);
@@ -21,6 +22,7 @@ const weeklyPoints: any = ref([]);
 const store = useStore();
 
 onMounted(async () => {
+  inject();
   if (localStorage.leagueId) {
     store.updateLeagueId(localStorage.leagueId);
     await getAllData();
