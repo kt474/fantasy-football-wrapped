@@ -52,7 +52,9 @@ const setColorMode = () => {
           class="font-medium flex flex-col p-4 md:p-0 mt-4 border rounded-lg md:flex-row md:space-x-2 md:mt-0 md:border-0"
         >
           <button
-            data-tooltip-target="settings-tooltip"
+            data-modal-target="default-modal"
+            data-modal-toggle="default-modal"
+            data-tooltip-target="about-tooltip"
             data-tooltip-placement="bottom"
             class="text-white bg-blue-200 hover:bg-blue-300 focus:ring focus:outline-none focus:ring-blue-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           >
@@ -64,17 +66,87 @@ const setColorMode = () => {
               viewBox="0 0 20 20"
             >
               <path
-                d="M18 7.5h-.423l-.452-1.09.3-.3a1.5 1.5 0 0 0 0-2.121L16.01 2.575a1.5 1.5 0 0 0-2.121 0l-.3.3-1.089-.452V2A1.5 1.5 0 0 0 11 .5H9A1.5 1.5 0 0 0 7.5 2v.423l-1.09.452-.3-.3a1.5 1.5 0 0 0-2.121 0L2.576 3.99a1.5 1.5 0 0 0 0 2.121l.3.3L2.423 7.5H2A1.5 1.5 0 0 0 .5 9v2A1.5 1.5 0 0 0 2 12.5h.423l.452 1.09-.3.3a1.5 1.5 0 0 0 0 2.121l1.415 1.413a1.5 1.5 0 0 0 2.121 0l.3-.3 1.09.452V18A1.5 1.5 0 0 0 9 19.5h2a1.5 1.5 0 0 0 1.5-1.5v-.423l1.09-.452.3.3a1.5 1.5 0 0 0 2.121 0l1.415-1.414a1.5 1.5 0 0 0 0-2.121l-.3-.3.452-1.09H18a1.5 1.5 0 0 0 1.5-1.5V9A1.5 1.5 0 0 0 18 7.5Zm-8 6a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
+                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
               />
             </svg>
           </button>
           <div
-            id="settings-tooltip"
+            id="about-tooltip"
             role="tooltip"
             class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
           >
-            Settings
+            About
             <div class="tooltip-arrow" data-popper-arrow></div>
+          </div>
+          <div
+            id="default-modal"
+            tabindex="-1"
+            aria-hidden="true"
+            class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+          >
+            <div class="relative p-4 w-full max-w-2xl max-h-full">
+              <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <div
+                  class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
+                >
+                  <h3
+                    class="text-xl font-semibold text-gray-900 dark:text-white"
+                  >
+                    About
+                  </h3>
+                  <button
+                    type="button"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                    data-modal-hide="default-modal"
+                  >
+                    <svg
+                      class="w-3 h-3"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 14 14"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                      />
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                  </button>
+                </div>
+                <div class="p-4 md:p-5 space-y-4">
+                  <p
+                    class="text-base leading-relaxed text-gray-500 dark:text-gray-400"
+                  >
+                    This website was made as a tool to show more detailed
+                    information about your fantasy football league. Currently,
+                    only Sleeper leagues are supported.
+                  </p>
+                  <p
+                    class="text-base leading-relaxed text-gray-500 dark:text-gray-400"
+                  >
+                    Everything on this site is also completely open source and
+                    the source code can be found on
+                    <a
+                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      href="https://github.com/kt474/fantasy-football-wrapped"
+                      target="_blank"
+                      >Github</a
+                    >. To report a bug or request new features, please open an
+                    issue
+                    <a
+                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      href="https://github.com/kt474/fantasy-football-wrapped/issues"
+                      target="_blank"
+                      >here</a
+                    >.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
           <a
             href="https://github.com/kt474/fantasy-football-wrapped"
