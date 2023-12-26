@@ -30,26 +30,29 @@ const originalData = computed(() => {
     medians.push(Number(getMedian(value)?.toFixed(2)));
   });
 
-  combinedPoints.forEach((value: any) => {
-    const pairs = zip(value.points, medians);
-    const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
-    value["winsWithMedian"] = counts[true] + value.wins;
-    value["lossesWithMedian"] = counts[false] + value.losses;
-    value["rating"] = getPowerRanking(
-      mean(value.points),
-      max(value.points),
-      min(value.points),
-      value.wins / (value.wins + value.losses)
-    );
-  });
+  if (combinedPoints) {
+    combinedPoints.forEach((value: any) => {
+      value["rating"] = getPowerRanking(
+        mean(value.points),
+        Number(max(value.points)),
+        Number(min(value.points)),
+        value.wins / (value.wins + value.losses)
+      );
+      const pairs = zip(value.points, medians);
+      const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
+      value["winsWithMedian"] = counts["true"] + value.wins;
+      value["lossesWithMedian"] = counts["false"] + value.losses;
+    });
 
-  const result = combinedPoints.sort((a: any, b: any) => {
-    if (a.wins !== b.wins) {
-      return b.wins - a.wins;
-    }
-    return b.pointsFor - a.pointsFor;
-  });
-  return result;
+    const result = combinedPoints.sort((a: any, b: any) => {
+      if (a.wins !== b.wins) {
+        return b.wins - a.wins;
+      }
+      return b.pointsFor - a.pointsFor;
+    });
+    return result;
+  }
+  return [];
 });
 
 // sorted version of originalData
