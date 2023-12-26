@@ -10,6 +10,10 @@ const props = defineProps<{
   points: Array<object>;
 }>();
 
+const savedLeague = computed(() => {
+  return localStorage.leagueId;
+});
+
 const originalData = computed(() => {
   const combined = props.users.map((a: any) => ({
     ...a,
@@ -317,7 +321,7 @@ const mostMedianLosses = computed(() => {
         </tr>
       </tbody>
     </table>
-    <div v-else role="status" class="flex justify-center m-6">
+    <div v-else-if="savedLeague" role="status" class="flex justify-center m-6">
       <svg
         aria-hidden="true"
         class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"

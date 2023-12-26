@@ -22,6 +22,7 @@ const onSubmit = async () => {
       localStorage.leagueId = leagueIdInput.value;
     }
   }
+  leagueIdInput.value = "";
 };
 </script>
 
