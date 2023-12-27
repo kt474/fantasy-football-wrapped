@@ -95,7 +95,7 @@ const getWeeklyPoints = async () => {
 
 <template>
   <div :class="{ dark: darkMode }" class="h-screen">
-    <div class="bg-slate-50 dark:bg-slate-800">
+    <div class="bg-slate-50 dark:bg-slate-800 overflow-auto h-full">
       <div class="container mx-auto">
         <Header />
         <Input />

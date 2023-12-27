@@ -123,7 +123,14 @@ const setColorMode = () => {
                   >
                     This website was made as a tool to show more detailed
                     information about your fantasy football league. Currently,
-                    only Sleeper leagues are supported.
+                    only
+                    <a
+                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      href="https://sleeper.com"
+                      target="_blank"
+                      >Sleeper</a
+                    >
+                    leagues are supported.
                   </p>
                   <p
                     class="text-base leading-relaxed text-gray-500 dark:text-gray-400"
