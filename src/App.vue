@@ -7,6 +7,7 @@ import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
 import Input from "./components/Input.vue";
 import Intro from "./components/Intro.vue";
+import LeagueCard from "./components/LeagueCard.vue";
 import {
   getLeague,
   getRosters,
@@ -17,7 +18,13 @@ import {
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore } from "./store/store";
 import { inject } from "@vercel/analytics";
-const leagueInfo = ref({ name: "", regularSeasonLength: 0 });
+const leagueInfo = ref({
+  name: "",
+  regularSeasonLength: 0,
+  rosters: 0,
+  season: "",
+  seasonType: "",
+});
 const leagueRosters = ref([]);
 const leagueUsers = ref([]);
 const weeklyPoints: any = ref([]);
@@ -97,12 +104,13 @@ const getWeeklyPoints = async () => {
 
 <template>
   <div :class="{ dark: darkMode }" class="h-screen">
-    <div class="bg-slate-50 dark:bg-slate-800 overflow-auto h-full">
+    <div class="bg-slate-50 dark:bg-slate-950 overflow-auto h-full">
       <Header />
       <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
-      <div class="container mx-auto max-w-7xl">
+      <div class="container mx-auto">
         <div v-if="leagueId">
           <Input />
+          <LeagueCard :league-info="leagueInfo" />
           <Table
             :users="leagueUsers"
             :rosters="leagueRosters"
