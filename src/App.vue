@@ -32,6 +32,7 @@ const store = useStore();
 
 onMounted(async () => {
   inject();
+  setHtmlBackground();
   if (localStorage.leagueId) {
     store.updateLeagueId(localStorage.leagueId);
     await getAllData();
@@ -56,6 +57,22 @@ watch(
     await getAllData();
   }
 );
+
+watch(
+  () => darkMode.value,
+  () => setHtmlBackground()
+);
+
+const setHtmlBackground = () => {
+  const html = document.querySelector("html");
+  if (html) {
+    if (darkMode.value) {
+      html.style.backgroundColor = "#020617";
+    } else {
+      html.style.backgroundColor = "#f8fafc";
+    }
+  }
+};
 
 const getAllData = async () => {
   //@ts-ignore TODO fix this
