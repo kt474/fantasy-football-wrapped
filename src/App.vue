@@ -6,6 +6,7 @@ import Table from "./components/Table.vue";
 import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
 import Input from "./components/Input.vue";
+import Intro from "./components/Intro.vue";
 import {
   getLeague,
   getRosters,
@@ -13,6 +14,7 @@ import {
   getMatchup,
   getAvatar,
 } from "./api/api";
+import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore } from "./store/store";
 import { inject } from "@vercel/analytics";
 const leagueInfo = ref({ name: "", regularSeasonLength: 0 });
@@ -103,10 +105,19 @@ const getWeeklyPoints = async () => {
           {{ leagueInfo["name"] }}
         </h2>
         <Table
+          v-if="leagueId"
           :users="leagueUsers"
           :rosters="leagueRosters"
           :points="weeklyPoints"
         />
+        <div v-else>
+          <Intro />
+          <Table
+            :users="fakeUsers"
+            :rosters="fakeRosters"
+            :points="fakePoints"
+          />
+        </div>
         <Footer />
       </div>
     </div>
