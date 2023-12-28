@@ -98,20 +98,20 @@ const getWeeklyPoints = async () => {
 <template>
   <div :class="{ dark: darkMode }" class="h-screen">
     <div class="bg-slate-50 dark:bg-slate-800 overflow-auto h-full">
-      <div class="container mx-auto">
-        <Header />
-        <Input />
-        <h2 class="text-2xl font-medium dark:text-white m-4">
-          {{ leagueInfo["name"] }}
-        </h2>
-        <Table
-          v-if="leagueId"
-          :users="leagueUsers"
-          :rosters="leagueRosters"
-          :points="weeklyPoints"
-        />
+      <Header />
+      <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
+      <div class="container mx-auto max-w-7xl">
+        <div v-if="leagueId">
+          <Input />
+          <Table
+            :users="leagueUsers"
+            :rosters="leagueRosters"
+            :points="weeklyPoints"
+          />
+        </div>
         <div v-else>
           <Intro />
+          <Input />
           <Table
             :users="fakeUsers"
             :rosters="fakeRosters"

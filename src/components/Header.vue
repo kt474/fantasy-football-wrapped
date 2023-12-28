@@ -31,7 +31,9 @@ const setColorMode = () => {
 };
 </script>
 <template>
-  <nav class="bg-blue-200 border-gray-200 rounded-b-xl dark:bg-gray-700">
+  <nav
+    class="bg-slate-50 border-gray-200 dark:bg-slate-800 border-solid container mx-auto"
+  >
     <div
       class="max-w-screen-2xl flex flex-wrap items-center justify-between mx-auto p-4"
     >
@@ -43,7 +45,7 @@ const setColorMode = () => {
         />
         <span
           class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
-          >FF League Analyzer</span
+          >Fantasy Football Wrapped</span
         >
       </a>
 
@@ -56,7 +58,7 @@ const setColorMode = () => {
             data-modal-toggle="default-modal"
             data-tooltip-target="about-tooltip"
             data-tooltip-placement="bottom"
-            class="text-white bg-blue-200 hover:bg-blue-300 focus:ring focus:outline-none focus:ring-blue-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+            class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-800 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           >
             <svg
               class="w-5 h-5 text-gray-800 dark:text-white"
@@ -162,7 +164,7 @@ const setColorMode = () => {
             <button
               data-tooltip-target="github-tooltip"
               data-tooltip-placement="bottom"
-              class="text-white bg-blue-200 hover:bg-blue-300 focus:ring focus:outline-none focus:ring-blue-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+              class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-800 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
             >
               <svg
                 class="w-5 h-5 text-gray-800 dark:text-white"
@@ -192,7 +194,7 @@ const setColorMode = () => {
             data-tooltip-target="tooltip-bottom"
             data-tooltip-placement="bottom"
             type="button"
-            class="text-white bg-blue-200 hover:bg-blue-300 focus:ring focus:outline-none focus:ring-blue-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+            class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-800 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           >
             <svg
               v-if="darkMode"
@@ -208,11 +210,11 @@ const setColorMode = () => {
             </svg>
             <svg
               v-else
-              class="w-4 h-4 text-gray-800 dark:text-white"
+              class="w-5 h-5 text-gray-800 dark:text-white"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
-              viewBox="0 0 18 20"
+              viewBox="0 0 20 20"
             >
               <path
                 d="M17.8 13.75a1 1 0 0 0-.859-.5A7.488 7.488 0 0 1 10.52 2a1 1 0 0 0 0-.969A1.035 1.035 0 0 0 9.687.5h-.113a9.5 9.5 0 1 0 8.222 14.247 1 1 0 0 0 .004-.997Z"
