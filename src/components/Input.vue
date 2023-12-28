@@ -27,7 +27,7 @@ const onSubmit = async () => {
 </script>
 
 <template>
-  <div class="container mx-auto my-4 px-4">
+  <div class="container mx-auto my-4">
     <div class="flex justify-start">
       <div class="w-1/4">
         <label

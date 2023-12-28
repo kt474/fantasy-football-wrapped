@@ -1,8 +1,8 @@
 <script setup lang="ts"></script>
 <template>
-  <div class="container my-8">
+  <div class="my-8">
     <h1
-      class="text-center lg:px-40 xl:px-60 2xl:px-80 mb-4 text-3xl font-bold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-6xl dark:text-white"
+      class="text-center lg:px-40 xl:px-60 mb-4 text-4xl font-bold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white"
     >
       Your year-end
       <span

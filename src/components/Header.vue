@@ -32,10 +32,10 @@ const setColorMode = () => {
 </script>
 <template>
   <nav
-    class="bg-slate-50 border-gray-200 dark:bg-slate-950 border-solid container mx-auto"
+    class="bg-slate-50 border-gray-200 dark:bg-slate-950 border-solid container mx-auto w-11/12"
   >
     <div
-      class="max-w-screen-2xl flex flex-wrap items-center justify-between mx-auto p-4"
+      class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto py-4"
     >
       <a class="flex items-center space-x-3 rtl:space-x-reverse">
         <img
