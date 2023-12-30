@@ -126,7 +126,6 @@ const getWeeklyPoints = async () => {
       <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
       <div class="container mx-auto w-11/12">
         <div v-if="leagueId">
-          <Input />
           <LeagueCard :league-info="leagueInfo" />
           <Table
             :users="leagueUsers"
