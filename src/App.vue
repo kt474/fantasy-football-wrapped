@@ -1,5 +1,4 @@
 <script setup lang="ts">
-//@ts-ignore
 import { groupBy, flatten } from "lodash";
 import { onMounted, ref, computed, watch } from "vue";
 import Table from "./components/Table.vue";
@@ -18,13 +17,15 @@ import {
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore } from "./store/store";
 import { inject } from "@vercel/analytics";
-const leagueInfo = ref({
-  name: "",
-  regularSeasonLength: 0,
-  rosters: 0,
-  season: "",
-  seasonType: "",
-});
+
+type LeagueInfo = {
+  name: string;
+  regularSeasonLength: number;
+  rosters: number;
+  season: string;
+  seasonType: string;
+};
+const leagueInfo = ref({} as LeagueInfo);
 const leagueRosters = ref([]);
 const leagueUsers = ref([]);
 const weeklyPoints: any = ref([]);
@@ -75,8 +76,13 @@ const setHtmlBackground = () => {
 };
 
 const getAllData = async () => {
-  //@ts-ignore TODO fix this
-  leagueInfo.value = await getLeague(leagueId.value);
+  leagueInfo.value = (await getLeague(leagueId.value)) as {
+    name: string;
+    regularSeasonLength: number;
+    rosters: number;
+    season: string;
+    seasonType: string;
+  };
   leagueRosters.value = await getRosters(leagueId.value);
   leagueUsers.value = await getUsers(leagueId.value);
   weeklyPoints.value = await getWeeklyPoints();
@@ -124,7 +130,7 @@ const getWeeklyPoints = async () => {
     <div class="bg-slate-50 dark:bg-slate-950 overflow-auto h-full">
       <Header />
       <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
-      <div class="container mx-auto w-11/12">
+      <div class="container mx-auto w-11/12 max-w-screen-xl">
         <div v-if="leagueId">
           <LeagueCard :league-info="leagueInfo" />
           <Table

@@ -4,7 +4,13 @@ export const getLeague = async (leagueId: string) => {
       `https://api.sleeper.app/v1/league/${leagueId}`
     );
     if (response.status === 404) {
-      return { name: "", regularSeasonLength: 0 };
+      return {
+        name: "",
+        regularSeasonLength: 0,
+        rosters: 0,
+        season: "",
+        seasonType: "",
+      };
     }
     const league = await response.json();
     return {

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-//@ts-ignore
 import { mean, max, min, zip, countBy, maxBy, minBy } from "lodash";
 import { getPowerRanking, getMedian } from "../api/helper";
 import { computed, ref } from "vue";
