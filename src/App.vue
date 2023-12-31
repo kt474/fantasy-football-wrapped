@@ -55,7 +55,9 @@ const leagueId = computed(() => {
 watch(
   () => leagueId.value,
   async () => {
-    await getAllData();
+    if (leagueId.value) {
+      await getAllData();
+    }
   }
 );
 

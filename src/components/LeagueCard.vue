@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { capitalize } from "lodash";
 import { useStore } from "../store/store";
+import { initFlowbite } from "flowbite";
+import { onMounted } from "vue";
+
+onMounted(() => {
+  initFlowbite();
+});
 const props = defineProps<{
   leagueInfo: any;
 }>();
@@ -50,9 +56,8 @@ const removeLeague = () => {
             class="py-2 text-sm text-gray-700 dark:text-gray-200"
             aria-labelledby="dropdownMenuIconButton"
           >
-            <li>
+            <li class="cursor-pointer">
               <a
-                href="#"
                 class="block px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                 >Refresh</a
               >
