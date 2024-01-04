@@ -6,6 +6,7 @@ import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
 import Input from "./components/Input.vue";
 import Intro from "./components/Intro.vue";
+import Alert from "./components/Alert.vue";
 import LeagueCard from "./components/LeagueCard.vue";
 import {
   getLeague,
@@ -50,6 +51,13 @@ const regularSeasonLength = computed(() => {
 
 const leagueId = computed(() => {
   return store.leagueId;
+});
+
+const showAddedAlert = computed(() => {
+  return store.showAddedAlert;
+});
+const showRemovedAlert = computed(() => {
+  return store.showRemovedAlert;
 });
 
 watch(
@@ -133,7 +141,7 @@ const getWeeklyPoints = async () => {
       <Header />
       <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
       <div class="container mx-auto w-11/12 max-w-screen-xl">
-        <div v-if="leagueId">
+        <div v-if="leagueId" class="container mx-auto">
           <LeagueCard :league-info="leagueInfo" />
           <Table
             :users="leagueUsers"
@@ -141,7 +149,7 @@ const getWeeklyPoints = async () => {
             :points="weeklyPoints"
           />
         </div>
-        <div v-else>
+        <div v-else class="container mx-auto">
           <Intro />
           <Input />
           <Table
@@ -153,6 +161,8 @@ const getWeeklyPoints = async () => {
         <Footer />
       </div>
     </div>
+    <Alert v-if="showAddedAlert" alert-msg="League successfully added!" />
+    <Alert v-if="showRemovedAlert" alert-msg="League removed!" />
   </div>
 </template>
 

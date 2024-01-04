@@ -16,6 +16,10 @@ const removeLeague = () => {
   if (localStorage.leagueId) {
     localStorage.removeItem("leagueId");
     store.updateLeagueId("");
+    store.updateRemovedAlert(true);
+    setTimeout(() => {
+      store.updateRemovedAlert(false);
+    }, 3000);
   }
 };
 </script>

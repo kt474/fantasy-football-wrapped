@@ -20,9 +20,13 @@ const onSubmit = async () => {
       showErrorMsg.value = false;
       store.updateLeagueId(leagueIdInput.value);
       localStorage.leagueId = leagueIdInput.value;
+      store.updateShowAddedAlert(true);
+      setTimeout(() => {
+        store.updateShowAddedAlert(false);
+      }, 3000);
     }
+    leagueIdInput.value = "";
   }
-  leagueIdInput.value = "";
 };
 </script>
 

@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="text-xs m-4 pb-4 mt-8 dark:text-white">
+  <div class="text-xs m-4 pb-4 mt-8 dark:text-white container mx-auto">
     <p>
       Rating formula is from
       <a
