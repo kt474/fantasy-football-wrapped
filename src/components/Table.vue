@@ -10,50 +10,52 @@ const props = defineProps<{
 }>();
 
 const savedLeague = computed(() => {
-  return localStorage.leagueId;
+  return localStorage.leagueId[0];
 });
 
 const originalData = computed(() => {
-  const combined = props.users.map((a: any) => ({
-    ...a,
-    ...props.rosters.find((b: any) => b.id === a.id),
-  }));
-  const combinedPoints = combined.map((a: any) => ({
-    ...a,
-    ...props.points.find((b: any) => b.rosterId === a.rosterId),
-  }));
+  if (props.users && props.points) {
+    const combined = props.users.map((a: any) => ({
+      ...a,
+      ...props.rosters.find((b: any) => b.id === a.id),
+    }));
+    const combinedPoints = combined.map((a: any) => ({
+      ...a,
+      ...props.points.find((b: any) => b.rosterId === a.rosterId),
+    }));
 
-  const pointsArr: any = [];
-  combinedPoints.forEach((value: any) => {
-    pointsArr.push(value.points);
-  });
-  const zipped = zip(...pointsArr);
-  const medians: number[] = [];
-  zipped.forEach((value: any) => {
-    medians.push(Number(getMedian(value)?.toFixed(2)));
-  });
-
-  if (combinedPoints) {
+    const pointsArr: any = [];
     combinedPoints.forEach((value: any) => {
-      value["rating"] = getPowerRanking(
-        mean(value.points),
-        Number(max(value.points)),
-        Number(min(value.points)),
-        value.wins / (value.wins + value.losses)
-      );
-      const pairs = zip(value.points, medians);
-      const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
-      value["winsWithMedian"] = counts["true"] + value.wins;
-      value["lossesWithMedian"] = counts["false"] + value.losses;
+      pointsArr.push(value.points);
+    });
+    const zipped = zip(...pointsArr);
+    const medians: number[] = [];
+    zipped.forEach((value: any) => {
+      medians.push(Number(getMedian(value)?.toFixed(2)));
     });
 
-    const result = combinedPoints.sort((a: any, b: any) => {
-      if (a.wins !== b.wins) {
-        return b.wins - a.wins;
-      }
-      return b.pointsFor - a.pointsFor;
-    });
-    return result;
+    if (combinedPoints) {
+      combinedPoints.forEach((value: any) => {
+        value["rating"] = getPowerRanking(
+          mean(value.points),
+          Number(max(value.points)),
+          Number(min(value.points)),
+          value.wins / (value.wins + value.losses)
+        );
+        const pairs = zip(value.points, medians);
+        const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
+        value["winsWithMedian"] = counts["true"] + value.wins;
+        value["lossesWithMedian"] = counts["false"] + value.losses;
+      });
+
+      const result = combinedPoints.sort((a: any, b: any) => {
+        if (a.wins !== b.wins) {
+          return b.wins - a.wins;
+        }
+        return b.pointsFor - a.pointsFor;
+      });
+      return result;
+    }
   }
   return [];
 });
@@ -124,7 +126,7 @@ const mostMedianLosses = computed(() => {
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table
       v-if="tableData.length > 0"
-      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
     >
       <thead
         class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
@@ -239,7 +241,7 @@ const mostMedianLosses = computed(() => {
         <tr
           v-for="(item, index) in tableData"
           :key="index"
-          class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
+          class="border-b odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 dark:border-gray-700"
         >
           <th
             scope="row"
@@ -248,7 +250,7 @@ const mostMedianLosses = computed(() => {
             <div class="flex items-center">
               <img
                 v-if="item.avatarImg"
-                class="rounded-full w-8 h-8"
+                class="w-8 h-8 rounded-full"
                 :src="item.avatarImg"
               />
               <svg

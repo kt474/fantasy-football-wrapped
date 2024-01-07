@@ -14,8 +14,12 @@ const store = useStore();
 
 const removeLeague = () => {
   if (localStorage.leagueId) {
-    localStorage.removeItem("leagueId");
-    store.updateLeagueId("");
+    let leagues = JSON.parse(localStorage.leagueId);
+    console.log(leagues);
+    const newLeagues = leagues.filter(
+      (item: string) => item !== props.leagueInfo.leagueId
+    );
+    localStorage.setItem("leagueId", JSON.stringify(newLeagues));
     store.updateRemovedAlert(true);
     setTimeout(() => {
       store.updateRemovedAlert(false);
@@ -25,7 +29,7 @@ const removeLeague = () => {
 </script>
 <template>
   <div
-    class="block max-w-xs my-4 px-4 py-3 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+    class="block px-4 py-3 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex justify-between">
       <h5
@@ -37,7 +41,7 @@ const removeLeague = () => {
         <button
           id="dropdownMenuIconButton"
           data-dropdown-toggle="dropdownDots"
-          class="mb-1 inline-flex items-center p-2 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-2 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+          class="inline-flex items-center p-2 mb-1 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-2 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
           type="button"
         >
           <svg
@@ -54,7 +58,7 @@ const removeLeague = () => {
         </button>
         <div
           id="dropdownDots"
-          class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-32 dark:bg-gray-700 dark:divide-gray-600"
+          class="z-10 hidden w-32 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600"
         >
           <ul
             class="py-2 text-sm text-gray-700 dark:text-gray-200"

@@ -19,6 +19,7 @@ export const getLeague = async (leagueId: string) => {
       rosters: league["total_rosters"],
       season: league["season"],
       seasonType: league["season_type"],
+      leagueId: league["league_id"],
     };
   } catch (error) {
     return error;

@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "../store/store";
 import { getLeague } from "../api/api";
 const store = useStore();
 const leagueIdInput = ref("");
 const showErrorMsg = ref(false);
 const errorMsg = ref("");
+
+const leagueIds = computed(() => {
+  return store.leagueId;
+});
 
 const onSubmit = async () => {
   if (leagueIdInput.value === "") {
@@ -16,11 +20,17 @@ const onSubmit = async () => {
     if (!checkInput["name"]) {
       errorMsg.value = "Invalid league ID";
       showErrorMsg.value = true;
+    } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
+      errorMsg.value = "League already added";
+      showErrorMsg.value = true;
     } else {
       showErrorMsg.value = false;
       store.updateLeagueId(leagueIdInput.value);
-      localStorage.leagueId = leagueIdInput.value;
+      localStorage.setItem("leagueId", JSON.stringify(leagueIds.value));
+      const newLeagueInfo = await getLeague(leagueIdInput.value);
+      store.updateLeagueInfo(newLeagueInfo);
       store.updateShowAddedAlert(true);
+      store.updateShowInput(false);
       setTimeout(() => {
         store.updateShowAddedAlert(false);
       }, 3000);
