@@ -8,15 +8,9 @@ import Input from "./components/Input.vue";
 import Intro from "./components/Intro.vue";
 import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
-import {
-  getRosters,
-  getUsers,
-  getMatchup,
-  getAvatar,
-  getLeague,
-} from "./api/api";
+import { getRosters, getUsers, getMatchup, getAvatar } from "./api/api";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
-import { useStore } from "./store/store";
+import { useStore, LeagueInfoType } from "./store/store";
 import { inject } from "@vercel/analytics";
 
 const store = useStore();
@@ -24,12 +18,10 @@ const store = useStore();
 onMounted(async () => {
   inject();
   setHtmlBackground();
-  if (localStorage.leagueId) {
-    const storedIds: string[] = JSON.parse(localStorage.leagueId);
-    storedIds.forEach(async (id: string) => {
-      store.updateLeagueId(id);
-      const newLeagueInfo = await getLeague(id);
-      store.updateLeagueInfo(newLeagueInfo);
+  if (localStorage.leagueInfo) {
+    const savedLeagues = JSON.parse(localStorage.leagueInfo);
+    savedLeagues.forEach((league: LeagueInfoType) => {
+      store.updateLeagueInfo(league);
     });
     await getAllData();
   }
@@ -53,12 +45,12 @@ const regularSeasonLength = computed(() => {
   return leagueInfoArray.value[0].regularSeasonLength;
 });
 
-const leagueId = computed(() => {
-  return store.leagueId[0];
-});
-
 const leagueInfoArray = computed(() => {
   return store.leagueInfo;
+});
+
+const leagueIds = computed(() => {
+  return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
 });
 
 const showAddedAlert = computed(() => {
@@ -72,11 +64,9 @@ const showInput = computed(() => {
 });
 
 watch(
-  () => leagueId.value,
+  () => leagueIds.value,
   async () => {
-    if (leagueId.value) {
-      await getAllData();
-    }
+    await getAllData();
   }
 );
 
@@ -97,7 +87,7 @@ const setHtmlBackground = () => {
 };
 
 const getAllData = async () => {
-  store.leagueId.forEach(async (id: string) => {
+  leagueIds.value.forEach(async (id: string) => {
     store.updateLeagueRosters(await getRosters(id));
     store.updateLeagueUsers(await getUsers(id));
     store.updateWeeklyPoints(await getWeeklyPoints(id));
@@ -147,7 +137,7 @@ const getWeeklyPoints = async (leagueId: string) => {
       <Header />
       <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
       <div class="container w-11/12 max-w-screen-xl mx-auto">
-        <div v-if="leagueId" class="container mx-auto">
+        <div v-if="leagueInfoArray.length > 0" class="container mx-auto">
           <Input v-if="showInput" />
           <div class="flex justify-between">
             <CardContainer />

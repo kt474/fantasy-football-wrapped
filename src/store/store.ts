@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-type LeagueInfo = {
+export type LeagueInfoType = {
   name: string;
   regularSeasonLength: number;
   rosters: number;
@@ -11,11 +11,10 @@ type LeagueInfo = {
 export const useStore = defineStore("main", {
   state: () => ({
     darkMode: false,
-    leagueId: [] as string[],
     showAddedAlert: false,
     showRemovedAlert: false,
     showInput: false,
-    leagueInfo: [] as LeagueInfo[],
+    leagueInfo: [] as LeagueInfoType[],
     leagueRosters: [] as any[],
     leagueUsers: [] as any[],
     weeklyPoints: [] as any[],
@@ -23,13 +22,6 @@ export const useStore = defineStore("main", {
   actions: {
     updateDarkMode(payload: boolean) {
       this.darkMode = payload;
-    },
-    updateLeagueId(payload: string) {
-      if (!this.leagueId.includes(payload)) {
-        this.$patch((state) => {
-          state.leagueId.push(payload);
-        });
-      }
     },
     updateShowAddedAlert(payload: boolean) {
       this.showAddedAlert = payload;

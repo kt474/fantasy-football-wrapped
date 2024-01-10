@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { capitalize } from "lodash";
-import { useStore } from "../store/store";
+import { useStore, LeagueInfoType } from "../store/store";
 import { initFlowbite } from "flowbite";
 import { onMounted } from "vue";
 
@@ -13,13 +13,16 @@ const props = defineProps<{
 const store = useStore();
 
 const removeLeague = () => {
-  if (localStorage.leagueId) {
-    let leagues = JSON.parse(localStorage.leagueId);
-    console.log(leagues);
-    const newLeagues = leagues.filter(
-      (item: string) => item !== props.leagueInfo.leagueId
+  if (localStorage.leagueInfo) {
+    store.$patch((state) => {
+      state.leagueInfo = state.leagueInfo.filter(
+        (item: any) => item.leagueId !== props.leagueInfo.leagueId
+      );
+    });
+    localStorage.setItem(
+      "leagueInfo",
+      JSON.stringify(store.leagueInfo as LeagueInfoType[])
     );
-    localStorage.setItem("leagueId", JSON.stringify(newLeagues));
     store.updateRemovedAlert(true);
     setTimeout(() => {
       store.updateRemovedAlert(false);

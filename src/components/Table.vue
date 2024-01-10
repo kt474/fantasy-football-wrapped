@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const savedLeague = computed(() => {
-  return localStorage.leagueId[0];
+  return localStorage.leagueInfo[0].leagueId;
 });
 
 const originalData = computed(() => {

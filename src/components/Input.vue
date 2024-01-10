@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useStore } from "../store/store";
+import { useStore, LeagueInfoType } from "../store/store";
 import { getLeague } from "../api/api";
 const store = useStore();
 const leagueIdInput = ref("");
@@ -8,7 +8,7 @@ const showErrorMsg = ref(false);
 const errorMsg = ref("");
 
 const leagueIds = computed(() => {
-  return store.leagueId;
+  return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
 });
 
 const onSubmit = async () => {
@@ -25,10 +25,15 @@ const onSubmit = async () => {
       showErrorMsg.value = true;
     } else {
       showErrorMsg.value = false;
-      store.updateLeagueId(leagueIdInput.value);
-      localStorage.setItem("leagueId", JSON.stringify(leagueIds.value));
       const newLeagueInfo = await getLeague(leagueIdInput.value);
       store.updateLeagueInfo(newLeagueInfo);
+
+      const currentLeagues = JSON.parse(
+        localStorage.getItem("leagueInfo") || "[]"
+      );
+      currentLeagues.push(newLeagueInfo);
+      localStorage.setItem("leagueInfo", JSON.stringify(currentLeagues));
+
       store.updateShowAddedAlert(true);
       store.updateShowInput(false);
       setTimeout(() => {

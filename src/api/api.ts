@@ -10,6 +10,7 @@ export const getLeague = async (leagueId: string) => {
         rosters: 0,
         season: "",
         seasonType: "",
+        leagueId: "",
       };
     }
     const league = await response.json();
