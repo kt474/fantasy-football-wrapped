@@ -91,7 +91,7 @@ const removeLeague = () => {
         ": " +
         capitalize(props.leagueInfo.seasonType) +
         " " +
-        props.leagueInfo.rosters +
+        props.leagueInfo.totalRosters +
         " man"
       }}
     </p>

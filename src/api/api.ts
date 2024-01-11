@@ -7,7 +7,7 @@ export const getLeague = async (leagueId: string) => {
       return {
         name: "",
         regularSeasonLength: 0,
-        rosters: 0,
+        totalRosters: 0,
         season: "",
         seasonType: "",
         leagueId: "",
@@ -17,7 +17,7 @@ export const getLeague = async (leagueId: string) => {
     return {
       name: league["name"],
       regularSeasonLength: league["settings"]["playoff_week_start"] - 1,
-      rosters: league["total_rosters"],
+      totalRosters: league["total_rosters"],
       season: league["season"],
       seasonType: league["season_type"],
       leagueId: league["league_id"],

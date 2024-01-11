@@ -2,10 +2,13 @@ import { defineStore } from "pinia";
 export type LeagueInfoType = {
   name: string;
   regularSeasonLength: number;
-  rosters: number;
+  totalRosters: number;
   season: string;
   seasonType: string;
   leagueId: string;
+  users?: [];
+  rosters?: [];
+  weeklyPoints?: [];
 };
 
 export const useStore = defineStore("main", {
@@ -15,10 +18,13 @@ export const useStore = defineStore("main", {
     showRemovedAlert: false,
     showInput: false,
     leagueInfo: [] as LeagueInfoType[],
-    leagueRosters: [] as any[],
-    leagueUsers: [] as any[],
-    weeklyPoints: [] as any[],
   }),
+  getters: {
+    leagueUsers: (state) => state.leagueInfo.map((league) => league.users),
+    leagueRosters: (state) => state.leagueInfo.map((league) => league.rosters),
+    weeklyPoints: (state) =>
+      state.leagueInfo.map((league) => league.weeklyPoints),
+  },
   actions: {
     updateDarkMode(payload: boolean) {
       this.darkMode = payload;
@@ -38,21 +44,6 @@ export const useStore = defineStore("main", {
     },
     updateShowInput(payload: boolean) {
       this.showInput = payload;
-    },
-    updateLeagueRosters(payload: any) {
-      this.$patch((state) => {
-        state.leagueRosters.push(payload);
-      });
-    },
-    updateLeagueUsers(payload: any) {
-      this.$patch((state) => {
-        state.leagueUsers.push(payload);
-      });
-    },
-    updateWeeklyPoints(payload: any) {
-      this.$patch((state) => {
-        state.weeklyPoints.push(payload);
-      });
     },
   },
 });

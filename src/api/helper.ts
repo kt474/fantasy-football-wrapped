@@ -1,4 +1,6 @@
 // helper methods
+import { groupBy, flatten } from "lodash";
+import { getMatchup } from "./api";
 export const getPowerRanking = (
   avgScore: number,
   highScore: number,
@@ -18,6 +20,40 @@ export const getMedian = (arr: number[]): number | undefined => {
   const s = [...arr].sort((a, b) => a - b);
   const mid = Math.floor(s.length / 2);
   return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+};
+
+export const getWeeklyPoints = async (
+  leagueId: string,
+  regularSeasonLength: number
+) => {
+  const allMatchups = [];
+  for (let i: number = 0; i < regularSeasonLength; i++) {
+    const singleWeek = await getMatchup(i + 1, leagueId);
+    allMatchups.push(singleWeek);
+  }
+
+  const grouped = Object.values(groupBy(flatten(allMatchups), "rosterId"));
+  const allTeams: Array<object> = [];
+  grouped.forEach((group: any) => {
+    let consolidatedObject: Record<
+      number,
+      { rosterId: number; points: number[] }
+    > = group.reduce(
+      (
+        result: any,
+        { rosterId, points }: { rosterId: number; points: number }
+      ) => {
+        if (!result[rosterId]) {
+          result[rosterId] = { rosterId, points: [] };
+        }
+        result[rosterId].points.push(points);
+        return result;
+      },
+      {}
+    );
+    allTeams.push(Object.values(consolidatedObject)[0]);
+  });
+  return allTeams;
 };
 
 export const fakeUsers = [

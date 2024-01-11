@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { groupBy, flatten } from "lodash";
 import { onMounted, computed, watch } from "vue";
 import Table from "./components/Table.vue";
 import Header from "./components/Header.vue";
@@ -8,7 +7,6 @@ import Input from "./components/Input.vue";
 import Intro from "./components/Intro.vue";
 import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
-import { getRosters, getUsers, getMatchup, getAvatar } from "./api/api";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
 import { inject } from "@vercel/analytics";
@@ -23,34 +21,15 @@ onMounted(async () => {
     savedLeagues.forEach((league: LeagueInfoType) => {
       store.updateLeagueInfo(league);
     });
-    await getAllData();
   }
-});
-
-const leagueUsers = computed(() => {
-  return store.leagueUsers;
-});
-const leagueRosters = computed(() => {
-  return store.leagueRosters;
-});
-const weeklyPoints = computed(() => {
-  return store.weeklyPoints;
 });
 
 const darkMode = computed(() => {
   return store.darkMode;
 });
 
-const regularSeasonLength = computed(() => {
-  return leagueInfoArray.value[0].regularSeasonLength;
-});
-
 const leagueInfoArray = computed(() => {
   return store.leagueInfo;
-});
-
-const leagueIds = computed(() => {
-  return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
 });
 
 const showAddedAlert = computed(() => {
@@ -62,13 +41,6 @@ const showRemovedAlert = computed(() => {
 const showInput = computed(() => {
   return store.showInput;
 });
-
-watch(
-  () => leagueIds.value,
-  async () => {
-    await getAllData();
-  }
-);
 
 watch(
   () => darkMode.value,
@@ -85,50 +57,6 @@ const setHtmlBackground = () => {
     }
   }
 };
-
-const getAllData = async () => {
-  leagueIds.value.forEach(async (id: string) => {
-    store.updateLeagueRosters(await getRosters(id));
-    store.updateLeagueUsers(await getUsers(id));
-    store.updateWeeklyPoints(await getWeeklyPoints(id));
-    store.leagueUsers[0].forEach(async (user: any) => {
-      if (user["avatar"] !== null) {
-        user["avatarImg"] = await getAvatar(user["avatar"]);
-      }
-    });
-  });
-};
-
-const getWeeklyPoints = async (leagueId: string) => {
-  const allMatchups = [];
-  for (let i: number = 0; i < regularSeasonLength.value; i++) {
-    const singleWeek = await getMatchup(i + 1, leagueId);
-    allMatchups.push(singleWeek);
-  }
-
-  const grouped = Object.values(groupBy(flatten(allMatchups), "rosterId"));
-  const allTeams: Array<object> = [];
-  grouped.forEach((group: any) => {
-    let consolidatedObject: Record<
-      number,
-      { rosterId: number; points: number[] }
-    > = group.reduce(
-      (
-        result: any,
-        { rosterId, points }: { rosterId: number; points: number }
-      ) => {
-        if (!result[rosterId]) {
-          result[rosterId] = { rosterId, points: [] };
-        }
-        result[rosterId].points.push(points);
-        return result;
-      },
-      {}
-    );
-    allTeams.push(Object.values(consolidatedObject)[0]);
-  });
-  return allTeams;
-};
 </script>
 
 <template>
@@ -143,10 +71,14 @@ const getWeeklyPoints = async (leagueId: string) => {
             <CardContainer />
           </div>
           <Table
-            v-if="leagueUsers[0] && leagueRosters[0] && weeklyPoints[0]"
-            :users="leagueUsers[0]"
-            :rosters="leagueRosters[0]"
-            :points="weeklyPoints[0]"
+            v-if="
+              store.leagueUsers[0] &&
+              store.leagueRosters[0] &&
+              store.weeklyPoints[0]
+            "
+            :users="store.leagueUsers[0]"
+            :rosters="store.leagueRosters[0]"
+            :points="store.weeklyPoints[0]"
           />
         </div>
         <div v-else class="container mx-auto">
