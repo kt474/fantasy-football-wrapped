@@ -15,6 +15,7 @@ const leagues = computed(() => {
       v-for="(leagueInfo, index) in leagues"
       :key="index"
       :leagueInfo="leagueInfo"
+      :dropdownIndex="index"
     />
     <button
       @click="store.updateShowInput(true)"

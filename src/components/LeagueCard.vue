@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { capitalize } from "lodash";
 import { useStore, LeagueInfoType } from "../store/store";
-import { initFlowbite } from "flowbite";
 import { onMounted } from "vue";
+import { initFlowbite } from "flowbite";
 
 onMounted(() => {
   initFlowbite();
 });
+
 const props = defineProps<{
   leagueInfo: any;
+  dropdownIndex: number;
 }>();
 const store = useStore();
 
@@ -43,7 +45,7 @@ const removeLeague = () => {
       <div>
         <button
           id="dropdownMenuIconButton"
-          data-dropdown-toggle="dropdownDots"
+          :data-dropdown-toggle="props.dropdownIndex.toString()"
           class="inline-flex items-center p-2 mb-1 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-2 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
           type="button"
         >
@@ -60,7 +62,7 @@ const removeLeague = () => {
           </svg>
         </button>
         <div
-          id="dropdownDots"
+          :id="props.dropdownIndex.toString()"
           class="z-10 hidden w-32 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600"
         >
           <ul

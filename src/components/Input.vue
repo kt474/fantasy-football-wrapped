@@ -89,7 +89,7 @@ const onSubmit = async () => {
         <p
           v-if="showErrorMsg"
           id="helper-text-explanation"
-          class="mt-2 text-xs text-red-600 dark:text-red-500"
+          class="mt-2 -mb-4 text-xs text-red-600 dark:text-red-500"
         >
           {{ errorMsg }}
         </p>
