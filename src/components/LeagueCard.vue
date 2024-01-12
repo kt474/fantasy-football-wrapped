@@ -57,7 +57,7 @@ const removeLeague = () => {
         <button
           id="dropdownMenuIconButton"
           :data-dropdown-toggle="props.dropdownIndex.toString()"
-          class="inline-flex items-center p-2 mb-1 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-2 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+          class="inline-flex items-center p-2 mb-1 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-200 focus:ring-2 focus:outline-none dark:text-white focus:ring-gray-100 dark:bg-gray-800 dark:hover:bg-gray-600 dark:focus:ring-gray-500"
           type="button"
         >
           <svg

@@ -45,7 +45,8 @@ watch(
 watch(
   () => store.leagueInfo.length,
   () => {
-    if (store.leagueInfo.length > 0) {
+    // This logic is not perfect
+    if (store.leagueInfo.length > 0 && !store.showRemovedAlert) {
       store.updateShowAddedAlert(true);
       setTimeout(() => {
         store.updateShowAddedAlert(false);
