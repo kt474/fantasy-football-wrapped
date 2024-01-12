@@ -21,10 +21,15 @@ const removeLeague = () => {
         (item: any) => item.leagueId !== props.leagueInfo.leagueId
       );
     });
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
+    if (store.leagueInfo.length === 0) {
+      localStorage.removeItem("leagueInfo");
+    } else {
+      localStorage.setItem(
+        "leagueInfo",
+        JSON.stringify(store.leagueInfo as LeagueInfoType[])
+      );
+    }
+    store.updateCurrentLeagueId("");
     store.updateRemovedAlert(true);
     setTimeout(() => {
       store.updateRemovedAlert(false);
@@ -34,7 +39,7 @@ const removeLeague = () => {
 </script>
 <template>
   <div
-    class="block px-4 py-3 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
+    class="block px-4 py-3 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex justify-between">
       <h5

@@ -18,6 +18,7 @@ export const useStore = defineStore("main", {
     showRemovedAlert: false,
     showInput: false,
     leagueInfo: [] as LeagueInfoType[],
+    currentLeagueId: "",
   }),
   getters: {
     leagueUsers: (state) => state.leagueInfo.map((league) => league.users),
@@ -44,6 +45,9 @@ export const useStore = defineStore("main", {
     },
     updateShowInput(payload: boolean) {
       this.showInput = payload;
+    },
+    updateCurrentLeagueId(payload: string) {
+      this.currentLeagueId = payload;
     },
   },
 });

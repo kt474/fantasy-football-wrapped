@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useStore, LeagueInfoType } from "../store/store";
-import { getLeague, getRosters, getUsers, getAvatar } from "../api/api";
-import { getWeeklyPoints } from "../api/helper";
+import { getLeague } from "../api/api";
 const store = useStore();
 const leagueIdInput = ref("");
 const showErrorMsg = ref(false);
@@ -26,30 +25,8 @@ const onSubmit = async () => {
       showErrorMsg.value = true;
     } else {
       showErrorMsg.value = false;
-      const newLeagueInfo: any = await getLeague(leagueIdInput.value);
-      newLeagueInfo["rosters"] = await getRosters(leagueIdInput.value);
-      newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
-        leagueIdInput.value,
-        12
-      );
-      newLeagueInfo["users"] = await getUsers(leagueIdInput.value);
-      for (const val of newLeagueInfo["users"]) {
-        if (val["avatar"] !== null) {
-          val["avatarImg"] = await getAvatar(val["avatar"]);
-        }
-      }
-      store.updateLeagueInfo(newLeagueInfo);
-      const currentLeagues = JSON.parse(
-        localStorage.getItem("leagueInfo") || "[]"
-      );
-      currentLeagues.push(newLeagueInfo);
-      localStorage.setItem("leagueInfo", JSON.stringify(currentLeagues));
-
-      store.updateShowAddedAlert(true);
+      store.updateCurrentLeagueId(leagueIdInput.value);
       store.updateShowInput(false);
-      setTimeout(() => {
-        store.updateShowAddedAlert(false);
-      }, 3000);
     }
     leagueIdInput.value = "";
   }
