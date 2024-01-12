@@ -14,6 +14,10 @@ const props = defineProps<{
 }>();
 const store = useStore();
 
+const selectLeague = () => {
+  store.updateCurrentLeagueId(props.leagueInfo.leagueId);
+};
+
 const removeLeague = () => {
   if (localStorage.leagueInfo) {
     store.$patch((state) => {
@@ -29,7 +33,7 @@ const removeLeague = () => {
         JSON.stringify(store.leagueInfo as LeagueInfoType[])
       );
     }
-    store.updateCurrentLeagueId("");
+    store.updateCurrentLeagueId(store.leagueIds[0] || "");
     store.updateRemovedAlert(true);
     setTimeout(() => {
       store.updateRemovedAlert(false);
@@ -39,10 +43,12 @@ const removeLeague = () => {
 </script>
 <template>
   <div
+    @click.self="selectLeague()"
     class="block px-4 py-3 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
   >
-    <div class="flex justify-between">
+    <div @click.self="selectLeague()" class="flex justify-between">
       <h5
+        @click.self="selectLeague()"
         class="mb-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-white"
       >
         {{ props.leagueInfo.name }}
@@ -91,8 +97,14 @@ const removeLeague = () => {
         </div>
       </div>
     </div>
-    <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
-    <p class="font-normal text-gray-700 dark:text-gray-400 mt-1.5">
+    <div
+      @click.self="selectLeague()"
+      class="w-full border-b border-slate-200 dark:border-slate-600"
+    ></div>
+    <p
+      @click.self="selectLeague()"
+      class="font-normal text-gray-700 dark:text-gray-400 mt-1.5"
+    >
       {{
         props.leagueInfo.season +
         ": " +

@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { findIndex } from "lodash";
 export type LeagueInfoType = {
   name: string;
   regularSeasonLength: number;
@@ -6,9 +7,9 @@ export type LeagueInfoType = {
   season: string;
   seasonType: string;
   leagueId: string;
-  users?: [];
-  rosters?: [];
-  weeklyPoints?: [];
+  users: [];
+  rosters: [];
+  weeklyPoints: [];
 };
 
 export const useStore = defineStore("main", {
@@ -21,10 +22,19 @@ export const useStore = defineStore("main", {
     currentLeagueId: "",
   }),
   getters: {
-    leagueUsers: (state) => state.leagueInfo.map((league) => league.users),
-    leagueRosters: (state) => state.leagueInfo.map((league) => league.rosters),
+    leagueUsers: (state) =>
+      state.leagueInfo.map((league: LeagueInfoType) => league.users),
+    leagueRosters: (state) =>
+      state.leagueInfo.map((league: LeagueInfoType) => league.rosters),
     weeklyPoints: (state) =>
-      state.leagueInfo.map((league) => league.weeklyPoints),
+      state.leagueInfo.map((league: LeagueInfoType) => league.weeklyPoints),
+    leagueIds: (state) =>
+      state.leagueInfo.map((league: LeagueInfoType) => league.leagueId),
+    currentLeagueIndex: (state) => {
+      return findIndex(state.leagueInfo, {
+        leagueId: state.currentLeagueId,
+      });
+    },
   },
   actions: {
     updateDarkMode(payload: boolean) {

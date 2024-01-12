@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, watch } from "vue";
+import { findIndex } from "lodash";
+import { onMounted, watch, computed } from "vue";
 import Table from "./components/Table.vue";
 import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
@@ -38,9 +39,7 @@ watch(
 
 watch(
   () => store.currentLeagueId,
-  () => {
-    getData();
-  }
+  () => getData()
 );
 
 watch(
@@ -56,7 +55,10 @@ watch(
 );
 
 const getData = async () => {
-  if (store.currentLeagueId) {
+  if (
+    store.currentLeagueId &&
+    !store.leagueIds.includes(store.currentLeagueId)
+  ) {
     const newLeagueInfo: any = await getLeague(store.currentLeagueId);
     newLeagueInfo["rosters"] = await getRosters(store.currentLeagueId);
     newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
@@ -77,6 +79,12 @@ const getData = async () => {
     localStorage.setItem("leagueInfo", JSON.stringify(currentLeagues));
   }
 };
+
+const getCurrentLeagueInfo = computed(() => {
+  return findIndex(store.leagueInfo, {
+    leagueId: store.currentLeagueId,
+  });
+});
 
 const setHtmlBackground = () => {
   const html = document.querySelector("html");
@@ -100,9 +108,9 @@ const setHtmlBackground = () => {
           <Input v-if="store.showInput" />
           <div
             v-if="
-              store.leagueUsers[0] &&
-              store.leagueRosters[0] &&
-              store.weeklyPoints[0]
+              store.leagueUsers[getCurrentLeagueInfo] &&
+              store.leagueRosters[getCurrentLeagueInfo] &&
+              store.weeklyPoints[getCurrentLeagueInfo]
             "
             class="flex justify-between"
           >
@@ -110,13 +118,13 @@ const setHtmlBackground = () => {
           </div>
           <Table
             v-if="
-              store.leagueUsers[0] &&
-              store.leagueRosters[0] &&
-              store.weeklyPoints[0]
+              store.leagueUsers[getCurrentLeagueInfo] &&
+              store.leagueRosters[getCurrentLeagueInfo] &&
+              store.weeklyPoints[getCurrentLeagueInfo]
             "
-            :users="store.leagueUsers[0]"
-            :rosters="store.leagueRosters[0]"
-            :points="store.weeklyPoints[0]"
+            :users="store.leagueUsers[getCurrentLeagueInfo]"
+            :rosters="store.leagueRosters[getCurrentLeagueInfo]"
+            :points="store.weeklyPoints[getCurrentLeagueInfo]"
           />
           <div v-else role="status" class="flex justify-center m-6">
             <svg
