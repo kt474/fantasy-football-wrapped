@@ -26,9 +26,11 @@ onMounted(async () => {
   if (localStorage.leagueInfo) {
     const savedLeagues = JSON.parse(localStorage.leagueInfo);
     savedLeagues.forEach((league: LeagueInfoType) => {
-      store.updateLeagueInfo(league);
-      store.updateCurrentLeagueId(league.leagueId);
+      if (!store.leagueIds.includes(league.leagueId)) {
+        store.updateLeagueInfo(league);
+      }
     });
+    store.updateCurrentLeagueId(localStorage.currentLeagueId);
   }
 });
 
@@ -39,14 +41,20 @@ watch(
 
 watch(
   () => store.currentLeagueId,
-  () => getData()
+  () => {
+    localStorage.currentLeagueId = store.currentLeagueId;
+    getData();
+  }
 );
 
 watch(
   () => store.leagueInfo.length,
   () => {
-    // This logic is not perfect
-    if (store.leagueInfo.length > 0 && !store.showRemovedAlert) {
+    if (
+      store.leagueInfo.length > 0 &&
+      !store.showRemovedAlert &&
+      store.leagueSubmitted
+    ) {
       store.updateShowAddedAlert(true);
       setTimeout(() => {
         store.updateShowAddedAlert(false);

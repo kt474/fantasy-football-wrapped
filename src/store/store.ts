@@ -20,6 +20,7 @@ export const useStore = defineStore("main", {
     showInput: false,
     leagueInfo: [] as LeagueInfoType[],
     currentLeagueId: "",
+    leagueSubmitted: false,
   }),
   getters: {
     leagueUsers: (state) =>

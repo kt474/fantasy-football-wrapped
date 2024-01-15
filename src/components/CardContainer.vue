@@ -23,7 +23,7 @@ const leagues = computed(() => {
       class="h-9 mt-12 mx-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >
       <svg
-        class="w-4 h-4 text-white dark:text-gray-800"
+        class="w-4 h-4 text-white"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

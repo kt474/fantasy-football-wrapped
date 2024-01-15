@@ -26,6 +26,7 @@ const onSubmit = async () => {
     } else {
       showErrorMsg.value = false;
       store.updateCurrentLeagueId(leagueIdInput.value);
+      store.leagueSubmitted = true;
       store.updateShowInput(false);
     }
     leagueIdInput.value = "";
