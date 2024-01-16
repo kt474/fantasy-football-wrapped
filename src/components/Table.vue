@@ -2,12 +2,15 @@
 import { mean, max, min, zip, countBy, maxBy, minBy } from "lodash";
 import { getPowerRanking, getMedian } from "../api/helper";
 import { computed, ref } from "vue";
+import { getAvatar } from "../api/api";
+import { useStore } from "../store/store";
 const tableOrder = ref("wins");
 const props = defineProps<{
   users: Array<object>;
   rosters: Array<object>;
   points: Array<object>;
 }>();
+const store = useStore();
 
 const originalData = computed(() => {
   if (props.users && props.points) {
@@ -85,6 +88,17 @@ const tableData: any = computed(() => {
     });
   }
 });
+
+// createObjectUrl does not persist across page loads
+const refetchAvatar = () => {
+  let currentUsers = store.leagueUsers[store.currentLeagueIndex];
+  currentUsers.forEach(async (val: any) => {
+    if (val["avatar"] !== null) {
+      val["avatarImg"] = await getAvatar(val["avatar"]);
+    }
+  });
+  store.leagueUsers[store.currentLeagueIndex] = currentUsers;
+};
 
 const mostWins = computed(() => {
   return maxBy(originalData.value, "wins")?.wins;
@@ -306,6 +320,7 @@ const mostMedianLosses = computed(() => {
           >
             <div class="flex items-center">
               <img
+                @error="refetchAvatar()"
                 v-if="item.avatarImg"
                 class="w-8 h-8 rounded-full"
                 :src="item.avatarImg"
