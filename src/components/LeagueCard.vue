@@ -3,6 +3,7 @@ import { capitalize } from "lodash";
 import { useStore, LeagueInfoType } from "../store/store";
 import { onMounted } from "vue";
 import { initFlowbite } from "flowbite";
+import { getData } from "../api/api";
 
 onMounted(() => {
   initFlowbite();
@@ -16,6 +17,23 @@ const store = useStore();
 
 const selectLeague = () => {
   store.updateCurrentLeagueId(props.leagueInfo.leagueId);
+};
+
+const refreshLeague = () => {
+  store.$patch((state) => {
+    state.leagueInfo = state.leagueInfo.filter(
+      (item: any) => item.leagueId !== props.leagueInfo.leagueId
+    );
+  });
+  if (store.leagueInfo.length === 0) {
+    localStorage.removeItem("leagueInfo");
+  } else {
+    localStorage.setItem(
+      "leagueInfo",
+      JSON.stringify(store.leagueInfo as LeagueInfoType[])
+    );
+  }
+  getData(store, props.leagueInfo.leagueId);
 };
 
 const removeLeague = () => {
@@ -88,6 +106,7 @@ const removeLeague = () => {
           >
             <li class="cursor-pointer">
               <a
+                @click="refreshLeague()"
                 class="block px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                 >Refresh</a
               >

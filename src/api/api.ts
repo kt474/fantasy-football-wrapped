@@ -1,3 +1,4 @@
+import { getWeeklyPoints } from "./helper";
 export const getLeague = async (leagueId: string) => {
   try {
     const response = await fetch(
@@ -78,4 +79,24 @@ export const getAvatar = async (avatarId: string) => {
   const response = await fetch(`https://sleepercdn.com/avatars/${avatarId}`);
   const avatar = await response.blob();
   return URL.createObjectURL(avatar);
+};
+
+export const getData = async (store: any, leagueId: string) => {
+  if (leagueId && !store.leagueIds.includes(leagueId)) {
+    const newLeagueInfo: any = await getLeague(leagueId);
+    newLeagueInfo["rosters"] = await getRosters(leagueId);
+    newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(leagueId, 14);
+    newLeagueInfo["users"] = await getUsers(leagueId);
+    for (const val of newLeagueInfo["users"]) {
+      if (val["avatar"] !== null) {
+        val["avatarImg"] = await getAvatar(val["avatar"]);
+      }
+    }
+    store.updateLeagueInfo(newLeagueInfo);
+    const currentLeagues = JSON.parse(
+      localStorage.getItem("leagueInfo") || "[]"
+    );
+    currentLeagues.push(newLeagueInfo);
+    localStorage.setItem("leagueInfo", JSON.stringify(currentLeagues));
+  }
 };

@@ -8,13 +8,8 @@ import Input from "./components/Input.vue";
 import Intro from "./components/Intro.vue";
 import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
-import { getLeague, getRosters, getUsers, getAvatar } from "./api/api";
-import {
-  fakePoints,
-  fakeRosters,
-  fakeUsers,
-  getWeeklyPoints,
-} from "./api/helper";
+import { getData } from "./api/api";
+import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
 import { inject } from "@vercel/analytics";
 
@@ -42,8 +37,12 @@ watch(
 watch(
   () => store.currentLeagueId,
   () => {
-    localStorage.currentLeagueId = store.currentLeagueId;
-    getData();
+    if (store.leagueInfo.length === 0) {
+      localStorage.removeItem("currentLeagueId");
+    } else {
+      localStorage.currentLeagueId = store.currentLeagueId;
+    }
+    getData(store, store.currentLeagueId);
   }
 );
 
@@ -63,33 +62,7 @@ watch(
   }
 );
 
-const getData = async () => {
-  if (
-    store.currentLeagueId &&
-    !store.leagueIds.includes(store.currentLeagueId)
-  ) {
-    const newLeagueInfo: any = await getLeague(store.currentLeagueId);
-    newLeagueInfo["rosters"] = await getRosters(store.currentLeagueId);
-    newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
-      store.currentLeagueId,
-      14
-    );
-    newLeagueInfo["users"] = await getUsers(store.currentLeagueId);
-    for (const val of newLeagueInfo["users"]) {
-      if (val["avatar"] !== null) {
-        val["avatarImg"] = await getAvatar(val["avatar"]);
-      }
-    }
-    store.updateLeagueInfo(newLeagueInfo);
-    const currentLeagues = JSON.parse(
-      localStorage.getItem("leagueInfo") || "[]"
-    );
-    currentLeagues.push(newLeagueInfo);
-    localStorage.setItem("leagueInfo", JSON.stringify(currentLeagues));
-  }
-};
-
-const getCurrentLeagueInfo = computed(() => {
+const getCurrentLeagueIndex = computed(() => {
   return findIndex(store.leagueInfo, {
     leagueId: store.currentLeagueId,
   });
@@ -117,9 +90,9 @@ const setHtmlBackground = () => {
           <Input v-if="store.showInput" />
           <div
             v-if="
-              store.leagueUsers[getCurrentLeagueInfo] &&
-              store.leagueRosters[getCurrentLeagueInfo] &&
-              store.weeklyPoints[getCurrentLeagueInfo]
+              store.leagueUsers[getCurrentLeagueIndex] &&
+              store.leagueRosters[getCurrentLeagueIndex] &&
+              store.weeklyPoints[getCurrentLeagueIndex]
             "
             class="flex justify-between"
           >
@@ -127,13 +100,13 @@ const setHtmlBackground = () => {
           </div>
           <Table
             v-if="
-              store.leagueUsers[getCurrentLeagueInfo] &&
-              store.leagueRosters[getCurrentLeagueInfo] &&
-              store.weeklyPoints[getCurrentLeagueInfo]
+              store.leagueUsers[getCurrentLeagueIndex] &&
+              store.leagueRosters[getCurrentLeagueIndex] &&
+              store.weeklyPoints[getCurrentLeagueIndex]
             "
-            :users="store.leagueUsers[getCurrentLeagueInfo]"
-            :rosters="store.leagueRosters[getCurrentLeagueInfo]"
-            :points="store.weeklyPoints[getCurrentLeagueInfo]"
+            :users="store.leagueUsers[getCurrentLeagueIndex]"
+            :rosters="store.leagueRosters[getCurrentLeagueIndex]"
+            :points="store.weeklyPoints[getCurrentLeagueIndex]"
           />
           <div v-else role="status" class="flex justify-center m-6">
             <svg
