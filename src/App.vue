@@ -37,7 +37,7 @@ watch(
 watch(
   () => store.currentLeagueId,
   () => {
-    if (store.leagueInfo.length === 0) {
+    if (store.currentLeagueId === "") {
       localStorage.removeItem("currentLeagueId");
     } else {
       localStorage.currentLeagueId = store.currentLeagueId;

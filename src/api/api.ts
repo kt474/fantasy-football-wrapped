@@ -85,7 +85,10 @@ export const getData = async (store: any, leagueId: string) => {
   if (leagueId && !store.leagueIds.includes(leagueId)) {
     const newLeagueInfo: any = await getLeague(leagueId);
     newLeagueInfo["rosters"] = await getRosters(leagueId);
-    newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(leagueId, 14);
+    newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
+      leagueId,
+      newLeagueInfo["regularSeasonLength"]
+    );
     newLeagueInfo["users"] = await getUsers(leagueId);
     for (const val of newLeagueInfo["users"]) {
       if (val["avatar"] !== null) {
