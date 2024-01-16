@@ -129,7 +129,11 @@ const mostMedianLosses = computed(() => {
         <tr>
           <th scope="col" class="px-6 py-3">Team name</th>
           <th scope="col" class="px-6 py-3">
-            <div class="flex items-center">
+            <div
+              data-tooltip-target="record-tooltip"
+              data-tooltip-placement="top"
+              class="flex items-center"
+            >
               Record
               <a class="cursor-pointer" @click="tableOrder = 'wins'"
                 ><svg
@@ -147,9 +151,21 @@ const mostMedianLosses = computed(() => {
                   /></svg
               ></a>
             </div>
+            <div
+              id="record-tooltip"
+              role="tooltip"
+              class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
+            >
+              Regular season wins and losses
+              <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
           </th>
           <th scope="col" class="px-6 py-3">
-            <div class="flex items-center">
+            <div
+              data-tooltip-target="points-tooltip"
+              data-tooltip-placement="top"
+              class="flex items-center"
+            >
               Points
               <a class="cursor-pointer" @click="tableOrder = 'points'"
                 ><svg
@@ -167,9 +183,21 @@ const mostMedianLosses = computed(() => {
                   /></svg
               ></a>
             </div>
+            <div
+              id="points-tooltip"
+              role="tooltip"
+              class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
+            >
+              Total regular season points
+              <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
           </th>
           <th scope="col" class="px-6 py-3">
-            <div class="flex items-center">
+            <div
+              data-tooltip-target="points-against-tooltip"
+              data-tooltip-placement="top"
+              class="flex items-center"
+            >
               Points Against
               <a class="cursor-pointer" @click="tableOrder = 'pointsAgainst'"
                 ><svg
@@ -188,9 +216,21 @@ const mostMedianLosses = computed(() => {
                   /></svg
               ></a>
             </div>
+            <div
+              id="points-against-tooltip"
+              role="tooltip"
+              class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
+            >
+              Total regular season points against
+              <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
           </th>
           <th scope="col" class="px-6 py-3">
-            <div class="flex items-center">
+            <div
+              data-tooltip-target="rating-tooltip"
+              data-tooltip-placement="top"
+              class="flex items-center"
+            >
               Rating
               <a class="cursor-pointer" @click="tableOrder = 'rating'"
                 ><svg
@@ -208,9 +248,22 @@ const mostMedianLosses = computed(() => {
                   /></svg
               ></a>
             </div>
+            <div
+              id="rating-tooltip"
+              role="tooltip"
+              class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 max-w-60 tooltip dark:bg-gray-600"
+            >
+              Team rating based on average score, high score, low score, and win
+              percentage. Higher is better.
+              <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
           </th>
           <th scope="col" class="px-6 py-3">
-            <div class="flex items-center">
+            <div
+              data-tooltip-target="median-tooltip"
+              data-tooltip-placement="top"
+              class="flex items-center"
+            >
               Median Record
               <a class="cursor-pointer" @click="tableOrder = 'medianRecord'"
                 ><svg
@@ -228,6 +281,15 @@ const mostMedianLosses = computed(() => {
                     d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
                   /></svg
               ></a>
+            </div>
+            <div
+              id="median-tooltip"
+              role="tooltip"
+              class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 max-w-60 tooltip dark:bg-gray-600"
+            >
+              Team record with median scoring, where a win is awarded if the
+              weekly score is higher than the median league score for that week.
+              <div class="tooltip-arrow" data-popper-arrow></div>
             </div>
           </th>
         </tr>
