@@ -14,11 +14,18 @@ const store = useStore();
 
 const originalData = computed(() => {
   if (props.users && props.points) {
-    const combined = props.users.map((a: any) => ({
-      ...a,
-      ...props.rosters.find((b: any) => b.id === a.id),
-    }));
-    const combinedPoints = combined.map((a: any) => ({
+    const combined = props.users.map((a: any) => {
+      const matched = props.rosters.find((b: any) => b.id === a.id);
+      if (matched) {
+        return {
+          ...a,
+          ...matched,
+        };
+      }
+      return null;
+    });
+    const filtered = combined.filter((a: any) => a !== null);
+    const combinedPoints = filtered.map((a: any) => ({
       ...a,
       ...props.points.find((b: any) => b.rosterId === a.rosterId),
     }));

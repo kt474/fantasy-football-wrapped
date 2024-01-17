@@ -88,16 +88,13 @@ const setHtmlBackground = () => {
       <div class="container w-11/12 max-w-screen-xl mx-auto">
         <div v-if="store.currentLeagueId" class="container mx-auto">
           <Input v-if="store.showInput" />
-          <div
+          <CardContainer
             v-if="
               store.leagueUsers[getCurrentLeagueIndex] &&
               store.leagueRosters[getCurrentLeagueIndex] &&
               store.weeklyPoints[getCurrentLeagueIndex]
             "
-            class="flex justify-between"
-          >
-            <CardContainer />
-          </div>
+          />
           <Table
             v-if="
               store.leagueUsers[getCurrentLeagueIndex] &&
