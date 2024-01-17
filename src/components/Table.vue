@@ -152,7 +152,7 @@ const mostMedianLosses = computed(() => {
           <th scope="col" class="px-6 py-3">
             <div
               data-tooltip-target="record-tooltip"
-              data-tooltip-placement="top"
+              data-tooltip-placement="bottom"
               class="flex items-center"
             >
               Record
@@ -184,7 +184,7 @@ const mostMedianLosses = computed(() => {
           <th scope="col" class="px-6 py-3">
             <div
               data-tooltip-target="points-tooltip"
-              data-tooltip-placement="top"
+              data-tooltip-placement="bottom"
               class="flex items-center"
             >
               Points
@@ -216,7 +216,7 @@ const mostMedianLosses = computed(() => {
           <th scope="col" class="px-6 py-3">
             <div
               data-tooltip-target="points-against-tooltip"
-              data-tooltip-placement="top"
+              data-tooltip-placement="bottom"
               class="flex items-center"
             >
               Points Against
@@ -249,7 +249,7 @@ const mostMedianLosses = computed(() => {
           <th scope="col" class="px-6 py-3">
             <div
               data-tooltip-target="rating-tooltip"
-              data-tooltip-placement="top"
+              data-tooltip-placement="bottom"
               class="flex items-center"
             >
               Rating
@@ -282,7 +282,7 @@ const mostMedianLosses = computed(() => {
           <th scope="col" class="px-6 py-3">
             <div
               data-tooltip-target="median-tooltip"
-              data-tooltip-placement="top"
+              data-tooltip-placement="bottom"
               class="flex items-center"
             >
               Median Record

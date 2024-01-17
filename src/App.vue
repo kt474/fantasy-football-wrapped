@@ -58,6 +58,7 @@ watch(
       setTimeout(() => {
         store.updateShowAddedAlert(false);
       }, 3000);
+      store.leagueSubmitted = false;
     }
   }
 );
@@ -138,6 +139,7 @@ const setHtmlBackground = () => {
       </div>
     </div>
     <Alert v-if="store.showAddedAlert" alert-msg="League successfully added!" />
+    <Alert v-if="store.showRefreshAlert" alert-msg="League data refreshed!" />
     <Alert v-if="store.showRemovedAlert" alert-msg="League removed!" />
   </div>
 </template>

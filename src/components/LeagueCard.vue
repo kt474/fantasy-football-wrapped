@@ -19,7 +19,7 @@ const selectLeague = () => {
   store.updateCurrentLeagueId(props.leagueInfo.leagueId);
 };
 
-const refreshLeague = () => {
+const refreshLeague = async () => {
   store.$patch((state) => {
     state.leagueInfo = state.leagueInfo.filter(
       (item: any) => item.leagueId !== props.leagueInfo.leagueId
@@ -33,7 +33,11 @@ const refreshLeague = () => {
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
     );
   }
-  getData(store, props.leagueInfo.leagueId);
+  await getData(store, props.leagueInfo.leagueId);
+  store.showRefreshAlert = true;
+  setTimeout(() => {
+    store.showRefreshAlert = false;
+  }, 3000);
 };
 
 const removeLeague = () => {
@@ -51,7 +55,6 @@ const removeLeague = () => {
         JSON.stringify(store.leagueInfo as LeagueInfoType[])
       );
     }
-    // TODO Fix logic once there are more than 2 leagues
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
     store.updateRemovedAlert(true);
     setTimeout(() => {
@@ -73,7 +76,7 @@ const removeLeague = () => {
     <div @click.self="selectLeague()" class="flex justify-between">
       <h5
         @click.self="selectLeague()"
-        class="mb-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-white"
+        class="mb-1 text-xl font-semibold tracking-tight text-gray-900 truncate dark:text-white"
       >
         {{ props.leagueInfo.name }}
       </h5>
