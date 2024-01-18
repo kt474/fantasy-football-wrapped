@@ -139,6 +139,7 @@ const mostMedianLosses = computed(() => {
 });
 </script>
 <template>
+  <p class="mb-2 text-xl font-semibold">Standings</p>
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table
       v-if="tableData.length > 0"
@@ -323,7 +324,7 @@ const mostMedianLosses = computed(() => {
         >
           <th
             scope="row"
-            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+            class="px-6 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
           >
             <div class="flex items-center">
               <img
@@ -349,7 +350,7 @@ const mostMedianLosses = computed(() => {
             </div>
           </th>
           <td
-            class="px-6 py-4"
+            class="px-6 py-2"
             :class="{
               'text-blue-500 font-semibold': item.wins === mostWins,
               'text-red-500 font-semibold': item.losses === mostLosses,
@@ -358,7 +359,7 @@ const mostMedianLosses = computed(() => {
             {{ item.wins }} - {{ item.losses }}
           </td>
           <td
-            class="px-6 py-4"
+            class="px-6 py-2"
             :class="{
               'text-blue-500 font-semibold': item.pointsFor === mostPoints,
               'text-red-500 font-semibold': item.pointsFor === leastPoints,
@@ -367,7 +368,7 @@ const mostMedianLosses = computed(() => {
             {{ item.pointsFor }}
           </td>
           <td
-            class="px-6 py-4"
+            class="px-6 py-2"
             :class="{
               'text-blue-500 font-semibold':
                 item.pointsAgainst === mostPointsAgainst,
@@ -378,7 +379,7 @@ const mostMedianLosses = computed(() => {
             {{ item.pointsAgainst }}
           </td>
           <td
-            class="px-6 py-4"
+            class="px-6 py-2"
             :class="{
               'text-blue-500 font-semibold': item.rating === highestRating,
               'text-red-500 font-semibold': item.rating === lowestRating,
@@ -387,7 +388,7 @@ const mostMedianLosses = computed(() => {
             {{ item.rating ? item.rating : "" }}
           </td>
           <td
-            class="px-6 py-4"
+            class="px-6 py-2"
             :class="{
               'text-blue-500 font-semibold':
                 item.winsWithMedian === mostMedianWins,
