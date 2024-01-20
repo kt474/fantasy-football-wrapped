@@ -7,7 +7,7 @@ export type LeagueInfoType = {
   season: string;
   seasonType: string;
   leagueId: string;
-  winner?: number;
+  leagueWinner: string;
   users: [];
   rosters: [];
   weeklyPoints: [];

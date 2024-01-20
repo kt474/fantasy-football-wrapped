@@ -8,7 +8,7 @@ import Input from "./components/Input.vue";
 import Intro from "./components/Intro.vue";
 import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
-import BracketCard from "./components/BracketCard.vue";
+import WinnerCard from "./components/WinnerCard.vue";
 import { getData } from "./api/api";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
@@ -98,15 +98,16 @@ const setHtmlBackground = () => {
             "
           >
             <CardContainer />
-            <Table
-              :users="store.leagueUsers[getCurrentLeagueIndex]"
-              :rosters="store.leagueRosters[getCurrentLeagueIndex]"
-              :points="store.weeklyPoints[getCurrentLeagueIndex]"
-            />
-            <BracketCard
-              v-if="store.leagueInfo[getCurrentLeagueIndex].winner"
-              class="mt-4"
-            />
+            <div class="flex flex-wrap justify-between">
+              <Table
+                :users="store.leagueUsers[getCurrentLeagueIndex]"
+                :rosters="store.leagueRosters[getCurrentLeagueIndex]"
+                :points="store.weeklyPoints[getCurrentLeagueIndex]"
+              />
+              <WinnerCard
+                v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
+              />
+            </div>
           </div>
           <div v-else role="status" class="flex justify-center m-6">
             <svg

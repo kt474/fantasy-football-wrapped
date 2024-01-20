@@ -1,5 +1,4 @@
 import { getWeeklyPoints } from "./helper";
-import { find } from "lodash";
 export const getLeague = async (leagueId: string) => {
   try {
     const response = await fetch(
@@ -13,6 +12,7 @@ export const getLeague = async (leagueId: string) => {
         season: "",
         seasonType: "",
         leagueId: "",
+        leagueWinner: "",
       };
     }
     const league = await response.json();
@@ -23,6 +23,7 @@ export const getLeague = async (leagueId: string) => {
       season: league["season"],
       seasonType: league["season_type"],
       leagueId: league["league_id"],
+      leagueWinner: league["metadata"]["latest_league_winner_roster_id"],
     };
   } catch (error) {
     return error;
@@ -82,15 +83,6 @@ export const getAvatar = async (avatarId: string) => {
   return URL.createObjectURL(avatar);
 };
 
-export const getWinnersBracket = async (leagueId: string) => {
-  const response = await fetch(
-    `https://api.sleeper.app/v1/league/${leagueId}/winners_bracket`
-  );
-  const winnersBracket = await response.json();
-  const winner = find(winnersBracket, { p: 1 });
-  return winner["w"];
-};
-
 export const getData = async (store: any, leagueId: string) => {
   if (leagueId && !store.leagueIds.includes(leagueId)) {
     const newLeagueInfo: any = await getLeague(leagueId);
@@ -105,7 +97,6 @@ export const getData = async (store: any, leagueId: string) => {
         val["avatarImg"] = await getAvatar(val["avatar"]);
       }
     }
-    newLeagueInfo["winner"] = await getWinnersBracket(leagueId);
     store.updateLeagueInfo(newLeagueInfo);
     const currentLeagues = JSON.parse(
       localStorage.getItem("leagueInfo") || "[]"
