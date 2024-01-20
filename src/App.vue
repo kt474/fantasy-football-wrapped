@@ -100,6 +100,7 @@ const setHtmlBackground = () => {
             <CardContainer />
             <div class="flex flex-wrap justify-between">
               <Table
+                class="xl:w-3/4"
                 :users="store.leagueUsers[getCurrentLeagueIndex]"
                 :rosters="store.leagueRosters[getCurrentLeagueIndex]"
                 :points="store.weeklyPoints[getCurrentLeagueIndex]"

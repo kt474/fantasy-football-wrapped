@@ -139,9 +139,7 @@ const mostMedianLosses = computed(() => {
 });
 </script>
 <template>
-  <div
-    class="relative w-full mb-4 overflow-x-auto shadow-md xl:w-3/4 sm:rounded-lg"
-  >
+  <div class="relative w-full mb-4 overflow-x-auto shadow-md sm:rounded-lg">
     <table
       v-if="tableData.length > 0"
       class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
