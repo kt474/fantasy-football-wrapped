@@ -18,7 +18,7 @@ const winner: any = computed(() => {
 </script>
 <template>
   <div
-    class="block p-6 bg-white border border-gray-200 rounded-lg shadow h-52 dark:bg-gray-800 dark:border-gray-700 xl:flex-grow xl:ml-4 xl:mr-2"
+    class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow h-52 dark:bg-gray-800 dark:border-gray-700"
   >
     <h5
       class="mb-4 text-2xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"

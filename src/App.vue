@@ -9,6 +9,7 @@ import Intro from "./components/Intro.vue";
 import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
 import WinnerCard from "./components/WinnerCard.vue";
+import BestManagerCard from "./components/BestManagerCard.vue";
 import { getData } from "./api/api";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
@@ -98,16 +99,19 @@ const setHtmlBackground = () => {
             "
           >
             <CardContainer />
-            <div class="flex flex-wrap justify-between">
+            <div class="flex flex-wrap justify-between mt-4">
               <Table
                 class="xl:w-3/4"
                 :users="store.leagueUsers[getCurrentLeagueIndex]"
                 :rosters="store.leagueRosters[getCurrentLeagueIndex]"
                 :points="store.weeklyPoints[getCurrentLeagueIndex]"
               />
-              <WinnerCard
-                v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
-              />
+              <div class="xl:flex-grow xl:ml-4 xl:mr-2">
+                <WinnerCard
+                  v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
+                />
+                <BestManagerCard class="xl:mt-4" />
+              </div>
             </div>
           </div>
           <div v-else role="status" class="flex justify-center m-6">
@@ -134,6 +138,7 @@ const setHtmlBackground = () => {
           <Intro />
           <Input />
           <Table
+            class="mt-4"
             :users="fakeUsers"
             :rosters="fakeRosters"
             :points="fakePoints"

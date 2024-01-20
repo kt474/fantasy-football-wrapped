@@ -1,4 +1,5 @@
 import { getWeeklyPoints } from "./helper";
+import { round } from "lodash";
 export const getLeague = async (leagueId: string) => {
   try {
     const response = await fetch(
@@ -40,6 +41,11 @@ export const getRosters = async (leagueId: string) => {
       id: roster["owner_id"],
       pointsFor: roster["settings"]["fpts"],
       pointsAgainst: roster["settings"]["fpts_against"],
+      potentialPoints: roster["settings"]["ppts"],
+      managerEfficiency: round(
+        roster["settings"]["fpts"] / roster["settings"]["ppts"],
+        3
+      ),
       wins: roster["settings"]["wins"],
       losses: roster["settings"]["losses"],
       rosterId: roster["roster_id"],

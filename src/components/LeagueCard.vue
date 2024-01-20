@@ -71,7 +71,7 @@ const removeLeague = () => {
         ? 'border-b-2 border-b-blue-700 dark:border-b-blue-600'
         : ''
     "
-    class="block px-4 py-3 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
+    class="block px-4 py-3 mt-4 mr-4 bg-white border border-gray-200 rounded-lg shadow cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
   >
     <div @click.self="selectLeague()" class="flex justify-between">
       <h5

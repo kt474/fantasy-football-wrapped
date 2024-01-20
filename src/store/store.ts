@@ -13,6 +13,17 @@ export type LeagueInfoType = {
   weeklyPoints: [];
 };
 
+export type RosterType = {
+  id: string;
+  pointsFor: number;
+  pointsAgainst: number;
+  potentialPoints: number;
+  managerEfficiency: number;
+  wins: number;
+  losses: number;
+  rosterId: number;
+};
+
 export const useStore = defineStore("main", {
   state: () => ({
     darkMode: false,
@@ -28,7 +39,9 @@ export const useStore = defineStore("main", {
     leagueUsers: (state) =>
       state.leagueInfo.map((league: LeagueInfoType) => league.users),
     leagueRosters: (state) =>
-      state.leagueInfo.map((league: LeagueInfoType) => league.rosters),
+      state.leagueInfo.map(
+        (league: LeagueInfoType) => league.rosters as RosterType[]
+      ),
     weeklyPoints: (state) =>
       state.leagueInfo.map((league: LeagueInfoType) => league.weeklyPoints),
     leagueIds: (state) =>
