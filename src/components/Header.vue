@@ -37,7 +37,7 @@ const setColorMode = () => {
     <div
       class="flex flex-wrap items-center justify-between max-w-screen-xl py-4 mx-auto"
     >
-      <a
+      <div
         aria-label="Logo"
         class="flex items-center space-x-3 rtl:space-x-reverse"
       >
@@ -52,7 +52,7 @@ const setColorMode = () => {
           class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
           >Fantasy Football Wrapped</span
         >
-      </a>
+      </div>
 
       <div class="hidden w-full md:block md:w-auto" id="navbar-default">
         <div
@@ -154,13 +154,12 @@ const setColorMode = () => {
                       target="_blank"
                       >Github</a
                     >. To report a bug or request new features, please open an
-                    issue
                     <a
                       aria-label="Link to github issues page"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                       href="https://github.com/kt474/fantasy-football-wrapped/issues"
                       target="_blank"
-                      >here</a
+                      >issue</a
                     >.
                   </p>
                 </div>

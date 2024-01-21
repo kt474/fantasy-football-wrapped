@@ -159,8 +159,8 @@ const mostMedianLosses = computed(() => {
               class="flex items-center cursor-pointer dark:text-gray-200"
             >
               Record
-              <a aria-label="Sort by wins"
-                ><svg
+              <div aria-label="Sort by wins">
+                <svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50': tableOrder == 'wins',
@@ -172,8 +172,9 @@ const mostMedianLosses = computed(() => {
                 >
                   <path
                     d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                  /></svg
-              ></a>
+                  />
+                </svg>
+              </div>
             </div>
             <div
               id="record-tooltip"
@@ -192,8 +193,8 @@ const mostMedianLosses = computed(() => {
               class="flex items-center cursor-pointer dark:text-gray-200"
             >
               Points
-              <a aria-label="Sort by points"
-                ><svg
+              <div aria-label="Sort by points">
+                <svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50': tableOrder == 'points',
@@ -205,8 +206,9 @@ const mostMedianLosses = computed(() => {
                 >
                   <path
                     d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                  /></svg
-              ></a>
+                  />
+                </svg>
+              </div>
             </div>
             <div
               id="points-tooltip"
@@ -225,8 +227,8 @@ const mostMedianLosses = computed(() => {
               class="flex items-center w-20 cursor-pointer dark:text-gray-200"
             >
               Points Against
-              <a aria-label="Sort by points against"
-                ><svg
+              <div aria-label="Sort by points against">
+                <svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50':
@@ -239,8 +241,9 @@ const mostMedianLosses = computed(() => {
                 >
                   <path
                     d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                  /></svg
-              ></a>
+                  />
+                </svg>
+              </div>
             </div>
             <div
               id="points-against-tooltip"
@@ -259,8 +262,8 @@ const mostMedianLosses = computed(() => {
               class="flex items-center cursor-pointer dark:text-gray-200"
             >
               Rating
-              <a aria-label="Sort by rating"
-                ><svg
+              <div aria-label="Sort by rating">
+                <svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50': tableOrder == 'rating',
@@ -272,8 +275,9 @@ const mostMedianLosses = computed(() => {
                 >
                   <path
                     d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                  /></svg
-              ></a>
+                  />
+                </svg>
+              </div>
             </div>
             <div
               id="rating-tooltip"
@@ -293,8 +297,8 @@ const mostMedianLosses = computed(() => {
               class="flex items-center w-20 cursor-pointer dark:text-gray-200"
             >
               Median Record
-              <a aria-label="Sort by median record"
-                ><svg
+              <div aria-label="Sort by median record">
+                <svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50':
@@ -307,8 +311,9 @@ const mostMedianLosses = computed(() => {
                 >
                   <path
                     d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                  /></svg
-              ></a>
+                  />
+                </svg>
+              </div>
             </div>
             <div
               id="median-tooltip"
