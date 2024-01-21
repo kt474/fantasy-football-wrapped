@@ -32,13 +32,18 @@ const setColorMode = () => {
 </script>
 <template>
   <nav
-    class="bg-slate-50 border-gray-200 dark:bg-slate-950 border-solid container mx-auto w-11/12"
+    class="container w-11/12 mx-auto border-gray-200 border-solid bg-slate-50 dark:bg-slate-950"
   >
     <div
-      class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto py-4"
+      class="flex flex-wrap items-center justify-between max-w-screen-xl py-4 mx-auto"
     >
-      <a class="flex items-center space-x-3 rtl:space-x-reverse">
+      <a
+        aria-label="Logo"
+        class="flex items-center space-x-3 rtl:space-x-reverse"
+      >
         <img
+          height="32"
+          width="32"
           src="../assets/football-helmet.png"
           class="h-8"
           alt="Flowbite Logo"
@@ -51,9 +56,10 @@ const setColorMode = () => {
 
       <div class="hidden w-full md:block md:w-auto" id="navbar-default">
         <div
-          class="font-medium flex flex-col p-4 md:p-0 mt-4 border rounded-lg md:flex-row md:space-x-2 md:mt-0 md:border-0"
+          class="flex flex-col p-4 mt-4 font-medium border rounded-lg md:p-0 md:flex-row md:space-x-2 md:mt-0 md:border-0"
         >
           <button
+            aria-label="Button to show info modal"
             data-modal-target="default-modal"
             data-modal-toggle="default-modal"
             data-tooltip-target="about-tooltip"
@@ -86,10 +92,10 @@ const setColorMode = () => {
             aria-hidden="true"
             class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
           >
-            <div class="relative p-4 w-full max-w-2xl max-h-full">
+            <div class="relative w-full max-w-2xl max-h-full p-4">
               <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                 <div
-                  class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
+                  class="flex items-center justify-between p-4 border-b rounded-t md:p-5 dark:border-gray-600"
                 >
                   <h3
                     class="text-xl font-semibold text-gray-900 dark:text-white"
@@ -97,8 +103,9 @@ const setColorMode = () => {
                     About
                   </h3>
                   <button
+                    aria-label="Button to close info modal"
                     type="button"
-                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                    class="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900 ms-auto dark:hover:bg-gray-600 dark:hover:text-white"
                     data-modal-hide="default-modal"
                   >
                     <svg
@@ -119,7 +126,7 @@ const setColorMode = () => {
                     <span class="sr-only">Close modal</span>
                   </button>
                 </div>
-                <div class="p-4 md:p-5 space-y-4">
+                <div class="p-4 space-y-4 md:p-5">
                   <p
                     class="text-base leading-relaxed text-gray-500 dark:text-gray-400"
                   >
@@ -127,6 +134,7 @@ const setColorMode = () => {
                     information about your fantasy football league. Currently,
                     only
                     <a
+                      aria-label="Link to sleeper website"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                       href="https://sleeper.com"
                       target="_blank"
@@ -140,6 +148,7 @@ const setColorMode = () => {
                     Everything on this site is also completely open source and
                     the source code can be found on
                     <a
+                      aria-label="Link to github repository"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                       href="https://github.com/kt474/fantasy-football-wrapped"
                       target="_blank"
@@ -147,6 +156,7 @@ const setColorMode = () => {
                     >. To report a bug or request new features, please open an
                     issue
                     <a
+                      aria-label="Link to github issues page"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                       href="https://github.com/kt474/fantasy-football-wrapped/issues"
                       target="_blank"
@@ -158,10 +168,12 @@ const setColorMode = () => {
             </div>
           </div>
           <a
+            aria-label="Button for github repository"
             href="https://github.com/kt474/fantasy-football-wrapped"
             target="_blank"
           >
             <button
+              aria-label="Button for github repository"
               data-tooltip-target="github-tooltip"
               data-tooltip-placement="bottom"
               class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
@@ -190,6 +202,7 @@ const setColorMode = () => {
             </div>
           </a>
           <button
+            aria-label="Button to toggle dark mode"
             @click="setColorMode()"
             data-tooltip-target="tooltip-bottom"
             data-tooltip-placement="bottom"

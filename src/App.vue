@@ -109,7 +109,7 @@ const setHtmlBackground = () => {
                 :points="store.weeklyPoints[getCurrentLeagueIndex]"
               />
               <div
-                class="flex flex-wrap justify-between w-full xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mr-2 xl:mt-0"
+                class="flex flex-wrap justify-between w-full xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mt-0"
               >
                 <WinnerCard
                   v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"

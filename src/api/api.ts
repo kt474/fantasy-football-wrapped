@@ -101,6 +101,7 @@ export const getTransactions = async (leagueId: string, week: number) => {
 
 export const getData = async (store: any, leagueId: string) => {
   if (leagueId && !store.leagueIds.includes(leagueId)) {
+    console.log("fetching data");
     const newLeagueInfo: any = await getLeague(leagueId);
     newLeagueInfo["rosters"] = await getRosters(leagueId);
     newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
@@ -128,6 +129,8 @@ export const getData = async (store: any, leagueId: string) => {
       }
     });
     newLeagueInfo["transactions"] = sumById;
+    const date = new Date();
+    newLeagueInfo["lastUpdated"] = date.getTime();
     store.updateLeagueInfo(newLeagueInfo);
     const currentLeagues = JSON.parse(
       localStorage.getItem("leagueInfo") || "[]"

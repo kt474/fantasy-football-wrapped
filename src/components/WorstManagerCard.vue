@@ -101,6 +101,7 @@ const worstManagerUser: any = computed(() => {
     <div class="mt-2 text-center">
       <div class="flex justify-center">
         <img
+          alt="Worst manager user avatar"
           v-if="worstManagerUser.avatarImg"
           class="w-8 h-8 rounded-full"
           :src="worstManagerUser.avatarImg"

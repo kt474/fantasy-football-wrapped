@@ -92,6 +92,7 @@ const winner: any = computed(() => {
     </h5>
     <div class="flex justify-center mt-2">
       <img
+        alt="League winner user avatar"
         v-if="winner.avatarImg"
         class="w-8 h-8 rounded-full"
         :src="winner.avatarImg"

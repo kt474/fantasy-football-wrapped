@@ -84,6 +84,7 @@ const mostTransactionsUser: any = computed(() => {
     <div class="mt-2 text-center">
       <div class="flex justify-center">
         <img
+          alt="Most transactions user avatar"
           v-if="mostTransactionsUser.avatarImg"
           class="w-8 h-8 rounded-full"
           :src="mostTransactionsUser.avatarImg"

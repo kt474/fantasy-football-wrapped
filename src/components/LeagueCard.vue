@@ -68,10 +68,10 @@ const removeLeague = () => {
     @click.self="selectLeague()"
     :class="
       props.leagueInfo.leagueId === store.currentLeagueId
-        ? 'border-b-2 border-b-blue-700 dark:border-b-blue-600'
+        ? 'border-b-4 border-b-blue-700 dark:border-b-blue-600'
         : ''
     "
-    class="block px-4 py-3 mt-4 mr-4 bg-white border border-gray-200 rounded-lg shadow cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
+    class="block px-4 py-3 mt-4 mr-4 bg-white border border-gray-200 rounded-lg shadow cursor-pointer card-width w-80 hover:bg-gray-100 dark:hover:bg-gray-700 min-w-60 dark:bg-gray-800 dark:border-gray-700"
   >
     <div @click.self="selectLeague()" class="flex justify-between">
       <h5
@@ -82,6 +82,7 @@ const removeLeague = () => {
       </h5>
       <div>
         <button
+          aria-label="Button to open dropdown menu"
           id="dropdownMenuIconButton"
           :data-dropdown-toggle="props.dropdownIndex.toString()"
           class="inline-flex items-center p-2 mb-1 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-200 focus:ring-2 focus:outline-none dark:text-white focus:ring-gray-100 dark:bg-gray-800 dark:hover:bg-gray-600 dark:focus:ring-gray-500"
@@ -109,6 +110,7 @@ const removeLeague = () => {
           >
             <li class="cursor-pointer">
               <a
+                aria-label="Refresh league data from API"
                 @click="refreshLeague()"
                 class="block px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                 >Refresh</a
@@ -116,6 +118,7 @@ const removeLeague = () => {
             </li>
             <li class="cursor-pointer">
               <a
+                aria-label="Remove league from dashboard"
                 @click="removeLeague()"
                 class="block px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                 >Remove</a
@@ -144,3 +147,8 @@ const removeLeague = () => {
     </p>
   </div>
 </template>
+<style scoped>
+.card-width {
+  width: 19.3rem;
+}
+</style>

@@ -159,7 +159,7 @@ const mostMedianLosses = computed(() => {
               class="flex items-center cursor-pointer"
             >
               Record
-              <a
+              <a aria-label="Sort by wins"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
@@ -192,7 +192,7 @@ const mostMedianLosses = computed(() => {
               class="flex items-center cursor-pointer"
             >
               Points
-              <a
+              <a aria-label="Sort by points"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
@@ -225,7 +225,7 @@ const mostMedianLosses = computed(() => {
               class="flex items-center w-20 cursor-pointer"
             >
               Points Against
-              <a
+              <a aria-label="Sort by points against"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
@@ -259,7 +259,7 @@ const mostMedianLosses = computed(() => {
               class="flex items-center cursor-pointer"
             >
               Rating
-              <a
+              <a aria-label="Sort by rating"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
@@ -293,7 +293,7 @@ const mostMedianLosses = computed(() => {
               class="flex items-center w-20 cursor-pointer"
             >
               Median Record
-              <a
+              <a aria-label="Sort by median record"
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
@@ -334,6 +334,7 @@ const mostMedianLosses = computed(() => {
           >
             <div class="flex items-center">
               <img
+                alt="User avatar"
                 @error="refetchAvatar()"
                 v-if="item.avatarImg"
                 class="w-8 h-8 rounded-full"

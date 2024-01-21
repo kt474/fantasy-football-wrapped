@@ -105,6 +105,7 @@ const bestManagerUser: any = computed(() => {
     </h5>
     <div class="flex justify-center mt-1 mb-2">
       <img
+        alt="Best manager user avatar"
         v-if="bestManagerUser.avatarImg"
         class="w-8 h-8 rounded-full"
         :src="bestManagerUser.avatarImg"
