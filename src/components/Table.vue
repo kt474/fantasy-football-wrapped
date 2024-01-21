@@ -150,13 +150,13 @@ const mostMedianLosses = computed(() => {
         class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400"
       >
         <tr>
-          <th scope="col" class="px-6 py-3">Team name</th>
+          <th scope="col" class="px-6 py-3 dark:text-gray-200">Team name</th>
           <th scope="col" class="px-6 py-3">
             <div
               @click="tableOrder = 'wins'"
               data-tooltip-target="record-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center cursor-pointer"
+              class="flex items-center cursor-pointer dark:text-gray-200"
             >
               Record
               <a aria-label="Sort by wins"
@@ -189,7 +189,7 @@ const mostMedianLosses = computed(() => {
               @click="tableOrder = 'points'"
               data-tooltip-target="points-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center cursor-pointer"
+              class="flex items-center cursor-pointer dark:text-gray-200"
             >
               Points
               <a aria-label="Sort by points"
@@ -222,7 +222,7 @@ const mostMedianLosses = computed(() => {
               @click="tableOrder = 'pointsAgainst'"
               data-tooltip-target="points-against-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center w-20 cursor-pointer"
+              class="flex items-center w-20 cursor-pointer dark:text-gray-200"
             >
               Points Against
               <a aria-label="Sort by points against"
@@ -256,7 +256,7 @@ const mostMedianLosses = computed(() => {
               @click="tableOrder = 'rating'"
               data-tooltip-target="rating-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center cursor-pointer"
+              class="flex items-center cursor-pointer dark:text-gray-200"
             >
               Rating
               <a aria-label="Sort by rating"
@@ -290,7 +290,7 @@ const mostMedianLosses = computed(() => {
               @click="tableOrder = 'medianRecord'"
               data-tooltip-target="median-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center w-20 cursor-pointer"
+              class="flex items-center w-20 cursor-pointer dark:text-gray-200"
             >
               Median Record
               <a aria-label="Sort by median record"
@@ -359,8 +359,10 @@ const mostMedianLosses = computed(() => {
           <td
             class="px-6 py-3"
             :class="{
-              'text-blue-500 font-semibold': item.wins === mostWins,
-              'text-red-500 font-semibold': item.losses === mostLosses,
+              'text-blue-600 dark:text-blue-500 font-semibold':
+                item.wins === mostWins,
+              'text-red-600 dark:text-red-500 font-semibold':
+                item.losses === mostLosses,
             }"
           >
             {{ item.wins }} - {{ item.losses }}
@@ -368,8 +370,10 @@ const mostMedianLosses = computed(() => {
           <td
             class="px-6 py-3"
             :class="{
-              'text-blue-500 font-semibold': item.pointsFor === mostPoints,
-              'text-red-500 font-semibold': item.pointsFor === leastPoints,
+              'text-blue-600 dark:text-blue-500 font-semibold':
+                item.pointsFor === mostPoints,
+              'text-red-600 dark:text-red-500 font-semibold':
+                item.pointsFor === leastPoints,
             }"
           >
             {{ item.pointsFor }}
@@ -377,9 +381,9 @@ const mostMedianLosses = computed(() => {
           <td
             class="px-6 py-3"
             :class="{
-              'text-blue-500 font-semibold':
+              'text-blue-600 dark:text-blue-500 font-semibold':
                 item.pointsAgainst === mostPointsAgainst,
-              'text-red-500 font-semibold':
+              'text-red-600 dark:text-red-500 font-semibold':
                 item.pointsAgainst === leastPointsAgainst,
             }"
           >
@@ -388,8 +392,10 @@ const mostMedianLosses = computed(() => {
           <td
             class="px-6 py-3"
             :class="{
-              'text-blue-500 font-semibold': item.rating === highestRating,
-              'text-red-500 font-semibold': item.rating === lowestRating,
+              'text-blue-600 dark:text-blue-500 font-semibold':
+                item.rating === highestRating,
+              'text-red-600 dark:text-red-500 font-semibold':
+                item.rating === lowestRating,
             }"
           >
             {{ item.rating ? item.rating : "" }}
@@ -397,9 +403,9 @@ const mostMedianLosses = computed(() => {
           <td
             class="px-6 py-3"
             :class="{
-              'text-blue-500 font-semibold':
+              'text-blue-600 font-semibold dark:text-blue-500':
                 item.winsWithMedian === mostMedianWins,
-              'text-red-500 font-semibold':
+              'text-red-600 dark:text-red-500 font-semibold':
                 item.lossesWithMedian === mostMedianLosses,
             }"
           >

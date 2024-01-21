@@ -5,7 +5,7 @@
     <p>
       Rating formula is from
       <a
-        aria-label="Rating formula website"
+        aria-label="http://www.okiraqi.org/opr.html Rating formula website"
         class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
         href="http://www.okiraqi.org/opr.html"
         target="_blank"
@@ -15,7 +15,7 @@
     <p>
       Icon Credit to
       <a
-        aria-label="Icon credit"
+        aria-label="Freepik - Flaticon icon credit"
         class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
         href="https://www.flaticon.com/free-icons/american-football"
         title="american football icons"
