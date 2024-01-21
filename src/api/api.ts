@@ -1,4 +1,4 @@
-import { getWeeklyPoints } from "./helper";
+import { getWeeklyPoints, getTotalTransactions } from "./helper";
 import { round } from "lodash";
 export const getLeague = async (leagueId: string) => {
   try {
@@ -24,7 +24,9 @@ export const getLeague = async (leagueId: string) => {
       season: league["season"],
       seasonType: league["season_type"],
       leagueId: league["league_id"],
-      leagueWinner: league["metadata"]["latest_league_winner_roster_id"],
+      leagueWinner: league["metadata"]
+        ? league["metadata"]["latest_league_winner_roster_id"]
+        : null,
     };
   } catch (error) {
     return error;
@@ -89,6 +91,14 @@ export const getAvatar = async (avatarId: string) => {
   return URL.createObjectURL(avatar);
 };
 
+export const getTransactions = async (leagueId: string, week: number) => {
+  const response = await fetch(
+    `https://api.sleeper.app/v1/league/${leagueId}/transactions/${week}`
+  );
+  const transactions = await response.json();
+  return transactions;
+};
+
 export const getData = async (store: any, leagueId: string) => {
   if (leagueId && !store.leagueIds.includes(leagueId)) {
     const newLeagueInfo: any = await getLeague(leagueId);
@@ -103,6 +113,21 @@ export const getData = async (store: any, leagueId: string) => {
         val["avatarImg"] = await getAvatar(val["avatar"]);
       }
     }
+    const transactions = [];
+    for (let i = 1; i <= newLeagueInfo["regularSeasonLength"]; i++) {
+      transactions.push(
+        getTotalTransactions(await getTransactions(leagueId, i + 1))
+      );
+    }
+    let sumById: any = {};
+    transactions.forEach((obj) => {
+      for (const id in obj) {
+        if (obj.hasOwnProperty(id)) {
+          sumById[id] = (sumById[id] || 0) + obj[id];
+        }
+      }
+    });
+    newLeagueInfo["transactions"] = sumById;
     store.updateLeagueInfo(newLeagueInfo);
     const currentLeagues = JSON.parse(
       localStorage.getItem("leagueInfo") || "[]"

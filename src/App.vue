@@ -10,6 +10,8 @@ import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
 import WinnerCard from "./components/WinnerCard.vue";
 import BestManagerCard from "./components/BestManagerCard.vue";
+import WorstManagerCard from "./components/WorstManagerCard.vue";
+import TransactionsCard from "./components/TransactionsCard.vue";
 import { getData } from "./api/api";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
@@ -106,11 +108,25 @@ const setHtmlBackground = () => {
                 :rosters="store.leagueRosters[getCurrentLeagueIndex]"
                 :points="store.weeklyPoints[getCurrentLeagueIndex]"
               />
-              <div class="xl:flex-grow xl:ml-4 xl:mr-2">
+              <div
+                class="flex flex-wrap justify-between w-full xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mr-2 xl:mt-0"
+              >
                 <WinnerCard
                   v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
+                  class="mt-4 xl:mt-0"
                 />
-                <BestManagerCard class="xl:mt-4" />
+                <BestManagerCard
+                  v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
+                  class="mt-4"
+                />
+                <WorstManagerCard
+                  v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
+                  class="mt-4"
+                />
+                <TransactionsCard
+                  v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
+                  class="mt-4"
+                />
               </div>
             </div>
           </div>

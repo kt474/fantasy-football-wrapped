@@ -1,6 +1,29 @@
 // helper methods
 import { groupBy, flatten } from "lodash";
 import { getMatchup } from "./api";
+
+export const getTotalTransactions = (transactions: any) => {
+  return transactions.reduce((countMap: any, obj: any) => {
+    const id = obj.creator;
+    const shouldCount = obj.status === "complete";
+
+    if (shouldCount) {
+      countMap[id] = (countMap[id] || 0) + 1;
+    }
+
+    return countMap;
+  }, {});
+};
+
+export const sumWeeklyTransactions = (trasactionObj: any) => {
+  trasactionObj.reduce((sumMap: any, obj: any) => {
+    for (let [id, value] of Object.entries(obj)) {
+      sumMap[id] = (sumMap[id] || 0) + value;
+    }
+    return sumMap;
+  }, {});
+};
+
 export const getPowerRanking = (
   avgScore: number,
   highScore: number,

@@ -11,6 +11,7 @@ export type LeagueInfoType = {
   users: [];
   rosters: [];
   weeklyPoints: [];
+  transactions: [];
 };
 
 export type RosterType = {
@@ -36,6 +37,8 @@ export const useStore = defineStore("main", {
     leagueSubmitted: false,
   }),
   getters: {
+    transactions: (state) =>
+      state.leagueInfo.map((league: LeagueInfoType) => league.transactions),
     leagueUsers: (state) =>
       state.leagueInfo.map((league: LeagueInfoType) => league.users),
     leagueRosters: (state) =>
