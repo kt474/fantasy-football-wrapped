@@ -153,12 +153,13 @@ const mostMedianLosses = computed(() => {
           <th scope="col" class="px-6 py-3">Team name</th>
           <th scope="col" class="px-6 py-3">
             <div
+              @click="tableOrder = 'wins'"
               data-tooltip-target="record-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center"
+              class="flex items-center cursor-pointer"
             >
               Record
-              <a class="cursor-pointer" @click="tableOrder = 'wins'"
+              <a
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
@@ -185,12 +186,13 @@ const mostMedianLosses = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
+              @click="tableOrder = 'points'"
               data-tooltip-target="points-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center"
+              class="flex items-center cursor-pointer"
             >
               Points
-              <a class="cursor-pointer" @click="tableOrder = 'points'"
+              <a
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
@@ -217,12 +219,13 @@ const mostMedianLosses = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
+              @click="tableOrder = 'pointsAgainst'"
               data-tooltip-target="points-against-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center"
+              class="flex items-center w-20 cursor-pointer"
             >
               Points Against
-              <a class="cursor-pointer" @click="tableOrder = 'pointsAgainst'"
+              <a
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
@@ -250,12 +253,13 @@ const mostMedianLosses = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
+              @click="tableOrder = 'rating'"
               data-tooltip-target="rating-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center"
+              class="flex items-center cursor-pointer"
             >
               Rating
-              <a class="cursor-pointer" @click="tableOrder = 'rating'"
+              <a
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
@@ -283,12 +287,13 @@ const mostMedianLosses = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
+              @click="tableOrder = 'medianRecord'"
               data-tooltip-target="median-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center"
+              class="flex items-center w-20 cursor-pointer"
             >
               Median Record
-              <a class="cursor-pointer" @click="tableOrder = 'medianRecord'"
+              <a
                 ><svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
