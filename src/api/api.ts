@@ -101,7 +101,6 @@ export const getTransactions = async (leagueId: string, week: number) => {
 
 export const getData = async (store: any, leagueId: string) => {
   if (leagueId && !store.leagueIds.includes(leagueId)) {
-    console.log("fetching data");
     const newLeagueInfo: any = await getLeague(leagueId);
     newLeagueInfo["rosters"] = await getRosters(leagueId);
     newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(

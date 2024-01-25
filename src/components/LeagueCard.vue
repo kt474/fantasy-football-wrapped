@@ -69,7 +69,7 @@ const removeLeague = () => {
     :class="
       props.leagueInfo.leagueId === store.currentLeagueId
         ? 'border-b-4 border-b-blue-700 dark:border-b-blue-600'
-        : ''
+        : 'border-b-2'
     "
     class="block px-4 py-3 mt-4 mr-4 bg-white border border-gray-200 rounded-lg shadow cursor-pointer card-width w-80 hover:bg-gray-100 dark:hover:bg-gray-700 min-w-60 dark:bg-gray-800 dark:border-gray-700"
   >

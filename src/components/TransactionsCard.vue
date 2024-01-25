@@ -107,7 +107,7 @@ const mostTransactionsUser: any = computed(() => {
         </p>
       </div>
       <p
-        class="mx-auto mt-2 leading-5 text-gray-800 text-md dark:text-white text-pretty"
+        class="mx-auto mt-1 leading-5 text-gray-800 text-md dark:text-white text-pretty"
       >
         <span class="font-semibold">{{ mostTransactions[1] }}</span> Roster
         moves
