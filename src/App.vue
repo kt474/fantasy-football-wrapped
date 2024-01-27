@@ -64,6 +64,10 @@ watch(
       }, 3000);
       store.leagueSubmitted = false;
     }
+    localStorage.setItem(
+      "leagueInfo",
+      JSON.stringify(store.leagueInfo as LeagueInfoType[])
+    );
   }
 );
 

@@ -131,10 +131,5 @@ export const getData = async (store: any, leagueId: string) => {
     const date = new Date();
     newLeagueInfo["lastUpdated"] = date.getTime();
     store.updateLeagueInfo(newLeagueInfo);
-    const currentLeagues = JSON.parse(
-      localStorage.getItem("leagueInfo") || "[]"
-    );
-    currentLeagues.push(newLeagueInfo);
-    localStorage.setItem("leagueInfo", JSON.stringify(currentLeagues));
   }
 };

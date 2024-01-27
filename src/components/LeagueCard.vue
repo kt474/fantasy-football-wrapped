@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { capitalize } from "lodash";
-import { useStore, LeagueInfoType } from "../store/store";
+import { useStore } from "../store/store";
 import { onMounted } from "vue";
 import { initFlowbite } from "flowbite";
 import { getData } from "../api/api";
@@ -25,14 +25,6 @@ const refreshLeague = async () => {
       (item: any) => item.leagueId !== props.leagueInfo.leagueId
     );
   });
-  if (store.leagueInfo.length === 0) {
-    localStorage.removeItem("leagueInfo");
-  } else {
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
-  }
   await getData(store, props.leagueInfo.leagueId);
   store.showRefreshAlert = true;
   setTimeout(() => {
@@ -47,14 +39,6 @@ const removeLeague = () => {
         (item: any) => item.leagueId !== props.leagueInfo.leagueId
       );
     });
-    if (store.leagueInfo.length === 0) {
-      localStorage.removeItem("leagueInfo");
-    } else {
-      localStorage.setItem(
-        "leagueInfo",
-        JSON.stringify(store.leagueInfo as LeagueInfoType[])
-      );
-    }
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
     store.updateRemovedAlert(true);
     setTimeout(() => {
