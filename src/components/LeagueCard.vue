@@ -25,7 +25,7 @@ const refreshLeague = async () => {
       (item: any) => item.leagueId !== props.leagueInfo.leagueId
     );
   });
-  await getData(store, props.leagueInfo.leagueId);
+  store.updateLeagueInfo(await getData(props.leagueInfo.leagueId));
   store.showRefreshAlert = true;
   setTimeout(() => {
     store.showRefreshAlert = false;

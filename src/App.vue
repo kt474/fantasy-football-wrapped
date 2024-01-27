@@ -12,7 +12,6 @@ import WinnerCard from "./components/WinnerCard.vue";
 import BestManagerCard from "./components/BestManagerCard.vue";
 import WorstManagerCard from "./components/WorstManagerCard.vue";
 import TransactionsCard from "./components/TransactionsCard.vue";
-import { getData } from "./api/api";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
 import { inject } from "@vercel/analytics";
@@ -43,10 +42,10 @@ watch(
   () => {
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentLeagueId");
+      localStorage.removeItem("leagueInfo");
     } else {
       localStorage.currentLeagueId = store.currentLeagueId;
     }
-    getData(store, store.currentLeagueId);
   }
 );
 

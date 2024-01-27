@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useStore, LeagueInfoType } from "../store/store";
-import { getLeague } from "../api/api";
+import { getData, getLeague } from "../api/api";
 const store = useStore();
 const leagueIdInput = ref("");
 const showErrorMsg = ref(false);
@@ -26,6 +26,7 @@ const onSubmit = async () => {
     } else {
       showErrorMsg.value = false;
       store.updateCurrentLeagueId(leagueIdInput.value);
+      store.updateLeagueInfo(await getData(leagueIdInput.value));
       store.leagueSubmitted = true;
       store.updateShowInput(false);
     }

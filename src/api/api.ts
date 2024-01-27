@@ -99,37 +99,35 @@ export const getTransactions = async (leagueId: string, week: number) => {
   return transactions;
 };
 
-export const getData = async (store: any, leagueId: string) => {
-  if (leagueId && !store.leagueIds.includes(leagueId)) {
-    const newLeagueInfo: any = await getLeague(leagueId);
-    newLeagueInfo["rosters"] = await getRosters(leagueId);
-    newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
-      leagueId,
-      newLeagueInfo["regularSeasonLength"]
-    );
-    newLeagueInfo["users"] = await getUsers(leagueId);
-    for (const val of newLeagueInfo["users"]) {
-      if (val["avatar"] !== null) {
-        val["avatarImg"] = await getAvatar(val["avatar"]);
-      }
+export const getData = async (leagueId: string) => {
+  const newLeagueInfo: any = await getLeague(leagueId);
+  newLeagueInfo["rosters"] = await getRosters(leagueId);
+  newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
+    leagueId,
+    newLeagueInfo["regularSeasonLength"]
+  );
+  newLeagueInfo["users"] = await getUsers(leagueId);
+  for (const val of newLeagueInfo["users"]) {
+    if (val["avatar"] !== null) {
+      val["avatarImg"] = await getAvatar(val["avatar"]);
     }
-    const transactions = [];
-    for (let i = 1; i <= newLeagueInfo["regularSeasonLength"]; i++) {
-      transactions.push(
-        getTotalTransactions(await getTransactions(leagueId, i + 1))
-      );
-    }
-    let sumById: any = {};
-    transactions.forEach((obj) => {
-      for (const id in obj) {
-        if (obj.hasOwnProperty(id)) {
-          sumById[id] = (sumById[id] || 0) + obj[id];
-        }
-      }
-    });
-    newLeagueInfo["transactions"] = sumById;
-    const date = new Date();
-    newLeagueInfo["lastUpdated"] = date.getTime();
-    store.updateLeagueInfo(newLeagueInfo);
   }
+  const transactions = [];
+  for (let i = 1; i <= newLeagueInfo["regularSeasonLength"]; i++) {
+    transactions.push(
+      getTotalTransactions(await getTransactions(leagueId, i + 1))
+    );
+  }
+  let sumById: any = {};
+  transactions.forEach((obj) => {
+    for (const id in obj) {
+      if (obj.hasOwnProperty(id)) {
+        sumById[id] = (sumById[id] || 0) + obj[id];
+      }
+    }
+  });
+  newLeagueInfo["transactions"] = sumById;
+  const date = new Date();
+  newLeagueInfo["lastUpdated"] = date.getTime();
+  return newLeagueInfo;
 };
