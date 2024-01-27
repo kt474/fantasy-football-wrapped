@@ -15,6 +15,7 @@ import TransactionsCard from "./components/TransactionsCard.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
 import { inject } from "@vercel/analytics";
+import { getData } from "./api/api";
 
 const store = useStore();
 
@@ -23,9 +24,16 @@ onMounted(async () => {
   setHtmlBackground();
   if (localStorage.leagueInfo) {
     const savedLeagues = JSON.parse(localStorage.leagueInfo);
-    savedLeagues.forEach((league: LeagueInfoType) => {
+    savedLeagues.forEach(async (league: LeagueInfoType) => {
       if (!store.leagueIds.includes(league.leagueId)) {
-        store.updateLeagueInfo(league);
+        const currentTime = new Date().getTime();
+        const diff = currentTime - league.lastUpdated;
+        if (diff > 86400000) {
+          // 1 day
+          store.updateLeagueInfo(await getData(league.leagueId));
+        } else {
+          store.updateLeagueInfo(league);
+        }
       }
     });
     store.updateCurrentLeagueId(localStorage.currentLeagueId);
