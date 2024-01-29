@@ -30,15 +30,30 @@ const originalData = computed(() => {
       ...props.points.find((b: any) => b.rosterId === a.rosterId),
     }));
 
-    const pointsArr: any = [];
+    const pointsArr: any[] = [];
     combinedPoints.forEach((value: any) => {
       pointsArr.push(value.points);
+      value["winsAgainstAll"] = 0;
+      value["lossesAgainstAll"] = 0;
     });
-    const zipped = zip(...pointsArr);
+    const zipped: any = zip(...pointsArr);
     const medians: number[] = [];
-    zipped.forEach((value: any) => {
-      medians.push(Number(getMedian(value)?.toFixed(2)));
-    });
+    for (let i: number = 0; i < zipped.length; i++) {
+      medians.push(Number(getMedian(zipped[i])?.toFixed(2)));
+      for (let j: number = 0; j < zipped[i].length; j++) {
+        const numberOfWins = zipped[i].filter(
+          (a: any) => a < zipped[i][j]
+        ).length;
+        const currentTeam = combinedPoints.find((obj: any) => {
+          return obj.points[i] === zipped[i][j];
+        });
+        if (currentTeam) {
+          currentTeam["winsAgainstAll"] += numberOfWins;
+          currentTeam["lossesAgainstAll"] +=
+            zipped[i].length - numberOfWins - 1;
+        }
+      }
+    }
     if (combinedPoints) {
       combinedPoints.forEach((value: any) => {
         value["rating"] = getPowerRanking(
@@ -86,6 +101,13 @@ const tableData: any = computed(() => {
     return originalData.value.sort((a: any, b: any) => {
       return b.rating - a.rating;
     });
+  } else if (tableOrder.value === "recordAgainstAll") {
+    return originalData.value.sort((a: any, b: any) => {
+      if (a.winsAgainstAll !== b.winsAgainstAll) {
+        return b.winsAgainstAll - a.winsAgainstAll;
+      }
+      return b.pointsFor - a.pointsFor;
+    });
   } else if (tableOrder.value === "medianRecord") {
     return originalData.value.sort((a: any, b: any) => {
       if (a.winsWithMedian !== b.winsWithMedian) {
@@ -125,11 +147,11 @@ const mostPointsAgainst = computed(() => {
 const leastPointsAgainst = computed(() => {
   return minBy(originalData.value, "pointsAgainst")?.pointsAgainst;
 });
-const highestRating = computed(() => {
-  return maxBy(originalData.value, "rating")?.rating;
+const mostWinsAgainstAll = computed(() => {
+  return maxBy(originalData.value, "winsAgainstAll")?.winsAgainstAll;
 });
-const lowestRating = computed(() => {
-  return minBy(originalData.value, "rating")?.rating;
+const mostLossesAgainstAll = computed(() => {
+  return maxBy(originalData.value, "lossesAgainstAll")?.lossesAgainstAll;
 });
 const mostMedianWins = computed(() => {
   return maxBy(originalData.value, "winsWithMedian")?.winsWithMedian;
@@ -256,17 +278,18 @@ const mostMedianLosses = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
-              @click="tableOrder = 'rating'"
-              data-tooltip-target="rating-tooltip"
+              @click="tableOrder = 'recordAgainstAll'"
+              data-tooltip-target="recordAgainstAll-tooltip"
               data-tooltip-placement="bottom"
-              class="flex items-center cursor-pointer dark:text-gray-200"
+              class="flex items-center w-20 cursor-pointer dark:text-gray-200"
             >
-              Rating
-              <div aria-label="Sort by rating">
+              Record vs. All
+              <div aria-label="Sort by record against all ">
                 <svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
-                    'fill-slate-600 dark:fill-slate-50': tableOrder == 'rating',
+                    'fill-slate-600 dark:fill-slate-50':
+                      tableOrder == 'recordAgainstAll',
                   }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
@@ -280,12 +303,11 @@ const mostMedianLosses = computed(() => {
               </div>
             </div>
             <div
-              id="rating-tooltip"
+              id="recordAgainstAll-tooltip"
               role="tooltip"
               class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 max-w-60 tooltip dark:bg-gray-600"
             >
-              Team rating based on average score, high score, low score, and win
-              percentage. Higher is better.
+              Team record if each team played every other team each week.
               <div class="tooltip-arrow" data-popper-arrow></div>
             </div>
           </th>
@@ -320,8 +342,9 @@ const mostMedianLosses = computed(() => {
               role="tooltip"
               class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 max-w-60 tooltip dark:bg-gray-600"
             >
-              Team record with median scoring, where a win is awarded if the
-              weekly score is higher than the median league score for that week.
+              Team record where a win is awarded if the weekly score is higher
+              than the league median, and a loss is added if the score is less
+              than the median.
               <div class="tooltip-arrow" data-popper-arrow></div>
             </div>
           </th>
@@ -398,12 +421,13 @@ const mostMedianLosses = computed(() => {
             class="px-6 py-3"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
-                item.rating === highestRating,
+                item.winsAgainstAll === mostWinsAgainstAll,
               'text-red-600 dark:text-red-500 font-semibold':
-                item.rating === lowestRating,
+                item.lossesAgainstAll === mostLossesAgainstAll,
             }"
           >
-            {{ item.rating ? item.rating : "" }}
+            {{ item.winsAgainstAll }} -
+            {{ item.lossesAgainstAll }}
           </td>
           <td
             class="px-6 py-3"
