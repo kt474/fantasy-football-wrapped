@@ -68,12 +68,13 @@ const originalData = computed(() => {
         value["lossesWithMedian"] = counts["false"] + value.losses;
       });
 
-      const result = combinedPoints.sort((a: any, b: any) => {
+      const result: any[] = combinedPoints.sort((a: any, b: any) => {
         if (a.wins !== b.wins) {
           return b.wins - a.wins;
         }
         return b.pointsFor - a.pointsFor;
       });
+      store.tableData = result;
       return result;
     }
   }

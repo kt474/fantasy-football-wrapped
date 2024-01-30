@@ -12,6 +12,7 @@ import WinnerCard from "./components/WinnerCard.vue";
 import BestManagerCard from "./components/BestManagerCard.vue";
 import WorstManagerCard from "./components/WorstManagerCard.vue";
 import TransactionsCard from "./components/TransactionsCard.vue";
+import Chart from "./components/Chart.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
 import { inject } from "@vercel/analytics";
@@ -140,6 +141,7 @@ const setHtmlBackground = () => {
                 />
               </div>
             </div>
+            <Chart class="mt-4" />
           </div>
           <div v-else role="status" class="flex justify-center m-6">
             <svg

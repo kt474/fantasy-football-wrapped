@@ -2,6 +2,16 @@
 import { groupBy, flatten } from "lodash";
 import { getMatchup } from "./api";
 
+export const winsOnWeek = (recordString: string, week: number) => {
+  let count = 0;
+  for (let i = 0; i <= week; i++) {
+    if (recordString[i] === "W") {
+      count++;
+    }
+  }
+  return count;
+};
+
 export const getTotalTransactions = (transactions: any) => {
   return transactions.reduce((countMap: any, obj: any) => {
     const id = obj.creator;

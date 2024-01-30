@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@vercel/analytics": "^1.1.1",
+    "apexcharts": "^3.45.2",
     "flowbite": "^2.2.1",
     "lodash": "^4.17.21",
     "pinia": "^2.1.7",
-    "vue": "^3.3.11"
+    "vue": "^3.3.11",
+    "vue3-apexcharts": "^1.4.4"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.202",
