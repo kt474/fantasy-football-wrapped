@@ -343,9 +343,9 @@ const mostMedianLosses = computed(() => {
               role="tooltip"
               class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 max-w-60 tooltip dark:bg-gray-600"
             >
-              Team record where a win is awarded if the weekly score is higher
-              than the league median, and a loss is added if the score is less
-              than the median.
+              Team record where a win is awarded if a team's weekly score is
+              higher than the league median, and a loss is added if the score is
+              less than the median.
               <div class="tooltip-arrow" data-popper-arrow></div>
             </div>
           </th>

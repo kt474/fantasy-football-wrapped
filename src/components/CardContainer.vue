@@ -11,7 +11,7 @@ const leagues = computed(() => {
 </script>
 <template>
   <div class="container flex mr-4">
-    <div class="flex max-w-screen-xl overflow-scroll">
+    <div class="flex max-w-screen-xl overflow-auto no-scrollbar">
       <LeagueCard
         v-for="(leagueInfo, index) in leagues"
         :key="index"
@@ -44,3 +44,15 @@ const leagues = computed(() => {
     </button>
   </div>
 </template>
+<style>
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+</style>
