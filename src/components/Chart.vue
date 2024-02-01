@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { mean, max, min } from "lodash";
+import { mean, max, min, zip } from "lodash";
 import { useStore } from "../store/store";
 import { getPowerRanking, winsOnWeek } from "../api/helper";
 const store = useStore();
 
 const powerRanking = computed(() => {
   const result: any = [];
+  const ratingsContainer: any = [];
   store.tableData.forEach((value: any) => {
     const ratingArr: number[] = [];
     value.points.forEach((_: number, week: number) => {
@@ -21,11 +22,23 @@ const powerRanking = computed(() => {
         )
       );
     });
+    ratingsContainer.push(ratingArr);
     result.push({
       name: value.name,
       type: "line",
-      data: ratingArr,
+      ratings: ratingArr,
     });
+  });
+  const orderedArrs = zip(...ratingsContainer);
+  orderedArrs.forEach((arr: any[]) => {
+    arr.sort((a: number, b: number) => b - a);
+  });
+  result.forEach((user: any) => {
+    const data: any[] = [];
+    user.ratings.forEach((value: number, index: number) => {
+      data.push(orderedArrs[index].indexOf(value) + 1);
+    });
+    user["data"] = data;
   });
   return result;
 });
@@ -37,6 +50,10 @@ const xAxis = computed(() => {
     ).keys(),
   ].slice(1);
 });
+
+const numOfTeams = computed(() => {
+  return store.tableData.length;
+});
 const chartOptions = ref({
   chart: {
     id: "power-ranking",
@@ -44,11 +61,38 @@ const chartOptions = ref({
       show: false,
     },
   },
+  colors: [
+    "#78716c",
+    "#ef4444",
+    "#f97316",
+    "#eab308",
+    "#84cc16",
+    "#14b8a6",
+    "#22c55e",
+    "#0ea5e9",
+    "#6366f1",
+    "#a855f7",
+    "#ec4899",
+    "#f43f5e",
+  ],
   xaxis: {
     categories: xAxis,
+    title: {
+      text: "Week",
+    },
+  },
+  yaxis: {
+    reversed: true,
+    min: 1,
+    stepSize: 1,
+    tickAmount: numOfTeams.value - 1,
+    title: {
+      text: "Ranking",
+    },
   },
   stroke: {
     curve: "straight",
+    width: 3,
   },
 });
 </script>
@@ -68,6 +112,7 @@ const chartOptions = ref({
     </div>
     <apexchart
       width="100%"
+      height="400"
       type="line"
       :options="chartOptions"
       :series="powerRanking"
