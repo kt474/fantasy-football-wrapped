@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { mean, max, min, zip } from "lodash";
 import { useStore } from "../store/store";
 import { getPowerRanking, winsOnWeek } from "../api/helper";
@@ -54,8 +54,32 @@ const xAxis = computed(() => {
 const numOfTeams = computed(() => {
   return store.tableData.length;
 });
+
+const chartTextColor = computed(() => {
+  return store.darkMode ? "#ffffff" : "#111827";
+});
+
+const updateChartColor = () => {
+  chartOptions.value = {
+    ...chartOptions.value,
+    chart: {
+      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      id: "power-ranking",
+      toolbar: {
+        show: false,
+      },
+    },
+  };
+};
+
+watch(
+  () => store.darkMode,
+  () => updateChartColor()
+);
+
 const chartOptions = ref({
   chart: {
+    foreColor: chartTextColor.value,
     id: "power-ranking",
     toolbar: {
       show: false,
@@ -76,7 +100,7 @@ const chartOptions = ref({
     "#f43f5e",
   ],
   xaxis: {
-    categories: xAxis,
+    categories: xAxis.value,
     title: {
       text: "Week",
       style: {
