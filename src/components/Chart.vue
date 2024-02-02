@@ -62,9 +62,9 @@ const chartOptions = ref({
     },
   },
   colors: [
-    "#78716c",
     "#ef4444",
     "#f97316",
+    "#f59e0b",
     "#eab308",
     "#84cc16",
     "#14b8a6",
@@ -79,6 +79,12 @@ const chartOptions = ref({
     categories: xAxis,
     title: {
       text: "Week",
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
     },
   },
   yaxis: {
@@ -88,6 +94,12 @@ const chartOptions = ref({
     tickAmount: numOfTeams.value - 1,
     title: {
       text: "Ranking",
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
     },
   },
   stroke: {
