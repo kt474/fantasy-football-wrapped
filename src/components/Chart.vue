@@ -130,6 +130,13 @@ const chartOptions = ref({
     curve: "straight",
     width: 3,
   },
+  markers: {
+    size: 3.5,
+    strokeWidth: 1,
+    hover: {
+      size: 5,
+    },
+  },
 });
 </script>
 <template>
