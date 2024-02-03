@@ -86,7 +86,7 @@ const winner: any = computed(() => {
       </g>
     </svg>
     <h5
-      class="mt-2 text-2xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
+      class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
       League Champ
     </h5>
