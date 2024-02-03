@@ -23,7 +23,7 @@ const weeks = computed(() => {
   <div
     class="px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between sm:mt-1.5 mb-3">
       <h5
         class="w-20 text-xl font-bold leading-none text-gray-900 dark:text-white text-pretty"
       >
@@ -42,7 +42,7 @@ const weeks = computed(() => {
     </div>
     <div class="flow-root">
       <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-        <li v-for="(user, index) in rankingValues" class="py-1 sm:py-2">
+        <li v-for="(user, index) in rankingValues" class="py-2">
           <div class="flex items-center">
             <div class="flex-1 min-w-0 ms-2">
               <p

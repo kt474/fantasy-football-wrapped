@@ -183,5 +183,14 @@ const chartOptions = ref({
       :options="chartOptions"
       :series="powerRanking"
     ></apexchart>
+    <p
+      class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
+    >
+      Ranking formula:
+      <span class="italic"
+        >((average weekly score * 6) + ((highest score + lowest score) * 2) +
+        (win percentage * 400)) / 10</span
+      >
+    </p>
   </div>
 </template>

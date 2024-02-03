@@ -144,7 +144,7 @@ const setHtmlBackground = () => {
             </div>
             <div class="flex flex-wrap md:flex-nowrap">
               <Chart class="mt-4" />
-              <PowerRankingCard class="mt-4 xl:ml-4" />
+              <PowerRankingCard class="mt-4 md:ml-4" />
             </div>
           </div>
           <div v-else role="status" class="flex justify-center m-6">
