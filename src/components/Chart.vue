@@ -68,6 +68,16 @@ const updateChartColor = () => {
       toolbar: {
         show: false,
       },
+      zoom: {
+        enabled: false,
+      },
+    },
+    tooltip: {
+      theme: store.darkMode ? "dark" : "light",
+      x: {
+        show: true,
+        formatter: (x: number) => `Week ${x}`,
+      },
     },
   };
 };
@@ -83,6 +93,9 @@ const chartOptions = ref({
     id: "power-ranking",
     toolbar: {
       show: false,
+    },
+    zoom: {
+      enabled: false,
     },
   },
   colors: [
@@ -124,6 +137,13 @@ const chartOptions = ref({
           "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
         fontWeight: 600,
       },
+    },
+  },
+  tooltip: {
+    theme: store.darkMode ? "dark" : "light",
+    x: {
+      show: true,
+      formatter: (x: number) => `Week ${x}`,
     },
   },
   stroke: {
