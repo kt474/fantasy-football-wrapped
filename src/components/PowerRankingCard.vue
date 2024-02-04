@@ -64,7 +64,10 @@ const weeks = computed(() => {
 </template>
 <style scoped>
 .custom-width {
-  min-width: 19rem;
+  @media (min-width: 768px) {
+    min-width: 19rem;
+  }
+  min-width: 100%;
 }
 .custom-padding {
   padding-right: 2rem !important;

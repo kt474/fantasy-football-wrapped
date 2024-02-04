@@ -2,6 +2,14 @@
 import { groupBy, flatten } from "lodash";
 import { getMatchup } from "./api";
 
+export const getRandomUser = (leagueSize: number, excludedIndex: number) => {
+  let randomIndex;
+  do {
+    randomIndex = Math.floor(Math.random() * leagueSize);
+  } while (randomIndex === excludedIndex);
+  return randomIndex;
+};
+
 export const winsOnWeek = (recordString: string, week: number) => {
   let count = 0;
   for (let i = 0; i <= week; i++) {

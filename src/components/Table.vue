@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { mean, max, min, zip, countBy, maxBy, minBy } from "lodash";
-import { getPowerRanking, getMedian } from "../api/helper";
+import { getPowerRanking, getMedian, getRandomUser } from "../api/helper";
 import { computed, ref } from "vue";
 import { getAvatar } from "../api/api";
 import { useStore } from "../store/store";
@@ -56,6 +56,22 @@ const originalData = computed(() => {
     }
     if (combinedPoints) {
       combinedPoints.forEach((value: any) => {
+        let randomScheduleWins = 0;
+        const numOfSimulations = 1000;
+        for (let i = 0; i < value.points.length; i++) {
+          for (
+            let simulations = 0;
+            simulations < numOfSimulations;
+            simulations++
+          )
+            if (
+              value.points[i] >
+              combinedPoints[getRandomUser(combinedPoints.length, i)].points[i]
+            ) {
+              randomScheduleWins++;
+            }
+        }
+        value["randomScheduleWins"] = randomScheduleWins / numOfSimulations;
         value["rating"] = getPowerRanking(
           mean(value.points),
           Number(max(value.points)),
@@ -121,13 +137,11 @@ const tableData: any = computed(() => {
 
 // createObjectUrl does not persist across page loads
 const refetchAvatar = () => {
-  let currentUsers = store.leagueUsers[store.currentLeagueIndex];
-  currentUsers.forEach(async (val: any) => {
+  store.leagueInfo[store.currentLeagueIndex].users.forEach(async (val: any) => {
     if (val["avatar"] !== null) {
       val["avatarImg"] = await getAvatar(val["avatar"]);
     }
   });
-  store.leagueUsers[store.currentLeagueIndex] = currentUsers;
 };
 
 const mostWins = computed(() => {

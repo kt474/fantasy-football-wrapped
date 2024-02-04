@@ -13,7 +13,9 @@ import BestManagerCard from "./components/BestManagerCard.vue";
 import WorstManagerCard from "./components/WorstManagerCard.vue";
 import TransactionsCard from "./components/TransactionsCard.vue";
 import PowerRankingCard from "./components/PowerRankingCard.vue";
-import Chart from "./components/Chart.vue";
+import PowerRankingChart from "./components/PowerRankingChart.vue";
+import ExpectedWins from "./components/ExpectedWins.vue";
+import ExpectedWinsChart from "./components/ExpectedWinsChart.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
 import { inject } from "@vercel/analytics";
@@ -106,13 +108,7 @@ const setHtmlBackground = () => {
       <div class="container w-11/12 max-w-screen-xl mx-auto">
         <div v-if="store.currentLeagueId" class="container mx-auto">
           <Input v-if="store.showInput" />
-          <div
-            v-if="
-              store.leagueUsers[getCurrentLeagueIndex] &&
-              store.leagueRosters[getCurrentLeagueIndex] &&
-              store.weeklyPoints[getCurrentLeagueIndex]
-            "
-          >
+          <div v-if="store.leagueUsers[getCurrentLeagueIndex]">
             <CardContainer />
             <div class="flex flex-wrap justify-between mt-4">
               <Table
@@ -143,8 +139,12 @@ const setHtmlBackground = () => {
               </div>
             </div>
             <div class="flex flex-wrap md:flex-nowrap">
-              <Chart class="mt-4" />
+              <PowerRankingChart class="mt-4" />
               <PowerRankingCard class="mt-4 md:ml-4" />
+            </div>
+            <div class="flex flex-wrap md:flex-nowrap">
+              <ExpectedWins class="mt-4" />
+              <ExpectedWinsChart class="mt-4 md:ml-4" />
             </div>
           </div>
           <div v-else role="status" class="flex justify-center m-6">
