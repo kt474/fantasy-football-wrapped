@@ -150,7 +150,7 @@ const chartOptions = ref({
     </div>
     <apexchart
       width="100%"
-      height="450"
+      height="475"
       :options="chartOptions"
       :series="series"
     ></apexchart>

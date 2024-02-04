@@ -23,7 +23,7 @@ const bestManagerUser: any = computed(() => {
 </script>
 <template>
   <div
-    class="block max-w-xs p-2 bg-white border border-gray-200 rounded-lg shadow h-44 dark:bg-gray-800 dark:border-gray-700 min-w-56"
+    class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto h-44 dark:bg-gray-800 dark:border-gray-700 min-w-56"
   >
     <svg
       class="mx-auto my-1 w-14"
