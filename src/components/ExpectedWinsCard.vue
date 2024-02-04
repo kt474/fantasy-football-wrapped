@@ -3,7 +3,7 @@ import { cloneDeep, maxBy, minBy } from "lodash";
 import { useStore } from "../store/store";
 import { computed, ref } from "vue";
 const store = useStore();
-const tableOrder = ref("randomScheduleWins");
+const tableOrder = ref("winsDifference");
 
 const tableData = computed(() => {
   const tableDataCopy = cloneDeep(store.tableData);

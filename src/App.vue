@@ -14,7 +14,7 @@ import WorstManagerCard from "./components/WorstManagerCard.vue";
 import TransactionsCard from "./components/TransactionsCard.vue";
 import PowerRankingCard from "./components/PowerRankingCard.vue";
 import PowerRankingChart from "./components/PowerRankingChart.vue";
-import ExpectedWins from "./components/ExpectedWins.vue";
+import ExpectedWinsCard from "./components/ExpectedWinsCard.vue";
 import ExpectedWinsChart from "./components/ExpectedWinsChart.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
@@ -143,7 +143,7 @@ const setHtmlBackground = () => {
               <PowerRankingCard class="mt-4 md:ml-4" />
             </div>
             <div class="flex flex-wrap md:flex-nowrap">
-              <ExpectedWins class="mt-4" />
+              <ExpectedWinsCard class="mt-4" />
               <ExpectedWinsChart class="mt-4 md:ml-4" />
             </div>
           </div>
