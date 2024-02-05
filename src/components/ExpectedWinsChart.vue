@@ -11,10 +11,10 @@ const seriesData = computed(() => {
       y: user.wins,
       goals: [
         {
-          name: "Expected Wins",
+          name: "Expected",
           value: user.randomScheduleWins,
           strokeHeight: 5,
-          strokeColor: "#775DD0",
+          strokeColor: "#a855f7",
         },
       ],
     });
@@ -46,6 +46,9 @@ const updateChartColor = () => {
           return `${x.toFixed(2)}`;
         },
       },
+      marker: {
+        show: false,
+      },
     },
   };
 };
@@ -68,10 +71,10 @@ const chartOptions = ref({
   },
   plotOptions: {
     bar: {
-      columnWidth: "60%",
+      columnWidth: "75%",
     },
   },
-  colors: ["#00E396"],
+  colors: ["#22c55e"],
   dataLabels: {
     enabled: false,
   },
@@ -86,10 +89,14 @@ const chartOptions = ref({
         return `${x.toFixed(2)}`;
       },
     },
+    marker: {
+      show: false,
+    },
   },
   xaxis: {
     title: {
-      text: "Manager",
+      text: "League Manager",
+      offsetY: -10,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -112,6 +119,7 @@ const chartOptions = ref({
   legend: {
     show: true,
     showForSingleSeries: true,
+    offsetX: 21,
     customLegendItems: ["Actual", "Expected"],
     markers: {
       fillColors: ["#00E396", "#775DD0"],
