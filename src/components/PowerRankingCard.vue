@@ -8,7 +8,9 @@ const rankingValues = computed(() => {
     return b.ratings[currentWeek.value - 1] - a.ratings[currentWeek.value - 1];
   });
 });
-const currentWeek = ref(14);
+const currentWeek = ref(
+  store.leagueInfo[store.currentLeagueIndex].regularSeasonLength
+);
 const weeks = computed(() => {
   return [
     ...Array(

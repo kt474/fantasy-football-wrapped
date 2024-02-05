@@ -57,7 +57,7 @@ const originalData = computed(() => {
     if (combinedPoints) {
       combinedPoints.forEach((value: any) => {
         let randomScheduleWins = 0;
-        const numOfSimulations = 1000;
+        const numOfSimulations = 10000;
         for (let i = 0; i < value.points.length; i++) {
           for (
             let simulations = 0;

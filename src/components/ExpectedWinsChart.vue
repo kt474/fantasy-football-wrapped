@@ -149,5 +149,11 @@ const chartOptions = ref({
       :options="chartOptions"
       :series="seriesData"
     ></apexchart>
+    <p
+      class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
+    >
+      Expected number of wins is calculated by simulating 10000 randomized
+      weekly matchups
+    </p>
   </div>
 </template>
