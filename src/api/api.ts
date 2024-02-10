@@ -51,7 +51,7 @@ export const getRosters = async (leagueId: string) => {
       wins: roster["settings"]["wins"],
       losses: roster["settings"]["losses"],
       rosterId: roster["roster_id"],
-      recordByWeek: roster["metadata"]["record"],
+      recordByWeek: roster["metadata"] ? roster["metadata"]["record"] : "",
     };
   });
   return result;

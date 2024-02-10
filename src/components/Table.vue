@@ -57,18 +57,22 @@ const originalData = computed(() => {
       combinedPoints.forEach((value: any) => {
         let randomScheduleWins = 0;
         const numOfSimulations = 4000;
-        for (let i = 0; i < value.points.length; i++) {
-          for (
-            let simulations = 0;
-            simulations < numOfSimulations;
-            simulations++
-          )
-            if (
-              value.points[i] >
-              combinedPoints[getRandomUser(combinedPoints.length, i)].points[i]
-            ) {
-              randomScheduleWins++;
-            }
+        if (value.points) {
+          for (let i = 0; i < value.points.length; i++) {
+            for (
+              let simulations = 0;
+              simulations < numOfSimulations;
+              simulations++
+            )
+              if (
+                value.points[i] >
+                combinedPoints[getRandomUser(combinedPoints.length, i)].points[
+                  i
+                ]
+              ) {
+                randomScheduleWins++;
+              }
+          }
         }
         value["randomScheduleWins"] = randomScheduleWins / numOfSimulations;
         value["rating"] = getPowerRanking(

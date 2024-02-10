@@ -10,18 +10,20 @@ const powerRanking = computed(() => {
   const ratingsContainer: any = [];
   store.tableData.forEach((value: any) => {
     const ratingArr: number[] = [];
-    value.points.forEach((_: number, week: number) => {
-      const currentWins = winsOnWeek(value.recordByWeek, week);
-      const currentLosess = week + 1 - currentWins;
-      ratingArr.push(
-        getPowerRanking(
-          mean(value.points.slice(0, week + 1)),
-          Number(max(value.points.slice(0, week + 1))),
-          Number(min(value.points.slice(0, week + 1))),
-          currentWins / (currentWins + currentLosess)
-        )
-      );
-    });
+    if (value.points) {
+      value.points.forEach((_: number, week: number) => {
+        const currentWins = winsOnWeek(value.recordByWeek, week);
+        const currentLosess = week + 1 - currentWins;
+        ratingArr.push(
+          getPowerRanking(
+            mean(value.points.slice(0, week + 1)),
+            Number(max(value.points.slice(0, week + 1))),
+            Number(min(value.points.slice(0, week + 1))),
+            currentWins / (currentWins + currentLosess)
+          )
+        );
+      });
+    }
     ratingsContainer.push(ratingArr);
     result.push({
       name: value.name,
