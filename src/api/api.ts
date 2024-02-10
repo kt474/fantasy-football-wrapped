@@ -88,8 +88,7 @@ export const getMatchup = async (week: number, leagueId: string) => {
 
 export const getAvatar = async (avatarId: string) => {
   const response = await fetch(`https://sleepercdn.com/avatars/${avatarId}`);
-  const avatar = await response.blob();
-  return URL.createObjectURL(avatar);
+  return response.url;
 };
 
 export const getTransactions = async (leagueId: string, week: number) => {
