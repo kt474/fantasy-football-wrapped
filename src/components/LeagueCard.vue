@@ -133,6 +133,6 @@ const removeLeague = () => {
 </template>
 <style scoped>
 .card-width {
-  width: 19.35rem;
+  width: 19.75rem;
 }
 </style>

@@ -50,7 +50,7 @@ const weeks = computed(() => {
       <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
         <li v-for="(user, index) in rankingValues" class="py-2">
           <div class="flex items-center">
-            <div class="flex-1 min-w-0 ms-2">
+            <div class="flex-1 min-w-0 list-padding ms-2">
               <p
                 class="text-sm font-medium text-gray-900 truncate dark:text-white"
               >
@@ -58,7 +58,7 @@ const weeks = computed(() => {
               </p>
             </div>
             <div
-              class="inline-flex items-center text-sm font-medium text-gray-700 dark:text-white"
+              class="inline-flex items-center text-sm font-normal text-gray-700 dark:text-white"
             >
               {{ user.ratings[currentWeek - 1] }}
             </div>
@@ -77,5 +77,8 @@ const weeks = computed(() => {
 }
 .custom-padding {
   padding-right: 2rem !important;
+}
+.list-padding {
+  padding: 0.2rem 0 0.2rem 0;
 }
 </style>
