@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { findIndex } from "lodash";
-import { onMounted, watch, computed } from "vue";
+import { onMounted, watch } from "vue";
 import Table from "./components/Table.vue";
 import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
@@ -8,14 +7,6 @@ import Input from "./components/Input.vue";
 import Intro from "./components/Intro.vue";
 import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
-import WinnerCard from "./components/WinnerCard.vue";
-import BestManagerCard from "./components/BestManagerCard.vue";
-import WorstManagerCard from "./components/WorstManagerCard.vue";
-import TransactionsCard from "./components/TransactionsCard.vue";
-import PowerRankingCard from "./components/PowerRankingCard.vue";
-import PowerRankingChart from "./components/PowerRankingChart.vue";
-import ExpectedWinsCard from "./components/ExpectedWinsCard.vue";
-import ExpectedWinsChart from "./components/ExpectedWinsChart.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore, LeagueInfoType } from "./store/store";
 import { inject } from "@vercel/analytics";
@@ -82,12 +73,6 @@ watch(
   }
 );
 
-const getCurrentLeagueIndex = computed(() => {
-  return findIndex(store.leagueInfo, {
-    leagueId: store.currentLeagueId,
-  });
-});
-
 const setHtmlBackground = () => {
   const html = document.querySelector("html");
   if (html) {
@@ -108,44 +93,14 @@ const setHtmlBackground = () => {
       <div class="container w-11/12 max-w-screen-xl mx-auto">
         <div v-if="store.currentLeagueId" class="container mx-auto">
           <Input v-if="store.showInput" />
-          <div v-if="store.leagueUsers[getCurrentLeagueIndex]">
+          <div v-if="store.leagueUsers[store.currentLeagueIndex]">
             <CardContainer />
-            <div class="flex flex-wrap justify-between mt-4">
-              <Table
-                class="xl:w-3/4"
-                :users="store.leagueUsers[getCurrentLeagueIndex]"
-                :rosters="store.leagueRosters[getCurrentLeagueIndex]"
-                :points="store.weeklyPoints[getCurrentLeagueIndex]"
-              />
-              <div
-                class="flex flex-wrap justify-between w-full xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mt-0"
-              >
-                <WinnerCard
-                  v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
-                  class="mt-4 xl:mt-0"
-                />
-                <BestManagerCard
-                  v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
-                  class="mt-4"
-                />
-                <WorstManagerCard
-                  v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
-                  class="mt-4"
-                />
-                <TransactionsCard
-                  v-if="store.leagueInfo[getCurrentLeagueIndex].leagueWinner"
-                  class="mt-4"
-                />
-              </div>
-            </div>
-            <div class="flex flex-wrap md:flex-nowrap">
-              <PowerRankingChart class="mt-4" />
-              <PowerRankingCard class="mt-4 md:ml-4" />
-            </div>
-            <div class="flex flex-wrap md:flex-nowrap">
-              <ExpectedWinsCard class="mt-4" />
-              <ExpectedWinsChart class="mt-4 md:ml-4" />
-            </div>
+            <Table
+              class="mt-4"
+              :users="store.leagueUsers[store.currentLeagueIndex]"
+              :rosters="store.leagueRosters[store.currentLeagueIndex]"
+              :points="store.weeklyPoints[store.currentLeagueIndex]"
+            />
           </div>
           <div v-else role="status" class="flex justify-center m-6">
             <svg

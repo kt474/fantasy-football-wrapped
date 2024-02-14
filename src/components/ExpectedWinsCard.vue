@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { cloneDeep, maxBy, minBy } from "lodash";
-import { useStore } from "../store/store";
 import { computed, ref } from "vue";
-const store = useStore();
 const tableOrder = ref("winsDifference");
-
+const props = defineProps<{
+  tableData: any[];
+}>();
 const tableData = computed(() => {
-  const tableDataCopy = cloneDeep(store.tableData);
+  const tableDataCopy = cloneDeep(props.tableData);
   if (tableOrder.value === "randomScheduleWins") {
     return tableDataCopy.sort((a: any, b: any) => {
       return b.randomScheduleWins - a.randomScheduleWins;
@@ -37,7 +37,7 @@ const leastWinsDifference = computed(() => {
 </script>
 <template>
   <div
-    class="relative w-full max-w-lg overflow-x-auto shadow-md md:w-2/3 sm:rounded-lg"
+    class="relative w-full max-w-lg overflow-x-auto shadow-md md:w-2/3 sm:rounded-lg dark:bg-gray-700"
   >
     <table
       class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
@@ -48,14 +48,14 @@ const leastWinsDifference = computed(() => {
         <tr>
           <th scope="col" class="px-6 py-3 dark:text-gray-200">Team Name</th>
 
-          <th scope="col" class="px-6 py-3">
+          <th scope="col" class="px-4 py-3">
             <div
               @click="tableOrder = 'randomScheduleWins'"
               class="flex items-center w-24 cursor-pointer dark:text-gray-200"
             >
               Expected Wins
-              <a href="#"
-                ><svg
+              <div>
+                <svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50':
@@ -68,18 +68,19 @@ const leastWinsDifference = computed(() => {
                 >
                   <path
                     d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                  /></svg
-              ></a>
+                  />
+                </svg>
+              </div>
             </div>
           </th>
-          <th scope="col" class="px-6 py-3">
+          <th scope="col" class="px-4 py-3">
             <div
               @click="tableOrder = 'winsDifference'"
               class="flex items-center cursor-pointer w-28 dark:text-gray-200"
             >
               Wins above Expected
-              <a href="#"
-                ><svg
+              <div>
+                <svg
                   class="w-3 h-3 ms-1.5 fill-slate-400"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50':
@@ -92,8 +93,9 @@ const leastWinsDifference = computed(() => {
                 >
                   <path
                     d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                  /></svg
-              ></a>
+                  />
+                </svg>
+              </div>
             </div>
           </th>
         </tr>

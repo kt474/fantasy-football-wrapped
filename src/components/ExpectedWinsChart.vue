@@ -3,9 +3,13 @@ import { ref, computed, watch } from "vue";
 import { useStore } from "../store/store";
 const store = useStore();
 
+const props = defineProps<{
+  tableData: Array<object>;
+}>();
+
 const seriesData = computed(() => {
   const result: any[] = [];
-  store.tableData.forEach((user: any) => {
+  props.tableData.forEach((user: any) => {
     result.push({
       x: user.name,
       y: user.wins,

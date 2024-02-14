@@ -3,8 +3,12 @@ import { computed, ref } from "vue";
 import { useStore } from "../store/store";
 const store = useStore();
 
+const props = defineProps<{
+  powerRankings: any[];
+}>();
+
 const rankingValues = computed(() => {
-  return store.powerRankings.sort((a, b) => {
+  return props.powerRankings.sort((a, b) => {
     return b.ratings[currentWeek.value - 1] - a.ratings[currentWeek.value - 1];
   });
 });

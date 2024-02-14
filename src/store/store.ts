@@ -36,8 +36,7 @@ export const useStore = defineStore("main", {
     leagueInfo: [] as LeagueInfoType[],
     currentLeagueId: "",
     leagueSubmitted: false,
-    tableData: [] as any[],
-    powerRankings: [] as any[],
+    currentTab: "standings",
   }),
   getters: {
     transactions: (state) =>

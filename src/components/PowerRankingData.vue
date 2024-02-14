@@ -3,12 +3,17 @@ import { ref, computed, watch } from "vue";
 import { mean, max, min, zip } from "lodash";
 import { useStore } from "../store/store";
 import { getPowerRanking, winsOnWeek } from "../api/helper";
+import PowerRankingCard from "./PowerRankingCard.vue";
 const store = useStore();
 
-const powerRanking = computed(() => {
+const props = defineProps<{
+  tableData: Array<object>;
+}>();
+
+const powerRankings = computed(() => {
   const result: any = [];
   const ratingsContainer: any = [];
-  store.tableData.forEach((value: any) => {
+  props.tableData.forEach((value: any) => {
     const ratingArr: number[] = [];
     if (value.points) {
       value.points.forEach((_: number, week: number) => {
@@ -42,7 +47,6 @@ const powerRanking = computed(() => {
     });
     user["data"] = data;
   });
-  store.powerRankings = result;
   return result;
 });
 
@@ -55,7 +59,7 @@ const xAxis = computed(() => {
 });
 
 const numOfTeams = computed(() => {
-  return store.tableData.length;
+  return store.leagueInfo[store.currentLeagueIndex].totalRosters;
 });
 
 const chartTextColor = computed(() => {
@@ -163,36 +167,42 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <div
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
-  >
-    <div class="flex justify-between">
-      <div>
-        <h5
-          class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
-        >
-          Power Rankings
-        </h5>
-        <p class="text-base font-normal text-gray-500 dark:text-gray-400">
-          Regular Season
-        </p>
-      </div>
-    </div>
-    <apexchart
-      width="100%"
-      height="400"
-      type="line"
-      :options="chartOptions"
-      :series="powerRanking"
-    ></apexchart>
-    <p
-      class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
+  <div class="flex flex-wrap md:flex-nowrap">
+    <div
+      class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
     >
-      Ranking formula:
-      <span class="italic"
-        >((average weekly score * 6) + ((highest score + lowest score) * 2) +
-        (win percentage * 400)) / 10</span
+      <div class="flex justify-between">
+        <div>
+          <h5
+            class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+          >
+            Power Rankings
+          </h5>
+          <p class="text-base font-normal text-gray-500 dark:text-gray-400">
+            Regular Season
+          </p>
+        </div>
+      </div>
+      <apexchart
+        width="100%"
+        height="400"
+        type="line"
+        :options="chartOptions"
+        :series="powerRankings"
+      ></apexchart>
+      <p
+        class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
       >
-    </p>
+        Ranking formula:
+        <span class="italic"
+          >((average weekly score * 6) + ((highest score + lowest score) * 2) +
+          (win percentage * 400)) / 10</span
+        >
+      </p>
+    </div>
+    <PowerRankingCard
+      :power-rankings="powerRankings"
+      class="mt-4 md:ml-4 md:mt-0"
+    />
   </div>
 </template>
