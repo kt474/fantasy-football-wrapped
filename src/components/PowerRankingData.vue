@@ -185,7 +185,7 @@ const chartOptions = ref({
       </div>
       <apexchart
         width="100%"
-        height="400"
+        height="475"
         type="line"
         :options="chartOptions"
         :series="powerRankings"

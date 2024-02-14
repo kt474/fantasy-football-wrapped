@@ -40,9 +40,6 @@ const removeLeague = () => {
       );
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
-    if (!store.currentLeagueId) {
-      store.powerRankings = [];
-    }
     store.updateRemovedAlert(true);
     setTimeout(() => {
       store.updateRemovedAlert(false);
