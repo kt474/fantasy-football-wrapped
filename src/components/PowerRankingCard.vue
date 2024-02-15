@@ -52,7 +52,7 @@ const weeks = computed(() => {
           <div class="flex items-center">
             <div class="flex-1 min-w-0 list-padding ms-2">
               <p
-                class="text-sm font-medium text-gray-900 truncate dark:text-white"
+                class="w-48 text-sm font-medium text-gray-900 truncate dark:text-white"
               >
                 {{ index + 1 }}.&nbsp; {{ user.name }}
               </p>

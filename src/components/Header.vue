@@ -35,7 +35,7 @@ const setColorMode = () => {
     class="container w-11/12 mx-auto border-gray-200 border-solid bg-slate-50 dark:bg-slate-950"
   >
     <div
-      class="flex flex-wrap items-center justify-between max-w-screen-xl py-4 mx-auto"
+      class="flex flex-wrap items-center justify-between max-w-screen-xl py-2 mx-auto"
     >
       <div
         aria-label="Logo"

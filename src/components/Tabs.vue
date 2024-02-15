@@ -4,6 +4,7 @@ const store = useStore();
 
 const changeTab = (tab: string) => {
   store.currentTab = tab;
+  localStorage.currentTab = tab;
 };
 </script>
 <template>

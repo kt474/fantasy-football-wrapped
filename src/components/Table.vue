@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { mean, max, min, zip, countBy, maxBy, minBy } from "lodash";
 import { getPowerRanking, getMedian, getRandomUser } from "../api/helper";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useStore } from "../store/store";
 import PowerRankingData from "./PowerRankingData.vue";
 import ExpectedWinsCard from "./ExpectedWinsCard.vue";
@@ -18,6 +18,12 @@ const props = defineProps<{
   points: Array<object>;
 }>();
 const store = useStore();
+
+onMounted(() => {
+  if (localStorage.currentTab) {
+    store.currentTab = localStorage.currentTab;
+  }
+});
 
 const originalData = computed(() => {
   if (props.users && props.points) {

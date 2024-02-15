@@ -41,6 +41,8 @@ const removeLeague = () => {
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
     store.updateRemovedAlert(true);
+    store.currentTab = "standings";
+    localStorage.removeItem("currentTab");
     setTimeout(() => {
       store.updateRemovedAlert(false);
     }, 3000);
