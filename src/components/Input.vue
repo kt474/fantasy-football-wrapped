@@ -36,27 +36,9 @@ const onSubmit = async () => {
 </script>
 
 <template>
-  <div class="container mx-auto mt-4">
+  <div class="container w-1/2 mx-auto mt-4 mb-20">
     <div class="flex justify-start">
-      <div class="w-1/4">
-        <label
-          for="platform-menu"
-          class="block mb-2 text-lg font-medium text-gray-900 dark:text-white"
-          >Platform</label
-        >
-        <select
-          id="platform-menu"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        >
-          <option selected>Sleeper</option>
-        </select>
-      </div>
-      <div class="w-2/3 ml-4">
-        <label
-          for="default-input"
-          class="block mb-2 text-lg font-medium text-gray-900 dark:text-white"
-          >League ID</label
-        >
+      <div class="w-full">
         <input
           v-model="leagueIdInput"
           type="text"
@@ -72,7 +54,7 @@ const onSubmit = async () => {
           {{ errorMsg }}
         </p>
       </div>
-      <div class="ml-4 mt-9">
+      <div class="ml-4">
         <button
           aria-label="Button to submit league ID"
           @click="onSubmit()"
