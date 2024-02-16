@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { mean, max, min, zip, countBy, maxBy, minBy } from "lodash";
-import { getPowerRanking, getMedian, getRandomUser } from "../api/helper";
+import {
+  getPowerRanking,
+  getMedian,
+  getRandomUser,
+  fakeRosters,
+  fakeUsers,
+} from "../api/helper";
 import { computed, onMounted, ref } from "vue";
 import { useStore } from "../store/store";
 import PowerRankingData from "./PowerRankingData.vue";
@@ -181,16 +187,31 @@ const mostMedianWins = computed(() => {
 const mostMedianLosses = computed(() => {
   return maxBy(originalData.value, "lossesWithMedian")?.lossesWithMedian;
 });
+
+const leagueWinner = computed(() => {
+  return Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner);
+});
+const mostTransactions = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex].transactions;
+});
+
+const regularSeasonLength = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex].regularSeasonLength;
+});
+
+const totalRosters = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex].totalRosters;
+});
 </script>
 <template>
   <div>
     <Tabs />
     <div
       v-if="store.currentTab === 'standings'"
-      class="flex flex-wrap justify-between mt-4"
+      class="flex flex-wrap justify-between h-full min-h-0 mt-4"
     >
       <div
-        class="relative w-full overflow-x-auto shadow-md xl:w-3/4 sm:rounded-lg dark:bg-gray-700"
+        class="relative w-full overflow-x-auto shadow-md xl:w-3/4 sm:rounded-lg dark:bg-gray-900"
       >
         <table
           v-if="tableData.length > 0"
@@ -477,28 +498,76 @@ const mostMedianLosses = computed(() => {
         </table>
       </div>
       <div
-        class="flex flex-wrap justify-between w-full xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mt-0"
+        :class="{ 'custom-height': props.users.length <= 10 }"
+        class="flex flex-wrap justify-between w-full overflow-y-auto xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mt-0"
       >
         <WinnerCard
           v-if="store.leagueInfo[store.currentLeagueIndex]?.leagueWinner"
+          :rosters="props.rosters"
+          :users="props.users"
+          :leagueWinner="leagueWinner"
+          class="mt-4 xl:mt-0"
+        />
+        <WinnerCard
+          v-else
+          :rosters="fakeRosters"
+          :users="fakeUsers"
+          :leagueWinner="6"
           class="mt-4 xl:mt-0"
         />
         <BestManagerCard
-          v-if="store.leagueInfo[store.currentLeagueIndex]?.leagueWinner"
+          v-if="store.currentLeagueId"
+          :rosters="props.rosters"
+          :users="props.users"
+          class="mt-4"
+        />
+        <BestManagerCard
+          v-else
+          :rosters="fakeRosters"
+          :users="fakeUsers"
           class="mt-4"
         />
         <WorstManagerCard
-          v-if="store.leagueInfo[store.currentLeagueIndex]?.leagueWinner"
+          v-if="store.currentLeagueId"
+          :rosters="props.rosters"
+          :users="props.users"
+          class="mt-4"
+        />
+        <WorstManagerCard
+          v-else
+          :rosters="fakeRosters"
+          :users="fakeUsers"
           class="mt-4"
         />
         <TransactionsCard
-          v-if="store.leagueInfo[store.currentLeagueIndex]?.leagueWinner"
+          v-if="store.currentLeagueId"
+          :users="props.users"
+          :mostTransactions="mostTransactions"
+          class="mt-4"
+        />
+        <TransactionsCard
+          v-else
+          :users="fakeUsers"
+          :mostTransactions="{ 1: 24 }"
           class="mt-4"
         />
       </div>
     </div>
     <div v-if="store.currentTab === 'powerRankings'">
-      <PowerRankingData :tableData="tableData" class="mt-4" />
+      <PowerRankingData
+        v-if="store.currentLeagueId"
+        :tableData="tableData"
+        :regularSeasonLength="regularSeasonLength"
+        :totalRosters="totalRosters"
+        class="mt-4"
+      />
+      <!-- <PowerRankingData
+        v-else
+        :tableData="tableData"
+        :regularSeasonLength="13"
+        :totalRosters="12"
+        class="mt-4"
+      /> -->
     </div>
     <div
       v-if="store.currentTab === 'expectedWins'"
@@ -509,3 +578,8 @@ const mostMedianLosses = computed(() => {
     </div>
   </div>
 </template>
+<style scoped>
+.custom-height {
+  height: 39.1rem;
+}
+</style>

@@ -8,6 +8,8 @@ const store = useStore();
 
 const props = defineProps<{
   tableData: Array<object>;
+  regularSeasonLength: number;
+  totalRosters: number;
 }>();
 
 const powerRankings = computed(() => {
@@ -51,15 +53,11 @@ const powerRankings = computed(() => {
 });
 
 const xAxis = computed(() => {
-  return [
-    ...Array(
-      store.leagueInfo[store.currentLeagueIndex].regularSeasonLength + 1
-    ).keys(),
-  ].slice(1);
+  return [...Array(props.regularSeasonLength + 1).keys()].slice(1);
 });
 
 const numOfTeams = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex].totalRosters;
+  return props.totalRosters;
 });
 
 const chartTextColor = computed(() => {

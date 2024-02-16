@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useStore, RosterType } from "../store/store";
-
-const store = useStore();
+import { RosterType } from "../store/store";
+const props = defineProps<{
+  users: any[];
+  rosters: any[];
+}>();
 
 const worstManager: any = computed(() => {
-  const rosterEfficiency = store.leagueRosters[store.currentLeagueIndex].reduce(
+  const rosterEfficiency = props.rosters.reduce(
     (highestValue: any, roster: RosterType) => {
       return roster.managerEfficiency < highestValue.managerEfficiency
         ? roster
@@ -16,7 +18,7 @@ const worstManager: any = computed(() => {
 });
 
 const worstManagerUser: any = computed(() => {
-  return store.leagueUsers[store.currentLeagueIndex].filter(
+  return props.users.filter(
     (user: any) => user.id === worstManager.value["id"]
   )[0];
 });

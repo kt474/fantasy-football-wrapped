@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useStore } from "../store/store";
 
-const store = useStore();
+const props = defineProps<{
+  users: any[];
+  rosters: any[];
+  leagueWinner: number;
+}>();
 
 const winner: any = computed(() => {
-  const winnerId = store.leagueRosters[store.currentLeagueIndex].filter(
-    (roster: any) =>
-      roster.rosterId ===
-      Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
+  const winnerId = props.rosters.filter(
+    (roster: any) => roster.rosterId === props.leagueWinner
   )[0]["id"];
 
-  return store.leagueUsers[store.currentLeagueIndex].filter(
-    (user: any) => user.id === winnerId
-  )[0];
+  return props.users.filter((user: any) => user.id === winnerId)[0];
 });
 </script>
 <template>

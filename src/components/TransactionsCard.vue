@@ -1,26 +1,25 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useStore } from "../store/store";
 import { maxBy, toPairs } from "lodash";
 
-const store = useStore();
+const props = defineProps<{
+  users: any[];
+  mostTransactions: object;
+}>();
 
 const mostTransactions: any = computed(() => {
-  return maxBy(
-    toPairs(store.leagueInfo[store.currentLeagueIndex].transactions),
-    ([, value]) => value
-  );
+  return maxBy(toPairs(props.mostTransactions), ([, value]) => value);
 });
 
 const mostTransactionsUser: any = computed(() => {
-  return store.leagueUsers[store.currentLeagueIndex].filter(
+  return props.users.filter(
     (user: any) => user.id === mostTransactions.value[0]
   )[0];
 });
 </script>
 <template>
   <div
-    class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto h-44 dark:bg-gray-800 dark:border-gray-700 min-w-56"
+    class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow h-44 sm:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
   >
     <svg
       class="mx-auto my-1 w-14"
