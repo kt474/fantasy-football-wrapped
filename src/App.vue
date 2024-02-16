@@ -102,7 +102,7 @@ const setHtmlBackground = () => {
               :points="store.weeklyPoints[store.currentLeagueIndex]"
             />
           </div>
-          <div v-else role="status" class="flex justify-center m-6">
+          <div v-else role="status" class="flex justify-center h-screen m-6">
             <svg
               aria-hidden="true"
               class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
@@ -132,8 +132,8 @@ const setHtmlBackground = () => {
             :points="fakePoints"
           />
         </div>
-        <Footer />
       </div>
+      <Footer />
     </div>
     <Alert v-if="store.showAddedAlert" alert-msg="League successfully added!" />
     <Alert v-if="store.showRefreshAlert" alert-msg="League data refreshed!" />

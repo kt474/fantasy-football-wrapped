@@ -1,27 +1,44 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="container pb-4 m-4 mx-auto mt-8 text-xs dark:text-white">
-    <p>
-      Rating formula is from
-      <a
-        aria-label="http://www.okiraqi.org/opr.html Rating formula website"
-        class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-        href="http://www.okiraqi.org/opr.html"
-        target="_blank"
-        >http://www.okiraqi.org/opr.html</a
-      >
-    </p>
-    <p>
-      Icon Credit to
-      <a
-        aria-label="Freepik - Flaticon icon credit"
-        class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-        href="https://www.flaticon.com/free-icons/american-football"
-        title="american football icons"
-        target="_blank"
-        >Freepik - Flaticon</a
-      >
-    </p>
+  <div
+    class="w-full py-3 mx-auto mt-8 text-xs text-gray-700 bg-white border-t dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600"
+  >
+    <div class="container flex justify-between mx-auto align-middle">
+      <div>
+        <p class="mb-2 font-bold text-black dark:text-white">
+          Acknowledgements
+        </p>
+        <p>
+          Data:
+          <a
+            href="https://docs.sleeper.com/"
+            class="text-blue-600 dark:text-blue-500 hover:underline"
+            >Sleeper API</a
+          >
+        </p>
+        <p>
+          Rating formula:
+          <a
+            aria-label="http://www.okiraqi.org/opr.html Rating formula website"
+            class="text-blue-600 dark:text-blue-500 hover:underline"
+            href="http://www.okiraqi.org/opr.html"
+            target="_blank"
+            >OIL Power Rating</a
+          >
+        </p>
+        <p>
+          Icon:
+          <a
+            aria-label="Freepik - Flaticon icon credit"
+            class="text-blue-600 dark:text-blue-500 hover:underline"
+            href="https://www.flaticon.com/free-icons/american-football"
+            title="american football icons"
+            target="_blank"
+            >Freepik - Flaticon</a
+          >
+        </p>
+      </div>
+    </div>
   </div>
 </template>
