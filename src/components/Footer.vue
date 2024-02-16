@@ -4,7 +4,9 @@
   <div
     class="w-full py-3 mx-auto mt-8 text-xs text-gray-700 border-t dark:text-gray-400 dark:border-gray-600"
   >
-    <div class="container flex justify-between mx-auto align-middle">
+    <div
+      class="container flex justify-between max-w-screen-xl mx-auto align-middle"
+    >
       <div>
         <p class="mb-2 font-bold text-black dark:text-white">
           Acknowledgements

@@ -108,7 +108,8 @@ const leastWinsDifference = computed(() => {
         >
           <th
             scope="row"
-            class="px-6 py-3 font-medium text-gray-900 truncate max-w-56 whitespace-nowrap dark:text-white"
+            :class="props.tableData.length <= 10 ? 'py-4' : 'py-3'"
+            class="px-6 font-medium text-gray-900 truncate max-w-56 whitespace-nowrap dark:text-white"
           >
             {{ item.name }}
           </th>

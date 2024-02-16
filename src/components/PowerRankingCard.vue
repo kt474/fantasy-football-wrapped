@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useStore } from "../store/store";
-const store = useStore();
 
 const props = defineProps<{
   powerRankings: any[];
+  regularSeasonLength: number;
 }>();
 
 const rankingValues = computed(() => {
@@ -12,17 +11,9 @@ const rankingValues = computed(() => {
     return b.ratings[currentWeek.value - 1] - a.ratings[currentWeek.value - 1];
   });
 });
-const currentWeek = ref(
-  store.leagueInfo[store.currentLeagueIndex].regularSeasonLength
-);
+const currentWeek = ref(props.regularSeasonLength);
 const weeks = computed(() => {
-  return [
-    ...Array(
-      store.leagueInfo[store.currentLeagueIndex].regularSeasonLength
-    ).keys(),
-  ]
-    .slice(1)
-    .reverse();
+  return [...Array(props.regularSeasonLength).keys()].slice(1).reverse();
 });
 </script>
 <template>
@@ -48,7 +39,10 @@ const weeks = computed(() => {
     </div>
     <div class="flow-root">
       <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-        <li v-for="(user, index) in rankingValues" class="py-2">
+        <li
+          v-for="(user, index) in rankingValues"
+          :class="props.powerRankings.length <= 10 ? 'py-3' : 'py-2'"
+        >
           <div class="flex items-center">
             <div class="flex-1 min-w-0 list-padding ms-2">
               <p

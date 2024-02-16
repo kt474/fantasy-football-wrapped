@@ -200,6 +200,7 @@ const chartOptions = ref({
     </div>
     <PowerRankingCard
       :power-rankings="powerRankings"
+      :regular-season-length="props.regularSeasonLength"
       class="mt-4 md:ml-4 md:mt-0"
     />
   </div>

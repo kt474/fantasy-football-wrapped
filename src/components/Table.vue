@@ -561,13 +561,13 @@ const totalRosters = computed(() => {
         :totalRosters="totalRosters"
         class="mt-4"
       />
-      <!-- <PowerRankingData
+      <PowerRankingData
         v-else
         :tableData="tableData"
-        :regularSeasonLength="13"
-        :totalRosters="12"
+        :regularSeasonLength="14"
+        :totalRosters="10"
         class="mt-4"
-      /> -->
+      />
     </div>
     <div
       v-if="store.currentTab === 'expectedWins'"

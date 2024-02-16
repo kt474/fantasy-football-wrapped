@@ -178,6 +178,7 @@ export const fakeRosters = [
     losses: 9,
     rosterId: 1,
     managerEfficiency: 0.875,
+    recordByWeek: "LLLWLWWLLWLWLL",
   },
   {
     id: "2",
@@ -187,6 +188,7 @@ export const fakeRosters = [
     losses: 7,
     rosterId: 2,
     managerEfficiency: 0.683,
+    recordByWeek: "WWLWLWWLLWLWLL",
   },
   {
     id: "3",
@@ -196,6 +198,7 @@ export const fakeRosters = [
     losses: 5,
     rosterId: 3,
     managerEfficiency: 0.791,
+    recordByWeek: "LLLWLWWWWWLWWW",
   },
   {
     id: "4",
@@ -205,6 +208,7 @@ export const fakeRosters = [
     losses: 6,
     rosterId: 5,
     managerEfficiency: 0.841,
+    recordByWeek: "LWWWLWWLLWLWWL",
   },
   {
     id: "5",
@@ -214,6 +218,7 @@ export const fakeRosters = [
     losses: 6,
     rosterId: 6,
     managerEfficiency: 0.828,
+    recordByWeek: "WWLWLWWLLWLWLW",
   },
   {
     id: "6",
@@ -223,6 +228,7 @@ export const fakeRosters = [
     losses: 5,
     rosterId: 7,
     managerEfficiency: 0.778,
+    recordByWeek: "LWWWLWWLWWLWWL",
   },
   {
     id: "7",
@@ -232,6 +238,7 @@ export const fakeRosters = [
     losses: 8,
     rosterId: 8,
     managerEfficiency: 0.775,
+    recordByWeek: "LWLWLWWLLWLWLL",
   },
   {
     id: "8",
@@ -241,6 +248,7 @@ export const fakeRosters = [
     losses: 6,
     rosterId: 9,
     managerEfficiency: 0.841,
+    recordByWeek: "LWWWLWWLLWLWLW",
   },
   {
     id: "9",
@@ -250,6 +258,7 @@ export const fakeRosters = [
     losses: 9,
     rosterId: 4,
     managerEfficiency: 0.813,
+    recordByWeek: "LLLWLLLWWWLWLL",
   },
   {
     id: "10",
@@ -259,6 +268,7 @@ export const fakeRosters = [
     losses: 7,
     rosterId: 10,
     managerEfficiency: 0.925,
+    recordByWeek: "LLLWLWWLLWLWWW",
   },
 ];
 export const fakePoints = [
