@@ -97,7 +97,12 @@ const setHtmlBackground = () => {
       <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
       <div class="container w-11/12 max-w-screen-xl mx-auto">
         <div v-if="store.currentLeagueId" class="container mx-auto">
-          <Input v-if="store.showInput" />
+          <label
+            v-if="store.showInput"
+            class="block mt-3 -mb-3 text-sm font-medium text-gray-900 dark:text-white"
+            >Add League</label
+          >
+          <Input v-if="store.showInput" class="custom-input-width" />
           <div v-if="store.leagueUsers[store.currentLeagueIndex]">
             <CardContainer />
             <Table
@@ -129,7 +134,7 @@ const setHtmlBackground = () => {
         </div>
         <div v-else class="container mx-auto">
           <Intro />
-          <Input />
+          <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
           <Table
             class="mt-4"
             :users="fakeUsers"
@@ -149,4 +154,8 @@ const setHtmlBackground = () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.custom-input-width {
+  width: 25.8rem;
+}
+</style>
