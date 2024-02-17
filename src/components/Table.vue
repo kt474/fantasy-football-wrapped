@@ -25,6 +25,26 @@ const props = defineProps<{
 }>();
 const store = useStore();
 
+type tableData = {
+  name: string;
+  wins: number;
+  losses: number;
+  pointsFor: number;
+  pointsAgainst: number;
+  winsAgainstAll: number;
+  lossesAgainstAll: number;
+  winsWithMedian: number;
+  lossesWithMedian: number;
+  rating: number;
+  randomScheduleWins: number;
+  avatarImg: string;
+  points: number[];
+};
+
+interface savedData {
+  [key: string]: tableData[];
+}
+
 onMounted(() => {
   if (localStorage.currentTab) {
     store.currentTab = localStorage.currentTab;
@@ -32,6 +52,12 @@ onMounted(() => {
 });
 
 const originalData = computed(() => {
+  if (localStorage.originalData && store.currentLeagueId) {
+    const savedData: savedData = JSON.parse(localStorage.originalData);
+    if (savedData[store.currentLeagueId]) {
+      return savedData[store.currentLeagueId];
+    }
+  }
   if (props.users && props.points) {
     const combined = props.users.map((a: any) => {
       const matched = props.rosters.find((b: any) => b.id === a.id);
@@ -76,7 +102,7 @@ const originalData = computed(() => {
     if (combinedPoints) {
       combinedPoints.forEach((value: any) => {
         let randomScheduleWins = 0;
-        const numOfSimulations = 4000;
+        const numOfSimulations = 10000;
         if (value.points) {
           for (let i = 0; i < value.points.length; i++) {
             for (
@@ -113,6 +139,16 @@ const originalData = computed(() => {
         }
         return b.pointsFor - a.pointsFor;
       });
+
+      if (store.currentLeagueId) {
+        let savedData: any = {};
+        if (localStorage.originalData) {
+          savedData = JSON.parse(localStorage.originalData);
+        }
+        savedData[store.currentLeagueId] = result;
+        localStorage.originalData = JSON.stringify(savedData);
+      }
+
       return result;
     }
   }

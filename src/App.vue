@@ -25,6 +25,11 @@ onMounted(async () => {
         const diff = currentTime - league.lastUpdated;
         if (diff > 86400000) {
           // 1 day
+          if (localStorage.originalData) {
+            const currentData = JSON.parse(localStorage.originalData);
+            delete currentData[league.leagueId];
+            localStorage.originalData = JSON.stringify(currentData);
+          }
           store.updateLeagueInfo(await getData(league.leagueId));
         } else {
           store.updateLeagueInfo(league);
@@ -133,6 +138,9 @@ const setHtmlBackground = () => {
           />
         </div>
       </div>
+      <div
+        class="w-full mt-16 border-b border-slate-200 dark:border-slate-600"
+      ></div>
       <Footer />
     </div>
     <Alert v-if="store.showAddedAlert" alert-msg="League successfully added!" />

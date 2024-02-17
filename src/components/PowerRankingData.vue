@@ -70,6 +70,9 @@ const updateChartColor = () => {
     chart: {
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       id: "power-ranking",
+      animations: {
+        enabled: false,
+      },
       toolbar: {
         show: false,
       },
@@ -96,6 +99,9 @@ const chartOptions = ref({
   chart: {
     foreColor: chartTextColor.value,
     id: "power-ranking",
+    animations: {
+      enabled: false,
+    },
     toolbar: {
       show: false,
     },

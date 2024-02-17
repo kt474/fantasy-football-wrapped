@@ -26,6 +26,11 @@ const refreshLeague = async () => {
     );
   });
   store.updateLeagueInfo(await getData(props.leagueInfo.leagueId));
+  if (localStorage.originalData) {
+    const currentData = JSON.parse(localStorage.originalData);
+    delete currentData[props.leagueInfo.leagueId];
+    localStorage.originalData = JSON.stringify(currentData);
+  }
   store.showRefreshAlert = true;
   setTimeout(() => {
     store.showRefreshAlert = false;
@@ -41,8 +46,19 @@ const removeLeague = () => {
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
     store.updateRemovedAlert(true);
-    store.currentTab = "standings";
-    localStorage.removeItem("currentTab");
+    if (store.currentLeagueId === "") {
+      localStorage.removeItem("currentTab");
+      store.currentTab = "standings";
+    }
+    if (localStorage.originalData) {
+      const currentData = JSON.parse(localStorage.originalData);
+      delete currentData[props.leagueInfo.leagueId];
+      if (Object.keys(currentData).length == 0) {
+        localStorage.removeItem("originalData");
+      } else {
+        localStorage.originalData = JSON.stringify(currentData);
+      }
+    }
     setTimeout(() => {
       store.updateRemovedAlert(false);
     }, 3000);
