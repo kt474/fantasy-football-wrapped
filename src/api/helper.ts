@@ -247,7 +247,7 @@ export const fakeRosters = [
     wins: 8,
     losses: 6,
     rosterId: 9,
-    managerEfficiency: 0.841,
+    managerEfficiency: 0.891,
     recordByWeek: "LWWWLWWLLWLWLW",
   },
   {
@@ -267,7 +267,7 @@ export const fakeRosters = [
     wins: 7,
     losses: 7,
     rosterId: 10,
-    managerEfficiency: 0.925,
+    managerEfficiency: 0.865,
     recordByWeek: "LLLWLWWLLWLWWW",
   },
 ];

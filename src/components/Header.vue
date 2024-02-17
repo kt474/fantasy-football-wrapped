@@ -49,7 +49,7 @@ const setColorMode = () => {
           alt="Flowbite Logo"
         />
         <span
-          class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
+          class="self-center text-lg font-semibold sm:text-2xl whitespace-nowrap dark:text-white"
           >Fantasy Football Wrapped</span
         >
       </div>

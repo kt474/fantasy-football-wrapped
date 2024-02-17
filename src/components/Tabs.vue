@@ -15,7 +15,7 @@ const changeTab = (tab: string) => {
       <a
         @click="changeTab('standings')"
         aria-current="page"
-        class="inline-block p-4 rounded-t-lg"
+        class="inline-block p-2 rounded-t-lg sm:p-4"
         :class="{
           ' text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
             store.currentTab === 'standings',
@@ -26,7 +26,7 @@ const changeTab = (tab: string) => {
     <li class="cursor-pointer me-2">
       <a
         @click="changeTab('powerRankings')"
-        class="inline-block p-4 rounded-t-lg"
+        class="inline-block p-2 rounded-t-lg sm:p-4"
         :class="{
           'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
             store.currentTab === 'powerRankings',
@@ -37,7 +37,7 @@ const changeTab = (tab: string) => {
     <li class="cursor-pointer me-2">
       <a
         @click="changeTab('expectedWins')"
-        class="inline-block p-4 rounded-t-lg"
+        class="inline-block p-2 rounded-t-lg sm:p-4"
         :class="{
           'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
             store.currentTab === 'expectedWins',

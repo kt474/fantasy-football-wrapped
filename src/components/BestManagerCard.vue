@@ -29,7 +29,7 @@ const bestManagerUser: any = computed(() => {
     class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
   >
     <svg
-      :class="props.users.length <= 10 ? 'w-9' : 'w-14'"
+      :class="props.users.length <= 10 ? 'w-9' : 'w-14 mt-1.5'"
       class="mx-auto my-1"
       version="1.0"
       id="Layer_1"
