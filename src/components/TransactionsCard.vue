@@ -19,10 +19,12 @@ const mostTransactionsUser: any = computed(() => {
 </script>
 <template>
   <div
-    class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow h-44 sm:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
+    :class="props.users.length <= 10 ? 'h-36' : 'h-44'"
+    class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
   >
     <svg
-      class="mx-auto my-1 w-14"
+      :class="props.users.length <= 10 ? 'w-9 -mt-1' : 'w-14'"
+      class="mx-auto my-1"
       version="1.0"
       id="Layer_1"
       xmlns="http://www.w3.org/2000/svg"
@@ -81,16 +83,16 @@ const mostTransactionsUser: any = computed(() => {
       Most Transactions
     </h5>
     <div class="mt-2 text-center">
-      <div class="flex justify-center">
+      <div class="flex justify-center -mt-0.5">
         <img
           alt="Most transactions user avatar"
           v-if="mostTransactionsUser.avatarImg"
-          class="w-8 h-8 rounded-full"
+          class="rounded-full w-7 h-7"
           :src="mostTransactionsUser.avatarImg"
         />
         <svg
           v-else
-          class="w-8 h-8 text-gray-800 dark:text-white"
+          class="text-gray-800 w-7 h-7 dark:text-white"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
@@ -101,7 +103,7 @@ const mostTransactionsUser: any = computed(() => {
           />
         </svg>
 
-        <p class="mx-3 mt-1 text-gray-800 text-md dark:text-white">
+        <p class="mx-3 mt-0.5 text-gray-800 text-md dark:text-white">
           {{ mostTransactionsUser.name }}
         </p>
       </div>

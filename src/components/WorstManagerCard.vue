@@ -25,10 +25,12 @@ const worstManagerUser: any = computed(() => {
 </script>
 <template>
   <div
-    class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto h-44 dark:bg-gray-800 dark:border-gray-700 min-w-56"
+    :class="props.users.length <= 10 ? 'h-36' : 'h-44'"
+    class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
   >
     <svg
-      class="mx-auto my-1 w-14"
+      :class="props.users.length <= 10 ? 'w-8 mt-px' : 'w-14'"
+      class="mx-auto my-1"
       version="1.0"
       id="Layer_1"
       xmlns="http://www.w3.org/2000/svg"
@@ -101,11 +103,14 @@ const worstManagerUser: any = computed(() => {
       Worst Manager
     </h5>
     <div class="mt-2 text-center">
-      <div class="flex justify-center">
+      <div
+        class="flex justify-center"
+        :class="props.users.length <= 10 ? '-mt-1' : ''"
+      >
         <img
           alt="Worst manager user avatar"
           v-if="worstManagerUser.avatarImg"
-          class="w-8 h-8 rounded-full"
+          class="rounded-full w-7 h-7"
           :src="worstManagerUser.avatarImg"
         />
         <svg

@@ -133,7 +133,7 @@ const chartOptions = ref({
 </script>
 <template>
   <div
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-96"
+    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
   >
     <div class="flex justify-between">
       <div>

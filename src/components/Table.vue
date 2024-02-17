@@ -535,7 +535,7 @@ const totalRosters = computed(() => {
       </div>
       <div
         :class="{ 'custom-height': props.users.length <= 10 }"
-        class="flex flex-wrap justify-between w-full overflow-y-auto xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mt-0"
+        class="flex flex-wrap justify-between w-full xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mt-0"
       >
         <WinnerCard
           v-if="store.leagueInfo[store.currentLeagueIndex]?.leagueWinner"
