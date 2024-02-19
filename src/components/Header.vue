@@ -128,7 +128,7 @@ const setColorMode = () => {
                 </div>
                 <div class="p-4 space-y-4 md:p-5">
                   <p
-                    class="text-base leading-relaxed text-gray-500 dark:text-gray-400"
+                    class="text-base leading-relaxed text-gray-700 dark:text-gray-200"
                   >
                     This website was made as a tool to show more detailed
                     information about your fantasy football league. Currently,
@@ -143,7 +143,7 @@ const setColorMode = () => {
                     leagues are supported.
                   </p>
                   <p
-                    class="text-base leading-relaxed text-gray-500 dark:text-gray-400"
+                    class="text-base leading-relaxed text-gray-700 dark:text-gray-200"
                   >
                     Everything on this site is also completely open source and
                     the source code can be found on
