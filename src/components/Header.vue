@@ -42,14 +42,14 @@ const setColorMode = () => {
         class="flex items-center space-x-3 rtl:space-x-reverse"
       >
         <img
-          height="32"
-          width="32"
+          height="24"
+          width="24"
           src="../assets/football-helmet.png"
-          class="h-8"
+          class="h-6"
           alt="Flowbite Logo"
         />
         <span
-          class="self-center text-lg font-semibold sm:text-2xl whitespace-nowrap dark:text-white"
+          class="self-center text-lg font-semibold sm:text-xl whitespace-nowrap dark:text-white"
           >Fantasy Football Wrapped</span
         >
       </div>
