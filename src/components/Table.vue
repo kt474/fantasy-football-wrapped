@@ -532,7 +532,7 @@ const totalRosters = computed(() => {
         class="flex flex-wrap justify-between w-full xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mt-0"
       >
         <WinnerCard
-          v-if="store.leagueInfo[store.currentLeagueIndex]?.leagueWinner"
+          v-if="store.currentLeagueId"
           :rosters="props.rosters"
           :users="props.users"
           :leagueWinner="leagueWinner"
@@ -582,11 +582,7 @@ const totalRosters = computed(() => {
           class="mt-4"
         />
       </div>
-      <StandingsChart
-        v-if="store.currentLeagueId"
-        :tableData="tableData"
-        class="mt-4"
-      />
+      <StandingsChart :tableData="tableData" class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'powerRankings'">
       <PowerRankingData

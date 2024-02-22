@@ -8,11 +8,13 @@ const props = defineProps<{
 }>();
 
 const winner: any = computed(() => {
-  const winnerId = props.rosters.filter(
-    (roster: any) => roster.rosterId === props.leagueWinner
-  )[0]["id"];
-
-  return props.users.filter((user: any) => user.id === winnerId)[0];
+  if (props.leagueWinner) {
+    const winnerId = props.rosters.filter(
+      (roster: any) => roster.rosterId === props.leagueWinner
+    )[0]["id"];
+    return props.users.filter((user: any) => user.id === winnerId)[0];
+  }
+  return props.users[0];
 });
 </script>
 <template>
