@@ -18,6 +18,7 @@ import WorstManagerCard from "./WorstManagerCard.vue";
 import TransactionsCard from "./TransactionsCard.vue";
 import Tabs from "./Tabs.vue";
 const tableOrder = ref("wins");
+const hover = ref("");
 const props = defineProps<{
   users: Array<object>;
   rosters: Array<object>;
@@ -263,8 +264,8 @@ const totalRosters = computed(() => {
               <th scope="col" class="px-6 py-3">
                 <div
                   @click="tableOrder = 'wins'"
-                  data-tooltip-target="record-tooltip"
-                  data-tooltip-placement="bottom"
+                  @mouseover="hover = 'wins'"
+                  @mouseleave="hover = ''"
                   class="flex items-center cursor-pointer dark:text-gray-200"
                 >
                   Record
@@ -287,19 +288,17 @@ const totalRosters = computed(() => {
                   </div>
                 </div>
                 <div
-                  id="record-tooltip"
-                  role="tooltip"
-                  class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
+                  :class="hover === 'wins' ? 'visible' : 'invisible'"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
                 >
                   Regular season wins and losses
-                  <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
               </th>
               <th scope="col" class="px-6 py-3">
                 <div
                   @click="tableOrder = 'points'"
-                  data-tooltip-target="points-tooltip"
-                  data-tooltip-placement="bottom"
+                  @mouseover="hover = 'points'"
+                  @mouseleave="hover = ''"
                   class="flex items-center cursor-pointer dark:text-gray-200"
                 >
                   Points
@@ -322,19 +321,17 @@ const totalRosters = computed(() => {
                   </div>
                 </div>
                 <div
-                  id="points-tooltip"
-                  role="tooltip"
-                  class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
+                  :class="hover === 'points' ? 'visible' : 'invisible'"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
                 >
                   Total regular season points
-                  <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
               </th>
               <th scope="col" class="px-6 py-3">
                 <div
                   @click="tableOrder = 'pointsAgainst'"
-                  data-tooltip-target="points-against-tooltip"
-                  data-tooltip-placement="bottom"
+                  @mouseover="hover = 'pointsAgainst'"
+                  @mouseleave="hover = ''"
                   class="flex items-center w-20 cursor-pointer dark:text-gray-200"
                 >
                   Points Against
@@ -357,19 +354,17 @@ const totalRosters = computed(() => {
                   </div>
                 </div>
                 <div
-                  id="points-against-tooltip"
-                  role="tooltip"
-                  class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
+                  :class="hover === 'pointsAgainst' ? 'visible' : 'invisible'"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-24 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
                 >
                   Total regular season points against
-                  <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
               </th>
               <th scope="col" class="px-6 py-3">
                 <div
                   @click="tableOrder = 'recordAgainstAll'"
-                  data-tooltip-target="recordAgainstAll-tooltip"
-                  data-tooltip-placement="bottom"
+                  @mouseover="hover = 'recordAgainstAll'"
+                  @mouseleave="hover = ''"
                   class="flex items-center w-20 cursor-pointer dark:text-gray-200"
                 >
                   Record vs. All
@@ -392,19 +387,19 @@ const totalRosters = computed(() => {
                   </div>
                 </div>
                 <div
-                  id="recordAgainstAll-tooltip"
-                  role="tooltip"
-                  class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 max-w-60 tooltip dark:bg-gray-600"
+                  :class="
+                    hover === 'recordAgainstAll' ? 'visible' : 'invisible'
+                  "
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm max-w-60 tooltip dark:bg-gray-600"
                 >
                   Team record if each team played every other team each week.
-                  <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
               </th>
               <th scope="col" class="px-6 py-3">
                 <div
                   @click="tableOrder = 'medianRecord'"
-                  data-tooltip-target="median-tooltip"
-                  data-tooltip-placement="bottom"
+                  @mouseover="hover = 'medianRecord'"
+                  @mouseleave="hover = ''"
                   class="flex items-center w-20 cursor-pointer dark:text-gray-200"
                 >
                   Median Record
@@ -427,14 +422,12 @@ const totalRosters = computed(() => {
                   </div>
                 </div>
                 <div
-                  id="median-tooltip"
-                  role="tooltip"
-                  class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm opacity-0 max-w-60 tooltip dark:bg-gray-600"
+                  :class="hover === 'medianRecord' ? 'visible' : 'invisible'"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm max-w-60 tooltip dark:bg-gray-600"
                 >
                   Team record where a win is awarded if a team's weekly score is
                   higher than the league median, and a loss is added if the
                   score is less than the median.
-                  <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
               </th>
             </tr>
