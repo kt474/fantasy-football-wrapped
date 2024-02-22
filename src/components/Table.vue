@@ -582,7 +582,11 @@ const totalRosters = computed(() => {
           class="mt-4"
         />
       </div>
-      <StandingsChart :tableData="tableData" class="mt-4" />
+      <StandingsChart
+        v-if="store.currentLeagueId"
+        :tableData="tableData"
+        class="mt-4"
+      />
     </div>
     <div v-if="store.currentTab === 'powerRankings'">
       <PowerRankingData

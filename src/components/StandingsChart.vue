@@ -12,7 +12,6 @@ const seriesData = computed(() => {
   const winPercentageAll: number[] = [];
   const winPercentageMedian: number[] = [];
   props.tableData.forEach((user: any) => {
-    console.log(user.wins);
     winPercentage.push(
       parseFloat((user.wins / (user.losses + user.wins)).toFixed(2))
     );
@@ -88,6 +87,7 @@ const chartOptions = ref({
       enabled: false,
     },
   },
+  colors: ["#fb923c", "#4ade80", "#60a5fa"],
   tooltip: {
     theme: store.darkMode ? "dark" : "light",
   },
@@ -142,6 +142,18 @@ const chartOptions = ref({
   <div
     class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
   >
+    <div class="flex justify-between">
+      <div>
+        <h5
+          class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+        >
+          Win Percentages
+        </h5>
+        <p class="text-base font-normal text-gray-500 dark:text-gray-400">
+          Regular Season
+        </p>
+      </div>
+    </div>
     <apexchart
       type="bar"
       width="100%"
