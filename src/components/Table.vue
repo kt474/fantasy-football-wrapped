@@ -16,6 +16,7 @@ import WinnerCard from "./WinnerCard.vue";
 import BestManagerCard from "./BestManagerCard.vue";
 import WorstManagerCard from "./WorstManagerCard.vue";
 import TransactionsCard from "./TransactionsCard.vue";
+import StandingsChart from "./StandingsChart.vue";
 import Tabs from "./Tabs.vue";
 const tableOrder = ref("wins");
 const hover = ref("");
@@ -581,6 +582,7 @@ const totalRosters = computed(() => {
           class="mt-4"
         />
       </div>
+      <StandingsChart :tableData="tableData" class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'powerRankings'">
       <PowerRankingData

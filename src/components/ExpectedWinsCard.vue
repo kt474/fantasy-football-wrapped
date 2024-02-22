@@ -111,7 +111,7 @@ const leastWinsDifference = computed(() => {
             </div>
             <div
               :class="hover === 'winsDifference' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm -ml-14 w-52 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-12 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
             >
               Difference between expected wins and actual wins
             </div>

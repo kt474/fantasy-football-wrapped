@@ -142,6 +142,7 @@ const chartOptions = ref({
     tickAmount: numOfTeams.value - 1,
     title: {
       text: "Ranking",
+      offsetX: -10,
       style: {
         fontSize: "16px",
         fontFamily:
