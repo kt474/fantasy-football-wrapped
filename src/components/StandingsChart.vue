@@ -58,6 +58,9 @@ const updateChartColor = () => {
     chart: {
       type: "bar",
       foreColor: store.darkMode ? "#ffffff" : "#111827",
+      animations: {
+        enabled: false,
+      },
       toolbar: {
         show: false,
       },
@@ -80,6 +83,9 @@ const chartOptions = ref({
   chart: {
     foreColor: store.darkMode ? "#ffffff" : "#111827",
     type: "bar",
+    animations: {
+      enabled: false,
+    },
     toolbar: {
       show: false,
     },
@@ -109,7 +115,7 @@ const chartOptions = ref({
     categories: xAxis.value,
     title: {
       text: "League Manager",
-      offsetY: -10,
+      offsetY: -5,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -119,6 +125,9 @@ const chartOptions = ref({
     },
   },
   yaxis: {
+    min: 0,
+    max: 1,
+    tickAmount: 4,
     title: {
       text: "Win Percentage",
       offsetX: -10,

@@ -12,9 +12,13 @@ const mostTransactions: any = computed(() => {
 });
 
 const mostTransactionsUser: any = computed(() => {
-  return props.users.filter(
-    (user: any) => user.id === mostTransactions.value[0]
-  )[0];
+  if (mostTransactions.value) {
+    return props.users.filter(
+      (user: any) => user.id === mostTransactions.value[0]
+    )[0];
+  } else {
+    return props.users[0];
+  }
 });
 </script>
 <template>
@@ -110,8 +114,10 @@ const mostTransactionsUser: any = computed(() => {
       <p
         class="mx-auto mt-1 leading-5 text-gray-800 text-md dark:text-white text-pretty"
       >
-        <span class="font-semibold">{{ mostTransactions[1] }}</span> Roster
-        moves
+        <span class="font-semibold">{{
+          mostTransactions ? mostTransactions[1] : "0"
+        }}</span>
+        Roster moves
       </p>
     </div>
   </div>
