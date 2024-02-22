@@ -2,6 +2,7 @@
 import { cloneDeep, maxBy, minBy } from "lodash";
 import { computed, ref } from "vue";
 const tableOrder = ref("winsDifference");
+const hover = ref("");
 const props = defineProps<{
   tableData: any[];
 }>();
@@ -51,6 +52,8 @@ const leastWinsDifference = computed(() => {
           <th scope="col" class="px-4 py-3">
             <div
               @click="tableOrder = 'randomScheduleWins'"
+              @mouseover="hover = 'randomScheduleWins'"
+              @mouseleave="hover = ''"
               class="flex items-center w-24 cursor-pointer dark:text-gray-200"
             >
               Expected Wins
@@ -72,10 +75,19 @@ const leastWinsDifference = computed(() => {
                 </svg>
               </div>
             </div>
+            <div
+              :class="hover === 'randomScheduleWins' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-60 tooltip dark:bg-gray-600"
+            >
+              Average number of wins after simulating 10,000 randomized weekly
+              matchups
+            </div>
           </th>
           <th scope="col" class="px-4 py-3">
             <div
               @click="tableOrder = 'winsDifference'"
+              @mouseover="hover = 'winsDifference'"
+              @mouseleave="hover = ''"
               class="flex items-center cursor-pointer w-28 dark:text-gray-200"
             >
               Wins above Expected
@@ -96,6 +108,12 @@ const leastWinsDifference = computed(() => {
                   />
                 </svg>
               </div>
+            </div>
+            <div
+              :class="hover === 'winsDifference' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm -ml-14 w-52 tooltip dark:bg-gray-600"
+            >
+              Difference between expected wins and actual wins
             </div>
           </th>
         </tr>
