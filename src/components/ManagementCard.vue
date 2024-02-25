@@ -1,45 +1,209 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { maxBy, cloneDeep, minBy } from "lodash";
+import { computed, ref } from "vue";
+const tableOrder = ref("points");
+const hover = ref("");
 const props = defineProps<{
   tableData: any[];
 }>();
 
-const sortedTableData = computed(() => {
-  return props.tableData.sort((a, b) => {
-    return b.managerEfficiency - a.managerEfficiency;
-  });
+const tableData = computed(() => {
+  const tableDataCopy = cloneDeep(props.tableData);
+  if (tableOrder.value === "points") {
+    return tableDataCopy.sort((a: any, b: any) => {
+      return b.pointsFor - a.pointsFor;
+    });
+  } else if (tableOrder.value === "potentialPoints") {
+    return tableDataCopy.sort((a: any, b: any) => {
+      return b.potentialPoints - a.potentialPoints;
+    });
+  } else if (tableOrder.value === "efficiency") {
+    return tableDataCopy.sort((a: any, b: any) => {
+      return b.managerEfficiency - a.managerEfficiency;
+    });
+  }
+});
+
+const mostPoints = computed(() => {
+  return maxBy(tableData.value, "pointsFor")?.pointsFor;
+});
+const minPoints = computed(() => {
+  return minBy(tableData.value, "pointsFor")?.pointsFor;
+});
+const mostPontentialPoints = computed(() => {
+  return maxBy(tableData.value, "potentialPoints")?.potentialPoints;
+});
+const minPontentialPoints = computed(() => {
+  return minBy(tableData.value, "potentialPoints")?.potentialPoints;
+});
+const highestEfficiency = computed(() => {
+  return maxBy(tableData.value, "managerEfficiency")?.managerEfficiency;
+});
+const lowestEfficiency = computed(() => {
+  return minBy(tableData.value, "managerEfficiency")?.managerEfficiency;
 });
 </script>
 <template>
   <div
-    class="px-6 py-2 bg-white border border-gray-200 rounded-lg shadow w-80 dark:bg-gray-800 dark:border-gray-700"
+    class="relative w-full max-w-xl overflow-x-auto shadow-md sm:rounded-lg dark:bg-gray-700"
   >
-    <div class="flex items-center justify-between sm:mt-1.5 mb-1">
-      <h5
-        class="w-20 text-xl font-bold leading-6 text-gray-900 dark:text-white text-pretty"
+    <table
+      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
+    >
+      <thead
+        class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400"
       >
-        Roster Efficiency
-      </h5>
-    </div>
-    <div class="flow-root">
-      <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-        <li v-for="(user, index) in sortedTableData">
-          <div class="flex items-center">
-            <div class="flex-1 min-w-0 py-2.5 ms-2">
-              <p
-                class="w-48 text-sm font-medium text-gray-900 truncate dark:text-white"
-              >
-                {{ index + 1 }}.&nbsp; {{ user.name }}
-              </p>
+        <tr>
+          <th scope="col" class="px-4 py-3 dark:text-gray-200">Team Name</th>
+
+          <th scope="col" class="px-1 py-3">
+            <div
+              @click="tableOrder = 'points'"
+              @mouseover="hover = 'points'"
+              @mouseleave="hover = ''"
+              class="flex items-center w-20 cursor-pointer dark:text-gray-200"
+            >
+              Total Points
+              <div>
+                <svg
+                  class="w-3 h-3 ms-1.5 fill-slate-400"
+                  :class="{
+                    'fill-slate-600 dark:fill-slate-50': tableOrder == 'points',
+                  }"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  />
+                </svg>
+              </div>
             </div>
             <div
-              class="inline-flex items-center text-sm font-normal text-gray-600 dark:text-gray-400"
+              :class="hover === 'points' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-52 tooltip dark:bg-gray-600"
             >
-              {{ (user.managerEfficiency * 100).toFixed(1) }}%
+              Total regular season points
             </div>
-          </div>
-        </li>
-      </ul>
-    </div>
+          </th>
+          <th scope="col" class="px-1 py-3">
+            <div
+              @click="tableOrder = 'potentialPoints'"
+              @mouseover="hover = 'potentialPoints'"
+              @mouseleave="hover = ''"
+              class="flex items-center w-24 cursor-pointer dark:text-gray-200"
+            >
+              Potential Points
+              <div>
+                <svg
+                  class="w-3 h-3 ms-1.5 fill-slate-400"
+                  :class="{
+                    'fill-slate-600 dark:fill-slate-50':
+                      tableOrder == 'potentialPoints',
+                  }"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div
+              :class="hover === 'potentialPoints' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+            >
+              Maximum points possible if the best lineup was set each week
+            </div>
+          </th>
+          <th scope="col" class="px-1 py-3">
+            <div
+              @click="tableOrder = 'efficiency'"
+              @mouseover="hover = 'efficiency'"
+              @mouseleave="hover = ''"
+              class="flex items-center w-20 cursor-pointer dark:text-gray-200"
+            >
+              Efficiency
+              <div>
+                <svg
+                  class="w-3 h-3 ms-1.5 fill-slate-400"
+                  :class="{
+                    'fill-slate-600 dark:fill-slate-50':
+                      tableOrder == 'efficiency',
+                  }"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div
+              :class="hover === 'efficiency' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+            >
+              Points / Potential Points
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="(item, index) in tableData"
+          :key="index"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+        >
+          <th
+            scope="row"
+            :class="props.tableData.length <= 10 ? 'py-4' : 'py-3'"
+            class="px-6 font-medium text-gray-900 truncate max-w-56 whitespace-nowrap dark:text-white"
+          >
+            {{ item.name }}
+          </th>
+          <td
+            class="py-2 pl-1 pr-3"
+            :class="{
+              'text-blue-600 dark:text-blue-500 font-semibold':
+                item.pointsFor === mostPoints,
+              'text-red-600 dark:text-red-500 font-semibold':
+                item.pointsFor === minPoints,
+            }"
+          >
+            {{ item.pointsFor }}
+          </td>
+          <td
+            class="py-2 pl-1 pr-3"
+            :class="{
+              'text-blue-600 dark:text-blue-500 font-semibold':
+                item.potentialPoints === mostPontentialPoints,
+              'text-red-600 dark:text-red-500 font-semibold':
+                item.potentialPoints === minPontentialPoints,
+            }"
+          >
+            {{ item.potentialPoints }}
+          </td>
+          <td
+            class="py-2 pl-1 pr-3"
+            :class="{
+              'text-blue-600 dark:text-blue-500 font-semibold':
+                item.managerEfficiency === highestEfficiency,
+              'text-red-600 dark:text-red-500 font-semibold':
+                item.managerEfficiency === lowestEfficiency,
+            }"
+          >
+            {{ (item.managerEfficiency * 100).toFixed(1) }}%
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
