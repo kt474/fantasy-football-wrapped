@@ -17,6 +17,8 @@ import BestManagerCard from "./BestManagerCard.vue";
 import WorstManagerCard from "./WorstManagerCard.vue";
 import TransactionsCard from "./TransactionsCard.vue";
 import StandingsChart from "./StandingsChart.vue";
+import ManagementCard from "./ManagementCard.vue";
+import ManagementChart from "./ManagementChart.vue";
 import Tabs from "./Tabs.vue";
 const tableOrder = ref("wins");
 const hover = ref("");
@@ -606,6 +608,13 @@ const totalRosters = computed(() => {
     >
       <ExpectedWinsCard :tableData="tableData" class="mt-4" />
       <ExpectedWinsChart :tableData="tableData" class="mt-4 md:ml-4" />
+    </div>
+    <div
+      v-if="store.currentTab === 'managerEfficiency'"
+      class="flex flex-wrap md:flex-nowrap"
+    >
+      <ManagementCard :tableData="tableData" class="mt-4" />
+      <ManagementChart :tableData="tableData" class="mt-4 md:ml-4" />
     </div>
   </div>
 </template>

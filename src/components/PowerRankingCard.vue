@@ -52,7 +52,7 @@ const weeks = computed(() => {
               </p>
             </div>
             <div
-              class="inline-flex items-center text-sm font-normal text-gray-700 dark:text-white"
+              class="inline-flex items-center text-sm font-normal text-gray-600 dark:text-gray-400"
             >
               {{ user.ratings[currentWeek - 1] }}
             </div>

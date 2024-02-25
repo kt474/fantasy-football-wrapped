@@ -2,61 +2,57 @@
 import { ref, computed, watch } from "vue";
 import { useStore } from "../store/store";
 const store = useStore();
-
 const props = defineProps<{
-  tableData: Array<object>;
+  tableData: any[];
 }>();
 
-const seriesData = computed(() => {
-  const winPercentage: number[] = [];
-  const winPercentageAll: number[] = [];
-  const winPercentageMedian: number[] = [];
-  props.tableData.forEach((user: any) => {
-    winPercentage.push(
-      parseFloat((user.wins / (user.losses + user.wins)).toFixed(2))
+const jitter = () => Math.random() * 0.02 - 0.01;
+
+const recordVsEfficiency = computed(() => {
+  const result: any[] = [];
+  props.tableData.forEach((team) => {
+    const winPercentage = parseFloat(
+      (team.wins / (team.wins + team.losses) + jitter()).toFixed(2)
     );
-    winPercentageAll.push(
-      parseFloat(
-        (
-          user.winsAgainstAll /
-          (user.lossesAgainstAll + user.winsAgainstAll)
-        ).toFixed(2)
-      )
-    );
-    winPercentageMedian.push(
-      parseFloat(
-        (
-          user.winsWithMedian /
-          (user.lossesWithMedian + user.winsWithMedian)
-        ).toFixed(2)
-      )
-    );
+    console.log(team.managerEfficiency);
+    result.push([team.managerEfficiency, winPercentage]);
   });
-  return [
-    {
-      name: "Win Percentage",
-      data: winPercentage,
-    },
-    {
-      name: "Record vs. All Win Percentage",
-      data: winPercentageAll,
-    },
-    {
-      name: "Median Record Win Percentage",
-      data: winPercentageMedian,
-    },
-  ];
+  return result;
 });
 
-const xAxis = computed(() => {
-  return props.tableData.map((user: any) => user.name);
+const allRecordVsEfficiency = computed(() => {
+  const result: any[] = [];
+  props.tableData.forEach((team) => {
+    const winPercentage = parseFloat(
+      (
+        team.winsAgainstAll / (team.winsAgainstAll + team.lossesAgainstAll) +
+        jitter()
+      ).toFixed(2)
+    );
+    result.push([team.managerEfficiency, winPercentage]);
+  });
+  return result;
+});
+
+const medianRecordVsEfficiency = computed(() => {
+  const result: any[] = [];
+  props.tableData.forEach((team) => {
+    const winPercentage = parseFloat(
+      (
+        team.winsWithMedian / (team.winsWithMedian + team.lossesWithMedian) +
+        jitter()
+      ).toFixed(2)
+    );
+    result.push([team.managerEfficiency, winPercentage]);
+  });
+  return result;
 });
 
 const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
-      type: "bar",
+      type: "scatter",
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       toolbar: {
         show: false,
@@ -70,16 +66,14 @@ const updateChartColor = () => {
     },
   };
 };
-
 watch(
   () => store.darkMode,
   () => updateChartColor()
 );
-
 const chartOptions = ref({
   chart: {
     foreColor: store.darkMode ? "#ffffff" : "#111827",
-    type: "bar",
+    type: "scatter",
     toolbar: {
       show: false,
     },
@@ -91,25 +85,19 @@ const chartOptions = ref({
   tooltip: {
     theme: store.darkMode ? "dark" : "light",
   },
-  plotOptions: {
-    bar: {
-      horizontal: false,
-      columnWidth: "60%",
-    },
-  },
   dataLabels: {
     enabled: false,
   },
-  stroke: {
-    show: true,
-    width: 2,
-    colors: ["transparent"],
+  markers: {
+    size: 8,
   },
+  legend: {},
   xaxis: {
-    categories: xAxis.value,
+    type: "numeric",
+    decimalsInFloat: 2,
     title: {
-      text: "League Manager",
-      offsetY: -5,
+      text: "Manager Efficiency",
+      offsetY: 5,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -123,7 +111,7 @@ const chartOptions = ref({
     max: 1,
     tickAmount: 4,
     title: {
-      text: "Win Percentage",
+      text: "Win Percentages",
       offsetX: -10,
       style: {
         fontSize: "16px",
@@ -133,13 +121,22 @@ const chartOptions = ref({
       },
     },
   },
-  fill: {
-    opacity: 1,
-  },
-  legend: {
-    offsetX: 20,
-  },
 });
+
+const series = ref([
+  {
+    name: "Record",
+    data: recordVsEfficiency.value,
+  },
+  {
+    name: "Record vs. All",
+    data: allRecordVsEfficiency.value,
+  },
+  {
+    name: "Median Record",
+    data: medianRecordVsEfficiency.value,
+  },
+]);
 </script>
 <template>
   <div
@@ -150,7 +147,7 @@ const chartOptions = ref({
         <h5
           class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
         >
-          Win Percentages
+          Roster Efficiency vs. Win Percentages
         </h5>
         <p class="text-base font-normal text-gray-500 dark:text-gray-400">
           Regular Season
@@ -158,11 +155,10 @@ const chartOptions = ref({
       </div>
     </div>
     <apexchart
-      type="bar"
-      width="100%"
+      type="scatter"
       height="475"
       :options="chartOptions"
-      :series="seriesData"
+      :series="series"
     ></apexchart>
   </div>
 </template>
