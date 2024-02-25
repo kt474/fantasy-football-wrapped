@@ -133,7 +133,13 @@ const chartOptions = ref({
     strokeWidth: 2,
     strokeColors: store.darkMode ? "#f3f4f6" : "#111827",
   },
-  legend: {},
+  legend: {
+    width: 700,
+    horizontalAlign: "center",
+    fontSize: "12px",
+    fontFamily:
+      "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+  },
   xaxis: {
     tickAmount: 6,
     title: {
@@ -165,27 +171,27 @@ const chartOptions = ref({
 });
 const series = computed(() => [
   {
-    name: "Record",
+    name: "Pts vs. Actual Win %",
     data: recordVsPoints.value,
   },
   {
-    name: "Record vs. All",
+    name: "Pts vs. Win % Against All",
     data: allRecordVsPoints.value,
   },
   {
-    name: "Median Record",
+    name: "Pts vs. Win % Median Record",
     data: medianRecordVsPoints.value,
   },
   {
-    name: "Potential Record",
+    name: "Potential Pts vs. Actual Win %",
     data: recordVsPotentialPoints.value,
   },
   {
-    name: "Potential Record vs. All",
+    name: "Potential Pts vs. Win % Against All",
     data: allRecordVsPotentialPoints.value,
   },
   {
-    name: "Potential Median Record",
+    name: "Potential Pts vs. Win % Median Record",
     data: medianRecordVsPotentialPoints.value,
   },
 ]);
@@ -214,3 +220,8 @@ const series = computed(() => [
     ></apexchart>
   </div>
 </template>
+<style>
+.apexcharts-legend {
+  margin: auto !important;
+}
+</style>
