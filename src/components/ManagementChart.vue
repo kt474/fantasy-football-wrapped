@@ -6,9 +6,6 @@ const props = defineProps<{
   tableData: any[];
 }>();
 
-const xAxis = computed(() => {
-  return props.tableData.map((user: any) => user.name);
-});
 const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
@@ -25,10 +22,28 @@ const updateChartColor = () => {
     tooltip: {
       theme: store.darkMode ? "dark" : "light",
     },
+    xaxis: {
+      categories: props.tableData.map((user: any) => user.name),
+      title: {
+        text: "League Manager",
+        offsetY: -5,
+        style: {
+          fontSize: "16px",
+          fontFamily:
+            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+          fontWeight: 600,
+        },
+      },
+    },
   };
 };
 watch(
   () => store.darkMode,
+  () => updateChartColor()
+);
+
+watch(
+  () => store.currentLeagueId,
   () => updateChartColor()
 );
 const chartOptions = ref({
@@ -61,7 +76,7 @@ const chartOptions = ref({
     colors: ["transparent"],
   },
   xaxis: {
-    categories: xAxis.value,
+    categories: props.tableData.map((user: any) => user.name),
     title: {
       text: "League Manager",
       offsetY: -5,

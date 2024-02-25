@@ -61,7 +61,7 @@ const lowestEfficiency = computed(() => {
               @click="tableOrder = 'points'"
               @mouseover="hover = 'points'"
               @mouseleave="hover = ''"
-              class="flex items-center w-20 cursor-pointer dark:text-gray-200"
+              class="flex items-center w-16 cursor-pointer dark:text-gray-200"
             >
               Total Points
               <div>
@@ -88,7 +88,7 @@ const lowestEfficiency = computed(() => {
               Total regular season points
             </div>
           </th>
-          <th scope="col" class="px-1 py-3">
+          <th scope="col" class="px-1 py-3 max-w-24">
             <div
               @click="tableOrder = 'potentialPoints'"
               @mouseover="hover = 'potentialPoints'"

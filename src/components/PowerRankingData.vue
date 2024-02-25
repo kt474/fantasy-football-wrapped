@@ -52,10 +52,6 @@ const powerRankings = computed(() => {
   return result;
 });
 
-const xAxis = computed(() => {
-  return [...Array(props.regularSeasonLength + 1).keys()].slice(1);
-});
-
 const chartTextColor = computed(() => {
   return store.darkMode ? "#ffffff" : "#111827";
 });
@@ -80,11 +76,32 @@ const updateChartColor = () => {
         formatter: (x: number) => `Week ${x}`,
       },
     },
+    yaxis: {
+      reversed: true,
+      min: 1,
+      stepSize: 1,
+      tickAmount: props.totalRosters - 1,
+      title: {
+        text: "Ranking",
+        offsetX: -10,
+        style: {
+          fontSize: "16px",
+          fontFamily:
+            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+          fontWeight: 600,
+        },
+      },
+    },
   };
 };
 
 watch(
   () => store.darkMode,
+  () => updateChartColor()
+);
+
+watch(
+  () => store.currentLeagueId,
   () => updateChartColor()
 );
 
@@ -114,7 +131,7 @@ const chartOptions = ref({
     "#f43f5e",
   ],
   xaxis: {
-    categories: xAxis.value,
+    categories: [...Array(props.regularSeasonLength + 1).keys()].slice(1),
     title: {
       text: "Week",
       style: {
@@ -154,7 +171,7 @@ const chartOptions = ref({
   },
   markers: {
     size: 5,
-    strokeWidth: 1,
+    strokeWidth: 2,
     hover: {
       size: 6,
     },
