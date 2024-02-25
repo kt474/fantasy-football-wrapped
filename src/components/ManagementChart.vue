@@ -6,53 +6,14 @@ const props = defineProps<{
   tableData: any[];
 }>();
 
-const jitter = () => Math.random() * 0.02 - 0.01;
-
-const recordVsEfficiency = computed(() => {
-  const result: any[] = [];
-  props.tableData.forEach((team) => {
-    const winPercentage = parseFloat(
-      (team.wins / (team.wins + team.losses) + jitter()).toFixed(2)
-    );
-    console.log(team.managerEfficiency);
-    result.push([team.managerEfficiency, winPercentage]);
-  });
-  return result;
+const xAxis = computed(() => {
+  return props.tableData.map((user: any) => user.name);
 });
-
-const allRecordVsEfficiency = computed(() => {
-  const result: any[] = [];
-  props.tableData.forEach((team) => {
-    const winPercentage = parseFloat(
-      (
-        team.winsAgainstAll / (team.winsAgainstAll + team.lossesAgainstAll) +
-        jitter()
-      ).toFixed(2)
-    );
-    result.push([team.managerEfficiency, winPercentage]);
-  });
-  return result;
-});
-
-const medianRecordVsEfficiency = computed(() => {
-  const result: any[] = [];
-  props.tableData.forEach((team) => {
-    const winPercentage = parseFloat(
-      (
-        team.winsWithMedian / (team.winsWithMedian + team.lossesWithMedian) +
-        jitter()
-      ).toFixed(2)
-    );
-    result.push([team.managerEfficiency, winPercentage]);
-  });
-  return result;
-});
-
 const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
-      type: "scatter",
+      type: "bar",
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       toolbar: {
         show: false,
@@ -73,7 +34,7 @@ watch(
 const chartOptions = ref({
   chart: {
     foreColor: store.darkMode ? "#ffffff" : "#111827",
-    type: "scatter",
+    type: "bar",
     toolbar: {
       show: false,
     },
@@ -81,23 +42,29 @@ const chartOptions = ref({
       enabled: false,
     },
   },
-  colors: ["#fb923c", "#4ade80", "#60a5fa"],
+  colors: ["#fb923c", "#4ade80"],
   tooltip: {
     theme: store.darkMode ? "dark" : "light",
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: "60%",
+    },
   },
   dataLabels: {
     enabled: false,
   },
-  markers: {
-    size: 8,
+  stroke: {
+    show: true,
+    width: 2,
+    colors: ["transparent"],
   },
-  legend: {},
   xaxis: {
-    type: "numeric",
-    decimalsInFloat: 2,
+    categories: xAxis.value,
     title: {
-      text: "Manager Efficiency",
-      offsetY: 5,
+      text: "League Manager",
+      offsetY: -5,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -107,11 +74,8 @@ const chartOptions = ref({
     },
   },
   yaxis: {
-    min: 0,
-    max: 1,
-    tickAmount: 4,
     title: {
-      text: "Win Percentages",
+      text: "Total Points",
       offsetX: -10,
       style: {
         fontSize: "16px",
@@ -121,22 +85,26 @@ const chartOptions = ref({
       },
     },
   },
+  fill: {
+    opacity: 1,
+  },
+  legend: {
+    offsetX: 20,
+  },
 });
 
-const series = ref([
-  {
-    name: "Record",
-    data: recordVsEfficiency.value,
-  },
-  {
-    name: "Record vs. All",
-    data: allRecordVsEfficiency.value,
-  },
-  {
-    name: "Median Record",
-    data: medianRecordVsEfficiency.value,
-  },
-]);
+const seriesData = computed(() => {
+  return [
+    {
+      name: "Points",
+      data: props.tableData.map((row) => row.pointsFor),
+    },
+    {
+      name: "Potential Points",
+      data: props.tableData.map((row) => row.potentialPoints),
+    },
+  ];
+});
 </script>
 <template>
   <div
@@ -147,7 +115,7 @@ const series = ref([
         <h5
           class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
         >
-          Roster Efficiency vs. Win Percentages
+          Total Points vs. Potential Points
         </h5>
         <p class="text-base font-normal text-gray-500 dark:text-gray-400">
           Regular Season
@@ -155,10 +123,16 @@ const series = ref([
       </div>
     </div>
     <apexchart
-      type="scatter"
+      width="100%"
       height="475"
       :options="chartOptions"
-      :series="series"
+      :series="seriesData"
     ></apexchart>
+    <p
+      class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
+    >
+      Potential points are calculated by taking the highest scoring possible
+      lineup for each week, including bench players.
+    </p>
   </div>
 </template>
