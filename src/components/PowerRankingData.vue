@@ -56,10 +56,6 @@ const xAxis = computed(() => {
   return [...Array(props.regularSeasonLength + 1).keys()].slice(1);
 });
 
-const numOfTeams = computed(() => {
-  return props.totalRosters;
-});
-
 const chartTextColor = computed(() => {
   return store.darkMode ? "#ffffff" : "#111827";
 });
@@ -70,9 +66,6 @@ const updateChartColor = () => {
     chart: {
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       id: "power-ranking",
-      animations: {
-        enabled: false,
-      },
       toolbar: {
         show: false,
       },
@@ -99,9 +92,6 @@ const chartOptions = ref({
   chart: {
     foreColor: chartTextColor.value,
     id: "power-ranking",
-    animations: {
-      enabled: false,
-    },
     toolbar: {
       show: false,
     },
@@ -139,7 +129,7 @@ const chartOptions = ref({
     reversed: true,
     min: 1,
     stepSize: 1,
-    tickAmount: numOfTeams.value - 1,
+    tickAmount: props.totalRosters - 1,
     title: {
       text: "Ranking",
       offsetX: -10,
@@ -160,13 +150,13 @@ const chartOptions = ref({
   },
   stroke: {
     curve: "straight",
-    width: 3,
+    width: 5,
   },
   markers: {
-    size: 3.5,
+    size: 5,
     strokeWidth: 1,
     hover: {
-      size: 5,
+      size: 6,
     },
   },
 });
