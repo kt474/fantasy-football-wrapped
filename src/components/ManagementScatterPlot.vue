@@ -78,6 +78,11 @@ const medianRecordVsPotentialPoints = computed(() => {
   });
   return result;
 });
+
+const getUser = (index: number) => {
+  return props.tableData[index];
+};
+
 const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
@@ -93,6 +98,12 @@ const updateChartColor = () => {
     },
     tooltip: {
       theme: store.darkMode ? "dark" : "light",
+      x: {
+        formatter: (x: number, y: any) => {
+          const user = getUser(y.dataPointIndex);
+          return `${user.name}: ${x}`;
+        },
+      },
     },
     markers: {
       size: 10,
@@ -119,6 +130,12 @@ const chartOptions = ref({
   colors: ["#fdba74", "#f97316", "#c2410c", "#86efac", "#22c55e", "#15803d"],
   tooltip: {
     theme: store.darkMode ? "dark" : "light",
+    x: {
+      formatter: (x: number, y: any) => {
+        const user = getUser(y.dataPointIndex);
+        return `${user.name}: ${x}`;
+      },
+    },
   },
   dataLabels: {
     enabled: false,
