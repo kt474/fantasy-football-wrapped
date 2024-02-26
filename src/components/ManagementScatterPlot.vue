@@ -230,43 +230,61 @@ const series = computed(() => [
       class="max-w-md px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow min-w-80 dark:bg-gray-800 dark:border-gray-700"
     >
       <h5
-        class="w-56 mb-2 text-xl font-bold leading-none text-gray-900 dark:text-white"
+        class="w-56 mt-1 mb-2 text-xl font-bold leading-none text-gray-900 dark:text-white"
       >
         Correlation Coefficients (r value)
       </h5>
       <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-        <li class="flex justify-between py-2">
-          <p class="font-semibold dark:text-white">Pts vs. Win %</p>
+        <li class="flex justify-between py-3">
+          <div class="flex">
+            <div class="w-4 h-4 mt-1 mr-2 bg-orange-300 rounded-full"></div>
+            <p class="font-semibold dark:text-white">Pts vs. Win %</p>
+          </div>
           <p class="text-gray-600 dark:text-gray-400">
             {{ getRValue(recordVsPoints) }}
           </p>
         </li>
-        <li class="flex justify-between py-2">
-          <p class="font-semibold dark:text-white">Pts vs. All Win %</p>
+        <li class="flex justify-between py-3">
+          <div class="flex">
+            <div class="w-4 h-4 mt-1 mr-2 bg-orange-500 rounded-full"></div>
+            <p class="font-semibold dark:text-white">Pts vs. All Win %</p>
+          </div>
           <p class="text-gray-600 dark:text-gray-400">
             {{ getRValue(allRecordVsPoints) }}
           </p>
         </li>
-        <li class="flex justify-between py-2">
-          <p class="font-semibold dark:text-white">Pts vs. Median Win %</p>
+        <li class="flex justify-between py-3">
+          <div class="flex">
+            <div class="w-4 h-4 mt-1 mr-2 bg-orange-700 rounded-full"></div>
+            <p class="font-semibold dark:text-white">Pts vs. Median Win %</p>
+          </div>
           <p class="text-gray-600 dark:text-gray-400">
             {{ getRValue(medianRecordVsPoints) }}
           </p>
         </li>
-        <li class="flex justify-between py-2">
-          <p class="font-semibold dark:text-white">PPts vs. Win %</p>
+        <li class="flex justify-between py-3">
+          <div class="flex">
+            <div class="w-4 h-4 mt-1 mr-2 bg-green-300 rounded-full"></div>
+            <p class="font-semibold dark:text-white">PPts vs. Win %</p>
+          </div>
           <p class="text-gray-600 dark:text-gray-400">
             {{ getRValue(recordVsPotentialPoints) }}
           </p>
         </li>
-        <li class="flex justify-between py-2">
-          <p class="font-semibold dark:text-white">PPts vs. All Win %</p>
+        <li class="flex justify-between py-3">
+          <div class="flex">
+            <div class="w-4 h-4 mt-1 mr-2 bg-green-500 rounded-full"></div>
+            <p class="font-semibold dark:text-white">PPts vs. All Win %</p>
+          </div>
           <p class="text-gray-600 dark:text-gray-400">
             {{ getRValue(allRecordVsPotentialPoints) }}
           </p>
         </li>
-        <li class="flex justify-between py-2">
-          <p class="font-semibold dark:text-white">PPts vs. Median Win %</p>
+        <li class="flex justify-between py-3">
+          <div class="flex">
+            <div class="w-4 h-4 mt-1 mr-2 bg-green-700 rounded-full"></div>
+            <p class="font-semibold dark:text-white">PPts vs. Median Win %</p>
+          </div>
           <p class="text-gray-600 dark:text-gray-400">
             {{ getRValue(medianRecordVsPotentialPoints) }}
           </p>
@@ -290,7 +308,7 @@ const series = computed(() => [
       </div>
       <apexchart
         type="scatter"
-        height="475"
+        height="300"
         :options="chartOptions"
         :series="series"
       ></apexchart>
