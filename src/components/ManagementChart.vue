@@ -130,11 +130,8 @@ const seriesData = computed(() => {
         <h5
           class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
         >
-          Total Points vs. Potential Points
+          Regular Season Points
         </h5>
-        <p class="text-base font-normal text-gray-500 dark:text-gray-400">
-          Regular Season
-        </p>
       </div>
     </div>
     <apexchart
