@@ -76,6 +76,14 @@ const updateChartColor = () => {
         formatter: (x: number) => `Week ${x}`,
       },
     },
+    markers: {
+      size: 5,
+      strokeWidth: 2,
+      strokeColors: store.darkMode ? "#e5e7eb" : "#374151",
+      hover: {
+        size: 6,
+      },
+    },
     yaxis: {
       reversed: true,
       min: 1,
@@ -172,6 +180,7 @@ const chartOptions = ref({
   markers: {
     size: 5,
     strokeWidth: 2,
+    strokeColors: store.darkMode ? "#e5e7eb" : "#374151",
     hover: {
       size: 6,
     },
