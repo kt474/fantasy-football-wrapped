@@ -18,8 +18,8 @@ import WorstManagerCard from "./WorstManagerCard.vue";
 import TransactionsCard from "./TransactionsCard.vue";
 import StandingsChart from "./StandingsChart.vue";
 import ManagementCard from "./ManagementCard.vue";
-import ManagementChart from "./ManagementChart.vue";
 import ManagementScatterPlot from "./ManagementScatterPlot.vue";
+import RankingGraph from "./RankingGraph.vue";
 import Tabs from "./Tabs.vue";
 const tableOrder = ref("wins");
 const hover = ref("");
@@ -613,14 +613,16 @@ const totalRosters = computed(() => {
     <div v-if="store.currentTab === 'managerEfficiency'">
       <div class="flex flex-wrap md:flex-nowrap">
         <ManagementCard :tableData="tableData" class="mt-4" />
-        <ManagementChart :tableData="tableData" class="mt-4 md:ml-4" />
+        <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
       </div>
       <ManagementScatterPlot :tableData="tableData" class="mt-4" />
     </div>
   </div>
 </template>
 <style scoped>
-.custom-height {
-  height: 39.1rem;
+@media (min-width: 1280px) {
+  .custom-height {
+    height: 39.1rem;
+  }
 }
 </style>

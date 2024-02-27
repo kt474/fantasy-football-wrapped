@@ -77,11 +77,11 @@ const updateChartColor = () => {
       },
     },
     markers: {
-      size: 5,
+      size: 6,
       strokeWidth: 2,
       strokeColors: store.darkMode ? "#e5e7eb" : "#374151",
       hover: {
-        size: 6,
+        size: 7,
       },
     },
     yaxis: {
@@ -178,11 +178,11 @@ const chartOptions = ref({
     width: 5,
   },
   markers: {
-    size: 5,
+    size: 6,
     strokeWidth: 2,
     strokeColors: store.darkMode ? "#e5e7eb" : "#374151",
     hover: {
-      size: 6,
+      size: 7,
     },
   },
 });

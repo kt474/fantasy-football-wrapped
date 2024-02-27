@@ -1,0 +1,159 @@
+<script setup lang="ts">
+import { computed, ref, watch } from "vue";
+import { useStore } from "../store/store";
+const props = defineProps<{
+  tableData: Array<object>;
+}>();
+const store = useStore();
+
+const series = computed(() => {
+  const result: any[] = [];
+  const points = props.tableData.map((team: any) => team.pointsFor);
+  points.sort((a, b) => b - a);
+  const potentialPoints = props.tableData.map(
+    (team: any) => team.potentialPoints
+  );
+  potentialPoints.sort((a, b) => b - a);
+  props.tableData.forEach((team: any) => {
+    result.push({
+      name: team.name,
+      data: [
+        points.indexOf(team.pointsFor) + 1,
+        potentialPoints.indexOf(team.potentialPoints) + 1,
+      ],
+    });
+  });
+  return result;
+});
+
+const chartTextColor = computed(() => {
+  return store.darkMode ? "#ffffff" : "#111827";
+});
+
+const updateChartColor = () => {
+  chartOptions.value = {
+    ...chartOptions.value,
+    chart: {
+      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      id: "power-ranking",
+      animations: {
+        enabled: false,
+      },
+      toolbar: {
+        show: false,
+      },
+      zoom: {
+        enabled: false,
+      },
+    },
+  };
+};
+
+watch(
+  () => store.darkMode,
+  () => updateChartColor()
+);
+
+const chartOptions = ref({
+  chart: {
+    animations: {
+      enabled: false,
+    },
+    foreColor: chartTextColor.value,
+    id: "potential-points",
+    toolbar: {
+      show: false,
+    },
+    zoom: {
+      enabled: false,
+    },
+  },
+  grid: {
+    show: false,
+  },
+  colors: [
+    "#ef4444",
+    "#f97316",
+    "#f59e0b",
+    "#eab308",
+    "#84cc16",
+    "#14b8a6",
+    "#22c55e",
+    "#0ea5e9",
+    "#6366f1",
+    "#a855f7",
+    "#ec4899",
+    "#f43f5e",
+  ],
+  xaxis: {
+    categories: ["Actual Points", "Potential Points"],
+    axisBorder: {
+      show: false,
+    },
+    title: {
+      text: "Points",
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
+    },
+  },
+  yaxis: {
+    reversed: true,
+    labels: {
+      show: false,
+    },
+    title: {
+      text: "Ranking",
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
+    },
+  },
+  tooltip: {
+    enabled: false,
+  },
+  stroke: {
+    curve: "smooth",
+    width: 5,
+  },
+  dataLabels: {
+    enabled: true,
+  },
+  legend: {
+    offsetY: 8,
+  },
+  markers: {
+    size: 5,
+  },
+});
+</script>
+<template>
+  <div
+    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
+  >
+    <div class="flex justify-between">
+      <div>
+        <h5
+          class="-mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+        >
+          Points vs Potential Points
+        </h5>
+      </div>
+    </div>
+    <apexchart
+      width="100%"
+      height="475"
+      :options="chartOptions"
+      :series="series"
+    ></apexchart>
+    <p
+      class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
+    ></p>
+  </div>
+</template>
