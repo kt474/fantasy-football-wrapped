@@ -6,6 +6,14 @@ const props = defineProps<{
 }>();
 const store = useStore();
 
+const pointsArray = computed(() => {
+  return props.tableData.map((team: any) => team.pointsFor);
+});
+
+const potentialPointsArray = computed(() => {
+  return props.tableData.map((team: any) => team.potentialPoints);
+});
+
 const series = computed(() => {
   const result: any[] = [];
   const points = props.tableData.map((team: any) => team.pointsFor);
@@ -92,6 +100,7 @@ const chartOptions = ref({
     },
     title: {
       text: "Points",
+      offsetY: -5,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -107,6 +116,7 @@ const chartOptions = ref({
     },
     title: {
       text: "Ranking",
+      offsetX: -5,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -123,13 +133,24 @@ const chartOptions = ref({
     width: 5,
   },
   dataLabels: {
+    formatter: (_: any, options: any) => {
+      if (options.dataPointIndex === 0) {
+        return pointsArray.value[options.seriesIndex];
+      }
+      return potentialPointsArray.value[options.seriesIndex];
+    },
     enabled: true,
+    background: {
+      padding: 8,
+      borderRadius: 10,
+      borderWidth: 2,
+    },
   },
   legend: {
     offsetY: 8,
   },
   markers: {
-    size: 5,
+    size: 0,
   },
 });
 </script>
