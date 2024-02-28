@@ -207,11 +207,11 @@ export const fakeRosters = [
     id: "4",
     pointsFor: 1553,
     pointsAgainst: 1433,
-    potentialPoints: 1753,
+    potentialPoints: 1807,
     wins: 8,
     losses: 6,
     rosterId: 4,
-    managerEfficiency: 0.886,
+    managerEfficiency: 0.859,
     recordByWeek: "LWWWLWWLLWLWWL",
   },
   {
@@ -228,12 +228,12 @@ export const fakeRosters = [
   {
     id: "6",
     pointsFor: 1646,
-    potentialPoints: 1840,
+    potentialPoints: 1796,
     pointsAgainst: 1502,
     wins: 9,
     losses: 5,
     rosterId: 6,
-    managerEfficiency: 0.894,
+    managerEfficiency: 0.916,
     recordByWeek: "LWWWLWWLWWLWWL",
   },
   {

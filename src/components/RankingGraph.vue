@@ -43,15 +43,27 @@ const updateChartColor = () => {
     ...chartOptions.value,
     chart: {
       foreColor: store.darkMode ? "#ffffff" : "#111827",
-      id: "power-ranking",
-      animations: {
-        enabled: false,
-      },
+      id: "ranking-bump-chart",
       toolbar: {
         show: false,
       },
       zoom: {
         enabled: false,
+      },
+    },
+    dataLabels: {
+      formatter: (_: any, options: any) => {
+        if (options.dataPointIndex === 0) {
+          return pointsArray.value[options.seriesIndex];
+        }
+        return potentialPointsArray.value[options.seriesIndex];
+      },
+      enabled: true,
+      background: {
+        padding: 8,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: store.darkMode ? "#e5e7eb" : "#111827",
       },
     },
   };
@@ -64,9 +76,6 @@ watch(
 
 const chartOptions = ref({
   chart: {
-    animations: {
-      enabled: false,
-    },
     foreColor: chartTextColor.value,
     id: "potential-points",
     toolbar: {
@@ -94,7 +103,8 @@ const chartOptions = ref({
     "#f43f5e",
   ],
   xaxis: {
-    categories: ["Actual Points", "Potential Points"],
+    // Hacky fix so the label isn't cut off
+    categories: ["lllllllll   Actual Points", "Potential Points"],
     axisBorder: {
       show: false,
     },
@@ -113,16 +123,6 @@ const chartOptions = ref({
     reversed: true,
     labels: {
       show: false,
-    },
-    title: {
-      text: "Ranking",
-      offsetX: -5,
-      style: {
-        fontSize: "16px",
-        fontFamily:
-          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
-        fontWeight: 600,
-      },
     },
   },
   tooltip: {
@@ -144,6 +144,7 @@ const chartOptions = ref({
       padding: 8,
       borderRadius: 10,
       borderWidth: 2,
+      borderColor: store.darkMode ? "#e5e7eb" : "#111827",
     },
   },
   legend: {
@@ -174,7 +175,10 @@ const chartOptions = ref({
       :series="series"
     ></apexchart>
     <p
-      class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
-    ></p>
+      class="mt-8 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
+    >
+      Potential points are the maximum number of points a team could have scored
+      if weekly lineups were optimized
+    </p>
   </div>
 </template>
