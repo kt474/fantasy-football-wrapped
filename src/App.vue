@@ -84,7 +84,7 @@ const setHtmlBackground = () => {
     if (store.darkMode) {
       html.style.backgroundColor = "#020617";
     } else {
-      html.style.backgroundColor = "#f1f5f9";
+      html.style.backgroundColor = "#f8fafc";
     }
   }
 };
@@ -92,7 +92,7 @@ const setHtmlBackground = () => {
 
 <template>
   <div :class="{ dark: store.darkMode }" class="h-screen">
-    <div class="h-full overflow-auto bg-slate-100 dark:bg-slate-950">
+    <div class="h-full overflow-auto bg-slate-50 dark:bg-slate-950">
       <Header />
       <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
       <div class="container w-11/12 max-w-screen-xl mx-auto">

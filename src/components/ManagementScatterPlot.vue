@@ -227,7 +227,7 @@ const series = computed(() => [
 <template>
   <div class="flex flex-wrap md:flex-nowrap">
     <div
-      class="max-w-md px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow min-w-80 dark:bg-gray-800 dark:border-gray-700"
+      class="max-w-lg px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow min-w-80 dark:bg-gray-800 dark:border-gray-700"
     >
       <h5
         class="w-56 mt-1 mb-2 text-xl font-bold leading-none text-gray-900 dark:text-white"

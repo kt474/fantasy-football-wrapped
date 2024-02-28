@@ -32,7 +32,7 @@ const setColorMode = () => {
 </script>
 <template>
   <nav
-    class="container w-11/12 mx-auto border-gray-200 border-solid bg-slate-100 dark:bg-slate-950"
+    class="container w-11/12 mx-auto border-gray-200 border-solid bg-slate-50 dark:bg-slate-950"
   >
     <div
       class="flex flex-wrap items-center justify-between max-w-screen-xl py-2 mx-auto"
@@ -64,7 +64,7 @@ const setColorMode = () => {
             data-modal-toggle="default-modal"
             data-tooltip-target="about-tooltip"
             data-tooltip-placement="bottom"
-            class="text-white bg-slate-100 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+            class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           >
             <svg
               class="w-5 h-5 text-gray-800 dark:text-white"
@@ -175,7 +175,7 @@ const setColorMode = () => {
               aria-label="Button for github repository"
               data-tooltip-target="github-tooltip"
               data-tooltip-placement="bottom"
-              class="text-white bg-slate-100 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+              class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
             >
               <svg
                 class="w-5 h-5 text-gray-800 dark:text-white"
@@ -206,7 +206,7 @@ const setColorMode = () => {
             data-tooltip-target="tooltip-bottom"
             data-tooltip-placement="bottom"
             type="button"
-            class="text-white bg-slate-100 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+            class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           >
             <svg
               v-if="darkMode"

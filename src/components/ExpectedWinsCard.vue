@@ -40,7 +40,7 @@ const leastWinsDifference = computed(() => {
 </script>
 <template>
   <div
-    class="relative w-full max-w-lg shadow-md overflow-x-clip md:w-2/3 sm:rounded-lg"
+    class="relative w-full max-w-lg overflow-x-auto shadow-md md:w-2/3 sm:rounded-lg"
   >
     <table
       class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
@@ -165,7 +165,7 @@ const leastWinsDifference = computed(() => {
 </template>
 <style scoped>
 .light-custom-bg-color {
-  background-color: #edeef0;
+  background-color: #eff0f2;
 }
 .dark-custom-bg-color {
   background-color: #374151;

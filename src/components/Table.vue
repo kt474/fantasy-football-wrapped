@@ -629,7 +629,7 @@ const totalRosters = computed(() => {
   }
 }
 .light-custom-bg-color {
-  background-color: #edeef0;
+  background-color: #eff0f2;
 }
 .dark-custom-bg-color {
   background-color: #374151;
