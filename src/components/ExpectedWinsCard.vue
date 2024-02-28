@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { cloneDeep, maxBy, minBy } from "lodash";
 import { computed, ref } from "vue";
+import { useStore } from "../store/store";
+const store = useStore();
 const tableOrder = ref("winsDifference");
 const hover = ref("");
 const props = defineProps<{
@@ -38,13 +40,16 @@ const leastWinsDifference = computed(() => {
 </script>
 <template>
   <div
-    class="relative w-full max-w-lg shadow-md overflow-x-clip md:w-2/3 sm:rounded-lg dark:bg-gray-700"
+    class="relative w-full max-w-lg shadow-md overflow-x-clip md:w-2/3 sm:rounded-lg"
   >
     <table
       class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
     >
       <thead
-        class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400"
+        :class="
+          store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
+        "
+        class="text-xs text-gray-700 uppercase dark:text-gray-400"
       >
         <tr>
           <th scope="col" class="px-6 py-3 dark:text-gray-200">Team Name</th>
@@ -158,3 +163,11 @@ const leastWinsDifference = computed(() => {
     </table>
   </div>
 </template>
+<style scoped>
+.light-custom-bg-color {
+  background-color: #edeef0;
+}
+.dark-custom-bg-color {
+  background-color: #374151;
+}
+</style>

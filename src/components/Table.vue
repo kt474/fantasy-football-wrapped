@@ -259,7 +259,10 @@ const totalRosters = computed(() => {
           class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
         >
           <thead
-            class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400"
+            :class="
+              store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
+            "
+            class="text-xs text-gray-700 uppercase dark:text-gray-400"
           >
             <tr>
               <th scope="col" class="px-6 py-3 dark:text-gray-200">
@@ -624,5 +627,11 @@ const totalRosters = computed(() => {
   .custom-height {
     height: 39.1rem;
   }
+}
+.light-custom-bg-color {
+  background-color: #edeef0;
+}
+.dark-custom-bg-color {
+  background-color: #374151;
 }
 </style>
