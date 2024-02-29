@@ -252,7 +252,7 @@ const totalRosters = computed(() => {
       class="flex flex-wrap justify-between h-full min-h-0 mt-4"
     >
       <div
-        class="relative w-full overflow-x-auto shadow-md xl:w-3/4 sm:rounded-lg dark:bg-gray-900"
+        class="relative w-full overflow-x-auto rounded-lg shadow-md xl:w-3/4 dark:bg-gray-900"
       >
         <table
           v-if="tableData.length > 0"

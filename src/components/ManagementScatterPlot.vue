@@ -227,7 +227,7 @@ const series = computed(() => [
 <template>
   <div class="flex flex-wrap md:flex-nowrap">
     <div
-      class="max-w-lg px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow min-w-80 dark:bg-gray-800 dark:border-gray-700"
+      class="px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow custom-min-width dark:bg-gray-800 dark:border-gray-700"
     >
       <h5
         class="w-56 mt-1 mb-2 text-xl font-bold leading-none text-gray-900 dark:text-white"
@@ -315,8 +315,15 @@ const series = computed(() => [
     </div>
   </div>
 </template>
-<style>
+<style scoped>
 .apexcharts-legend {
   margin: auto !important;
+}
+
+.custom-min-width {
+  @media (min-width: 768px) {
+    min-width: 22rem;
+  }
+  min-width: 100%;
 }
 </style>

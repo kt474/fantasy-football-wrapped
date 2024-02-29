@@ -40,7 +40,7 @@ const leastWinsDifference = computed(() => {
 </script>
 <template>
   <div
-    class="relative w-full max-w-lg overflow-x-auto shadow-md md:w-2/3 sm:rounded-lg"
+    class="relative w-full max-w-lg overflow-x-auto rounded-lg shadow-md md:w-2/3"
   >
     <table
       class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
