@@ -38,6 +38,17 @@
             >Freepik - Flaticon</a
           >
         </p>
+        <p>
+          Please report any issues on
+          <a
+            aria-label="Github repository link for fantasy-football-wrapped"
+            class="text-blue-600 dark:text-blue-500 hover:underline"
+            target="_blank"
+            title="Github link"
+            href="https://github.com/kt474/fantasy-football-wrapped"
+            >Github</a
+          >
+        </p>
       </div>
     </div>
   </div>

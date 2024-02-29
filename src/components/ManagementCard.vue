@@ -46,9 +46,7 @@ const lowestEfficiency = computed(() => {
 });
 </script>
 <template>
-  <div
-    class="relative w-full max-w-xl overflow-x-auto rounded-lg shadow-md dark:bg-gray-700"
-  >
+  <div class="relative w-full max-w-xl overflow-x-auto rounded-lg shadow-md">
     <table
       class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
     >
@@ -66,7 +64,7 @@ const lowestEfficiency = computed(() => {
               @click="tableOrder = 'points'"
               @mouseover="hover = 'points'"
               @mouseleave="hover = ''"
-              class="flex items-center w-16 cursor-pointer dark:text-gray-200"
+              class="flex items-center w-20 cursor-pointer dark:text-gray-200"
             >
               Total Points
               <div>
@@ -126,12 +124,12 @@ const lowestEfficiency = computed(() => {
               Maximum points possible if the best lineup was set each week
             </div>
           </th>
-          <th scope="col" class="px-1 py-3">
+          <th scope="col" class="py-3 pl-2 pr-3">
             <div
               @click="tableOrder = 'efficiency'"
               @mouseover="hover = 'efficiency'"
               @mouseleave="hover = ''"
-              class="flex items-center w-20 cursor-pointer dark:text-gray-200"
+              class="flex items-center w-24 cursor-pointer dark:text-gray-200"
             >
               Efficiency
               <div>

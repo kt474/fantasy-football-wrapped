@@ -150,7 +150,6 @@ const chartOptions = ref({
     strokeColors: store.darkMode ? "#f3f4f6" : "#111827",
   },
   legend: {
-    width: 700,
     horizontalAlign: "center",
     fontSize: "12px",
     fontFamily:
@@ -315,9 +314,10 @@ const series = computed(() => [
     </div>
   </div>
 </template>
-<style scoped>
+<style>
 .apexcharts-legend {
   margin: auto !important;
+  max-width: 700px;
 }
 
 .custom-min-width {
