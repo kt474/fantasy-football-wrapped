@@ -124,7 +124,7 @@ const lowestEfficiency = computed(() => {
               Maximum points possible if the best lineup was set each week
             </div>
           </th>
-          <th scope="col" class="py-3 pl-2 pr-3">
+          <th scope="col" class="py-3 pl-2 pr-3 lg:pr-0">
             <div
               @click="tableOrder = 'efficiency'"
               @mouseover="hover = 'efficiency'"

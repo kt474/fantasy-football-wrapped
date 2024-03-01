@@ -12,6 +12,11 @@ const leagueIds = computed(() => {
 });
 
 const onSubmit = async () => {
+  if (store.leagueInfo.length >= 5) {
+    errorMsg.value = "Maximum of 5 leagues allowed";
+    showErrorMsg.value = true;
+    return;
+  }
   if (leagueIdInput.value === "") {
     errorMsg.value = "Please enter a league ID";
     showErrorMsg.value = true;
