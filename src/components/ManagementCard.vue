@@ -195,7 +195,7 @@ const lowestEfficiency = computed(() => {
             {{ item.potentialPoints }}
           </td>
           <td
-            class="py-2 pl-1 pr-3"
+            class="py-2 pl-2.5 pr-3"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
                 item.managerEfficiency === highestEfficiency,

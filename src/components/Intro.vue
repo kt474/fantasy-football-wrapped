@@ -2,9 +2,9 @@
 <template>
   <div class="mt-20">
     <h1
-      class="mb-4 text-4xl font-bold leading-none tracking-tight text-center text-gray-900 lg:px-40 xl:px-60 md:text-5xl lg:text-6xl dark:text-white"
+      class="px-3 mb-4 text-4xl font-bold leading-none tracking-tight text-center text-gray-900 lg:px-40 xl:px-56 md:text-5xl lg:text-6xl dark:text-white"
     >
-      Your year-end
+      Your complete
       <span
         class="text-transparent bg-clip-text bg-gradient-to-r to-indigo-600 from-sky-500 dark:to-indigo-500 dark:from-sky-400"
         >fantasy football</span
