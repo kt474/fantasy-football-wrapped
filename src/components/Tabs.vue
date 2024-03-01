@@ -12,7 +12,7 @@ const changeTab = (tab: string) => {
     class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-300"
   >
     <li class="cursor-pointer me-2">
-      <a
+      <button
         @click="changeTab('standings')"
         aria-current="page"
         class="inline-block p-2 rounded-t-lg sm:p-4"
@@ -20,41 +20,45 @@ const changeTab = (tab: string) => {
           ' text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
             store.currentTab === 'standings',
         }"
-        >Standings</a
       >
+        Standings
+      </button>
     </li>
     <li class="cursor-pointer me-2">
-      <a
+      <button
         @click="changeTab('powerRankings')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
         :class="{
           'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
             store.currentTab === 'powerRankings',
         }"
-        >Power Rankings</a
       >
+        Power Rankings
+      </button>
     </li>
     <li class="cursor-pointer me-2">
-      <a
+      <button
         @click="changeTab('expectedWins')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
         :class="{
           'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
             store.currentTab === 'expectedWins',
         }"
-        >Expected Wins</a
       >
+        Expected Wins
+      </button>
     </li>
     <li class="cursor-pointer me-2">
-      <a
+      <button
         @click="changeTab('managerEfficiency')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
         :class="{
           'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
             store.currentTab === 'managerEfficiency',
         }"
-        >Roster Management</a
       >
+        Roster Management
+      </button>
     </li>
   </ul>
 </template>

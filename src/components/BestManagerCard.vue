@@ -102,11 +102,11 @@ const bestManagerUser: any = computed(() => {
         </g>
       </g>
     </svg>
-    <h5
+    <h1
       class="text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
       Best Manager
-    </h5>
+    </h1>
     <div class="flex justify-center mt-1 mb-2">
       <img
         alt="Best manager user avatar"

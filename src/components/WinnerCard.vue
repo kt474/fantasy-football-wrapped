@@ -88,11 +88,11 @@ const winner: any = computed(() => {
         </g>
       </g>
     </svg>
-    <h5
+    <h1
       class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
       League Champ
-    </h5>
+    </h1>
     <div class="flex justify-center mt-2">
       <img
         alt="League winner user avatar"

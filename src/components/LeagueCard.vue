@@ -111,20 +111,22 @@ const removeLeague = () => {
             aria-labelledby="dropdownMenuIconButton"
           >
             <li class="cursor-pointer">
-              <a
+              <button
                 aria-label="Refresh league data from API"
                 @click="refreshLeague()"
-                class="block px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                >Refresh</a
+                class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >
+                Refresh
+              </button>
             </li>
             <li class="cursor-pointer">
-              <a
+              <button
                 aria-label="Remove league from dashboard"
                 @click="removeLeague()"
-                class="block px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                >Remove</a
+                class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >
+                Remove
+              </button>
             </li>
           </ul>
         </div>
