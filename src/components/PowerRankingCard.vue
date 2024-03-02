@@ -44,7 +44,7 @@ const weeks = computed(() => {
           :class="props.powerRankings.length <= 10 ? 'py-3' : 'py-2'"
         >
           <div class="flex items-center">
-            <div class="flex-1 min-w-0 list-padding ms-2">
+            <div class="flex-1 min-w-0 list-padding ms-1">
               <p
                 class="w-48 text-sm font-medium text-gray-900 truncate dark:text-white"
               >

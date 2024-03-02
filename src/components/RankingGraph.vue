@@ -42,6 +42,7 @@ const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
+      offsetX: 15,
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       id: "ranking-bump-chart",
       toolbar: {
@@ -76,6 +77,7 @@ watch(
 
 const chartOptions = ref({
   chart: {
+    offsetX: 15,
     foreColor: chartTextColor.value,
     id: "potential-points",
     toolbar: {
