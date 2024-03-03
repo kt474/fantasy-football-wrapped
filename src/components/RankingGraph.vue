@@ -151,6 +151,7 @@ const chartOptions = ref({
   },
   legend: {
     offsetY: 8,
+    offsetX: -40,
   },
   markers: {
     size: 0,

@@ -2,7 +2,7 @@
 <template>
   <div class="mt-20">
     <h1
-      class="px-3 mb-4 text-4xl font-bold leading-none tracking-tight text-center text-gray-900 lg:px-40 xl:px-56 md:text-5xl lg:text-6xl dark:text-white"
+      class="px-1 mb-4 font-bold tracking-tight text-center text-gray-900 custom-font-size sm:leading-none lg:px-40 xl:px-56 md:text-5xl lg:text-6xl dark:text-white"
     >
       Your complete
       <span
@@ -31,3 +31,11 @@
     </p>
   </div>
 </template>
+<style scoped>
+@media (max-width: 768px) {
+  .custom-font-size {
+    font-size: 2.65rem;
+    line-height: 2.75rem;
+  }
+}
+</style>

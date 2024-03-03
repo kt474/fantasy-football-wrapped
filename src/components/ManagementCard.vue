@@ -46,7 +46,9 @@ const lowestEfficiency = computed(() => {
 });
 </script>
 <template>
-  <div class="relative w-full max-w-xl overflow-x-auto rounded-lg shadow-md">
+  <div
+    class="relative w-full max-w-xl overflow-x-auto rounded-lg shadow-md dark:bg-gray-700"
+  >
     <table
       class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
     >
