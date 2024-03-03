@@ -185,6 +185,9 @@ const chartOptions = ref({
       size: 7,
     },
   },
+  legend: {
+    offsetX: 20,
+  },
 });
 </script>
 <template>
