@@ -164,11 +164,11 @@ const chartOptions = ref({
   >
     <div class="flex justify-between">
       <div>
-        <h5
+        <h1
           class="-mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
         >
           Points vs Potential Points
-        </h5>
+        </h1>
       </div>
     </div>
     <apexchart

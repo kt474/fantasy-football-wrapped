@@ -84,7 +84,7 @@ const removeLeague = () => {
       </h5>
       <div>
         <button
-          aria-label="Button to open dropdown menu"
+          :aria-label="'Button to open dropdown menu' + props.dropdownIndex"
           id="dropdownMenuIconButton"
           :data-dropdown-toggle="props.dropdownIndex.toString()"
           class="inline-flex items-center p-2 mb-1 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-200 focus:ring-2 focus:outline-none dark:text-white focus:ring-gray-100 dark:bg-gray-800 dark:hover:bg-gray-600 dark:focus:ring-gray-500"

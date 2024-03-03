@@ -138,11 +138,11 @@ const chartOptions = ref({
   >
     <div class="flex justify-between">
       <div>
-        <h5
+        <h1
           class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
         >
           Expected Wins
-        </h5>
+        </h1>
         <p class="text-base font-normal text-gray-500 dark:text-gray-400">
           Regular Season
         </p>
