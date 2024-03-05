@@ -39,14 +39,14 @@
           >
         </p>
         <p>
-          Please report any issues on
+          Avatars:
           <a
-            aria-label="Github repository link for fantasy-football-wrapped"
+            aria-label="avataaars generator"
             class="text-blue-700 dark:text-blue-500 hover:underline"
+            href="https://getavataaars.com/"
+            title="avataaars generator website"
             target="_blank"
-            title="Github link"
-            href="https://github.com/kt474/fantasy-football-wrapped"
-            >Github</a
+            >Avataaars generator</a
           >
         </p>
       </div>
