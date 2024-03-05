@@ -1,7 +1,7 @@
 
 # Fantasy Football Wrapped
 
-Detailed analysis and charts for fantasy football leagues. Currently only sleeper leagues are supported. 
+Detailed analysis and charts for your fantasy football league. See information regarding power rankings, standings, expected wins, roster management, and more. Currently only sleeper leagues are supported. 
 
 Made with [Vue 3](https://vuejs.org/) and [Flowbite](https://flowbite.com/)
 
