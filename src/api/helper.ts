@@ -102,7 +102,7 @@ export const fakeUsers = [
     id: "1",
     name: "Just the Tua Us",
     avatar: "3fd3d500b13b04926820e10e9306f6ab",
-    avatarImg: "/src/assets/avatars/avatar1.svg",
+    avatarImg: "../assets/avatars/avatar1.svg",
   },
   {
     id: "2",
