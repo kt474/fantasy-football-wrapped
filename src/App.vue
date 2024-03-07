@@ -8,7 +8,8 @@ import Intro from "./components/Intro.vue";
 import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
-import { useStore, LeagueInfoType } from "./store/store";
+import { useStore } from "./store/store";
+import { LeagueInfoType } from "./api/types";
 import { inject } from "@vercel/analytics";
 import { getData } from "./api/api";
 
