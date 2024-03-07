@@ -43,7 +43,7 @@ export const useStore = defineStore("main", {
     updateRemovedAlert(payload: boolean) {
       this.showRemovedAlert = payload;
     },
-    updateLeagueInfo(payload: any) {
+    updateLeagueInfo(payload: LeagueInfoType) {
       if (!this.leagueInfo.includes(payload)) {
         this.$patch((state) => {
           state.leagueInfo.push(payload);

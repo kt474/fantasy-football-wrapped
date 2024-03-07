@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { maxBy, toPairs } from "lodash";
+import { UserType } from "../api/types";
 
 const props = defineProps<{
-  users: any[];
+  users: UserType[];
   mostTransactions: object;
 }>();
 

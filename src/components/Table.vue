@@ -9,7 +9,7 @@ import {
 } from "../api/helper";
 import { computed, onMounted, ref } from "vue";
 import { useStore } from "../store/store";
-import { TableDataType } from "../api/types";
+import { TableDataType, UserType, RosterType } from "../api/types";
 import PowerRankingData from "./PowerRankingData.vue";
 import ExpectedWinsCard from "./ExpectedWinsCard.vue";
 import ExpectedWinsChart from "./ExpectedWinsChart.vue";
@@ -25,8 +25,8 @@ import Tabs from "./Tabs.vue";
 const tableOrder = ref("wins");
 const hover = ref("");
 const props = defineProps<{
-  users: Array<object>;
-  rosters: Array<object>;
+  users: UserType[];
+  rosters: RosterType[];
   points: Array<object>;
 }>();
 const store = useStore();

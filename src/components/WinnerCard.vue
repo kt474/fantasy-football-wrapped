@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { UserType, RosterType } from "../api/types";
 
 const props = defineProps<{
-  users: any[];
-  rosters: any[];
+  users: UserType[];
+  rosters: RosterType[];
   leagueWinner: number;
 }>();
 
 const winner: any = computed(() => {
   if (props.leagueWinner) {
     const winnerId = props.rosters.filter(
-      (roster: any) => roster.rosterId === props.leagueWinner
+      (roster: RosterType) => roster.rosterId === props.leagueWinner
     )[0]["id"];
-    return props.users.filter((user: any) => user.id === winnerId)[0];
+    return props.users.filter((user: UserType) => user.id === winnerId)[0];
   }
   return props.users[0];
 });

@@ -3,11 +3,12 @@ import { ref, computed, watch } from "vue";
 import { mean, max, min, zip } from "lodash";
 import { useStore } from "../store/store";
 import { getPowerRanking, winsOnWeek } from "../api/helper";
+import { TableDataType } from "../api/types";
 import PowerRankingCard from "./PowerRankingCard.vue";
 const store = useStore();
 
 const props = defineProps<{
-  tableData: Array<object>;
+  tableData: TableDataType[];
   regularSeasonLength: number;
   totalRosters: number;
 }>();

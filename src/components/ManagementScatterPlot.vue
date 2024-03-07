@@ -2,9 +2,10 @@
 import { mean } from "lodash";
 import { ref, computed, watch } from "vue";
 import { useStore } from "../store/store";
+import { TableDataType } from "../api/types";
 const store = useStore();
 const props = defineProps<{
-  tableData: any[];
+  tableData: TableDataType[];
 }>();
 const jitter = () => Math.random() * 0.02 - 0.01;
 const recordVsPoints = computed(() => {

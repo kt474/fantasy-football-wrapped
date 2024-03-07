@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { RosterType } from "../api/types";
+import { RosterType, UserType } from "../api/types";
 const props = defineProps<{
-  users: any[];
-  rosters: any[];
+  users: UserType[];
+  rosters: RosterType[];
 }>();
 
 const bestManager: any = computed(() => {
