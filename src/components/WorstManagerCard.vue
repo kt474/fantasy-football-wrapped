@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { RosterType } from "../store/store";
+import { RosterType } from "../api/types";
 const props = defineProps<{
   users: any[];
   rosters: any[];
