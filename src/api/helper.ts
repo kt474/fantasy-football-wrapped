@@ -102,71 +102,61 @@ export const fakeUsers = [
     id: "1",
     name: "Just the Tua Us",
     avatar: "3fd3d500b13b04926820e10e9306f6ab",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFroBand&accessoriesType=Kurt&hairColor=Red&facialHairType=BeardMajestic&facialHairColor=Auburn&clotheType=ShirtCrewNeck&clotheColor=Gray02&eyeType=Side&eyebrowType=DefaultNatural&mouthType=Disbelief&skinColor=Tanned",
+    avatarImg: "/src/assets/avatars/avatar1.svg",
   },
   {
     id: "2",
     name: "Bijan Mustard",
     avatar: "a77d198f5c82bd93d3da5bd10493f7cd",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=ShortHairTheCaesar&accessoriesType=Sunglasses&hairColor=Auburn&facialHairType=MoustacheFancy&facialHairColor=BlondeGolden&clotheType=BlazerSweater&clotheColor=PastelOrange&eyeType=Surprised&eyebrowType=FlatNatural&mouthType=Serious&skinColor=DarkBrown",
+    avatarImg: "/src/assets/avatars/avatar2.svg",
   },
   {
     id: "3",
     name: "Addison in Wonderland",
     avatar: "8eb8f8bf999945d523f2c4033f70473e",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Blank&facialHairType=MoustacheFancy&facialHairColor=Blonde&clotheType=Hoodie&clotheColor=Gray02&eyeType=Squint&eyebrowType=UpDownNatural&mouthType=Grimace&skinColor=Brown",
+    avatarImg: "/src/assets/avatars/avatar3.svg",
   },
   {
     id: "4",
     name: "Ladies and Edelman",
     avatar: "15d7cf259bc30eab8f6120f45f652fb6",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=ShortHairDreads02&accessoriesType=Blank&hatColor=Heather&hairColor=Blonde&facialHairType=MoustacheMagnum&facialHairColor=Red&clotheType=GraphicShirt&clotheColor=PastelOrange&graphicType=Pizza&eyeType=Default&eyebrowType=Angry&mouthType=Eating&skinColor=Yellow",
+    avatarImg: "/src/assets/avatars/avatar4.svg",
   },
   {
     id: "5",
     name: "Run CMC",
     avatar: "15d7cf259bc30eab8f6120f45f652fb6",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=Turban&accessoriesType=Wayfarers&hatColor=PastelGreen&hairColor=Blonde&facialHairType=MoustacheMagnum&facialHairColor=Platinum&clotheType=GraphicShirt&clotheColor=Gray02&graphicType=Diamond&eyeType=Happy&eyebrowType=AngryNatural&mouthType=Smile&skinColor=Tanned",
+    avatarImg: "/src/assets/avatars/avatar5.svg",
   },
   {
     id: "6",
     name: "Finding Deebo",
     avatar: "d6ad9a18c52dcdb704399beed5d5b21f",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=WinterHat3&accessoriesType=Wayfarers&hatColor=Red&hairColor=BlondeGolden&facialHairType=BeardLight&facialHairColor=Brown&clotheType=CollarSweater&clotheColor=Gray02&eyeType=Squint&eyebrowType=DefaultNatural&mouthType=Disbelief&skinColor=Light",
+    avatarImg: "/src/assets/avatars/avatar6.svg",
   },
   {
     id: "7",
     name: "Loud and Stroud",
     avatar: "3d8ea1e7289177ddf22dd57e107ee334",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=WinterHat3&accessoriesType=Kurt&hatColor=PastelYellow&hairColor=BrownDark&facialHairType=BeardLight&facialHairColor=BlondeGolden&clotheType=BlazerSweater&clotheColor=Pink&eyeType=Squint&eyebrowType=Angry&mouthType=Grimace&skinColor=Light",
+    avatarImg: "/src/assets/avatars/avatar7.svg",
   },
   {
     id: "8",
     name: "How I Kmet Your Mother",
     avatar: "4f4090e5e9c3941414db40a871e3e909",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=Hat&accessoriesType=Kurt&hairColor=Platinum&facialHairType=Blank&clotheType=Hoodie&clotheColor=Red&eyeType=WinkWacky&eyebrowType=UpDownNatural&mouthType=ScreamOpen&skinColor=Light",
+    avatarImg: "/src/assets/avatars/avatar8.svg",
   },
   {
     id: "9",
     name: "Game of Mahomes",
     avatar: "b3338675f635c2c1f42b469621d38ec6",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFroBand&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&facialHairColor=Black&clotheType=ShirtVNeck&clotheColor=PastelRed&graphicType=Resist&eyeType=Close&eyebrowType=DefaultNatural&mouthType=Concerned&skinColor=Tanned",
+    avatarImg: "/src/assets/avatars/avatar9.svg",
   },
   {
     id: "10",
     name: "Kamara Shy",
     avatar: "81d984f3556782876d25195356b0ab58",
-    avatarImg:
-      "https://avataaars.io/?avatarStyle=Circle&topType=LongHairCurly&accessoriesType=Sunglasses&hairColor=Platinum&facialHairType=Blank&facialHairColor=Red&clotheType=CollarSweater&clotheColor=Pink&eyeType=Hearts&eyebrowType=SadConcerned&mouthType=Sad&skinColor=Pale",
+    avatarImg: "/src/assets/avatars/avatar10.svg",
   },
 ];
 export const fakeRosters = [

@@ -23,3 +23,19 @@ export type RosterType = {
   losses: number;
   rosterId: number;
 };
+
+export type TableDataType = {
+  name: string;
+  wins: number;
+  losses: number;
+  pointsFor: number;
+  pointsAgainst: number;
+  winsAgainstAll: number;
+  lossesAgainstAll: number;
+  winsWithMedian: number;
+  lossesWithMedian: number;
+  rating: number;
+  randomScheduleWins: number;
+  avatarImg: string;
+  points: number[];
+};

@@ -9,6 +9,7 @@ import {
 } from "../api/helper";
 import { computed, onMounted, ref } from "vue";
 import { useStore } from "../store/store";
+import { TableDataType } from "../api/types";
 import PowerRankingData from "./PowerRankingData.vue";
 import ExpectedWinsCard from "./ExpectedWinsCard.vue";
 import ExpectedWinsChart from "./ExpectedWinsChart.vue";
@@ -30,24 +31,8 @@ const props = defineProps<{
 }>();
 const store = useStore();
 
-type tableData = {
-  name: string;
-  wins: number;
-  losses: number;
-  pointsFor: number;
-  pointsAgainst: number;
-  winsAgainstAll: number;
-  lossesAgainstAll: number;
-  winsWithMedian: number;
-  lossesWithMedian: number;
-  rating: number;
-  randomScheduleWins: number;
-  avatarImg: string;
-  points: number[];
-};
-
 interface savedData {
-  [key: string]: tableData[];
+  [key: string]: TableDataType[];
 }
 
 onMounted(() => {
