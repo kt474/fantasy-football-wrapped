@@ -108,13 +108,13 @@ export const fakeUsers = [
     id: "2",
     name: "Bijan Mustard",
     avatar: "a77d198f5c82bd93d3da5bd10493f7cd",
-    avatarImg: "/src/assets/avatars/avatar2.svg",
+    avatarImg: "./assets/avatars/avatar2.svg",
   },
   {
     id: "3",
     name: "Addison in Wonderland",
     avatar: "8eb8f8bf999945d523f2c4033f70473e",
-    avatarImg: "/src/assets/avatars/avatar3.svg",
+    avatarImg: "src/assets/avatars/avatar3.svg",
   },
   {
     id: "4",
@@ -126,7 +126,7 @@ export const fakeUsers = [
     id: "5",
     name: "Run CMC",
     avatar: "15d7cf259bc30eab8f6120f45f652fb6",
-    avatarImg: "/src/assets/avatars/avatar5.svg",
+    avatarImg: ".../assets/avatars/avatar5.svg",
   },
   {
     id: "6",
