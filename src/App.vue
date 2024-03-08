@@ -11,7 +11,7 @@ import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./api/types";
 import { inject } from "@vercel/analytics";
-import { getData } from "./api/api";
+import { getData, getLeague } from "./api/api";
 
 const store = useStore();
 
@@ -38,6 +38,16 @@ onMounted(async () => {
       }
     });
     store.updateCurrentLeagueId(localStorage.currentLeagueId);
+  } else {
+    const queryParams = new URLSearchParams(window.location.search);
+    const leagueId = queryParams.get("leagueId");
+    if (leagueId) {
+      const checkInput: any = await getLeague(leagueId);
+      if (checkInput["name"]) {
+        store.updateCurrentLeagueId(leagueId);
+        store.updateLeagueInfo(await getData(leagueId));
+      }
+    }
   }
 });
 
@@ -152,6 +162,7 @@ const setHtmlBackground = () => {
     <Alert v-if="store.showAddedAlert" alert-msg="League successfully added!" />
     <Alert v-if="store.showRefreshAlert" alert-msg="League data refreshed!" />
     <Alert v-if="store.showRemovedAlert" alert-msg="League removed!" />
+    <Alert v-if="store.showCopiedAlert" alert-msg="URL copied to clipboard!" />
   </div>
 </template>
 

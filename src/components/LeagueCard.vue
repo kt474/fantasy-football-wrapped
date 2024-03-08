@@ -59,10 +59,25 @@ const removeLeague = () => {
         localStorage.originalData = JSON.stringify(currentData);
       }
     }
+    window.history.replaceState({}, document.title, window.location.pathname);
     setTimeout(() => {
       store.updateRemovedAlert(false);
     }, 3000);
   }
+};
+
+const shareLeague = () => {
+  const currentUrl =
+    window.location.protocol +
+    "//" +
+    window.location.host +
+    window.location.pathname;
+  const updatedURL = `${currentUrl}?leagueId=${props.leagueInfo.leagueId}`;
+  navigator.clipboard.writeText(updatedURL);
+  store.showCopiedAlert = true;
+  setTimeout(() => {
+    store.showCopiedAlert = false;
+  }, 3000);
 };
 </script>
 <template>
@@ -126,6 +141,15 @@ const removeLeague = () => {
                 class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >
                 Remove
+              </button>
+            </li>
+            <li class="cursor-pointer">
+              <button
+                aria-label="Remove league from dashboard"
+                @click="shareLeague()"
+                class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                Share
               </button>
             </li>
           </ul>
