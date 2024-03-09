@@ -1,6 +1,6 @@
 <script setup lang="ts"></script>
 <template>
-  <div class="mt-20">
+  <div class="pt-20">
     <h1
       class="px-1 mb-4 font-bold tracking-tight text-center text-gray-900 custom-font-size sm:leading-none lg:px-40 xl:px-56 md:text-5xl lg:text-6xl dark:text-white"
     >

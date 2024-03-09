@@ -143,7 +143,7 @@ const setHtmlBackground = () => {
             <span class="sr-only">Loading...</span>
           </div>
         </div>
-        <div v-else class="container mx-auto">
+        <div v-else class="container mx-auto custom-background">
           <Intro />
           <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
           <Table
@@ -169,5 +169,14 @@ const setHtmlBackground = () => {
 <style scoped>
 .custom-input-width {
   width: 25.8rem;
+}
+.custom-background {
+  background: rgb(36, 19, 0);
+  background: linear-gradient(
+    90deg,
+    rgba(36, 19, 0, 0) 0%,
+    rgba(161, 108, 233, 0.125) 54%,
+    rgba(0, 187, 255, 0) 100%
+  );
 }
 </style>
