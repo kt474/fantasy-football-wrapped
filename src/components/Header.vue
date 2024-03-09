@@ -49,8 +49,8 @@ const setColorMode = () => {
           alt="Flowbite Logo"
         />
         <span
-          class="self-center text-lg font-semibold sm:text-xl whitespace-nowrap dark:text-white"
-          >Fantasy Football Wrapped</span
+          class="self-center -mb-1.5 custom-font whitespace-nowrap dark:text-white"
+          ><span class="text-blue-600 dark:text-blue-500">ff</span>wrapped</span
         >
       </div>
 
@@ -246,3 +246,12 @@ const setColorMode = () => {
     </div>
   </nav>
 </template>
+<style scoped>
+.custom-font {
+  font-family: "Josefin Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 1.6rem;
+}
+</style>
