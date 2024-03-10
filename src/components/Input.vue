@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import { useStore } from "../store/store";
 import { LeagueInfoType } from "../api/types";
 import { getData, getLeague } from "../api/api";
+import { supabase } from "../lib/supabaseClient";
 const store = useStore();
 const leagueIdInput = ref("");
 const showErrorMsg = ref(false);
@@ -35,6 +36,9 @@ const onSubmit = async () => {
       store.updateLeagueInfo(await getData(leagueIdInput.value));
       store.leagueSubmitted = true;
       store.updateShowInput(false);
+      await supabase
+        .from("leagues")
+        .insert([{ league_id: leagueIdInput.value }]);
     }
     leagueIdInput.value = "";
   }

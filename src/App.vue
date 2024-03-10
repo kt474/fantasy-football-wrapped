@@ -175,7 +175,7 @@ const setHtmlBackground = () => {
   background: linear-gradient(
     90deg,
     rgba(36, 19, 0, 0) 0%,
-    rgba(161, 108, 233, 0.125) 54%,
+    rgba(161, 108, 233, 0.115) 54%,
     rgba(0, 187, 255, 0) 100%
   );
 }

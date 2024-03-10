@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.7",
     "@vercel/analytics": "^1.1.1",
     "apexcharts": "^3.45.2",
     "flowbite": "^2.2.1",
