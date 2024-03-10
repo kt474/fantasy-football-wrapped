@@ -1,6 +1,6 @@
 <script setup lang="ts"></script>
 <template>
-  <div class="pt-20">
+  <div class="pt-20 text-center">
     <h1
       class="px-1 mb-4 font-bold tracking-tight text-center text-gray-900 custom-font-size sm:leading-none lg:px-40 xl:px-56 md:text-5xl lg:text-6xl dark:text-white"
     >
@@ -22,13 +22,16 @@
     >
       Start by entering your league ID below.
     </p>
-    <p
-      class="mb-6 text-lg font-semibold text-center text-blue-600 dark:text-blue-500 lg:text-xl sm:px-16 xl:px-48"
+    <a
+      aria-label="Sleeper website link"
+      href="https://sleeper.com/"
+      target="_blank"
+      class="inline-block mb-2 text-lg font-semibold text-center text-blue-600 dark:text-blue-500 lg:text-xl sm:px-16 xl:px-48"
     >
       https://sleeper.com/leagues/<span class="text-red-600 dark:text-red-500"
         >{League ID Here}</span
       >
-    </p>
+    </a>
   </div>
 </template>
 <style scoped>
