@@ -1,6 +1,7 @@
 export type LeagueInfoType = {
   name: string;
   regularSeasonLength: number;
+  medianScoring: number;
   totalRosters: number;
   season: string;
   seasonType: string;

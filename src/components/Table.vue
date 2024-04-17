@@ -111,16 +111,25 @@ const originalData = computed(() => {
           }
         }
         value["randomScheduleWins"] = randomScheduleWins / numOfSimulations;
+        if (medianScoring.value) {
+          value["randomScheduleWins"] =
+            (2 * randomScheduleWins) / numOfSimulations;
+        }
         value["rating"] = getPowerRanking(
           mean(value.points),
           Number(max(value.points)),
           Number(min(value.points)),
           value.wins / (value.wins + value.losses)
         );
-        const pairs = zip(value.points, medians);
-        const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
-        value["winsWithMedian"] = counts["true"] + value.wins;
-        value["lossesWithMedian"] = counts["false"] + value.losses;
+        if (!medianScoring.value) {
+          const pairs = zip(value.points, medians);
+          const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
+          value["winsWithMedian"] = counts["true"] + value.wins;
+          value["lossesWithMedian"] = counts["false"] + value.losses;
+        } else {
+          value["winsWithMedian"] = value.wins;
+          value["lossesWithMedian"] = value.losses;
+        }
       });
 
       const result: any[] = combinedPoints.sort((a: any, b: any) => {
@@ -227,6 +236,15 @@ const regularSeasonLength = computed(() => {
 
 const totalRosters = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex].totalRosters;
+});
+
+const medianScoring = computed(() => {
+  if (store.leagueInfo[store.currentLeagueIndex]) {
+    return store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
+      ? true
+      : false;
+  }
+  return false;
 });
 </script>
 <template>
