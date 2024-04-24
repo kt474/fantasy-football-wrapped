@@ -33,12 +33,13 @@ const onSubmit = async () => {
     } else {
       showErrorMsg.value = false;
       store.updateCurrentLeagueId(leagueIdInput.value);
-      store.updateLeagueInfo(await getData(leagueIdInput.value));
+      const newLeagueInfo = await getData(leagueIdInput.value);
+      store.updateLeagueInfo(newLeagueInfo);
       store.leagueSubmitted = true;
       store.updateShowInput(false);
       await supabase
         .from("leagues")
-        .insert([{ league_id: leagueIdInput.value }]);
+        .insert([{ league_id: leagueIdInput.value, name: newLeagueInfo.name }]);
     }
     leagueIdInput.value = "";
   }
