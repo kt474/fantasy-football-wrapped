@@ -21,6 +21,8 @@ import StandingsChart from "./StandingsChart.vue";
 import ManagementCard from "./ManagementCard.vue";
 import ManagementScatterPlot from "./ManagementScatterPlot.vue";
 import RankingGraph from "./RankingGraph.vue";
+import Playoffs from "./Playoffs.vue";
+import LeagueHistory from "./LeagueHistory.vue";
 import Tabs from "./Tabs.vue";
 const tableOrder = ref("wins");
 const hover = ref("");
@@ -622,6 +624,12 @@ const medianScoring = computed(() => {
         <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
       </div>
       <ManagementScatterPlot :tableData="tableData" class="mt-4" />
+    </div>
+    <div v-if="store.currentTab === 'playoffs'">
+      <Playoffs />
+    </div>
+    <div v-if="store.currentTab === 'leagueHistory'">
+      <LeagueHistory />
     </div>
   </div>
 </template>
