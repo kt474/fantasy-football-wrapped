@@ -1,5 +1,12 @@
 import { getWeeklyPoints, getTotalTransactions } from "./helper";
 import { round } from "lodash";
+
+const seasonType: any = {
+  0: "Redraft",
+  1: "Keeper",
+  2: "Dynasty",
+};
+
 export const getLeague = async (leagueId: string) => {
   try {
     const response = await fetch(
@@ -15,6 +22,7 @@ export const getLeague = async (leagueId: string) => {
         seasonType: "",
         leagueId: "",
         leagueWinner: "",
+        previousLeagueId: "",
       };
     }
     const league = await response.json();
@@ -24,11 +32,12 @@ export const getLeague = async (leagueId: string) => {
       medianScoring: league["settings"]["league_average_match"],
       totalRosters: league["total_rosters"],
       season: league["season"],
-      seasonType: league["season_type"],
+      seasonType: seasonType[league["settings"]["type"]],
       leagueId: league["league_id"],
       leagueWinner: league["metadata"]
         ? league["metadata"]["latest_league_winner_roster_id"]
         : null,
+      previousLeagueId: league["previous_league_id"],
     };
   } catch (error) {
     return error;
