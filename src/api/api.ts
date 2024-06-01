@@ -7,6 +7,47 @@ const seasonType: any = {
   2: "Dynasty",
 };
 
+export const inputLeague = async (leagueId: string, name: string) => {
+  try {
+    const response = await fetch(
+      "https://ffwrapped-backend.vercel.app/api/addEntry",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: {
+            league_id: leagueId,
+            name: name,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+export const getWinnersBracket = async (leagueId: string) => {
+  const response = await fetch(
+    `https://api.sleeper.app/v1/league/${leagueId}/winners_bracket`
+  );
+  const winnersBracket = await response.json();
+  return winnersBracket;
+};
+
+export const getLosersBracket = async (leagueId: string) => {
+  const response = await fetch(
+    `https://api.sleeper.app/v1/league/${leagueId}/losers_bracket`
+  );
+  const losersBracket = await response.json();
+  return losersBracket;
+};
+
 export const getLeague = async (leagueId: string) => {
   try {
     const response = await fetch(
@@ -119,6 +160,7 @@ export const getTransactions = async (leagueId: string, week: number) => {
 export const getData = async (leagueId: string) => {
   const newLeagueInfo: any = await getLeague(leagueId);
   newLeagueInfo["rosters"] = await getRosters(leagueId);
+  newLeagueInfo["winnersBracket"] = await getWinnersBracket(leagueId);
   newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
     leagueId,
     newLeagueInfo["regularSeasonLength"]
