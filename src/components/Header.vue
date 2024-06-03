@@ -160,6 +160,12 @@ const setColorMode = () => {
                       href="https://github.com/kt474/fantasy-football-wrapped/issues"
                       target="_blank"
                       >issue</a
+                    >
+                    or send an
+                    <a
+                      href="mailto:kt474@cornell.edu?subject=ffwrapped request"
+                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      >email</a
                     >.
                   </p>
                 </div>
