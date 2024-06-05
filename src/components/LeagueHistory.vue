@@ -33,5 +33,5 @@
 // });
 </script>
 <template>
-  <p>Coming soon</p>
+  <p class="m-2 h-screen">Coming soon</p>
 </template>
