@@ -10,6 +10,7 @@ export type LeagueInfoType = {
   lastUpdated: number;
   previousLeagueId: string;
   winnersBracket: any[];
+  losersBracket: any[];
   users: any[];
   rosters: any[];
   weeklyPoints: [];
