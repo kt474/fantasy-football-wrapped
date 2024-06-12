@@ -15,7 +15,7 @@ const winner: any = computed(() => {
     )[0]["id"];
     return props.users.filter((user: UserType) => user.id === winnerId)[0];
   }
-  return props.users[0];
+  return null;
 });
 </script>
 <template>
@@ -97,7 +97,7 @@ const winner: any = computed(() => {
     <div class="flex justify-center mt-2">
       <img
         alt="League winner user avatar"
-        v-if="winner.avatarImg"
+        v-if="winner"
         class="rounded-full w-7 h-7"
         :src="winner.avatarImg"
       />
@@ -113,8 +113,14 @@ const winner: any = computed(() => {
           d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
         />
       </svg>
-      <p class="mx-2 mt-0.5 text-gray-800 text-md dark:text-white">
+      <p
+        v-if="winner"
+        class="mx-2 mt-0.5 text-gray-800 text-md dark:text-white"
+      >
         {{ winner.name }}
+      </p>
+      <p v-else class="mx-2 mt-0.5 text-gray-800 text-md dark:text-white">
+        Undecided
       </p>
     </div>
   </div>

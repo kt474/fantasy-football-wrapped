@@ -84,7 +84,7 @@ const originalData = computed(() => {
         const currentTeam = combinedPoints.find((obj: any) => {
           return obj.points[i] === zipped[i][j];
         });
-        if (currentTeam) {
+        if (currentTeam.losses !== 0 && currentTeam.wins !== 0) {
           currentTeam["winsAgainstAll"] += numberOfWins;
           currentTeam["lossesAgainstAll"] +=
             zipped[i].length - numberOfWins - 1;

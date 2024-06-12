@@ -14,7 +14,7 @@ const worstManager: any = computed(() => {
         : highestValue;
     }
   );
-  return rosterEfficiency;
+  return rosterEfficiency.managerEfficiency ? rosterEfficiency : null;
 });
 
 const worstManagerUser: any = computed(() => {
@@ -109,7 +109,7 @@ const worstManagerUser: any = computed(() => {
       >
         <img
           alt="Worst manager user avatar"
-          v-if="worstManagerUser.avatarImg"
+          v-if="worstManager && worstManagerUser && worstManagerUser.avatarImg"
           class="rounded-full w-7 h-7"
           :src="worstManagerUser.avatarImg"
         />
@@ -126,14 +126,21 @@ const worstManagerUser: any = computed(() => {
           />
         </svg>
 
-        <p class="mx-3 mt-1 text-gray-800 text-md dark:text-white">
+        <p
+          v-if="worstManager && worstManagerUser"
+          class="mx-3 mt-1 text-gray-800 text-md dark:text-white"
+        >
           {{ worstManagerUser.name }}
+        </p>
+        <p v-else class="mx-3 mt-1 text-gray-800 text-md dark:text-white">
+          Undecided
         </p>
       </div>
       <p class="mx-auto mt-2 leading-5 text-gray-800 text-md dark:text-white">
-        <span class="font-semibold"
+        <span v-if="worstManager && worstManagerUser" class="font-semibold"
           >{{ (worstManager.managerEfficiency * 100).toFixed(1) }}%</span
         >
+        <span v-else class="font-semibold">0%</span>
         efficiency
       </p>
     </div>

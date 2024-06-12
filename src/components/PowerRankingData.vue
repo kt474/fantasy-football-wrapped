@@ -18,7 +18,7 @@ const powerRankings = computed(() => {
   const ratingsContainer: any = [];
   props.tableData.forEach((value: any) => {
     const ratingArr: number[] = [];
-    if (value.points) {
+    if (value.recordByWeek) {
       value.points.forEach((_: number, week: number) => {
         const currentWins = winsOnWeek(value.recordByWeek, week);
         const currentLosess = week + 1 - currentWins;
