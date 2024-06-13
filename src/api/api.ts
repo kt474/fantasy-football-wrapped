@@ -96,10 +96,9 @@ export const getRosters = async (leagueId: string) => {
       pointsFor: roster["settings"]["fpts"],
       pointsAgainst: roster["settings"]["fpts_against"],
       potentialPoints: roster["settings"]["ppts"],
-      managerEfficiency: round(
-        roster["settings"]["fpts"] / roster["settings"]["ppts"],
-        3
-      ),
+      managerEfficiency: roster["settings"]["ppts"]
+        ? round(roster["settings"]["fpts"] / roster["settings"]["ppts"], 3)
+        : 0,
       wins: roster["settings"]["wins"],
       losses: roster["settings"]["losses"],
       rosterId: roster["roster_id"],

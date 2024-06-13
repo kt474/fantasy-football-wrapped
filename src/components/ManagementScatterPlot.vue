@@ -110,6 +110,9 @@ const getRValue = (pointsArray: any[]) => {
     xDenominator += xDiff ** 2;
     yDenominator += yDiff ** 2;
   });
+  if (Number.isNaN(numerator)) {
+    return 0;
+  }
   return (numerator / Math.sqrt(xDenominator * yDenominator)).toFixed(2);
 };
 watch(
