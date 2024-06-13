@@ -17,6 +17,13 @@ const winner: any = computed(() => {
   }
   return null;
 });
+
+const winnerRoster: any = computed(() => {
+  if (props.leagueWinner) {
+    return props.rosters.find((user) => user.rosterId === props.leagueWinner);
+  }
+  return null;
+});
 </script>
 <template>
   <div
@@ -90,6 +97,15 @@ const winner: any = computed(() => {
       </g>
     </svg>
     <h1
+      v-if="
+        winnerRoster && winnerRoster.wins === 0 && winnerRoster.losses === 0
+      "
+      class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
+    >
+      Previous Winner
+    </h1>
+    <h1
+      v-else
       class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
       League Champ
@@ -97,7 +113,7 @@ const winner: any = computed(() => {
     <div class="flex justify-center mt-2">
       <img
         alt="League winner user avatar"
-        v-if="winner"
+        v-if="winner && winner.avatarImg"
         class="rounded-full w-7 h-7"
         :src="winner.avatarImg"
       />
