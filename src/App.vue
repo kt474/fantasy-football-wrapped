@@ -7,6 +7,7 @@ import Input from "./components/Input.vue";
 import Intro from "./components/Intro.vue";
 import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
+import SkeletonLoading from "./components/SkeletonLoading.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./api/types";
@@ -123,10 +124,10 @@ const setHtmlBackground = () => {
               :points="store.weeklyPoints[store.currentLeagueIndex]"
             />
           </div>
-          <div v-else role="status" class="flex justify-center h-screen m-6">
+          <div v-else role="status" class="flex flex-wrap justify-center mt-4">
             <svg
               aria-hidden="true"
-              class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+              class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600 mb-4"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -141,6 +142,7 @@ const setHtmlBackground = () => {
               />
             </svg>
             <span class="sr-only">Loading...</span>
+            <SkeletonLoading />
           </div>
         </div>
         <div v-else class="container mx-auto custom-background">
