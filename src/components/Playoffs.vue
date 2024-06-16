@@ -37,20 +37,20 @@ const numberOfLoserRounds = computed(() => {
 <template>
   <div v-if="store.leagueInfo[store.currentLeagueIndex]">
     <div
-      class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow w-fit dark:bg-gray-800 dark:border-gray-700 text-black dark:text-white"
+      class="block p-4 my-4 mr-4 text-black bg-white border border-gray-200 rounded-lg shadow w-fit dark:bg-gray-800 dark:border-gray-700 dark:text-white"
     >
       <p class="text-3xl font-bold">Winner's Bracket</p>
       <div class="flex flex-wrap">
         <div v-for="index in numberOfWinnerRounds">
-          <p class="mt-2 font-semibold text-lg -mb-2">Round {{ index }}</p>
+          <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ index }}</p>
           <div
             v-for="matchup in store.leagueInfo[store.currentLeagueIndex]
               .winnersBracket"
           >
             <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
-              <p class="font-semibold text-lg mt-12">Championship</p>
+              <p class="mt-12 text-lg font-semibold">Championship</p>
               <svg
-                class="mx-4 w-8 mt-10"
+                class="w-8 mx-4 mt-10"
                 version="1.0"
                 id="Layer_1"
                 xmlns="http://www.w3.org/2000/svg"
@@ -117,13 +117,13 @@ const numberOfLoserRounds = computed(() => {
             </div>
             <p
               v-if="matchup.p === 3 && index === matchup.r"
-              class="font-semibold text-lg mt-12 -mb-2"
+              class="mt-12 -mb-2 text-lg font-semibold"
             >
               3rd Place
             </p>
             <p
               v-if="matchup.p === 5 && index === matchup.r"
-              class="font-semibold text-lg mt-12 -mb-2"
+              class="mt-12 -mb-2 text-lg font-semibold"
             >
               5th Place
             </p>
@@ -270,22 +270,22 @@ const numberOfLoserRounds = computed(() => {
     </div>
     <!-- losers bracket -->
     <div
-      class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow w-fit dark:bg-gray-800 dark:border-gray-700 text-black dark:text-white"
+      class="block p-4 my-4 mr-4 text-black bg-white border border-gray-200 rounded-lg shadow w-fit dark:bg-gray-800 dark:border-gray-700 dark:text-white"
     >
       <p class="text-3xl font-bold">Loser's Bracket</p>
       <div class="flex flex-wrap">
         <div v-for="index in numberOfLoserRounds">
-          <p class="mt-2 font-semibold text-lg -mb-2">Round {{ index }}</p>
+          <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ index }}</p>
           <div
             v-for="matchup in store.leagueInfo[store.currentLeagueIndex]
               .losersBracket"
           >
             <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
-              <p class="font-semibold text-lg mt-12">Last Place</p>
+              <p class="mt-12 text-lg font-semibold">Last Place</p>
             </div>
             <p
               v-if="matchup.p === 3 && index === matchup.r"
-              class="font-semibold text-lg mt-12 -mb-2"
+              class="mt-12 -mb-2 text-lg font-semibold"
             >
               {{
                 store.leagueInfo[store.currentLeagueIndex].totalRosters - 3
@@ -293,7 +293,7 @@ const numberOfLoserRounds = computed(() => {
             </p>
             <p
               v-if="matchup.p === 5 && index === matchup.r"
-              class="font-semibold text-lg mt-12 -mb-2"
+              class="mt-12 -mb-2 text-lg font-semibold"
             >
               {{
                 store.leagueInfo[store.currentLeagueIndex].totalRosters - 5
@@ -441,5 +441,5 @@ const numberOfLoserRounds = computed(() => {
       </div>
     </div>
   </div>
-  <p v-else class="m-2 h-screen">Coming soon</p>
+  <p v-else class="h-screen m-2">Coming soon</p>
 </template>
