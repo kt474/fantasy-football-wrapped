@@ -5,7 +5,7 @@ const props = defineProps<{
 </script>
 <template>
   <div
-    class="w-1/4 px-6 pt-2.5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+    class="w-full lg:w-1/4 px-6 pt-2.5 mt-4 lg:mt-0 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex items-center justify-between sm:mt-1.5 mb-2">
       <h5
