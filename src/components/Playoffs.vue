@@ -43,11 +43,11 @@ const finalPlacements = computed(() => {
         result.push(matchRosterId(matchup.w, totalRosters));
         result.push(matchRosterId(matchup.l, totalRosters - 1));
       } else if (matchup.p === 3) {
-        result.push(matchRosterId(matchup.w, totalRosters - 3));
-        result.push(matchRosterId(matchup.l, totalRosters - 2));
+        result.push(matchRosterId(matchup.w, totalRosters - 2));
+        result.push(matchRosterId(matchup.l, totalRosters - 3));
       } else if (matchup.p === 5) {
-        result.push(matchRosterId(matchup.w, totalRosters - 5));
-        result.push(matchRosterId(matchup.l, totalRosters - 4));
+        result.push(matchRosterId(matchup.w, totalRosters - 4));
+        result.push(matchRosterId(matchup.l, totalRosters - 5));
       }
     }
   );
@@ -76,12 +76,13 @@ const numberOfLoserRounds = computed(() => {
   <div v-if="store.leagueInfo[store.currentLeagueIndex]">
     <div class="flex flex-wrap my-4 lg:flex-nowrap">
       <div
-        class="block p-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 w-fit lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+        class="block w-full p-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
       >
         <p class="text-3xl font-bold">Winner's Bracket</p>
-        <div class="flex flex-wrap">
+        <div class="flex">
           <div v-for="index in numberOfWinnerRounds">
-            <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ index }}</p>
+            <p class="mt-2 -mb-2 text-xl font-semibold">Round {{ index }}</p>
+            <hr class="h-px my-6 bg-gray-200 border-0 dark:bg-gray-700" />
             <div
               v-for="matchup in store.leagueInfo[store.currentLeagueIndex]
                 .winnersBracket"
@@ -191,7 +192,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                   </svg>
                   <p
-                    class="mx-2"
+                    class="mx-2 truncate"
                     :class="
                       matchup.t1 === matchup.w
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
@@ -223,7 +224,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                     </svg>
                     <p
-                      class="mx-2 mt-1"
+                      class="mx-2 mt-1 truncate"
                       :class="
                         matchup.t2 === matchup.w
                           ? 'text-blue-600 dark:text-blue-500 font-semibold'
@@ -259,7 +260,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                   </svg>
                   <p
-                    class="mx-2 mt-0.5"
+                    class="mx-2 mt-0.5 truncate"
                     :class="
                       matchup.t1 === matchup.w
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
@@ -291,7 +292,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                     </svg>
                     <p
-                      class="mx-2 mt-0.5"
+                      class="mx-2 mt-0.5 truncate"
                       :class="
                         matchup.t2 === matchup.w
                           ? 'text-blue-600 dark:text-blue-500 font-semibold'
@@ -311,12 +312,13 @@ const numberOfLoserRounds = computed(() => {
     </div>
     <!-- losers bracket -->
     <div
-      class="block p-4 my-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 w-fit dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+      class="block w-full p-4 my-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
     >
       <p class="text-3xl font-bold">Loser's Bracket</p>
-      <div class="flex flex-wrap">
+      <div class="flex">
         <div v-for="index in numberOfLoserRounds">
           <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ index }}</p>
+          <hr class="h-px my-6 bg-gray-200 border-0 dark:bg-gray-700" />
           <div
             v-for="matchup in store.leagueInfo[store.currentLeagueIndex]
               .losersBracket"
@@ -365,9 +367,9 @@ const numberOfLoserRounds = computed(() => {
                   />
                 </svg>
                 <p
-                  class="mx-2"
+                  class="mx-2 truncate"
                   :class="
-                    matchup.t1 === matchup.w
+                    matchup.t1 === matchup.l
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
                       : 'text-gray-400'
                   "
@@ -397,9 +399,9 @@ const numberOfLoserRounds = computed(() => {
                     />
                   </svg>
                   <p
-                    class="mx-2 mt-1"
+                    class="mx-2 mt-1 truncate"
                     :class="
-                      matchup.t2 === matchup.w
+                      matchup.t2 === matchup.l
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
                         : 'text-gray-400'
                     "
@@ -433,9 +435,9 @@ const numberOfLoserRounds = computed(() => {
                   />
                 </svg>
                 <p
-                  class="mx-2 mt-0.5"
+                  class="mx-2 mt-0.5 truncate"
                   :class="
-                    matchup.t1 === matchup.w
+                    matchup.t1 === matchup.l
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
                       : 'text-gray-400'
                   "
@@ -465,9 +467,9 @@ const numberOfLoserRounds = computed(() => {
                     />
                   </svg>
                   <p
-                    class="mx-2 mt-0.5"
+                    class="mx-2 mt-0.5 truncate"
                     :class="
-                      matchup.t2 === matchup.w
+                      matchup.t2 === matchup.l
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
                         : 'text-gray-400'
                     "

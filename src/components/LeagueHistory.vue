@@ -33,5 +33,5 @@
 // });
 </script>
 <template>
-  <p class="m-2 h-screen">Coming soon</p>
+  <p class="h-screen m-2 dark:text-white">Coming soon</p>
 </template>
