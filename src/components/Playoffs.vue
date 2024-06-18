@@ -88,9 +88,9 @@ const numberOfLoserRounds = computed(() => {
                 .winnersBracket"
             >
               <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
-                <p class="mt-12 text-lg font-semibold">Championship</p>
+                <p class="text-lg font-semibold mt-7">Championship</p>
                 <svg
-                  class="w-8 mx-4 mt-11"
+                  class="w-8 mx-4 mt-7"
                   version="1.0"
                   id="Layer_1"
                   xmlns="http://www.w3.org/2000/svg"
@@ -312,7 +312,7 @@ const numberOfLoserRounds = computed(() => {
     </div>
     <!-- losers bracket -->
     <div
-      class="block w-full p-4 my-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+      class="block w-full p-4 my-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:w-fit lg:mr-4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
     >
       <p class="text-3xl font-bold">Loser's Bracket</p>
       <div class="flex">
@@ -324,7 +324,65 @@ const numberOfLoserRounds = computed(() => {
               .losersBracket"
           >
             <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
-              <p class="mt-12 text-lg font-semibold">Last Place</p>
+              <p class="text-lg font-semibold mt-7">Last Place</p>
+              <svg
+                width="32px"
+                height="32px"
+                viewBox="0 0 128 128"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                aria-hidden="true"
+                role="img"
+                class="mx-3 mt-6 iconify iconify--noto"
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <path
+                  d="M118.89 75.13a15.693 15.693 0 0 0-7-7.33a22.627 22.627 0 0 0-6-2.63c1.53-5.6-.64-10.06-3.69-13.39c-4.51-4.88-9.2-5.59-9.2-5.59c1.62-3.07 2.11-6.61 1.36-10c-.77-3.69-3.08-6.86-6.36-8.72c-3.1-1.83-6.92-2.73-10.84-3.47c-1.88-.34-9.81-1.45-13.1-6c-2.65-3.69-2.73-10.33-3.45-12.32s-3.38-1.15-6.23.76C51.05 8.7 44.15 15.83 41.49 23a24.6 24.6 0 0 0-1.28 13.89c-2.14.35-4.23.97-6.21 1.85c-.16 0-.32.1-.49.17c-3 1.24-9.43 7-10 15.85c-.21 3.13.19 6.26 1.17 9.24c-2.19.57-4.3 1.43-6.26 2.57c-2.29.98-4.38 2.38-6.15 4.13c-1.95 2.41-3.37 5.2-4.15 8.2a27.594 27.594 0 0 0 2 19.77c1.8 3.47 4.06 6.67 6.74 9.52c8.55 8.79 23.31 12.11 35 14c14.19 2.34 29.05 1.52 42.33-4c19.92-8.22 25.22-21.44 26-25.17c1.73-8.25-.39-16.02-1.3-17.89z"
+                  fill="#885742"
+                ></path>
+
+                <path
+                  d="M87.45 92.89c-1.57.8-3.17 1.52-4.78 2.16c-1.08.43-2.17.82-3.27 1.17c-1.1.36-2.21.67-3.33 1c-2.24.56-4.52.97-6.82 1.21c-1.74.19-3.5.28-5.25.28c-4.62 0-9.22-.65-13.67-1.91l-1.46-.44a55.12 55.12 0 0 1-7.15-2.84l-1.39-.69a22.722 22.722 0 0 0 12.72 15.31c3.43 1.59 7.17 2.4 10.95 2.38c3.82.03 7.6-.75 11.09-2.31a21.868 21.868 0 0 0 12.58-15.44l-.22.12z"
+                  fill="#35220b"
+                ></path>
+
+                <path
+                  d="M85.19 90c-7 1.23-14.09 1.82-21.19 1.77c-7.1.04-14.19-.55-21.19-1.77a2.16 2.16 0 0 0-2.53 2.54v.25A51.578 51.578 0 0 0 64 98.66c1.75 0 3.51-.09 5.25-.28c2.3-.24 4.58-.65 6.82-1.21c1.12-.28 2.23-.59 3.33-1s2.19-.74 3.27-1.17c1.62-.67 3.21-1.39 4.78-2.16l.22-.12l.06-.27c.17-1.19-.66-2.29-1.86-2.46a2.22 2.22 0 0 0-.68.01z"
+                  fill="#ffffff"
+                ></path>
+
+                <g>
+                  <circle
+                    cx="80.13"
+                    cy="69.49"
+                    r="12.4"
+                    fill="#ffffff"
+                  ></circle>
+
+                  <ellipse
+                    cx="80.13"
+                    cy="69.49"
+                    rx="5.73"
+                    ry="5.82"
+                    fill="#35220b"
+                  ></ellipse>
+
+                  <circle
+                    cx="47.87"
+                    cy="69.49"
+                    r="12.4"
+                    fill="#ffffff"
+                  ></circle>
+
+                  <ellipse
+                    cx="47.87"
+                    cy="69.49"
+                    rx="5.73"
+                    ry="5.82"
+                    fill="#35220b"
+                  ></ellipse>
+                </g>
+              </svg>
             </div>
             <p
               v-if="matchup.p === 3 && index === matchup.r"
