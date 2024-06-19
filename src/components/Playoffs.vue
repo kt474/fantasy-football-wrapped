@@ -2,17 +2,43 @@
 import FinalPlacements from "./FinalPlacements.vue";
 import { computed } from "vue";
 import { useStore } from "../store/store";
+import {
+  fakeWinnersBracket,
+  fakeLosersBracket,
+  fakeRosters,
+  fakeUsers,
+} from "../api/helper";
 const store = useStore();
 
+const winnersBracket = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].winnersBracket
+    : fakeWinnersBracket;
+});
+
+const losersBracket = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].losersBracket
+    : fakeLosersBracket;
+});
+
+const totalRosters = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].totalRosters
+    : 10;
+});
+
 const matchRosterId = (rosterId: string, placement?: number) => {
-  if (!store.leagueInfo[store.currentLeagueIndex]) return {};
-  const userId = store.leagueInfo[store.currentLeagueIndex].rosters.find(
-    (roster) => roster.rosterId === rosterId
-  );
+  // if (!store.leagueInfo[store.currentLeagueIndex]) return {};
+  const rosters = store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].rosters
+    : fakeRosters;
+  const users = store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].users
+    : fakeUsers;
+  const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
-    const userObject = store.leagueInfo[store.currentLeagueIndex].users.find(
-      (user) => user.id === userId.id
-    );
+    const userObject = users.find((user) => user.id === userId.id);
     if (placement) {
       userObject.placement = placement;
     }
@@ -22,71 +48,60 @@ const matchRosterId = (rosterId: string, placement?: number) => {
 
 const finalPlacements = computed(() => {
   let result: any = [];
-  store.leagueInfo[store.currentLeagueIndex].winnersBracket.forEach(
-    (matchup) => {
-      if (matchup.p === 1) {
-        result.push(matchRosterId(matchup.w, 1));
-        result.push(matchRosterId(matchup.l, 2));
-      } else if (matchup.p === 3) {
-        result.push(matchRosterId(matchup.w, 3));
-        result.push(matchRosterId(matchup.l, 4));
-      } else if (matchup.p === 5) {
-        result.push(matchRosterId(matchup.w, 5));
-        result.push(matchRosterId(matchup.l, 6));
-      }
+  winnersBracket.value.forEach((matchup) => {
+    if (matchup.p === 1) {
+      result.push(matchRosterId(matchup.w, 1));
+      result.push(matchRosterId(matchup.l, 2));
+    } else if (matchup.p === 3) {
+      result.push(matchRosterId(matchup.w, 3));
+      result.push(matchRosterId(matchup.l, 4));
+    } else if (matchup.p === 5) {
+      result.push(matchRosterId(matchup.w, 5));
+      result.push(matchRosterId(matchup.l, 6));
     }
-  );
-  const totalRosters = store.leagueInfo[store.currentLeagueIndex].totalRosters;
-  store.leagueInfo[store.currentLeagueIndex].losersBracket.forEach(
-    (matchup) => {
-      if (matchup.p === 1) {
-        result.push(matchRosterId(matchup.w, totalRosters));
-        result.push(matchRosterId(matchup.l, totalRosters - 1));
-      } else if (matchup.p === 3) {
-        result.push(matchRosterId(matchup.w, totalRosters - 2));
-        result.push(matchRosterId(matchup.l, totalRosters - 3));
-      } else if (matchup.p === 5) {
-        result.push(matchRosterId(matchup.w, totalRosters - 4));
-        result.push(matchRosterId(matchup.l, totalRosters - 5));
-      }
+  });
+
+  losersBracket.value.forEach((matchup) => {
+    if (matchup.p === 1) {
+      result.push(matchRosterId(matchup.w, totalRosters.value));
+      result.push(matchRosterId(matchup.l, totalRosters.value - 1));
+    } else if (matchup.p === 3) {
+      result.push(matchRosterId(matchup.w, totalRosters.value - 2));
+      result.push(matchRosterId(matchup.l, totalRosters.value - 3));
+    } else if (matchup.p === 5) {
+      result.push(matchRosterId(matchup.w, totalRosters.value - 4));
+      result.push(matchRosterId(matchup.l, totalRosters.value - 5));
     }
-  );
+  });
   return result.sort((a: any, b: any) => a.placement - b.placement);
 });
 
 const numberOfWinnerRounds = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex].winnersBracket.reduce(
-    (acc, curr) => {
-      return curr.r > acc ? curr.r : acc;
-    },
-    0
-  );
+  return winnersBracket.value.reduce((acc, curr) => {
+    return curr.r > acc ? curr.r : acc;
+  }, 0);
 });
 
 const numberOfLoserRounds = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex].losersBracket.reduce(
-    (acc, curr) => {
-      return curr.r > acc ? curr.r : acc;
-    },
-    0
-  );
+  return losersBracket.value.reduce((acc, curr) => {
+    return curr.r > acc ? curr.r : acc;
+  }, 0);
 });
 </script>
 <template>
-  <div v-if="store.leagueInfo[store.currentLeagueIndex]">
+  <div>
     <div class="flex flex-wrap my-4 lg:flex-nowrap">
       <div
-        class="block w-full p-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+        class="block w-full p-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
       >
         <p class="text-3xl font-bold">Winner's Bracket</p>
         <div class="flex flex-wrap">
           <div v-for="index in numberOfWinnerRounds">
             <p class="mt-2 -mb-2 text-xl font-semibold">Round {{ index }}</p>
-            <hr class="h-px my-6 bg-gray-200 border-0 dark:bg-gray-700" />
-            <div
-              v-for="matchup in store.leagueInfo[store.currentLeagueIndex]
-                .winnersBracket"
-            >
+            <hr
+              class="w-full h-px my-6 bg-gray-200 border-0 dark:bg-gray-700"
+            />
+            <div v-for="matchup in winnersBracket">
               <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
                 <p class="text-lg font-semibold mt-7">Championship</p>
                 <svg
@@ -170,7 +185,7 @@ const numberOfLoserRounds = computed(() => {
               <!-- championship matchup -->
               <div
                 v-if="index === matchup.r && matchup.p === 1"
-                class="block p-4 my-2 mr-4 bg-white border border-gray-200 rounded-lg shadow w-72 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-2 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
               >
                 <div v-if="matchRosterId(matchup.t1)" class="flex mb-2">
                   <img
@@ -238,7 +253,7 @@ const numberOfLoserRounds = computed(() => {
               </div>
               <div
                 v-else-if="index === matchup.r"
-                class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 w-72 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
               >
                 <div v-if="matchRosterId(matchup.t1)" class="flex mb-2">
                   <img
@@ -312,17 +327,14 @@ const numberOfLoserRounds = computed(() => {
     </div>
     <!-- losers bracket -->
     <div
-      class="block w-full p-4 my-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:w-fit lg:mr-4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+      class="block p-4 my-4 text-black bg-white border border-gray-200 rounded-lg shadow w-fit dark:bg-gray-800 dark:border-gray-700 dark:text-white"
     >
       <p class="text-3xl font-bold">Loser's Bracket</p>
       <div class="flex flex-wrap">
         <div v-for="index in numberOfLoserRounds">
           <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ index }}</p>
           <hr class="h-px my-6 bg-gray-200 border-0 dark:bg-gray-700" />
-          <div
-            v-for="matchup in store.leagueInfo[store.currentLeagueIndex]
-              .losersBracket"
-          >
+          <div v-for="matchup in losersBracket">
             <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
               <p class="text-lg font-semibold mt-7">Last Place</p>
               <svg
@@ -388,22 +400,18 @@ const numberOfLoserRounds = computed(() => {
               v-if="matchup.p === 3 && index === matchup.r"
               class="mt-12 -mb-2 text-lg font-semibold"
             >
-              {{
-                store.leagueInfo[store.currentLeagueIndex].totalRosters - 3
-              }}th Place
+              {{ totalRosters - 3 }}th Place
             </p>
             <p
               v-if="matchup.p === 5 && index === matchup.r"
               class="mt-12 -mb-2 text-lg font-semibold"
             >
-              {{
-                store.leagueInfo[store.currentLeagueIndex].totalRosters - 5
-              }}th Place
+              {{ totalRosters - 5 }}th Place
             </p>
             <!-- last place matchup -->
             <div
               v-if="index === matchup.r && matchup.p === 1"
-              class="block p-4 my-2 mr-4 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 w-72 dark:bg-gray-800 dark:border-gray-700"
+              class="block p-4 my-2 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
             >
               <div v-if="matchRosterId(matchup.t1)" class="flex mb-2">
                 <img
@@ -471,7 +479,7 @@ const numberOfLoserRounds = computed(() => {
             </div>
             <div
               v-else-if="index === matchup.r"
-              class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 w-72 dark:bg-gray-800 dark:border-gray-700"
+              class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
             >
               <div v-if="matchRosterId(matchup.t1)" class="flex mb-2">
                 <img
@@ -542,5 +550,18 @@ const numberOfLoserRounds = computed(() => {
       </div>
     </div>
   </div>
-  <p v-else class="h-screen m-2">Coming soon</p>
+  <!-- <p v-else class="h-screen m-2">Coming soon</p> -->
 </template>
+<style scoped>
+.custom-card-width {
+  @media (width >= 1536px) {
+    width: 17.5rem;
+  }
+  @media (1300px <width < 1536px) {
+    width: 16.5rem;
+  }
+  @media (width <= 1300px) {
+    width: 13rem;
+  }
+}
+</style>

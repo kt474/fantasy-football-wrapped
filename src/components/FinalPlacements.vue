@@ -5,7 +5,7 @@ const props = defineProps<{
 </script>
 <template>
   <div
-    class="w-full lg:w-1/4 px-6 pt-2.5 mt-4 lg:mt-0 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+    class="w-full lg:w-1/4 px-6 pt-2.5 mt-4 lg:mt-0 lg:ml-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex items-center justify-between sm:mt-1.5 mb-2">
       <h5
@@ -20,7 +20,8 @@ const props = defineProps<{
           <div v-if="user" class="flex items-center">
             <div class="flex-1 min-w-0 list-padding ms-1">
               <p
-                class="py-1.5 text-lg text-gray-600 dark:text-gray-400 truncate"
+                class="text-lg text-gray-600 truncate dark:text-gray-400"
+                :class="props.rosters.length <= 10 ? 'py-2.5' : 'py-1.5'"
               >
                 <span class="font-medium text-black dark:text-white"
                   >{{ index + 1 }}.&nbsp;</span
