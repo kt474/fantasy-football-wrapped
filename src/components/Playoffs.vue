@@ -7,9 +7,16 @@ import {
   fakeLosersBracket,
   fakeRosters,
   fakeUsers,
+  fakePoints,
 } from "../api/helper";
 import { RosterType } from "../api/types";
 const store = useStore();
+
+const regularSeasonLength = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].regularSeasonLength
+    : 14;
+});
 
 const winnersBracket = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
@@ -48,7 +55,12 @@ const matchRosterId = (rosterId: string, placement?: number) => {
 };
 
 const getPointsScored = (rosterId: number, week: number) => {
-  if (!store.leagueInfo[store.currentLeagueIndex]) return;
+  if (!store.leagueInfo[store.currentLeagueIndex]) {
+    const pointsArray: any = fakePoints.find(
+      (roster: any) => roster.rosterId === rosterId
+    );
+    return pointsArray.points[week - 1];
+  }
   const pointsArray: any = store.leagueInfo[
     store.currentLeagueIndex
   ].weeklyPoints.find((roster: RosterType) => roster.rosterId === rosterId);
@@ -229,16 +241,9 @@ const numberOfLoserRounds = computed(() => {
                       {{ matchRosterId(matchup.t1).name }}
                     </p>
                   </div>
-                  <p
-                    v-if="store.leagueInfo[store.currentLeagueIndex]"
-                    class="mr-1"
-                  >
+                  <p class="mr-1">
                     {{
-                      getPointsScored(
-                        matchup.t1,
-                        store.leagueInfo[store.currentLeagueIndex]
-                          .regularSeasonLength + index
-                      )
+                      getPointsScored(matchup.t1, regularSeasonLength + index)
                     }}
                   </p>
                 </div>
@@ -276,16 +281,9 @@ const numberOfLoserRounds = computed(() => {
                         {{ matchRosterId(matchup.t2).name }}
                       </p>
                     </div>
-                    <p
-                      v-if="store.leagueInfo[store.currentLeagueIndex]"
-                      class="mt-1 mr-1"
-                    >
+                    <p class="mt-1 mr-1">
                       {{
-                        getPointsScored(
-                          matchup.t2,
-                          store.leagueInfo[store.currentLeagueIndex]
-                            .regularSeasonLength + index
-                        )
+                        getPointsScored(matchup.t2, regularSeasonLength + index)
                       }}
                     </p>
                   </div>
@@ -327,16 +325,9 @@ const numberOfLoserRounds = computed(() => {
                       {{ matchRosterId(matchup.t1).name }}
                     </p>
                   </div>
-                  <p
-                    v-if="store.leagueInfo[store.currentLeagueIndex]"
-                    class="mt-0.5 mr-1"
-                  >
+                  <p class="mt-0.5 mr-1">
                     {{
-                      getPointsScored(
-                        matchup.t1,
-                        store.leagueInfo[store.currentLeagueIndex]
-                          .regularSeasonLength + index
-                      )
+                      getPointsScored(matchup.t1, regularSeasonLength + index)
                     }}
                   </p>
                 </div>
@@ -374,16 +365,9 @@ const numberOfLoserRounds = computed(() => {
                         {{ matchRosterId(matchup.t2).name }}
                       </p>
                     </div>
-                    <p
-                      v-if="store.leagueInfo[store.currentLeagueIndex]"
-                      class="mt-0.5 mr-1"
-                    >
+                    <p class="mt-0.5 mr-1">
                       {{
-                        getPointsScored(
-                          matchup.t2,
-                          store.leagueInfo[store.currentLeagueIndex]
-                            .regularSeasonLength + index
-                        )
+                        getPointsScored(matchup.t2, regularSeasonLength + index)
                       }}
                     </p>
                   </div>
@@ -515,17 +499,8 @@ const numberOfLoserRounds = computed(() => {
                     {{ matchRosterId(matchup.t1).name }}
                   </p>
                 </div>
-                <p
-                  v-if="store.leagueInfo[store.currentLeagueIndex]"
-                  class="mr-1"
-                >
-                  {{
-                    getPointsScored(
-                      matchup.t1,
-                      store.leagueInfo[store.currentLeagueIndex]
-                        .regularSeasonLength + index
-                    )
-                  }}
+                <p class="mr-1">
+                  {{ getPointsScored(matchup.t1, regularSeasonLength + index) }}
                 </p>
               </div>
               <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
@@ -562,16 +537,9 @@ const numberOfLoserRounds = computed(() => {
                       {{ matchRosterId(matchup.t2).name }}
                     </p>
                   </div>
-                  <p
-                    v-if="store.leagueInfo[store.currentLeagueIndex]"
-                    class="mt-1 mr-1"
-                  >
+                  <p class="mt-1 mr-1">
                     {{
-                      getPointsScored(
-                        matchup.t2,
-                        store.leagueInfo[store.currentLeagueIndex]
-                          .regularSeasonLength + index
-                      )
+                      getPointsScored(matchup.t2, regularSeasonLength + index)
                     }}
                   </p>
                 </div>
@@ -613,17 +581,8 @@ const numberOfLoserRounds = computed(() => {
                     {{ matchRosterId(matchup.t1).name }}
                   </p>
                 </div>
-                <p
-                  v-if="store.leagueInfo[store.currentLeagueIndex]"
-                  class="mt-0.5 mr-1"
-                >
-                  {{
-                    getPointsScored(
-                      matchup.t1,
-                      store.leagueInfo[store.currentLeagueIndex]
-                        .regularSeasonLength + index
-                    )
-                  }}
+                <p class="mt-0.5 mr-1">
+                  {{ getPointsScored(matchup.t1, regularSeasonLength + index) }}
                 </p>
               </div>
               <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
@@ -660,16 +619,9 @@ const numberOfLoserRounds = computed(() => {
                       {{ matchRosterId(matchup.t2).name }}
                     </p>
                   </div>
-                  <p
-                    v-if="store.leagueInfo[store.currentLeagueIndex]"
-                    class="mt-0.5 mr-1"
-                  >
+                  <p class="mt-0.5 mr-1">
                     {{
-                      getPointsScored(
-                        matchup.t2,
-                        store.leagueInfo[store.currentLeagueIndex]
-                          .regularSeasonLength + index
-                      )
+                      getPointsScored(matchup.t2, regularSeasonLength + index)
                     }}
                   </p>
                 </div>
@@ -678,9 +630,11 @@ const numberOfLoserRounds = computed(() => {
           </div>
         </div>
       </div>
+      <p class="text-xs text-gray-500 footer-font dark:text-gray-400">
+        Winner advances in loser bracket format
+      </p>
     </div>
   </div>
-  <!-- <p v-else class="h-screen m-2">Coming soon</p> -->
 </template>
 <style scoped>
 .custom-card-width {
