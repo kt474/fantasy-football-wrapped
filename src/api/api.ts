@@ -64,12 +64,14 @@ export const getLeague = async (leagueId: string) => {
         leagueId: "",
         leagueWinner: "",
         previousLeagueId: "",
+        lastScoredWeek: 0,
       };
     }
     const league = await response.json();
     return {
       name: league["name"],
       regularSeasonLength: league["settings"]["playoff_week_start"] - 1,
+      lastScoredWeek: league["settings"]["last_scored_leg"],
       medianScoring: league["settings"]["league_average_match"],
       totalRosters: league["total_rosters"],
       season: league["season"],
@@ -163,7 +165,7 @@ export const getData = async (leagueId: string) => {
   newLeagueInfo["losersBracket"] = await getLosersBracket(leagueId);
   newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
     leagueId,
-    newLeagueInfo["regularSeasonLength"]
+    newLeagueInfo["lastScoredWeek"]
   );
   newLeagueInfo["users"] = await getUsers(leagueId);
   for (const val of newLeagueInfo["users"]) {
