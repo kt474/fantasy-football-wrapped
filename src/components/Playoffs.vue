@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FinalPlacements from "./FinalPlacements.vue";
+import PlacementFlowChart from "./PlacementFlowChart.vue";
 import { computed } from "vue";
 import { useStore } from "../store/store";
 import {
@@ -365,146 +366,109 @@ const numberOfLoserRounds = computed(() => {
       <FinalPlacements :rosters="finalPlacements" />
     </div>
     <!-- losers bracket -->
-    <div
-      class="block p-4 my-4 text-black bg-white border border-gray-200 rounded-lg shadow w-fit dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-    >
-      <p class="text-3xl font-bold">Loser's Bracket</p>
-      <div class="flex flex-wrap">
-        <div v-for="index in numberOfLoserRounds">
-          <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ index }}</p>
-          <hr class="h-px my-6 bg-gray-200 border-0 dark:bg-gray-700" />
-          <div v-for="matchup in losersBracket">
-            <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
-              <p class="text-lg font-semibold mt-7">Last Place</p>
-              <svg
-                width="32px"
-                height="32px"
-                viewBox="0 0 128 128"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                aria-hidden="true"
-                role="img"
-                class="mx-3 mt-6 iconify iconify--noto"
-                preserveAspectRatio="xMidYMid meet"
-              >
-                <path
-                  d="M118.89 75.13a15.693 15.693 0 0 0-7-7.33a22.627 22.627 0 0 0-6-2.63c1.53-5.6-.64-10.06-3.69-13.39c-4.51-4.88-9.2-5.59-9.2-5.59c1.62-3.07 2.11-6.61 1.36-10c-.77-3.69-3.08-6.86-6.36-8.72c-3.1-1.83-6.92-2.73-10.84-3.47c-1.88-.34-9.81-1.45-13.1-6c-2.65-3.69-2.73-10.33-3.45-12.32s-3.38-1.15-6.23.76C51.05 8.7 44.15 15.83 41.49 23a24.6 24.6 0 0 0-1.28 13.89c-2.14.35-4.23.97-6.21 1.85c-.16 0-.32.1-.49.17c-3 1.24-9.43 7-10 15.85c-.21 3.13.19 6.26 1.17 9.24c-2.19.57-4.3 1.43-6.26 2.57c-2.29.98-4.38 2.38-6.15 4.13c-1.95 2.41-3.37 5.2-4.15 8.2a27.594 27.594 0 0 0 2 19.77c1.8 3.47 4.06 6.67 6.74 9.52c8.55 8.79 23.31 12.11 35 14c14.19 2.34 29.05 1.52 42.33-4c19.92-8.22 25.22-21.44 26-25.17c1.73-8.25-.39-16.02-1.3-17.89z"
-                  fill="#885742"
-                ></path>
+    <div class="flex">
+      <div
+        class="block w-3/4 p-4 mr-4 text-black bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+      >
+        <p class="text-3xl font-bold">Loser's Bracket</p>
+        <div class="flex flex-wrap">
+          <div v-for="index in numberOfLoserRounds">
+            <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ index }}</p>
+            <hr class="h-px my-6 bg-gray-200 border-0 dark:bg-gray-700" />
+            <div v-for="matchup in losersBracket">
+              <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
+                <p class="text-lg font-semibold mt-7">Last Place</p>
+                <svg
+                  width="32px"
+                  height="32px"
+                  viewBox="0 0 128 128"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                  aria-hidden="true"
+                  role="img"
+                  class="mx-3 mt-6 iconify iconify--noto"
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  <path
+                    d="M118.89 75.13a15.693 15.693 0 0 0-7-7.33a22.627 22.627 0 0 0-6-2.63c1.53-5.6-.64-10.06-3.69-13.39c-4.51-4.88-9.2-5.59-9.2-5.59c1.62-3.07 2.11-6.61 1.36-10c-.77-3.69-3.08-6.86-6.36-8.72c-3.1-1.83-6.92-2.73-10.84-3.47c-1.88-.34-9.81-1.45-13.1-6c-2.65-3.69-2.73-10.33-3.45-12.32s-3.38-1.15-6.23.76C51.05 8.7 44.15 15.83 41.49 23a24.6 24.6 0 0 0-1.28 13.89c-2.14.35-4.23.97-6.21 1.85c-.16 0-.32.1-.49.17c-3 1.24-9.43 7-10 15.85c-.21 3.13.19 6.26 1.17 9.24c-2.19.57-4.3 1.43-6.26 2.57c-2.29.98-4.38 2.38-6.15 4.13c-1.95 2.41-3.37 5.2-4.15 8.2a27.594 27.594 0 0 0 2 19.77c1.8 3.47 4.06 6.67 6.74 9.52c8.55 8.79 23.31 12.11 35 14c14.19 2.34 29.05 1.52 42.33-4c19.92-8.22 25.22-21.44 26-25.17c1.73-8.25-.39-16.02-1.3-17.89z"
+                    fill="#885742"
+                  ></path>
 
-                <path
-                  d="M87.45 92.89c-1.57.8-3.17 1.52-4.78 2.16c-1.08.43-2.17.82-3.27 1.17c-1.1.36-2.21.67-3.33 1c-2.24.56-4.52.97-6.82 1.21c-1.74.19-3.5.28-5.25.28c-4.62 0-9.22-.65-13.67-1.91l-1.46-.44a55.12 55.12 0 0 1-7.15-2.84l-1.39-.69a22.722 22.722 0 0 0 12.72 15.31c3.43 1.59 7.17 2.4 10.95 2.38c3.82.03 7.6-.75 11.09-2.31a21.868 21.868 0 0 0 12.58-15.44l-.22.12z"
-                  fill="#35220b"
-                ></path>
-
-                <path
-                  d="M85.19 90c-7 1.23-14.09 1.82-21.19 1.77c-7.1.04-14.19-.55-21.19-1.77a2.16 2.16 0 0 0-2.53 2.54v.25A51.578 51.578 0 0 0 64 98.66c1.75 0 3.51-.09 5.25-.28c2.3-.24 4.58-.65 6.82-1.21c1.12-.28 2.23-.59 3.33-1s2.19-.74 3.27-1.17c1.62-.67 3.21-1.39 4.78-2.16l.22-.12l.06-.27c.17-1.19-.66-2.29-1.86-2.46a2.22 2.22 0 0 0-.68.01z"
-                  fill="#ffffff"
-                ></path>
-
-                <g>
-                  <circle
-                    cx="80.13"
-                    cy="69.49"
-                    r="12.4"
-                    fill="#ffffff"
-                  ></circle>
-
-                  <ellipse
-                    cx="80.13"
-                    cy="69.49"
-                    rx="5.73"
-                    ry="5.82"
+                  <path
+                    d="M87.45 92.89c-1.57.8-3.17 1.52-4.78 2.16c-1.08.43-2.17.82-3.27 1.17c-1.1.36-2.21.67-3.33 1c-2.24.56-4.52.97-6.82 1.21c-1.74.19-3.5.28-5.25.28c-4.62 0-9.22-.65-13.67-1.91l-1.46-.44a55.12 55.12 0 0 1-7.15-2.84l-1.39-.69a22.722 22.722 0 0 0 12.72 15.31c3.43 1.59 7.17 2.4 10.95 2.38c3.82.03 7.6-.75 11.09-2.31a21.868 21.868 0 0 0 12.58-15.44l-.22.12z"
                     fill="#35220b"
-                  ></ellipse>
+                  ></path>
 
-                  <circle
-                    cx="47.87"
-                    cy="69.49"
-                    r="12.4"
+                  <path
+                    d="M85.19 90c-7 1.23-14.09 1.82-21.19 1.77c-7.1.04-14.19-.55-21.19-1.77a2.16 2.16 0 0 0-2.53 2.54v.25A51.578 51.578 0 0 0 64 98.66c1.75 0 3.51-.09 5.25-.28c2.3-.24 4.58-.65 6.82-1.21c1.12-.28 2.23-.59 3.33-1s2.19-.74 3.27-1.17c1.62-.67 3.21-1.39 4.78-2.16l.22-.12l.06-.27c.17-1.19-.66-2.29-1.86-2.46a2.22 2.22 0 0 0-.68.01z"
                     fill="#ffffff"
-                  ></circle>
+                  ></path>
 
-                  <ellipse
-                    cx="47.87"
-                    cy="69.49"
-                    rx="5.73"
-                    ry="5.82"
-                    fill="#35220b"
-                  ></ellipse>
-                </g>
-              </svg>
-            </div>
-            <p
-              v-if="matchup.p === 3 && index === matchup.r"
-              class="mt-12 -mb-2 text-lg font-semibold"
-            >
-              {{ totalRosters - 3 }}th Place
-            </p>
-            <p
-              v-if="matchup.p === 5 && index === matchup.r"
-              class="mt-12 -mb-2 text-lg font-semibold"
-            >
-              {{ totalRosters - 5 }}th Place
-            </p>
-            <!-- last place matchup -->
-            <div
-              v-if="index === matchup.r && matchup.p === 1"
-              class="block p-4 my-2 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
-            >
-              <div
-                v-if="matchRosterId(matchup.t1)"
-                class="flex justify-between mb-2"
-                :class="
-                  matchup.t1 === matchup.l
-                    ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                    : 'text-gray-500 dark:text-gray-400 font-normal'
-                "
-              >
-                <div class="flex">
-                  <img
-                    v-if="matchRosterId(matchup.t1).avatarImg"
-                    alt="User avatar"
-                    class="w-8 h-8 rounded-full"
-                    :src="matchRosterId(matchup.t1).avatarImg"
-                  />
-                  <svg
-                    v-else
-                    class="w-8 h-8 text-gray-800 dark:text-white"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                    />
-                  </svg>
-                  <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                    {{ matchRosterId(matchup.t1).name }}
-                  </p>
-                </div>
-                <p class="mr-1">
-                  {{ getPointsScored(matchup.t1, index) }}
-                </p>
+                  <g>
+                    <circle
+                      cx="80.13"
+                      cy="69.49"
+                      r="12.4"
+                      fill="#ffffff"
+                    ></circle>
+
+                    <ellipse
+                      cx="80.13"
+                      cy="69.49"
+                      rx="5.73"
+                      ry="5.82"
+                      fill="#35220b"
+                    ></ellipse>
+
+                    <circle
+                      cx="47.87"
+                      cy="69.49"
+                      r="12.4"
+                      fill="#ffffff"
+                    ></circle>
+
+                    <ellipse
+                      cx="47.87"
+                      cy="69.49"
+                      rx="5.73"
+                      ry="5.82"
+                      fill="#35220b"
+                    ></ellipse>
+                  </g>
+                </svg>
               </div>
-              <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
-              <div>
+              <p
+                v-if="matchup.p === 3 && index === matchup.r"
+                class="mt-12 -mb-2 text-lg font-semibold"
+              >
+                {{ totalRosters - 3 }}th Place
+              </p>
+              <p
+                v-if="matchup.p === 5 && index === matchup.r"
+                class="mt-12 -mb-2 text-lg font-semibold"
+              >
+                {{ totalRosters - 5 }}th Place
+              </p>
+              <!-- last place matchup -->
+              <div
+                v-if="index === matchup.r && matchup.p === 1"
+                class="block p-4 my-2 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
+              >
                 <div
-                  v-if="matchRosterId(matchup.t2)"
-                  class="flex justify-between"
+                  v-if="matchRosterId(matchup.t1)"
+                  class="flex justify-between mb-2"
                   :class="
-                    matchup.t2 === matchup.l
+                    matchup.t1 === matchup.l
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
                       : 'text-gray-500 dark:text-gray-400 font-normal'
                   "
                 >
                   <div class="flex">
                     <img
-                      v-if="matchRosterId(matchup.t2).avatarImg"
+                      v-if="matchRosterId(matchup.t1).avatarImg"
                       alt="User avatar"
                       class="w-8 h-8 rounded-full"
-                      :src="matchRosterId(matchup.t2).avatarImg"
+                      :src="matchRosterId(matchup.t1).avatarImg"
                     />
                     <svg
                       v-else
@@ -518,73 +482,73 @@ const numberOfLoserRounds = computed(() => {
                         d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                       />
                     </svg>
-                    <p class="mx-2 mt-1 truncate max-w-20 xl:max-w-32">
-                      {{ matchRosterId(matchup.t2).name }}
+                    <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                      {{ matchRosterId(matchup.t1).name }}
                     </p>
                   </div>
-                  <p class="mt-1 mr-1">
-                    {{ getPointsScored(matchup.t2, index) }}
+                  <p class="mr-1">
+                    {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
-              </div>
-            </div>
-            <div
-              v-else-if="index === matchup.r"
-              class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
-            >
-              <div
-                v-if="matchRosterId(matchup.t1)"
-                class="flex justify-between mb-2"
-                :class="
-                  matchup.t1 === matchup.l
-                    ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                    : 'text-gray-500 dark:text-gray-400 font-normal'
-                "
-              >
-                <div class="flex">
-                  <img
-                    v-if="matchRosterId(matchup.t1).avatarImg"
-                    alt="User avatar"
-                    class="w-8 h-8 rounded-full"
-                    :src="matchRosterId(matchup.t1).avatarImg"
-                  />
-                  <svg
-                    v-else
-                    class="w-8 h-8 text-gray-800 dark:text-white"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
+                <div>
+                  <div
+                    v-if="matchRosterId(matchup.t2)"
+                    class="flex justify-between"
+                    :class="
+                      matchup.t2 === matchup.l
+                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                        : 'text-gray-500 dark:text-gray-400 font-normal'
+                    "
                   >
-                    <path
-                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                    />
-                  </svg>
-                  <p class="mx-2 mt-0.5 truncate max-w-20 xl:max-w-32">
-                    {{ matchRosterId(matchup.t1).name }}
-                  </p>
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.t2).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.t2).avatarImg"
+                      />
+                      <svg
+                        v-else
+                        class="w-8 h-8 text-gray-800 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                        />
+                      </svg>
+                      <p class="mx-2 mt-1 truncate max-w-20 xl:max-w-32">
+                        {{ matchRosterId(matchup.t2).name }}
+                      </p>
+                    </div>
+                    <p class="mt-1 mr-1">
+                      {{ getPointsScored(matchup.t2, index) }}
+                    </p>
+                  </div>
                 </div>
-                <p class="mt-0.5 mr-1">
-                  {{ getPointsScored(matchup.t1, index) }}
-                </p>
               </div>
-              <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
-              <div>
+              <div
+                v-else-if="index === matchup.r"
+                class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
+              >
                 <div
-                  v-if="matchRosterId(matchup.t2)"
-                  class="flex justify-between"
+                  v-if="matchRosterId(matchup.t1)"
+                  class="flex justify-between mb-2"
                   :class="
-                    matchup.t2 === matchup.l
+                    matchup.t1 === matchup.l
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
                       : 'text-gray-500 dark:text-gray-400 font-normal'
                   "
                 >
                   <div class="flex">
                     <img
-                      v-if="matchRosterId(matchup.t2).avatarImg"
+                      v-if="matchRosterId(matchup.t1).avatarImg"
                       alt="User avatar"
                       class="w-8 h-8 rounded-full"
-                      :src="matchRosterId(matchup.t2).avatarImg"
+                      :src="matchRosterId(matchup.t1).avatarImg"
                     />
                     <svg
                       v-else
@@ -599,21 +563,61 @@ const numberOfLoserRounds = computed(() => {
                       />
                     </svg>
                     <p class="mx-2 mt-0.5 truncate max-w-20 xl:max-w-32">
-                      {{ matchRosterId(matchup.t2).name }}
+                      {{ matchRosterId(matchup.t1).name }}
                     </p>
                   </div>
                   <p class="mt-0.5 mr-1">
-                    {{ getPointsScored(matchup.t2, index) }}
+                    {{ getPointsScored(matchup.t1, index) }}
                   </p>
+                </div>
+                <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
+                <div>
+                  <div
+                    v-if="matchRosterId(matchup.t2)"
+                    class="flex justify-between"
+                    :class="
+                      matchup.t2 === matchup.l
+                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                        : 'text-gray-500 dark:text-gray-400 font-normal'
+                    "
+                  >
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.t2).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.t2).avatarImg"
+                      />
+                      <svg
+                        v-else
+                        class="w-8 h-8 text-gray-800 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                        />
+                      </svg>
+                      <p class="mx-2 mt-0.5 truncate max-w-20 xl:max-w-32">
+                        {{ matchRosterId(matchup.t2).name }}
+                      </p>
+                    </div>
+                    <p class="mt-0.5 mr-1">
+                      {{ getPointsScored(matchup.t2, index) }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <p class="text-xs text-gray-500 footer-font dark:text-gray-400">
+          Loser advances in loser bracket format
+        </p>
       </div>
-      <p class="text-xs text-gray-500 footer-font dark:text-gray-400">
-        Loser advances in loser bracket format
-      </p>
+      <PlacementFlowChart />
     </div>
   </div>
 </template>
