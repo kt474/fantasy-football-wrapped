@@ -165,7 +165,12 @@ export const getData = async (leagueId: string) => {
   newLeagueInfo["losersBracket"] = await getLosersBracket(leagueId);
   newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
     leagueId,
-    newLeagueInfo["lastScoredWeek"]
+    newLeagueInfo["regularSeasonLength"]
+  );
+  newLeagueInfo["playoffPoints"] = await getWeeklyPoints(
+    leagueId,
+    newLeagueInfo["lastScoredWeek"],
+    newLeagueInfo["regularSeasonLength"]
   );
   newLeagueInfo["users"] = await getUsers(leagueId);
   for (const val of newLeagueInfo["users"]) {

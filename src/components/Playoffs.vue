@@ -12,12 +12,6 @@ import {
 import { RosterType } from "../api/types";
 const store = useStore();
 
-const regularSeasonLength = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].regularSeasonLength
-    : 14;
-});
-
 const winnersBracket = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].winnersBracket
@@ -37,7 +31,6 @@ const totalRosters = computed(() => {
 });
 
 const matchRosterId = (rosterId: string, placement?: number) => {
-  // if (!store.leagueInfo[store.currentLeagueIndex]) return {};
   const rosters = store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].rosters
     : fakeRosters;
@@ -59,11 +52,11 @@ const getPointsScored = (rosterId: number, week: number) => {
     const pointsArray: any = fakePoints.find(
       (roster: any) => roster.rosterId === rosterId
     );
-    return pointsArray.points[week - 1];
+    return pointsArray.playoffPoints[week - 1];
   }
   const pointsArray: any = store.leagueInfo[
     store.currentLeagueIndex
-  ].weeklyPoints.find((roster: RosterType) => roster.rosterId === rosterId);
+  ].playoffPoints.find((roster: RosterType) => roster.rosterId === rosterId);
   if (!pointsArray) return;
   return pointsArray.points[week - 1];
 };
@@ -211,7 +204,7 @@ const numberOfLoserRounds = computed(() => {
                 :class="
                   matchup.t1 === matchup.w
                     ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                    : 'text-gray-500'
+                    : 'text-gray-500 dark:text-gray-400'
                 "
               >
                 <div
@@ -242,9 +235,7 @@ const numberOfLoserRounds = computed(() => {
                     </p>
                   </div>
                   <p class="mr-1">
-                    {{
-                      getPointsScored(matchup.t1, regularSeasonLength + index)
-                    }}
+                    {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
                 <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
@@ -255,7 +246,7 @@ const numberOfLoserRounds = computed(() => {
                     :class="
                       matchup.t2 === matchup.w
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 font-normal'
+                        : 'text-gray-500 dark:text-gray-400 font-normal'
                     "
                   >
                     <div v-if="matchRosterId(matchup.t2)" class="flex">
@@ -282,9 +273,7 @@ const numberOfLoserRounds = computed(() => {
                       </p>
                     </div>
                     <p class="mt-1 mr-1">
-                      {{
-                        getPointsScored(matchup.t2, regularSeasonLength + index)
-                      }}
+                      {{ getPointsScored(matchup.t2, index) }}
                     </p>
                   </div>
                 </div>
@@ -299,7 +288,7 @@ const numberOfLoserRounds = computed(() => {
                   :class="
                     matchup.t1 === matchup.w
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                      : 'text-gray-500 font-normal'
+                      : 'text-gray-500 dark:text-gray-400 font-normal'
                   "
                 >
                   <div class="flex">
@@ -326,9 +315,7 @@ const numberOfLoserRounds = computed(() => {
                     </p>
                   </div>
                   <p class="mt-0.5 mr-1">
-                    {{
-                      getPointsScored(matchup.t1, regularSeasonLength + index)
-                    }}
+                    {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
                 <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
@@ -339,7 +326,7 @@ const numberOfLoserRounds = computed(() => {
                     :class="
                       matchup.t2 === matchup.w
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 font-normal'
+                        : 'text-gray-500 dark:text-gray-400 font-normal'
                     "
                   >
                     <div class="flex">
@@ -366,9 +353,7 @@ const numberOfLoserRounds = computed(() => {
                       </p>
                     </div>
                     <p class="mt-0.5 mr-1">
-                      {{
-                        getPointsScored(matchup.t2, regularSeasonLength + index)
-                      }}
+                      {{ getPointsScored(matchup.t2, index) }}
                     </p>
                   </div>
                 </div>
@@ -473,7 +458,7 @@ const numberOfLoserRounds = computed(() => {
                 :class="
                   matchup.t1 === matchup.l
                     ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                    : 'text-gray-500 font-normal'
+                    : 'text-gray-500 dark:text-gray-400 font-normal'
                 "
               >
                 <div class="flex">
@@ -500,7 +485,7 @@ const numberOfLoserRounds = computed(() => {
                   </p>
                 </div>
                 <p class="mr-1">
-                  {{ getPointsScored(matchup.t1, regularSeasonLength + index) }}
+                  {{ getPointsScored(matchup.t1, index) }}
                 </p>
               </div>
               <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
@@ -511,7 +496,7 @@ const numberOfLoserRounds = computed(() => {
                   :class="
                     matchup.t2 === matchup.l
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                      : 'text-gray-500 font-normal'
+                      : 'text-gray-500 dark:text-gray-400 font-normal'
                   "
                 >
                   <div class="flex">
@@ -538,9 +523,7 @@ const numberOfLoserRounds = computed(() => {
                     </p>
                   </div>
                   <p class="mt-1 mr-1">
-                    {{
-                      getPointsScored(matchup.t2, regularSeasonLength + index)
-                    }}
+                    {{ getPointsScored(matchup.t2, index) }}
                   </p>
                 </div>
               </div>
@@ -555,7 +538,7 @@ const numberOfLoserRounds = computed(() => {
                 :class="
                   matchup.t1 === matchup.l
                     ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                    : 'text-gray-500 font-normal'
+                    : 'text-gray-500 dark:text-gray-400 font-normal'
                 "
               >
                 <div class="flex">
@@ -582,7 +565,7 @@ const numberOfLoserRounds = computed(() => {
                   </p>
                 </div>
                 <p class="mt-0.5 mr-1">
-                  {{ getPointsScored(matchup.t1, regularSeasonLength + index) }}
+                  {{ getPointsScored(matchup.t1, index) }}
                 </p>
               </div>
               <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
@@ -593,7 +576,7 @@ const numberOfLoserRounds = computed(() => {
                   :class="
                     matchup.t2 === matchup.l
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                      : 'text-gray-500 font-normal'
+                      : 'text-gray-500 dark:text-gray-400 font-normal'
                   "
                 >
                   <div class="flex">
@@ -620,9 +603,7 @@ const numberOfLoserRounds = computed(() => {
                     </p>
                   </div>
                   <p class="mt-0.5 mr-1">
-                    {{
-                      getPointsScored(matchup.t2, regularSeasonLength + index)
-                    }}
+                    {{ getPointsScored(matchup.t2, index) }}
                   </p>
                 </div>
               </div>
@@ -631,7 +612,7 @@ const numberOfLoserRounds = computed(() => {
         </div>
       </div>
       <p class="text-xs text-gray-500 footer-font dark:text-gray-400">
-        Winner advances in loser bracket format
+        Loser advances in loser bracket format
       </p>
     </div>
   </div>

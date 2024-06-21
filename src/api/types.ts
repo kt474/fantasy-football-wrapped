@@ -15,6 +15,7 @@ export type LeagueInfoType = {
   users: any[];
   rosters: any[];
   weeklyPoints: [];
+  playoffPoints: [];
   transactions: [];
 };
 
