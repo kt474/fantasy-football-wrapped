@@ -143,7 +143,7 @@ watch(
       width="100%"
       :options="chartOptions"
       :series="seriesData"
-      class="flex justify-center lg:ml-4 xl:ml-6"
+      class="flex justify-center lg:ml-3 xl:ml-6"
     ></apexchart>
   </div>
 </template>

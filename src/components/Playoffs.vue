@@ -616,9 +616,6 @@ const numberOfLoserRounds = computed(() => {
             </div>
           </div>
         </div>
-        <p class="text-xs text-gray-500 footer-font dark:text-gray-400">
-          Loser advances in loser bracket format
-        </p>
       </div>
       <PlacementFlowChart
         :tableData="props.tableData"
