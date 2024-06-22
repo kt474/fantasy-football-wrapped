@@ -366,7 +366,7 @@ const numberOfLoserRounds = computed(() => {
       <FinalPlacements :rosters="finalPlacements" />
     </div>
     <!-- losers bracket -->
-    <div class="flex">
+    <div class="flex flex-wrap lg:flex-nowrap">
       <div
         class="block w-3/4 p-4 mr-4 text-black bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 dark:text-white"
       >
