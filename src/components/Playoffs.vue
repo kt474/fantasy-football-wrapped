@@ -371,7 +371,7 @@ const numberOfLoserRounds = computed(() => {
     <!-- losers bracket -->
     <div class="flex flex-wrap lg:flex-nowrap">
       <div
-        class="block w-3/4 p-4 mr-4 text-black bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+        class="block w-full p-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
       >
         <p class="text-3xl font-bold">Loser's Bracket</p>
         <div class="flex flex-wrap">
