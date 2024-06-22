@@ -134,11 +134,15 @@ const originalData = computed(() => {
         }
       });
 
-      const result: any[] = combinedPoints.sort((a: any, b: any) => {
+      combinedPoints.sort((a: any, b: any) => {
         if (a.wins !== b.wins) {
           return b.wins - a.wins;
         }
         return b.pointsFor - a.pointsFor;
+      });
+
+      combinedPoints.forEach((user, index) => {
+        user["regularSeasonRank"] = index + 1;
       });
 
       if (store.currentLeagueId) {
@@ -146,11 +150,11 @@ const originalData = computed(() => {
         if (localStorage.originalData) {
           savedData = JSON.parse(localStorage.originalData);
         }
-        savedData[store.currentLeagueId] = result;
+        savedData[store.currentLeagueId] = combinedPoints;
         localStorage.originalData = JSON.stringify(savedData);
       }
 
-      return result;
+      return combinedPoints;
     }
   }
   return [];
@@ -626,7 +630,7 @@ const medianScoring = computed(() => {
       <ManagementScatterPlot :tableData="tableData" class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'playoffs'">
-      <Playoffs />
+      <Playoffs :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">
       <LeagueHistory />

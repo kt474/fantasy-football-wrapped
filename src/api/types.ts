@@ -54,4 +54,5 @@ export type TableDataType = {
   points: number[];
   potentialPoints: number;
   managerEfficiency: number;
+  regularSeasonRank: number;
 };

@@ -10,7 +10,10 @@ import {
   fakeUsers,
   fakePoints,
 } from "../api/helper";
-import { RosterType } from "../api/types";
+import { RosterType, TableDataType } from "../api/types";
+const props = defineProps<{
+  tableData: TableDataType[];
+}>();
 const store = useStore();
 
 const winnersBracket = computed(() => {
@@ -617,7 +620,10 @@ const numberOfLoserRounds = computed(() => {
           Loser advances in loser bracket format
         </p>
       </div>
-      <PlacementFlowChart />
+      <PlacementFlowChart
+        :tableData="props.tableData"
+        :finalPlacements="finalPlacements"
+      />
     </div>
   </div>
 </template>
