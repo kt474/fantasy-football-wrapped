@@ -172,12 +172,14 @@ const chartOptions = ref({
         </p>
       </div>
     </div>
+    <!-- chart overflows on safari sometimes  -->
     <apexchart
       type="bar"
-      width="100%"
+      width="99.9%"
       height="475"
       :options="chartOptions"
       :series="seriesData"
+      class="overflow-hidden"
     ></apexchart>
   </div>
 </template>
