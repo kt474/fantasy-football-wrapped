@@ -7,7 +7,13 @@ const seasonType: any = {
   2: "Dynasty",
 };
 
-export const inputLeague = async (leagueId: string, name: string) => {
+export const inputLeague = async (
+  leagueId: string,
+  name: string,
+  size: number,
+  type: string,
+  year: string
+) => {
   try {
     const response = await fetch(
       "https://ffwrapped-backend.vercel.app/api/addEntry",
@@ -20,6 +26,9 @@ export const inputLeague = async (leagueId: string, name: string) => {
           data: {
             league_id: leagueId,
             name: name,
+            size: size,
+            type: type,
+            year: year,
           },
         }),
       }

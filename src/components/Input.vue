@@ -36,7 +36,13 @@ const onSubmit = async () => {
       store.updateLeagueInfo(newLeagueInfo);
       store.leagueSubmitted = true;
       store.updateShowInput(false);
-      await inputLeague(leagueIdInput.value, newLeagueInfo.name);
+      await inputLeague(
+        leagueIdInput.value,
+        newLeagueInfo.name,
+        newLeagueInfo.totalRosters,
+        newLeagueInfo.seasonType,
+        newLeagueInfo.season
+      );
     }
     leagueIdInput.value = "";
   }
