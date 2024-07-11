@@ -17,6 +17,7 @@ export type LeagueInfoType = {
   weeklyPoints: [];
   playoffPoints: [];
   transactions: [];
+  previousLeagues: any[];
 };
 
 export type RosterType = {
@@ -55,4 +56,5 @@ export type TableDataType = {
   potentialPoints: number;
   managerEfficiency: number;
   regularSeasonRank: number;
+  id: string;
 };

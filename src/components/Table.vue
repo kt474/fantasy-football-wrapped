@@ -633,7 +633,7 @@ const medianScoring = computed(() => {
       <Playoffs :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">
-      <LeagueHistory />
+      <LeagueHistory :tableData="tableData" />
     </div>
   </div>
 </template>

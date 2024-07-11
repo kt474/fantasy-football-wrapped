@@ -170,7 +170,7 @@ const shareLeague = () => {
         capitalize(props.leagueInfo.seasonType) +
         " " +
         props.leagueInfo.totalRosters +
-        " man"
+        "-team"
       }}
     </p>
   </div>

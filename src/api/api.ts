@@ -204,5 +204,6 @@ export const getData = async (leagueId: string) => {
   newLeagueInfo["transactions"] = sumById;
   const date = new Date();
   newLeagueInfo["lastUpdated"] = date.getTime();
+  newLeagueInfo["previousLeagues"] = [];
   return newLeagueInfo;
 };
