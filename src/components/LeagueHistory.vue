@@ -116,7 +116,10 @@ const tableData = computed(() => {
             >
               Compiled Record
               <svg
-                class="w-3 h-3 ms-1.5"
+                class="w-3 h-3 ms-1.5 fill-slate-400"
+                :class="{
+                  'fill-slate-600 dark:fill-slate-50': tableOrder == 'wins',
+                }"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -135,7 +138,10 @@ const tableData = computed(() => {
             >
               Points
               <svg
-                class="w-3 h-3 ms-1.5"
+                class="w-3 h-3 ms-1.5 fill-slate-400"
+                :class="{
+                  'fill-slate-600 dark:fill-slate-50': tableOrder == 'points',
+                }"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
