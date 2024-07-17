@@ -5,6 +5,7 @@ import { TableDataType, RosterType } from "../api/types";
 import { useStore } from "../store/store";
 import { getData } from "../api/api";
 import { LeagueInfoType } from "../api/types";
+import Alert from "../components/Alert.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -38,8 +39,37 @@ const getPreviousLeagues = async () => {
   }
 };
 
+const addNewLeague = async (season: string) => {
+  const newLeagueInfo = store.leagueInfo[
+    store.currentLeagueIndex
+  ].previousLeagues.find((league: any) => league.season === season);
+  if (newLeagueInfo) {
+    if (
+      !store.leagueInfo
+        .map((league: LeagueInfoType) => league.leagueId)
+        .includes(newLeagueInfo.leagueId)
+    ) {
+      store.updateLeagueInfo(newLeagueInfo);
+      store.updateCurrentLeagueId(newLeagueInfo.leagueId);
+    } else {
+      store.updateExistsAlert(true);
+      setTimeout(() => {
+        store.updateExistsAlert(false);
+      }, 3000);
+    }
+  } else {
+    store.updateExistsAlert(true);
+    setTimeout(() => {
+      store.updateExistsAlert(false);
+    }, 3000);
+  }
+};
+
 onMounted(async () => {
-  if (store.leagueInfo[store.currentLeagueIndex].previousLeagues.length == 0) {
+  if (
+    store.leagueInfo[store.currentLeagueIndex] &&
+    store.leagueInfo[store.currentLeagueIndex].previousLeagues.length == 0
+  ) {
     isLoading.value = true;
     await getPreviousLeagues();
     isLoading.value = false;
@@ -56,10 +86,15 @@ const dataAllYears = computed(() => {
       losses: user.losses,
       points: user.pointsFor,
       avatarImg: user.avatarImg,
-      seasons: [store.leagueInfo[store.currentLeagueIndex].season],
+      seasons: store.leagueInfo[store.currentLeagueIndex]
+        ? [store.leagueInfo[store.currentLeagueIndex].season]
+        : ["2023"],
     });
   });
-  if (store.leagueInfo[store.currentLeagueIndex].previousLeagues.length > 0) {
+  if (
+    store.leagueInfo[store.currentLeagueIndex] &&
+    store.leagueInfo[store.currentLeagueIndex].previousLeagues.length > 0
+  ) {
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.forEach(
       (league: any) => {
         league.rosters.forEach((user: RosterType) => {
@@ -80,7 +115,7 @@ const dataAllYears = computed(() => {
   return result;
 });
 
-const tableData = computed(() => {
+const tableDataAllYears = computed(() => {
   if (tableOrder.value === "wins") {
     return dataAllYears.value.sort((a: any, b: any) => {
       if (a.wins / a.losses !== b.wins / b.losses) {
@@ -97,11 +132,11 @@ const tableData = computed(() => {
 
 const bestRecord = computed(() => {
   const user = maxBy(dataAllYears.value, (a) => a.wins / a.losses);
-  return (user.wins / user.losses).toFixed(2);
+  return user ? (user.wins / user.losses).toFixed(2) : null;
 });
 const worstRecord = computed(() => {
   const user = minBy(dataAllYears.value, (a) => a.wins / a.losses);
-  return (user.wins / user.losses).toFixed(2);
+  return user ? (user.wins / user.losses).toFixed(2) : null;
 });
 
 const mostPoints = computed(() => {
@@ -209,7 +244,7 @@ const leastPoints = computed(() => {
       </thead>
       <tbody>
         <tr
-          v-for="(user, index) in tableData"
+          v-for="(user, index) in tableDataAllYears"
           class="bg-white border-b odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 dark:border-gray-700"
         >
           <th
@@ -261,11 +296,33 @@ const leastPoints = computed(() => {
           >
             {{ user.points }}
           </td>
-          <td class="px-6 py-3">{{ user.seasons.join(", ") }}</td>
+          <td class="px-6 py-3">
+            <div class="flex">
+              <div
+                v-for="(season, index) in user.seasons"
+                class="flex flex-nowrap"
+              >
+                <p
+                  class="text-blue-600 underline cursor-pointer dark:text-blue-500"
+                  @click="addNewLeague(season)"
+                >
+                  {{ season }}
+                </p>
+                <span :class="{ hidden: index == user.seasons.length - 1 }"
+                  >,&nbsp;
+                </span>
+              </div>
+            </div>
+          </td>
           <td class="px-6 py-3 text-right"></td>
         </tr>
       </tbody>
     </table>
+    <Alert
+      v-if="store.showLeagueExistsAlert"
+      alert-msg="League already exists"
+      type="error"
+    />
   </div>
   <div v-else>
     <svg

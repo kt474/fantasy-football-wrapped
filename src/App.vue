@@ -161,10 +161,26 @@ const setHtmlBackground = () => {
       ></div>
       <Footer />
     </div>
-    <Alert v-if="store.showAddedAlert" alert-msg="League successfully added!" />
-    <Alert v-if="store.showRefreshAlert" alert-msg="League data refreshed!" />
-    <Alert v-if="store.showRemovedAlert" alert-msg="League removed!" />
-    <Alert v-if="store.showCopiedAlert" alert-msg="URL copied to clipboard!" />
+    <Alert
+      v-if="store.showAddedAlert"
+      alert-msg="League successfully added!"
+      type="success"
+    />
+    <Alert
+      v-if="store.showRefreshAlert"
+      alert-msg="League data refreshed!"
+      type="success"
+    />
+    <Alert
+      v-if="store.showRemovedAlert"
+      alert-msg="League removed!"
+      type="success"
+    />
+    <Alert
+      v-if="store.showCopiedAlert"
+      alert-msg="URL copied to clipboard!"
+      type="success"
+    />
   </div>
 </template>
 

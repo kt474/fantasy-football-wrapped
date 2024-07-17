@@ -9,6 +9,7 @@ export const useStore = defineStore("main", {
     showRemovedAlert: false,
     showRefreshAlert: false,
     showCopiedAlert: false,
+    showLeagueExistsAlert: false,
     showInput: false,
     leagueInfo: [] as LeagueInfoType[],
     currentLeagueId: "",
@@ -43,6 +44,9 @@ export const useStore = defineStore("main", {
     },
     updateRemovedAlert(payload: boolean) {
       this.showRemovedAlert = payload;
+    },
+    updateExistsAlert(payload: boolean) {
+      this.showLeagueExistsAlert = payload;
     },
     updateLeagueInfo(payload: LeagueInfoType) {
       if (!this.leagueInfo.includes(payload)) {
