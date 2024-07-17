@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const isLoading = ref(false);
 const tableOrder = ref("wins");
+const hover = ref("");
 
 const checkPreviousLeagues = async (leagueId: string) => {
   const leagueData = await getData(leagueId);
@@ -111,8 +112,6 @@ const leastPoints = computed(() => {
 });
 </script>
 <template>
-  {{ bestRecord }}
-  {{ worstRecord }}
   <div
     v-if="!isLoading"
     class="relative mt-4 overflow-x-auto shadow-md sm:rounded-lg"
@@ -132,6 +131,8 @@ const leastPoints = computed(() => {
             <div
               class="flex items-center cursor-pointer dark:text-gray-200"
               @click="tableOrder = 'wins'"
+              @mouseover="hover = 'wins'"
+              @mouseleave="hover = ''"
             >
               Compiled Record
               <svg
@@ -149,11 +150,19 @@ const leastPoints = computed(() => {
                 />
               </svg>
             </div>
+            <div
+              :class="hover === 'wins' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+            >
+              Total wins and losses across all seasons
+            </div>
           </th>
           <th scope="col" class="px-6 py-3">
             <div
               class="flex items-center cursor-pointer dark:text-gray-200"
               @click="tableOrder = 'points'"
+              @mouseover="hover = 'points'"
+              @mouseleave="hover = ''"
             >
               Points
               <svg
@@ -171,9 +180,27 @@ const leastPoints = computed(() => {
                 />
               </svg>
             </div>
+            <div
+              :class="hover === 'points' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+            >
+              Total regular season points across all seasons
+            </div>
           </th>
           <th scope="col" class="px-6 py-3 dark:text-gray-200">
-            <div class="flex items-center">Seasons</div>
+            <div
+              class="flex items-center"
+              @mouseover="hover = 'season'"
+              @mouseleave="hover = ''"
+            >
+              Seasons
+            </div>
+            <div
+              :class="hover === 'season' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+            >
+              Seasons played
+            </div>
           </th>
           <th scope="col" class="px-6 py-3">
             <span class="sr-only">Edit</span>
