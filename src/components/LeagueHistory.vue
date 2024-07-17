@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
+import { maxBy, minBy } from "lodash";
 import { TableDataType, RosterType } from "../api/types";
 import { useStore } from "../store/store";
 import { getData } from "../api/api";
@@ -81,8 +82,8 @@ const dataAllYears = computed(() => {
 const tableData = computed(() => {
   if (tableOrder.value === "wins") {
     return dataAllYears.value.sort((a: any, b: any) => {
-      if (a.wins !== b.wins) {
-        return b.wins - a.wins;
+      if (a.wins / a.losses !== b.wins / b.losses) {
+        return b.wins / b.losses - a.wins / a.losses;
       }
       return b.points - a.points;
     });
@@ -92,8 +93,26 @@ const tableData = computed(() => {
     });
   }
 });
+
+const bestRecord = computed(() => {
+  const user = maxBy(dataAllYears.value, (a) => a.wins / a.losses);
+  return (user.wins / user.losses).toFixed(2);
+});
+const worstRecord = computed(() => {
+  const user = minBy(dataAllYears.value, (a) => a.wins / a.losses);
+  return (user.wins / user.losses).toFixed(2);
+});
+
+const mostPoints = computed(() => {
+  return maxBy(dataAllYears.value, "points")?.points;
+});
+const leastPoints = computed(() => {
+  return minBy(dataAllYears.value, "points")?.points;
+});
 </script>
 <template>
+  {{ bestRecord }}
+  {{ worstRecord }}
   <div
     v-if="!isLoading"
     class="relative mt-4 overflow-x-auto shadow-md sm:rounded-lg"
@@ -108,10 +127,10 @@ const tableData = computed(() => {
         class="text-xs text-gray-700 uppercase dark:text-gray-400"
       >
         <tr>
-          <th scope="col" class="px-6 py-3">Team name</th>
+          <th scope="col" class="px-6 py-3 dark:text-gray-200">Team name</th>
           <th scope="col" class="px-6 py-3">
             <div
-              class="flex items-center cursor-pointer"
+              class="flex items-center cursor-pointer dark:text-gray-200"
               @click="tableOrder = 'wins'"
             >
               Compiled Record
@@ -133,7 +152,7 @@ const tableData = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
-              class="flex items-center cursor-pointer"
+              class="flex items-center cursor-pointer dark:text-gray-200"
               @click="tableOrder = 'points'"
             >
               Points
@@ -153,7 +172,7 @@ const tableData = computed(() => {
               </svg>
             </div>
           </th>
-          <th scope="col" class="px-6 py-3">
+          <th scope="col" class="px-6 py-3 dark:text-gray-200">
             <div class="flex items-center">Seasons</div>
           </th>
           <th scope="col" class="px-6 py-3">
@@ -164,7 +183,7 @@ const tableData = computed(() => {
       <tbody>
         <tr
           v-for="(user, index) in tableData"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+          class="bg-white border-b odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 dark:border-gray-700"
         >
           <th
             scope="row"
@@ -193,10 +212,30 @@ const tableData = computed(() => {
               <p>{{ user.name }}</p>
             </div>
           </th>
-          <td class="px-6 py-4">{{ user.wins }} - {{ user.losses }}</td>
-          <td class="px-6 py-4">{{ user.points }}</td>
-          <td class="px-6 py-4">{{ user.seasons.join(", ") }}</td>
-          <td class="px-6 py-4 text-right"></td>
+          <td
+            class="px-6 py-3"
+            :class="{
+              'text-blue-600 dark:text-blue-500 font-semibold':
+                (user.wins / user.losses).toFixed(2) === bestRecord,
+              'text-red-600 dark:text-red-500 font-semibold':
+                (user.wins / user.losses).toFixed(2) === worstRecord,
+            }"
+          >
+            {{ user.wins }} - {{ user.losses }}
+          </td>
+          <td
+            class="px-6 py-3"
+            :class="{
+              'text-blue-600 dark:text-blue-500 font-semibold':
+                user.points === mostPoints,
+              'text-red-600 dark:text-red-500 font-semibold':
+                user.points === leastPoints,
+            }"
+          >
+            {{ user.points }}
+          </td>
+          <td class="px-6 py-3">{{ user.seasons.join(", ") }}</td>
+          <td class="px-6 py-3 text-right"></td>
         </tr>
       </tbody>
     </table>
