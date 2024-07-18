@@ -17,16 +17,19 @@ const tableOrder = ref("wins");
 const hover = ref("");
 
 const checkPreviousLeagues = async (leagueId: string) => {
-  const leagueData = await getData(leagueId);
-  store.leagueInfo[store.currentLeagueIndex].previousLeagues.push(leagueData);
+  // for some reason sometimes 0 is returned as the previous league id
+  if (leagueId !== "0") {
+    const leagueData = await getData(leagueId);
+    store.leagueInfo[store.currentLeagueIndex].previousLeagues.push(leagueData);
 
-  if (leagueData.previousLeagueId) {
-    await checkPreviousLeagues(leagueData.previousLeagueId);
-  } else {
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
+    if (leagueData.previousLeagueId) {
+      await checkPreviousLeagues(leagueData.previousLeagueId);
+    } else {
+      localStorage.setItem(
+        "leagueInfo",
+        JSON.stringify(store.leagueInfo as LeagueInfoType[])
+      );
+    }
   }
 };
 
@@ -94,7 +97,7 @@ const dataAllYears = computed(() => {
       avatarImg: user.avatarImg,
       seasons: store.leagueInfo[store.currentLeagueIndex]
         ? [store.leagueInfo[store.currentLeagueIndex].season]
-        : ["2023"],
+        : ["2023", "2022"], // defaulting to this for main page fake data
     });
   });
   if (
@@ -117,6 +120,13 @@ const dataAllYears = computed(() => {
         });
       }
     );
+  } else {
+    // fake data for main page
+    result.forEach((user) => {
+      user.wins += user.wins;
+      user.losses += user.losses;
+      user.points += user.points;
+    });
   }
   return result;
 });
