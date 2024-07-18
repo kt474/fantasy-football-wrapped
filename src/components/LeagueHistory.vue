@@ -51,6 +51,12 @@ const addNewLeague = async (season: string) => {
     ) {
       store.updateLeagueInfo(newLeagueInfo);
       store.updateCurrentLeagueId(newLeagueInfo.leagueId);
+      store.currentTab = "standings";
+      localStorage.currentTab = "standings";
+      store.updateShowAddedAlert(true);
+      setTimeout(() => {
+        store.updateShowAddedAlert(false);
+      }, 3000);
     } else {
       store.updateExistsAlert(true);
       setTimeout(() => {
