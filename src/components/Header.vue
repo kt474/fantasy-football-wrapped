@@ -130,7 +130,7 @@ const setColorMode = () => {
                   <p
                     class="text-base leading-relaxed text-gray-700 dark:text-gray-200"
                   >
-                    This website was made as a tool to show more detailed
+                    ffwrapped was made as a tool to show more detailed
                     information about your fantasy football league. Currently,
                     only
                     <a
@@ -166,6 +166,19 @@ const setColorMode = () => {
                       href="mailto:kt474@cornell.edu?subject=ffwrapped request"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                       >email</a
+                    >.
+                  </p>
+                  <p
+                    class="text-base leading-relaxed text-gray-700 dark:text-gray-200"
+                  >
+                    While using this site will always be completely free,
+                    maintenance and servers are not. If you would like to
+                    support this project, please consider
+                    <a
+                      href="https://buymeacoffee.com/kt474"
+                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      target="_blank"
+                      >buying me a coffee</a
                     >.
                   </p>
                 </div>
