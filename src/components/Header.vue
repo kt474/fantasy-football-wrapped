@@ -145,8 +145,8 @@ const setColorMode = () => {
                   <p
                     class="text-base leading-relaxed text-gray-700 dark:text-gray-200"
                   >
-                    Everything on this site is also completely open source and
-                    the source code can be found on
+                    Everything on this site is completely free and open source.
+                    The source code can be found on
                     <a
                       aria-label="Link to github repository"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"

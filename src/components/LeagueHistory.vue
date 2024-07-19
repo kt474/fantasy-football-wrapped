@@ -43,34 +43,36 @@ const getPreviousLeagues = async () => {
 };
 
 const addNewLeague = async (season: string) => {
-  const newLeagueInfo = store.leagueInfo[
-    store.currentLeagueIndex
-  ].previousLeagues.find((league: any) => league.season === season);
-  if (newLeagueInfo) {
-    if (
-      !store.leagueInfo
-        .map((league: LeagueInfoType) => league.leagueId)
-        .includes(newLeagueInfo.leagueId)
-    ) {
-      store.updateLeagueInfo(newLeagueInfo);
-      store.updateCurrentLeagueId(newLeagueInfo.leagueId);
-      store.currentTab = "standings";
-      localStorage.currentTab = "standings";
-      store.updateShowAddedAlert(true);
-      setTimeout(() => {
-        store.updateShowAddedAlert(false);
-      }, 3000);
+  if (store.leagueInfo[store.currentLeagueIndex]) {
+    const newLeagueInfo = store.leagueInfo[
+      store.currentLeagueIndex
+    ].previousLeagues.find((league: any) => league.season === season);
+    if (newLeagueInfo) {
+      if (
+        !store.leagueInfo
+          .map((league: LeagueInfoType) => league.leagueId)
+          .includes(newLeagueInfo.leagueId)
+      ) {
+        store.updateLeagueInfo(newLeagueInfo);
+        store.updateCurrentLeagueId(newLeagueInfo.leagueId);
+        store.currentTab = "standings";
+        localStorage.currentTab = "standings";
+        store.updateShowAddedAlert(true);
+        setTimeout(() => {
+          store.updateShowAddedAlert(false);
+        }, 3000);
+      } else {
+        store.updateExistsAlert(true);
+        setTimeout(() => {
+          store.updateExistsAlert(false);
+        }, 3000);
+      }
     } else {
       store.updateExistsAlert(true);
       setTimeout(() => {
         store.updateExistsAlert(false);
       }, 3000);
     }
-  } else {
-    store.updateExistsAlert(true);
-    setTimeout(() => {
-      store.updateExistsAlert(false);
-    }, 3000);
   }
 };
 
@@ -120,7 +122,7 @@ const dataAllYears = computed(() => {
         });
       }
     );
-  } else {
+  } else if (!store.leagueInfo[store.currentLeagueIndex]) {
     // fake data for main page
     result.forEach((user) => {
       user.wins += user.wins;
@@ -187,7 +189,7 @@ const leastPoints = computed(() => {
             >
               Compiled Record
               <svg
-                class="w-3 h-3 ms-1.5 fill-slate-400"
+                class="w-6 h-3 ms-1.5 fill-slate-400"
                 :class="{
                   'fill-slate-600 dark:fill-slate-50': tableOrder == 'wins',
                 }"
