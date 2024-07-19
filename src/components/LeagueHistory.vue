@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import { maxBy, minBy } from "lodash";
 import { TableDataType, RosterType } from "../api/types";
 import { useStore } from "../store/store";
-import { getData } from "../api/api";
+import { getData, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../api/types";
 import Alert from "../components/Alert.vue";
 
@@ -61,6 +61,13 @@ const addNewLeague = async (season: string) => {
         setTimeout(() => {
           store.updateShowAddedAlert(false);
         }, 3000);
+        await inputLeague(
+          newLeagueInfo.leagueId,
+          newLeagueInfo.name,
+          newLeagueInfo.totalRosters,
+          newLeagueInfo.seasonType,
+          newLeagueInfo.season
+        );
       } else {
         store.updateExistsAlert(true);
         setTimeout(() => {
