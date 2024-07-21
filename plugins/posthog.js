@@ -7,6 +7,7 @@ export default {
       import.meta.env.VITE_POSTHOG_KEY,
       {
         api_host: "https://us.i.posthog.com",
+        persistence: "localStorage",
       }
     );
   },
