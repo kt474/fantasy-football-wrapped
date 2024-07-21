@@ -106,7 +106,7 @@ const dataAllYears = computed(() => {
       avatarImg: user.avatarImg,
       seasons: store.leagueInfo[store.currentLeagueIndex]
         ? [store.leagueInfo[store.currentLeagueIndex].season]
-        : ["2023", "2022"], // defaulting to this for main page fake data
+        : ["2023", "2022", "2021"], // defaulting to this for main page fake data
     });
   });
   if (
@@ -132,9 +132,9 @@ const dataAllYears = computed(() => {
   } else if (!store.leagueInfo[store.currentLeagueIndex]) {
     // fake data for main page
     result.forEach((user) => {
-      user.wins += user.wins;
-      user.losses += user.losses;
-      user.points += user.points;
+      user.wins += 2 * user.wins;
+      user.losses += 2 * user.losses;
+      user.points += 2 * user.points;
     });
   }
   return result;
