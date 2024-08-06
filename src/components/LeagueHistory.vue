@@ -337,12 +337,23 @@ const leastPoints = computed(() => {
                 class="flex flex-nowrap"
               >
                 <div
-                  class="text-blue-600 underline cursor-pointer dark:text-blue-500 flex"
+                  class="flex text-blue-600 underline cursor-pointer dark:text-blue-500"
                   @click="addNewLeague(season)"
                 >
                   {{ season }}
                   <svg
-                    v-if="user.rosterId === user.leagueWinner[index]"
+                    v-if="
+                      user.rosterId === user.leagueWinner[index] ||
+                      (store.leagueInfo.length < 1 &&
+                        index === 1 &&
+                        user.rosterId === 2) ||
+                      (store.leagueInfo.length < 1 &&
+                        index === 0 &&
+                        user.rosterId === 6) ||
+                      (store.leagueInfo.length < 1 &&
+                        index === 2 &&
+                        user.rosterId === 8)
+                    "
                     class="w-5 ml-2 mr-1"
                     version="1.0"
                     id="Layer_1"
