@@ -128,7 +128,7 @@ const setColorMode = () => {
                 </div>
                 <div class="p-4 space-y-4 md:p-5">
                   <p
-                    class="text-base leading-relaxed text-gray-700 dark:text-gray-200"
+                    class="text-base leading-relaxed text-gray-700 dark:text-gray-100"
                   >
                     Welcome to ffwrapped, a platform designed to provide
                     insightful data and charts about your fantasy football
@@ -143,7 +143,7 @@ const setColorMode = () => {
                     leagues are supported.
                   </p>
                   <p
-                    class="text-base leading-relaxed text-gray-700 dark:text-gray-200"
+                    class="text-base leading-relaxed text-gray-700 dark:text-gray-100"
                   >
                     Everything on this site is completely free and open source.
                     The source code can be found on
@@ -169,7 +169,7 @@ const setColorMode = () => {
                     >.
                   </p>
                   <p
-                    class="text-base leading-relaxed text-gray-700 dark:text-gray-200"
+                    class="text-base leading-relaxed text-gray-700 dark:text-gray-100"
                   >
                     Using this site will always be completely free (and ad free)
                     but if you would like to support this project, please
