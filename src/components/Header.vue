@@ -145,8 +145,8 @@ const setColorMode = () => {
                   <p
                     class="text-base leading-relaxed text-gray-700 dark:text-gray-100"
                   >
-                    Everything on this site is completely free and open source.
-                    The source code can be found on
+                    Everything on this site is open source and completely free
+                    to use. The source code can be found on
                     <a
                       aria-label="Link to github repository"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
@@ -168,7 +168,7 @@ const setColorMode = () => {
                       >email</a
                     >.
                   </p>
-                  <p
+                  <!-- <p
                     class="text-base leading-relaxed text-gray-700 dark:text-gray-100"
                   >
                     Using this site will always be completely free (and ad free)
@@ -180,7 +180,7 @@ const setColorMode = () => {
                       target="_blank"
                       >buying me a coffee</a
                     >.
-                  </p>
+                  </p> -->
                 </div>
               </div>
             </div>
