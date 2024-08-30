@@ -113,7 +113,9 @@ const dataAllYears = computed(() => {
       points: user.pointsFor,
       avatarImg: user.avatarImg,
       rosterId: user.rosterId,
-      randomScheduleWins: user.randomScheduleWins,
+      randomScheduleWins: store.leagueInfo[store.currentLeagueIndex]
+        ? user.randomScheduleWins
+        : 3 * user.randomScheduleWins,
       leagueWinner:
         store.leagueInfo[store.currentLeagueIndex] &&
         store.leagueInfo[store.currentLeagueIndex].playoffPoints.length > 0
