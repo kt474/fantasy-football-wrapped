@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { maxBy, minBy } from "lodash";
-import { TableDataType, RosterType } from "../api/types";
+import { TableDataType } from "../api/types";
 import { useStore } from "../store/store";
 import { getData, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../api/types";
 import Alert from "../components/Alert.vue";
+import { createTableData } from "../api/helper.ts";
 
 const store = useStore();
 const props = defineProps<{
@@ -41,6 +42,13 @@ const getPreviousLeagues = async () => {
     await checkPreviousLeagues(previousLeagueId);
   }
 };
+
+const medianScoring = computed(() => {
+  if (store.leagueInfo[store.currentLeagueIndex]) {
+    return store.leagueInfo[store.currentLeagueIndex].medianScoring === 1;
+  }
+  return false;
+});
 
 const addNewLeague = async (season: string) => {
   if (store.leagueInfo[store.currentLeagueIndex]) {
@@ -105,6 +113,7 @@ const dataAllYears = computed(() => {
       points: user.pointsFor,
       avatarImg: user.avatarImg,
       rosterId: user.rosterId,
+      randomScheduleWins: user.randomScheduleWins,
       leagueWinner:
         store.leagueInfo[store.currentLeagueIndex] &&
         store.leagueInfo[store.currentLeagueIndex].playoffPoints.length > 0
@@ -121,12 +130,25 @@ const dataAllYears = computed(() => {
   ) {
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.forEach(
       (league: any) => {
-        league.rosters.forEach((user: RosterType) => {
+        let tableData;
+        if (localStorage.getItem(league.leagueId)) {
+          tableData = JSON.parse(localStorage.getItem(league.leagueId));
+        } else {
+          tableData = createTableData(
+            league.users,
+            league.rosters,
+            league.weeklyPoints,
+            medianScoring.value
+          );
+          localStorage.setItem(league.leagueId, JSON.stringify(tableData));
+        }
+        tableData.forEach((user: tableDataType) => {
           result.forEach((resultUser) => {
             if (resultUser.id === user.id) {
               resultUser.wins += user.wins;
               resultUser.losses += user.losses;
               resultUser.points += user.pointsFor;
+              resultUser.randomScheduleWins += user.randomScheduleWins;
               if (league.weeklyPoints.length > 0) {
                 resultUser.seasons.push(league.season);
               }
@@ -161,6 +183,10 @@ const tableDataAllYears = computed(() => {
     return dataAllYears.value.sort((a: any, b: any) => {
       return b.points - a.points;
     });
+  } else if (tableOrder.value === "expectedWins") {
+    return dataAllYears.value.sort((a: any, b: any) => {
+      return b.wins - b.randomScheduleWins - (a.wins - a.randomScheduleWins);
+    });
   }
 });
 
@@ -178,6 +204,16 @@ const mostPoints = computed(() => {
 });
 const leastPoints = computed(() => {
   return minBy(dataAllYears.value, "points")?.points;
+});
+
+const mostLucky = computed(() => {
+  const user = maxBy(dataAllYears.value, (a) => a.wins - a.randomScheduleWins);
+  return user ? (user.wins - user.randomScheduleWins).toFixed(2) : null;
+});
+
+const mostUnlucky = computed(() => {
+  const user = minBy(dataAllYears.value, (a) => a.wins - a.randomScheduleWins);
+  return user ? (user.wins - user.randomScheduleWins).toFixed(2) : null;
 });
 </script>
 <template>
@@ -229,6 +265,38 @@ const leastPoints = computed(() => {
           <th scope="col" class="px-6 py-3">
             <div
               class="flex items-center cursor-pointer dark:text-gray-200"
+              @click="tableOrder = 'expectedWins'"
+              @mouseover="hover = 'expectedWins'"
+              @mouseleave="hover = ''"
+            >
+              Wins above expected
+              <svg
+                class="w-3 h-3 ms-1.5 fill-slate-400"
+                :class="{
+                  'fill-slate-600 dark:fill-slate-50':
+                    tableOrder == 'expectedWins',
+                }"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                />
+              </svg>
+            </div>
+            <div
+              :class="hover === 'expectedWins' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600 max-w-80"
+            >
+              (Actual wins) - (Average number of wins after simulating 10,000
+              randomized weekly matchups)
+            </div>
+          </th>
+          <th scope="col" class="px-6 py-3">
+            <div
+              class="flex items-center cursor-pointer dark:text-gray-200"
               @click="tableOrder = 'points'"
               @mouseover="hover = 'points'"
               @mouseleave="hover = ''"
@@ -256,6 +324,7 @@ const leastPoints = computed(() => {
               Total regular season points across all seasons
             </div>
           </th>
+
           <th scope="col" class="px-6 py-3 dark:text-gray-200">
             <div
               class="flex items-center"
@@ -323,6 +392,18 @@ const leastPoints = computed(() => {
             class="px-6 py-3"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
+                (user.wins - user.randomScheduleWins).toFixed(2) === mostLucky,
+              'text-red-600 dark:text-red-500 font-semibold':
+                (user.wins - user.randomScheduleWins).toFixed(2) ===
+                mostUnlucky,
+            }"
+          >
+            {{ (user.wins - user.randomScheduleWins).toFixed(2) }}
+          </td>
+          <td
+            class="px-6 py-3"
+            :class="{
+              'text-blue-600 dark:text-blue-500 font-semibold':
                 user.points === mostPoints,
               'text-red-600 dark:text-red-500 font-semibold':
                 user.points === leastPoints,
@@ -330,6 +411,7 @@ const leastPoints = computed(() => {
           >
             {{ user.points }}
           </td>
+
           <td class="px-6 py-3">
             <div class="flex">
               <div
@@ -355,12 +437,9 @@ const leastPoints = computed(() => {
                         user.rosterId === 8)
                     "
                     class="w-5 ml-2 mr-1"
-                    version="1.0"
                     id="Layer_1"
                     xmlns="http://www.w3.org/2000/svg"
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
                     viewBox="0 0 64 64"
-                    enable-background="new 0 0 64 64"
                     xml:space="preserve"
                     fill="#000000"
                   >

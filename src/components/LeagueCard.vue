@@ -4,6 +4,7 @@ import { useStore } from "../store/store";
 import { onMounted } from "vue";
 import { initFlowbite } from "flowbite";
 import { getData } from "../api/api";
+import { LeagueInfoType } from "../api/types";
 
 onMounted(() => {
   initFlowbite();
@@ -39,6 +40,11 @@ const refreshLeague = async () => {
 
 const removeLeague = () => {
   if (localStorage.leagueInfo) {
+    if (props.leagueInfo.previousLeagues) {
+      props.leagueInfo.previousLeagues.forEach((league: LeagueInfoType) => {
+        localStorage.removeItem(league.leagueId);
+      });
+    }
     store.$patch((state) => {
       state.leagueInfo = state.leagueInfo.filter(
         (item: any) => item.leagueId !== props.leagueInfo.leagueId

@@ -1,12 +1,6 @@
 <script setup lang="ts">
-import { mean, max, min, zip, countBy, maxBy, minBy } from "lodash";
-import {
-  getPowerRanking,
-  getMedian,
-  getRandomUser,
-  fakeRosters,
-  fakeUsers,
-} from "../api/helper";
+import { maxBy, minBy } from "lodash";
+import { fakeRosters, fakeUsers, createTableData } from "../api/helper";
 import { computed, onMounted, ref } from "vue";
 import { useStore } from "../store/store";
 import { TableDataType, UserType, RosterType } from "../api/types";
@@ -51,111 +45,21 @@ const originalData = computed(() => {
     }
   }
   if (props.users && props.points) {
-    const combined = props.users.map((a: any) => {
-      const matched = props.rosters.find((b: any) => b.id === a.id);
-      if (matched) {
-        return {
-          ...a,
-          ...matched,
-        };
+    let combinedPoints = createTableData(
+      props.users,
+      props.rosters,
+      props.points,
+      medianScoring.value
+    );
+    if (store.currentLeagueId) {
+      let savedData: any = {};
+      if (localStorage.originalData) {
+        savedData = JSON.parse(localStorage.originalData);
       }
-      return null;
-    });
-    const filtered = combined.filter((a: any) => a !== null);
-    const combinedPoints = filtered.map((a: any) => ({
-      ...a,
-      ...props.points.find((b: any) => b.rosterId === a.rosterId),
-    }));
-
-    const pointsArr: any[] = [];
-    combinedPoints.forEach((value: any) => {
-      pointsArr.push(value.points);
-      value["winsAgainstAll"] = 0;
-      value["lossesAgainstAll"] = 0;
-    });
-    const zipped: any = zip(...pointsArr);
-    const medians: number[] = [];
-    for (let i: number = 0; i < zipped.length; i++) {
-      medians.push(Number(getMedian(zipped[i])?.toFixed(2)));
-      for (let j: number = 0; j < zipped[i].length; j++) {
-        const numberOfWins = zipped[i].filter(
-          (a: any) => a < zipped[i][j]
-        ).length;
-        const currentTeam = combinedPoints.find((obj: any) => {
-          return obj.points[i] === zipped[i][j];
-        });
-        if (currentTeam.losses !== 0 && currentTeam.wins !== 0) {
-          currentTeam["winsAgainstAll"] += numberOfWins;
-          currentTeam["lossesAgainstAll"] +=
-            zipped[i].length - numberOfWins - 1;
-        }
-      }
+      savedData[store.currentLeagueId] = combinedPoints;
+      localStorage.originalData = JSON.stringify(savedData);
     }
-    if (combinedPoints) {
-      combinedPoints.forEach((value: any) => {
-        let randomScheduleWins = 0;
-        const numOfSimulations = 10000;
-        if (value.points) {
-          for (let i = 0; i < value.points.length; i++) {
-            for (
-              let simulations = 0;
-              simulations < numOfSimulations;
-              simulations++
-            )
-              if (
-                value.points[i] >
-                combinedPoints[getRandomUser(combinedPoints.length, i)].points[
-                  i
-                ]
-              ) {
-                randomScheduleWins++;
-              }
-          }
-        }
-        value["randomScheduleWins"] = randomScheduleWins / numOfSimulations;
-        if (medianScoring.value) {
-          value["randomScheduleWins"] =
-            (2 * randomScheduleWins) / numOfSimulations;
-        }
-        value["rating"] = getPowerRanking(
-          mean(value.points),
-          Number(max(value.points)),
-          Number(min(value.points)),
-          value.wins / (value.wins + value.losses)
-        );
-        if (!medianScoring.value) {
-          const pairs = zip(value.points, medians);
-          const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
-          value["winsWithMedian"] = counts["true"] + value.wins;
-          value["lossesWithMedian"] = counts["false"] + value.losses;
-        } else {
-          value["winsWithMedian"] = value.wins;
-          value["lossesWithMedian"] = value.losses;
-        }
-      });
-
-      combinedPoints.sort((a: any, b: any) => {
-        if (a.wins !== b.wins) {
-          return b.wins - a.wins;
-        }
-        return b.pointsFor - a.pointsFor;
-      });
-
-      combinedPoints.forEach((user, index) => {
-        user["regularSeasonRank"] = index + 1;
-      });
-
-      if (store.currentLeagueId) {
-        let savedData: any = {};
-        if (localStorage.originalData) {
-          savedData = JSON.parse(localStorage.originalData);
-        }
-        savedData[store.currentLeagueId] = combinedPoints;
-        localStorage.originalData = JSON.stringify(savedData);
-      }
-
-      return combinedPoints;
-    }
+    return combinedPoints;
   }
   return [];
 });
@@ -246,9 +150,7 @@ const totalRosters = computed(() => {
 
 const medianScoring = computed(() => {
   if (store.leagueInfo[store.currentLeagueIndex]) {
-    return store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
-      ? true
-      : false;
+    return store.leagueInfo[store.currentLeagueIndex].medianScoring === 1;
   }
   return false;
 });

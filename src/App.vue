@@ -21,7 +21,7 @@ onMounted(async () => {
   setHtmlBackground();
   if (localStorage.leagueInfo) {
     const savedLeagues = JSON.parse(localStorage.leagueInfo);
-    savedLeagues.forEach(async (league: LeagueInfoType) => {
+    savedLeagues.forEach((league: LeagueInfoType) => {
       if (!store.leagueIds.includes(league.leagueId)) {
         const currentTime = new Date().getTime();
         const diff = currentTime - league.lastUpdated;
@@ -32,7 +32,7 @@ onMounted(async () => {
             delete currentData[league.leagueId];
             localStorage.originalData = JSON.stringify(currentData);
           }
-          store.updateLeagueInfo(await getData(league.leagueId));
+          store.updateLeagueInfo(getData(league.leagueId));
         } else {
           store.updateLeagueInfo(league);
         }
