@@ -21,7 +21,7 @@ onMounted(async () => {
   setHtmlBackground();
   if (localStorage.leagueInfo) {
     const savedLeagues = JSON.parse(localStorage.leagueInfo);
-    savedLeagues.forEach((league: LeagueInfoType) => {
+    for (const league of savedLeagues) {
       if (!store.leagueIds.includes(league.leagueId)) {
         const currentTime = new Date().getTime();
         const diff = currentTime - league.lastUpdated;
@@ -32,12 +32,12 @@ onMounted(async () => {
             delete currentData[league.leagueId];
             localStorage.originalData = JSON.stringify(currentData);
           }
-          store.updateLeagueInfo(getData(league.leagueId));
+          store.updateLeagueInfo(await getData(league.leagueId));
         } else {
           store.updateLeagueInfo(league);
         }
       }
-    });
+    }
     store.updateCurrentLeagueId(localStorage.currentLeagueId);
   } else {
     const queryParams = new URLSearchParams(window.location.search);
