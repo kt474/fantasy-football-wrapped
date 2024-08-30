@@ -65,7 +65,7 @@ const originalData = computed(() => {
 });
 
 // sorted version of originalData
-const tableData: any = computed(() => {
+const tableData = computed(() => {
   if (tableOrder.value === "wins") {
     return originalData.value.sort((a: any, b: any) => {
       if (a.wins !== b.wins) {

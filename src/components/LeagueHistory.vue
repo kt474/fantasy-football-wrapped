@@ -132,7 +132,7 @@ const dataAllYears = computed(() => {
       (league: any) => {
         let tableData;
         if (localStorage.getItem(league.leagueId)) {
-          tableData = JSON.parse(localStorage.getItem(league.leagueId));
+          tableData = JSON.parse(<string>localStorage.getItem(league.leagueId));
         } else {
           tableData = createTableData(
             league.users,
@@ -142,7 +142,7 @@ const dataAllYears = computed(() => {
           );
           localStorage.setItem(league.leagueId, JSON.stringify(tableData));
         }
-        tableData.forEach((user: tableDataType) => {
+        tableData.forEach((user: TableDataType) => {
           result.forEach((resultUser) => {
             if (resultUser.id === user.id) {
               resultUser.wins += user.wins;

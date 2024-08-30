@@ -2,7 +2,12 @@
 import { groupBy, flatten, zip, mean, max, min, countBy } from "lodash";
 import { getMatchup } from "./api";
 
-export const createTableData = (users, rosters, points, medianScoring) => {
+export const createTableData = (
+  users: any[],
+  rosters: any[],
+  points: any[],
+  medianScoring: boolean
+) => {
   if (users && points) {
     const combined = users.map((a: any) => {
       const matched = rosters.find((b: any) => b.id === a.id);
@@ -67,8 +72,7 @@ export const createTableData = (users, rosters, points, medianScoring) => {
         }
         value["randomScheduleWins"] = randomScheduleWins / numOfSimulations;
         if (medianScoring) {
-          value["randomScheduleWins"] =
-            (2 * randomScheduleWins) / numOfSimulations;
+          value["randomScheduleWins"] = 3;
         }
         value["rating"] = getPowerRanking(
           mean(value.points),
