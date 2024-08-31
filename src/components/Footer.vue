@@ -2,7 +2,7 @@
 
 <template>
   <div
-    class="container w-11/12 py-3 mx-auto text-xs text-gray-700 dark:text-gray-400"
+    class="container w-11/12 py-3 mx-auto text-xs text-gray-700 dark:text-gray-300"
   >
     <div class="flex justify-between max-w-screen-xl mx-auto">
       <div>

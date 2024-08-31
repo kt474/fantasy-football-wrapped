@@ -208,7 +208,7 @@ const numberOfLoserRounds = computed(() => {
                 :class="
                   matchup.t1 === matchup.w
                     ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                    : 'text-gray-500 dark:text-gray-400'
+                    : 'text-gray-500 dark:text-gray-300'
                 "
               >
                 <div
@@ -250,7 +250,7 @@ const numberOfLoserRounds = computed(() => {
                     :class="
                       matchup.t2 === matchup.w
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 dark:text-gray-400 font-normal'
+                        : 'text-gray-500 dark:text-gray-300 font-normal'
                     "
                   >
                     <div v-if="matchRosterId(matchup.t2)" class="flex">
@@ -292,7 +292,7 @@ const numberOfLoserRounds = computed(() => {
                   :class="
                     matchup.t1 === matchup.w
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                      : 'text-gray-500 dark:text-gray-400 font-normal'
+                      : 'text-gray-500 dark:text-gray-300 font-normal'
                   "
                 >
                   <div class="flex">
@@ -330,7 +330,7 @@ const numberOfLoserRounds = computed(() => {
                     :class="
                       matchup.t2 === matchup.w
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 dark:text-gray-400 font-normal'
+                        : 'text-gray-500 dark:text-gray-300 font-normal'
                     "
                   >
                     <div class="flex">
@@ -463,7 +463,7 @@ const numberOfLoserRounds = computed(() => {
                   :class="
                     matchup.t1 === matchup.l
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                      : 'text-gray-500 dark:text-gray-400 font-normal'
+                      : 'text-gray-500 dark:text-gray-300 font-normal'
                   "
                 >
                   <div class="flex">
@@ -501,7 +501,7 @@ const numberOfLoserRounds = computed(() => {
                     :class="
                       matchup.t2 === matchup.l
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 dark:text-gray-400 font-normal'
+                        : 'text-gray-500 dark:text-gray-300 font-normal'
                     "
                   >
                     <div class="flex">
@@ -543,7 +543,7 @@ const numberOfLoserRounds = computed(() => {
                   :class="
                     matchup.t1 === matchup.l
                       ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                      : 'text-gray-500 dark:text-gray-400 font-normal'
+                      : 'text-gray-500 dark:text-gray-300 font-normal'
                   "
                 >
                   <div class="flex">
@@ -581,7 +581,7 @@ const numberOfLoserRounds = computed(() => {
                     :class="
                       matchup.t2 === matchup.l
                         ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 dark:text-gray-400 font-normal'
+                        : 'text-gray-500 dark:text-gray-300 font-normal'
                     "
                   >
                     <div class="flex">

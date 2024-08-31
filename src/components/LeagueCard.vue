@@ -168,7 +168,7 @@ const shareLeague = () => {
     ></div>
     <p
       @click.self="selectLeague()"
-      class="font-normal text-gray-700 dark:text-gray-400 mt-1.5"
+      class="font-normal text-gray-700 dark:text-gray-300 mt-1.5"
     >
       {{
         props.leagueInfo.season +

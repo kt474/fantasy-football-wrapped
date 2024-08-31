@@ -20,7 +20,7 @@ const props = defineProps<{
           <div v-if="user" class="flex items-center">
             <div class="flex-1 min-w-0 list-padding ms-1">
               <p
-                class="text-lg text-gray-600 truncate dark:text-gray-400"
+                class="text-lg text-gray-600 truncate dark:text-gray-300"
                 :class="props.rosters.length <= 10 ? 'py-2.5' : 'py-1.5'"
               >
                 <span class="font-medium text-black dark:text-white"

@@ -203,7 +203,7 @@ const chartOptions = ref({
           >
             Power Rankings
           </h1>
-          <p class="text-base font-normal text-gray-500 dark:text-gray-400">
+          <p class="text-base font-normal text-gray-500 dark:text-gray-300">
             Regular Season
           </p>
         </div>
@@ -216,7 +216,7 @@ const chartOptions = ref({
         :series="powerRankings"
       ></apexchart>
       <p
-        class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
+        class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
       >
         Ranking formula:
         <span class="italic"

@@ -44,13 +44,13 @@ const leastWinsDifference = computed(() => {
     class="relative w-full max-w-lg overflow-x-auto rounded-lg shadow-md md:w-2/3 dark:bg-gray-700"
   >
     <table
-      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
+      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
     >
       <thead
         :class="
           store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
         "
-        class="text-xs text-gray-700 uppercase dark:text-gray-400"
+        class="text-xs text-gray-700 uppercase dark:text-gray-300"
       >
         <tr>
           <th scope="col" class="px-6 py-3 dark:text-gray-200">Team Name</th>

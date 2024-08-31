@@ -144,7 +144,7 @@ const chartOptions = ref({
         >
           Expected Wins
         </h1>
-        <p class="text-base font-normal text-gray-500 dark:text-gray-400">
+        <p class="text-base font-normal text-gray-500 dark:text-gray-300">
           Regular Season
         </p>
       </div>
@@ -156,7 +156,7 @@ const chartOptions = ref({
       :series="seriesData"
     ></apexchart>
     <p
-      class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
+      class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
     >
       Expected number of wins is calculated by simulating 10000 randomized
       weekly matchups

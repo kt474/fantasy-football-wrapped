@@ -179,7 +179,7 @@ const chartOptions = ref({
       :series="series"
     ></apexchart>
     <p
-      class="mt-8 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-400"
+      class="mt-8 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
     >
       Potential points are the maximum number of points a team could have scored
       if weekly lineups were optimized

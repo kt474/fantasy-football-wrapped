@@ -243,7 +243,7 @@ const series = computed(() => [
             <div class="w-4 h-4 mt-1 mr-2 bg-orange-300 rounded-full"></div>
             <p class="font-semibold dark:text-white">Pts vs. Win %</p>
           </div>
-          <p class="text-gray-600 dark:text-gray-400">
+          <p class="text-gray-600 dark:text-gray-300">
             {{ getRValue(recordVsPoints) }}
           </p>
         </li>
@@ -252,7 +252,7 @@ const series = computed(() => [
             <div class="w-4 h-4 mt-1 mr-2 bg-orange-500 rounded-full"></div>
             <p class="font-semibold dark:text-white">Pts vs. All Win %</p>
           </div>
-          <p class="text-gray-600 dark:text-gray-400">
+          <p class="text-gray-600 dark:text-gray-300">
             {{ getRValue(allRecordVsPoints) }}
           </p>
         </li>
@@ -261,7 +261,7 @@ const series = computed(() => [
             <div class="w-4 h-4 mt-1 mr-2 bg-orange-700 rounded-full"></div>
             <p class="font-semibold dark:text-white">Pts vs. Median Win %</p>
           </div>
-          <p class="text-gray-600 dark:text-gray-400">
+          <p class="text-gray-600 dark:text-gray-300">
             {{ getRValue(medianRecordVsPoints) }}
           </p>
         </li>
@@ -270,7 +270,7 @@ const series = computed(() => [
             <div class="w-4 h-4 mt-1 mr-2 bg-green-300 rounded-full"></div>
             <p class="font-semibold dark:text-white">PPts vs. Win %</p>
           </div>
-          <p class="text-gray-600 dark:text-gray-400">
+          <p class="text-gray-600 dark:text-gray-300">
             {{ getRValue(recordVsPotentialPoints) }}
           </p>
         </li>
@@ -279,7 +279,7 @@ const series = computed(() => [
             <div class="w-4 h-4 mt-1 mr-2 bg-green-500 rounded-full"></div>
             <p class="font-semibold dark:text-white">PPts vs. All Win %</p>
           </div>
-          <p class="text-gray-600 dark:text-gray-400">
+          <p class="text-gray-600 dark:text-gray-300">
             {{ getRValue(allRecordVsPotentialPoints) }}
           </p>
         </li>
@@ -288,7 +288,7 @@ const series = computed(() => [
             <div class="w-4 h-4 mt-1 mr-2 bg-green-700 rounded-full"></div>
             <p class="font-semibold dark:text-white">PPts vs. Median Win %</p>
           </div>
-          <p class="text-gray-600 dark:text-gray-400">
+          <p class="text-gray-600 dark:text-gray-300">
             {{ getRValue(medianRecordVsPotentialPoints) }}
           </p>
         </li>
@@ -304,7 +304,7 @@ const series = computed(() => [
           >
             Points vs. Win Percentages
           </h5>
-          <p class="text-base font-normal text-gray-500 dark:text-gray-400">
+          <p class="text-base font-normal text-gray-500 dark:text-gray-300">
             Regular Season
           </p>
         </div>

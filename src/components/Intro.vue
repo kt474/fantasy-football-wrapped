@@ -12,13 +12,13 @@
       league summary
     </h1>
     <p
-      class="max-w-4xl mx-auto mt-6 mb-0 text-lg font-normal text-center text-gray-500 text-balance lg:text-xl sm:px-16 dark:text-gray-400"
+      class="max-w-4xl mx-auto mt-6 mb-0 text-lg font-normal text-center text-gray-500 text-balance lg:text-xl sm:px-16 dark:text-gray-300"
     >
       Detailed analysis and informative charts for winning fantasy football
       managers.
     </p>
     <p
-      class="max-w-3xl mx-auto text-lg font-normal text-center text-gray-500 lg:text-xl sm:px-16 dark:text-gray-400"
+      class="max-w-3xl mx-auto text-lg font-normal text-center text-gray-500 lg:text-xl sm:px-16 dark:text-gray-300"
     >
       Start by entering your league ID below.
     </p>
