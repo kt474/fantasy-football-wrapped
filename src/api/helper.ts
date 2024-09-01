@@ -218,19 +218,19 @@ export const fakeUsers = [
   },
   {
     id: "3",
-    name: "Addison in Wonderland",
+    name: "The Princess McBride",
     avatar: "8eb8f8bf999945d523f2c4033f70473e",
     avatarImg: "../avatars/avatar3.svg",
   },
   {
     id: "4",
-    name: "Ladies and Edelman",
+    name: "Baby Back Gibbs",
     avatar: "15d7cf259bc30eab8f6120f45f652fb6",
     avatarImg: "../avatars/avatar4.svg",
   },
   {
     id: "5",
-    name: "Run CMC",
+    name: "Pollard Greens",
     avatar: "15d7cf259bc30eab8f6120f45f652fb6",
     avatarImg: "../avatars/avatar5.svg",
   },
@@ -248,7 +248,7 @@ export const fakeUsers = [
   },
   {
     id: "8",
-    name: "How I Kmet Your Mother",
+    name: "Ja’Marr the Merrier",
     avatar: "4f4090e5e9c3941414db40a871e3e909",
     avatarImg: "../avatars/avatar8.svg",
   },
@@ -260,7 +260,7 @@ export const fakeUsers = [
   },
   {
     id: "10",
-    name: "Kamara Shy",
+    name: "Dak to the Future",
     avatar: "81d984f3556782876d25195356b0ab58",
     avatarImg: "../avatars/avatar10.svg",
   },
