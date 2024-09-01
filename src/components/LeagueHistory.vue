@@ -282,7 +282,7 @@ const worstManager = computed(() => {
           <th scope="col" class="px-6 py-3 dark:text-gray-200">Team name</th>
           <th scope="col" class="px-6 py-3">
             <div
-              class="flex items-center cursor-pointer dark:text-gray-200"
+              class="flex items-center w-24 cursor-pointer dark:text-gray-200"
               @click="tableOrder = 'wins'"
               @mouseover="hover = 'wins'"
               @mouseleave="hover = ''"
@@ -312,7 +312,7 @@ const worstManager = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
-              class="flex items-center w-32 cursor-pointer dark:text-gray-200"
+              class="flex items-center cursor-pointer w-28 dark:text-gray-200"
               @click="tableOrder = 'expectedWins'"
               @mouseover="hover = 'expectedWins'"
               @mouseleave="hover = ''"
@@ -374,7 +374,7 @@ const worstManager = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
-              class="flex items-center cursor-pointer dark:text-gray-200"
+              class="flex items-center cursor-pointer w-28 dark:text-gray-200"
               @click="tableOrder = 'managerEfficiency'"
               @mouseover="hover = 'managerEfficiency'"
               @mouseleave="hover = ''"
@@ -398,7 +398,7 @@ const worstManager = computed(() => {
             </div>
             <div
               :class="hover === 'managerEfficiency' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
             >
               Points / Potential points
             </div>
