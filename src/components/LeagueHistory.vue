@@ -50,6 +50,16 @@ const medianScoring = computed(() => {
   return false;
 });
 
+const currentLeague = computed(() => {
+  if (
+    store.leagueInfo[store.currentLeagueIndex] &&
+    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+  ) {
+    return 0;
+  }
+  return -1;
+});
+
 const addNewLeague = async (season: string) => {
   if (store.leagueInfo[store.currentLeagueIndex]) {
     const newLeagueInfo = store.leagueInfo[
@@ -113,9 +123,12 @@ const dataAllYears = computed(() => {
       points: user.pointsFor,
       avatarImg: user.avatarImg,
       rosterId: user.rosterId,
+      managerEfficiency: store.leagueInfo[store.currentLeagueIndex]
+        ? user.managerEfficiency
+        : 2 * user.managerEfficiency,
       randomScheduleWins: store.leagueInfo[store.currentLeagueIndex]
         ? user.randomScheduleWins
-        : 3 * user.randomScheduleWins,
+        : 3 * user.randomScheduleWins, // defaulting to this for main page fake data
       leagueWinner:
         store.leagueInfo[store.currentLeagueIndex] &&
         store.leagueInfo[store.currentLeagueIndex].playoffPoints.length > 0
@@ -151,6 +164,7 @@ const dataAllYears = computed(() => {
               resultUser.losses += user.losses;
               resultUser.points += user.pointsFor;
               resultUser.randomScheduleWins += user.randomScheduleWins;
+              resultUser.managerEfficiency += user.managerEfficiency;
               if (league.weeklyPoints.length > 0) {
                 resultUser.seasons.push(league.season);
               }
@@ -189,6 +203,13 @@ const tableDataAllYears = computed(() => {
     return dataAllYears.value.sort((a: any, b: any) => {
       return b.wins - b.randomScheduleWins - (a.wins - a.randomScheduleWins);
     });
+  } else if (tableOrder.value === "managerEfficiency") {
+    return dataAllYears.value.sort((a: any, b: any) => {
+      return (
+        b.managerEfficiency / (b.seasons.length + currentLeague.value) -
+        a.managerEfficiency / (a.seasons.length + currentLeague.value)
+      );
+    });
   }
 });
 
@@ -217,6 +238,31 @@ const mostUnlucky = computed(() => {
   const user = minBy(dataAllYears.value, (a) => a.wins - a.randomScheduleWins);
   return user ? (user.wins - user.randomScheduleWins).toFixed(2) : null;
 });
+
+const bestManager = computed(() => {
+  const user = maxBy(
+    dataAllYears.value,
+    (a) => a.managerEfficiency / (a.seasons.length + currentLeague.value)
+  );
+  return user
+    ? (
+        (user.managerEfficiency / (user.seasons.length + currentLeague.value)) *
+        100
+      ).toFixed(1)
+    : null;
+});
+const worstManager = computed(() => {
+  const user = minBy(
+    dataAllYears.value,
+    (a) => a.managerEfficiency / (a.seasons.length + currentLeague.value)
+  );
+  return user
+    ? (
+        (user.managerEfficiency / (user.seasons.length + currentLeague.value)) *
+        100
+      ).toFixed(1)
+    : null;
+});
 </script>
 <template>
   <div
@@ -224,13 +270,13 @@ const mostUnlucky = computed(() => {
     class="relative mt-4 overflow-x-auto shadow-md sm:rounded-lg"
   >
     <table
-      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400"
+      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
     >
       <thead
         :class="
           store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
         "
-        class="text-xs text-gray-700 uppercase dark:text-gray-400"
+        class="text-xs text-gray-700 uppercase dark:text-gray-300"
       >
         <tr>
           <th scope="col" class="px-6 py-3 dark:text-gray-200">Team name</th>
@@ -266,14 +312,14 @@ const mostUnlucky = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
-              class="flex items-center cursor-pointer dark:text-gray-200"
+              class="flex items-center w-32 cursor-pointer dark:text-gray-200"
               @click="tableOrder = 'expectedWins'"
               @mouseover="hover = 'expectedWins'"
               @mouseleave="hover = ''"
             >
               Wins above expected
               <svg
-                class="w-3 h-3 ms-1.5 fill-slate-400"
+                class="w-5 h-3 ms-1.5 fill-slate-400"
                 :class="{
                   'fill-slate-600 dark:fill-slate-50':
                     tableOrder == 'expectedWins',
@@ -324,6 +370,37 @@ const mostUnlucky = computed(() => {
               class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
             >
               Total regular season points across all seasons
+            </div>
+          </th>
+          <th scope="col" class="px-6 py-3">
+            <div
+              class="flex items-center cursor-pointer dark:text-gray-200"
+              @click="tableOrder = 'managerEfficiency'"
+              @mouseover="hover = 'managerEfficiency'"
+              @mouseleave="hover = ''"
+            >
+              Manager Efficiency
+              <svg
+                class="w-5 h-3 ms-1.5 fill-slate-400"
+                :class="{
+                  'fill-slate-600 dark:fill-slate-50':
+                    tableOrder == 'managerEfficiency',
+                }"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                />
+              </svg>
+            </div>
+            <div
+              :class="hover === 'managerEfficiency' ? 'visible' : 'invisible'"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+            >
+              Points / Potential points
             </div>
           </th>
 
@@ -413,7 +490,33 @@ const mostUnlucky = computed(() => {
           >
             {{ user.points }}
           </td>
-
+          <td
+            v-if="user.seasons.length + currentLeague != 0"
+            class="px-6 py-3"
+            :class="{
+              'text-blue-600 dark:text-blue-500 font-semibold':
+                (
+                  (user.managerEfficiency /
+                    (user.seasons.length + currentLeague)) *
+                  100
+                ).toFixed(1) === bestManager,
+              'text-red-600 dark:text-red-500 font-semibold':
+                (
+                  (user.managerEfficiency /
+                    (user.seasons.length + currentLeague)) *
+                  100
+                ).toFixed(1) === worstManager,
+            }"
+          >
+            {{
+              (
+                (user.managerEfficiency /
+                  (user.seasons.length + currentLeague)) *
+                100
+              ).toFixed(1)
+            }}%
+          </td>
+          <td v-else class="px-6 py-3">0%</td>
           <td class="px-6 py-3">
             <div class="flex">
               <div
