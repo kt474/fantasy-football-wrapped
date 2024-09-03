@@ -72,7 +72,8 @@ export const createTableData = (
         }
         value["randomScheduleWins"] = randomScheduleWins / numOfSimulations;
         if (medianScoring) {
-          value["randomScheduleWins"] = 3;
+          value["randomScheduleWins"] =
+            (2 * randomScheduleWins) / numOfSimulations;
         }
         value["rating"] = getPowerRanking(
           mean(value.points),
