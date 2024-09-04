@@ -13,7 +13,6 @@ import WorstManagerCard from "./WorstManagerCard.vue";
 import TransactionsCard from "./TransactionsCard.vue";
 import StandingsChart from "./StandingsChart.vue";
 import ManagementCard from "./ManagementCard.vue";
-import ManagementScatterPlot from "./ManagementScatterPlot.vue";
 import RankingGraph from "./RankingGraph.vue";
 import Playoffs from "./Playoffs.vue";
 import LeagueHistory from "./LeagueHistory.vue";
@@ -529,7 +528,7 @@ const medianScoring = computed(() => {
         <ManagementCard :tableData="tableData" class="mt-4" />
         <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
       </div>
-      <ManagementScatterPlot :tableData="tableData" class="mt-4" />
+      <!-- <ManagementScatterPlot :tableData="tableData" class="mt-4" /> -->
     </div>
     <div v-if="store.currentTab === 'playoffs'">
       <Playoffs :tableData="tableData" />
