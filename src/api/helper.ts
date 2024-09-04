@@ -255,13 +255,13 @@ export const fakeUsers = [
   },
   {
     id: "9",
-    name: "Game of Mahomes",
+    name: "Dak to the Future",
     avatar: "b3338675f635c2c1f42b469621d38ec6",
     avatarImg: "../avatars/avatar9.svg",
   },
   {
     id: "10",
-    name: "Dak to the Future",
+    name: "LaPorta Potty",
     avatar: "81d984f3556782876d25195356b0ab58",
     avatarImg: "../avatars/avatar10.svg",
   },
