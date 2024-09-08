@@ -7,6 +7,7 @@ import {
   getLeague,
   getUsername,
   inputLeague,
+  inputUsername,
   getAllLeagues,
 } from "../api/api";
 const store = useStore();
@@ -48,6 +49,7 @@ const onSubmit = async () => {
     store.username = user.display_name;
     store.setLeaguesList(leagues);
     store.updateShowLeaguesList(true);
+    await inputUsername(user.display_name, seasonYear.value);
   } else {
     if (store.leagueInfo.length > 5) {
       errorMsg.value = "Maximum of 5 leagues allowed";

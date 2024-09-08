@@ -7,6 +7,32 @@ export const seasonType: any = {
   2: "Dynasty",
 };
 
+export const inputUsername = async (username: string, year: string) => {
+  try {
+    const response = await fetch(
+      "https://ffwrapped-backend.vercel.app/api/addUsername",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: {
+            username: username,
+            year: year,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
 export const inputLeague = async (
   leagueId: string,
   name: string,
