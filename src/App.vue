@@ -8,6 +8,7 @@ import Intro from "./components/Intro.vue";
 import Alert from "./components/Alert.vue";
 import CardContainer from "./components/CardContainer.vue";
 import SkeletonLoading from "./components/SkeletonLoading.vue";
+import UserLeagueList from "./components/UserLeagueList.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./api/types";
@@ -144,6 +145,12 @@ const setHtmlBackground = () => {
             <span class="sr-only">Loading...</span>
             <SkeletonLoading />
           </div>
+        </div>
+        <div
+          v-else-if="store.showLeaguesList"
+          class="container h-full mx-auto mb-96"
+        >
+          <UserLeagueList />
         </div>
         <div v-else class="container mx-auto custom-background">
           <Intro />

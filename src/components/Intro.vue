@@ -20,7 +20,7 @@
     <p
       class="max-w-3xl mx-auto text-lg font-normal text-center text-gray-500 lg:text-xl sm:px-16 dark:text-gray-300"
     >
-      Start by entering your league ID below.
+      Start by entering your league ID or username below.
     </p>
     <a
       aria-label="Sleeper website link"

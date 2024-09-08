@@ -15,6 +15,9 @@ export const useStore = defineStore("main", {
     currentLeagueId: "",
     leagueSubmitted: false,
     currentTab: "standings",
+    showLeaguesList: false,
+    leaguesList: [] as any[],
+    username: "",
   }),
   getters: {
     transactions: (state) =>
@@ -60,6 +63,12 @@ export const useStore = defineStore("main", {
     },
     updateCurrentLeagueId(payload: string) {
       this.currentLeagueId = payload;
+    },
+    updateShowLeaguesList(payload: boolean) {
+      this.showLeaguesList = payload;
+    },
+    setLeaguesList(payload: any[]) {
+      this.leaguesList = payload;
     },
   },
 });

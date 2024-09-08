@@ -1,7 +1,7 @@
 import { getWeeklyPoints, getTotalTransactions } from "./helper";
 import { round } from "lodash";
 
-const seasonType: any = {
+export const seasonType: any = {
   0: "Redraft",
   1: "Keeper",
   2: "Dynasty",
@@ -55,6 +55,20 @@ export const getLosersBracket = async (leagueId: string) => {
   );
   const losersBracket = await response.json();
   return losersBracket;
+};
+
+export const getUsername = async (username: string) => {
+  const response = await fetch(`https://api.sleeper.app/v1/user/${username}`);
+  const user = await response.json();
+  return user;
+};
+
+export const getAllLeagues = async (userId: string, season: string) => {
+  const response = await fetch(
+    `https://api.sleeper.app/v1/user/${userId}/leagues/nfl/${season}`
+  );
+  const leagues = await response.json();
+  return leagues;
 };
 
 export const getLeague = async (leagueId: string) => {

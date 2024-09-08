@@ -38,7 +38,12 @@ const setColorMode = () => {
       class="flex flex-wrap items-center justify-between max-w-screen-xl py-2 mx-auto"
     >
       <div
+        @click="
+          store.leaguesList = [];
+          store.showLeaguesList = false;
+        "
         aria-label="Logo"
+        :class="{ 'cursor-pointer': store.showLeaguesList }"
         class="flex items-center space-x-3 rtl:space-x-reverse"
       >
         <img
@@ -159,13 +164,21 @@ const setColorMode = () => {
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                       href="https://github.com/kt474/fantasy-football-wrapped/issues"
                       target="_blank"
-                      >issue</a
+                      >issue,</a
                     >
-                    or send an
+                    send an
                     <a
                       href="mailto:kt474@cornell.edu?subject=ffwrapped request"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                      >email</a
+                      >email,</a
+                    >
+                    or reach out on
+                    <a
+                      aria-label="Link to twitter"
+                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      href="https://twitter.com/kevkevkt"
+                      target="_blank"
+                      >twitter</a
                     >.
                   </p>
                   <!-- <p
