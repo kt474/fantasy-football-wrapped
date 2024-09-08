@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useStore } from "../store/store";
-import { seasonType, getData } from "../api/api";
+import { seasonType, getData, inputLeague } from "../api/api";
 
 const checkedLeagues = ref([]);
 const showError = ref(false);
@@ -17,6 +17,13 @@ const addLeagues = async () => {
       store.updateCurrentLeagueId(league);
       const newLeagueInfo = await getData(league);
       store.updateLeagueInfo(newLeagueInfo);
+      await inputLeague(
+        league,
+        newLeagueInfo.name,
+        newLeagueInfo.totalRosters,
+        newLeagueInfo.seasonType,
+        newLeagueInfo.season
+      );
     }
     store.setLeaguesList([]);
     store.updateShowLeaguesList(false);
