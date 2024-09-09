@@ -140,7 +140,10 @@ const mostTransactions = computed(() => {
 });
 
 const regularSeasonLength = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex].regularSeasonLength;
+  if (store.leagueInfo[store.currentLeagueIndex].status == "in_season") {
+    return store.leagueInfo[store.currentLeagueIndex].currentWeek + 1;
+  }
+  return store.leagueInfo[store.currentLeagueIndex].regularSeasonLength + 1;
 });
 
 const totalRosters = computed(() => {

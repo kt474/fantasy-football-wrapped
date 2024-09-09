@@ -221,6 +221,7 @@ export const getData = async (leagueId: string) => {
   newLeagueInfo["losersBracket"] = await getLosersBracket(leagueId);
   if (newLeagueInfo["status"] == "in_season") {
     const currentWeek = await getCurrentLeagueState();
+    newLeagueInfo["currentWeek"] = currentWeek.week;
     newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
       leagueId,
       currentWeek.week

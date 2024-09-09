@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   powerRankings: any[];
@@ -11,10 +11,16 @@ const rankingValues = computed(() => {
     return b.ratings[currentWeek.value - 1] - a.ratings[currentWeek.value - 1];
   });
 });
-const currentWeek = ref(props.regularSeasonLength);
+
 const weeks = computed(() => {
   return [...Array(props.regularSeasonLength).keys()].slice(1).reverse();
 });
+const currentWeek = ref(weeks.value[0]);
+
+watch(
+  () => props.regularSeasonLength,
+  () => (currentWeek.value = weeks.value[0])
+);
 </script>
 <template>
   <div
@@ -32,7 +38,7 @@ const weeks = computed(() => {
         class="block p-2 text-sm text-gray-900 border border-gray-300 rounded-lg w-15 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 custom-padding"
         v-model="currentWeek"
       >
-        <option selected value="14">Week 14</option>
+        <!-- <option selected value="14">Week 14</option> -->
         <option v-for="week in weeks" :key="week" :value="week">
           Week {{ week }}
         </option>
