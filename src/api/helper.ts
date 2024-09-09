@@ -54,7 +54,7 @@ export const createTableData = (
         let randomScheduleWins = 0;
         const numOfSimulations = 10000;
         if (value.points) {
-          for (let i = 0; i < value.points.length; i++) {
+          for (let i = 0; i < value.wins + value.losses; i++) {
             for (
               let simulations = 0;
               simulations < numOfSimulations;
