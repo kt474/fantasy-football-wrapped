@@ -18,6 +18,7 @@ export type LeagueInfoType = {
   playoffPoints: [];
   transactions: [];
   previousLeagues: any[];
+  status: string;
 };
 
 export type RosterType = {

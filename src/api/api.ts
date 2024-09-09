@@ -114,6 +114,7 @@ export const getLeague = async (leagueId: string) => {
         leagueWinner: "",
         previousLeagueId: "",
         lastScoredWeek: 0,
+        status: "",
       };
     }
     const league = await response.json();
@@ -130,6 +131,7 @@ export const getLeague = async (leagueId: string) => {
         ? league["metadata"]["latest_league_winner_roster_id"]
         : null,
       previousLeagueId: league["previous_league_id"],
+      status: league["status"],
     };
   } catch (error) {
     return error;
@@ -179,10 +181,10 @@ export const getMatchup = async (week: number, leagueId: string) => {
     `https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`
   );
   const matchup = await response.json();
-  const result = matchup.map((matchup: any) => {
+  const result = matchup.map((game: any) => {
     return {
-      rosterId: matchup["roster_id"],
-      points: matchup["points"],
+      rosterId: game["roster_id"],
+      points: game["points"],
     };
   });
   return result;
@@ -207,15 +209,28 @@ export const getTransactions = async (leagueId: string, week: number) => {
   return transactions;
 };
 
+export const getCurrentLeagueState = async () => {
+  const response = await fetch("https://api.sleeper.app/v1/state/nfl");
+  return await response.json();
+};
+
 export const getData = async (leagueId: string) => {
   const newLeagueInfo: any = await getLeague(leagueId);
   newLeagueInfo["rosters"] = await getRosters(leagueId);
   newLeagueInfo["winnersBracket"] = await getWinnersBracket(leagueId);
   newLeagueInfo["losersBracket"] = await getLosersBracket(leagueId);
-  newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
-    leagueId,
-    newLeagueInfo["regularSeasonLength"]
-  );
+  if (newLeagueInfo["status"] == "in_season") {
+    const currentWeek = await getCurrentLeagueState();
+    newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
+      leagueId,
+      currentWeek.week
+    );
+  } else {
+    newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
+      leagueId,
+      newLeagueInfo["regularSeasonLength"]
+    );
+  }
   newLeagueInfo["playoffPoints"] = await getWeeklyPoints(
     leagueId,
     newLeagueInfo["lastScoredWeek"],

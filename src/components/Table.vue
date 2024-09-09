@@ -436,8 +436,8 @@ const medianScoring = computed(() => {
                     item.lossesWithMedian === mostMedianLosses,
                 }"
               >
-                {{ item.winsWithMedian ? item.winsWithMedian : "" }} -
-                {{ item.lossesWithMedian ? item.lossesWithMedian : "" }}
+                {{ item.winsWithMedian ? item.winsWithMedian : 0 }} -
+                {{ item.lossesWithMedian ? item.lossesWithMedian : 0 }}
               </td>
             </tr>
           </tbody>
