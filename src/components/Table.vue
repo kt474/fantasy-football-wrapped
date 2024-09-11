@@ -514,7 +514,7 @@ const medianScoring = computed(() => {
       <PowerRankingData
         v-else
         :tableData="tableData"
-        :regularSeasonLength="14"
+        :regularSeasonLength="15"
         :totalRosters="10"
         class="mt-4"
       />
