@@ -141,7 +141,7 @@ const mostTransactions = computed(() => {
 
 const regularSeasonLength = computed(() => {
   if (store.leagueInfo[store.currentLeagueIndex].status == "in_season") {
-    return store.leagueInfo[store.currentLeagueIndex].currentWeek + 1;
+    return store.leagueInfo[store.currentLeagueIndex].lastScoredWeek + 1;
   }
   return store.leagueInfo[store.currentLeagueIndex].regularSeasonLength + 1;
 });
