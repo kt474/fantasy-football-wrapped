@@ -42,7 +42,7 @@ export const createTableData = (
         const currentTeam = combinedPoints.find((obj: any) => {
           return obj.points[i] === zipped[i][j];
         });
-        if (currentTeam.losses !== 0 && currentTeam.wins !== 0) {
+        if (currentTeam.pointsFor !== 0) {
           currentTeam["winsAgainstAll"] += numberOfWins;
           currentTeam["lossesAgainstAll"] +=
             zipped[i].length - numberOfWins - 1;
