@@ -20,7 +20,8 @@
     <p
       class="max-w-3xl mx-auto text-lg font-normal text-center text-gray-500 lg:text-xl sm:px-16 dark:text-gray-300"
     >
-      Start by entering your league ID or username below.
+      Start by entering your league ID
+      <span class="hidden sm:inline">or username</span> below.
     </p>
     <a
       aria-label="Sleeper website link"
@@ -29,7 +30,7 @@
       class="inline-block mb-2 text-lg font-semibold text-center text-blue-600 dark:text-blue-500 lg:text-xl sm:px-16 xl:px-48"
     >
       https://sleeper.com/leagues/<span class="text-red-600 dark:text-red-500"
-        >{League ID Here}</span
+        >{League ID}</span
       >
     </a>
   </div>
