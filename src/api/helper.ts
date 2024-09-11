@@ -84,8 +84,10 @@ export const createTableData = (
         if (!medianScoring) {
           const pairs = zip(value.points, medians);
           const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
-          value["winsWithMedian"] = counts["true"] + value.wins;
-          value["lossesWithMedian"] = counts["false"] + value.losses;
+          const addedWins = counts["true"] ? counts["true"] : 0;
+          const addedLosses = counts["false"] ? counts["false"] : 0;
+          value["winsWithMedian"] = addedWins + value.wins;
+          value["lossesWithMedian"] = addedLosses + value.losses;
         } else {
           value["winsWithMedian"] = value.wins;
           value["lossesWithMedian"] = value.losses;
