@@ -37,8 +37,8 @@
 <style scoped>
 @media (max-width: 768px) {
   .custom-font-size {
-    font-size: 2.65rem;
-    line-height: 2.75rem;
+    font-size: 2.4rem;
+    line-height: 2.5rem;
   }
 }
 </style>
