@@ -133,6 +133,9 @@ const mostMedianLosses = computed(() => {
 });
 
 const leagueWinner = computed(() => {
+  if (store.leagueInfo[store.currentLeagueIndex].status !== "complete") {
+    return null;
+  }
   return Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner);
 });
 const mostTransactions = computed(() => {
@@ -454,7 +457,7 @@ const medianScoring = computed(() => {
           v-if="store.currentLeagueId"
           :rosters="props.rosters"
           :users="props.users"
-          :leagueWinner="leagueWinner"
+          :leagueWinner?="leagueWinner"
           class="mt-4 xl:mt-0"
         />
         <WinnerCard
