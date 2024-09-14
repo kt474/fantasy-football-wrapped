@@ -457,7 +457,7 @@ const medianScoring = computed(() => {
           v-if="store.currentLeagueId"
           :rosters="props.rosters"
           :users="props.users"
-          :leagueWinner?="leagueWinner"
+          :leagueWinner="leagueWinner"
           class="mt-4 xl:mt-0"
         />
         <WinnerCard

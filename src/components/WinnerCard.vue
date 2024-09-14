@@ -5,7 +5,7 @@ import { UserType, RosterType } from "../api/types";
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
-  leagueWinner?: number;
+  leagueWinner: number | null;
 }>();
 
 const winner: any = computed(() => {
