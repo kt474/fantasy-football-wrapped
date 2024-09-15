@@ -128,7 +128,7 @@ const worstManagerUser: any = computed(() => {
 
         <p
           v-if="worstManager && worstManagerUser"
-          class="mx-3 mt-1 text-gray-800 text-md dark:text-white"
+          class="mx-3 mt-0.5 text-gray-800 text-md dark:text-white"
         >
           {{ worstManagerUser.name }}
         </p>

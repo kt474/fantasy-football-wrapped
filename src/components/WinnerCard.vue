@@ -15,6 +15,8 @@ const leagueStatusComplete = computed(() => {
     if (store.leagueInfo[store.currentLeagueIndex].status == "complete") {
       return true;
     }
+  } else {
+    return true;
   }
   return false;
 });
