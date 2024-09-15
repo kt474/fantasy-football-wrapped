@@ -21,6 +21,15 @@ watch(
   () => props.regularSeasonLength,
   () => (currentWeek.value = weeks.value[0])
 );
+
+const listPadding = computed(() => {
+  if (props.powerRankings.length <= 10) {
+    return "py-3";
+  } else if (props.powerRankings.length <= 12) {
+    return "py-2";
+  }
+  return "py-1";
+});
 </script>
 <template>
   <div
@@ -46,10 +55,7 @@ watch(
     </div>
     <div class="flow-root">
       <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-        <li
-          v-for="(user, index) in rankingValues"
-          :class="props.powerRankings.length <= 10 ? 'py-3' : 'py-2'"
-        >
+        <li v-for="(user, index) in rankingValues" :class="listPadding">
           <div class="flex items-center">
             <div class="flex-1 min-w-0 list-padding ms-1">
               <p

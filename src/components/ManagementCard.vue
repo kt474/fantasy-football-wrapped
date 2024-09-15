@@ -45,6 +45,15 @@ const highestEfficiency = computed(() => {
 const lowestEfficiency = computed(() => {
   return minBy(tableData.value, "managerEfficiency")?.managerEfficiency;
 });
+
+const listPadding = computed(() => {
+  if (props.tableData.length <= 10) {
+    return "py-4";
+  } else if (props.tableData.length <= 12) {
+    return "py-3";
+  }
+  return "py-2.5";
+});
 </script>
 <template>
   <div
@@ -170,7 +179,7 @@ const lowestEfficiency = computed(() => {
         >
           <th
             scope="row"
-            :class="props.tableData.length <= 10 ? 'py-4' : 'py-3'"
+            :class="listPadding"
             class="px-6 font-medium text-gray-900 truncate max-w-56 whitespace-nowrap dark:text-white"
           >
             {{ item.name }}
