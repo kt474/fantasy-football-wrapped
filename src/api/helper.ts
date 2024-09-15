@@ -141,15 +141,6 @@ export const getTotalTransactions = (transactions: any) => {
   }, {});
 };
 
-export const sumWeeklyTransactions = (trasactionObj: any) => {
-  trasactionObj.reduce((sumMap: any, obj: any) => {
-    for (let [id, value] of Object.entries(obj)) {
-      sumMap[id] = (sumMap[id] || 0) + value;
-    }
-    return sumMap;
-  }, {});
-};
-
 export const getPowerRanking = (
   avgScore: number,
   highScore: number,

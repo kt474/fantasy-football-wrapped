@@ -219,6 +219,7 @@ export const getData = async (leagueId: string) => {
   newLeagueInfo["rosters"] = await getRosters(leagueId);
   newLeagueInfo["winnersBracket"] = await getWinnersBracket(leagueId);
   newLeagueInfo["losersBracket"] = await getLosersBracket(leagueId);
+  const transactions = [];
   if (newLeagueInfo["status"] == "in_season") {
     const currentWeek = await getCurrentLeagueState();
     newLeagueInfo["currentWeek"] = currentWeek.week;
@@ -226,11 +227,21 @@ export const getData = async (leagueId: string) => {
       leagueId,
       currentWeek.week
     );
+    for (let i = 0; i <= newLeagueInfo["currentWeek"]; i++) {
+      transactions.push(
+        getTotalTransactions(await getTransactions(leagueId, i + 1))
+      );
+    }
   } else {
     newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
       leagueId,
       newLeagueInfo["regularSeasonLength"]
     );
+    for (let i = 0; i <= newLeagueInfo["regularSeasonLength"]; i++) {
+      transactions.push(
+        getTotalTransactions(await getTransactions(leagueId, i + 1))
+      );
+    }
   }
   newLeagueInfo["playoffPoints"] = await getWeeklyPoints(
     leagueId,
@@ -242,12 +253,6 @@ export const getData = async (leagueId: string) => {
     if (val["avatar"] !== null) {
       val["avatarImg"] = await getAvatar(val["avatar"]);
     }
-  }
-  const transactions = [];
-  for (let i = 1; i <= newLeagueInfo["regularSeasonLength"]; i++) {
-    transactions.push(
-      getTotalTransactions(await getTransactions(leagueId, i + 1))
-    );
   }
   let sumById: any = {};
   transactions.forEach((obj) => {
