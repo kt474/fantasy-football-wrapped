@@ -4,6 +4,7 @@ import { RosterType, UserType } from "../api/types";
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
+  cardHeight: string;
 }>();
 
 const worstManager: any = computed(() => {
@@ -25,11 +26,15 @@ const worstManagerUser: any = computed(() => {
 </script>
 <template>
   <div
-    :class="props.users.length <= 10 ? 'h-36' : 'h-44'"
+    :class="props.cardHeight"
     class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
   >
     <svg
-      :class="props.users.length <= 10 ? 'w-8 mt-px' : 'w-14'"
+      :class="{
+        'w-8 mt-px': props.users.length <= 10,
+        'w-14': props.users.length <= 12 && props.users.length > 10,
+        'w-16 mt-4': props.users.length > 12,
+      }"
       class="mx-auto my-1"
       version="1.0"
       id="Layer_1"

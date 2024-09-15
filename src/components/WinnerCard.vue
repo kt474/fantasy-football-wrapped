@@ -8,6 +8,7 @@ const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
   leagueWinner: number | null;
+  cardHeight: string;
 }>();
 
 const leagueStatusComplete = computed(() => {
@@ -33,11 +34,15 @@ const winner: any = computed(() => {
 </script>
 <template>
   <div
-    :class="props.users.length <= 10 ? 'h-36' : 'h-44'"
+    :class="props.cardHeight"
     class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
   >
     <svg
-      :class="props.users.length <= 10 ? 'w-10' : 'w-16 mt-2.5'"
+      :class="{
+        'w-10': props.users.length <= 10,
+        'w-16 mt-2.5': props.users.length <= 12 && props.users.length > 10,
+        'w-16 mt-7': props.users.length > 12,
+      }"
       class="mx-auto mt-2"
       version="1.0"
       id="Layer_1"

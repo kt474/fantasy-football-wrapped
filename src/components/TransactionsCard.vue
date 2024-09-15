@@ -6,6 +6,7 @@ import { UserType } from "../api/types";
 const props = defineProps<{
   users: UserType[];
   mostTransactions: object;
+  cardHeight: string;
 }>();
 
 const mostTransactions: any = computed(() => {
@@ -24,11 +25,15 @@ const mostTransactionsUser: any = computed(() => {
 </script>
 <template>
   <div
-    :class="props.users.length <= 10 ? 'h-36' : 'h-44'"
+    :class="props.cardHeight"
     class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
   >
     <svg
-      :class="props.users.length <= 10 ? 'w-9 -mt-1' : 'w-14'"
+      :class="{
+        'w-9 -mt-1': props.users.length <= 10,
+        'w-14': props.users.length <= 12 && props.users.length > 10,
+        'w-16 mt-3': props.users.length > 12,
+      }"
       class="mx-auto my-1"
       version="1.0"
       id="Layer_1"

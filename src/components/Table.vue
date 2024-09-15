@@ -162,6 +162,15 @@ const medianScoring = computed(() => {
   }
   return false;
 });
+
+const cardHeight = computed(() => {
+  if (props.users.length <= 10) {
+    return "h-36";
+  } else if (props.users.length <= 12) {
+    return "h-44";
+  }
+  return "h-52";
+});
 </script>
 <template>
   <div>
@@ -461,6 +470,7 @@ const medianScoring = computed(() => {
           :rosters="props.rosters"
           :users="props.users"
           :leagueWinner="leagueWinner"
+          :cardHeight="cardHeight"
           class="mt-4 xl:mt-0"
         />
         <WinnerCard
@@ -468,42 +478,49 @@ const medianScoring = computed(() => {
           :rosters="fakeRosters"
           :users="fakeUsers"
           :leagueWinner="6"
+          :cardHeight="cardHeight"
           class="mt-4 xl:mt-0"
         />
         <BestManagerCard
           v-if="store.currentLeagueId"
           :rosters="props.rosters"
           :users="props.users"
+          :cardHeight="cardHeight"
           class="mt-4"
         />
         <BestManagerCard
           v-else
           :rosters="fakeRosters"
           :users="fakeUsers"
+          :cardHeight="cardHeight"
           class="mt-4"
         />
         <WorstManagerCard
           v-if="store.currentLeagueId"
           :rosters="props.rosters"
           :users="props.users"
+          :cardHeight="cardHeight"
           class="mt-4"
         />
         <WorstManagerCard
           v-else
           :rosters="fakeRosters"
           :users="fakeUsers"
+          :cardHeight="cardHeight"
           class="mt-4"
         />
         <TransactionsCard
           v-if="store.currentLeagueId"
           :users="props.users"
           :mostTransactions="mostTransactions"
+          :cardHeight="cardHeight"
           class="mt-4"
         />
         <TransactionsCard
           v-else
           :users="fakeUsers"
           :mostTransactions="{ 1: 24 }"
+          :cardHeight="cardHeight"
           class="mt-4"
         />
       </div>
