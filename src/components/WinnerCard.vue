@@ -28,13 +28,6 @@ const winner: any = computed(() => {
   }
   return null;
 });
-
-const winnerRoster: any = computed(() => {
-  if (props.leagueWinner) {
-    return props.rosters.find((user) => user.rosterId === props.leagueWinner);
-  }
-  return null;
-});
 </script>
 <template>
   <div
