@@ -1,12 +1,23 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { UserType, RosterType } from "../api/types";
+import { useStore } from "../store/store";
 
+const store = useStore();
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
   leagueWinner: number | null;
 }>();
+
+const leagueStatusComplete = computed(() => {
+  if (store.leagueInfo[store.currentLeagueIndex]) {
+    if (store.leagueInfo[store.currentLeagueIndex].status == "complete") {
+      return true;
+    }
+  }
+  return false;
+});
 
 const winner: any = computed(() => {
   if (props.leagueWinner) {
@@ -96,13 +107,12 @@ const winnerRoster: any = computed(() => {
         </g>
       </g>
     </svg>
+
     <h1
-      v-if="
-        winnerRoster && winnerRoster.wins === 0 && winnerRoster.losses === 0
-      "
+      v-if="!leagueStatusComplete"
       class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
-      Previous Winner
+      Projected League Champ
     </h1>
     <h1
       v-else

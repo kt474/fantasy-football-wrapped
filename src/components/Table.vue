@@ -134,7 +134,10 @@ const mostMedianLosses = computed(() => {
 
 const leagueWinner = computed(() => {
   if (store.leagueInfo[store.currentLeagueIndex].status !== "complete") {
-    return null;
+    const projectedWinner = tableData.value.reduce((max: any, obj: any) =>
+      obj.randomScheduleWins > max.randomScheduleWins ? obj : max
+    );
+    return projectedWinner.rosterId;
   }
   return Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner);
 });
