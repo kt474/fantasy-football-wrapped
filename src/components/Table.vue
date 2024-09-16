@@ -7,6 +7,7 @@ import { TableDataType, UserType, RosterType } from "../api/types";
 import PowerRankingData from "./PowerRankingData.vue";
 import ExpectedWinsCard from "./ExpectedWinsCard.vue";
 import ExpectedWinsChart from "./ExpectedWinsChart.vue";
+import ExpectedWinsChart2 from "./ExpectedWinsChart2.vue";
 import WinnerCard from "./WinnerCard.vue";
 import BestManagerCard from "./BestManagerCard.vue";
 import WorstManagerCard from "./WorstManagerCard.vue";
@@ -542,12 +543,12 @@ const cardHeight = computed(() => {
         class="mt-4"
       />
     </div>
-    <div
-      v-if="store.currentTab === 'expectedWins'"
-      class="flex flex-wrap md:flex-nowrap"
-    >
-      <ExpectedWinsCard :tableData="tableData" class="mt-4" />
-      <ExpectedWinsChart :tableData="tableData" class="mt-4 md:ml-4" />
+    <div v-if="store.currentTab === 'expectedWins'">
+      <div class="flex flex-wrap md:flex-nowrap">
+        <ExpectedWinsCard :tableData="tableData" class="mt-4" />
+        <ExpectedWinsChart :tableData="tableData" class="mt-4 md:ml-4" />
+      </div>
+      <ExpectedWinsChart2 :tableData="tableData" class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'managerEfficiency'">
       <div class="flex flex-wrap md:flex-nowrap">
