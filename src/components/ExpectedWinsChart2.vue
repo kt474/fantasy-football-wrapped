@@ -200,8 +200,7 @@ const chartOptions = ref({
       :class="props.tableData.length <= 12 ? 'mt-2' : 'mt-6'"
     >
       Difference between number of actual wins and number of expected wins based
-      off of simulating random matchups. The higher the value, the luckier the
-      manager.
+      off of simulating random matchups. Higher values indicate more luck.
     </p>
   </div>
 </template>
