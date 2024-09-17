@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { maxBy, toPairs } from "lodash";
-import { UserType } from "../api/types";
+import { UserType, RosterType } from "../api/types";
 
 const props = defineProps<{
   users: UserType[];
+  rosters: RosterType[];
   mostTransactions: object;
   cardHeight: string;
 }>();
@@ -30,9 +31,9 @@ const mostTransactionsUser: any = computed(() => {
   >
     <svg
       :class="{
-        'w-9 -mt-1': props.users.length <= 10,
-        'w-14': props.users.length <= 12 && props.users.length > 10,
-        'w-16 mt-3': props.users.length > 12,
+        'w-9 -mt-1': props.rosters.length <= 10,
+        'w-14': props.rosters.length <= 12 && props.rosters.length > 10,
+        'w-16 mt-3': props.rosters.length > 12,
       }"
       class="mx-auto my-1"
       version="1.0"

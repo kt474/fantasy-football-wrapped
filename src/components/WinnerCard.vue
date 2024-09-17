@@ -39,9 +39,9 @@ const winner: any = computed(() => {
   >
     <svg
       :class="{
-        'w-10': props.users.length <= 10,
-        'w-16 mt-2.5': props.users.length <= 12 && props.users.length > 10,
-        'w-16 mt-7': props.users.length > 12,
+        'w-10': props.rosters.length <= 10,
+        'w-16 mt-2.5': props.rosters.length <= 12 && props.rosters.length > 10,
+        'w-16 mt-7': props.rosters.length > 12,
       }"
       class="mx-auto mt-2"
       version="1.0"

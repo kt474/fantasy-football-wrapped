@@ -165,9 +165,9 @@ const medianScoring = computed(() => {
 });
 
 const cardHeight = computed(() => {
-  if (props.users.length <= 10) {
+  if (props.rosters.length <= 10) {
     return "h-36";
-  } else if (props.users.length <= 12) {
+  } else if (props.rosters.length <= 12) {
     return "h-44";
   }
   return "h-52";
@@ -515,6 +515,7 @@ const cardHeight = computed(() => {
           :users="props.users"
           :mostTransactions="mostTransactions"
           :cardHeight="cardHeight"
+          :rosters="props.rosters"
           class="mt-4"
         />
         <TransactionsCard
@@ -522,6 +523,7 @@ const cardHeight = computed(() => {
           :users="fakeUsers"
           :mostTransactions="{ 1: 24 }"
           :cardHeight="cardHeight"
+          :rosters="props.rosters"
           class="mt-4"
         />
       </div>

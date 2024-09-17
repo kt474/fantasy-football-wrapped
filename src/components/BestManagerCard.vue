@@ -31,9 +31,9 @@ const bestManagerUser: any = computed(() => {
   >
     <svg
       :class="{
-        'w-9': props.users.length <= 10,
-        'w-14 mt-1.5': props.users.length <= 12 && props.users.length > 10,
-        'w-16 mt-5': props.users.length > 12,
+        'w-9': props.rosters.length <= 10,
+        'w-14 mt-1.5': props.rosters.length <= 12 && props.rosters.length > 10,
+        'w-16 mt-5': props.rosters.length > 12,
       }"
       class="mx-auto my-1"
       version="1.0"
