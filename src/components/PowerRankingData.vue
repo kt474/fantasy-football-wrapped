@@ -195,6 +195,11 @@ const chartOptions = ref({
 </script>
 <template>
   <div class="flex flex-wrap md:flex-nowrap">
+    <PowerRankingCard
+      :power-rankings="powerRankings"
+      :regular-season-length="props.regularSeasonLength"
+      class="mb-4 md:mr-4 md:mb-0"
+    />
     <div
       class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
     >
@@ -227,10 +232,5 @@ const chartOptions = ref({
         >
       </p>
     </div>
-    <PowerRankingCard
-      :power-rankings="powerRankings"
-      :regular-season-length="props.regularSeasonLength"
-      class="mt-4 md:ml-4 md:mt-0"
-    />
   </div>
 </template>
