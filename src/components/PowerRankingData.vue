@@ -20,16 +20,18 @@ const powerRankings = computed(() => {
     const ratingArr: number[] = [];
     if (value.recordByWeek && value.points) {
       value.points.forEach((_: number, week: number) => {
-        const currentWins = winsOnWeek(value.recordByWeek, week);
-        const currentLosess = week + 1 - currentWins;
-        ratingArr.push(
-          getPowerRanking(
-            mean(value.points.slice(0, week + 1)),
-            Number(max(value.points.slice(0, week + 1))),
-            Number(min(value.points.slice(0, week + 1))),
-            currentWins / (currentWins + currentLosess)
-          )
-        );
+        if (week < value.recordByWeek.length) {
+          const currentWins = winsOnWeek(value.recordByWeek, week);
+          const currentLosess = week + 1 - currentWins;
+          ratingArr.push(
+            getPowerRanking(
+              mean(value.points.slice(0, week + 1)),
+              Number(max(value.points.slice(0, week + 1))),
+              Number(min(value.points.slice(0, week + 1))),
+              currentWins / (currentWins + currentLosess)
+            )
+          );
+        }
       });
     }
     ratingsContainer.push(ratingArr);
