@@ -27,7 +27,7 @@ export const createTableData = (
 
     const pointsArr: any[] = [];
     combinedPoints.forEach((value: any) => {
-      pointsArr.push(value.points);
+      pointsArr.push(value.points.slice(0, value.recordByWeek.length));
       value["winsAgainstAll"] = 0;
       value["lossesAgainstAll"] = 0;
     });
@@ -82,7 +82,10 @@ export const createTableData = (
           value.wins / (value.wins + value.losses)
         );
         if (!medianScoring) {
-          const pairs = zip(value.points, medians);
+          const pairs = zip(
+            value.points.slice(0, value.recordByWeek.length),
+            medians
+          );
           const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
           const addedWins = counts["true"] ? counts["true"] : 0;
           const addedLosses = counts["false"] ? counts["false"] : 0;
