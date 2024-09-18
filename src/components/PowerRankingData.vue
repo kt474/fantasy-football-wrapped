@@ -198,10 +198,10 @@ const chartOptions = ref({
     <PowerRankingCard
       :power-rankings="powerRankings"
       :regular-season-length="props.regularSeasonLength"
-      class="mb-4 md:mr-4 md:mb-0"
+      class="w-full mb-4 md:w-1/3 md:mr-4 md:mb-0"
     />
     <div
-      class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
+      class="w-full p-4 bg-white rounded-lg shadow md:w-2/3 dark:bg-gray-800 md:p-6 min-w-80"
     >
       <div class="flex justify-between">
         <div>
