@@ -6,8 +6,7 @@ export default {
     app.config.globalProperties.$posthog = posthog.init(
       import.meta.env.VITE_POSTHOG_KEY,
       {
-        api_host: "https://www.ffwrapped.com/ingest",
-        ui_host: "https://us.posthog.com",
+        api_host: "https://us.i.posthog.com",
         persistence: "localStorage",
       }
     );
