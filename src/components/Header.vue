@@ -98,7 +98,7 @@ const setColorMode = () => {
             class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
           >
             <div class="relative w-full max-w-2xl max-h-full p-4">
-              <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+              <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
                 <div
                   class="flex items-center justify-between p-4 border-b rounded-t md:p-5 dark:border-gray-600"
                 >
@@ -140,7 +140,7 @@ const setColorMode = () => {
                     league. Currently, only
                     <a
                       aria-label="Link to sleeper website"
-                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      class="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                       href="https://sleeper.com"
                       target="_blank"
                       >Sleeper</a
@@ -154,14 +154,14 @@ const setColorMode = () => {
                     to use. The source code can be found on
                     <a
                       aria-label="Link to github repository"
-                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      class="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                       href="https://github.com/kt474/fantasy-football-wrapped"
                       target="_blank"
                       >Github</a
                     >. To report a bug or request new features, please open an
                     <a
                       aria-label="Link to github issues page"
-                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      class="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                       href="https://github.com/kt474/fantasy-football-wrapped/issues"
                       target="_blank"
                       >issue,</a
@@ -169,13 +169,13 @@ const setColorMode = () => {
                     send an
                     <a
                       href="mailto:kt474@cornell.edu?subject=ffwrapped request"
-                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      class="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                       >email,</a
                     >
                     or reach out on
                     <a
                       aria-label="Link to twitter"
-                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      class="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                       href="https://twitter.com/kevkevkt"
                       target="_blank"
                       >twitter</a
