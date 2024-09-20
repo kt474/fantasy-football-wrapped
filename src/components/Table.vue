@@ -205,7 +205,7 @@ const cardHeight = computed(() => {
                   class="flex items-center cursor-pointer dark:text-gray-200"
                 >
                   Record
-                  <div aria-label="Sort by wins">
+                  <div>
                     <svg
                       class="w-3 h-3 ms-1.5 fill-slate-400"
                       :class="{
@@ -238,7 +238,7 @@ const cardHeight = computed(() => {
                   class="flex items-center cursor-pointer dark:text-gray-200"
                 >
                   Points
-                  <div aria-label="Sort by points">
+                  <div>
                     <svg
                       class="w-3 h-3 ms-1.5 fill-slate-400"
                       :class="{
@@ -271,7 +271,7 @@ const cardHeight = computed(() => {
                   class="flex items-center w-20 cursor-pointer dark:text-gray-200"
                 >
                   Points Against
-                  <div aria-label="Sort by points against">
+                  <div>
                     <svg
                       class="w-3 h-3 ms-1.5 fill-slate-400"
                       :class="{
@@ -304,7 +304,7 @@ const cardHeight = computed(() => {
                   class="flex items-center w-20 cursor-pointer dark:text-gray-200"
                 >
                   Record vs. All
-                  <div aria-label="Sort by record against all ">
+                  <div>
                     <svg
                       class="w-3 h-3 ms-1.5 fill-slate-400"
                       :class="{
@@ -339,7 +339,7 @@ const cardHeight = computed(() => {
                   class="flex items-center w-20 cursor-pointer dark:text-gray-200"
                 >
                   Median Record
-                  <div aria-label="Sort by median record">
+                  <div>
                     <svg
                       class="w-3 h-3 ms-1.5 fill-slate-400"
                       :class="{
