@@ -51,7 +51,7 @@ const onSubmit = async () => {
     store.updateShowLeaguesList(true);
     localStorage.inputType = "League ID";
     store.updateShowInput(false);
-    await inputUsername(user.display_name, seasonYear.value);
+    inputUsername(user.display_name, seasonYear.value);
   } else {
     if (store.leagueInfo.length > 5) {
       errorMsg.value = "Maximum of 5 leagues allowed";
@@ -76,7 +76,7 @@ const onSubmit = async () => {
         store.updateLeagueInfo(newLeagueInfo);
         store.leagueSubmitted = true;
         store.updateShowInput(false);
-        await inputLeague(
+        inputLeague(
           leagueIdInput.value,
           newLeagueInfo.name,
           newLeagueInfo.totalRosters,
