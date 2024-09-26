@@ -6,7 +6,6 @@ const store = useStore();
 
 const transactionData = computed(() => {
   const currentLeague: any = store.leagueInfo[store.currentLeagueIndex];
-  console.log(currentLeague);
   const result: any[] = [];
   currentLeague.users.forEach((user: any) => {
     if (user.id in currentLeague.transactions) {
