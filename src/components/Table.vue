@@ -12,6 +12,7 @@ import WinnerCard from "./WinnerCard.vue";
 import BestManagerCard from "./BestManagerCard.vue";
 import WorstManagerCard from "./WorstManagerCard.vue";
 import TransactionsCard from "./TransactionsCard.vue";
+import TransactionsChart from "./TransactionsChart.vue";
 import StandingsChart from "./StandingsChart.vue";
 import ManagementCard from "./ManagementCard.vue";
 import RankingGraph from "./RankingGraph.vue";
@@ -557,6 +558,7 @@ const cardHeight = computed(() => {
         <ManagementCard :tableData="tableData" class="mt-4" />
         <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
       </div>
+      <TransactionsChart class="mt-4" />
       <!-- <ManagementScatterPlot :tableData="tableData" class="mt-4" /> -->
     </div>
     <div v-if="store.currentTab === 'playoffs'">
