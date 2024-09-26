@@ -1,22 +1,28 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
+import { fakeUsers } from "../../api/helper";
 
 const store = useStore();
 
 const transactionData = computed(() => {
   const currentLeague: any = store.leagueInfo[store.currentLeagueIndex];
   const result: any[] = [];
-  currentLeague.users.forEach((user: any) => {
-    if (user.id in currentLeague.transactions) {
-      result.push({
-        name: user.name,
-        transactions: currentLeague.transactions[user.id],
-      });
-    }
+  if (currentLeague) {
+    currentLeague.users.forEach((user: any) => {
+      if (user.id in currentLeague.transactions) {
+        result.push({
+          name: user.name,
+          transactions: currentLeague.transactions[user.id],
+        });
+      }
+    });
+    return result.sort((a, b) => a.transactions - b.transactions);
+  }
+  const fakeData = fakeUsers.map((user) => {
+    return { name: user.name, transactions: user.transactions };
   });
-
-  return result.sort((a, b) => a.transactions - b.transactions);
+  return fakeData.sort((a, b) => a.transactions - b.transactions);
 });
 
 const seriesData = computed(() => {
