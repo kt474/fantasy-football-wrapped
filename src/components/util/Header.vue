@@ -49,7 +49,7 @@ const setColorMode = () => {
         <img
           height="24"
           width="24"
-          src="../assets/football-helmet.png"
+          src="../../assets/football-helmet.png"
           class="h-6"
           alt="Flowbite Logo"
         />
