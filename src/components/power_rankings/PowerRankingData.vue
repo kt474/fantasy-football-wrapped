@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { mean, max, min, zip } from "lodash";
-import { useStore } from "../store/store";
-import { getPowerRanking, winsOnWeek } from "../api/helper";
-import { TableDataType } from "../api/types";
+import { useStore } from "../../store/store";
+import { getPowerRanking, winsOnWeek } from "../../api/helper";
+import { TableDataType } from "../../api/types";
 import PowerRankingCard from "./PowerRankingCard.vue";
 const store = useStore();
 

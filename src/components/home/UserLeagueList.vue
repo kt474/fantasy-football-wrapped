@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useStore } from "../store/store";
-import { seasonType, getData, inputLeague } from "../api/api";
+import { useStore } from "../../store/store";
+import { seasonType, getData, inputLeague } from "../../api/api";
 
 const checkedLeagues = ref([]);
 const showError = ref(false);

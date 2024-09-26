@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from "vue";
-import { useStore } from "../store/store";
+import { useStore } from "../../store/store";
 const store = useStore();
 const systemDarkMode = window.matchMedia(
   "(prefers-color-scheme: dark)"

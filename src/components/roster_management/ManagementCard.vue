@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { maxBy, cloneDeep, minBy } from "lodash";
 import { computed, ref } from "vue";
-import { useStore } from "../store/store";
-import { TableDataType } from "../api/types";
+import { useStore } from "../../store/store";
+import { TableDataType } from "../../api/types";
 const store = useStore();
 const tableOrder = ref("points");
 const hover = ref("");

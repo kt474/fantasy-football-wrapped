@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
-import { useStore } from "../store/store";
-import { LeagueInfoType } from "../api/types";
+import { useStore } from "../../store/store";
+import { LeagueInfoType } from "../../api/types";
 import {
   getData,
   getLeague,
@@ -9,7 +9,7 @@ import {
   inputLeague,
   inputUsername,
   getAllLeagues,
-} from "../api/api";
+} from "../../api/api";
 const store = useStore();
 const leagueIdInput = ref("");
 const inputType = ref("League ID");

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import LeagueCard from "./LeagueCard.vue";
-import { useStore } from "../store/store";
+import { useStore } from "../../store/store";
 import { computed } from "vue";
 
 const store = useStore();

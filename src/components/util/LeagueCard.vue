@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { capitalize } from "lodash";
-import { useStore } from "../store/store";
+import { useStore } from "../../store/store";
 import { onMounted } from "vue";
 import { initFlowbite } from "flowbite";
-import { getData } from "../api/api";
-import { LeagueInfoType } from "../api/types";
+import { getData } from "../../api/api";
+import { LeagueInfoType } from "../../api/types";
 
 onMounted(() => {
   initFlowbite();

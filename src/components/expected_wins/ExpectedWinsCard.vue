@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { cloneDeep, maxBy, minBy } from "lodash";
 import { computed, ref } from "vue";
-import { useStore } from "../store/store";
-import { TableDataType } from "../api/types";
+import { useStore } from "../../store/store";
+import { TableDataType } from "../../api/types";
 const store = useStore();
 const tableOrder = ref("winsDifference");
 const hover = ref("");

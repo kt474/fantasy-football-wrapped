@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { mean } from "lodash";
 import { ref, computed, watch } from "vue";
-import { useStore } from "../store/store";
-import { TableDataType } from "../api/types";
+import { useStore } from "../../store/store";
+import { TableDataType } from "../../api/types";
 const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];

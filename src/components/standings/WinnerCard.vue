@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { UserType, RosterType } from "../api/types";
-import { useStore } from "../store/store";
+import { UserType, RosterType } from "../../api/types";
+import { useStore } from "../../store/store";
 
 const store = useStore();
 const props = defineProps<{

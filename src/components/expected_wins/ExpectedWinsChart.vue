@@ -1,44 +1,30 @@
 <script setup lang="ts">
-import { max, min, cloneDeep } from "lodash";
 import { ref, computed, watch } from "vue";
-import { useStore } from "../store/store";
-import { TableDataType } from "../api/types";
+import { useStore } from "../../store/store";
+import { TableDataType } from "../../api/types";
 const store = useStore();
 
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
-const tableDataCopy = computed(() => {
-  const result = cloneDeep(props.tableData);
-  return result.sort(
-    (a, b) => a.wins - a.randomScheduleWins - (b.wins - b.randomScheduleWins)
-  );
-});
-
 const seriesData = computed(() => {
-  const result = tableDataCopy.value.map((user: any) => {
-    return parseFloat((user.wins - user.randomScheduleWins).toFixed(2));
+  const result: any[] = [];
+  props.tableData.forEach((user: any) => {
+    result.push({
+      x: user.name,
+      y: user.wins,
+      goals: [
+        {
+          name: "Expected",
+          value: user.randomScheduleWins,
+          strokeHeight: 5,
+          strokeColor: "#a855f7",
+        },
+      ],
+    });
   });
-  return [{ name: "Win Difference", data: result }];
-});
-
-const categories = computed(() => {
-  return tableDataCopy.value.map((user) => user.name);
-});
-
-const maxWinDifference = computed(() => {
-  const winDifference = props.tableData.map((user: any) => {
-    return Math.ceil(user.wins - user.randomScheduleWins);
-  });
-  return max(winDifference);
-});
-
-const minWinDifference = computed(() => {
-  const winDifference = props.tableData.map((user: any) => {
-    return Math.floor(user.wins - user.randomScheduleWins);
-  });
-  return min(winDifference);
+  return [{ name: "Actual Wins", data: result }];
 });
 
 const updateChartColor = () => {
@@ -69,44 +55,11 @@ const updateChartColor = () => {
         show: false,
       },
     },
-    xaxis: {
-      categories: categories.value,
-      title: {
-        text: "League Manager",
-        offsetY: 3,
-        style: {
-          fontSize: "16px",
-          fontFamily:
-            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
-          fontWeight: 600,
-        },
-      },
-    },
-    yaxis: {
-      min: minWinDifference.value,
-      max: maxWinDifference.value,
-      tickAmount: 4,
-      title: {
-        text: "Win Difference",
-        offsetX: -10,
-        style: {
-          fontSize: "16px",
-          fontFamily:
-            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
-          fontWeight: 600,
-        },
-      },
-    },
   };
 };
 
 watch(
   () => store.darkMode,
-  () => updateChartColor()
-);
-
-watch(
-  () => store.currentLeagueId,
   () => updateChartColor()
 );
 
@@ -146,10 +99,9 @@ const chartOptions = ref({
     },
   },
   xaxis: {
-    categories: categories.value,
     title: {
       text: "League Manager",
-      offsetY: 3,
+      offsetY: -10,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -159,11 +111,8 @@ const chartOptions = ref({
     },
   },
   yaxis: {
-    min: minWinDifference.value,
-    max: maxWinDifference.value,
-    tickAmount: 4,
     title: {
-      text: "Win Difference",
+      text: "Wins",
       offsetX: -10,
       style: {
         fontSize: "16px",
@@ -171,6 +120,15 @@ const chartOptions = ref({
           "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
         fontWeight: 600,
       },
+    },
+  },
+  legend: {
+    show: true,
+    showForSingleSeries: true,
+    offsetX: 21,
+    customLegendItems: ["Actual", "Expected"],
+    markers: {
+      fillColors: ["#00E396", "#775DD0"],
     },
   },
 });
@@ -184,14 +142,16 @@ const chartOptions = ref({
         <h1
           class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
         >
-          Expected Win Difference
+          Actual vs Expected Wins
         </h1>
+        <p class="text-base font-normal text-gray-500 dark:text-gray-300">
+          Regular Season
+        </p>
       </div>
     </div>
     <apexchart
       width="100%"
       height="475"
-      type="bar"
       :options="chartOptions"
       :series="seriesData"
     ></apexchart>
@@ -199,8 +159,8 @@ const chartOptions = ref({
       class="text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
       :class="props.tableData.length <= 12 ? 'mt-2' : 'mt-6'"
     >
-      Difference between number of actual wins and number of expected wins based
-      off of simulating random matchups. Higher values indicate more luck.
+      Expected number of wins is calculated by simulating 10000 randomized
+      weekly matchups
     </p>
   </div>
 </template>

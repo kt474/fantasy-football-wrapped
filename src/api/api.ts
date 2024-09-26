@@ -67,6 +67,14 @@ export const inputLeague = async (
     console.error("Error:", error);
   }
 };
+
+export const getProjections = async (player: string, year: string) => {
+  const response = await fetch(
+    `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
+  );
+  const playerInfo = await response.json();
+  return playerInfo["stats"]["pts_std"];
+};
 export const getWinnersBracket = async (leagueId: string) => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/winners_bracket`
@@ -156,6 +164,7 @@ export const getRosters = async (leagueId: string) => {
       losses: roster["settings"]["losses"],
       rosterId: roster["roster_id"],
       recordByWeek: roster["metadata"] ? roster["metadata"]["record"] : "",
+      players: roster["players"],
     };
   });
   return result;

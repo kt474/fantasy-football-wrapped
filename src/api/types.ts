@@ -32,6 +32,7 @@ export type RosterType = {
   losses: number;
   rosterId: number;
   recordByWeek: string;
+  players?: string[];
 };
 
 export type UserType = {

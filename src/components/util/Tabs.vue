@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useStore } from "../store/store";
+import { useStore } from "../../store/store";
 const store = useStore();
 
 const changeTab = (tab: string) => {

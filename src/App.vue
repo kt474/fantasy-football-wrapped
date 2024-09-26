@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { onMounted, watch, ref } from "vue";
-import Table from "./components/Table.vue";
-import Header from "./components/Header.vue";
-import Footer from "./components/Footer.vue";
-import Input from "./components/Input.vue";
-import Intro from "./components/Intro.vue";
-import Alert from "./components/Alert.vue";
-import CardContainer from "./components/CardContainer.vue";
-import SkeletonLoading from "./components/SkeletonLoading.vue";
-import UserLeagueList from "./components/UserLeagueList.vue";
+import Table from "./components/standings/Table.vue";
+import Header from "./components/util/Header.vue";
+import Footer from "./components/util/Footer.vue";
+import Input from "./components/util/Input.vue";
+import Intro from "./components/home/Intro.vue";
+import Alert from "./components/util/Alert.vue";
+import CardContainer from "./components/util/CardContainer.vue";
+import SkeletonLoading from "./components/util/SkeletonLoading.vue";
+import UserLeagueList from "./components/home/UserLeagueList.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./api/types";

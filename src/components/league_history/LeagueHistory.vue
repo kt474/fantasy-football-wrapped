@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { maxBy, minBy } from "lodash";
-import { TableDataType } from "../api/types";
-import { useStore } from "../store/store";
-import { getData, inputLeague } from "../api/api";
-import { LeagueInfoType } from "../api/types";
-import Alert from "../components/Alert.vue";
-import { createTableData } from "../api/helper.ts";
+import { TableDataType } from "../../api/types.ts";
+import { useStore } from "../../store/store.ts";
+import { getData, inputLeague } from "../../api/api.ts";
+import { LeagueInfoType } from "../../api/types.ts";
+import Alert from "../util/Alert.vue";
+import { createTableData } from "../../api/helper.ts";
 
 const store = useStore();
 const props = defineProps<{

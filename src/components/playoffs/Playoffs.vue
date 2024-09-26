@@ -2,15 +2,15 @@
 import FinalPlacements from "./FinalPlacements.vue";
 import PlacementFlowChart from "./PlacementFlowChart.vue";
 import { computed } from "vue";
-import { useStore } from "../store/store";
+import { useStore } from "../../store/store";
 import {
   fakeWinnersBracket,
   fakeLosersBracket,
   fakeRosters,
   fakeUsers,
   fakePoints,
-} from "../api/helper";
-import { RosterType, TableDataType } from "../api/types";
+} from "../../api/helper";
+import { RosterType, TableDataType } from "../../api/types";
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
