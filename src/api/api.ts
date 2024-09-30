@@ -9,7 +9,7 @@ export const seasonType: any = {
 
 export const inputUsername = async (username: string, year: string) => {
   try {
-    const response = await fetch(import.meta.env.ADD_USERNAME_URL, {
+    const response = await fetch(import.meta.env.VITE_USERNAME_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +38,7 @@ export const inputLeague = async (
   year: string
 ) => {
   try {
-    const response = await fetch(import.meta.env.ADD_LEAGUE_URL, {
+    const response = await fetch(import.meta.env.VITE_LEAGUE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
