@@ -13,7 +13,7 @@ import { fakePoints, fakeRosters, fakeUsers } from "./api/helper";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./api/types";
 import { inject } from "@vercel/analytics";
-import { getData, getLeague } from "./api/api";
+import { getData, getLeague, inputLeague } from "./api/api";
 
 const store = useStore();
 const showLoading = ref(false);
@@ -37,6 +37,13 @@ onMounted(async () => {
           showLoading.value = true;
           store.updateLeagueInfo(await getData(league.leagueId));
           showLoading.value = false;
+          inputLeague(
+            league,
+            league.name,
+            league.totalRosters,
+            league.seasonType,
+            league.season
+          );
         } else {
           store.updateLeagueInfo(league);
         }
