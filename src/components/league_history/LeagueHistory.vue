@@ -620,7 +620,7 @@ const worstManager = computed(() => {
       type="error"
     />
   </div>
-  <div v-else>
+  <div class="h-screen" v-else>
     <svg
       aria-hidden="true"
       class="w-8 h-8 mx-auto mt-4 mb-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"

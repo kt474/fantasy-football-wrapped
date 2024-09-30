@@ -128,7 +128,11 @@ const setHtmlBackground = () => {
               :points="store.weeklyPoints[store.currentLeagueIndex]"
             />
           </div>
-          <div v-else role="status" class="flex flex-wrap justify-center mt-4">
+          <div
+            v-else
+            role="status"
+            class="flex flex-wrap justify-center h-full mt-4"
+          >
             <svg
               aria-hidden="true"
               class="w-8 h-8 mb-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
@@ -151,7 +155,7 @@ const setHtmlBackground = () => {
         </div>
         <div
           v-else-if="store.showLeaguesList"
-          class="container h-full mx-auto mb-96"
+          class="container h-screen mx-auto"
         >
           <UserLeagueList />
         </div>
@@ -159,7 +163,7 @@ const setHtmlBackground = () => {
         <div
           v-else-if="showLoading"
           role="status"
-          class="flex flex-wrap justify-center mt-4"
+          class="flex flex-wrap justify-center h-full mt-4"
         >
           <svg
             aria-hidden="true"

@@ -9,21 +9,18 @@ export const seasonType: any = {
 
 export const inputUsername = async (username: string, year: string) => {
   try {
-    const response = await fetch(
-      "https://ffwrapped-backend.vercel.app/api/addUsername",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    const response = await fetch(import.meta.env.ADD_USERNAME_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data: {
+          username: username,
+          year: year,
         },
-        body: JSON.stringify({
-          data: {
-            username: username,
-            year: year,
-          },
-        }),
-      }
-    );
+      }),
+    });
 
     if (!response.ok) {
       throw new Error("Network response was not ok");
@@ -41,24 +38,21 @@ export const inputLeague = async (
   year: string
 ) => {
   try {
-    const response = await fetch(
-      "https://ffwrapped-backend.vercel.app/api/addEntry",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    const response = await fetch(import.meta.env.ADD_LEAGUE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data: {
+          league_id: leagueId,
+          name: name,
+          size: size,
+          type: type,
+          year: year,
         },
-        body: JSON.stringify({
-          data: {
-            league_id: leagueId,
-            name: name,
-            size: size,
-            type: type,
-            year: year,
-          },
-        }),
-      }
-    );
+      }),
+    });
 
     if (!response.ok) {
       throw new Error("Network response was not ok");
@@ -73,7 +67,10 @@ export const getProjections = async (player: string, year: string) => {
     `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
   );
   const playerInfo = await response.json();
-  return playerInfo["stats"]["pts_std"];
+  return {
+    projection: playerInfo["stats"]["pts_std"],
+    position: playerInfo["player"]["position"],
+  };
 };
 export const getWinnersBracket = async (leagueId: string) => {
   const response = await fetch(
