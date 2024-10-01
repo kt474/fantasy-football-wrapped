@@ -160,10 +160,7 @@ const setHtmlBackground = () => {
             <SkeletonLoading />
           </div>
         </div>
-        <div
-          v-else-if="store.showLeaguesList"
-          class="container h-screen mx-auto"
-        >
+        <div v-else-if="store.showLeaguesList" class="container mx-auto">
           <UserLeagueList />
         </div>
         <!-- show loading screen on auto 24 hr refresh -->

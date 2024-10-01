@@ -35,15 +35,15 @@ const addLeagues = async () => {
 };
 </script>
 <template>
-  <div class="w-full">
+  <div class="w-full h-screen">
     <h3 class="my-4 text-2xl font-medium text-gray-900 dark:text-white">
       Welcome {{ store.username }}!
     </h3>
-    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+    <h3 class="mb-2 text-xl font-medium text-gray-900 dark:text-white">
       Select leagues:
     </h3>
-    <ul class="flex flex-wrap w-full rounded-lg">
-      <li v-for="(league, index) in store.leaguesList" class="mb-2 mr-2 w-60">
+    <ul class="flex flex-wrap w-full overflow-auto rounded-lg max-h-96">
+      <li v-for="(league, index) in store.leaguesList" class="w-64 mb-2 mr-2">
         <input
           type="checkbox"
           :id="'league-' + index"
@@ -53,11 +53,11 @@ const addLeagues = async () => {
         />
         <label
           :for="'league-' + index"
-          class="inline-flex items-center justify-between w-full px-3 py-2.5 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-blue-600 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+          class="inline-flex items-center justify-between w-full px-4 py-2.5 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-blue-600 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
         >
           <div>
             <h5
-              class="mb-1 text-lg font-medium text-gray-900 truncate dark:text-white max-w-52"
+              class="mb-1 text-xl font-medium text-gray-900 truncate dark:text-white max-w-52"
             >
               {{ league.name }}
             </h5>
@@ -73,7 +73,7 @@ const addLeagues = async () => {
         </label>
       </li>
     </ul>
-    <p v-if="showError" class="mt-2 -mb-2 text-red-600 dark:text-red-500">
+    <p v-if="showError" class="mt-2 text-red-600 dark:text-red-500">
       A maximum of 5 leagues can be added at a time
     </p>
     <button
