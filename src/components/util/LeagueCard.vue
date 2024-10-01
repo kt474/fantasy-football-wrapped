@@ -3,7 +3,7 @@ import { capitalize } from "lodash";
 import { useStore } from "../../store/store";
 import { onMounted } from "vue";
 import { initFlowbite } from "flowbite";
-import { getData } from "../../api/api";
+import { getData, inputLeague } from "../../api/api";
 import { LeagueInfoType } from "../../api/types";
 
 onMounted(() => {
@@ -11,7 +11,7 @@ onMounted(() => {
 });
 
 const props = defineProps<{
-  leagueInfo: any;
+  leagueInfo: LeagueInfoType;
   dropdownIndex: number;
 }>();
 const store = useStore();
@@ -36,6 +36,13 @@ const refreshLeague = async () => {
   setTimeout(() => {
     store.showRefreshAlert = false;
   }, 3000);
+  inputLeague(
+    props.leagueInfo.leagueId,
+    props.leagueInfo.name,
+    props.leagueInfo.totalRosters,
+    props.leagueInfo.seasonType,
+    props.leagueInfo.season
+  );
 };
 
 const removeLeague = () => {
