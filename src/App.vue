@@ -38,7 +38,7 @@ onMounted(async () => {
           store.updateLeagueInfo(await getData(league.leagueId));
           showLoading.value = false;
           inputLeague(
-            league,
+            league.leagueId,
             league.name,
             league.totalRosters,
             league.seasonType,
