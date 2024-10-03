@@ -33,6 +33,7 @@ export type RosterType = {
   rosterId: number;
   recordByWeek: string;
   players?: string[];
+  projections?: any[];
 };
 
 export type UserType = {

@@ -19,6 +19,7 @@ import RankingGraph from "../roster_management/RankingGraph.vue";
 import Playoffs from "../playoffs/Playoffs.vue";
 import LeagueHistory from "../league_history/LeagueHistory.vue";
 import Tabs from "../util/Tabs.vue";
+import Projections from "../power_rankings/Projections.vue";
 const tableOrder = ref("wins");
 const hover = ref("");
 const props = defineProps<{
@@ -545,6 +546,7 @@ const cardHeight = computed(() => {
         :totalRosters="10"
         class="mt-4"
       />
+      <Projections class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'expectedWins'">
       <div class="flex flex-wrap md:flex-nowrap">

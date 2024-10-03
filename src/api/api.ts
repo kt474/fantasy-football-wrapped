@@ -62,13 +62,38 @@ export const inputLeague = async (
   }
 };
 
-export const getProjections = async (player: string, year: string) => {
+export const getWeeklyProjections = async (
+  player: string,
+  year: string,
+  week: number
+) => {
+  const response = await fetch(
+    `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
+  );
+
+  const allWeeks = await response.json();
+  let totalProjection = 0;
+  for (const scoredWeek in allWeeks) {
+    if (allWeeks[scoredWeek] && Number(scoredWeek) >= week) {
+      totalProjection += allWeeks[scoredWeek]["stats"]["pts_std"];
+    }
+  }
+  return Math.round(totalProjection);
+};
+
+export const getProjections = async (
+  player: string,
+  year: string,
+  week: number
+) => {
   const response = await fetch(
     `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
   );
   const playerInfo = await response.json();
+  const playerProjection = await getWeeklyProjections(player, year, week);
+
   return {
-    projection: playerInfo["stats"]["pts_std"],
+    projection: playerProjection,
     position: playerInfo["player"]["position"],
   };
 };
@@ -225,6 +250,7 @@ export const getData = async (leagueId: string) => {
   newLeagueInfo["rosters"] = await getRosters(leagueId);
   newLeagueInfo["winnersBracket"] = await getWinnersBracket(leagueId);
   newLeagueInfo["losersBracket"] = await getLosersBracket(leagueId);
+
   const transactions = [];
   if (newLeagueInfo["status"] == "in_season") {
     const currentWeek = await getCurrentLeagueState();
@@ -238,6 +264,18 @@ export const getData = async (leagueId: string) => {
         getTotalTransactions(await getTransactions(leagueId, i + 1))
       );
     }
+    await Promise.all(
+      newLeagueInfo.rosters.map(async (roster: any) => {
+        const singleRoster: any[] = [];
+        const projectionPromises = roster.players.map((player: any) => {
+          return getProjections(player, "2024", currentWeek.week);
+        });
+
+        const projections = await Promise.all(projectionPromises);
+        singleRoster.push(...projections);
+        roster["projections"] = singleRoster;
+      })
+    );
   } else {
     newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
       leagueId,
@@ -248,6 +286,18 @@ export const getData = async (leagueId: string) => {
         getTotalTransactions(await getTransactions(leagueId, i + 1))
       );
     }
+    await Promise.all(
+      newLeagueInfo.rosters.map(async (roster: any) => {
+        const singleRoster: any[] = [];
+        const projectionPromises = roster.players.map((player: any) => {
+          return getProjections(player, "2024", 0);
+        });
+
+        const projections = await Promise.all(projectionPromises);
+        singleRoster.push(...projections);
+        roster["projections"] = singleRoster;
+      })
+    );
   }
   newLeagueInfo["playoffPoints"] = await getWeeklyPoints(
     leagueId,
