@@ -245,7 +245,10 @@ export const getCurrentLeagueState = async () => {
   return await response.json();
 };
 
-export const getData = async (leagueId: string) => {
+export const getData = async (
+  leagueId: string,
+  leagueHistory: boolean = false
+) => {
   const newLeagueInfo: any = await getLeague(leagueId);
   newLeagueInfo["rosters"] = await getRosters(leagueId);
   newLeagueInfo["winnersBracket"] = await getWinnersBracket(leagueId);
@@ -259,45 +262,49 @@ export const getData = async (leagueId: string) => {
       leagueId,
       currentWeek.week
     );
-    for (let i = 0; i <= newLeagueInfo["currentWeek"]; i++) {
-      transactions.push(
-        getTotalTransactions(await getTransactions(leagueId, i + 1))
+    if (!leagueHistory) {
+      for (let i = 0; i <= newLeagueInfo["currentWeek"]; i++) {
+        transactions.push(
+          getTotalTransactions(await getTransactions(leagueId, i + 1))
+        );
+      }
+      await Promise.all(
+        newLeagueInfo.rosters.map(async (roster: any) => {
+          const singleRoster: any[] = [];
+          const projectionPromises = roster.players.map((player: any) => {
+            return getProjections(player, "2024", currentWeek.week);
+          });
+
+          const projections = await Promise.all(projectionPromises);
+          singleRoster.push(...projections);
+          roster["projections"] = singleRoster;
+        })
       );
     }
-    await Promise.all(
-      newLeagueInfo.rosters.map(async (roster: any) => {
-        const singleRoster: any[] = [];
-        const projectionPromises = roster.players.map((player: any) => {
-          return getProjections(player, "2024", currentWeek.week);
-        });
-
-        const projections = await Promise.all(projectionPromises);
-        singleRoster.push(...projections);
-        roster["projections"] = singleRoster;
-      })
-    );
   } else {
     newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
       leagueId,
       newLeagueInfo["regularSeasonLength"]
     );
-    for (let i = 0; i <= newLeagueInfo["regularSeasonLength"]; i++) {
-      transactions.push(
-        getTotalTransactions(await getTransactions(leagueId, i + 1))
+    if (!leagueHistory) {
+      for (let i = 0; i <= newLeagueInfo["regularSeasonLength"]; i++) {
+        transactions.push(
+          getTotalTransactions(await getTransactions(leagueId, i + 1))
+        );
+      }
+      await Promise.all(
+        newLeagueInfo.rosters.map(async (roster: any) => {
+          const singleRoster: any[] = [];
+          const projectionPromises = roster.players.map((player: any) => {
+            return getProjections(player, "2024", 0);
+          });
+
+          const projections = await Promise.all(projectionPromises);
+          singleRoster.push(...projections);
+          roster["projections"] = singleRoster;
+        })
       );
     }
-    await Promise.all(
-      newLeagueInfo.rosters.map(async (roster: any) => {
-        const singleRoster: any[] = [];
-        const projectionPromises = roster.players.map((player: any) => {
-          return getProjections(player, "2024", 0);
-        });
-
-        const projections = await Promise.all(projectionPromises);
-        singleRoster.push(...projections);
-        roster["projections"] = singleRoster;
-      })
-    );
   }
   newLeagueInfo["playoffPoints"] = await getWeeklyPoints(
     leagueId,

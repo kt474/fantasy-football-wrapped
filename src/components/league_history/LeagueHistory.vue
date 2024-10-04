@@ -21,7 +21,7 @@ const previousLeagues = ref<string[]>([]);
 const checkPreviousLeagues = async (leagueId: string) => {
   // for some reason sometimes 0 is returned as the previous league id
   if (leagueId !== "0" && !previousLeagues.value.includes(leagueId)) {
-    const leagueData = await getData(leagueId);
+    const leagueData = await getData(leagueId, true);
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.push(leagueData);
     previousLeagues.value.push(leagueId); // prevent adding duplicates
     if (leagueData.previousLeagueId) {

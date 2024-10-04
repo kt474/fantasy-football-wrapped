@@ -53,6 +53,9 @@ const updateChartColor = () => {
       zoom: {
         enabled: false,
       },
+      animations: {
+        enabled: false,
+      },
     },
     tooltip: {
       theme: store.darkMode ? "dark" : "light",
@@ -118,6 +121,9 @@ const chartOptions = ref({
       show: false,
     },
     zoom: {
+      enabled: false,
+    },
+    animations: {
       enabled: false,
     },
   },

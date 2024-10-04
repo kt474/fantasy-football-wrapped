@@ -24,6 +24,9 @@ const updateChartColor = () => {
       zoom: {
         enabled: false,
       },
+      animations: {
+        enabled: false,
+      },
     },
   };
 };
@@ -64,6 +67,9 @@ const chartOptions = ref({
       show: false,
     },
     zoom: {
+      enabled: false,
+    },
+    animations: {
       enabled: false,
     },
   },

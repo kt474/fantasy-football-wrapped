@@ -52,6 +52,9 @@ const updateChartColor = () => {
       zoom: {
         enabled: false,
       },
+      animations: {
+        enabled: false,
+      },
     },
     dataLabels: {
       formatter: (_: any, options: any) => {
@@ -85,6 +88,9 @@ const chartOptions = ref({
       show: false,
     },
     zoom: {
+      enabled: false,
+    },
+    animations: {
       enabled: false,
     },
   },
