@@ -2,6 +2,7 @@
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { RosterType } from "../../api/types";
+import { fakeProjectionData } from "../../api/helper";
 
 const store = useStore();
 const categories = computed(() => {
@@ -9,6 +10,9 @@ const categories = computed(() => {
 });
 
 const formattedData = computed(() => {
+  if (store.leagueInfo.length == 0) {
+    return fakeProjectionData;
+  }
   const topPositions = ["RB", "WR"];
   const otherPositions = ["QB", "K", "DEF", "TE"];
   const nameMapping: any = new Map(
@@ -20,7 +24,6 @@ const formattedData = computed(() => {
   const mappedData: any[] = [];
   store.leagueInfo[store.currentLeagueIndex].rosters.forEach(
     (roster: RosterType) => {
-      console.log(roster);
       mappedData.push({
         name: nameMapping.get(roster.id),
         data: roster.projections,
@@ -216,6 +219,7 @@ const chartOptions = ref({
       enabled: false,
     },
   },
+  colors: ["#0ea5e9", "#22c55e", "#eab308", "#ef4444", "#6366f1", "#ec4899"],
   plotOptions: {
     bar: {
       horizontal: true,
