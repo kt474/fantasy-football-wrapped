@@ -61,7 +61,8 @@ const seriesData = computed(() => {
                 (user: any) => user.name === roster.name
               ) + 1,
           });
-        } else {
+          // if a roster doesn't have any players in a position
+        } else if (!player.position) {
           data.push({
             x: player.position,
             y: totalRosters.value,
@@ -98,6 +99,38 @@ const updateChartColor = () => {
     stroke: {
       colors: ["#fff"],
       width: 1,
+    },
+    plotOptions: {
+      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      heatmap: {
+        shadeIntensity: 0.25,
+        radius: 0,
+        colorScale: {
+          // ["#0ea5e9", "#22c55e", "#eab308", "#ef4444"]
+          ranges: [
+            {
+              from: 0,
+              to: Math.floor(totalRosters.value / 4),
+              color: "#0ea5e9",
+            },
+            {
+              from: Math.floor(totalRosters.value / 4) + 1,
+              to: Math.floor(totalRosters.value / 2),
+              color: "#22c55e",
+            },
+            {
+              from: Math.floor(totalRosters.value / 2) + 1,
+              to: Math.floor(totalRosters.value * (3 / 4)),
+              color: "#eab308",
+            },
+            {
+              from: Math.floor(totalRosters.value * (3 / 4)) + 1,
+              to: totalRosters.value,
+              color: "#ef4444",
+            },
+          ],
+        },
+      },
     },
   };
 };

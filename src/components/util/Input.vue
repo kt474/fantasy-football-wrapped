@@ -53,7 +53,7 @@ const onSubmit = async () => {
     store.updateShowInput(false);
     inputUsername(user.display_name, seasonYear.value);
   } else {
-    if (store.leagueInfo.length > 5) {
+    if (store.leagueInfo.length >= 5) {
       errorMsg.value = "Maximum of 5 leagues allowed";
       showErrorMsg.value = true;
       return;
