@@ -4,6 +4,7 @@ import { useStore } from "../../store/store";
 import { RosterType, LeagueInfoType } from "../../api/types";
 import { fakeProjectionData } from "../../api/helper";
 import { getProjections } from "../../api/api";
+import HeatMap from "./HeatMap.vue";
 
 const store = useStore();
 const loading = ref(false);
@@ -57,7 +58,7 @@ const formattedData = computed(() => {
     return fakeProjectionData;
   }
   const topPositions = ["RB", "WR"];
-  const otherPositions = ["QB", "K", "DEF", "TE"];
+  const otherPositions = ["QB", "TE", "K", "DEF"];
   const nameMapping: any = new Map(
     store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
       user.id,
@@ -225,7 +226,7 @@ const updateChartColor = () => {
         dataLabels: {
           total: {
             enabled: true,
-            offsetX: 0,
+            offsetX: -3,
             style: {
               fontSize: "13px",
               fontWeight: 900,
@@ -269,7 +270,7 @@ const chartOptions = ref({
       dataLabels: {
         total: {
           enabled: true,
-          offsetX: 0,
+          offsetX: -3,
           style: {
             fontSize: "13px",
             fontWeight: 900,
@@ -291,29 +292,35 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <div
-    v-if="!loading"
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
-  >
-    <div class="flex justify-between">
-      <div>
-        <h1
-          class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
-        >
-          Roster Strength
-        </h1>
-      </div>
-    </div>
-    <apexchart
-      type="bar"
-      height="350"
-      :options="chartOptions"
-      :series="seriesData"
-    ></apexchart>
-    <p
-      class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
+  <div>
+    <div
+      v-if="!loading"
+      class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
     >
-      Roster strength is based on Sleeper ROS projections.
-    </p>
+      <div class="flex justify-between">
+        <div>
+          <h1
+            class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+          >
+            Roster Strength
+          </h1>
+          <p class="text-base font-normal text-gray-500 dark:text-gray-300">
+            Rest of season projections
+          </p>
+        </div>
+      </div>
+      <apexchart
+        type="bar"
+        height="350"
+        :options="chartOptions"
+        :series="seriesData"
+      ></apexchart>
+      <p
+        class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
+      >
+        Projection data is from the Sleeper API.
+      </p>
+    </div>
+    <HeatMap v-if="!loading" :formattedData="formattedData" class="mt-4" />
   </div>
 </template>

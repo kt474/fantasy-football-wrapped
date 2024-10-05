@@ -561,7 +561,6 @@ const cardHeight = computed(() => {
         <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
       </div>
       <TransactionsChart class="mt-4" />
-      <!-- <ManagementScatterPlot :tableData="tableData" class="mt-4" /> -->
     </div>
     <div v-if="store.currentTab === 'playoffs'">
       <Playoffs :tableData="tableData" />
