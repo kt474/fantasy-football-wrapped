@@ -1,13 +1,52 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
-import { RosterType } from "../../api/types";
+import { RosterType, LeagueInfoType } from "../../api/types";
 import { fakeProjectionData } from "../../api/helper";
+import { getProjections } from "../../api/api";
 
 const store = useStore();
 const categories = computed(() => {
   return formattedData.value.map((user) => user.name);
 });
+
+onMounted(async () => {
+  if (
+    store.leagueInfo.length > 0 &&
+    !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
+  ) {
+    await getData();
+  }
+});
+
+const getData = async () => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  await Promise.all(
+    currentLeague.rosters.map(async (roster: any) => {
+      const singleRoster: any[] = [];
+      const projectionPromises = roster.players.map((player: any) => {
+        return getProjections(
+          player,
+          "2024",
+          currentLeague["currentWeek"] ? currentLeague["currentWeek"] : 0,
+          currentLeague["scoringType"]
+        );
+      });
+
+      const projections = await Promise.all(projectionPromises);
+      singleRoster.push(...projections);
+      store.addProjectionData(
+        store.currentLeagueIndex,
+        roster.id,
+        singleRoster
+      );
+    })
+  );
+  localStorage.setItem(
+    "leagueInfo",
+    JSON.stringify(store.leagueInfo as LeagueInfoType[])
+  );
+};
 
 const formattedData = computed(() => {
   if (store.leagueInfo.length == 0) {

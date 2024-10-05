@@ -58,6 +58,27 @@ export const useStore = defineStore("main", {
         });
       }
     },
+    addProjectionData(
+      index: number,
+      rosterId: string,
+      projectionData: { projection: number; position: string }[]
+    ) {
+      const updatedLeagueInfo = [...this.leagueInfo];
+      updatedLeagueInfo[index] = {
+        ...updatedLeagueInfo[index],
+        rosters: updatedLeagueInfo[index].rosters.map((roster) => {
+          if (roster && roster.id === rosterId) {
+            return {
+              ...roster,
+              projections: projectionData,
+            };
+          }
+          return roster;
+        }),
+      };
+
+      this.leagueInfo = updatedLeagueInfo;
+    },
     updateShowInput(payload: boolean) {
       this.showInput = payload;
     },

@@ -80,7 +80,6 @@ export const getWeeklyProjections = async (
   } else if (scoringType === 0.5) {
     scoring = "pts_half_ppr";
   }
-  console.log(scoring);
   for (const scoredWeek in allWeeks) {
     if (
       allWeeks[scoredWeek] &&
@@ -265,10 +264,7 @@ export const getCurrentLeagueState = async () => {
   return await response.json();
 };
 
-export const getData = async (
-  leagueId: string,
-  leagueHistory: boolean = false
-) => {
+export const getData = async (leagueId: string) => {
   const newLeagueInfo: any = await getLeague(leagueId);
   newLeagueInfo["rosters"] = await getRosters(leagueId);
   newLeagueInfo["winnersBracket"] = await getWinnersBracket(leagueId);
@@ -282,28 +278,10 @@ export const getData = async (
       leagueId,
       currentWeek.week
     );
-    if (!leagueHistory) {
-      for (let i = 0; i <= newLeagueInfo["currentWeek"]; i++) {
-        transactions.push(
-          getTotalTransactions(await getTransactions(leagueId, i + 1))
-        );
-      }
-      await Promise.all(
-        newLeagueInfo.rosters.map(async (roster: any) => {
-          const singleRoster: any[] = [];
-          const projectionPromises = roster.players.map((player: any) => {
-            return getProjections(
-              player,
-              "2024",
-              currentWeek.week,
-              newLeagueInfo["scoringType"]
-            );
-          });
 
-          const projections = await Promise.all(projectionPromises);
-          singleRoster.push(...projections);
-          roster["projections"] = singleRoster;
-        })
+    for (let i = 0; i <= newLeagueInfo["currentWeek"]; i++) {
+      transactions.push(
+        getTotalTransactions(await getTransactions(leagueId, i + 1))
       );
     }
   } else {
@@ -311,28 +289,10 @@ export const getData = async (
       leagueId,
       newLeagueInfo["regularSeasonLength"]
     );
-    if (!leagueHistory) {
-      for (let i = 0; i <= newLeagueInfo["regularSeasonLength"]; i++) {
-        transactions.push(
-          getTotalTransactions(await getTransactions(leagueId, i + 1))
-        );
-      }
-      await Promise.all(
-        newLeagueInfo.rosters.map(async (roster: any) => {
-          const singleRoster: any[] = [];
-          const projectionPromises = roster.players.map((player: any) => {
-            return getProjections(
-              player,
-              "2024",
-              0,
-              newLeagueInfo["scoringType"]
-            );
-          });
 
-          const projections = await Promise.all(projectionPromises);
-          singleRoster.push(...projections);
-          roster["projections"] = singleRoster;
-        })
+    for (let i = 0; i <= newLeagueInfo["regularSeasonLength"]; i++) {
+      transactions.push(
+        getTotalTransactions(await getTransactions(leagueId, i + 1))
       );
     }
   }
