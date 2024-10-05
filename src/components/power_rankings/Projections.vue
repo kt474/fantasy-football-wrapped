@@ -6,6 +6,7 @@ import { fakeProjectionData } from "../../api/helper";
 import { getProjections } from "../../api/api";
 
 const store = useStore();
+const loading = ref(false);
 const categories = computed(() => {
   return formattedData.value.map((user) => user.name);
 });
@@ -15,7 +16,10 @@ onMounted(async () => {
     store.leagueInfo.length > 0 &&
     !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
   ) {
+    loading.value = true;
     await getData();
+    updateChartColor();
+    loading.value = false;
   }
 });
 
@@ -221,7 +225,7 @@ const updateChartColor = () => {
         dataLabels: {
           total: {
             enabled: true,
-            offsetX: 3,
+            offsetX: 0,
             style: {
               fontSize: "13px",
               fontWeight: 900,
@@ -265,7 +269,7 @@ const chartOptions = ref({
       dataLabels: {
         total: {
           enabled: true,
-          offsetX: 3,
+          offsetX: 0,
           style: {
             fontSize: "13px",
             fontWeight: 900,
@@ -288,6 +292,7 @@ const chartOptions = ref({
 </script>
 <template>
   <div
+    v-if="!loading"
     class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
   >
     <div class="flex justify-between">
