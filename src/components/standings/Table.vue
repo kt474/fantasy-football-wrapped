@@ -413,6 +413,7 @@ const cardHeight = computed(() => {
                 }"
               >
                 {{ item.wins }} - {{ item.losses }}
+                {{ item.ties != 0 ? `- ${item.ties}` : "" }}
               </td>
               <td
                 class="px-6 py-3"

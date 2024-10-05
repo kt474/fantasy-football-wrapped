@@ -128,7 +128,7 @@ const chartOptions = ref({
   plotOptions: {
     foreColor: store.darkMode ? "#ffffff" : "#111827",
     heatmap: {
-      shadeIntensity: 0.5,
+      shadeIntensity: 0.25,
       radius: 0,
       colorScale: {
         // ["#0ea5e9", "#22c55e", "#eab308", "#ef4444"]
