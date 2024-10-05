@@ -61,6 +61,11 @@ const seriesData = computed(() => {
                 (user: any) => user.name === roster.name
               ) + 1,
           });
+        } else {
+          data.push({
+            x: player.position,
+            y: totalRosters.value,
+          });
         }
       });
       result.push({ data: data, name: roster.name });

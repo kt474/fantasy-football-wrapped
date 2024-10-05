@@ -293,34 +293,92 @@ const chartOptions = ref({
 </script>
 <template>
   <div>
-    <div
-      v-if="!loading"
-      class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
-    >
-      <div class="flex justify-between">
-        <div>
-          <h1
-            class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
-          >
-            Roster Strength
-          </h1>
-          <p class="text-base font-normal text-gray-500 dark:text-gray-300">
-            Rest of season projections
-          </p>
-        </div>
-      </div>
-      <apexchart
-        type="bar"
-        height="350"
-        :options="chartOptions"
-        :series="seriesData"
-      ></apexchart>
-      <p
-        class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
+    <div v-if="!loading">
+      <div
+        class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
       >
-        Projection data is from the Sleeper API.
-      </p>
+        <div class="flex justify-between">
+          <div>
+            <h1
+              class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+            >
+              Roster Strength
+            </h1>
+            <p class="text-base font-normal text-gray-500 dark:text-gray-300">
+              Rest of season projections
+            </p>
+          </div>
+        </div>
+        <apexchart
+          type="bar"
+          height="350"
+          :options="chartOptions"
+          :series="seriesData"
+        ></apexchart>
+        <p
+          class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
+        >
+          Projection data is from the Sleeper API.
+        </p>
+      </div>
+      <HeatMap :formattedData="formattedData" class="mt-4" />
     </div>
-    <HeatMap v-if="!loading" :formattedData="formattedData" class="mt-4" />
+    <div
+      v-else
+      role="status"
+      class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
+    >
+      <div
+        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2.5"
+      ></div>
+      <div
+        class="w-48 h-2 mb-10 bg-gray-200 rounded-full dark:bg-gray-700"
+      ></div>
+
+      <div class="flex items-baseline mt-4">
+        <div
+          class="w-full h-40 bg-gray-200 rounded-t-lg dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-60 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full h-40 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full h-32 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-36 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-72 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+        ></div>
+      </div>
+      <span class="sr-only">Loading...</span>
+    </div>
   </div>
 </template>
+<style scoped>
+.custom-height {
+  height: 400px;
+}
+</style>

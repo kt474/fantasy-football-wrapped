@@ -23,6 +23,23 @@ test("Retrieving league data", async () => {
     losses: 9,
     rosterId: 1,
     recordByWeek: "LLLWWWLLLLWLWL",
+    players: [
+      "10222",
+      "10236",
+      "2747",
+      "4866",
+      "4981",
+      "6111",
+      "6797",
+      "6803",
+      "7543",
+      "7553",
+      "8112",
+      "8137",
+      "9511",
+      "9753",
+      "NYJ",
+    ],
   });
   expect(data.winnersBracket.length).toBe(7);
   expect(data.losersBracket.length).toBe(7);
