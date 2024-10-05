@@ -1,7 +1,7 @@
 import { getWeeklyPoints, getTotalTransactions } from "./helper";
 import { round } from "lodash";
 
-export const seasonType: any = {
+export const seasonType: { [key: number]: string } = {
   0: "Redraft",
   1: "Keeper",
   2: "Dynasty",
@@ -65,7 +65,8 @@ export const inputLeague = async (
 export const getWeeklyProjections = async (
   player: string,
   year: string,
-  week: number
+  week: number,
+  scoringType: number
 ) => {
   const response = await fetch(
     `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
@@ -73,9 +74,20 @@ export const getWeeklyProjections = async (
 
   const allWeeks = await response.json();
   let totalProjection = 0;
+  let scoring = "pts_ppr";
+  if (scoringType === 0) {
+    scoring = "pts_std";
+  } else if (scoringType === 0.5) {
+    scoring = "pts_half_ppr";
+  }
+  console.log(scoring);
   for (const scoredWeek in allWeeks) {
-    if (allWeeks[scoredWeek] && Number(scoredWeek) >= week) {
-      totalProjection += allWeeks[scoredWeek]["stats"]["pts_std"];
+    if (
+      allWeeks[scoredWeek] &&
+      allWeeks[scoredWeek]["stats"]["pts_std"] &&
+      Number(scoredWeek) >= week
+    ) {
+      totalProjection += allWeeks[scoredWeek]["stats"][scoring];
     }
   }
   return Math.round(totalProjection);
@@ -84,13 +96,19 @@ export const getWeeklyProjections = async (
 export const getProjections = async (
   player: string,
   year: string,
-  week: number
+  week: number,
+  scoringType: number
 ) => {
   const response = await fetch(
     `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
   );
   const playerInfo = await response.json();
-  const playerProjection = await getWeeklyProjections(player, year, week);
+  const playerProjection = await getWeeklyProjections(
+    player,
+    year,
+    week,
+    scoringType
+  );
 
   return {
     projection: playerProjection,
@@ -145,6 +163,7 @@ export const getLeague = async (leagueId: string) => {
         previousLeagueId: "",
         lastScoredWeek: 0,
         status: "",
+        scoringType: 1,
       };
     }
     const league = await response.json();
@@ -162,6 +181,7 @@ export const getLeague = async (leagueId: string) => {
         : null,
       previousLeagueId: league["previous_league_id"],
       status: league["status"],
+      scoringType: league["scoring_settings"]["rec"],
     };
   } catch (error) {
     return error;
@@ -272,7 +292,12 @@ export const getData = async (
         newLeagueInfo.rosters.map(async (roster: any) => {
           const singleRoster: any[] = [];
           const projectionPromises = roster.players.map((player: any) => {
-            return getProjections(player, "2024", currentWeek.week);
+            return getProjections(
+              player,
+              "2024",
+              currentWeek.week,
+              newLeagueInfo["scoringType"]
+            );
           });
 
           const projections = await Promise.all(projectionPromises);
@@ -296,7 +321,12 @@ export const getData = async (
         newLeagueInfo.rosters.map(async (roster: any) => {
           const singleRoster: any[] = [];
           const projectionPromises = roster.players.map((player: any) => {
-            return getProjections(player, "2024", 0);
+            return getProjections(
+              player,
+              "2024",
+              0,
+              newLeagueInfo["scoringType"]
+            );
           });
 
           const projections = await Promise.all(projectionPromises);

@@ -20,6 +20,7 @@ export type LeagueInfoType = {
   previousLeagues: any[];
   status: string;
   currentWeek: number;
+  scoringType: number;
 };
 
 export type RosterType = {
