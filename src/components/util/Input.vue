@@ -87,6 +87,9 @@ const onSubmit = async () => {
       leagueIdInput.value = "";
     }
   }
+  // return to standings tab when league is added
+  store.currentTab = "standings";
+  localStorage.currentTab = "standings";
 };
 </script>
 
