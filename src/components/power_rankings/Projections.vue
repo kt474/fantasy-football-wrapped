@@ -220,13 +220,20 @@ const updateChartColor = () => {
         enabled: false,
       },
     },
+    stroke: {
+      colors: ["#fff"],
+      width: 1,
+    },
+    fill: {
+      opacity: 1,
+    },
     plotOptions: {
       bar: {
         horizontal: true,
         dataLabels: {
           total: {
             enabled: true,
-            offsetX: -3,
+            offsetX: -2,
             style: {
               fontSize: "13px",
               fontWeight: 900,
@@ -264,13 +271,20 @@ const chartOptions = ref({
     },
   },
   colors: ["#0ea5e9", "#22c55e", "#eab308", "#ef4444", "#6366f1", "#ec4899"],
+  stroke: {
+    colors: ["#fff"],
+    width: 1,
+  },
+  fill: {
+    opacity: 1,
+  },
   plotOptions: {
     bar: {
       horizontal: true,
       dataLabels: {
         total: {
           enabled: true,
-          offsetX: -3,
+          offsetX: -2,
           style: {
             fontSize: "13px",
             fontWeight: 900,

@@ -95,6 +95,10 @@ const updateChartColor = () => {
         show: false,
       },
     },
+    stroke: {
+      colors: ["#fff"],
+      width: 1,
+    },
   };
 };
 
@@ -117,12 +121,15 @@ const chartOptions = ref({
       show: false,
     },
   },
+  stroke: {
+    colors: ["#fff"],
+    width: 1,
+  },
   plotOptions: {
     foreColor: store.darkMode ? "#ffffff" : "#111827",
     heatmap: {
       shadeIntensity: 0.5,
       radius: 0,
-      useFillColorAsStroke: true,
       colorScale: {
         // ["#0ea5e9", "#22c55e", "#eab308", "#ef4444"]
         ranges: [
