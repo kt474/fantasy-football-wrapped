@@ -21,6 +21,7 @@ export type LeagueInfoType = {
   status: string;
   currentWeek: number;
   scoringType: number;
+  rosterPositions: string[];
 };
 
 export type RosterType = {

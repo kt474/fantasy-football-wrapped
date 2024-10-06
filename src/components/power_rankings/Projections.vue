@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { intersection } from "lodash";
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { RosterType, LeagueInfoType } from "../../api/types";
@@ -29,6 +30,7 @@ const getData = async () => {
   await Promise.all(
     currentLeague.rosters.map(async (roster: any) => {
       const singleRoster: any[] = [];
+      if (!roster.players) return [];
       const projectionPromises = roster.players.map((player: any) => {
         return getProjections(
           player,
@@ -58,7 +60,11 @@ const formattedData = computed(() => {
     return fakeProjectionData;
   }
   const topPositions = ["RB", "WR"];
-  const otherPositions = ["QB", "TE", "K", "DEF"];
+  const otherPositions = intersection(
+    ["QB", "TE", "K", "DEF"],
+    store.leagueInfo[store.currentLeagueIndex].rosterPositions
+  );
+
   const nameMapping: any = new Map(
     store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
       user.id,

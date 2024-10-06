@@ -163,6 +163,7 @@ export const getLeague = async (leagueId: string) => {
         lastScoredWeek: 0,
         status: "",
         scoringType: 1,
+        rosterPositions: [],
       };
     }
     const league = await response.json();
@@ -181,6 +182,7 @@ export const getLeague = async (leagueId: string) => {
       previousLeagueId: league["previous_league_id"],
       status: league["status"],
       scoringType: league["scoring_settings"]["rec"],
+      rosterPositions: league["roster_positions"],
     };
   } catch (error) {
     return error;

@@ -62,10 +62,10 @@ const seriesData = computed(() => {
               ) + 1,
           });
           // if a roster doesn't have any players in a position
-        } else if (!player.position) {
+        } else {
           data.push({
             x: player.position,
-            y: totalRosters.value,
+            y: 0,
           });
         }
       });
@@ -110,6 +110,11 @@ const updateChartColor = () => {
           ranges: [
             {
               from: 0,
+              to: 0.1,
+              color: "#000",
+            },
+            {
+              from: 1,
               to: Math.floor(totalRosters.value / 4),
               color: "#0ea5e9",
             },
@@ -168,6 +173,11 @@ const chartOptions = ref({
         ranges: [
           {
             from: 0,
+            to: 0.1,
+            color: "#000",
+          },
+          {
+            from: 1,
             to: Math.floor(totalRosters.value / 4),
             color: "#0ea5e9",
           },
