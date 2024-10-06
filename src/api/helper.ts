@@ -714,11 +714,11 @@ export const fakeProjectionData = [
   {
     name: "Dak to the Future",
     data: [
-      { position: "RB", projection: 444 },
-      { position: "WR", projection: 343 },
-      { projection: 279, position: "QB" },
+      { position: "RB", projection: 400 },
+      { position: "WR", projection: 330 },
+      { projection: 259, position: "QB" },
       { projection: 90, position: "TE" },
-      { projection: 88, position: "K" },
+      { projection: 83, position: "K" },
       { projection: 74, position: "DEF" },
     ],
     total: 1230,
