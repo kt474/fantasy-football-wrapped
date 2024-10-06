@@ -210,9 +210,6 @@ const chartOptions = ref({
           >
             Power Rankings
           </h1>
-          <p class="text-base font-normal text-gray-500 dark:text-gray-300">
-            Regular Season
-          </p>
         </div>
       </div>
       <apexchart

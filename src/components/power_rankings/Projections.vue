@@ -334,11 +334,8 @@ const chartOptions = ref({
             <h1
               class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
             >
-              Roster Strength
+              Roster Projections
             </h1>
-            <p class="text-base font-normal text-gray-500 dark:text-gray-300">
-              Rest of season projections
-            </p>
           </div>
         </div>
         <apexchart
@@ -350,7 +347,7 @@ const chartOptions = ref({
         <p
           class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
         >
-          Projection data is from the Sleeper API.
+          Rest of season projected points data from the Sleeper API.
         </p>
       </div>
       <HeatMap :formattedData="formattedData" class="mt-4" />

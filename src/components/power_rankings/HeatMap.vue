@@ -214,11 +214,8 @@ const chartOptions = ref({
         <h1
           class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
         >
-          Roster Strength
+          Position Group Rankings
         </h1>
-        <p class="text-base font-normal text-gray-500 dark:text-gray-300">
-          Position rankings
-        </p>
       </div>
     </div>
     <apexchart
