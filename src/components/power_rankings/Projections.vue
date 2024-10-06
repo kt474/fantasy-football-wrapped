@@ -206,7 +206,19 @@ watch(
 
 watch(
   () => store.currentLeagueId,
-  () => updateChartColor()
+  async () => {
+    if (
+      store.leagueInfo.length > 0 &&
+      !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
+    ) {
+      loading.value = true;
+      await getData();
+      updateChartColor();
+      loading.value = false;
+    } else {
+      updateChartColor();
+    }
+  }
 );
 
 const updateChartColor = () => {
@@ -239,7 +251,7 @@ const updateChartColor = () => {
         dataLabels: {
           total: {
             enabled: true,
-            offsetX: -2,
+            offsetX: -1,
             style: {
               fontSize: "13px",
               fontWeight: 900,
@@ -290,7 +302,7 @@ const chartOptions = ref({
       dataLabels: {
         total: {
           enabled: true,
-          offsetX: -2,
+          offsetX: -1,
           style: {
             fontSize: "13px",
             fontWeight: 900,
