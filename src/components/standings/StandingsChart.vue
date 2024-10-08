@@ -108,7 +108,7 @@ const chartOptions = ref({
       enabled: false,
     },
   },
-  colors: ["#fb923c", "#4ade80", "#60a5fa"],
+  colors: ["#f97316", "#22c55e", "#0ea5e9"],
   tooltip: {
     theme: store.darkMode ? "dark" : "light",
   },

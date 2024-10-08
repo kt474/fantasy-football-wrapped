@@ -134,7 +134,7 @@ const chartOptions = ref({
     offsetX: 21,
     customLegendItems: ["Actual", "Expected"],
     markers: {
-      fillColors: ["#00E396", "#775DD0"],
+      fillColors: ["#22c55e", "#a855f7"],
     },
   },
 });
