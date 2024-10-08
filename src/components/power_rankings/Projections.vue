@@ -34,7 +34,7 @@ const getData = async () => {
       const projectionPromises = roster.players.map((player: any) => {
         return getProjections(
           player,
-          "2024",
+          store.leagueInfo[store.currentLeagueIndex].season,
           currentLeague["currentWeek"] ? currentLeague["currentWeek"] : 0,
           currentLeague["scoringType"]
         );
