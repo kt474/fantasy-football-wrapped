@@ -63,6 +63,7 @@ const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
+      width: "97%",
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       id: "power-ranking",
       toolbar: {
@@ -118,6 +119,7 @@ watch(
 
 const chartOptions = ref({
   chart: {
+    width: "97%",
     foreColor: chartTextColor.value,
     id: "power-ranking",
     toolbar: {
@@ -213,7 +215,7 @@ const chartOptions = ref({
         </div>
       </div>
       <apexchart
-        width="99.9%"
+        width="97%"
         height="475"
         type="line"
         :options="chartOptions"
