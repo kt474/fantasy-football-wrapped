@@ -135,7 +135,7 @@ export const winsOnWeek = (recordString: string, week: number) => {
 export const getTotalTransactions = (transactions: any) => {
   return transactions.reduce((countMap: any, obj: any) => {
     const id = obj.creator;
-    const shouldCount = obj.status === "complete";
+    const shouldCount = obj.status === "complete" && obj.adds !== null;
 
     if (shouldCount) {
       countMap[id] = (countMap[id] || 0) + 1;
