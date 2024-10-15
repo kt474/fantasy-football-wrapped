@@ -76,8 +76,29 @@ export const useStore = defineStore("main", {
           return roster;
         }),
       };
-
       this.leagueInfo = updatedLeagueInfo;
+    },
+    addPlayoffData(index: number, rosterId: string, playoffData: any[]) {
+      const updatedLeagueInfo = [...this.leagueInfo];
+      updatedLeagueInfo[index] = {
+        ...updatedLeagueInfo[index],
+        rosters: updatedLeagueInfo[index].rosters.map((roster) => {
+          if (roster && roster.id === rosterId) {
+            return {
+              ...roster,
+              projections: playoffData,
+            };
+          }
+          return roster;
+        }),
+      };
+      this.leagueInfo = updatedLeagueInfo;
+    },
+    addPlayoffOdds(leagueId: string, payload: any[]) {
+      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      if (item) {
+        item.playoffProjections = payload;
+      }
     },
     updateShowInput(payload: boolean) {
       this.showInput = payload;

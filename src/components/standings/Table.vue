@@ -20,6 +20,7 @@ import Playoffs from "../playoffs/Playoffs.vue";
 import LeagueHistory from "../league_history/LeagueHistory.vue";
 import Tabs from "../util/Tabs.vue";
 import Projections from "../power_rankings/Projections.vue";
+import PlayoffPercentages from "../playoffs/PlayoffPercentages.vue";
 const tableOrder = ref("wins");
 const hover = ref("");
 const props = defineProps<{
@@ -564,6 +565,7 @@ const cardHeight = computed(() => {
       <TransactionsChart class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'playoffs'">
+      <PlayoffPercentages class="mt-4" />
       <Playoffs :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">

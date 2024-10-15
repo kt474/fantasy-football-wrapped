@@ -614,6 +614,49 @@ export const fakeLosersBracket = [
   },
 ];
 
+export const fakePlayoffData = [
+  {
+    name: "Finding Deebo",
+    placement: [100, 0, 0, 0, 0, 0],
+  },
+  {
+    name: "Pollard Greens",
+    placement: [0, 0, 100, 0, 0, 0],
+  },
+  {
+    name: "Baby Back Gibbs",
+    placement: [0, 0, 0, 100, 0, 0],
+  },
+  {
+    name: "Ja’Marr the Merrier",
+    placement: [0, 100, 0, 0, 0, 0],
+  },
+  {
+    name: "The Princess McBride",
+    placement: [0, 0, 0, 0, 100, 0],
+  },
+  {
+    name: "LaPorta Potty",
+    placement: [0, 0, 0, 0, 0, 100],
+  },
+  {
+    name: "Loud and Stroud",
+    placement: [0, 0, 0, 0, 0, 0],
+  },
+  {
+    name: "Bijan Mustard",
+    placement: [0, 0, 0, 0, 0, 0],
+  },
+  {
+    name: "Dak to the Future",
+    placement: [0, 0, 0, 0, 0, 0],
+  },
+  {
+    name: "Just the Tua Us",
+    placement: [0, 0, 0, 0, 0, 0],
+  },
+];
+
 export const fakeProjectionData = [
   {
     name: "Finding Deebo",
@@ -676,7 +719,7 @@ export const fakeProjectionData = [
     total: 1309,
   },
   {
-    name: " LaPorta Potty",
+    name: "LaPorta Potty",
     data: [
       { position: "RB", projection: 359 },
       { position: "WR", projection: 342 },

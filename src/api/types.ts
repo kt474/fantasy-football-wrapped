@@ -22,6 +22,8 @@ export type LeagueInfoType = {
   currentWeek: number;
   scoringType: number;
   rosterPositions: string[];
+  playoffTeams: number;
+  playoffProjections?: any[];
 };
 
 export type RosterType = {
@@ -35,7 +37,7 @@ export type RosterType = {
   rosterId: number;
   recordByWeek: string;
   players?: string[];
-  projections?: any[];
+  projections?: { projection: number; position: string }[];
 };
 
 export type UserType = {
