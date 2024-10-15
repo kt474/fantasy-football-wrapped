@@ -98,21 +98,29 @@ export const getProjections = async (
   week: number,
   scoringType: number
 ) => {
-  const response = await fetch(
-    `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
-  );
-  const playerInfo = await response.json();
-  const playerProjection = await getWeeklyProjections(
-    player,
-    year,
-    week,
-    scoringType
-  );
+  try {
+    const response = await fetch(
+      `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
+    );
+    const playerInfo = await response.json();
+    const playerProjection = await getWeeklyProjections(
+      player,
+      year,
+      week,
+      scoringType
+    );
 
-  return {
-    projection: playerProjection,
-    position: playerInfo["player"]["position"],
-  };
+    return {
+      projection: playerProjection,
+      position: playerInfo["player"]["position"],
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      projection: 0,
+      position: "",
+    };
+  }
 };
 export const getWinnersBracket = async (leagueId: string) => {
   const response = await fetch(
@@ -164,6 +172,7 @@ export const getLeague = async (leagueId: string) => {
         status: "",
         scoringType: 1,
         rosterPositions: [],
+        playoffTeams: 0,
       };
     }
     const league = await response.json();
@@ -183,6 +192,7 @@ export const getLeague = async (leagueId: string) => {
       status: league["status"],
       scoringType: league["scoring_settings"]["rec"],
       rosterPositions: league["roster_positions"],
+      playoffTeams: league["settings"]["playoff_teams"],
     };
   } catch (error) {
     return error;
