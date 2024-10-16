@@ -66,6 +66,9 @@ const getPointsScored = (rosterId: number, week: number) => {
 };
 
 const finalPlacements = computed(() => {
+  if (store.leagueInfo[store.currentLeagueIndex].status != "complete") {
+    return [];
+  }
   let result: any = [];
   winnersBracket.value.forEach((matchup) => {
     if (matchup.p === 1) {

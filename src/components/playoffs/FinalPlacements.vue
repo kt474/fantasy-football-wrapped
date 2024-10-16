@@ -14,7 +14,7 @@ const props = defineProps<{
         Final Placements
       </h5>
     </div>
-    <div class="flow-root">
+    <div v-if="props.rosters.length > 0" class="flow-root">
       <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
         <li v-for="(user, index) in props.rosters">
           <div v-if="user" class="flex items-center">
@@ -32,6 +32,11 @@ const props = defineProps<{
           </div>
         </li>
       </ul>
+    </div>
+    <div v-else class="text-gray-900 dark:text-white">
+      <p class="pt-1 border-t dark:bg-gray-800 dark:border-gray-700">
+        Season in progress
+      </p>
     </div>
   </div>
 </template>

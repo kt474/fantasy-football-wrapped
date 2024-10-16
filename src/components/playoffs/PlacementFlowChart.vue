@@ -144,6 +144,7 @@ watch(
       Regular Season vs Final Placement
     </h5>
     <apexchart
+      v-if="props.finalPlacements.length > 0"
       type="line"
       height="575"
       width="100%"
@@ -151,5 +152,10 @@ watch(
       :series="seriesData"
       class="flex justify-center lg:ml-3 xl:ml-6"
     ></apexchart>
+    <div v-else class="text-gray-900 dark:text-white">
+      <p class="pt-1 mt-2 border-t dark:bg-gray-800 dark:border-gray-700">
+        Season in progress
+      </p>
+    </div>
   </div>
 </template>
