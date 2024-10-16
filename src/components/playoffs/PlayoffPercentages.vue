@@ -243,6 +243,10 @@ const tableData = computed(() => {
           v-for="(item, index) in tableData"
           :key="index"
           class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+          :class="{
+            'border-b-blue-600 border-b-2 dark:border-b-blue-500':
+              index == playoffTeams - 1,
+          }"
         >
           <th
             scope="row"
