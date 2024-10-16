@@ -112,7 +112,7 @@ const winner: any = computed(() => {
       v-if="!leagueStatusComplete"
       class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
-      Projected League Champ
+      Best Performing Team
     </h1>
     <h1
       v-else
