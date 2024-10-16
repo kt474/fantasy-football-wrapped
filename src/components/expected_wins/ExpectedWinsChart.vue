@@ -39,9 +39,6 @@ const updateChartColor = () => {
       zoom: {
         enabled: false,
       },
-      animations: {
-        enabled: false,
-      },
     },
     tooltip: {
       theme: store.darkMode ? "dark" : "light",
@@ -74,9 +71,6 @@ const chartOptions = ref({
       show: false,
     },
     zoom: {
-      enabled: false,
-    },
-    animations: {
       enabled: false,
     },
   },
@@ -160,7 +154,7 @@ const chartOptions = ref({
     ></apexchart>
     <p
       class="text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
-      :class="props.tableData.length <= 12 ? 'mt-2' : 'mt-6'"
+      :class="props.tableData.length <= 12 ? 'mt-4' : 'mt-6'"
     >
       Expected number of wins is calculated by simulating 10000 randomized
       weekly matchups

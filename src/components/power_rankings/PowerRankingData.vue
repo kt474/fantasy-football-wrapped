@@ -222,7 +222,7 @@ const chartOptions = ref({
         :series="powerRankings"
       ></apexchart>
       <p
-        class="mt-2 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
+        class="mt-4 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
       >
         Ranking formula:
         <span class="italic"
