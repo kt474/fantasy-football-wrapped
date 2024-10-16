@@ -66,7 +66,10 @@ const getPointsScored = (rosterId: number, week: number) => {
 };
 
 const finalPlacements = computed(() => {
-  if (store.leagueInfo[store.currentLeagueIndex].status != "complete") {
+  if (
+    store.leagueInfo.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex].status != "complete"
+  ) {
     return [];
   }
   let result: any = [];
