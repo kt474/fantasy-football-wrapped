@@ -57,7 +57,15 @@ onMounted(async () => {
       const checkInput: any = await getLeague(leagueId);
       if (checkInput["name"]) {
         store.updateCurrentLeagueId(leagueId);
-        store.updateLeagueInfo(await getData(leagueId));
+        const league = await getData(leagueId);
+        store.updateLeagueInfo(league);
+        inputLeague(
+          leagueId,
+          league.name,
+          league.totalRosters,
+          league.seasonType,
+          league.season
+        );
       }
     }
   }
@@ -221,7 +229,7 @@ const setHtmlBackground = () => {
     />
     <Alert
       v-if="store.showCopiedAlert"
-      alert-msg="URL copied to clipboard!"
+      alert-msg="Link copied to clipboard!"
       type="success"
     />
   </div>
