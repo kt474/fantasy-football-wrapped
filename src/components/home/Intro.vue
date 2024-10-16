@@ -12,7 +12,7 @@
       league insights in one place
     </h1>
     <p
-      class="max-w-4xl mx-auto mt-6 mb-0 text-lg font-normal text-center text-gray-500 text-balance lg:text-xl sm:px-16 dark:text-gray-300"
+      class="max-w-4xl mx-auto mt-5 mb-0 text-lg font-normal text-center text-gray-500 text-balance lg:text-xl sm:px-16 dark:text-gray-300"
     >
       Informative data and elegant charts for winning fantasy football managers.
     </p>
