@@ -145,7 +145,7 @@ const dataAllYears = computed(() => {
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.length > 0
   ) {
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.forEach(
-      (league: any) => {
+      (league: LeagueInfoType) => {
         let tableData;
         if (localStorage.getItem(league.leagueId)) {
           tableData = JSON.parse(<string>localStorage.getItem(league.leagueId));
@@ -198,7 +198,7 @@ const tableDataAllYears = computed(() => {
     });
   } else if (tableOrder.value === "points") {
     return dataAllYears.value.sort((a: any, b: any) => {
-      return b.points - a.points;
+      return b.points / (b.wins + b.losses) - a.points / (a.wins + a.losses);
     });
   } else if (tableOrder.value === "expectedWins") {
     return dataAllYears.value.sort((a: any, b: any) => {
@@ -224,10 +224,16 @@ const worstRecord = computed(() => {
 });
 
 const mostPoints = computed(() => {
-  return maxBy(dataAllYears.value, "points")?.points;
+  const user = maxBy(dataAllYears.value, (a) => a.points / (a.wins + a.losses));
+  return user
+    ? Math.round((user.points * 100) / (user.wins + user.losses)) / 100
+    : null;
 });
 const leastPoints = computed(() => {
-  return minBy(dataAllYears.value, "points")?.points;
+  const user = minBy(dataAllYears.value, (a) => a.points / (a.wins + a.losses));
+  return user
+    ? Math.round((user.points * 100) / (user.wins + user.losses)) / 100
+    : null;
 });
 
 const mostLucky = computed(() => {
@@ -345,12 +351,12 @@ const worstManager = computed(() => {
           </th>
           <th scope="col" class="px-6 py-3">
             <div
-              class="flex items-center cursor-pointer dark:text-gray-200"
+              class="flex items-center cursor-pointer w-28 dark:text-gray-200"
               @click="tableOrder = 'points'"
               @mouseover="hover = 'points'"
               @mouseleave="hover = ''"
             >
-              Points
+              Points per game
               <svg
                 class="w-3 h-3 ms-1.5 fill-slate-400"
                 :class="{
@@ -484,12 +490,18 @@ const worstManager = computed(() => {
             class="px-6 py-3"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
-                user.points === mostPoints,
+                Math.round((user.points / (user.wins + user.losses)) * 100) /
+                  100 ===
+                mostPoints,
               'text-red-600 dark:text-red-500 font-semibold':
-                user.points === leastPoints,
+                Math.round((user.points / (user.wins + user.losses)) * 100) /
+                  100 ===
+                leastPoints,
             }"
           >
-            {{ user.points }}
+            {{
+              Math.round((user.points / (user.wins + user.losses)) * 100) / 100
+            }}
           </td>
           <td
             v-if="user.seasons.length + currentLeague != 0"
