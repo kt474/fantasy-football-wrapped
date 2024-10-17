@@ -67,6 +67,15 @@ const originalData = computed(() => {
   return [];
 });
 
+const sortedPropsTableData = computed(() => {
+  return originalData.value.sort((a: any, b: any) => {
+    if (a.wins !== b.wins) {
+      return b.wins - a.wins;
+    }
+    return b.pointsFor - a.pointsFor;
+  });
+});
+
 // sorted version of originalData
 const tableData: any = computed(() => {
   if (tableOrder.value === "wins") {
@@ -565,7 +574,7 @@ const cardHeight = computed(() => {
       <TransactionsChart class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'playoffs'">
-      <PlayoffPercentages class="mt-4" />
+      <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
       <Playoffs :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">

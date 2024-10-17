@@ -34,7 +34,7 @@ const props = defineProps<{
       </ul>
     </div>
     <div v-else class="text-gray-900 dark:text-white">
-      <p class="pt-1 border-t dark:bg-gray-800 dark:border-gray-700">
+      <p class="pt-1 mb-2 border-t dark:bg-gray-800 dark:border-gray-700">
         Season in progress
       </p>
     </div>

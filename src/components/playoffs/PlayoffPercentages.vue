@@ -2,12 +2,16 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { maxBy, sum } from "lodash";
 import { useStore } from "../../store/store";
-import { RosterType, LeagueInfoType } from "../../api/types";
+import { RosterType, LeagueInfoType, TableDataType } from "../../api/types";
 import { getProjections } from "../../api/api";
 import { fakePlayoffData } from "../../api/helper";
 const store = useStore();
 const loading = ref(false);
 const playoffOdds: any = ref([]);
+
+const props = defineProps<{
+  propsTableData: TableDataType[];
+}>();
 
 onMounted(async () => {
   if (
@@ -56,99 +60,112 @@ const numSimulations = 2000;
 
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  if (
-    store.leagueInfo.length > 0 &&
-    !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
-  ) {
-    await Promise.all(
-      currentLeague.rosters.map(async (roster: any) => {
-        const singleRoster: any[] = [];
-        if (!roster.players) return [];
-        const projectionPromises = roster.players.map((player: any) => {
-          return getProjections(
-            player,
-            store.leagueInfo[store.currentLeagueIndex].season,
-            currentLeague["currentWeek"] ? currentLeague["currentWeek"] : 0,
-            currentLeague["scoringType"]
-          );
-        });
-
-        const projections = await Promise.all(projectionPromises);
-        singleRoster.push(...projections);
-        store.addProjectionData(
-          store.currentLeagueIndex,
-          roster.id,
-          singleRoster
-        );
-      })
-    );
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
-  }
-
-  const nameMapping: any = new Map(
-    store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
-      user.id,
-      user.name,
-    ])
-  );
-
-  currentLeague.rosters.forEach((roster: RosterType) => {
-    const winScore = roster.wins / currentLeague.lastScoredWeek;
-    const pointScore = roster.pointsFor / maxPoints.value;
-    const projectedScore: number = roster.projections
-      ? getTopProjectionsSum(roster.projections) / maxProjectedScore.value
-      : 0;
-    playoffOdds.value.push({
-      name: nameMapping.get(roster.id),
-      id: roster.id,
-      score: calculatePowerScore(winScore, pointScore, projectedScore),
-      currentWins: roster.wins,
-      originalWins: roster.wins,
-      placement: [],
-      playoffPercentage: 0,
+  if (currentLeague.lastScoredWeek >= currentLeague.regularSeasonLength) {
+    playoffOdds.value = props.propsTableData.map((user, index) => {
+      return {
+        name: user.name,
+        id: user.id,
+        placement: Array(numSimulations).fill(index + 1),
+      };
     });
-  });
-
-  for (let sim = 0; sim < numSimulations; sim++) {
-    for (
-      let i = currentLeague.lastScoredWeek;
-      i <= currentLeague.regularSeasonLength;
-      i++
+  } else {
+    if (
+      store.leagueInfo.length > 0 &&
+      !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
     ) {
+      await Promise.all(
+        currentLeague.rosters.map(async (roster: any) => {
+          const singleRoster: any[] = [];
+          if (!roster.players) return [];
+          const projectionPromises = roster.players.map((player: any) => {
+            return getProjections(
+              player,
+              store.leagueInfo[store.currentLeagueIndex].season,
+              currentLeague["currentWeek"] ? currentLeague["currentWeek"] : 0,
+              currentLeague["scoringType"]
+            );
+          });
+
+          const projections = await Promise.all(projectionPromises);
+          singleRoster.push(...projections);
+          store.addProjectionData(
+            store.currentLeagueIndex,
+            roster.id,
+            singleRoster
+          );
+        })
+      );
+      localStorage.setItem(
+        "leagueInfo",
+        JSON.stringify(store.leagueInfo as LeagueInfoType[])
+      );
+    }
+
+    const nameMapping: any = new Map(
+      store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
+        user.id,
+        user.name,
+      ])
+    );
+
+    currentLeague.rosters.forEach((roster: RosterType) => {
+      const winScore = roster.wins / currentLeague.lastScoredWeek;
+      const pointScore = roster.pointsFor / maxPoints.value;
+      const projectedScore: number = roster.projections
+        ? getTopProjectionsSum(roster.projections) / maxProjectedScore.value
+        : 0;
+      playoffOdds.value.push({
+        name: nameMapping.get(roster.id),
+        id: roster.id,
+        score: calculatePowerScore(winScore, pointScore, projectedScore),
+        currentWins: roster.wins,
+        originalWins: roster.wins,
+        placement: [],
+        playoffPercentage: 0,
+      });
+    });
+
+    for (let sim = 0; sim < numSimulations; sim++) {
+      for (
+        let i = currentLeague.lastScoredWeek;
+        i <= currentLeague.regularSeasonLength;
+        i++
+      ) {
+        playoffOdds.value.forEach((roster: any) => {
+          const randomOpponentIndex = Math.floor(
+            Math.random() * currentLeague.totalRosters
+          );
+          const opponentPowerScore =
+            playoffOdds.value[randomOpponentIndex].score;
+          const winProbability =
+            Math.round(
+              (roster.score * 1000) / (roster.score + opponentPowerScore)
+            ) / 1000;
+          const randomOutcome = Math.random();
+          if (winProbability > randomOutcome) {
+            roster.currentWins += 1;
+          }
+        });
+      }
+      const copyArray = playoffOdds.value
+        .slice()
+        .sort((a: any, b: any) => b.currentWins - a.currentWins);
       playoffOdds.value.forEach((roster: any) => {
-        const randomOpponentIndex = Math.floor(
-          Math.random() * currentLeague.totalRosters
+        const placement = copyArray.findIndex(
+          (obj: any) => obj.id === roster.id
         );
-        const opponentPowerScore = playoffOdds.value[randomOpponentIndex].score;
-        const winProbability =
-          Math.round(
-            (roster.score * 1000) / (roster.score + opponentPowerScore)
-          ) / 1000;
-        const randomOutcome = Math.random();
-        if (winProbability > randomOutcome) {
-          roster.currentWins += 1;
+        roster.placement.push(placement + 1);
+        roster.currentWins = roster.originalWins;
+        if (placement + 1 <= playoffTeams.value) {
+          roster.playoffPercentage += 1;
         }
       });
     }
-    const copyArray = playoffOdds.value
-      .slice()
-      .sort((a: any, b: any) => b.currentWins - a.currentWins);
-    playoffOdds.value.forEach((roster: any) => {
-      const placement = copyArray.findIndex((obj: any) => obj.id === roster.id);
-      roster.placement.push(placement + 1);
-      roster.currentWins = roster.originalWins;
-      if (placement + 1 <= playoffTeams.value) {
-        roster.playoffPercentage += 1;
-      }
-    });
-  }
 
-  playoffOdds.value.sort(
-    (a: any, b: any) => b.playoffPercentage - a.playoffPercentage
-  );
+    playoffOdds.value.sort(
+      (a: any, b: any) => b.playoffPercentage - a.playoffPercentage
+    );
+  }
   store.addPlayoffOdds(store.currentLeagueId, playoffOdds.value);
   localStorage.setItem(
     "leagueInfo",
