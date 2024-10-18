@@ -88,11 +88,11 @@ const mostTransactionsUser: any = computed(() => {
         </g>
       </g>
     </svg>
-    <h1
+    <p
       class="text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
       Most Transactions
-    </h1>
+    </p>
     <div class="mt-2 text-center">
       <div class="flex justify-center -mt-0.5">
         <img

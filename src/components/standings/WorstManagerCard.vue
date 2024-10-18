@@ -102,11 +102,11 @@ const worstManagerUser: any = computed(() => {
         </g>
       </g>
     </svg>
-    <h1
+    <p
       class="text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
       Worst Manager
-    </h1>
+    </p>
     <div class="mt-2 text-center">
       <div
         class="flex justify-center"

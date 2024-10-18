@@ -1,16 +1,17 @@
 // helper methods
 import { groupBy, flatten, zip, mean, max, min, countBy } from "lodash";
 import { getMatchup } from "./api";
+import { RosterType, UserType } from "./types";
 
 export const createTableData = (
-  users: any[],
-  rosters: any[],
-  points: any[],
+  users: UserType[],
+  rosters: RosterType[],
+  points: Record<string, any>[],
   medianScoring: boolean
 ) => {
   if (users && points) {
-    const combined = users.map((a: any) => {
-      const matched = rosters.find((b: any) => b.id === a.id);
+    const combined = users.map((a: UserType) => {
+      const matched = rosters.find((b: RosterType) => b.id === a.id);
       if (matched) {
         return {
           ...a,

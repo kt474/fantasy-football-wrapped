@@ -16,7 +16,7 @@ export const useStore = defineStore("main", {
     leagueSubmitted: false,
     currentTab: "standings",
     showLeaguesList: false,
-    leaguesList: [] as any[],
+    leaguesList: [] as LeagueInfoType[],
     username: "",
   }),
   getters: {
@@ -78,7 +78,11 @@ export const useStore = defineStore("main", {
       };
       this.leagueInfo = updatedLeagueInfo;
     },
-    addPlayoffData(index: number, rosterId: string, playoffData: any[]) {
+    addPlayoffData(
+      index: number,
+      rosterId: string,
+      playoffData: Record<string, any>[]
+    ) {
       const updatedLeagueInfo = [...this.leagueInfo];
       updatedLeagueInfo[index] = {
         ...updatedLeagueInfo[index],
@@ -94,7 +98,7 @@ export const useStore = defineStore("main", {
       };
       this.leagueInfo = updatedLeagueInfo;
     },
-    addPlayoffOdds(leagueId: string, payload: any[]) {
+    addPlayoffOdds(leagueId: string, payload: Record<string, any>[]) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
         item.playoffProjections = payload;

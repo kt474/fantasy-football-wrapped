@@ -11,11 +11,12 @@
       >
       league insights in one place
     </h1>
-    <p
+    <h2
       class="max-w-4xl mx-auto mt-5 mb-0 text-lg font-normal text-center text-gray-500 text-balance lg:text-xl sm:px-16 dark:text-gray-300"
     >
-      Informative data and elegant charts for winning fantasy football managers.
-    </p>
+      Detailed analysis and elegant charts for winning fantasy football
+      managers.
+    </h2>
     <p
       class="max-w-3xl mx-auto text-lg font-normal text-center text-gray-500 lg:text-xl sm:px-16 dark:text-gray-300"
     >

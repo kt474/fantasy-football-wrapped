@@ -108,18 +108,18 @@ const winner: any = computed(() => {
       </g>
     </svg>
 
-    <h1
+    <p
       v-if="!leagueStatusComplete"
       class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
       Best Performing Team
-    </h1>
-    <h1
+    </p>
+    <p
       v-else
       class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
     >
       League Champ
-    </h1>
+    </p>
     <div class="flex justify-center mt-2">
       <img
         alt="League winner user avatar"
