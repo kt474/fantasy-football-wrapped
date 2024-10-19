@@ -286,8 +286,10 @@ const worstManager = computed(() => {
         class="text-xs text-gray-700 uppercase dark:text-gray-300"
       >
         <tr>
-          <th scope="col" class="px-6 py-3 dark:text-gray-200">Team name</th>
-          <th scope="col" class="px-6 py-3">
+          <th scope="col" class="px-2 py-3 sm:px-6 dark:text-gray-200">
+            Team name
+          </th>
+          <th scope="col" class="px-2 py-3 sm:px-6">
             <div
               class="flex items-center w-24 cursor-pointer dark:text-gray-200"
               @click="tableOrder = 'wins'"
@@ -317,7 +319,7 @@ const worstManager = computed(() => {
               Total wins and losses across all seasons
             </div>
           </th>
-          <th scope="col" class="px-6 py-3">
+          <th scope="col" class="px-2 py-3 sm:px-6">
             <div
               class="flex items-center cursor-pointer w-28 dark:text-gray-200"
               @click="tableOrder = 'expectedWins'"
@@ -349,7 +351,7 @@ const worstManager = computed(() => {
               randomized weekly matchups)
             </div>
           </th>
-          <th scope="col" class="px-6 py-3">
+          <th scope="col" class="px-2 py-3 sm:px-6">
             <div
               class="flex items-center cursor-pointer w-28 dark:text-gray-200"
               @click="tableOrder = 'points'"
@@ -358,7 +360,7 @@ const worstManager = computed(() => {
             >
               Points per game
               <svg
-                class="w-3 h-3 ms-1.5 fill-slate-400"
+                class="w-5 h-3 ms-1.5 fill-slate-400"
                 :class="{
                   'fill-slate-600 dark:fill-slate-50': tableOrder == 'points',
                 }"
@@ -379,7 +381,7 @@ const worstManager = computed(() => {
               Total regular season points across all seasons
             </div>
           </th>
-          <th scope="col" class="px-6 py-3">
+          <th scope="col" class="px-2 py-3 sm:px-6">
             <div
               class="flex items-center cursor-pointer w-28 dark:text-gray-200"
               @click="tableOrder = 'managerEfficiency'"
@@ -411,7 +413,7 @@ const worstManager = computed(() => {
             </div>
           </th>
 
-          <th scope="col" class="px-6 py-3 dark:text-gray-200">
+          <th scope="col" class="px-2 py-3 sm:px-6 dark:text-gray-200">
             <div
               class="flex items-center"
               @mouseover="hover = 'season'"
@@ -426,7 +428,7 @@ const worstManager = computed(() => {
               Seasons played
             </div>
           </th>
-          <th scope="col" class="px-6 py-3">
+          <th scope="col" class="px-2 py-3 sm:px-6">
             <span class="sr-only">Edit</span>
           </th>
         </tr>
@@ -438,7 +440,7 @@ const worstManager = computed(() => {
         >
           <th
             scope="row"
-            class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+            class="px-2 py-3 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
           >
             <div class="flex items-center">
               <img
@@ -460,11 +462,11 @@ const worstManager = computed(() => {
                 />
               </svg>
               <p class="ml-2">{{ index + 1 }}.&nbsp;</p>
-              <p>{{ user.name }}</p>
+              <p class="truncate max-w-36 sm:max-w-48">{{ user.name }}</p>
             </div>
           </th>
           <td
-            class="px-6 py-3"
+            class="px-2 py-3 sm:px-6"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
                 (user.wins / user.losses).toFixed(2) === bestRecord,
@@ -475,7 +477,7 @@ const worstManager = computed(() => {
             {{ user.wins }} - {{ user.losses }}
           </td>
           <td
-            class="px-6 py-3"
+            class="px-2 py-3 sm:px-6"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
                 (user.wins - user.randomScheduleWins).toFixed(2) === mostLucky,
@@ -487,7 +489,7 @@ const worstManager = computed(() => {
             {{ (user.wins - user.randomScheduleWins).toFixed(2) }}
           </td>
           <td
-            class="px-6 py-3"
+            class="px-2 py-3 sm:px-6"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
                 Math.round((user.points / (user.wins + user.losses)) * 100) /
@@ -505,7 +507,7 @@ const worstManager = computed(() => {
           </td>
           <td
             v-if="user.seasons.length + currentLeague != 0"
-            class="px-6 py-3"
+            class="px-2 py-3 sm:px-6"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
                 (
@@ -529,8 +531,8 @@ const worstManager = computed(() => {
               ).toFixed(1)
             }}%
           </td>
-          <td v-else class="px-6 py-3">0%</td>
-          <td class="px-6 py-3">
+          <td v-else class="px-2 py-3 sm:px-6">0%</td>
+          <td class="px-2 py-3 sm:px-6">
             <div class="flex">
               <div
                 v-for="(season, index) in user.seasons"
@@ -622,7 +624,7 @@ const worstManager = computed(() => {
               </div>
             </div>
           </td>
-          <td class="px-6 py-3 text-right"></td>
+          <td class="px-2 py-3 text-right sm:px-6"></td>
         </tr>
       </tbody>
     </table>

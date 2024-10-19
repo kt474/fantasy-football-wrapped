@@ -206,10 +206,10 @@ const cardHeight = computed(() => {
             class="text-xs text-gray-700 uppercase dark:text-gray-300"
           >
             <tr>
-              <th scope="col" class="px-6 py-3 dark:text-gray-200">
+              <th scope="col" class="px-2 py-3 sm:px-6 dark:text-gray-200">
                 Team name
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" class="px-2 py-3 sm:px-6">
                 <div
                   @click="tableOrder = 'wins'"
                   @mouseover="hover = 'wins'"
@@ -242,7 +242,7 @@ const cardHeight = computed(() => {
                   Regular season wins and losses
                 </div>
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" class="px-2 py-3 sm:px-6">
                 <div
                   @click="tableOrder = 'points'"
                   @mouseover="hover = 'points'"
@@ -275,7 +275,7 @@ const cardHeight = computed(() => {
                   Total regular season points
                 </div>
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" class="px-2 py-3 sm:px-6">
                 <div
                   @click="tableOrder = 'pointsAgainst'"
                   @mouseover="hover = 'pointsAgainst'"
@@ -308,7 +308,7 @@ const cardHeight = computed(() => {
                   Total regular season points against
                 </div>
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" class="px-2 py-3 sm:px-6">
                 <div
                   @click="tableOrder = 'recordAgainstAll'"
                   @mouseover="hover = 'recordAgainstAll'"
@@ -343,7 +343,7 @@ const cardHeight = computed(() => {
                   Team record if each team played every other team each week.
                 </div>
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" class="px-2 py-3 sm:px-6">
                 <div
                   @click="tableOrder = 'medianRecord'"
                   @mouseover="hover = 'medianRecord'"
@@ -388,7 +388,7 @@ const cardHeight = computed(() => {
             >
               <th
                 scope="row"
-                class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                class="px-2 py-3 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
               >
                 <div class="flex items-center">
                   <img
@@ -410,11 +410,11 @@ const cardHeight = computed(() => {
                     />
                   </svg>
                   <p class="ml-2">{{ index + 1 }}.&nbsp;</p>
-                  <p>{{ item.name }}</p>
+                  <p class="truncate max-w-36 sm:max-w-48">{{ item.name }}</p>
                 </div>
               </th>
               <td
-                class="px-6 py-3"
+                class="px-2 py-3 sm:px-6"
                 :class="{
                   'text-blue-600 dark:text-blue-500 font-semibold':
                     item.wins === mostWins,
@@ -426,7 +426,7 @@ const cardHeight = computed(() => {
                 {{ item.ties != 0 ? `- ${item.ties}` : "" }}
               </td>
               <td
-                class="px-6 py-3"
+                class="px-2 py-3 sm:px-6"
                 :class="{
                   'text-blue-600 dark:text-blue-500 font-semibold':
                     item.pointsFor === mostPoints,
@@ -437,7 +437,7 @@ const cardHeight = computed(() => {
                 {{ item.pointsFor }}
               </td>
               <td
-                class="px-6 py-3"
+                class="px-2 py-3 sm:px-6"
                 :class="{
                   'text-blue-600 dark:text-blue-500 font-semibold':
                     item.pointsAgainst === mostPointsAgainst,
@@ -448,7 +448,7 @@ const cardHeight = computed(() => {
                 {{ item.pointsAgainst }}
               </td>
               <td
-                class="px-6 py-3"
+                class="px-2 py-3 sm:px-6"
                 :class="{
                   'text-blue-600 dark:text-blue-500 font-semibold':
                     item.winsAgainstAll === mostWinsAgainstAll,
@@ -460,7 +460,7 @@ const cardHeight = computed(() => {
                 {{ item.lossesAgainstAll }}
               </td>
               <td
-                class="px-6 py-3"
+                class="px-2 py-3 sm:px-6"
                 :class="{
                   'text-blue-600 font-semibold dark:text-blue-500':
                     item.winsWithMedian === mostMedianWins,

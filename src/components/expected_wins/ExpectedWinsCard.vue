@@ -62,9 +62,11 @@ const listPadding = computed(() => {
         class="text-xs text-gray-700 uppercase dark:text-gray-300"
       >
         <tr>
-          <th scope="col" class="px-6 py-3 dark:text-gray-200">Team Name</th>
+          <th scope="col" class="px-2 py-3 sm:px-6 dark:text-gray-200">
+            Team Name
+          </th>
 
-          <th scope="col" class="px-4 py-3">
+          <th scope="col" class="px-2 py-3 sm:px-4">
             <div
               @click="tableOrder = 'randomScheduleWins'"
               @mouseover="hover = 'randomScheduleWins'"
@@ -98,7 +100,7 @@ const listPadding = computed(() => {
               matchups
             </div>
           </th>
-          <th scope="col" class="px-4 py-3">
+          <th scope="col" class="px-2 py-3 sm:px-4">
             <div
               @click="tableOrder = 'winsDifference'"
               @mouseover="hover = 'winsDifference'"
@@ -142,12 +144,12 @@ const listPadding = computed(() => {
           <th
             scope="row"
             :class="listPadding"
-            class="px-6 font-medium text-gray-900 truncate max-w-56 whitespace-nowrap dark:text-white"
+            class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-white"
           >
             {{ item.name }}
           </th>
           <td
-            class="px-4 py-2"
+            class="px-2 py-2 sm:px-4"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
                 item.randomScheduleWins === mostRandomScheduleWins,
