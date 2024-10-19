@@ -57,7 +57,8 @@ const changeTab = (tab: string) => {
             store.currentTab === 'managerEfficiency',
         }"
       >
-        Roster Management
+        Roster
+        <span class="hidden sm:inline">Management</span>
       </button>
     </li>
     <li class="cursor-pointer me-2">
