@@ -237,7 +237,10 @@ const setHtmlBackground = () => {
 
 <style scoped>
 .custom-input-width {
-  width: 25.8rem;
+  @media (min-width: 640px) {
+    width: 25.8rem;
+  }
+  width: 18.5rem;
 }
 .custom-background {
   background: rgb(36, 19, 0);
