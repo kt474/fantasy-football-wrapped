@@ -9,7 +9,7 @@ export const seasonType: { [key: number]: string } = {
 
 export const inputUsername = async (username: string, year: string) => {
   try {
-    const response = await fetch(import.meta.env.VITE_USERNAME_URL, {
+    await fetch(import.meta.env.VITE_USERNAME_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -21,10 +21,6 @@ export const inputUsername = async (username: string, year: string) => {
         },
       }),
     });
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
   } catch (error) {
     console.error("Error:", error);
   }
@@ -38,7 +34,7 @@ export const inputLeague = async (
   year: string
 ) => {
   try {
-    const response = await fetch(import.meta.env.VITE_LEAGUE_URL, {
+    await fetch(import.meta.env.VITE_LEAGUE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -53,10 +49,6 @@ export const inputLeague = async (
         },
       }),
     });
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
   } catch (error) {
     console.error("Error:", error);
   }
@@ -126,30 +118,26 @@ export const getWinnersBracket = async (leagueId: string) => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/winners_bracket`
   );
-  const winnersBracket = await response.json();
-  return winnersBracket;
+  return await response.json();
 };
 
 export const getLosersBracket = async (leagueId: string) => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/losers_bracket`
   );
-  const losersBracket = await response.json();
-  return losersBracket;
+  return await response.json();
 };
 
 export const getUsername = async (username: string) => {
   const response = await fetch(`https://api.sleeper.app/v1/user/${username}`);
-  const user = await response.json();
-  return user;
+  return await response.json();
 };
 
 export const getAllLeagues = async (userId: string, season: string) => {
   const response = await fetch(
     `https://api.sleeper.app/v1/user/${userId}/leagues/nfl/${season}`
   );
-  const leagues = await response.json();
-  return leagues;
+  return await response.json();
 };
 
 export const getLeague = async (leagueId: string) => {
@@ -204,7 +192,7 @@ export const getRosters = async (leagueId: string) => {
     `https://api.sleeper.app/v1/league/${leagueId}/rosters`
   );
   const rosters = await response.json();
-  const result = rosters.map((roster: any) => {
+  return rosters.map((roster: any) => {
     return {
       id: roster["owner_id"],
       pointsFor: roster["settings"]["fpts"],
@@ -221,7 +209,6 @@ export const getRosters = async (leagueId: string) => {
       players: roster["players"],
     };
   });
-  return result;
 };
 
 export const getUsers = async (leagueId: string) => {
@@ -229,14 +216,13 @@ export const getUsers = async (leagueId: string) => {
     `https://api.sleeper.app/v1/league/${leagueId}/users`
   );
   const users = await response.json();
-  const result = users.map((user: any) => {
+  return users.map((user: any) => {
     return {
       id: user["user_id"],
       name: user["metadata"]["team_name"] || user["display_name"],
       avatar: user["avatar"],
     };
   });
-  return result;
 };
 
 export const getMatchup = async (week: number, leagueId: string) => {
@@ -244,13 +230,12 @@ export const getMatchup = async (week: number, leagueId: string) => {
     `https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`
   );
   const matchup = await response.json();
-  const result = matchup.map((game: any) => {
+  return matchup.map((game: any) => {
     return {
       rosterId: game["roster_id"],
       points: game["points"],
     };
   });
-  return result;
 };
 
 export const getAvatar = async (avatarId: string) => {
@@ -268,8 +253,7 @@ export const getTransactions = async (leagueId: string, week: number) => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/transactions/${week}`
   );
-  const transactions = await response.json();
-  return transactions;
+  return await response.json();
 };
 
 export const getCurrentLeagueState = async () => {
