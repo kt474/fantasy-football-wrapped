@@ -37,7 +37,8 @@ onMounted(async () => {
           showLoading.value = true;
           store.updateLeagueInfo(await getData(league.leagueId));
           showLoading.value = false;
-          inputLeague(
+          // issues on mobile refresh
+          await inputLeague(
             league.leagueId,
             league.name,
             league.totalRosters,
@@ -59,7 +60,7 @@ onMounted(async () => {
         store.updateCurrentLeagueId(leagueId);
         const league = await getData(leagueId);
         store.updateLeagueInfo(league);
-        inputLeague(
+        await inputLeague(
           leagueId,
           league.name,
           league.totalRosters,
@@ -237,10 +238,10 @@ const setHtmlBackground = () => {
 
 <style scoped>
 .custom-input-width {
+  width: 18.5rem;
   @media (min-width: 640px) {
     width: 25.8rem;
   }
-  width: 18.5rem;
 }
 .custom-background {
   background: rgb(36, 19, 0);
