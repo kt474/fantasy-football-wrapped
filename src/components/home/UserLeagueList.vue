@@ -5,6 +5,7 @@ import { seasonType, getData, inputLeague } from "../../api/api";
 
 const checkedLeagues = ref([]);
 const showError = ref(false);
+const duplicateLeagueError = ref(false);
 const store = useStore();
 
 const addLeagues = async () => {
@@ -14,7 +15,12 @@ const addLeagues = async () => {
   }
   if (checkedLeagues.value.length >= 1) {
     for (const league of checkedLeagues.value) {
+      if (store.leagueIds.includes(league)) {
+        duplicateLeagueError.value = true;
+        return;
+      }
       store.updateCurrentLeagueId(league);
+      store.updateShowLeaguesList(false);
       const newLeagueInfo = await getData(league);
       store.updateLeagueInfo(newLeagueInfo);
       inputLeague(
@@ -26,7 +32,7 @@ const addLeagues = async () => {
       );
     }
     store.setLeaguesList([]);
-    store.updateShowLeaguesList(false);
+
     store.updateShowAddedAlert(true);
     setTimeout(() => {
       store.updateShowAddedAlert(false);
@@ -35,11 +41,17 @@ const addLeagues = async () => {
 };
 </script>
 <template>
-  <div class="w-full h-screen">
-    <h3 class="my-4 text-2xl font-medium text-gray-900 dark:text-white">
+  <div class="w-full" :class="{ 'h-screen': !store.currentLeagueId }">
+    <h3
+      class="my-4 text-2xl font-medium text-gray-900 dark:text-white"
+      :class="{ hidden: store.currentLeagueId }"
+    >
       Welcome {{ store.username }}!
     </h3>
-    <h3 class="mb-2 text-xl font-medium text-gray-900 dark:text-white">
+    <h3
+      class="mb-2 text-xl font-medium text-gray-900 dark:text-white"
+      :class="{ 'mt-2': store.currentLeagueId }"
+    >
       Select leagues:
     </h3>
     <ul class="flex flex-wrap w-full overflow-auto rounded-lg max-h-96">
@@ -75,6 +87,9 @@ const addLeagues = async () => {
     </ul>
     <p v-if="showError" class="mt-2 text-red-600 dark:text-red-500">
       A maximum of 5 leagues can be added at a time
+    </p>
+    <p v-if="duplicateLeagueError" class="-mt-1 text-red-600 dark:text-red-500">
+      A selected league already exists
     </p>
     <button
       @click="addLeagues"

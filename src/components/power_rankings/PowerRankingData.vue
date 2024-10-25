@@ -22,13 +22,13 @@ const powerRankings = computed(() => {
       value.points.forEach((_: number, week: number) => {
         if (week < value.recordByWeek.length) {
           const currentWins = winsOnWeek(value.recordByWeek, week);
-          const currentLosess = week + 1 - currentWins;
+          const currentLosses = week + 1 - currentWins;
           ratingArr.push(
             getPowerRanking(
               mean(value.points.slice(0, week + 1)),
               Number(max(value.points.slice(0, week + 1))),
               Number(min(value.points.slice(0, week + 1))),
-              currentWins / (currentWins + currentLosess)
+              currentWins / (currentWins + currentLosses)
             )
           );
         }

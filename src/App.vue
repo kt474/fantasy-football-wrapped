@@ -135,6 +135,9 @@ const setHtmlBackground = () => {
             >Add League</label
           >
           <Input v-if="store.showInput" class="custom-input-width" />
+          <div v-if="store.showLeaguesList" class="container mx-auto">
+            <UserLeagueList />
+          </div>
           <div v-if="store.leagueUsers[store.currentLeagueIndex]">
             <CardContainer />
             <Table

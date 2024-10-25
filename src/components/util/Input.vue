@@ -98,7 +98,6 @@ const onSubmit = async () => {
     <div class="flex justify-start">
       <select
         aria-label="Input type"
-        v-if="!store.leagueInfo.length"
         v-model="inputType"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height w-32"
       >
@@ -107,7 +106,7 @@ const onSubmit = async () => {
       </select>
       <select
         aria-label="Season year"
-        v-if="inputType === 'Username' && !store.leagueInfo.length"
+        v-if="inputType === 'Username'"
         v-model="seasonYear"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height w-24 hidden sm:block"
       >
