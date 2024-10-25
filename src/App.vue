@@ -85,6 +85,10 @@ watch(
       localStorage.removeItem("leagueInfo");
     } else {
       localStorage.currentLeagueId = store.currentLeagueId;
+      // update league id in url
+      const url: any = new URL(window.location.href);
+      url.searchParams.set("leagueId", store.currentLeagueId);
+      window.history.pushState({}, "", url.toString());
     }
   }
 );

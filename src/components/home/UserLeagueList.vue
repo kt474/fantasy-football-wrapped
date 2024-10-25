@@ -8,6 +8,12 @@ const showError = ref(false);
 const duplicateLeagueError = ref(false);
 const store = useStore();
 
+const updateURL = (leagueID: string) => {
+  const url: any = new URL(window.location.href);
+  url.searchParams.set("leagueId", leagueID);
+  window.history.pushState({}, "", url.toString());
+};
+
 const addLeagues = async () => {
   if (checkedLeagues.value.length > 5) {
     showError.value = true;
@@ -23,6 +29,7 @@ const addLeagues = async () => {
       store.updateShowLeaguesList(false);
       const newLeagueInfo = await getData(league);
       store.updateLeagueInfo(newLeagueInfo);
+      updateURL(league);
       inputLeague(
         league,
         newLeagueInfo.name,

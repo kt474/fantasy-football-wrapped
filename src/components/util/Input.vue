@@ -21,6 +21,12 @@ const leagueIds = computed(() => {
   return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
 });
 
+const updateURL = (leagueID: string) => {
+  const url: any = new URL(window.location.href);
+  url.searchParams.set("leagueId", leagueID);
+  window.history.pushState({}, "", url.toString());
+};
+
 onMounted(() => {
   if (localStorage.inputType) {
     inputType.value = localStorage.inputType;
@@ -76,6 +82,7 @@ const onSubmit = async () => {
         store.updateLeagueInfo(newLeagueInfo);
         store.leagueSubmitted = true;
         store.updateShowInput(false);
+        updateURL(leagueIdInput.value);
         inputLeague(
           leagueIdInput.value,
           newLeagueInfo.name,
