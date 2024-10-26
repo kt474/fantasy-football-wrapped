@@ -251,7 +251,7 @@ const updateChartColor = () => {
         dataLabels: {
           total: {
             enabled: true,
-            offsetX: -1,
+            offsetX: 3,
             style: {
               fontSize: "13px",
               fontWeight: 900,
@@ -302,7 +302,7 @@ const chartOptions = ref({
       dataLabels: {
         total: {
           enabled: true,
-          offsetX: -1,
+          offsetX: 3,
           style: {
             fontSize: "13px",
             fontWeight: 900,
