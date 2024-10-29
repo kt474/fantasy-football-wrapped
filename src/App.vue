@@ -35,8 +35,8 @@ onMounted(async () => {
             localStorage.originalData = JSON.stringify(currentData);
           }
           showLoading.value = true;
-          store.updateLeagueInfo(await getData(league.leagueId));
-          showLoading.value = false;
+          const refreshedData = await getData(league.leagueId);
+          store.updateLeagueInfo(refreshedData);
           // issues on mobile refresh
           await inputLeague(
             league.leagueId,
@@ -45,6 +45,7 @@ onMounted(async () => {
             league.seasonType,
             league.season
           );
+          showLoading.value = false;
         } else {
           store.updateLeagueInfo(league);
         }
