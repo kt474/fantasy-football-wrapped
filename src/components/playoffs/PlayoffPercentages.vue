@@ -250,7 +250,10 @@ const tableData = computed(() => {
               {{ getOrdinalSuffix(i) }}
             </div>
           </th>
-          <th scope="col" class="py-3 pl-3 md:pl-10 lg:pl-20 xl:pl-52">
+          <th
+            scope="col"
+            class="py-3 pl-3 pr-3 sm:pr-0 md:pl-10 lg:pl-20 xl:pl-52"
+          >
             Total
           </th>
         </tr>
