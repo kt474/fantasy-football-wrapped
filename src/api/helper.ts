@@ -56,8 +56,12 @@ export const createTableData = (
       combinedPoints.forEach((value: any) => {
         let randomScheduleWins = 0;
         const numOfSimulations = 10000;
+        const numberWeeks = medianScoring
+          ? 2 * (value.wins + value.losses)
+          : value.wins + value.losses;
+        const simulationWins = Array(numOfSimulations).fill(0);
         if (value.points) {
-          for (let i = 0; i < value.wins + value.losses; i++) {
+          for (let i = 0; i < numberWeeks; i++) {
             for (
               let simulations = 0;
               simulations < numOfSimulations;
@@ -70,9 +74,19 @@ export const createTableData = (
                 ]
               ) {
                 randomScheduleWins++;
+                simulationWins[simulations]++;
               }
           }
         }
+        const meanWins =
+          simulationWins.reduce((sum, wins) => sum + wins, 0) /
+          numOfSimulations;
+        const variance =
+          simulationWins.reduce(
+            (sum, wins) => sum + Math.pow(wins - meanWins, 2),
+            0
+          ) / numOfSimulations;
+        value["expectedWinsSTD"] = Math.sqrt(variance);
         value["randomScheduleWins"] = randomScheduleWins / numOfSimulations;
         if (medianScoring) {
           value["randomScheduleWins"] =
@@ -113,6 +127,28 @@ export const createTableData = (
     }
   }
   return [];
+};
+
+const erf = (x: number) => {
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+
+  const sign = x >= 0 ? 1 : -1;
+  x = Math.abs(x);
+
+  const t = 1.0 / (1.0 + p * x);
+  const y =
+    1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+  return sign * y;
+};
+
+export const zScoreToPValue = (z: number) => {
+  return 2 * (1 - 0.5 * (1 + erf(Math.abs(z) / Math.sqrt(2))));
 };
 
 export const getRandomUser = (leagueSize: number, excludedIndex: number) => {

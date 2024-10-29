@@ -66,4 +66,5 @@ export type TableDataType = {
   regularSeasonRank: number;
   id: string;
   rosterId: number;
+  expectedWinsSTD: number;
 };
