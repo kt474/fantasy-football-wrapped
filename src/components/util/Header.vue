@@ -59,17 +59,15 @@ const setColorMode = () => {
         >
       </div>
 
-      <div class="hidden w-full md:block md:w-auto" id="navbar-default">
-        <div
-          class="flex flex-col p-4 mt-4 font-medium border rounded-lg md:p-0 md:flex-row md:space-x-2 md:mt-0 md:border-0"
-        >
+      <div class="block w-auto" id="navbar-default">
+        <div class="flex flex-row p-0 mt-0 space-x-2 font-medium rounded-lg">
           <button
             aria-label="Button to show info modal"
             data-modal-target="default-modal"
             data-modal-toggle="default-modal"
             data-tooltip-target="about-tooltip"
             data-tooltip-placement="bottom"
-            class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+            class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600 -mr-2 md:mr-2"
           >
             <svg
               class="w-5 h-5 text-gray-800 dark:text-white"
@@ -207,7 +205,7 @@ const setColorMode = () => {
               aria-label="Button for github repository"
               data-tooltip-target="github-tooltip"
               data-tooltip-placement="bottom"
-              class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+              class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center hidden md:inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
             >
               <svg
                 class="w-5 h-5 text-gray-800 dark:text-white"

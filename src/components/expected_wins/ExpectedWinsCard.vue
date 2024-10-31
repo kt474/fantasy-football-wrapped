@@ -195,7 +195,7 @@ const listPadding = computed(() => {
             {{ item.name }}
           </th>
           <td
-            class="px-1 py-2"
+            class="px-2 py-2"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
                 item.randomScheduleWins === mostRandomScheduleWins,
