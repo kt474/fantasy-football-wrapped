@@ -174,7 +174,7 @@ const listPadding = computed(() => {
             </div>
             <div
               :class="hover === 'probability' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-12 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
             >
               Probability of having at least the number of current actual wins.
             </div>
