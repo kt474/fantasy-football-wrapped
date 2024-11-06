@@ -155,7 +155,7 @@ const setHtmlBackground = () => {
           <div
             v-else
             role="status"
-            class="flex flex-wrap justify-center h-full mt-4"
+            class="flex flex-wrap justify-center h-full mt-4 mb-32"
           >
             <svg
               aria-hidden="true"
@@ -184,7 +184,7 @@ const setHtmlBackground = () => {
         <div
           v-else-if="showLoading"
           role="status"
-          class="flex flex-wrap justify-center h-full mt-4"
+          class="flex flex-wrap justify-center h-full mt-4 mb-32"
         >
           <svg
             aria-hidden="true"
