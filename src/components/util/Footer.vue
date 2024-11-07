@@ -102,9 +102,7 @@
                 <div
                   class="text-base leading-relaxed text-gray-700 dark:text-gray-100"
                 >
-                  <p class="mb-3 text-xl font-semibold">
-                    Last updated: August 5th, 2024
-                  </p>
+                  <p class="mb-3 text-xl font-semibold">Introduction</p>
                   ffwrapped ("we," "our," or "us") is committed to protecting
                   your privacy. This Privacy Policy explains how we collect,
                   use, and share information when you use our website,
