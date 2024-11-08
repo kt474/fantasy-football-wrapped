@@ -21,6 +21,7 @@ const selectLeague = () => {
 };
 
 const refreshLeague = async () => {
+  selectLeague();
   store.$patch((state) => {
     state.leagueInfo = state.leagueInfo.filter(
       (item: any) => item.leagueId !== props.leagueInfo.leagueId
