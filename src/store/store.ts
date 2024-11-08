@@ -18,6 +18,7 @@ export const useStore = defineStore("main", {
     showLeaguesList: false,
     leaguesList: [] as any[],
     username: "",
+    loadingLeague: "",
   }),
   getters: {
     transactions: (state) =>
@@ -39,6 +40,9 @@ export const useStore = defineStore("main", {
     },
   },
   actions: {
+    updateLoadingLeague(payload: string) {
+      this.loadingLeague = payload;
+    },
     updateDarkMode(payload: boolean) {
       this.darkMode = payload;
     },

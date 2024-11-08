@@ -19,6 +19,7 @@ const addLeagues = async () => {
     showError.value = true;
     return;
   }
+  let index = 0;
   if (checkedLeagues.value.length >= 1) {
     for (const league of checkedLeagues.value) {
       if (store.leagueIds.includes(league)) {
@@ -27,6 +28,8 @@ const addLeagues = async () => {
       }
       store.updateCurrentLeagueId(league);
       store.updateShowLeaguesList(false);
+      store.updateLoadingLeague(store.leaguesList[index].name);
+      index += 1;
       const newLeagueInfo = await getData(league);
       store.updateLeagueInfo(newLeagueInfo);
       updateURL(league);
@@ -39,7 +42,7 @@ const addLeagues = async () => {
       );
     }
     store.setLeaguesList([]);
-
+    store.updateLoadingLeague("");
     store.updateShowAddedAlert(true);
     setTimeout(() => {
       store.updateShowAddedAlert(false);

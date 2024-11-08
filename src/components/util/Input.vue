@@ -77,11 +77,13 @@ const onSubmit = async () => {
         showErrorMsg.value = true;
       } else {
         showErrorMsg.value = false;
+        store.updateLoadingLeague(checkInput["name"]);
         store.updateCurrentLeagueId(leagueIdInput.value);
         const newLeagueInfo = await getData(leagueIdInput.value);
         store.updateLeagueInfo(newLeagueInfo);
         store.leagueSubmitted = true;
         store.updateShowInput(false);
+        store.updateLoadingLeague("");
         updateURL(leagueIdInput.value);
         inputLeague(
           leagueIdInput.value,

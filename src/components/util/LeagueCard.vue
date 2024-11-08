@@ -26,6 +26,7 @@ const refreshLeague = async () => {
       (item: any) => item.leagueId !== props.leagueInfo.leagueId
     );
   });
+  store.updateLoadingLeague(props.leagueInfo.name);
   store.updateLeagueInfo(await getData(props.leagueInfo.leagueId));
   if (localStorage.originalData) {
     const currentData = JSON.parse(localStorage.originalData);
@@ -33,6 +34,7 @@ const refreshLeague = async () => {
     localStorage.originalData = JSON.stringify(currentData);
   }
   store.showRefreshAlert = true;
+  store.updateLoadingLeague("");
   setTimeout(() => {
     store.showRefreshAlert = false;
   }, 3000);
