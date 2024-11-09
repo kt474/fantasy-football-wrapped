@@ -665,7 +665,8 @@ const worstManager = computed(() => {
       />
     </svg>
     <p class="flex justify-center text-lg dark:text-white">
-      Loading {{ loadingYear }} season...
+      Loading
+      <span class="font-bold">&nbsp;{{ loadingYear }}&nbsp;</span>season...
     </p>
   </div>
 </template>
