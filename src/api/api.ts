@@ -234,6 +234,7 @@ export const getMatchup = async (week: number, leagueId: string) => {
     return {
       rosterId: game["roster_id"],
       points: game["points"],
+      matchupId: game["matchup_id"],
     };
   });
 };

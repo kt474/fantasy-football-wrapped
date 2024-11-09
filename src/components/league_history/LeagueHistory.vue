@@ -7,7 +7,7 @@ import { getData, inputLeague, getLeague } from "../../api/api.ts";
 import { LeagueInfoType } from "../../api/types.ts";
 import Alert from "../util/Alert.vue";
 import { createTableData } from "../../api/helper.ts";
-// import AllMatchups from "./AllMatchups.vue";
+import AllMatchups from "./AllMatchups.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -646,7 +646,7 @@ const worstManager = computed(() => {
       type="error"
     />
   </div>
-  <!-- <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" /> -->
+  <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
   <div class="h-screen" v-else>
     <svg
       aria-hidden="true"
