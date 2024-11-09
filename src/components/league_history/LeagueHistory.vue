@@ -3,10 +3,11 @@ import { ref, onMounted, computed } from "vue";
 import { maxBy, minBy } from "lodash";
 import { TableDataType } from "../../api/types.ts";
 import { useStore } from "../../store/store.ts";
-import { getData, inputLeague } from "../../api/api.ts";
+import { getData, inputLeague, getLeague } from "../../api/api.ts";
 import { LeagueInfoType } from "../../api/types.ts";
 import Alert from "../util/Alert.vue";
 import { createTableData } from "../../api/helper.ts";
+// import AllMatchups from "./AllMatchups.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -14,6 +15,7 @@ const props = defineProps<{
 }>();
 
 const isLoading = ref(false);
+const loadingYear = ref("");
 const tableOrder = ref("wins");
 const hover = ref("");
 const previousLeagues = ref<string[]>([]);
@@ -21,6 +23,8 @@ const previousLeagues = ref<string[]>([]);
 const checkPreviousLeagues = async (leagueId: string) => {
   // for some reason sometimes 0 is returned as the previous league id
   if (leagueId !== "0" && !previousLeagues.value.includes(leagueId)) {
+    const newLeagueInfo: any = await getLeague(leagueId);
+    loadingYear.value = newLeagueInfo["season"];
     const leagueData = await getData(leagueId);
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.push(leagueData);
     previousLeagues.value.push(leagueId); // prevent adding duplicates
@@ -122,8 +126,10 @@ const dataAllYears = computed(() => {
       wins: user.wins,
       losses: user.losses,
       points: user.pointsFor,
+      pointsArr: user.points,
       avatarImg: user.avatarImg,
       rosterId: user.rosterId,
+      matchups: user.matchups,
       managerEfficiency: store.leagueInfo[store.currentLeagueIndex]
         ? user.managerEfficiency
         : 2 * user.managerEfficiency,
@@ -171,6 +177,12 @@ const dataAllYears = computed(() => {
               }
               if (league.leagueWinner) {
                 resultUser.leagueWinner.push(Number(league.leagueWinner));
+              }
+              if (user.matchups) {
+                resultUser.matchups.push(...user.matchups);
+              }
+              if (user.points) {
+                resultUser.pointsArr.push(...user.points);
               }
             }
           });
@@ -634,6 +646,7 @@ const worstManager = computed(() => {
       type="error"
     />
   </div>
+  <!-- <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" /> -->
   <div class="h-screen" v-else>
     <svg
       aria-hidden="true"
@@ -652,7 +665,7 @@ const worstManager = computed(() => {
       />
     </svg>
     <p class="flex justify-center text-lg dark:text-white">
-      Loading previous leagues...
+      Loading {{ loadingYear }} season...
     </p>
   </div>
 </template>
