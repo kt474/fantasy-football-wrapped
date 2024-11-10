@@ -446,6 +446,7 @@ export const fakePoints = [
       121.1, 78.18, 101.68, 82.64,
     ],
     playoffPoints: [94.31, 99.75, 103.21],
+    matchups: [2, 3, 4, 2, 2, 1, 3, 5, 1, 3, 2, 2, 4, 2],
   },
   {
     rosterId: 2,
@@ -454,6 +455,7 @@ export const fakePoints = [
       67.44, 101.46, 109.26, 82.42,
     ],
     playoffPoints: [88.33, 104.13, 110.87],
+    matchups: [1, 1, 5, 2, 3, 5, 4, 1, 5, 2, 4, 3, 2, 1],
   },
   {
     rosterId: 3,
@@ -462,6 +464,7 @@ export const fakePoints = [
       104.28, 128.62, 126, 90.04,
     ],
     playoffPoints: [101.98, 110.71, 98.31],
+    matchups: [3, 4, 2, 3, 1, 4, 3, 5, 3, 2, 5, 2, 5, 4],
   },
   {
     rosterId: 4,
@@ -470,6 +473,7 @@ export const fakePoints = [
       130.76, 103.5, 126.72, 87.2, 95,
     ],
     playoffPoints: [103.53, 124.68, 100.48],
+    matchups: [4, 5, 3, 5, 5, 4, 1, 4, 3, 5, 1, 1, 1, 1],
   },
   {
     rosterId: 5,
@@ -478,6 +482,7 @@ export const fakePoints = [
       86.04, 147.46, 125.08, 94.82,
     ],
     playoffPoints: [111.39, 120.01, 89.68],
+    matchups: [5, 2, 1, 1, 4, 3, 2, 3, 5, 4, 5, 3, 1, 3],
   },
   {
     rosterId: 6,
@@ -486,6 +491,7 @@ export const fakePoints = [
       127.18, 131.9, 142.56, 99.28, 129.62,
     ],
     playoffPoints: [99.58, 131.79, 101.39],
+    matchups: [3, 1, 1, 4, 2, 3, 5, 2, 2, 1, 4, 4, 4, 5],
   },
   {
     rosterId: 7,
@@ -494,6 +500,7 @@ export const fakePoints = [
       83.36, 136.08, 115, 90.44,
     ],
     playoffPoints: [97.32, 93.11, 105.11],
+    matchups: [4, 2, 5, 5, 3, 1, 1, 1, 4, 3, 3, 5, 3, 3],
   },
   {
     rosterId: 8,
@@ -502,6 +509,7 @@ export const fakePoints = [
       104, 139.2, 128.62, 124.48,
     ],
     playoffPoints: [116.21, 108.19, 98.14],
+    matchups: [2, 4, 4, 4, 1, 5, 5, 3, 2, 1, 1, 5, 3, 2],
   },
   {
     rosterId: 9,
@@ -510,6 +518,7 @@ export const fakePoints = [
       114.78, 92.16, 93.62, 76.3,
     ],
     playoffPoints: [95.97, 112.49, 118.24],
+    matchups: [1, 5, 2, 3, 5, 2, 2, 2, 4, 5, 2, 1, 5, 4],
   },
   {
     rosterId: 10,
@@ -518,6 +527,7 @@ export const fakePoints = [
       108.64, 82.4, 131.96, 123.26,
     ],
     playoffPoints: [100.55, 107.57, 117.91],
+    matchups: [5, 3, 3, 1, 4, 2, 4, 4, 1, 4, 3, 4, 2, 5],
   },
 ];
 

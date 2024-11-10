@@ -1,39 +1,88 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useStore } from "../../store/store";
 
 const store = useStore();
 const props = defineProps<{
   tableData: any[];
 }>();
+
+const matchupData = computed(() => {
+  const result: any = [];
+  props.tableData.forEach((user) => {
+    const currentUser: any = [];
+    user.matchups.forEach((matchupId: number, index: number) => {
+      const opponentList = props.tableData.filter(
+        (opp) => opp.matchups[index] == matchupId
+      );
+      const opponent = opponentList.find((opp) => opp.name != user.name);
+      if (opponent) {
+        if (!currentUser.map((opp: any) => opp.name).includes(opponent.name)) {
+          if (user.pointsArr[index] > opponent.pointsArr[index]) {
+            currentUser.push({
+              name: opponent.name,
+              record: { wins: 1, losses: 0 },
+            });
+          } else {
+            currentUser.push({
+              name: opponent.name,
+              record: { losses: 1, wins: 0 },
+            });
+          }
+        } else {
+          if (user.pointsArr[index] > opponent.pointsArr[index]) {
+            currentUser.find((opp: any) => opp.name == opponent.name)[
+              "record"
+            ].wins += 1;
+          } else {
+            currentUser.find((opp: any) => opp.name == opponent.name)[
+              "record"
+            ].losses += 1;
+          }
+        }
+      }
+    });
+    result.push(currentUser);
+  });
+  return result;
+});
+
+const extractRecord = (user: any, opponent: any) => {
+  const opp = user.find((opp: any) => opp.name == opponent.name);
+  // This is backwards but the chart is read horizontally
+  return opp ? `${opp.record.losses} - ${opp.record.wins}` : "0 - 0";
+};
 </script>
 <template>
   <div
     :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
-    class="hidden w-full overflow-x-auto bg-gray-100 rounded-lg shadow-md dark:bg-gray-700"
+    class="relative w-full overflow-x-auto bg-gray-100 rounded-lg shadow-md dark:bg-gray-700"
   >
+    <p
+      class="flex justify-center pt-2 font-semibold text-gray-700 text-md dark:text-gray-200"
+    >
+      All Time H2H Matchups
+    </p>
     <table
-      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
+      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-200"
     >
       <thead
         :class="
           store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
         "
-        class="text-xs text-gray-700 uppercase dark:text-gray-300"
+        class="text-xs text-gray-700 dark:text-gray-200"
       >
         <tr>
-          <th scope="col" class="px-2 py-3 sm:px-6 w-60 dark:text-gray-200">
+          <th
+            scope="col"
+            class="px-2 py-3 uppercase sm:px-6 w-60 dark:text-gray-200"
+          >
             Team Name
           </th>
           <th v-for="item in props.tableData" scope="col" class="px-2 py-3">
-            <div class="flex items-center cursor-pointer dark:text-gray-200">
+            <div class="flex items-center dark:text-gray-200">
               {{ item.name }}
             </div>
-          </th>
-          <th
-            scope="col"
-            class="py-3 pl-3 pr-3 sm:pr-0 md:pl-10 lg:pl-20 xl:pl-52"
-          >
-            Total
           </th>
         </tr>
       </thead>
@@ -49,12 +98,15 @@ const props = defineProps<{
           >
             {{ item.name }}
           </th>
-          <!-- <td v-for="i in playoffTeams" class="px-2 py-3"></td> -->
-          <td
-            class="py-3 pl-3 pr-0 border-l sm:pr-3 md:pl-10 lg:pl-20 xl:pl-52 dark:bg-gray-800 dark:border-gray-700"
-          ></td>
+          <td v-for="user in matchupData" class="px-2 py-3">
+            {{ extractRecord(user, item) }}
+          </td>
         </tr>
       </tbody>
     </table>
+    <p class="py-3 ml-6 text-xs text-gray-500 footer-font dark:text-gray-300">
+      Table is meant to be read horizontally. For each team/row, each
+      opponent/column is the record the team has against that opponent.
+    </p>
   </div>
 </template>

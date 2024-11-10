@@ -226,18 +226,18 @@ const tableData = computed(() => {
     class="relative w-full overflow-x-auto bg-gray-100 rounded-lg shadow-md dark:bg-gray-700"
   >
     <p
-      class="flex justify-center pt-2 font-semibold text-gray-700 text-md dark:text-gray-300"
+      class="flex justify-center pt-2 font-semibold text-gray-700 text-md dark:text-gray-200"
     >
       Playoff Odds
     </p>
     <table
-      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
+      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-200"
     >
       <thead
         :class="
           store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
         "
-        class="text-xs text-gray-700 uppercase dark:text-gray-300"
+        class="text-xs text-gray-700 uppercase dark:text-gray-200"
       >
         <tr>
           <th scope="col" class="px-2 py-3 sm:px-6 w-60 dark:text-gray-200">
