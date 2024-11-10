@@ -16,6 +16,7 @@ const inputType = ref("League ID");
 const seasonYear = ref("2024");
 const showErrorMsg = ref(false);
 const errorMsg = ref("");
+const showHelperMsg = ref(false);
 
 const leagueIds = computed(() => {
   return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
@@ -51,10 +52,12 @@ const onSubmit = async () => {
       showErrorMsg.value = true;
       return;
     }
+    showHelperMsg.value = true;
     const leagues = await getAllLeagues(user.user_id, seasonYear.value);
     store.username = user.display_name;
     store.setLeaguesList(leagues);
     store.updateShowLeaguesList(true);
+    showHelperMsg.value = false;
     localStorage.inputType = "League ID";
     store.updateShowInput(false);
     inputUsername(user.display_name, seasonYear.value);
@@ -139,6 +142,13 @@ const onSubmit = async () => {
           class="mt-2 -mb-2 text-xs text-red-600 dark:text-red-500"
         >
           {{ errorMsg }}
+        </p>
+        <p
+          v-if="showHelperMsg"
+          id="helper-text-explanation"
+          class="mt-2 -mb-2 text-xs dark:text-white"
+        >
+          Loading leagues...
         </p>
       </div>
       <div class="ml-4">
