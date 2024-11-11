@@ -176,7 +176,10 @@ const listPadding = computed(() => {
               :class="hover === 'probability' ? 'visible' : 'invisible'"
               class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
             >
-              Probability of having at least the number of current actual wins.
+              If wins above expected is positive, this is the probability of
+              having equal to or greater than the number of actual wins. If
+              negative, the probability of having equal to or less than the
+              number of actual wins.
             </div>
           </th>
         </tr>
