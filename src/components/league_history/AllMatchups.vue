@@ -80,7 +80,7 @@ const extractRecord = (user: any, opponent: any) => {
             Team Name
           </th>
           <th v-for="item in props.tableData" scope="col" class="px-2 py-3">
-            <div class="flex items-center dark:text-gray-200">
+            <div class="flex items-center dark:text-gray-200 min-w-14">
               {{ item.name }}
             </div>
           </th>
@@ -98,7 +98,7 @@ const extractRecord = (user: any, opponent: any) => {
           >
             {{ item.name }}
           </th>
-          <td v-for="user in matchupData" class="px-2 py-3">
+          <td v-for="user in matchupData" class="px-2 py-3.5">
             {{ extractRecord(user, item) }}
           </td>
         </tr>
