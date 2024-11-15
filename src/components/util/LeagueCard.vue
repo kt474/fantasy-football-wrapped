@@ -39,7 +39,7 @@ const refreshLeague = async () => {
   setTimeout(() => {
     store.showRefreshAlert = false;
   }, 3000);
-  inputLeague(
+  await inputLeague(
     props.leagueInfo.leagueId,
     props.leagueInfo.name,
     props.leagueInfo.totalRosters,

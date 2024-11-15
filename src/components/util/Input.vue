@@ -88,7 +88,7 @@ const onSubmit = async () => {
         store.updateShowInput(false);
         store.updateLoadingLeague("");
         updateURL(leagueIdInput.value);
-        inputLeague(
+        await inputLeague(
           leagueIdInput.value,
           newLeagueInfo.name,
           newLeagueInfo.totalRosters,

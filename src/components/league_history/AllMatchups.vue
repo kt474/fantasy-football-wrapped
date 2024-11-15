@@ -104,7 +104,9 @@ const extractRecord = (user: any, opponent: any) => {
         </tr>
       </tbody>
     </table>
-    <p class="py-3 ml-6 text-xs text-gray-500 footer-font dark:text-gray-300">
+    <p
+      class="py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
+    >
       Table is meant to be read horizontally. For each team/row, each
       opponent/column is the record the team has against that opponent.
     </p>

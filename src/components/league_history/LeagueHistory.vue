@@ -84,7 +84,7 @@ const addNewLeague = async (season: string) => {
         setTimeout(() => {
           store.updateShowAddedAlert(false);
         }, 3000);
-        inputLeague(
+        await inputLeague(
           newLeagueInfo.leagueId,
           newLeagueInfo.name,
           newLeagueInfo.totalRosters,

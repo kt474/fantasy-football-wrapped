@@ -34,7 +34,7 @@ const addLeagues = async () => {
       const newLeagueInfo = await getData(league);
       store.updateLeagueInfo(newLeagueInfo);
       updateURL(league);
-      inputLeague(
+      await inputLeague(
         league,
         newLeagueInfo.name,
         newLeagueInfo.totalRosters,
