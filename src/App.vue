@@ -54,23 +54,24 @@ onMounted(async () => {
       }
     }
     store.updateCurrentLeagueId(localStorage.currentLeagueId);
-  } else {
-    const queryParams = new URLSearchParams(window.location.search);
-    const leagueId = queryParams.get("leagueId");
-    if (leagueId) {
-      const checkInput: any = await getLeague(leagueId);
-      if (checkInput["name"]) {
-        store.updateCurrentLeagueId(leagueId);
-        const league = await getData(leagueId);
-        store.updateLeagueInfo(league);
-        await inputLeague(
-          leagueId,
-          league.name,
-          league.totalRosters,
-          league.seasonType,
-          league.season
-        );
-      }
+  }
+  const queryParams = new URLSearchParams(window.location.search);
+  const leagueId = queryParams.get("leagueId");
+  if (leagueId && !store.leagueIds.includes(leagueId)) {
+    const checkInput: any = await getLeague(leagueId);
+    if (checkInput["name"]) {
+      store.updateCurrentLeagueId(leagueId);
+      store.updateLoadingLeague(checkInput["name"]);
+      const league = await getData(leagueId);
+      store.updateLeagueInfo(league);
+      await inputLeague(
+        leagueId,
+        league.name,
+        league.totalRosters,
+        league.seasonType,
+        league.season
+      );
+      store.updateLoadingLeague("");
     }
   }
 });
