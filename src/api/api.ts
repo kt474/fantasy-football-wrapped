@@ -263,59 +263,80 @@ export const getCurrentLeagueState = async () => {
 };
 
 export const getData = async (leagueId: string) => {
-  const newLeagueInfo: any = await getLeague(leagueId);
-  newLeagueInfo["rosters"] = await getRosters(leagueId);
-  newLeagueInfo["winnersBracket"] = await getWinnersBracket(leagueId);
-  newLeagueInfo["losersBracket"] = await getLosersBracket(leagueId);
+  // Initial parallel requests for base league data
+  const [leagueInfo, rosters, winnersBracket, losersBracket]: [
+    any,
+    any[],
+    any[],
+    any[]
+  ] = await Promise.all([
+    getLeague(leagueId),
+    getRosters(leagueId),
+    getWinnersBracket(leagueId),
+    getLosersBracket(leagueId),
+  ]);
 
-  const transactions = [];
-  if (newLeagueInfo["status"] == "in_season") {
-    const currentWeek = await getCurrentLeagueState();
-    newLeagueInfo["currentWeek"] = currentWeek.week;
-    newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
-      leagueId,
-      currentWeek.week
-    );
+  const newLeagueInfo: any = {
+    ...leagueInfo,
+    rosters,
+    winnersBracket,
+    losersBracket,
+    previousLeagues: [],
+  };
 
-    for (let i = 0; i <= newLeagueInfo["currentWeek"]; i++) {
-      transactions.push(
-        getTotalTransactions(await getTransactions(leagueId, i + 1))
-      );
-    }
+  // Determine the number of weeks to process
+  let numberOfWeeks: any;
+  let currentWeek: number | undefined;
+
+  if (newLeagueInfo.status === "in_season") {
+    const leagueState = await getCurrentLeagueState();
+    currentWeek = leagueState.week;
+    numberOfWeeks = currentWeek;
+    newLeagueInfo.currentWeek = currentWeek;
   } else {
-    newLeagueInfo["weeklyPoints"] = await getWeeklyPoints(
-      leagueId,
-      newLeagueInfo["regularSeasonLength"]
-    );
+    numberOfWeeks = newLeagueInfo.regularSeasonLength;
+  }
 
-    for (let i = 0; i <= newLeagueInfo["regularSeasonLength"]; i++) {
-      transactions.push(
-        getTotalTransactions(await getTransactions(leagueId, i + 1))
-      );
-    }
-  }
-  newLeagueInfo["playoffPoints"] = await getWeeklyPoints(
-    leagueId,
-    newLeagueInfo["lastScoredWeek"],
-    newLeagueInfo["regularSeasonLength"]
-  );
-  newLeagueInfo["users"] = await getUsers(leagueId);
-  for (const val of newLeagueInfo["users"]) {
-    if (val["avatar"] !== null) {
-      val["avatarImg"] = await getAvatar(val["avatar"]);
-    }
-  }
-  let sumById: any = {};
-  transactions.forEach((obj) => {
-    for (const id in obj) {
-      if (obj.hasOwnProperty(id)) {
-        sumById[id] = (sumById[id] || 0) + obj[id];
-      }
-    }
-  });
-  newLeagueInfo["transactions"] = sumById;
-  const date = new Date();
-  newLeagueInfo["lastUpdated"] = date.getTime();
-  newLeagueInfo["previousLeagues"] = [];
-  return newLeagueInfo;
+  // Parallel requests for weekly data
+  const [weeklyPoints, users, transactionPromises] = await Promise.all([
+    getWeeklyPoints(leagueId, currentWeek ?? newLeagueInfo.regularSeasonLength),
+    getUsers(leagueId),
+    Promise.all(
+      Array.from({ length: numberOfWeeks + 1 }, (_, i) =>
+        getTransactions(leagueId, i + 1).then(getTotalTransactions)
+      )
+    ),
+  ]);
+
+  // Process playoff points in parallel with avatar fetching
+  const [playoffPoints, processedUsers] = await Promise.all([
+    getWeeklyPoints(
+      leagueId,
+      newLeagueInfo.lastScoredWeek,
+      newLeagueInfo.regularSeasonLength
+    ),
+    Promise.all(
+      users.map(async (user: any) => ({
+        ...user,
+        avatarImg: user.avatar ? await getAvatar(user.avatar) : null,
+      }))
+    ),
+  ]);
+
+  // Combine all transactions
+  const transactions = transactionPromises.reduce((acc, obj) => {
+    Object.entries(obj).forEach(([id, value]) => {
+      acc[id] = (acc[id] || 0) + (value as number);
+    });
+    return acc;
+  }, {} as Record<string, number>);
+
+  return {
+    ...newLeagueInfo,
+    weeklyPoints,
+    playoffPoints,
+    users: processedUsers,
+    transactions,
+    lastUpdated: new Date().getTime(),
+  };
 };
