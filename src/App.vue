@@ -145,7 +145,12 @@ const setHtmlBackground = () => {
           <div v-if="store.showLeaguesList" class="container mx-auto">
             <UserLeagueList />
           </div>
-          <div v-if="store.leagueUsers[store.currentLeagueIndex]">
+          <div
+            v-if="
+              store.leagueUsers[store.currentLeagueIndex] &&
+              !store.loadingUserLeagues
+            "
+          >
             <CardContainer />
             <Table
               class="mt-4"

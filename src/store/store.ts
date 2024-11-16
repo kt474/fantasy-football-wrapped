@@ -19,6 +19,7 @@ export const useStore = defineStore("main", {
     leaguesList: [] as any[],
     username: "",
     loadingLeague: "",
+    loadingUserLeagues: false,
   }),
   getters: {
     transactions: (state) =>
@@ -40,6 +41,9 @@ export const useStore = defineStore("main", {
     },
   },
   actions: {
+    updateLoadingUserLeagues(payload: boolean) {
+      this.loadingUserLeagues = payload;
+    },
     updateLoadingLeague(payload: string) {
       this.loadingLeague = payload;
     },

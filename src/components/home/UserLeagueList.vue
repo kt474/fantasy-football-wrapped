@@ -24,6 +24,7 @@ const addLeagues = async () => {
     return;
   }
   if (checkedLeagues.value.length >= 1) {
+    store.updateLoadingUserLeagues(true);
     await Promise.all(
       checkedLeagues.value.map(async (league) => {
         store.updateCurrentLeagueId(league);
@@ -47,6 +48,7 @@ const addLeagues = async () => {
         );
       })
     );
+    store.updateLoadingUserLeagues(false);
     store.setLeaguesList([]);
     store.updateLoadingLeague("");
     store.updateShowAddedAlert(true);
