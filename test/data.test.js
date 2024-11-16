@@ -19,6 +19,7 @@ test("Retrieving league data", async () => {
     pointsAgainst: 1509,
     potentialPoints: 1577,
     managerEfficiency: 0.874,
+    ties: 0,
     wins: 5,
     losses: 9,
     rosterId: 1,
