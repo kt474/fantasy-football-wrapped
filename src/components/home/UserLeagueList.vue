@@ -19,29 +19,34 @@ const addLeagues = async () => {
     showError.value = true;
     return;
   }
+  if (checkedLeagues.value.some((league) => store.leagueIds.includes(league))) {
+    duplicateLeagueError.value = true;
+    return;
+  }
   if (checkedLeagues.value.length >= 1) {
-    for (const league of checkedLeagues.value) {
-      if (store.leagueIds.includes(league)) {
-        duplicateLeagueError.value = true;
-        return;
-      }
-      store.updateCurrentLeagueId(league);
-      store.updateShowLeaguesList(false);
-      const addedLeague = store.leaguesList.find(
-        (value) => value.league_id == league
-      );
-      store.updateLoadingLeague(addedLeague.name);
-      const newLeagueInfo = await getData(league);
-      store.updateLeagueInfo(newLeagueInfo);
-      updateURL(league);
-      await inputLeague(
-        league,
-        newLeagueInfo.name,
-        newLeagueInfo.totalRosters,
-        newLeagueInfo.seasonType,
-        newLeagueInfo.season
-      );
-    }
+    await Promise.all(
+      checkedLeagues.value.map(async (league) => {
+        store.updateCurrentLeagueId(league);
+        store.updateShowLeaguesList(false);
+
+        const addedLeague = store.leaguesList.find(
+          (value) => value.league_id == league
+        );
+        store.updateLoadingLeague(addedLeague.name);
+
+        const newLeagueInfo = await getData(league);
+        store.updateLeagueInfo(newLeagueInfo);
+        updateURL(league);
+
+        await inputLeague(
+          league,
+          newLeagueInfo.name,
+          newLeagueInfo.totalRosters,
+          newLeagueInfo.seasonType,
+          newLeagueInfo.season
+        );
+      })
+    );
     store.setLeaguesList([]);
     store.updateLoadingLeague("");
     store.updateShowAddedAlert(true);
