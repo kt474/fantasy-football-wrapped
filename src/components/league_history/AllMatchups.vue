@@ -98,7 +98,11 @@ const extractRecord = (user: any, opponent: any) => {
           >
             {{ item.name }}
           </th>
-          <td v-for="user in matchupData" class="px-2 py-3.5">
+          <td
+            v-for="(user, rowIndex) in matchupData"
+            class="px-2 py-3.5"
+            :class="{ 'bg-blue-100 dark:bg-blue-800': rowIndex == index }"
+          >
             {{ extractRecord(user, item) }}
           </td>
         </tr>
