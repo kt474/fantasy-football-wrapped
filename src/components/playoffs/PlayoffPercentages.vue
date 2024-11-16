@@ -14,10 +14,6 @@ const props = defineProps<{
 }>();
 
 onMounted(async () => {
-  await checkStatus();
-});
-
-const checkStatus = async () => {
   if (
     store.leagueInfo.length > 0 &&
     !store.leagueInfo[store.currentLeagueIndex].playoffProjections
@@ -29,11 +25,13 @@ const checkStatus = async () => {
     playoffOdds.value =
       store.leagueInfo[store.currentLeagueIndex].playoffProjections;
   }
-};
+});
 
 watch(
   () => store.currentLeagueId,
-  () => checkStatus()
+  () =>
+    (playoffOdds.value =
+      store.leagueInfo[store.currentLeagueIndex].playoffProjections)
 );
 
 const maxPoints = computed(() => {
