@@ -21,6 +21,7 @@ import LeagueHistory from "../league_history/LeagueHistory.vue";
 import Tabs from "../util/Tabs.vue";
 import Projections from "../power_rankings/Projections.vue";
 import PlayoffPercentages from "../playoffs/PlayoffPercentages.vue";
+import WeeklyReport from "../weekly_report/WeeklyReport.vue";
 const tableOrder = ref("wins");
 const hover = ref("");
 const props = defineProps<{
@@ -576,6 +577,14 @@ const cardHeight = computed(() => {
     <div v-if="store.currentTab === 'playoffs'">
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
       <Playoffs :tableData="tableData" />
+    </div>
+    <div v-if="store.currentTab === 'weeklyReport'">
+      <WeeklyReport
+        v-if="store.currentLeagueId"
+        :tableData="tableData"
+        :regular-season-length="regularSeasonLength"
+      />
+      <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">
       <LeagueHistory :tableData="tableData" />

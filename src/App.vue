@@ -38,8 +38,6 @@ onMounted(async () => {
           store.updateLoadingLeague(league.name);
           const refreshedData = await getData(league.leagueId);
           store.updateLeagueInfo(refreshedData);
-          store.updateLoadingLeague("");
-          // issues on mobile refresh
           await inputLeague(
             league.leagueId,
             league.name,
@@ -47,6 +45,7 @@ onMounted(async () => {
             league.seasonType,
             league.season
           );
+          store.updateLoadingLeague("");
           showLoading.value = false;
         } else {
           store.updateLeagueInfo(league);

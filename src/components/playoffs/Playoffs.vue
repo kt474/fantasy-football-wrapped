@@ -211,11 +211,6 @@ const numberOfLoserRounds = computed(() => {
               <div
                 v-if="index === matchup.r && matchup.p === 1"
                 class="block p-4 my-2 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
-                :class="
-                  matchup.t1 === matchup.w
-                    ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                    : 'text-gray-500 dark:text-gray-300'
-                "
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -244,21 +239,21 @@ const numberOfLoserRounds = computed(() => {
                       {{ matchRosterId(matchup.t1).name }}
                     </p>
                   </div>
-                  <p class="mr-1">
+                  <p
+                    class="mr-1"
+                    :class="
+                      matchup.t1 === matchup.w
+                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                        : 'text-gray-600 dark:text-gray-300'
+                    "
+                  >
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
                 <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
 
                 <div>
-                  <div
-                    class="flex justify-between"
-                    :class="
-                      matchup.t2 === matchup.w
-                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 dark:text-gray-300 font-normal'
-                    "
-                  >
+                  <div class="flex justify-between">
                     <div v-if="matchRosterId(matchup.t2)" class="flex">
                       <img
                         v-if="matchRosterId(matchup.t2).avatarImg"
@@ -282,7 +277,14 @@ const numberOfLoserRounds = computed(() => {
                         {{ matchRosterId(matchup.t2).name }}
                       </p>
                     </div>
-                    <p class="mt-1 mr-1">
+                    <p
+                      class="mt-1 mr-1"
+                      :class="
+                        matchup.t2 === matchup.w
+                          ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                          : 'text-gray-600 dark:text-gray-300 font-normal'
+                      "
+                    >
                       {{ getPointsScored(matchup.t2, index) }}
                     </p>
                   </div>
@@ -295,11 +297,6 @@ const numberOfLoserRounds = computed(() => {
                 <div
                   v-if="matchRosterId(matchup.t1)"
                   class="flex justify-between mb-2"
-                  :class="
-                    matchup.t1 === matchup.w
-                      ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                      : 'text-gray-500 dark:text-gray-300 font-normal'
-                  "
                 >
                   <div class="flex">
                     <img
@@ -324,7 +321,14 @@ const numberOfLoserRounds = computed(() => {
                       {{ matchRosterId(matchup.t1).name }}
                     </p>
                   </div>
-                  <p class="mt-0.5 mr-1">
+                  <p
+                    class="mt-0.5 mr-1"
+                    :class="
+                      matchup.t1 === matchup.w
+                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                        : 'text-gray-600 dark:text-gray-300 font-normal'
+                    "
+                  >
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
@@ -333,11 +337,6 @@ const numberOfLoserRounds = computed(() => {
                   <div
                     v-if="matchRosterId(matchup.t2)"
                     class="flex justify-between"
-                    :class="
-                      matchup.t2 === matchup.w
-                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 dark:text-gray-300 font-normal'
-                    "
                   >
                     <div class="flex">
                       <img
@@ -362,7 +361,14 @@ const numberOfLoserRounds = computed(() => {
                         {{ matchRosterId(matchup.t2).name }}
                       </p>
                     </div>
-                    <p class="mt-0.5 mr-1">
+                    <p
+                      class="mt-0.5 mr-1"
+                      :class="
+                        matchup.t2 === matchup.w
+                          ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                          : 'text-gray-600 dark:text-gray-300 font-normal'
+                      "
+                    >
                       {{ getPointsScored(matchup.t2, index) }}
                     </p>
                   </div>
@@ -466,11 +472,6 @@ const numberOfLoserRounds = computed(() => {
                 <div
                   v-if="matchRosterId(matchup.t1)"
                   class="flex justify-between mb-2"
-                  :class="
-                    matchup.t1 === matchup.l
-                      ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                      : 'text-gray-500 dark:text-gray-300 font-normal'
-                  "
                 >
                   <div class="flex">
                     <img
@@ -495,7 +496,14 @@ const numberOfLoserRounds = computed(() => {
                       {{ matchRosterId(matchup.t1).name }}
                     </p>
                   </div>
-                  <p class="mr-1">
+                  <p
+                    class="mr-1"
+                    :class="
+                      matchup.t1 === matchup.l
+                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                        : 'text-gray-600 dark:text-gray-300 font-normal'
+                    "
+                  >
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
@@ -504,11 +512,6 @@ const numberOfLoserRounds = computed(() => {
                   <div
                     v-if="matchRosterId(matchup.t2)"
                     class="flex justify-between"
-                    :class="
-                      matchup.t2 === matchup.l
-                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 dark:text-gray-300 font-normal'
-                    "
                   >
                     <div class="flex">
                       <img
@@ -533,7 +536,14 @@ const numberOfLoserRounds = computed(() => {
                         {{ matchRosterId(matchup.t2).name }}
                       </p>
                     </div>
-                    <p class="mt-1 mr-1">
+                    <p
+                      class="mt-1 mr-1"
+                      :class="
+                        matchup.t2 === matchup.l
+                          ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                          : 'text-gray-600 dark:text-gray-300 font-normal'
+                      "
+                    >
                       {{ getPointsScored(matchup.t2, index) }}
                     </p>
                   </div>
@@ -546,11 +556,6 @@ const numberOfLoserRounds = computed(() => {
                 <div
                   v-if="matchRosterId(matchup.t1)"
                   class="flex justify-between mb-2"
-                  :class="
-                    matchup.t1 === matchup.l
-                      ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                      : 'text-gray-500 dark:text-gray-300 font-normal'
-                  "
                 >
                   <div class="flex">
                     <img
@@ -575,7 +580,14 @@ const numberOfLoserRounds = computed(() => {
                       {{ matchRosterId(matchup.t1).name }}
                     </p>
                   </div>
-                  <p class="mt-0.5 mr-1">
+                  <p
+                    class="mt-0.5 mr-1"
+                    :class="
+                      matchup.t1 === matchup.l
+                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                        : 'text-gray-600 dark:text-gray-300 font-normal'
+                    "
+                  >
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
@@ -584,11 +596,6 @@ const numberOfLoserRounds = computed(() => {
                   <div
                     v-if="matchRosterId(matchup.t2)"
                     class="flex justify-between"
-                    :class="
-                      matchup.t2 === matchup.l
-                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-500 dark:text-gray-300 font-normal'
-                    "
                   >
                     <div class="flex">
                       <img
@@ -613,7 +620,14 @@ const numberOfLoserRounds = computed(() => {
                         {{ matchRosterId(matchup.t2).name }}
                       </p>
                     </div>
-                    <p class="mt-0.5 mr-1">
+                    <p
+                      class="mt-0.5 mr-1"
+                      :class="
+                        matchup.t2 === matchup.l
+                          ? 'text-blue-600 dark:text-blue-500 font-semibold'
+                          : 'text-gray-600 dark:text-gray-300 font-normal'
+                      "
+                    >
                       {{ getPointsScored(matchup.t2, index) }}
                     </p>
                   </div>

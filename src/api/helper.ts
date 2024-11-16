@@ -327,7 +327,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 1,
     managerEfficiency: 0.914,
-    recordByWeek: "LLLWLWWLLWLWLL",
+    recordByWeek: "WWLWWWLLLLWLWL",
   },
   {
     id: "2",
@@ -339,7 +339,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 2,
     managerEfficiency: 0.953,
-    recordByWeek: "WWLWLWWLLWLWLL",
+    recordByWeek: "WLWLLLLWLLLLLL",
   },
   {
     id: "3",
@@ -351,7 +351,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 3,
     managerEfficiency: 0.916,
-    recordByWeek: "LLLWLWWWWWLWWW",
+    recordByWeek: "WLWLWLWWWWWWWW",
   },
   {
     id: "4",
@@ -363,7 +363,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 4,
     managerEfficiency: 0.859,
-    recordByWeek: "LWWWLWWLLWLWWL",
+    recordByWeek: "WLWLWWLLLWLWLW",
   },
   {
     id: "5",
@@ -375,7 +375,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 5,
     managerEfficiency: 0.893,
-    recordByWeek: "WWLWLWWLLWLWLW",
+    recordByWeek: "WLLWWLLWWLLWWW",
   },
   {
     id: "6",
@@ -387,7 +387,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 6,
     managerEfficiency: 0.916,
-    recordByWeek: "LWWWLWWLWWLWWL",
+    recordByWeek: "LWWWLWWWWLWWLW",
   },
   {
     id: "7",
@@ -399,7 +399,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 7,
     managerEfficiency: 0.855,
-    recordByWeek: "LWLWLWWLLWLWLL",
+    recordByWeek: "LWLWWLWLWWLLLL",
   },
   {
     id: "8",
@@ -411,7 +411,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 8,
     managerEfficiency: 0.876,
-    recordByWeek: "LWWWLWWLLWLWLW",
+    recordByWeek: "LWWLLWLLLWWWWW",
   },
   {
     id: "9",
@@ -423,7 +423,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 9,
     managerEfficiency: 0.853,
-    recordByWeek: "LLLWLLLWWWLWLL",
+    recordByWeek: "LWLWLLWLLLLLLL",
   },
   {
     id: "10",
@@ -435,7 +435,7 @@ export const fakeRosters = [
     ties: 0,
     rosterId: 10,
     managerEfficiency: 0.87,
-    recordByWeek: "LLLWLWWLLWLWWW",
+    recordByWeek: "LLLLLWWWWWWLWL",
   },
 ];
 export const fakePoints = [

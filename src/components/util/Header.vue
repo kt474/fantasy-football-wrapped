@@ -134,8 +134,8 @@ const setColorMode = () => {
                     class="text-base leading-relaxed text-gray-700 dark:text-gray-100"
                   >
                     Welcome to ffwrapped, a platform designed to provide
-                    insightful data and charts about your fantasy football
-                    league. Currently, only
+                    insightful data and charts for your fantasy football league.
+                    Currently, only
                     <a
                       aria-label="Link to sleeper website"
                       class="font-medium text-blue-600 dark:text-blue-400 hover:underline"
