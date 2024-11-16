@@ -29,9 +29,16 @@ onMounted(async () => {
 
 watch(
   () => store.currentLeagueId,
-  () =>
-    (playoffOdds.value =
-      store.leagueInfo[store.currentLeagueIndex].playoffProjections)
+  async () => {
+    if (!store.leagueInfo[store.currentLeagueIndex].playoffProjections) {
+      playoffOdds.value = [];
+      loading.value = true;
+      await getData();
+      loading.value = false;
+    }
+    playoffOdds.value =
+      store.leagueInfo[store.currentLeagueIndex].playoffProjections;
+  }
 );
 
 const maxPoints = computed(() => {
