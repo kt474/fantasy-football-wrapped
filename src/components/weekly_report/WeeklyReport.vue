@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { TableDataType } from "../../api/types.ts";
 import { computed, ref, watch } from "vue";
+import { useStore } from "../../store/store";
+
+const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
   regularSeasonLength: number;
@@ -10,17 +13,189 @@ const weeks = computed(() => {
   return [...Array(props.regularSeasonLength).keys()].slice(1).reverse();
 });
 
+const currentWeek = ref(weeks.value[0]);
+
 const numOfMatchups = computed(() => {
-  return props.tableData.length / 2;
+  return sortedTableData.value.length / 2;
 });
 
+const sortedTableData = computed(() => {
+  return [...props.tableData].sort(
+    (a, b) => a.points[currentWeek.value - 1] - b.points[currentWeek.value - 1]
+  );
+});
+
+const seriesData = computed(() => {
+  return [
+    {
+      name: "Points",
+      data: sortedTableData.value.map(
+        (user: any) => user.points[currentWeek.value - 1]
+      ),
+    },
+  ];
+});
+
+const chartOptions = ref({
+  chart: {
+    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    type: "bar",
+    toolbar: {
+      show: false,
+    },
+    zoom: {
+      enabled: false,
+    },
+    animations: {
+      enabled: false,
+    },
+  },
+  plotOptions: {
+    bar: {
+      columnWidth: "75%",
+    },
+  },
+  colors: ["#22c55e"],
+  dataLabels: {
+    enabled: false,
+  },
+  tooltip: {
+    theme: store.darkMode ? "dark" : "light",
+    y: {
+      show: true,
+      formatter: (x: number) => {
+        if (Number.isInteger(x)) {
+          return `${x}`;
+        }
+        return `${x.toFixed(2)}`;
+      },
+    },
+    marker: {
+      show: false,
+    },
+  },
+  xaxis: {
+    categories: sortedTableData.value.map((user) => user.name),
+    title: {
+      text: "League Manager",
+      offsetY: 3,
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
+    },
+  },
+  yaxis: {
+    labels: {
+      formatter: function (x: number) {
+        return x;
+      },
+    },
+    title: {
+      text: "Points Scored",
+      offsetX: -10,
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
+    },
+  },
+});
+
+const updateChartColor = () => {
+  chartOptions.value = {
+    ...chartOptions.value,
+    chart: {
+      type: "bar",
+      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      toolbar: {
+        show: false,
+      },
+      zoom: {
+        enabled: false,
+      },
+      animations: {
+        enabled: false,
+      },
+    },
+    tooltip: {
+      theme: store.darkMode ? "dark" : "light",
+      y: {
+        show: true,
+        formatter: (x: number) => {
+          if (Number.isInteger(x)) {
+            return `${x}`;
+          }
+          return `${x.toFixed(2)}`;
+        },
+      },
+      marker: {
+        show: false,
+      },
+    },
+    xaxis: {
+      categories: sortedTableData.value.map((user) => user.name),
+      title: {
+        text: "League Manager",
+        offsetY: 3,
+        style: {
+          fontSize: "16px",
+          fontFamily:
+            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+          fontWeight: 600,
+        },
+      },
+    },
+    yaxis: {
+      labels: {
+        formatter: function (x: number) {
+          return x;
+        },
+      },
+      title: {
+        text: "Points Scored",
+        offsetX: -10,
+        style: {
+          fontSize: "16px",
+          fontFamily:
+            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+          fontWeight: 600,
+        },
+      },
+    },
+  };
+};
+
+watch(
+  () => store.darkMode,
+  () => updateChartColor()
+);
+
+watch(
+  () => store.currentLeagueId,
+  () => updateChartColor()
+);
+
+watch(
+  () => currentWeek.value,
+  () => updateChartColor()
+);
+
 const getRecord = (recordString: string, index: number) => {
+  if (
+    store.leagueInfo.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
+  ) {
+    index = index * 2;
+  }
   const numWins = recordString.slice(0, index).split("W").length - 1;
   const numLosses = recordString.slice(0, index).split("L").length - 1;
   return `${numWins} - ${numLosses}`;
 };
-
-const currentWeek = ref(weeks.value[0]);
 
 watch(
   () => props.regularSeasonLength,
@@ -52,7 +227,7 @@ watch(
         v-for="index in numOfMatchups"
         class="block px-4 py-2.5 my-2 mr-4 text-gray-600 bg-white border border-gray-200 rounded-lg shadow w-80 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
       >
-        <div v-for="user in props.tableData">
+        <div v-for="user in sortedTableData">
           <div v-if="user.matchups[currentWeek - 1] == index">
             <div class="flex justify-between my-2">
               <div class="flex">
@@ -87,7 +262,11 @@ watch(
                 class="mt-0.5"
                 :class="{
                   'text-blue-600 dark:text-blue-500 font-semibold':
-                    user.recordByWeek[currentWeek - 1] == 'W',
+                    store.leagueInfo.length > 0 &&
+                    store.leagueInfo[store.currentLeagueIndex].medianScoring ===
+                      1
+                      ? user.recordByWeek[2 * (currentWeek - 1)] == 'W'
+                      : user.recordByWeek[currentWeek - 1] == 'W',
                 }"
               >
                 {{ user.points[currentWeek - 1] }}
@@ -95,7 +274,7 @@ watch(
             </div>
             <hr
               v-if="
-                props.tableData
+                sortedTableData
                   .filter((u) => u.matchups[currentWeek - 1] === index)
                   .indexOf(user) === 0
               "
@@ -105,6 +284,13 @@ watch(
         </div>
       </div>
     </div>
-    <!-- <p class="text-xl font-bold text-gray-900 dark:text-white">Awards</p> -->
+    <p class="text-xl font-bold text-gray-900 dark:text-white">Points</p>
+    <apexchart
+      width="100%"
+      height="475"
+      type="bar"
+      :options="chartOptions"
+      :series="seriesData"
+    ></apexchart>
   </div>
 </template>
