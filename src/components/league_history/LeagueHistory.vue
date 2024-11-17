@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { maxBy, minBy } from "lodash";
 import { TableDataType } from "../../api/types.ts";
 import { useStore } from "../../store/store.ts";
@@ -116,6 +116,20 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+watch(
+  () => store.currentLeagueId,
+  async () => {
+    if (
+      store.leagueInfo[store.currentLeagueIndex] &&
+      store.leagueInfo[store.currentLeagueIndex].previousLeagues.length == 0
+    ) {
+      isLoading.value = true;
+      await getPreviousLeagues();
+      isLoading.value = false;
+    }
+  }
+);
 
 const dataAllYears = computed(() => {
   let result = props.tableData.map((user) => ({
