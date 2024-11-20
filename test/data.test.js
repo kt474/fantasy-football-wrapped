@@ -21,6 +21,7 @@ test("Retrieving league data", async () => {
     managerEfficiency: 0.874,
     wins: 5,
     losses: 9,
+    ties: 0,
     rosterId: 1,
     recordByWeek: "LLLWWWLLLLWLWL",
     players: [

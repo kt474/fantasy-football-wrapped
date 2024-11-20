@@ -10,7 +10,13 @@ const props = defineProps<{
 }>();
 
 const weeks = computed(() => {
-  return [...Array(props.regularSeasonLength).keys()].slice(1).reverse();
+  const recordLength = props.tableData[0].matchups.length + 1;
+  const weeksList = [...Array(props.regularSeasonLength).keys()]
+    .slice(1)
+    .reverse();
+  return recordLength < weeksList.length
+    ? [...Array(recordLength).keys()].slice(1).reverse()
+    : weeksList;
 });
 
 const currentWeek = ref(weeks.value[0]);
@@ -177,7 +183,10 @@ watch(
 
 watch(
   () => store.currentLeagueId,
-  () => updateChartColor()
+  () => {
+    updateChartColor();
+    currentWeek.value = weeks.value[0];
+  }
 );
 
 watch(

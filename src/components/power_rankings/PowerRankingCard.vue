@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { useStore } from "../../store/store";
+
+const store = useStore();
 
 const props = defineProps<{
   powerRankings: any[];
@@ -13,12 +16,23 @@ const rankingValues = computed(() => {
 });
 
 const weeks = computed(() => {
-  return [...Array(props.regularSeasonLength).keys()].slice(1).reverse();
+  const recordLength = props.powerRankings[0].data.length + 1;
+  const weeksList = [...Array(props.regularSeasonLength).keys()]
+    .slice(1)
+    .reverse();
+  return recordLength < weeksList.length
+    ? [...Array(recordLength).keys()].slice(1).reverse()
+    : weeksList;
 });
 const currentWeek = ref(weeks.value[0]);
 
 watch(
   () => props.regularSeasonLength,
+  () => (currentWeek.value = weeks.value[0])
+);
+
+watch(
+  () => store.currentLeagueId,
   () => (currentWeek.value = weeks.value[0])
 );
 
