@@ -190,7 +190,7 @@ const setColorMode = () => {
                       target="_blank"
                       >donations</a
                     >
-                    would be greatly appreciated
+                    would be greatly appreciated.
                   </p>
                 </div>
               </div>

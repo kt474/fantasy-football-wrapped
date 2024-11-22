@@ -7,6 +7,32 @@ export const seasonType: { [key: number]: string } = {
   2: "Dynasty",
 };
 
+export const getPlayerNames = async (playerIds: string[]) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`
+  );
+  const result = await response.json();
+  return result.players;
+};
+
+export const generateReport = async (prompt: string) => {
+  try {
+    const response = await fetch(import.meta.env.VITE_WEEKLY_REPORT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: prompt,
+      }),
+    });
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
 export const inputUsername = async (username: string, year: string) => {
   try {
     await fetch(import.meta.env.VITE_USERNAME_URL, {
@@ -235,6 +261,8 @@ export const getMatchup = async (week: number, leagueId: string) => {
       rosterId: game["roster_id"],
       points: game["points"],
       matchupId: game["matchup_id"],
+      starters: game["starters"],
+      starterPoints: game["starters_points"],
     };
   });
 };

@@ -69,4 +69,5 @@ export type TableDataType = {
   rosterId: number;
   expectedWinsSTD: number;
   recordByWeek: string;
+  players: string[];
 };
