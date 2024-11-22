@@ -2,7 +2,7 @@
 import { TableDataType } from "../../api/types.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
-import { getPlayerNames } from "../../api/api.ts";
+// import { getPlayerNames } from "../../api/api.ts";
 
 const store = useStore();
 const props = defineProps<{
@@ -22,15 +22,15 @@ const weeks = computed(() => {
 
 const currentWeek = ref(weeks.value[0]);
 
-const fetchPlayerNames = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  await Promise.all(
-    currentLeague.rosters.map(async (roster) => {
-      const playerNames = await getPlayerNames(roster.players);
-      store.addRosterNames(store.currentLeagueIndex, roster.id, playerNames);
-    })
-  );
-};
+// const fetchPlayerNames = async () => {
+//   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+//   await Promise.all(
+//     currentLeague.rosters.map(async (roster) => {
+//       const playerNames = await getPlayerNames(roster.players);
+//       store.addRosterNames(store.currentLeagueIndex, roster.id, playerNames);
+//     })
+//   );
+// };
 
 onMounted(async () => {
   // if (
