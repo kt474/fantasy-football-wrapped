@@ -12,10 +12,15 @@ export const getPlayerNames = async (playerIds: string[]) => {
     `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`
   );
   const result = await response.json();
-  return result.players;
+  return result.players.map((playerObj: any) => {
+    if (playerObj) {
+      return playerObj.name ? playerObj.name : playerObj.team;
+    }
+    return "";
+  });
 };
 
-export const generateReport = async (prompt: string) => {
+export const generateReport = async (prompt: any, metadata: any) => {
   try {
     const response = await fetch(import.meta.env.VITE_WEEKLY_REPORT, {
       method: "POST",
@@ -23,11 +28,13 @@ export const generateReport = async (prompt: string) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: prompt,
+        data: {
+          leagueMetadata: metadata,
+          matchups: prompt,
+        },
       }),
     });
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error("Error:", error);
   }

@@ -86,22 +86,6 @@ export const useStore = defineStore("main", {
       };
       this.leagueInfo = updatedLeagueInfo;
     },
-    addRosterNames(index: number, rosterId: string, names: string[]) {
-      const updatedLeagueInfo = [...this.leagueInfo];
-      updatedLeagueInfo[index] = {
-        ...updatedLeagueInfo[index],
-        rosters: updatedLeagueInfo[index].rosters.map((roster) => {
-          if (roster && roster.id === rosterId) {
-            return {
-              ...roster,
-              playerNames: names,
-            };
-          }
-          return roster;
-        }),
-      };
-      this.leagueInfo = updatedLeagueInfo;
-    },
     addPlayoffOdds(leagueId: string, payload: Record<string, any>[]) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {

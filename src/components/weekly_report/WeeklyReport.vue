@@ -2,13 +2,16 @@
 import { TableDataType } from "../../api/types.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
-// import { getPlayerNames } from "../../api/api.ts";
+import { getPlayerNames, generateReport } from "../../api/api.ts";
 
 const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
   regularSeasonLength: number;
 }>();
+
+const weeklyReport = ref("");
+const playerNames = ref([]);
 
 const weeks = computed(() => {
   const recordLength = props.tableData[0].matchups.length + 1;
@@ -22,23 +25,72 @@ const weeks = computed(() => {
 
 const currentWeek = ref(weeks.value[0]);
 
-// const fetchPlayerNames = async () => {
-//   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-//   await Promise.all(
-//     currentLeague.rosters.map(async (roster) => {
-//       const playerNames = await getPlayerNames(roster.players);
-//       store.addRosterNames(store.currentLeagueIndex, roster.id, playerNames);
-//     })
-//   );
-// };
+const fetchPlayerNames = async () => {
+  if (store.leagueIds.length > 0) {
+    const result: any = await Promise.all(
+      props.tableData.map(async (user: any) => {
+        return await getPlayerNames(user.starters[currentWeek.value - 1]);
+      })
+    );
+    playerNames.value = result;
+  }
+};
+
+const getReport = async () => {
+  if (store.leagueIds.length > 0) {
+    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const leagueMetadata = {
+      numberOfPlayoffTeams: currentLeague.playoffTeams,
+      numberRegularSeasonWeeks: currentLeague.regularSeasonLength,
+      currentWeek: currentWeek.value,
+    };
+    const response = await generateReport(reportPrompt.value, leagueMetadata);
+    weeklyReport.value = response.text
+      .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+      .replace(/\n/g, "<br>");
+    if (localStorage.report) {
+      const savedReports = JSON.parse(<string>localStorage.getItem("report"));
+      savedReports.splice(store.currentLeagueIndex, 0, weeklyReport.value);
+      localStorage.setItem("report", JSON.stringify(savedReports));
+    } else {
+      localStorage.setItem("report", JSON.stringify([weeklyReport.value]));
+    }
+  }
+};
 
 onMounted(async () => {
-  // if (
-  //   store.leagueInfo.length > 0 &&
-  //   !store.leagueInfo[store.currentLeagueIndex].rosters[0].playerNames
-  // ) {
-  //   await fetchPlayerNames();
-  // }
+  if (!localStorage.report) {
+    await fetchPlayerNames();
+    await getReport();
+  } else {
+    const savedReports = JSON.parse(<string>localStorage.getItem("report"));
+    if (savedReports[store.currentLeagueIndex]) {
+      weeklyReport.value = JSON.parse(<string>localStorage.getItem("report"))[
+        store.currentLeagueIndex
+      ];
+    } else {
+      await fetchPlayerNames();
+      await getReport();
+    }
+  }
+});
+
+const reportPrompt = computed(() => {
+  const result: any[] = [];
+  props.tableData.forEach((user: TableDataType, index: number) => {
+    result.push({
+      name: user.name,
+      matchupNumber: user.matchups[currentWeek.value - 1],
+      starterPoints: user.starterPoints[currentWeek.value - 1],
+      playerNames: playerNames.value[index],
+      pointsScored: user.points[currentWeek.value - 1],
+      wins: user.wins,
+      losses: user.losses,
+      currentRank: user.regularSeasonRank,
+      totalPoints: user.pointsFor,
+    });
+  });
+  return result;
 });
 
 const numOfMatchups = computed(() => {
@@ -206,6 +258,9 @@ watch(
   () => {
     updateChartColor();
     currentWeek.value = weeks.value[0];
+    weeklyReport.value = JSON.parse(<string>localStorage.getItem("report"))[
+      store.currentLeagueIndex
+    ];
   }
 );
 
@@ -237,7 +292,7 @@ watch(
   >
     <div class="flex items-center justify-between mb-3">
       <h5 class="text-3xl font-bold text-gray-900 dark:text-white">
-        Weekly Summary
+        Weekly Report
       </h5>
       <select
         aria-label="current week"
@@ -249,6 +304,128 @@ watch(
           Week {{ week }}
         </option>
       </select>
+    </div>
+    <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
+    <div v-if="currentWeek == weeks[0]">
+      <p class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        Summary
+      </p>
+      <div
+        v-if="weeklyReport"
+        class="max-w-5xl text-gray-900 dark:text-gray-300"
+      >
+        <p v-html="weeklyReport" class="mb-3"></p>
+        <p class="text-xs text-gray-500 dark:text-gray-300">
+          Generated using GPT-4o. Information provided may not always be
+          accurate.
+        </p>
+      </div>
+      <!-- Fake data for home page -->
+      <div
+        v-else-if="store.leagueIds.length == 0"
+        class="max-w-5xl text-gray-900 dark:text-gray-300"
+      >
+        <p class="mb-3">
+          The regular season finale was a showdown of the titans, or rather, a
+          gentle pillow fight among the top dogs. <b>Finding Deebo</b> held onto
+          the throne with 129.62 points, thanks to Josh Allen and Christian
+          McCaffrey. Meanwhile, <b>The Princess McBride</b> stumbled like a
+          toddler on roller skates, scoring 90.04 points.
+        </p>
+        <p class="mb-3">
+          Patrick Mahomes must think he's playing soccer with those numbers!
+          kevkevkt tried to keep up but ended up with a less-than-impressive
+          94.82. Justin Fields must have been too busy admiring his reflection
+          in the helmet to throw touchdowns.
+        </p>
+        <p class="mb-3">
+          <b>LaPorta Potty</b> narrowly missed a victory lap, but Jalen Hurts’
+          8.88 points were about as useful as a screen door on a submarine. The
+          <b>Dak to the Future</b> lived up to their name, scraping the bottom
+          with a pitiful 76.3 points. Gardner Minshew might need a new career
+          path—perhaps as a mustache model?
+        </p>
+        <p>
+          In a league where the playoffs are as elusive as Bigfoot,
+          <b>Ja’Marr the Merrier</b> clawed their way in, leaving
+          <b>Loud and Stroud</b> and <b>Bijan Mustard</b> to ponder what could
+          have been. Better luck next year, folks! Or maybe just draft
+          better—your choice.
+        </p>
+      </div>
+      <div v-else>
+        <div role="status" class="space-y-2.5 animate-pulse max-w-lg mt-2.5">
+          <p class="text-gray-900 dark:text-gray-300">Generating Summary...</p>
+          <div class="flex items-center w-full">
+            <div
+              class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+            ></div>
+          </div>
+          <div class="flex items-center w-full max-w-[480px]">
+            <div
+              class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+            ></div>
+          </div>
+          <div class="flex items-center w-full max-w-[400px]">
+            <div
+              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+            ></div>
+          </div>
+          <div class="flex items-center w-full max-w-[480px]">
+            <div
+              class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+            ></div>
+          </div>
+          <div class="flex items-center w-full max-w-[440px]">
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-32"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
+            ></div>
+          </div>
+          <div class="flex items-center w-full max-w-[360px]">
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
+            ></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+            ></div>
+          </div>
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+      <hr class="h-px mt-4 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
     </div>
     <p class="text-xl font-bold text-gray-900 dark:text-white">Matchups</p>
     <div class="flex flex-wrap w-full mb-2 overflow-auto">
@@ -313,6 +490,7 @@ watch(
         </div>
       </div>
     </div>
+    <hr class="h-px mt-4 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
     <p class="text-xl font-bold text-gray-900 dark:text-white">Points</p>
     <apexchart
       width="100%"

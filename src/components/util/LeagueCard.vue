@@ -34,6 +34,11 @@ const refreshLeague = async () => {
     delete currentData[props.leagueInfo.leagueId];
     localStorage.originalData = JSON.stringify(currentData);
   }
+  if (localStorage.report) {
+    const savedReports = JSON.parse(localStorage.report);
+    savedReports.splice(props.dropdownIndex, 1);
+    localStorage.report = JSON.stringify(savedReports);
+  }
   store.showRefreshAlert = true;
   store.updateLoadingLeague("");
   setTimeout(() => {
@@ -64,6 +69,7 @@ const removeLeague = () => {
     store.updateRemovedAlert(true);
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentTab");
+      localStorage.removeItem("report");
       store.currentTab = "standings";
     }
     if (localStorage.originalData) {
@@ -74,6 +80,11 @@ const removeLeague = () => {
       } else {
         localStorage.originalData = JSON.stringify(currentData);
       }
+    }
+    if (localStorage.report) {
+      const savedReports = JSON.parse(localStorage.report);
+      savedReports.splice(props.dropdownIndex, 1);
+      localStorage.report = JSON.stringify(savedReports);
     }
     window.history.replaceState({}, document.title, window.location.pathname);
     setTimeout(() => {

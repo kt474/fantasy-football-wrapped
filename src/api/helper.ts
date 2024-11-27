@@ -220,7 +220,11 @@ export const getWeeklyPoints = async (
   grouped.forEach((group: any) => {
     let consolidatedObject: Record<
       number,
-      { rosterId: number; points: number[]; matchupId: number }
+      {
+        rosterId: number;
+        points: number[];
+        matchupId: number;
+      }
     > = group.reduce(
       (
         result: any,
@@ -228,13 +232,29 @@ export const getWeeklyPoints = async (
           rosterId,
           points,
           matchupId,
-        }: { rosterId: number; points: number; matchupId: number }
+          starters,
+          starterPoints,
+        }: {
+          rosterId: number;
+          points: number;
+          matchupId: number;
+          starters: number[];
+          starterPoints: string[];
+        }
       ) => {
         if (!result[rosterId]) {
-          result[rosterId] = { rosterId, points: [], matchups: [] };
+          result[rosterId] = {
+            rosterId,
+            points: [],
+            matchups: [],
+            starters: [],
+            starterPoints: [],
+          };
         }
         result[rosterId].points.push(points);
         result[rosterId].matchups.push(matchupId);
+        result[rosterId].starters.push(starters);
+        result[rosterId].starterPoints.push(starterPoints);
         return result;
       },
       {}
