@@ -301,7 +301,7 @@ const worstManager = computed(() => {
 <template>
   <div
     v-if="!isLoading"
-    class="relative mt-4 overflow-x-auto shadow-md sm:rounded-lg"
+    class="relative mt-4 overflow-x-auto rounded-lg shadow-md"
   >
     <table
       class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
