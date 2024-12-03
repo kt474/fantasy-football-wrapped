@@ -24,6 +24,7 @@ export type LeagueInfoType = {
   rosterPositions: string[];
   playoffTeams: number;
   playoffProjections?: any[];
+  weeklyReport?: string;
 };
 
 export type RosterType = {

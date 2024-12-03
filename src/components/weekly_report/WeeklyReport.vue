@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TableDataType } from "../../api/types.ts";
+import { TableDataType, LeagueInfoType } from "../../api/types.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { getPlayerNames, generateReport } from "../../api/api.ts";
@@ -10,7 +10,7 @@ const props = defineProps<{
   regularSeasonLength: number;
 }>();
 
-const weeklyReport = ref("");
+const weeklyReport: any = ref("");
 const playerNames = ref([]);
 
 const weeks = computed(() => {
@@ -48,30 +48,24 @@ const getReport = async () => {
     weeklyReport.value = response.text
       .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
       .replace(/\n/g, "<br>");
-    if (localStorage.report) {
-      const savedReports = JSON.parse(<string>localStorage.getItem("report"));
-      savedReports.splice(store.currentLeagueIndex, 0, weeklyReport.value);
-      localStorage.setItem("report", JSON.stringify(savedReports));
-    } else {
-      localStorage.setItem("report", JSON.stringify([weeklyReport.value]));
-    }
+    store.addWeeklyReport(currentLeague.leagueId, weeklyReport.value);
+    localStorage.setItem(
+      "leagueInfo",
+      JSON.stringify(store.leagueInfo as LeagueInfoType[])
+    );
   }
 };
 
 onMounted(async () => {
-  if (!localStorage.report) {
+  if (
+    store.leagueInfo.length > 0 &&
+    !store.leagueInfo[store.currentLeagueIndex].weeklyReport
+  ) {
     await fetchPlayerNames();
     await getReport();
-  } else {
-    const savedReports = JSON.parse(<string>localStorage.getItem("report"));
-    if (savedReports[store.currentLeagueIndex]) {
-      weeklyReport.value = JSON.parse(<string>localStorage.getItem("report"))[
-        store.currentLeagueIndex
-      ];
-    } else {
-      await fetchPlayerNames();
-      await getReport();
-    }
+  } else if (store.leagueInfo.length > 0) {
+    weeklyReport.value =
+      store.leagueInfo[store.currentLeagueIndex].weeklyReport;
   }
 });
 
@@ -87,7 +81,6 @@ const reportPrompt = computed(() => {
       wins: user.wins,
       losses: user.losses,
       currentRank: user.regularSeasonRank,
-      totalPoints: user.pointsFor,
     });
   });
   return result;
@@ -255,12 +248,16 @@ watch(
 
 watch(
   () => store.currentLeagueId,
-  () => {
+  async () => {
     updateChartColor();
     currentWeek.value = weeks.value[0];
-    weeklyReport.value = JSON.parse(<string>localStorage.getItem("report"))[
-      store.currentLeagueIndex
-    ];
+    if (!store.leagueInfo[store.currentLeagueIndex].weeklyReport) {
+      weeklyReport.value = "";
+      await fetchPlayerNames();
+      await getReport();
+    }
+    weeklyReport.value =
+      store.leagueInfo[store.currentLeagueIndex].weeklyReport;
   }
 );
 
@@ -291,7 +288,7 @@ watch(
     class="h-full px-6 pt-4 mt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex items-center justify-between mb-3">
-      <h5 class="text-3xl font-bold text-gray-900 dark:text-white">
+      <h5 class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
         Weekly Report
       </h5>
       <select
@@ -307,7 +304,7 @@ watch(
     </div>
     <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
     <div v-if="currentWeek == weeks[0]">
-      <p class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+      <p class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
         Summary
       </p>
       <div
