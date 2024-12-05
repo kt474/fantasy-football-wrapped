@@ -20,16 +20,6 @@
           >
         </p>
         <p>
-          Rating formula:
-          <a
-            aria-label="http://www.okiraqi.org/opr.html Rating formula website"
-            class="text-blue-700 dark:text-blue-500 hover:underline"
-            href="http://www.okiraqi.org/opr.html"
-            target="_blank"
-            >OIL Power Rating</a
-          >
-        </p>
-        <p>
           Icon:
           <a
             aria-label="Freepik - Flaticon icon credit"
