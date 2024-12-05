@@ -41,6 +41,16 @@
             >Avataaars generator</a
           >
         </p>
+        <p>
+          <a
+            aria-label="buymeacoffee donation page"
+            class="text-blue-700 dark:text-blue-500 hover:underline"
+            href="https://buymeacoffee.com/kt474"
+            title="buymeacofee donation page"
+            target="_blank"
+            >Donate</a
+          >
+        </p>
         <button
           data-modal-target="footer-modal"
           data-modal-toggle="footer-modal"
