@@ -132,92 +132,87 @@ watch(
 );
 
 const dataAllYears = computed(() => {
-  if (store.leagueInfo[store.currentLeagueIndex].weeklyPoints.length > 0) {
-    let result = props.tableData.map((user) => ({
-      name: user.name,
-      id: user.id,
-      wins: user.wins,
-      losses: user.losses,
-      points: user.pointsFor,
-      pointsArr: [...user.points],
-      avatarImg: user.avatarImg,
-      rosterId: user.rosterId,
-      matchups: [...user.matchups],
-      managerEfficiency: store.leagueInfo[store.currentLeagueIndex]
-        ? user.managerEfficiency
-        : 2 * user.managerEfficiency,
-      randomScheduleWins: store.leagueInfo[store.currentLeagueIndex]
-        ? user.randomScheduleWins
-        : 3 * user.randomScheduleWins,
-      leagueWinner:
-        store.leagueInfo[store.currentLeagueIndex] &&
-        store.leagueInfo[store.currentLeagueIndex].playoffPoints.length > 0
-          ? [Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)]
-          : [null],
-      seasons: store.leagueInfo[store.currentLeagueIndex]
-        ? [store.leagueInfo[store.currentLeagueIndex].season]
-        : ["2023", "2022", "2021"],
-    }));
-
-    if (
+  let result = props.tableData.map((user) => ({
+    name: user.name,
+    id: user.id,
+    wins: user.wins,
+    losses: user.losses,
+    points: user.pointsFor,
+    pointsArr: [...user.points],
+    avatarImg: user.avatarImg,
+    rosterId: user.rosterId,
+    matchups: [...user.matchups],
+    managerEfficiency: store.leagueInfo[store.currentLeagueIndex]
+      ? user.managerEfficiency
+      : 2 * user.managerEfficiency,
+    randomScheduleWins: store.leagueInfo[store.currentLeagueIndex]
+      ? user.randomScheduleWins
+      : 3 * user.randomScheduleWins,
+    leagueWinner:
       store.leagueInfo[store.currentLeagueIndex] &&
-      store.leagueInfo[store.currentLeagueIndex].previousLeagues.length > 0
-    ) {
-      store.leagueInfo[store.currentLeagueIndex].previousLeagues.forEach(
-        (league: LeagueInfoType) => {
-          let tableData;
-          if (localStorage.getItem(league.leagueId)) {
-            tableData = JSON.parse(
-              <string>localStorage.getItem(league.leagueId)
-            );
-          } else {
-            tableData = createTableData(
-              league.users,
-              league.rosters,
-              league.weeklyPoints,
-              medianScoring.value
-            );
-            localStorage.setItem(league.leagueId, JSON.stringify(tableData));
-          }
-          tableData.forEach((user: TableDataType) => {
-            const resultUser = result.find((ru) => ru.id === user.id);
-            if (resultUser) {
-              resultUser.wins += user.wins;
-              resultUser.losses += user.losses;
-              resultUser.points += user.pointsFor;
-              resultUser.randomScheduleWins += user.randomScheduleWins;
-              resultUser.managerEfficiency += user.managerEfficiency;
+      store.leagueInfo[store.currentLeagueIndex].playoffPoints.length > 0
+        ? [Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)]
+        : [null],
+    seasons: store.leagueInfo[store.currentLeagueIndex]
+      ? [store.leagueInfo[store.currentLeagueIndex].season]
+      : ["2023", "2022", "2021"],
+  }));
 
-              if (league.weeklyPoints.length > 0) {
-                resultUser.seasons.push(league.season);
-              }
-              if (league.leagueWinner) {
-                // @ts-ignore
-                resultUser.leagueWinner.push(Number(league.leagueWinner));
-              }
-              if (user.matchups?.length) {
-                resultUser.matchups.push(...user.matchups);
-              }
-              if (user.points?.length) {
-                resultUser.pointsArr.push(...user.points);
-              }
-            }
-          });
+  if (
+    store.leagueInfo[store.currentLeagueIndex] &&
+    store.leagueInfo[store.currentLeagueIndex].previousLeagues.length > 0
+  ) {
+    store.leagueInfo[store.currentLeagueIndex].previousLeagues.forEach(
+      (league: LeagueInfoType) => {
+        let tableData;
+        if (localStorage.getItem(league.leagueId)) {
+          tableData = JSON.parse(<string>localStorage.getItem(league.leagueId));
+        } else {
+          tableData = createTableData(
+            league.users,
+            league.rosters,
+            league.weeklyPoints,
+            medianScoring.value
+          );
+          localStorage.setItem(league.leagueId, JSON.stringify(tableData));
         }
-      );
-    } else if (!store.leagueInfo[store.currentLeagueIndex]) {
-      // fake data for main page
-      result.forEach((user) => {
-        user.wins += 2 * user.wins;
-        user.losses += 2 * user.losses;
-        user.points += 2 * user.points;
-        user.pointsArr.push(...user.pointsArr, ...user.pointsArr);
-        user.matchups.push(...user.matchups, ...user.matchups);
-      });
-    }
-    return result;
+        tableData.forEach((user: TableDataType) => {
+          const resultUser = result.find((ru) => ru.id === user.id);
+          if (resultUser) {
+            resultUser.wins += user.wins;
+            resultUser.losses += user.losses;
+            resultUser.points += user.pointsFor;
+            resultUser.randomScheduleWins += user.randomScheduleWins;
+            resultUser.managerEfficiency += user.managerEfficiency;
+
+            if (league.weeklyPoints.length > 0) {
+              resultUser.seasons.push(league.season);
+            }
+            if (league.leagueWinner) {
+              // @ts-ignore
+              resultUser.leagueWinner.push(Number(league.leagueWinner));
+            }
+            if (user.matchups?.length) {
+              resultUser.matchups.push(...user.matchups);
+            }
+            if (user.points?.length) {
+              resultUser.pointsArr.push(...user.points);
+            }
+          }
+        });
+      }
+    );
+  } else if (!store.leagueInfo[store.currentLeagueIndex]) {
+    // fake data for main page
+    result.forEach((user) => {
+      user.wins += 2 * user.wins;
+      user.losses += 2 * user.losses;
+      user.points += 2 * user.points;
+      user.pointsArr.push(...user.pointsArr, ...user.pointsArr);
+      user.matchups.push(...user.matchups, ...user.matchups);
+    });
   }
-  return [];
+  return result;
 });
 
 const tableDataAllYears = computed(() => {
@@ -305,10 +300,7 @@ const worstManager = computed(() => {
 </script>
 <template>
   <div
-    v-if="
-      !isLoading &&
-      store.leagueInfo[store.currentLeagueIndex].weeklyPoints.length > 0
-    "
+    v-if="!isLoading"
     class="relative mt-4 overflow-x-auto rounded-lg shadow-md"
   >
     <table
