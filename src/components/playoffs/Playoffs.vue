@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import FinalPlacements from "./FinalPlacements.vue";
 import PlacementFlowChart from "./PlacementFlowChart.vue";
+import LeagueSummary from "./LeagueSummary.vue";
 import { computed } from "vue";
 import { useStore } from "../../store/store";
 import {
@@ -122,6 +123,7 @@ const numberOfLoserRounds = computed(() => {
 </script>
 <template>
   <div>
+    <LeagueSummary :tableData="tableData" :finalPlacements="finalPlacements" />
     <div class="flex flex-wrap my-4 lg:flex-nowrap">
       <div
         class="block w-full p-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"

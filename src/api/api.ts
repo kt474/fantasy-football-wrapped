@@ -37,6 +37,9 @@ export const generateReport = async (prompt: any, metadata: any) => {
     return await response.json();
   } catch (error) {
     console.error("Error:", error);
+    return {
+      text: "Unable to generate report. Please try again later.",
+    };
   }
 };
 

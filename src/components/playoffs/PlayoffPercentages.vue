@@ -208,6 +208,18 @@ const maxProjectedScore = computed(() => {
   return Math.max(...result);
 });
 
+const showPlayoffOdds = computed(() => {
+  if (store.leagueInfo.length > 0) {
+    if (store.leagueInfo[store.currentLeagueIndex].status != "complete") {
+      return true;
+    }
+    return false;
+  } else if (store.leagueInfo.length == 0) {
+    return false;
+  }
+  return true;
+});
+
 const calculatePowerScore = (
   winScore: number,
   pointScore: number,
@@ -227,150 +239,157 @@ const tableData = computed(() => {
 });
 </script>
 <template>
-  <div
-    v-if="!loading"
-    :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
-    class="relative w-full overflow-x-auto bg-gray-100 rounded-lg shadow-md dark:bg-gray-700"
-  >
-    <p
-      class="flex justify-center pt-2 font-semibold text-gray-700 text-md dark:text-gray-200"
-    >
-      Playoff Odds
-    </p>
-    <table
-      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-200"
-    >
-      <thead
-        :class="
-          store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
-        "
-        class="text-xs text-gray-700 uppercase dark:text-gray-200"
-      >
-        <tr>
-          <th scope="col" class="px-2 py-3 sm:px-6 w-60 dark:text-gray-200">
-            Team Name
-          </th>
-          <th v-for="i in playoffTeams" scope="col" class="px-2 py-3">
-            <div
-              class="flex items-center w-8 cursor-pointer dark:text-gray-200"
-            >
-              {{ getOrdinalSuffix(i) }}
-            </div>
-          </th>
-          <th
-            scope="col"
-            class="py-3 pl-3 pr-3 sm:pr-0 md:pl-10 lg:pl-20 xl:pl-52"
-          >
-            Total
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(item, index) in tableData"
-          :key="index"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-          :class="{
-            'border-b-blue-600 border-b-2 dark:border-b-blue-500':
-              index == playoffTeams - 1,
-          }"
-        >
-          <th
-            scope="row"
-            class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
-          >
-            {{ item.name }}
-          </th>
-          <td v-for="i in playoffTeams" class="px-2 py-3">
-            {{
-              store.leagueInfo.length > 0
-                ? Math.round(
-                    (item.placement.filter((position: number) => position === i)
-                      .length *
-                      100 *
-                      10) /
-                      numSimulations
-                  ) / 10
-                : item.placement[i - 1]
-            }}%
-          </td>
-          <td
-            class="py-3 pl-3 pr-0 border-l sm:pr-3 md:pl-10 lg:pl-20 xl:pl-52 dark:bg-gray-800 dark:border-gray-700"
-          >
-            {{
-              store.leagueInfo.length > 0
-                ? Math.round(
-                    (item.placement.filter((position: number) =>
-                      playoffArray.includes(position)
-                    ).length *
-                      100 *
-                      10) /
-                      numSimulations
-                  ) / 10
-                : sum(item.placement)
-            }}%
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p
-      class="py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
-    >
-      Playoff odds are calculated with each team's win percentage, total points,
-      and rest of season projected points.
-    </p>
-  </div>
-  <div
-    v-else
-    role="status"
-    class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
-  >
-    <p
-      class="flex justify-center -mb-6 text-xl font-semibold text-gray-900 dark:text-white"
-    >
-      Loading projection data...
-    </p>
+  <div v-if="showPlayoffOdds">
     <div
-      class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2.5"
-    ></div>
-    <div class="w-48 h-2 mb-10 bg-gray-200 rounded-full dark:bg-gray-700"></div>
-    <div class="flex items-baseline mt-36">
-      <div class="w-full h-40 bg-gray-200 rounded-t-lg dark:bg-gray-700"></div>
-      <div
-        class="w-full bg-gray-200 rounded-t-lg h-96 ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full bg-gray-200 rounded-t-lg h-60 ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full h-40 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full h-32 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full bg-gray-200 rounded-t-lg h-36 ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full bg-gray-200 rounded-t-lg h-72 ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
-      ></div>
-      <div
-        class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
-      ></div>
+      v-if="!loading"
+      :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
+      class="relative w-full overflow-x-auto bg-gray-100 rounded-lg shadow-md dark:bg-gray-700"
+    >
+      <p
+        class="flex justify-center pt-2 font-semibold text-gray-700 text-md dark:text-gray-200"
+      >
+        Playoff Odds
+      </p>
+      <table
+        class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-200"
+      >
+        <thead
+          :class="
+            store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
+          "
+          class="text-xs text-gray-700 uppercase dark:text-gray-200"
+        >
+          <tr>
+            <th scope="col" class="px-2 py-3 sm:px-6 w-60 dark:text-gray-200">
+              Team Name
+            </th>
+            <th v-for="i in playoffTeams" scope="col" class="px-2 py-3">
+              <div
+                class="flex items-center w-8 cursor-pointer dark:text-gray-200"
+              >
+                {{ getOrdinalSuffix(i) }}
+              </div>
+            </th>
+            <th
+              scope="col"
+              class="py-3 pl-3 pr-3 sm:pr-0 md:pl-10 lg:pl-20 xl:pl-52"
+            >
+              Total
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(item, index) in tableData"
+            :key="index"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+            :class="{
+              'border-b-blue-600 border-b-2 dark:border-b-blue-500':
+                index == playoffTeams - 1,
+            }"
+          >
+            <th
+              scope="row"
+              class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
+            >
+              {{ item.name }}
+            </th>
+            <td v-for="i in playoffTeams" class="px-2 py-3">
+              {{
+                store.leagueInfo.length > 0
+                  ? Math.round(
+                      (item.placement.filter(
+                        (position: number) => position === i
+                      ).length *
+                        100 *
+                        10) /
+                        numSimulations
+                    ) / 10
+                  : item.placement[i - 1]
+              }}%
+            </td>
+            <td
+              class="py-3 pl-3 pr-0 border-l sm:pr-3 md:pl-10 lg:pl-20 xl:pl-52 dark:bg-gray-800 dark:border-gray-700"
+            >
+              {{
+                store.leagueInfo.length > 0
+                  ? Math.round(
+                      (item.placement.filter((position: number) =>
+                        playoffArray.includes(position)
+                      ).length *
+                        100 *
+                        10) /
+                        numSimulations
+                    ) / 10
+                  : sum(item.placement)
+              }}%
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p
+        class="py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
+      >
+        Playoff odds are calculated with each team's win percentage, total
+        points, and rest of season projected points.
+      </p>
     </div>
-    <span class="sr-only">Loading...</span>
+    <div
+      v-else
+      role="status"
+      class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
+    >
+      <p
+        class="flex justify-center -mb-6 text-xl font-semibold text-gray-900 dark:text-white"
+      >
+        Loading projection data...
+      </p>
+      <div
+        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2.5"
+      ></div>
+      <div
+        class="w-48 h-2 mb-10 bg-gray-200 rounded-full dark:bg-gray-700"
+      ></div>
+      <div class="flex items-baseline mt-36">
+        <div
+          class="w-full h-40 bg-gray-200 rounded-t-lg dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-96 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-60 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full h-40 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full h-32 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-36 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-72 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+        ></div>
+        <div
+          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+        ></div>
+      </div>
+      <span class="sr-only">Loading...</span>
+    </div>
   </div>
 </template>
 <style scoped>

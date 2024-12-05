@@ -14,13 +14,16 @@ const weeklyReport: any = ref("");
 const playerNames = ref([]);
 
 const weeks = computed(() => {
-  const recordLength = props.tableData[0].matchups.length + 1;
-  const weeksList = [...Array(props.regularSeasonLength).keys()]
-    .slice(1)
-    .reverse();
-  return recordLength < weeksList.length
-    ? [...Array(recordLength).keys()].slice(1).reverse()
-    : weeksList;
+  if (props.tableData[0].matchups) {
+    const recordLength = props.tableData[0].matchups.length + 1;
+    const weeksList = [...Array(props.regularSeasonLength).keys()]
+      .slice(1)
+      .reverse();
+    return recordLength < weeksList.length
+      ? [...Array(recordLength).keys()].slice(1).reverse()
+      : weeksList;
+  }
+  return [];
 });
 
 const currentWeek = ref(weeks.value[0]);
@@ -59,6 +62,7 @@ const getReport = async () => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
+    props.tableData[0].matchups &&
     !store.leagueInfo[store.currentLeagueIndex].weeklyReport
   ) {
     await fetchPlayerNames();
@@ -285,6 +289,7 @@ watch(
 </script>
 <template>
   <div
+    v-if="props.tableData[0].matchups"
     class="h-full px-6 pt-4 mt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex items-center justify-between mb-3">
