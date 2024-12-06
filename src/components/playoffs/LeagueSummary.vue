@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TableDataType, LeagueInfoType } from "../../api/types";
-import { getPlayerNames, generateReport } from "../../api/api.ts";
+import { getPlayerNames, generateSummary } from "../../api/api.ts";
 import { ref, onMounted, watch, computed } from "vue";
 import { useStore } from "../../store/store";
 
@@ -90,7 +90,7 @@ const getSummary = async () => {
         ),
       };
     });
-    const response = await generateReport(userData, leagueMetadata);
+    const response = await generateSummary(userData, leagueMetadata);
     summary.value = response.text
       .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
       .replace(/\n/g, "<br>");
