@@ -79,11 +79,10 @@ const reportPrompt = computed(() => {
     result.push({
       name: user.name,
       matchupNumber: user.matchups[currentWeek.value - 1],
-      starterPoints: user.starterPoints[currentWeek.value - 1],
+      playerPoints: user.starterPoints[currentWeek.value - 1],
       playerNames: playerNames.value[index],
-      pointsScored: user.points[currentWeek.value - 1],
-      wins: user.wins,
-      losses: user.losses,
+      totalPoints: user.points[currentWeek.value - 1],
+      currentRecord: `${user.wins}-${user.losses}`,
       currentRank: user.regularSeasonRank,
     });
   });
