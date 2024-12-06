@@ -331,7 +331,8 @@ const tableData = computed(() => {
         class="py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
       >
         Playoff odds are calculated with each team's win percentage, total
-        points, and rest of season projected points.
+        points, and rest of season projected points. League settings are not
+        taken into account.
       </p>
     </div>
     <div
