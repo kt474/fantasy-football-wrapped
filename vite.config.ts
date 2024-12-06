@@ -15,7 +15,8 @@ export default defineConfig({
         name: "ffwrapped",
         short_name: "ffwrapped",
         description: "Fantasy football league insights",
-        theme_color: "#ffffff",
+        theme_color: "#f8fafc",
+        display: "standalone",
         icons: [
           {
             src: "192.png",

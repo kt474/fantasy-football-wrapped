@@ -31,14 +31,13 @@
           >
         </p>
         <p>
-          Avatars:
           <a
-            aria-label="avataaars generator"
+            aria-label="buymeacoffee donation page"
             class="text-blue-700 dark:text-blue-500 hover:underline"
-            href="https://getavataaars.com/"
-            title="avataaars generator website"
+            href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing"
+            title="buymeacofee donation page"
             target="_blank"
-            >Avataaars generator</a
+            >Install as PWA</a
           >
         </p>
         <p>
