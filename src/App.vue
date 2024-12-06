@@ -122,8 +122,14 @@ const setHtmlBackground = () => {
   if (html) {
     if (store.darkMode) {
       html.style.backgroundColor = "#020617";
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute("content", "#020617");
     } else {
       html.style.backgroundColor = "#f8fafc";
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute("content", "#f8fafc");
     }
   }
 };
