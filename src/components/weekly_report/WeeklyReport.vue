@@ -327,31 +327,34 @@ watch(
         class="max-w-5xl text-gray-900 dark:text-gray-300"
       >
         <p class="mb-3">
-          The regular season finale was a showdown of the titans, or rather, a
-          gentle pillow fight among the top dogs. <b>Finding Deebo</b> held onto
-          the throne with 129.62 points, thanks to Josh Allen and Christian
-          McCaffrey. Meanwhile, <b>The Princess McBride</b> stumbled like a
-          toddler on roller skates, scoring 90.04 points.
+          Week 14 was a rollercoaster, and some of you might want to demand a
+          refund for that ride.
+          <b>The Princess McBride</b> retains the top spot with a solid 124.48
+          points, thanks to Josh Allen and Christian McCaffrey doing their best
+          superhero impressions. Meanwhile, <b>Dak to the Future</b> looked more
+          like a pack of kittens, scoring just 90.04 points and proving that
+          even Patrick Mahomes can’t carry a team of underperformers.
         </p>
         <p class="mb-3">
-          Patrick Mahomes must think he's playing soccer with those numbers!
-          kevkevkt tried to keep up but ended up with a less-than-impressive
-          94.82. Justin Fields must have been too busy admiring his reflection
-          in the helmet to throw touchdowns.
+          <b>Finding Deebo</b> narrowly edged out <b>LaPorta Potty </b> in a
+          high-scoring showdown, 129.62 to 123.26. Deebo Samuel was the real
+          MVP, putting up numbers like he was playing Madden on rookie mode.
+          <b>Baby Back Gibbs</b> and <b>Bijan Mustard</b> had a snooze-fest,
+          with the BBQ Ribs barely staying awake long enough to win 95 to 82.64.
+          Travis Kelce's performance was less "Mr. Swift" and more "Mr. Swiftly
+          Disappointing."
         </p>
         <p class="mb-3">
-          <b>LaPorta Potty</b> narrowly missed a victory lap, but Jalen Hurts’
-          8.88 points were about as useful as a screen door on a submarine. The
-          <b>Dak to the Future</b> lived up to their name, scraping the bottom
-          with a pitiful 76.3 points. Gardner Minshew might need a new career
-          path—perhaps as a mustache model?
+          In the battle of the lower ranks, <b>Pollard Greens</b> barely
+          squeaked by <b>Loud and Stroud</b> 94.82 to 90.44. Tony Pollard and
+          James Cook did just enough to save the day, proving that even a broken
+          clock is right twice a day.
         </p>
         <p>
-          In a league where the playoffs are as elusive as Bigfoot,
-          <b>Ja’Marr the Merrier</b> clawed their way in, leaving
-          <b>Loud and Stroud</b> and <b>Bijan Mustard</b> to ponder what could
-          have been. Better luck next year, folks! Or maybe just draft
-          better—your choice.
+          Finally, <b>Ja’Marr the Merrier</b> showed
+          <b>Just the Tua Us</b> who's boss, winning 90.04 to 82.64. Russell
+          Wilson must have found a new playbook, because he was cooking, and not
+          just in the kitchen.
         </p>
       </div>
       <div v-else>
