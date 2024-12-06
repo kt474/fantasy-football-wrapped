@@ -29,6 +29,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.2.2",
     "vite": "^5.0.13",
+    "vite-plugin-pwa": "^0.21.1",
     "vite-plugin-vue-devtools": "^7.4.6",
     "vitest": "^1.6.0",
     "vue-tsc": "^2.0.21"
