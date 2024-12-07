@@ -332,8 +332,8 @@ watch(
           <b>The Princess McBride</b> retains the top spot with a solid 124.48
           points, thanks to Josh Allen and Christian McCaffrey doing their best
           superhero impressions. Meanwhile, <b>Dak to the Future</b> looked more
-          like a pack of kittens, scoring just 90.04 points and proving that
-          even Patrick Mahomes can’t carry a team of underperformers.
+          like back to the past, scoring just 90.04 points and proving that even
+          Patrick Mahomes can’t carry a team of underperformers.
         </p>
         <p class="mb-3">
           <b>Finding Deebo</b> narrowly edged out <b>LaPorta Potty </b> in a

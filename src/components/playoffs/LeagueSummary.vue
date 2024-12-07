@@ -126,34 +126,28 @@ const getSummary = async () => {
       class="max-w-5xl text-gray-900 dark:text-gray-300"
     >
       <p class="mb-3">
-        Well, well, well, the fantasy football gods have spoken, and
-        <b>Finding Deebo</b> is wearing the crown, leaving the rest of you
-        peasants to ponder your poor life choices. With Josh Allen and Christian
-        McCaffrey leading the charge, it was like watching a cheat code in
-        action.
+        <b>Finding Deebo</b> took the league by storm, riding Jalen Hurts and
+        Kyren Williams to a championship like a cowboy on a rocket-powered
+        steed. With 1646 points and a 9-5 record, they left the competition
+        eating dust and their own tears. <b>Baby Back Gibbs</b> tried to keep
+        up, but even Lamar Jackson couldn't sprint past the finish line fast
+        enough, settling for a respectable second place.
       </p>
       <p class="mb-3">
-        Meanwhile, <b>Bijan Mustard</b> lived up to their name, stinking it up
-        with Joe Flacco at the helm. Seriously, Joe Flacco?
-        <b>Baby Back Gibbs</b>
-        tried to keep pace with Patrick Mahomes and Tyreek Hill, but their
-        playoff performance was like a bad sequel—some hype, no delivery.
-      </p>
-      <p class="mb-3">
-        Speaking of underwhelming, <b>The Princess McBride</b> must've been
-        asleep at the wheel, with Tua and company barely making a peep.
-        <b>Ja’Marr the Merrier</b>
-        and <b>Pollard Greens</b> put up respectable fights, but it was
-        <b>LaPorta Potty</b>
-        who quietly snuck past the pack, proving that sometimes it's better to
-        fly under the radar than crash and burn like
-        <b>Dak to the Future</b> and their playoffs disaster.
+        <b>Pollard Greens</b> and <b>Ja’Marr the Merrier</b> showed up to the
+        playoffs like they were at a family reunion—happy to be there but not
+        expecting much. Meanwhile, the <b>LaPorta Potty</b> seemed to take their
+        name a bit too seriously, sleepwalking to a sixth-place finish.
+        <b>The Princess McBride</b> dashed in and out of relevance, ending up
+        fifth, while <b>Just the Tua Us</b> and <b>Loud and Stroud</b> played
+        the role of lovable underdogs, ultimately barking up the wrong tree.
       </p>
       <p class="mb-4">
-        And let's not forget <b>Just the Tua Us</b> and <b>Loud and Stroud</b>,
-        who both managed to be just mediocre enough to not embarrass themselves
-        completely. Better luck next year, folks—maybe leave the Flacco jerseys
-        at home.
+        <b>Dak to the Future</b> was as unpredictable as a cat on catnip,
+        finishing in second to last. And then there's <b>Bijan Mustard</b>, who
+        lived up to their name by stinking up the league basement. Joe Flacco as
+        your QB? Bold strategy, Cotton. Let's see how that worked out... oh,
+        right, last place. Better luck next year, folks!
       </p>
     </div>
     <div v-else>

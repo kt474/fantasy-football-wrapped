@@ -8,16 +8,21 @@ export const seasonType: { [key: number]: string } = {
 };
 
 export const getPlayerNames = async (playerIds: string[]) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`
-  );
-  const result = await response.json();
-  return result.players.map((playerObj: any) => {
-    if (playerObj) {
-      return playerObj.name ? playerObj.name : playerObj.team;
-    }
-    return "";
-  });
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`
+    );
+    const result = await response.json();
+    return result.players.map((playerObj: any) => {
+      if (playerObj) {
+        return playerObj.name ? playerObj.name : playerObj.team;
+      }
+      return "";
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return [];
+  }
 };
 
 export const generateSummary = async (prompt: any, metadata: any) => {
