@@ -80,6 +80,12 @@ const updateChartColor = () => {
           fontWeight: 600,
         },
       },
+      labels: {
+        formatter: function (str: string) {
+          const n = 17;
+          return str.length > n ? str.slice(0, n - 1) + "..." : str;
+        },
+      },
     },
   };
 };
@@ -128,6 +134,12 @@ const chartOptions = ref({
   },
   xaxis: {
     categories: props.tableData.map((user: any) => user.name),
+    labels: {
+      formatter: function (str: string) {
+        const n = 17;
+        return str.length > n ? str.slice(0, n - 1) + "..." : str;
+      },
+    },
     title: {
       text: "League Manager",
       offsetY: -5,

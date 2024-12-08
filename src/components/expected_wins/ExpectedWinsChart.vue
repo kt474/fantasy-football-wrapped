@@ -99,6 +99,12 @@ const chartOptions = ref({
     },
   },
   xaxis: {
+    labels: {
+      formatter: function (str: string) {
+        const n = 17;
+        return str.length > n ? str.slice(0, n - 1) + "..." : str;
+      },
+    },
     title: {
       text: "League Manager",
       offsetY: -10,
