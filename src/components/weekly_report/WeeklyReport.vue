@@ -66,11 +66,20 @@ const fetchPlayerNames = async () => {
 const getReport = async () => {
   if (store.leagueIds.length > 0) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-    const leagueMetadata = {
-      numberOfPlayoffTeams: currentLeague.playoffTeams,
-      numberRegularSeasonWeeks: currentLeague.regularSeasonLength,
-      currentWeek: currentWeek.value,
-    };
+    let leagueMetadata;
+    if (currentLeague.currentWeek > currentLeague.regularSeasonLength) {
+      leagueMetadata = {
+        numberOfPlayoffTeams: currentLeague.playoffTeams,
+        playoffRound:
+          currentLeague.currentWeek - currentLeague.regularSeasonLength,
+      };
+    } else {
+      leagueMetadata = {
+        numberOfPlayoffTeams: currentLeague.playoffTeams,
+        numberRegularSeasonWeeks: currentLeague.regularSeasonLength,
+        currentWeek: currentWeek.value,
+      };
+    }
     const response = await generateReport(reportPrompt.value, leagueMetadata);
     weeklyReport.value = response.text
       .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
