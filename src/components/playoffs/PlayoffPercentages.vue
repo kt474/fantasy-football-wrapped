@@ -328,11 +328,12 @@ const tableData = computed(() => {
         </tbody>
       </table>
       <p
-        class="py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
+        class="max-w-3xl py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
       >
-        Playoff odds are calculated with each team's win percentage, total
-        points, and rest of season projected points. League settings are not
-        taken into account.
+        Playoff odds are estimated using Monte Carlo simulation based on team
+        records, total points, and projected rest-of-season points. League
+        settings are not taken into account so mathematically eliminated teams
+        may still have a percentage greater than zero.
       </p>
     </div>
     <div
