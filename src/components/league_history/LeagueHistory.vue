@@ -150,7 +150,7 @@ const dataAllYears = computed(() => {
       : 3 * user.randomScheduleWins,
     leagueWinner:
       store.leagueInfo[store.currentLeagueIndex] &&
-      store.leagueInfo[store.currentLeagueIndex].playoffPoints.length > 0
+      store.leagueInfo[store.currentLeagueIndex].status == "complete"
         ? [Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)]
         : [null],
     seasons: store.leagueInfo[store.currentLeagueIndex]

@@ -61,9 +61,11 @@ const getPointsScored = (rosterId: number, week: number) => {
   }
   const pointsArray: any = store.leagueInfo[
     store.currentLeagueIndex
-  ].playoffPoints.find((roster: RosterType) => roster.rosterId === rosterId);
+  ].weeklyPoints.find((roster: RosterType) => roster.rosterId === rosterId);
   if (!pointsArray) return;
-  return pointsArray.points[week - 1];
+  return pointsArray.points[
+    week - 1 + store.leagueInfo[store.currentLeagueIndex].regularSeasonLength
+  ];
 };
 
 const getRecord = (rosterId: number) => {

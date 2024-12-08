@@ -51,7 +51,7 @@ const fetchPlayerNames = async () => {
   if (store.leagueIds.length > 0) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     const result: any = await Promise.all(
-      currentLeague.playoffPoints.map(async (user: any) => {
+      currentLeague.weeklyPoints.map(async (user: any) => {
         const starterNames = await getPlayerNames(user.starters.at(-1));
         return {
           playerNames: starterNames,

@@ -3,6 +3,7 @@ import { TableDataType, LeagueInfoType } from "../../api/types.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { getPlayerNames, generateReport } from "../../api/api.ts";
+import { max } from "lodash";
 
 const store = useStore();
 const props = defineProps<{
@@ -14,9 +15,16 @@ const weeklyReport: any = ref("");
 const playerNames = ref([]);
 
 const weeks = computed(() => {
+  if (store.leagueInfo.length == 0) {
+    return [...Array(15).keys()].slice(1).reverse();
+  }
   if (props.tableData[0].matchups) {
     const recordLength = props.tableData[0].matchups.length + 1;
-    const weeksList = [...Array(props.regularSeasonLength).keys()]
+    const weeksList = [
+      ...Array(
+        store.leagueInfo[store.currentLeagueIndex].lastScoredWeek + 1
+      ).keys(),
+    ]
       .slice(1)
       .reverse();
     return recordLength < weeksList.length
@@ -24,6 +32,22 @@ const weeks = computed(() => {
       : weeksList;
   }
   return [];
+});
+
+const playoffWeeks = computed(() => {
+  if (store.leagueInfo.length > 0) {
+    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const result: number[] = [];
+    for (
+      let i = currentLeague.regularSeasonLength + 1;
+      i <= currentLeague.lastScoredWeek;
+      i++
+    ) {
+      result.push(i);
+    }
+    return result;
+  }
+  return [15, 16, 17];
 });
 
 const currentWeek = ref(weeks.value[0]);
@@ -90,7 +114,14 @@ const reportPrompt = computed(() => {
 });
 
 const numOfMatchups = computed(() => {
-  return sortedTableData.value.length / 2;
+  const result: number[] = [];
+  sortedTableData.value.forEach((user) => {
+    const matchupIndex = user.matchups[currentWeek.value - 1];
+    if (matchupIndex && !result.includes(matchupIndex)) {
+      result.push(user.matchups[currentWeek.value - 1]);
+    }
+  });
+  return result;
 });
 
 const sortedTableData = computed(() => {
@@ -103,8 +134,10 @@ const seriesData = computed(() => {
   return [
     {
       name: "Points",
-      data: sortedTableData.value.map(
-        (user: any) => user.points[currentWeek.value - 1]
+      data: sortedTableData.value.map((user: any) =>
+        user.matchups[currentWeek.value - 1]
+          ? user.points[currentWeek.value - 1]
+          : 0
       ),
     },
   ];
@@ -281,6 +314,14 @@ const getRecord = (recordString: string, index: number) => {
   return `${numWins} - ${numLosses}`;
 };
 
+const getMatchupWinner = (matchupIndex: number, currentWeek: number) => {
+  const opponents = sortedTableData.value.filter(
+    (user) => user.matchups[currentWeek] === matchupIndex
+  );
+  const pointsArray = opponents.map((user) => user.points[currentWeek]);
+  return max(pointsArray);
+};
+
 watch(
   () => props.regularSeasonLength,
   () => (currentWeek.value = weeks.value[0])
@@ -298,11 +339,12 @@ watch(
       <select
         aria-label="current week"
         id="rankings"
-        class="block p-2 text-sm text-gray-900 border border-gray-300 rounded-lg w-15 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 custom-padding"
+        class="block p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 custom-padding"
+        :class="playoffWeeks.includes(currentWeek) ? 'w-44' : 'w-28'"
         v-model="currentWeek"
       >
         <option v-for="week in weeks" :key="week" :value="week">
-          Week {{ week }}
+          Week {{ week }} {{ playoffWeeks.includes(week) ? "(playoffs)" : "" }}
         </option>
       </select>
     </div>
@@ -332,7 +374,7 @@ watch(
           <b>The Princess McBride</b> retains the top spot with a solid 124.48
           points, thanks to Josh Allen and Christian McCaffrey doing their best
           superhero impressions. Meanwhile, <b>Dak to the Future</b> looked more
-          like back to the past, scoring just 90.04 points and proving that even
+          like back to the past, scoring just 76.3 points and proving that even
           Patrick Mahomes can’t carry a team of underperformers.
         </p>
         <p class="mb-3">
@@ -472,11 +514,8 @@ watch(
                 class="mt-0.5"
                 :class="{
                   'text-blue-600 dark:text-blue-500 font-semibold':
-                    store.leagueInfo.length > 0 &&
-                    store.leagueInfo[store.currentLeagueIndex].medianScoring ===
-                      1
-                      ? user.recordByWeek[2 * (currentWeek - 1)] == 'W'
-                      : user.recordByWeek[currentWeek - 1] == 'W',
+                    user.points[currentWeek - 1] ==
+                    getMatchupWinner(index, currentWeek - 1),
                 }"
               >
                 {{ user.points[currentWeek - 1] }}

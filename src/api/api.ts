@@ -365,7 +365,7 @@ export const getData = async (leagueId: string) => {
 
   // Parallel requests for weekly data
   const [weeklyPoints, users, transactionPromises] = await Promise.all([
-    getWeeklyPoints(leagueId, currentWeek ?? newLeagueInfo.regularSeasonLength),
+    getWeeklyPoints(leagueId, currentWeek ?? newLeagueInfo.lastScoredWeek),
     getUsers(leagueId),
     Promise.all(
       Array.from({ length: numberOfWeeks + 1 }, (_, i) =>
@@ -375,12 +375,7 @@ export const getData = async (leagueId: string) => {
   ]);
 
   // Process playoff points in parallel with avatar fetching
-  const [playoffPoints, processedUsers] = await Promise.all([
-    getWeeklyPoints(
-      leagueId,
-      newLeagueInfo.lastScoredWeek,
-      newLeagueInfo.regularSeasonLength
-    ),
+  const [processedUsers] = await Promise.all([
     Promise.all(
       users.map(async (user: any) => ({
         ...user,
@@ -400,7 +395,6 @@ export const getData = async (leagueId: string) => {
   return {
     ...newLeagueInfo,
     weeklyPoints,
-    playoffPoints,
     users: processedUsers,
     transactions,
     lastUpdated: new Date().getTime(),
