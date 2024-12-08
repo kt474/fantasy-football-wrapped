@@ -170,7 +170,7 @@ const getData = async () => {
     }
 
     playoffOdds.value.sort(
-      (a: any, b: any) => b.playoffPercentage - a.playoffPercentage
+      (a: any, b: any) => sum(a.placement) - sum(b.placement)
     );
   }
   store.addPlayoffOdds(store.currentLeagueId, playoffOdds.value);
