@@ -67,11 +67,16 @@ const getReport = async () => {
   if (store.leagueIds.length > 0) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     let leagueMetadata;
-    if (currentLeague.currentWeek > currentLeague.regularSeasonLength) {
+    if (isPlayoffs.value) {
+      const roundNames: { [key: number]: string } = {
+        1: "Quarterfinal round",
+        2: "Semifinal round",
+        3: "Final Championship round",
+        4: "Final Championship round",
+      };
       leagueMetadata = {
-        numberOfPlayoffTeams: currentLeague.playoffTeams,
         playoffRound:
-          currentLeague.currentWeek - currentLeague.regularSeasonLength,
+          roundNames[currentWeek.value - currentLeague.regularSeasonLength],
       };
     } else {
       leagueMetadata = {
@@ -106,19 +111,65 @@ onMounted(async () => {
   }
 });
 
+const isPlayoffs = computed(() => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (currentWeek.value > currentLeague.regularSeasonLength) {
+    return true;
+  }
+  return false;
+});
+
+const losersBracketIDs = computed(() => {
+  const result: number[] = [];
+  store.leagueInfo[store.currentLeagueIndex].losersBracket.forEach(
+    (matchup) => {
+      result.push(matchup.t1);
+      result.push(matchup.t2);
+    }
+  );
+  return result;
+});
+
+const winnersBracketIDs = computed(() => {
+  const result: number[] = [];
+  store.leagueInfo[store.currentLeagueIndex].winnersBracket.forEach(
+    (matchup) => {
+      result.push(matchup.t1);
+      result.push(matchup.t2);
+    }
+  );
+  return result;
+});
+
 const reportPrompt = computed(() => {
   const result: any[] = [];
-  props.tableData.forEach((user: TableDataType, index: number) => {
-    result.push({
-      name: user.name,
-      matchupNumber: user.matchups[currentWeek.value - 1],
-      playerPoints: user.starterPoints[currentWeek.value - 1],
-      playerNames: playerNames.value[index],
-      totalPoints: user.points[currentWeek.value - 1],
-      currentRecord: `${user.wins}-${user.losses}`,
-      currentRank: user.regularSeasonRank,
+  if (isPlayoffs.value) {
+    props.tableData.forEach((user: TableDataType, index: number) => {
+      if (user.matchups[currentWeek.value - 1]) {
+        result.push({
+          name: user.name,
+          matchupNumber: user.matchups[currentWeek.value - 1],
+          playerPoints: user.starterPoints[currentWeek.value - 1],
+          playerNames: playerNames.value[index],
+          inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
+          inWinnersBracket: winnersBracketIDs.value.includes(user.rosterId),
+        });
+      }
     });
-  });
+  } else {
+    props.tableData.forEach((user: TableDataType, index: number) => {
+      if (user.matchups[currentWeek.value - 1]) {
+        result.push({
+          name: user.name,
+          matchupNumber: user.matchups[currentWeek.value - 1],
+          playerPoints: user.starterPoints[currentWeek.value - 1],
+          playerNames: playerNames.value[index],
+          currentRecord: `${user.wins}-${user.losses}`,
+          currentRank: user.regularSeasonRank,
+        });
+      }
+    });
+  }
   return result;
 });
 
