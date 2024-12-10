@@ -32,7 +32,10 @@ onMounted(async () => {
     await fetchPlayerNames();
     await getSummary();
   } else if (store.leagueInfo.length > 0) {
-    summary.value = store.leagueInfo[store.currentLeagueIndex].yearEndReport;
+    const savedText: any =
+      store.leagueInfo[store.currentLeagueIndex].yearEndReport;
+    summary.value = savedText;
+    rawSummary.value = savedText.replace(/<b>(.*?)<\/b>/g, "**$1**");
   }
 });
 

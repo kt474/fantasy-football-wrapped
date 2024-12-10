@@ -108,8 +108,10 @@ onMounted(async () => {
     await fetchPlayerNames();
     await getReport();
   } else if (store.leagueInfo.length > 0) {
-    weeklyReport.value =
+    const savedText: any =
       store.leagueInfo[store.currentLeagueIndex].weeklyReport;
+    weeklyReport.value = savedText;
+    rawWeeklyReport.value = savedText.replace(/<b>(.*?)<\/b>/g, "**$1**");
   }
 });
 
