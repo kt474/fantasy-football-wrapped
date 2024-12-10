@@ -12,6 +12,7 @@ const props = defineProps<{
 }>();
 
 const weeklyReport: any = ref("");
+const rawWeeklyReport: any = ref("");
 const playerNames = ref([]);
 
 const weeks = computed(() => {
@@ -86,6 +87,7 @@ const getReport = async () => {
       };
     }
     const response = await generateReport(reportPrompt.value, leagueMetadata);
+    rawWeeklyReport.value = response.text;
     weeklyReport.value = response.text
       .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
       .replace(/\n/g, "<br>");
@@ -395,7 +397,7 @@ const getMatchupWinner = (matchupIndex: number, currentWeek: number) => {
 };
 
 const copyReport = () => {
-  navigator.clipboard.writeText(weeklyReport.value);
+  navigator.clipboard.writeText(rawWeeklyReport.value);
   store.showCopyReport = true;
   setTimeout(() => {
     store.showCopyReport = false;
