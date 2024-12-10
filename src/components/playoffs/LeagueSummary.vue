@@ -11,6 +11,7 @@ const props = defineProps<{
 }>();
 
 const summary: any = ref("");
+const rawSummary: any = ref("");
 const playoffPromptData = ref([]);
 
 const showSummary = computed(() => {
@@ -91,6 +92,7 @@ const getSummary = async () => {
       };
     });
     const response = await generateSummary(userData, leagueMetadata);
+    rawSummary.value = response.text;
     summary.value = response.text
       .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
       .replace(/\n/g, "<br>");
@@ -101,21 +103,48 @@ const getSummary = async () => {
     );
   }
 };
+const copyReport = () => {
+  navigator.clipboard.writeText(rawSummary.value);
+  store.showCopyReport = true;
+  setTimeout(() => {
+    store.showCopyReport = false;
+  }, 3000);
+};
 </script>
 <template>
   <div
     v-if="showSummary"
     class="h-full px-6 pt-4 mt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
-    <h5 class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-      League Recap
-    </h5>
+    <div class="flex justify-between">
+      <h5 class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+        League Recap
+      </h5>
+      <svg
+        @click="copyReport()"
+        class="w-6 h-6 mt-2 text-gray-800 cursor-pointer dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"
+        />
+      </svg>
+    </div>
     <hr class="h-px mt-3 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
     <div v-if="summary">
       <p
         v-html="summary"
         class="max-w-5xl my-3 text-gray-900 dark:text-gray-300"
       ></p>
+
       <p class="mb-4 text-xs text-gray-500 dark:text-gray-300">
         Generated using GPT-4o. Information provided may not always be accurate.
       </p>
