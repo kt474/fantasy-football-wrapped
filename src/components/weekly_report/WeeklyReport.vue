@@ -394,6 +394,14 @@ const getMatchupWinner = (matchupIndex: number, currentWeek: number) => {
   return max(pointsArray);
 };
 
+const copyReport = () => {
+  navigator.clipboard.writeText(weeklyReport.value);
+  store.showCopyReport = true;
+  setTimeout(() => {
+    store.showCopyReport = false;
+  }, 3000);
+};
+
 watch(
   () => props.regularSeasonLength,
   () => (currentWeek.value = weeks.value[0])
@@ -422,9 +430,28 @@ watch(
     </div>
     <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
     <div v-if="currentWeek == weeks[0]">
-      <p class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
-        Summary
-      </p>
+      <div class="flex">
+        <p class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
+          Summary
+        </p>
+        <svg
+          @click="copyReport()"
+          class="w-6 h-6 mt-0.5 ml-2 text-gray-800 cursor-pointer dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"
+          />
+        </svg>
+      </div>
       <div
         v-if="weeklyReport"
         class="max-w-5xl text-gray-900 dark:text-gray-300"

@@ -10,6 +10,7 @@ export const useStore = defineStore("main", {
     showRefreshAlert: false,
     showCopiedAlert: false,
     showLeagueExistsAlert: false,
+    showCopyReport: false,
     showInput: false,
     leagueInfo: [] as LeagueInfoType[],
     currentLeagueId: "",

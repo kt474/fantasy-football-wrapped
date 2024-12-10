@@ -254,6 +254,11 @@ const setHtmlBackground = () => {
       alert-msg="Link copied to clipboard!"
       type="success"
     />
+    <Alert
+      v-if="store.showCopyReport"
+      alert-msg="Summary copied to clipboard!"
+      type="success"
+    />
   </div>
 </template>
 
