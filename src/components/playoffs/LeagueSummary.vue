@@ -35,7 +35,9 @@ onMounted(async () => {
     const savedText: any =
       store.leagueInfo[store.currentLeagueIndex].yearEndReport;
     summary.value = savedText;
-    rawSummary.value = savedText.replace(/<b>(.*?)<\/b>/g, "**$1**");
+    rawSummary.value = savedText
+      .replace(/<b>(.*?)<\/b>/g, "**$1**")
+      .replace(/<br>/g, "\n");
   }
 });
 

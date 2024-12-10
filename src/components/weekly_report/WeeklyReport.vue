@@ -111,7 +111,9 @@ onMounted(async () => {
     const savedText: any =
       store.leagueInfo[store.currentLeagueIndex].weeklyReport;
     weeklyReport.value = savedText;
-    rawWeeklyReport.value = savedText.replace(/<b>(.*?)<\/b>/g, "**$1**");
+    rawWeeklyReport.value = savedText
+      .replace(/<b>(.*?)<\/b>/g, "**$1**")
+      .replace(/<br>/g, "\n");
   }
 });
 
