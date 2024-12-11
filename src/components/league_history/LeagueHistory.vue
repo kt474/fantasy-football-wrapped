@@ -372,7 +372,7 @@ const worstManager = computed(() => {
             </div>
             <div
               :class="hover === 'expectedWins' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600 max-w-80"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-20 tooltip dark:bg-gray-600 max-w-80"
             >
               (Actual wins) - (Average number of wins after simulating 10,000
               randomized weekly matchups)
@@ -403,7 +403,7 @@ const worstManager = computed(() => {
             </div>
             <div
               :class="hover === 'points' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-20 tooltip dark:bg-gray-600"
             >
               Total regular season points across all seasons
             </div>
@@ -434,7 +434,7 @@ const worstManager = computed(() => {
             </div>
             <div
               :class="hover === 'managerEfficiency' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-10 tooltip dark:bg-gray-600"
             >
               Points / Potential points
             </div>

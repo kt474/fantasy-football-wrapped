@@ -59,7 +59,7 @@ const extractRecord = (user: any, opponent: any) => {
     class="relative w-full overflow-x-auto bg-gray-100 rounded-lg shadow-md dark:bg-gray-700"
   >
     <p
-      class="flex justify-center pt-2 font-semibold text-gray-700 text-md dark:text-gray-200"
+      class="flex justify-center pt-2 text-lg font-semibold text-gray-700 dark:text-gray-200"
     >
       All Time H2H Matchups
     </p>

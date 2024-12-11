@@ -304,7 +304,7 @@ const cardHeight = computed(() => {
                 </div>
                 <div
                   :class="hover === 'pointsAgainst' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-24 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-24 tooltip dark:bg-gray-600"
                 >
                   Total regular season points against
                 </div>
@@ -339,7 +339,7 @@ const cardHeight = computed(() => {
                   :class="
                     hover === 'recordAgainstAll' ? 'visible' : 'invisible'
                   "
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm max-w-60 tooltip dark:bg-gray-600"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
                 >
                   Team record if each team played every other team each week.
                 </div>
@@ -372,7 +372,7 @@ const cardHeight = computed(() => {
                 </div>
                 <div
                   :class="hover === 'medianRecord' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm max-w-60 tooltip dark:bg-gray-600"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm -ml-14 sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
                 >
                   Team record where a win is awarded if a team's weekly score is
                   higher than the league median, and a loss is added if the
