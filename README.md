@@ -1,8 +1,19 @@
 # Fantasy Football Wrapped
 
-Detailed analysis and insights for your fantasy football league. See information regarding power rankings, expected wins, roster management, league history, and more. Currently only sleeper leagues are supported.
+Detailed analysis and insights for your fantasy football league.
 
-Made with [Vue 3](https://vuejs.org/) and [Flowbite](https://flowbite.com/)
+Current features:
+
+- Comprehensive standings
+- Power rankings
+- Roster rankings and projections
+- Expected wins (measuring luck)
+- Roster management stats
+- Playoff projections
+- AI generated weekly reports
+- League history stats
+
+Only Sleeper leagues are supported at the moment.
 
 ## Run Locally
 
