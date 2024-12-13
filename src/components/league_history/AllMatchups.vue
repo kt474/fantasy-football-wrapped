@@ -54,65 +54,72 @@ const extractRecord = (user: any, opponent: any) => {
 };
 </script>
 <template>
-  <div
-    :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
-    class="relative w-full overflow-x-auto bg-gray-100 rounded-lg shadow-md dark:bg-gray-700"
-  >
-    <p
-      class="flex justify-center pt-2 text-lg font-semibold text-gray-700 dark:text-gray-200"
+  <div>
+    <div
+      class="flex justify-between bg-gray-100 rounded-t-lg shadow-md dark:bg-gray-700"
+      :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
     >
-      All Time H2H Matchups
-    </p>
-    <table
-      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-200"
-    >
-      <thead
-        :class="
-          store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
-        "
-        class="text-xs text-gray-700 dark:text-gray-200"
+      <p
+        class="w-full pt-2 text-lg font-semibold text-center text-gray-700 dark:text-gray-200"
       >
-        <tr>
-          <th
-            scope="col"
-            class="px-2 py-3 uppercase sm:px-6 w-60 dark:text-gray-200"
-          >
-            Team Name
-          </th>
-          <th v-for="item in props.tableData" scope="col" class="px-2 py-3">
-            <div class="flex items-center dark:text-gray-200 min-w-14">
-              {{ item.name }}
-            </div>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(item, index) in props.tableData"
-          :key="index"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-        >
-          <th
-            scope="row"
-            class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
-          >
-            {{ item.name }}
-          </th>
-          <td
-            v-for="(user, rowIndex) in matchupData"
-            class="px-2 py-3.5"
-            :class="{ 'bg-blue-100 dark:bg-blue-800': rowIndex == index }"
-          >
-            {{ extractRecord(user, item) }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p
-      class="py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
+        All Time H2H Matchups
+      </p>
+    </div>
+    <div
+      :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
+      class="relative w-full overflow-x-auto bg-gray-100 rounded-b-lg shadow-md dark:bg-gray-700"
     >
-      Table is meant to be read horizontally. For each team/row, each
-      opponent/column is the record the team has against that opponent.
-    </p>
+      <table
+        class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-200"
+      >
+        <thead
+          :class="
+            store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
+          "
+          class="text-xs text-gray-700 dark:text-gray-200"
+        >
+          <tr>
+            <th
+              scope="col"
+              class="px-2 py-3 uppercase sm:px-6 w-60 dark:text-gray-200"
+            >
+              Team Name
+            </th>
+            <th v-for="item in props.tableData" scope="col" class="px-2 py-3">
+              <div class="flex items-center dark:text-gray-200 min-w-14">
+                {{ item.name }}
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(item, index) in props.tableData"
+            :key="index"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+          >
+            <th
+              scope="row"
+              class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
+            >
+              {{ item.name }}
+            </th>
+            <td
+              v-for="(user, rowIndex) in matchupData"
+              class="px-2 py-3.5"
+              :class="{ 'bg-blue-100 dark:bg-blue-800': rowIndex == index }"
+            >
+              {{ extractRecord(user, item) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p
+        class="py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
+      >
+        Table is meant to be read horizontally. For each team/row, each
+        opponent/column is the record the team has against that opponent.
+      </p>
+    </div>
   </div>
 </template>
