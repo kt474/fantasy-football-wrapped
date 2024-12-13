@@ -249,52 +249,57 @@ const tableData = computed(() => {
     "
   >
     <div
+      class="flex justify-between pb-2 shadow-md"
+      :class="`
+    ${store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'}
+    ${showData ? 'rounded-t-lg' : 'rounded-lg'}
+  `"
+    >
+      <p
+        class="w-full pt-2 text-lg font-semibold text-center text-gray-700 dark:text-gray-200"
+      >
+        Playoff Odds
+      </p>
+      <svg
+        v-if="!showData"
+        @click="showData = !showData"
+        class="w-6 h-6 mt-2.5 mr-3 sm:mr-4 text-gray-700 dark:text-gray-200 cursor-pointer"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M18.425 10.271C19.499 8.967 18.57 7 16.88 7H7.12c-1.69 0-2.618 1.967-1.544 3.271l4.881 5.927a2 2 0 0 0 3.088 0l4.88-5.927Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      <svg
+        v-else
+        @click="showData = !showData"
+        class="w-6 h-6 mt-2 mr-3 text-gray-700 cursor-pointer sm:mr-4 dark:text-gray-200"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M5.575 13.729C4.501 15.033 5.43 17 7.12 17h9.762c1.69 0 2.618-1.967 1.544-3.271l-4.881-5.927a2 2 0 0 0-3.088 0l-4.88 5.927Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div
       v-if="!loading"
       :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
-      class="relative w-full overflow-x-auto bg-gray-100 rounded-lg shadow-md dark:bg-gray-700"
+      class="relative w-full overflow-x-auto bg-gray-100 rounded-b-lg shadow-md dark:bg-gray-700"
     >
-      <div class="flex justify-between pb-2">
-        <p
-          class="w-full pt-2 text-lg font-semibold text-center text-gray-700 dark:text-gray-200"
-        >
-          Playoff Odds
-        </p>
-        <svg
-          v-if="!showData"
-          @click="showData = !showData"
-          class="w-6 h-6 mt-2.5 mr-6 text-gray-700 dark:text-gray-200 cursor-pointer"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M18.425 10.271C19.499 8.967 18.57 7 16.88 7H7.12c-1.69 0-2.618 1.967-1.544 3.271l4.881 5.927a2 2 0 0 0 3.088 0l4.88-5.927Z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <svg
-          v-else
-          @click="showData = !showData"
-          class="w-6 h-6 mt-2 mr-6 text-gray-700 cursor-pointer dark:text-gray-200"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5.575 13.729C4.501 15.033 5.43 17 7.12 17h9.762c1.69 0 2.618-1.967 1.544-3.271l-4.881-5.927a2 2 0 0 0-3.088 0l-4.88 5.927Z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </div>
-
       <table
         v-if="showData"
         class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-200"
