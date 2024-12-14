@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch, ref } from "vue";
+import { onMounted, watch } from "vue";
 import Header from "./components/util/Header.vue";
 import Footer from "./components/util/Footer.vue";
 import Alert from "./components/util/Alert.vue";
