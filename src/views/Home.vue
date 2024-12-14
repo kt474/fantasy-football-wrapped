@@ -21,7 +21,8 @@ onMounted(async () => {
       if (!store.leagueIds.includes(league.leagueId)) {
         const currentTime = new Date().getTime();
         const diff = currentTime - league.lastUpdated;
-        if (diff > 86400000) {
+        if (diff > 300) {
+          console.log("refetchin data");
           // 1 day
           if (localStorage.originalData) {
             const currentData = JSON.parse(localStorage.originalData);
@@ -30,8 +31,11 @@ onMounted(async () => {
           }
           showLoading.value = true;
           store.updateLoadingLeague(league.name);
+          console.log("loading name");
           const refreshedData = await getData(league.leagueId);
+          console.log("data fetched");
           store.updateLeagueInfo(refreshedData);
+          console.log("league updated");
           await inputLeague(
             league.leagueId,
             league.name,
@@ -40,6 +44,7 @@ onMounted(async () => {
             league.season
           );
           store.updateLoadingLeague("");
+          console.log("league name none");
           showLoading.value = false;
         } else {
           store.updateLeagueInfo(league);
