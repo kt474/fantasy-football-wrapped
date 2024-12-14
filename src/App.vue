@@ -46,6 +46,7 @@ onMounted(async () => {
             league.season
           );
           store.updateLoadingLeague("");
+          console.log("loading done");
           showLoading.value = false;
         } else {
           store.updateLeagueInfo(league);
