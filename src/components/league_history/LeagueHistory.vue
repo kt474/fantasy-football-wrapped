@@ -8,6 +8,7 @@ import { LeagueInfoType } from "../../api/types.ts";
 import Alert from "../util/Alert.vue";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
+import MostPoints from "./MostPoints.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -139,6 +140,21 @@ const dataAllYears = computed(() => {
     losses: user.losses,
     points: user.pointsFor,
     pointsArr: [...user.points],
+    pointSeason: store.leagueInfo[store.currentLeagueIndex]
+      ? [
+          {
+            season: store.leagueInfo[store.currentLeagueIndex].season,
+            points: [...user.points],
+          },
+        ]
+      : [
+          {
+            season: "2023",
+            points: [
+              parseFloat((Math.random() * (200 - 100) + 100).toFixed(2)),
+            ],
+          },
+        ],
     avatarImg: user.avatarImg,
     rosterId: user.rosterId,
     matchups: [...user.matchups],
@@ -197,6 +213,10 @@ const dataAllYears = computed(() => {
             }
             if (user.points?.length) {
               resultUser.pointsArr.push(...user.points);
+              resultUser.pointSeason.push({
+                season: league.season,
+                points: user.points,
+              });
             }
           }
         });
@@ -662,6 +682,7 @@ const worstManager = computed(() => {
     />
   </div>
   <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
+  <MostPoints v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
   <div class="h-screen" v-else>
     <svg
       aria-hidden="true"

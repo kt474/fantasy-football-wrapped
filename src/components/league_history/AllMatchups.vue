@@ -56,7 +56,7 @@ const extractRecord = (user: any, opponent: any) => {
 <template>
   <div>
     <div
-      class="flex justify-between bg-gray-100 rounded-t-lg shadow-md dark:bg-gray-700"
+      class="flex justify-between rounded-t-lg shadow-md"
       :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
     >
       <p
@@ -123,3 +123,11 @@ const extractRecord = (user: any, opponent: any) => {
     </div>
   </div>
 </template>
+<style scoped>
+.light-custom-bg-color {
+  background-color: #eff0f2;
+}
+.dark-custom-bg-color {
+  background-color: #374151;
+}
+</style>
