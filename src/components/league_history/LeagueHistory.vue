@@ -9,6 +9,7 @@ import Alert from "../util/Alert.vue";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
 import MostPoints from "./MostPoints.vue";
+import FewestPoints from "./FewestPoints.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -150,6 +151,12 @@ const dataAllYears = computed(() => {
       : [
           {
             season: "2023",
+            points: [
+              parseFloat((Math.random() * (200 - 100) + 100).toFixed(2)),
+            ],
+          },
+          {
+            season: "2024",
             points: [
               parseFloat((Math.random() * (200 - 100) + 100).toFixed(2)),
             ],
@@ -682,7 +689,10 @@ const worstManager = computed(() => {
     />
   </div>
   <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
-  <MostPoints v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
+  <div v-if="!isLoading" class="flex flex-wrap mt-4 md:flex-nowrap">
+    <MostPoints :tableData="dataAllYears" />
+    <FewestPoints :tableData="dataAllYears" class="mt-4 ml-0 md:mt-0 md:ml-4" />
+  </div>
   <div class="h-screen" v-else>
     <svg
       aria-hidden="true"

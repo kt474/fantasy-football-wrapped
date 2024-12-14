@@ -19,7 +19,7 @@ const mostPoints = computed(() => {
   );
 
   const sortedPointsWithDetails = allPointsWithDetails.sort(
-    (a, b) => b.point - a.point
+    (a, b) => a.point - b.point
   );
 
   return sortedPointsWithDetails.slice(0, 10);
@@ -33,7 +33,7 @@ const mostPoints = computed(() => {
     <p
       class="w-full pt-2 text-lg font-semibold text-center text-gray-700 dark:text-gray-200"
     >
-      All Time Weekly High Score
+      All Time Weekly Low Score
     </p>
     <table
       class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
