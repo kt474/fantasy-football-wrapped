@@ -76,7 +76,7 @@ const setHtmlBackground = () => {
 
 <template>
   <div :class="{ dark: store.darkMode }" class="h-screen">
-    <div class="h-full overflow-auto bg-slate-50 dark:bg-slate-950">
+    <div class="h-full bg-slate-50 dark:bg-slate-950">
       <Header />
       <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
       <RouterView />
