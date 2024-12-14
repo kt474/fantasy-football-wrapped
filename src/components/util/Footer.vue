@@ -9,17 +9,9 @@
         <p class="mb-2 font-bold text-black dark:text-white">
           Support & Resources
         </p>
-        <a
-          aria-label="Freepik - Flaticon icon credit"
-          class="text-blue-700 dark:text-blue-500 hover:underline"
-          href="https://www.flaticon.com/free-icons/american-football"
-          title="american football icons"
-          target="_blank"
-          >Icon Package</a
-        >
         <p>
           <router-link
-            to="/changelog"
+            :to="{ path: '/changelog', query: $route.query }"
             class="text-blue-700 dark:text-blue-500 hover:underline"
             >Changelog</router-link
           >
@@ -42,6 +34,16 @@
             title="PWA installation guide"
             target="_blank"
             >PWA Compatible</a
+          >
+        </p>
+        <p>
+          <a
+            aria-label="Freepik - Flaticon icon credit"
+            class="text-blue-700 dark:text-blue-500 hover:underline"
+            href="https://www.flaticon.com/free-icons/american-football"
+            title="american football icons"
+            target="_blank"
+            >Icon Package</a
           >
         </p>
         <button

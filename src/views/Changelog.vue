@@ -4,6 +4,18 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const data = [
   {
+    date: "12/14/24",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Adding a changelog required adding vue-router which caused some issues with fetching league data. If you experience issues with loading your league please try refreshing the page.",
+          "Added better error handling and an error alert if there are issues with fetching or refreshing data.",
+        ],
+      },
+    ],
+  },
+  {
     date: "12/13/24",
     content: [
       {
@@ -57,7 +69,7 @@ const data = [
           {{ entry.date }}
         </p>
 
-        <div v-for="content in entry.content">
+        <div v-for="content in entry.content" class="max-w-4xl">
           <span
             v-if="content.type == 'Update'"
             class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
@@ -69,7 +81,7 @@ const data = [
             >{{ content.type }}</span
           >
           <span
-            v-if="content.type == 'Bug'"
+            v-if="content.type == 'Fix'"
             class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300"
             >{{ content.type }}</span
           >
