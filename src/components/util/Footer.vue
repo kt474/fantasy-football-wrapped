@@ -7,17 +7,7 @@
     <div class="flex justify-between max-w-screen-xl mx-auto">
       <div>
         <p class="mb-2 font-bold text-black dark:text-white">
-          Acknowledgements
-        </p>
-        <p>
-          Data:
-          <a
-            aria-label="https://docs.sleeper.com/ Sleeper API"
-            href="https://docs.sleeper.com/"
-            class="text-blue-700 dark:text-blue-500 hover:underline"
-            target="_blank"
-            >Sleeper API</a
-          >
+          Support & Resources
         </p>
         <p>
           Icon:
@@ -31,13 +21,20 @@
           >
         </p>
         <p>
+          <router-link
+            to="/changelog"
+            class="text-blue-700 dark:text-blue-500 hover:underline"
+            >Changelog</router-link
+          >
+        </p>
+        <p>
           <a
             aria-label="buymeacoffee donation page"
             class="text-blue-700 dark:text-blue-500 hover:underline"
             href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing"
-            title="buymeacofee donation page"
+            title="PWA installation guide"
             target="_blank"
-            >Install as PWA</a
+            >PWA Compatible</a
           >
         </p>
         <p>
