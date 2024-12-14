@@ -110,5 +110,10 @@ const setHtmlBackground = () => {
       alert-msg="Summary copied to clipboard!"
       type="success"
     />
+    <Alert
+      v-if="store.showLoadingAlert"
+      alert-msg="Error fetching data. Please try refreshing the page."
+      type="error"
+    />
   </div>
 </template>

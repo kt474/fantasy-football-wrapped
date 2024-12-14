@@ -15,57 +15,64 @@ const store = useStore();
 const showLoading = ref(false);
 
 onMounted(async () => {
-  if (localStorage.leagueInfo) {
-    const savedLeagues = JSON.parse(localStorage.leagueInfo);
-    for (const league of savedLeagues) {
-      if (!store.leagueIds.includes(league.leagueId)) {
-        const currentTime = new Date().getTime();
-        const diff = currentTime - league.lastUpdated;
-        if (diff > 86400000) {
-          // 1 day
-          if (localStorage.originalData) {
-            const currentData = JSON.parse(localStorage.originalData);
-            delete currentData[league.leagueId];
-            localStorage.originalData = JSON.stringify(currentData);
+  try {
+    if (localStorage.leagueInfo) {
+      const savedLeagues = JSON.parse(localStorage.leagueInfo);
+      for (const league of savedLeagues) {
+        if (!store.leagueIds.includes(league.leagueId)) {
+          const currentTime = new Date().getTime();
+          const diff = currentTime - league.lastUpdated;
+          if (diff > 86400000) {
+            // 1 day
+            if (localStorage.originalData) {
+              const currentData = JSON.parse(localStorage.originalData);
+              delete currentData[league.leagueId];
+              localStorage.originalData = JSON.stringify(currentData);
+            }
+            showLoading.value = true;
+            store.updateLoadingLeague(league.name);
+            const refreshedData = await getData(league.leagueId);
+            store.updateLeagueInfo(refreshedData);
+            await inputLeague(
+              league.leagueId,
+              league.name,
+              league.totalRosters,
+              league.seasonType,
+              league.season
+            );
+            store.updateLoadingLeague("");
+            showLoading.value = false;
+          } else {
+            store.updateLeagueInfo(league);
           }
-          showLoading.value = true;
-          store.updateLoadingLeague(league.name);
-          const refreshedData = await getData(league.leagueId);
-          store.updateLeagueInfo(refreshedData);
-          await inputLeague(
-            league.leagueId,
-            league.name,
-            league.totalRosters,
-            league.seasonType,
-            league.season
-          );
-          store.updateLoadingLeague("");
-          showLoading.value = false;
-        } else {
-          store.updateLeagueInfo(league);
         }
       }
+      store.updateCurrentLeagueId(localStorage.currentLeagueId);
     }
-    store.updateCurrentLeagueId(localStorage.currentLeagueId);
-  }
-  const queryParams = new URLSearchParams(window.location.search);
-  const leagueId = queryParams.get("leagueId");
-  if (leagueId && !store.leagueIds.includes(leagueId)) {
-    const checkInput: any = await getLeague(leagueId);
-    if (checkInput["name"]) {
-      store.updateCurrentLeagueId(leagueId);
-      store.updateLoadingLeague(checkInput["name"]);
-      const league = await getData(leagueId);
-      store.updateLeagueInfo(league);
-      await inputLeague(
-        leagueId,
-        league.name,
-        league.totalRosters,
-        league.seasonType,
-        league.season
-      );
-      store.updateLoadingLeague("");
+    const queryParams = new URLSearchParams(window.location.search);
+    const leagueId = queryParams.get("leagueId");
+    if (leagueId && !store.leagueIds.includes(leagueId)) {
+      const checkInput: any = await getLeague(leagueId);
+      if (checkInput["name"]) {
+        store.updateCurrentLeagueId(leagueId);
+        store.updateLoadingLeague(checkInput["name"]);
+        const league = await getData(leagueId);
+        store.updateLeagueInfo(league);
+        await inputLeague(
+          leagueId,
+          league.name,
+          league.totalRosters,
+          league.seasonType,
+          league.season
+        );
+        store.updateLoadingLeague("");
+      }
     }
+  } catch {
+    store.showLoadingAlert = true;
+    setTimeout(() => {
+      store.showLoadingAlert = false;
+    }, 8000);
   }
 });
 </script>
