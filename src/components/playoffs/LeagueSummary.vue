@@ -90,7 +90,9 @@ const getSummary = async () => {
         totalPoints: user.pointsFor,
         regularSeasonRank: user.regularSeasonRank,
         finalRank: props.finalPlacements.find((val) => val.name === user.name)
-          .placement,
+          ? props.finalPlacements.find((val) => val.name === user.name)
+              .placement
+          : 0,
         playOffData: playoffPromptData.value.find(
           (val: any) => val.rosterId === user.rosterId
         ),

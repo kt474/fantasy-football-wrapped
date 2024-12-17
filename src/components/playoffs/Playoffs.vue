@@ -35,6 +35,25 @@ const totalRosters = computed(() => {
     : 10;
 });
 
+// The logic is different if leagues don't play with the toilet bowl
+const playoffType = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].playoffType
+    : 0;
+});
+
+const getPointsColor = (team1: number, team2: number) => {
+  if (playoffType.value === 1) {
+    return team1 === team2
+      ? "text-gray-600 dark:text-gray-300 font-normal"
+      : "text-blue-600 dark:text-blue-500 font-semibold";
+  } else {
+    return team1 === team2
+      ? "text-blue-600 dark:text-blue-500 font-semibold"
+      : "text-gray-600 dark:text-gray-300 font-normal";
+  }
+};
+
 const matchRosterId = (rosterId: string, placement?: number) => {
   const rosters = store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].rosters
@@ -528,11 +547,7 @@ const numberOfLoserRounds = computed(() => {
                   </div>
                   <p
                     class="mr-1"
-                    :class="
-                      matchup.t1 === matchup.l
-                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-600 dark:text-gray-300 font-normal'
-                    "
+                    :class="getPointsColor(matchup.t1, matchup.l)"
                   >
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
@@ -573,11 +588,7 @@ const numberOfLoserRounds = computed(() => {
                     </div>
                     <p
                       class="mt-1 mr-1"
-                      :class="
-                        matchup.t2 === matchup.l
-                          ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                          : 'text-gray-600 dark:text-gray-300 font-normal'
-                      "
+                      :class="getPointsColor(matchup.t2, matchup.l)"
                     >
                       {{ getPointsScored(matchup.t2, index) }}
                     </p>
@@ -620,11 +631,7 @@ const numberOfLoserRounds = computed(() => {
                   </div>
                   <p
                     class="mt-0.5 mr-1"
-                    :class="
-                      matchup.t1 === matchup.l
-                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-600 dark:text-gray-300 font-normal'
-                    "
+                    :class="getPointsColor(matchup.t1, matchup.l)"
                   >
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
@@ -665,11 +672,7 @@ const numberOfLoserRounds = computed(() => {
                     </div>
                     <p
                       class="mt-0.5 mr-1"
-                      :class="
-                        matchup.t2 === matchup.l
-                          ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                          : 'text-gray-600 dark:text-gray-300 font-normal'
-                      "
+                      :class="getPointsColor(matchup.t2, matchup.l)"
                     >
                       {{ getPointsScored(matchup.t2, index) }}
                     </p>

@@ -225,6 +225,7 @@ export const getLeague = async (leagueId: string) => {
         scoringType: 1,
         rosterPositions: [],
         playoffTeams: 0,
+        playoffType: 0,
       };
     }
     const league = await response.json();
@@ -245,6 +246,7 @@ export const getLeague = async (leagueId: string) => {
       scoringType: league["scoring_settings"]["rec"],
       rosterPositions: league["roster_positions"],
       playoffTeams: league["settings"]["playoff_teams"],
+      playoffType: league["settings"]["playoff_type"],
     };
   } catch (error) {
     return error;
