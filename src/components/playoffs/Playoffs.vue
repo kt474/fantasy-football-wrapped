@@ -36,10 +36,34 @@ const totalRosters = computed(() => {
 });
 
 // The logic is different if leagues don't play with the toilet bowl
+// 1 = standard losers bracket, 0 = toilet bowl
 const playoffType = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].playoffType
     : 0;
+});
+
+// check losers bracket type - true means 3 rounds, false means 2 rounds
+// sleeper api bracket data is confusing
+const bracketType = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? losersBracket.value.some((obj) => obj["p"] === 5)
+    : true;
+});
+
+const losersBracketFirstLossTitle = computed(() => {
+  if (bracketType.value) {
+    return `${totalRosters.value - 3}th Place`;
+  }
+  return playoffType.value === 0
+    ? `${totalRosters.value - 3}th Place`
+    : "Last Place";
+});
+
+const losersBracketFirstSecondTitle = computed(() => {
+  return playoffType.value === 0
+    ? `${totalRosters.value - 5}th Place`
+    : "Last Place";
 });
 
 const getPointsColor = (team1: number, team2: number) => {
@@ -438,8 +462,15 @@ const numberOfLoserRounds = computed(() => {
             <hr class="h-px my-6 bg-gray-200 border-0 dark:bg-gray-700" />
             <div v-for="matchup in losersBracket">
               <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
-                <p class="text-lg font-semibold mt-7">Last Place</p>
+                <p class="text-lg font-semibold mt-7">
+                  {{
+                    playoffType === 1
+                      ? "Consolation Bracket Winner"
+                      : "Last Place"
+                  }}
+                </p>
                 <svg
+                  v-if="playoffType === 0"
                   width="32px"
                   height="32px"
                   viewBox="0 0 128 128"
@@ -502,13 +533,13 @@ const numberOfLoserRounds = computed(() => {
                 v-if="matchup.p === 3 && index === matchup.r"
                 class="mt-12 -mb-2 text-lg font-semibold"
               >
-                {{ totalRosters - 3 }}th Place
+                {{ losersBracketFirstLossTitle }}
               </p>
               <p
                 v-if="matchup.p === 5 && index === matchup.r"
                 class="mt-12 -mb-2 text-lg font-semibold"
               >
-                {{ totalRosters - 5 }}th Place
+                {{ losersBracketFirstSecondTitle }}
               </p>
               <!-- last place matchup -->
               <div
