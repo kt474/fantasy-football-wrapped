@@ -11,6 +11,7 @@ const data = [
         type: "Fix",
         text: [
           "Fixed issues with the loser's playoff bracket formatting. The final placements were being calculated incorrectly.",
+          "Leagues from 2021 or older should now show the league winner correctly.",
         ],
       },
     ],

@@ -174,7 +174,11 @@ const dataAllYears = computed(() => {
     leagueWinner:
       store.leagueInfo[store.currentLeagueIndex] &&
       store.leagueInfo[store.currentLeagueIndex].status == "complete"
-        ? [Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)]
+        ? [
+            store.leagueInfo[store.currentLeagueIndex].leagueWinner
+              ? Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
+              : store.leagueInfo[store.currentLeagueIndex].legacyWinner,
+          ]
         : [null],
     seasons: store.leagueInfo[store.currentLeagueIndex]
       ? [store.leagueInfo[store.currentLeagueIndex].season]
@@ -214,6 +218,9 @@ const dataAllYears = computed(() => {
             if (league.leagueWinner) {
               // @ts-ignore
               resultUser.leagueWinner.push(Number(league.leagueWinner));
+            } else if (league.legacyWinner) {
+              // @ts-ignore
+              resultUser.leagueWinner.push(league.legacyWinner);
             }
             if (user.matchups?.length) {
               resultUser.matchups.push(...user.matchups);

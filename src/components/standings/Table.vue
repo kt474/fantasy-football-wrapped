@@ -153,7 +153,9 @@ const leagueWinner = computed(() => {
     );
     return projectedWinner.rosterId;
   }
-  return Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner);
+  return store.leagueInfo[store.currentLeagueIndex].leagueWinner
+    ? Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
+    : store.leagueInfo[store.currentLeagueIndex].legacyWinner;
 });
 const mostTransactions = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex].transactions;

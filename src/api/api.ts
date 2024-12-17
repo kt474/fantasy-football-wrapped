@@ -355,6 +355,7 @@ export const getData = async (leagueId: string) => {
   // Determine the number of weeks to process
   let numberOfWeeks: any;
   let currentWeek: number | undefined;
+  let legacyWinner: number | undefined;
 
   if (newLeagueInfo.status === "in_season") {
     const leagueState = await getCurrentLeagueState();
@@ -363,6 +364,11 @@ export const getData = async (leagueId: string) => {
     newLeagueInfo.currentWeek = currentWeek;
   } else {
     numberOfWeeks = newLeagueInfo.regularSeasonLength;
+    winnersBracket.forEach((matchup) => {
+      if (matchup.p === 1) {
+        legacyWinner = matchup.w;
+      }
+    });
   }
 
   // Parallel requests for weekly data
@@ -399,6 +405,7 @@ export const getData = async (leagueId: string) => {
     weeklyPoints,
     users: processedUsers,
     transactions,
+    legacyWinner: legacyWinner,
     lastUpdated: new Date().getTime(),
   };
 };

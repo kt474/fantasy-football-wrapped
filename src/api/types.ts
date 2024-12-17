@@ -7,6 +7,7 @@ export type LeagueInfoType = {
   seasonType: string;
   leagueId: string;
   leagueWinner: string;
+  legacyWinner: number;
   lastUpdated: number;
   previousLeagueId: string;
   lastScoredWeek: number;
