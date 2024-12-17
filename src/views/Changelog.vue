@@ -2,7 +2,19 @@
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+// this should eventually be moved to the server side
 const data = [
+  {
+    date: "12/16/24",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Fixed issues with the loser's playoff bracket formatting. The final placements were being calculated incorrectly.",
+        ],
+      },
+    ],
+  },
   {
     date: "12/14/24",
     content: [

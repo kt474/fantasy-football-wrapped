@@ -79,7 +79,7 @@ const getPointsColor = (team1: number, team2: number) => {
   }
 };
 
-const matchRosterId = (rosterId: string, placement?: number) => {
+const matchRosterId = (rosterId: number, placement?: number) => {
   const rosters = store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].rosters
     : fakeRosters;
@@ -183,6 +183,12 @@ const finalPlacements = computed(() => {
       }
     });
   }
+  // some playoff formats leave teams out
+  props.tableData.forEach((user) => {
+    if (!result.find((res: any) => res.id === user.id)) {
+      result.push(matchRosterId(user.rosterId, totalRosters.value / 2));
+    }
+  });
   return result.sort((a: any, b: any) => a.placement - b.placement);
 });
 
