@@ -46,9 +46,10 @@ const playoffType = computed(() => {
 // check losers bracket type - true means 3 rounds, false means 2 rounds
 // sleeper api bracket data is confusing
 const bracketType = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? losersBracket.value.some((obj) => obj["p"] === 5)
-    : true;
+  if (store.leagueInfo[store.currentLeagueIndex]) {
+    return losersBracket.value.some((obj) => obj["p"] === 5);
+  }
+  return true;
 });
 
 const losersBracketFirstLossTitle = computed(() => {
@@ -139,18 +140,49 @@ const finalPlacements = computed(() => {
     }
   });
 
-  losersBracket.value.forEach((matchup) => {
-    if (matchup.p === 1) {
-      result.push(matchRosterId(matchup.w, totalRosters.value));
-      result.push(matchRosterId(matchup.l, totalRosters.value - 1));
-    } else if (matchup.p === 3) {
-      result.push(matchRosterId(matchup.w, totalRosters.value - 2));
-      result.push(matchRosterId(matchup.l, totalRosters.value - 3));
-    } else if (matchup.p === 5) {
-      result.push(matchRosterId(matchup.w, totalRosters.value - 4));
-      result.push(matchRosterId(matchup.l, totalRosters.value - 5));
-    }
-  });
+  // the logic is backwards if losers bracket is consolation bracket vs toilet bowl
+  if (playoffType.value === 1) {
+    losersBracket.value.forEach((matchup) => {
+      if (!bracketType.value) {
+        if (matchup.p === 1) {
+          result.push(matchRosterId(matchup.w, totalRosters.value - 3));
+          result.push(matchRosterId(matchup.l, totalRosters.value - 2));
+        } else if (matchup.p === 3) {
+          result.push(matchRosterId(matchup.w, totalRosters.value - 1));
+          result.push(matchRosterId(matchup.l, totalRosters.value));
+        }
+        // do 10 man leagues have 3 playoff rounds in the losers bracket?
+        // else if (matchup.p === 5) {
+        //   result.push(matchRosterId(matchup.w, totalRosters.value - 1));
+        //   result.push(matchRosterId(matchup.l, totalRosters.value));
+        // }
+      } else {
+        if (matchup.p === 1) {
+          result.push(matchRosterId(matchup.w, totalRosters.value - 5));
+          result.push(matchRosterId(matchup.l, totalRosters.value - 4));
+        } else if (matchup.p === 3) {
+          result.push(matchRosterId(matchup.w, totalRosters.value - 3));
+          result.push(matchRosterId(matchup.l, totalRosters.value - 2));
+        } else if (matchup.p === 5) {
+          result.push(matchRosterId(matchup.w, totalRosters.value - 1));
+          result.push(matchRosterId(matchup.l, totalRosters.value));
+        }
+      }
+    });
+  } else {
+    losersBracket.value.forEach((matchup) => {
+      if (matchup.p === 1) {
+        result.push(matchRosterId(matchup.w, totalRosters.value));
+        result.push(matchRosterId(matchup.l, totalRosters.value - 1));
+      } else if (matchup.p === 3) {
+        result.push(matchRosterId(matchup.w, totalRosters.value - 2));
+        result.push(matchRosterId(matchup.l, totalRosters.value - 3));
+      } else if (matchup.p === 5) {
+        result.push(matchRosterId(matchup.w, totalRosters.value - 4));
+        result.push(matchRosterId(matchup.l, totalRosters.value - 5));
+      }
+    });
+  }
   return result.sort((a: any, b: any) => a.placement - b.placement);
 });
 
