@@ -203,7 +203,10 @@ watch(
                 : 'text-base'
             "
           >
-            <p v-for="player in trade.team2.players" class="truncate max-w-36">
+            <p
+              v-for="player in trade.team2.players"
+              class="truncate max-w-28 sm:max-w-36"
+            >
               {{ player }}
             </p>
             <p v-for="pick in trade.team2.draftPicks">
@@ -242,7 +245,10 @@ watch(
                 : 'text-base'
             "
           >
-            <p v-for="player in trade.team1.players" class="truncate max-w-36">
+            <p
+              v-for="player in trade.team1.players"
+              class="truncate max-w-28 sm:max-w-36"
+            >
               {{ player }}
             </p>
             <p v-for="pick in trade.team1.draftPicks">
