@@ -217,13 +217,11 @@ export const getWeeklyPoints = async (
   regularSeasonLength: number,
   startWeek: number = 0
 ) => {
-  const allMatchups = [];
-  for (let i: number = startWeek; i < regularSeasonLength; i++) {
-    const singleWeek = await getMatchup(i + 1, leagueId);
-    if (singleWeek.every((matchup: any) => matchup.points !== 0)) {
-      allMatchups.push(singleWeek);
-    }
+  const promises = [];
+  for (let i = startWeek; i < regularSeasonLength; i++) {
+    promises.push(getMatchup(i + 1, leagueId));
   }
+  const allMatchups = await Promise.all(promises);
   const grouped = Object.values(groupBy(flatten(allMatchups), "rosterId"));
   const allTeams: Array<object> = [];
   grouped.forEach((group: any) => {

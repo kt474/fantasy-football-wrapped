@@ -16,7 +16,10 @@ const playoffPromptData = ref([]);
 
 const showSummary = computed(() => {
   if (store.leagueInfo.length > 0) {
-    if (store.leagueInfo[store.currentLeagueIndex].status === "complete") {
+    if (
+      store.leagueInfo[store.currentLeagueIndex] &&
+      store.leagueInfo[store.currentLeagueIndex].status === "complete"
+    ) {
       return true;
     }
     return false;

@@ -148,18 +148,18 @@ const mostMedianLosses = computed(() => {
 });
 
 const leagueWinner = computed(() => {
-  if (
-    store.leagueInfo[store.currentLeagueIndex].status &&
-    store.leagueInfo[store.currentLeagueIndex].status !== "complete"
-  ) {
-    const projectedWinner = tableData.value.reduce((max: any, obj: any) =>
-      obj.winsAgainstAll > max.winsAgainstAll ? obj : max
-    );
-    return projectedWinner.rosterId;
+  if (store.leagueInfo[store.currentLeagueIndex]) {
+    if (store.leagueInfo[store.currentLeagueIndex].status !== "complete") {
+      const projectedWinner = tableData.value.reduce((max: any, obj: any) =>
+        obj.winsAgainstAll > max.winsAgainstAll ? obj : max
+      );
+      return projectedWinner.rosterId;
+    }
+    return store.leagueInfo[store.currentLeagueIndex].leagueWinner
+      ? Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
+      : store.leagueInfo[store.currentLeagueIndex].legacyWinner;
   }
-  return store.leagueInfo[store.currentLeagueIndex].leagueWinner
-    ? Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
-    : store.leagueInfo[store.currentLeagueIndex].legacyWinner;
+  return "";
 });
 const mostTransactions = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex].transactions;

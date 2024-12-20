@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "12/20/24",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "The league history tab should load significantly faster now. Requests to the API are done in parallel.",
+        ],
+      },
+    ],
+  },
+  {
     date: "12/19/24",
     content: [
       {
