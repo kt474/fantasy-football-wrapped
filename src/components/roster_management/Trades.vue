@@ -8,6 +8,13 @@ import { useStore } from "../../store/store";
 const store = useStore();
 const tradeData: any = ref([]);
 
+interface Trade {
+  roster_ids: number[];
+  adds: Record<number, any[]>;
+  draft_picks: any[];
+  waiver_budget: any[];
+}
+
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   const temp = currentLeague.trades.map((trade: any) => {
@@ -34,39 +41,37 @@ const getData = async () => {
 
   // Use Promise.all to resolve all async operations
   tradeData.value = await Promise.all(
-    temp.map(async (trade: any) => {
+    temp.map(async (trade: Trade) => {
+      // Fetch both teams' player names in parallel
+      const [team1Players, team2Players] = await Promise.all([
+        trade.adds[trade.roster_ids[1]]
+          ? getPlayerNames(trade.adds[trade.roster_ids[1]])
+          : Promise.resolve([]),
+        trade.adds[trade.roster_ids[0]]
+          ? getPlayerNames(trade.adds[trade.roster_ids[0]])
+          : Promise.resolve([]),
+      ]);
+
       return {
         team1: {
           user: getRosterName(trade.roster_ids[1]),
-          players: trade.adds[trade.roster_ids[1]]
-            ? await getPlayerNames(trade.adds[trade.roster_ids[1]])
-            : [],
-          draftPicks: trade.draft_picks.map((pick: any) => {
-            if (pick.owner_id == trade.roster_ids[1]) {
-              return pick;
-            }
-          }),
-          waiverBudget: trade.waiver_budget.map((budget: any) => {
-            if (budget.receiver == trade.roster_ids[1]) {
-              return budget;
-            }
-          }),
+          players: team1Players,
+          draftPicks: trade.draft_picks.filter(
+            (pick) => pick.owner_id === trade.roster_ids[1]
+          ),
+          waiverBudget: trade.waiver_budget.filter(
+            (budget) => budget.receiver === trade.roster_ids[1]
+          ),
         },
         team2: {
           user: getRosterName(trade.roster_ids[0]),
-          players: trade.adds[trade.roster_ids[0]]
-            ? await getPlayerNames(trade.adds[trade.roster_ids[0]])
-            : [],
-          draftPicks: trade.draft_picks.map((pick: any) => {
-            if (pick.owner_id == trade.roster_ids[0]) {
-              return pick;
-            }
-          }),
-          waiverBudget: trade.waiver_budget.map((budget: any) => {
-            if (budget.receiver == trade.roster_ids[0]) {
-              return budget;
-            }
-          }),
+          players: team2Players,
+          draftPicks: trade.draft_picks.filter(
+            (pick) => pick.owner_id === trade.roster_ids[0]
+          ),
+          waiverBudget: trade.waiver_budget.filter(
+            (budget) => budget.receiver === trade.roster_ids[0]
+          ),
         },
       };
     })
