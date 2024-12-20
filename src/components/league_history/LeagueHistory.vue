@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, Ref } from "vue";
 import { maxBy, minBy } from "lodash";
 import { TableDataType } from "../../api/types.ts";
 import { useStore } from "../../store/store.ts";
@@ -22,31 +22,87 @@ const tableOrder = ref("wins");
 const hover = ref("");
 const previousLeagues = ref<string[]>([]);
 
-const checkPreviousLeagues = async (leagueId: string) => {
-  // for some reason sometimes 0 is returned as the previous league id
-  if (leagueId !== "0" && !previousLeagues.value.includes(leagueId)) {
-    const newLeagueInfo: any = await getLeague(leagueId);
-    loadingYear.value = newLeagueInfo["season"];
-    const leagueData = await getData(leagueId);
-    store.leagueInfo[store.currentLeagueIndex].previousLeagues.push(leagueData);
-    previousLeagues.value.push(leagueId); // prevent adding duplicates
-    if (leagueData.previousLeagueId) {
-      await checkPreviousLeagues(leagueData.previousLeagueId);
-    } else {
-      localStorage.setItem(
-        "leagueInfo",
-        JSON.stringify(store.leagueInfo as LeagueInfoType[])
-      );
-    }
+interface LeagueData {
+  previousLeagueId?: string;
+  season?: string;
+  // Add other relevant fields
+}
+
+interface LeagueStore {
+  leagueInfo: LeagueInfoType[];
+  currentLeagueIndex: number;
+}
+
+const fetchLeagueData = async (leagueId: string): Promise<LeagueData> => {
+  try {
+    // Fetch league info and data in parallel
+    const [leagueInfo, leagueData]: [any, any] = await Promise.all([
+      getLeague(leagueId),
+      getData(leagueId),
+    ]);
+
+    // Combine the data
+    return {
+      ...leagueData,
+      season: leagueInfo.season,
+    };
+  } catch (error) {
+    console.error(`Error fetching league data for ID ${leagueId}:`, error);
+    throw error;
   }
 };
 
-const getPreviousLeagues = async () => {
+const checkPreviousLeagues = async (
+  leagueId: string,
+  store: LeagueStore,
+  previousLeagues: Ref<string[]>,
+  loadingYear: Ref<string>
+): Promise<void> => {
+  // Early return if league is invalid or already processed
+  if (leagueId === "0" || previousLeagues.value.includes(leagueId)) {
+    return;
+  }
+
+  try {
+    const leagueData = await fetchLeagueData(leagueId);
+    loadingYear.value = leagueData.season || "";
+
+    // Update store and tracking arrays
+    store.leagueInfo[store.currentLeagueIndex].previousLeagues.push(leagueData);
+    previousLeagues.value.push(leagueId);
+
+    // Recursively fetch previous league if it exists
+    if (leagueData.previousLeagueId) {
+      await checkPreviousLeagues(
+        leagueData.previousLeagueId,
+        store,
+        previousLeagues,
+        loadingYear
+      );
+    } else {
+      // Only save to localStorage when we've reached the end of the chain
+      localStorage.setItem("leagueInfo", JSON.stringify(store.leagueInfo));
+    }
+  } catch (error) {
+    console.error(`Failed to process league ${leagueId}:`, error);
+  }
+};
+
+const getPreviousLeagues = async (
+  store: LeagueStore,
+  previousLeagues: Ref<string[]>,
+  loadingYear: Ref<string>
+): Promise<void> => {
   const previousLeagueId =
     store.leagueInfo[store.currentLeagueIndex].previousLeagueId;
 
   if (previousLeagueId) {
-    await checkPreviousLeagues(previousLeagueId);
+    await checkPreviousLeagues(
+      previousLeagueId,
+      store,
+      previousLeagues,
+      loadingYear
+    );
   }
 };
 
@@ -114,7 +170,7 @@ onMounted(async () => {
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.length == 0
   ) {
     isLoading.value = true;
-    await getPreviousLeagues();
+    await getPreviousLeagues(store, previousLeagues, loadingYear);
     isLoading.value = false;
   }
 });
@@ -127,7 +183,7 @@ watch(
       store.leagueInfo[store.currentLeagueIndex].previousLeagues.length == 0
     ) {
       isLoading.value = true;
-      await getPreviousLeagues();
+      await getPreviousLeagues(store, previousLeagues, loadingYear);
       isLoading.value = false;
     }
   }
@@ -717,7 +773,7 @@ const worstManager = computed(() => {
         fill="currentFill"
       />
     </svg>
-    <p class="flex justify-center text-lg dark:text-white">
+    <p v-if="loadingYear" class="flex justify-center text-lg dark:text-white">
       Loading
       <span class="font-bold">&nbsp;{{ loadingYear }}&nbsp;</span>season...
     </p>
