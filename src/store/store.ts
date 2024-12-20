@@ -100,6 +100,12 @@ export const useStore = defineStore("main", {
         item.weeklyReport = payload;
       }
     },
+    addTradeNames(leagueId: string, payload: any[]) {
+      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      if (item) {
+        item.tradeNames = payload;
+      }
+    },
     addYearEndReport(leagueId: string, payload: string) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {

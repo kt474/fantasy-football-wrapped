@@ -5,6 +5,23 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "12/19/24",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "All league trades are now visible under the roster management tab. Trades include draft picks and waiver budget.",
+        ],
+      },
+      {
+        type: "Fix",
+        text: [
+          "Fixed an issue where multiple leagues being loaded at the same time caused league data to appear incorrectly.",
+        ],
+      },
+    ],
+  },
+  {
     date: "12/17/24",
     content: [
       {

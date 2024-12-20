@@ -17,6 +17,8 @@ export type LeagueInfoType = {
   rosters: any[];
   weeklyPoints: [];
   transactions: [];
+  trades: [];
+  tradeNames: any[];
   previousLeagues: any[];
   status: string;
   currentWeek: number;

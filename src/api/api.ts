@@ -1,4 +1,4 @@
-import { getWeeklyPoints, getTotalTransactions } from "./helper";
+import { getWeeklyPoints, getTotalTransactions, getTrades } from "./helper";
 import { round } from "lodash";
 
 export const seasonType: { [key: number]: string } = {
@@ -372,13 +372,16 @@ export const getData = async (leagueId: string) => {
   }
 
   // Parallel requests for weekly data
+  const trades: any = [];
   const [weeklyPoints, users, transactionPromises] = await Promise.all([
     getWeeklyPoints(leagueId, currentWeek ?? newLeagueInfo.lastScoredWeek),
     getUsers(leagueId),
     Promise.all(
-      Array.from({ length: numberOfWeeks + 1 }, (_, i) =>
-        getTransactions(leagueId, i + 1).then(getTotalTransactions)
-      )
+      Array.from({ length: numberOfWeeks + 1 }, async (_, i) => {
+        const weeklyTransaction = await getTransactions(leagueId, i + 1);
+        trades.push(getTrades(weeklyTransaction));
+        return getTotalTransactions(weeklyTransaction);
+      })
     ),
   ]);
 
@@ -405,6 +408,7 @@ export const getData = async (leagueId: string) => {
     weeklyPoints,
     users: processedUsers,
     transactions,
+    trades: trades.flat(),
     legacyWinner: legacyWinner,
     lastUpdated: new Date().getTime(),
   };

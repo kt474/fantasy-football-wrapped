@@ -177,9 +177,18 @@ export const getTotalTransactions = (transactions: any) => {
     if (shouldCount) {
       countMap[id] = (countMap[id] || 0) + 1;
     }
-
     return countMap;
   }, {});
+};
+
+export const getTrades = (transactions: any) => {
+  const result: any[] = [];
+  transactions.forEach((transaction: any) => {
+    if (transaction.status === "complete" && transaction.type === "trade") {
+      result.push(transaction);
+    }
+  });
+  return result;
 };
 
 export const getPowerRanking = (
@@ -263,6 +272,170 @@ export const getWeeklyPoints = async (
   });
   return allTeams;
 };
+
+export const fakeTrades = [
+  {
+    team1: {
+      user: {
+        id: "1",
+        name: "Just the Tua Us",
+        avatar: "3fd3d500b13b04926820e10e9306f6ab",
+        avatarImg: "../avatars/avatar1.svg",
+        transactions: 14,
+      },
+      players: ["J.K. Dobbins"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+    team2: {
+      user: {
+        id: "2",
+        name: "Bijan Mustard",
+        avatar: "a77d198f5c82bd93d3da5bd10493f7cd",
+        avatarImg: "../avatars/avatar2.svg",
+        transactions: 10,
+      },
+      players: ["Zack Moss", "Tyler Allgeier"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+  },
+  {
+    team1: {
+      user: {
+        id: "3",
+        name: "The Princess McBride",
+        avatar: "8eb8f8bf999945d523f2c4033f70473e",
+        avatarImg: "../avatars/avatar3.svg",
+        transactions: 25,
+      },
+      players: ["Justice Hill"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+    team2: {
+      user: {
+        id: "4",
+        name: "Baby Back Gibbs",
+        avatar: "15d7cf259bc30eab8f6120f45f652fb6",
+        avatarImg: "../avatars/avatar4.svg",
+        transactions: 31,
+      },
+      players: ["Tyjae Spears"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+  },
+  {
+    team1: {
+      user: {
+        id: "4",
+        name: "Baby Back Gibbs",
+        avatar: "15d7cf259bc30eab8f6120f45f652fb6",
+        avatarImg: "../avatars/avatar4.svg",
+        transactions: 31,
+      },
+      players: ["Tank Bigsby"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+    team2: {
+      user: {
+        id: "5",
+        name: "Pollard Greens",
+        avatar: "15d7cf259bc30eab8f6120f45f652fb6",
+        avatarImg: "../avatars/avatar5.svg",
+        transactions: 38,
+      },
+      players: ["Jordan Love"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+  },
+  {
+    team1: {
+      user: {
+        id: "6",
+        name: "Finding Deebo",
+        avatar: "d6ad9a18c52dcdb704399beed5d5b21f",
+        avatarImg: "../avatars/avatar6.svg",
+        transactions: 29,
+      },
+      players: ["Justice Hill", "Quentin Johnston", "Jayden Daniels"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+    team2: {
+      user: {
+        id: "7",
+        name: "Loud and Stroud",
+        avatar: "3d8ea1e7289177ddf22dd57e107ee334",
+        avatarImg: "../avatars/avatar7.svg",
+        transactions: 19,
+      },
+      players: ["Jalen Hurts", "Tank Dell", "Tyjae Spears"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+  },
+  {
+    team1: {
+      user: {
+        id: "8",
+        name: "Ja’Marr the Merrier",
+        avatar: "4f4090e5e9c3941414db40a871e3e909",
+        avatarImg: "../avatars/avatar8.svg",
+        transactions: 40,
+      },
+      players: ["Aaron Jones", "Cam Akers", "Najee Harris", "Cedric Tillman"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+    team2: {
+      user: {
+        id: "9",
+        name: "Dak to the Future",
+        avatar: "b3338675f635c2c1f42b469621d38ec6",
+        avatarImg: "../avatars/avatar9.svg",
+        transactions: 33,
+      },
+      players: ["Alvin Kamara", "Bo Nix"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+  },
+  {
+    team1: {
+      user: {
+        id: "9",
+        name: "Dak to the Future",
+        avatar: "b3338675f635c2c1f42b469621d38ec6",
+        avatarImg: "../avatars/avatar9.svg",
+        transactions: 33,
+      },
+      players: ["Nick Chubb", "Courtland Sutton", "James Cook", "Bucky Irving"],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+    team2: {
+      user: {
+        id: "10",
+        name: "LaPorta Potty",
+        avatar: "81d984f3556782876d25195356b0ab58",
+        avatarImg: "../avatars/avatar10.svg",
+        transactions: 42,
+      },
+      players: [
+        "Javonte Williams",
+        "Tyler Allgeier",
+        "Bijan Robinson",
+        "Quentin Johnston",
+      ],
+      draftPicks: [],
+      waiverBudget: [],
+    },
+  },
+];
 
 export const fakeUsers = [
   {

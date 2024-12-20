@@ -13,6 +13,7 @@ import BestManagerCard from "../standings/BestManagerCard.vue";
 import WorstManagerCard from "../standings/WorstManagerCard.vue";
 import TransactionsCard from "../standings/TransactionsCard.vue";
 import TransactionsChart from "../roster_management/TransactionsChart.vue";
+import Trades from "../roster_management/Trades.vue";
 import StandingsChart from "../standings/StandingsChart.vue";
 import ManagementCard from "../roster_management/ManagementCard.vue";
 import RankingGraph from "../roster_management/RankingGraph.vue";
@@ -147,7 +148,10 @@ const mostMedianLosses = computed(() => {
 });
 
 const leagueWinner = computed(() => {
-  if (store.leagueInfo[store.currentLeagueIndex].status !== "complete") {
+  if (
+    store.leagueInfo[store.currentLeagueIndex].status &&
+    store.leagueInfo[store.currentLeagueIndex].status !== "complete"
+  ) {
     const projectedWinner = tableData.value.reduce((max: any, obj: any) =>
       obj.winsAgainstAll > max.winsAgainstAll ? obj : max
     );
@@ -575,6 +579,7 @@ const cardHeight = computed(() => {
         <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
       </div>
       <TransactionsChart class="mt-4" />
+      <Trades class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'playoffs'">
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
