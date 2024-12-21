@@ -256,7 +256,8 @@ const tableData = computed(() => {
   `"
     >
       <p
-        class="w-full pt-2 text-lg font-semibold text-center text-gray-700 dark:text-gray-200"
+        class="w-full pt-2 text-lg font-semibold text-center text-gray-700 cursor-pointer dark:text-gray-200"
+        @click="showData = !showData"
       >
         Playoff Odds
       </p>

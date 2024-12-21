@@ -10,7 +10,13 @@ const data = [
       {
         type: "Update",
         text: [
-          "The league history tab should load significantly faster now. Requests to the API are done in parallel.",
+          "Performance improvements across the entire site. The league history tab should load significantly faster now. Requests to the API are done in parallel.",
+        ],
+      },
+      {
+        type: "Fix",
+        text: [
+          "Leagues with a mismatched number of users and rosters are now supported.",
         ],
       },
     ],
