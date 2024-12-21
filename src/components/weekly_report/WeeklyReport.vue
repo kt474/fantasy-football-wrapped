@@ -391,9 +391,12 @@ const getRecord = (recordString: string, index: number) => {
   ) {
     index = index * 2;
   }
-  const numWins = recordString.slice(0, index).split("W").length - 1;
-  const numLosses = recordString.slice(0, index).split("L").length - 1;
-  return `${numWins} - ${numLosses}`;
+  if (recordString) {
+    const numWins = recordString.slice(0, index).split("W").length - 1;
+    const numLosses = recordString.slice(0, index).split("L").length - 1;
+    return `${numWins} - ${numLosses}`;
+  }
+  return "0-0";
 };
 
 const getMatchupWinner = (matchupIndex: number, currentWeek: number) => {

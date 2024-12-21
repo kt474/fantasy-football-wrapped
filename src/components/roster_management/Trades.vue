@@ -262,6 +262,14 @@ watch(
         </div>
       </div>
     </div>
+    <div
+      v-else-if="
+        store.leagueInfo.length > 0 &&
+        store.leagueInfo[store.currentLeagueIndex].trades.length === 0
+      "
+    >
+      <p>No trades have been made.</p>
+    </div>
     <div v-else class="flex flex-wrap">
       <div
         v-for="x in 3"

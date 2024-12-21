@@ -114,9 +114,12 @@ const getPointsScored = (rosterId: number, week: number) => {
 
 const getRecord = (rosterId: number) => {
   const user: any = props.tableData.find((val) => val.rosterId === rosterId);
-  const numWins = user.recordByWeek.split("W").length - 1;
-  const numLosses = user.recordByWeek.split("L").length - 1;
-  return `${numWins} - ${numLosses}`;
+  if (user.recordByWeek) {
+    const numWins = user.recordByWeek.split("W").length - 1;
+    const numLosses = user.recordByWeek.split("L").length - 1;
+    return `${numWins} - ${numLosses}`;
+  }
+  return "0-0";
 };
 
 const finalPlacements = computed(() => {
