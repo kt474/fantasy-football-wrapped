@@ -69,7 +69,9 @@ const updateChartColor = () => {
       theme: store.darkMode ? "dark" : "light",
     },
     xaxis: {
-      categories: props.tableData.map((user: any) => user.name),
+      categories: props.tableData.map((user: any) =>
+        user.name ? user.name : ""
+      ),
       title: {
         text: "League Manager",
         offsetY: -5,
@@ -133,7 +135,9 @@ const chartOptions = ref({
     colors: ["transparent"],
   },
   xaxis: {
-    categories: props.tableData.map((user: any) => user.name),
+    categories: props.tableData.map((user: any) =>
+      user.name ? user.name : ""
+    ),
     labels: {
       formatter: function (str: string) {
         const n = 17;

@@ -10,7 +10,7 @@ import HeatMap from "./HeatMap.vue";
 const store = useStore();
 const loading = ref(false);
 const categories = computed(() => {
-  return formattedData.value.map((user) => user.name);
+  return formattedData.value.map((user) => (user.name ? user.name : ""));
 });
 
 onMounted(async () => {

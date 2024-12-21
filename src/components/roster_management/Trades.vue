@@ -143,7 +143,7 @@ watch(
         class="block h-48 p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow w-80 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 sm:w-96"
       >
         <div class="flex justify-between">
-          <div class="flex w-40">
+          <div v-if="trade.team1.user" class="flex w-40">
             <img
               alt="User avatar"
               v-if="trade.team1.user.avatarImg"
@@ -166,10 +166,10 @@ watch(
               {{ trade.team1.user.name }}
             </h2>
           </div>
-          <div class="flex w-40">
+          <div v-if="trade.team2.user" class="flex w-40">
             <img
               alt="User avatar"
-              v-if="trade.team2.user.avatarImg !== null"
+              v-if="trade.team2.user.avatarImg"
               class="w-8 h-8 rounded-full"
               :src="trade.team2.user.avatarImg"
             />

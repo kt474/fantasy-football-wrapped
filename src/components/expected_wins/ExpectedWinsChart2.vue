@@ -24,7 +24,7 @@ const seriesData = computed(() => {
 });
 
 const categories = computed(() => {
-  return tableDataCopy.value.map((user) => user.name);
+  return tableDataCopy.value.map((user) => (user.name ? user.name : ""));
 });
 
 const maxWinDifference = computed(() => {

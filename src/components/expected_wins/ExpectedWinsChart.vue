@@ -12,7 +12,7 @@ const seriesData = computed(() => {
   const result: any[] = [];
   props.tableData.forEach((user: any) => {
     result.push({
-      x: user.name,
+      x: user.name ? user.name : "",
       y: user.wins,
       goals: [
         {

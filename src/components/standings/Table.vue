@@ -162,7 +162,9 @@ const leagueWinner = computed(() => {
   return "";
 });
 const mostTransactions = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex].transactions;
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].transactions
+    : [];
 });
 
 const regularSeasonLength = computed(() => {

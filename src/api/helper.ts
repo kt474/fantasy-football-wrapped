@@ -20,6 +20,10 @@ export const createTableData = (
       }
       return null;
     });
+    const ghostRosters: any = rosters.filter((roster) => roster.id === null);
+    if (ghostRosters.length > 0) {
+      combined.push(...ghostRosters);
+    }
     const filtered = combined.filter((a: any) => a !== null);
     const combinedPoints = filtered.map((a: any) => ({
       ...a,

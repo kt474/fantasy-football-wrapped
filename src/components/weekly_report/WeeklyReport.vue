@@ -248,7 +248,9 @@ const chartOptions = ref({
     },
   },
   xaxis: {
-    categories: sortedTableData.value.map((user) => user.name),
+    categories: sortedTableData.value.map((user) =>
+      user.name ? user.name : ""
+    ),
     labels: {
       formatter: function (str: string) {
         const n = 17;
@@ -317,7 +319,9 @@ const updateChartColor = () => {
       },
     },
     xaxis: {
-      categories: sortedTableData.value.map((user) => user.name),
+      categories: sortedTableData.value.map((user) =>
+        user.name ? user.name : ""
+      ),
       labels: {
         formatter: function (str: string) {
           const n = 17;
