@@ -9,11 +9,13 @@ import App from "./App.vue";
 // @ts-ignore
 import posthogPlugin from "../plugins/posthog";
 import ChangelogPage from "./views/Changelog.vue";
+import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import Home from "./views/Home.vue";
 
 const routes = [
   { path: "/", component: Home },
   { path: "/changelog", component: ChangelogPage },
+  { path: "/privacy", component: PrivacyPolicy },
 ];
 
 const router = createRouter({
