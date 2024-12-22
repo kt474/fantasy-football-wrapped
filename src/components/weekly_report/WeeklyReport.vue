@@ -157,6 +157,7 @@ const reportPrompt = computed(() => {
           matchupNumber: user.matchups[currentWeek.value - 1],
           playerPoints: user.starterPoints[currentWeek.value - 1],
           playerNames: playerNames.value[index],
+          pointsScored: user.points[currentWeek.value - 1],
           inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
           inWinnersBracket: winnersBracketIDs.value.includes(user.rosterId),
         });
@@ -169,6 +170,7 @@ const reportPrompt = computed(() => {
           name: user.name,
           matchupNumber: user.matchups[currentWeek.value - 1],
           playerPoints: user.starterPoints[currentWeek.value - 1],
+          pointsScored: user.points[currentWeek.value - 1],
           playerNames: playerNames.value[index],
           currentRecord: `${user.wins}-${user.losses}`,
           currentRank: user.regularSeasonRank,
