@@ -9,6 +9,7 @@ import Intro from "../components/home/Intro.vue";
 import Table from "../components/standings/Table.vue";
 import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
+import { LeagueInfoType } from "../api/types";
 
 const store = useStore();
 
@@ -18,35 +19,38 @@ onMounted(async () => {
   try {
     if (localStorage.leagueInfo) {
       const savedLeagues = JSON.parse(localStorage.leagueInfo);
-      for (const league of savedLeagues) {
-        if (!store.leagueIds.includes(league.leagueId)) {
-          const currentTime = new Date().getTime();
-          const diff = currentTime - league.lastUpdated;
-          if (diff > 86400000) {
-            // 1 day
-            if (localStorage.originalData) {
-              const currentData = JSON.parse(localStorage.originalData);
-              delete currentData[league.leagueId];
-              localStorage.originalData = JSON.stringify(currentData);
+      await Promise.all(
+        savedLeagues.map(async (league: LeagueInfoType) => {
+          if (!store.leagueIds.includes(league.leagueId)) {
+            const currentTime = new Date().getTime();
+            const diff = currentTime - league.lastUpdated;
+            if (diff > 86400000) {
+              // 1 day
+              if (localStorage.originalData) {
+                const currentData = JSON.parse(localStorage.originalData);
+                delete currentData[league.leagueId];
+                localStorage.originalData = JSON.stringify(currentData);
+              }
+              showLoading.value = true;
+              store.updateLoadingLeague(league.name);
+              const refreshedData = await getData(league.leagueId);
+              store.updateLeagueInfo(refreshedData);
+              await inputLeague(
+                league.leagueId,
+                league.name,
+                league.totalRosters,
+                league.seasonType,
+                league.season
+              );
+              store.updateLoadingLeague("");
+              showLoading.value = false;
+            } else {
+              store.updateLeagueInfo(league);
             }
-            showLoading.value = true;
-            store.updateLoadingLeague(league.name);
-            const refreshedData = await getData(league.leagueId);
-            store.updateLeagueInfo(refreshedData);
-            await inputLeague(
-              league.leagueId,
-              league.name,
-              league.totalRosters,
-              league.seasonType,
-              league.season
-            );
-            store.updateLoadingLeague("");
-            showLoading.value = false;
-          } else {
-            store.updateLeagueInfo(league);
           }
-        }
-      }
+        })
+      );
+
       store.updateCurrentLeagueId(localStorage.currentLeagueId);
     }
     const queryParams = new URLSearchParams(window.location.search);
