@@ -152,12 +152,15 @@ const reportPrompt = computed(() => {
   if (isPlayoffs.value) {
     props.tableData.forEach((user: TableDataType, index: number) => {
       if (user.matchups[currentWeek.value - 1]) {
+        const week: number = currentWeek.value - 1;
         result.push({
           name: user.name,
-          matchupNumber: user.matchups[currentWeek.value - 1],
-          playerPoints: user.starterPoints[currentWeek.value - 1],
+          matchupNumber: user.matchups[week],
+          winner:
+            getMatchupWinner(user.matchups[week], week) === user.points[week],
+          playerPoints: user.starterPoints[week],
           playerNames: playerNames.value[index],
-          pointsScored: user.points[currentWeek.value - 1],
+          pointsScored: user.points[week],
           inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
           inWinnersBracket: winnersBracketIDs.value.includes(user.rosterId),
         });
@@ -166,11 +169,14 @@ const reportPrompt = computed(() => {
   } else {
     props.tableData.forEach((user: TableDataType, index: number) => {
       if (user.matchups[currentWeek.value - 1]) {
+        const week: number = currentWeek.value - 1;
         result.push({
           name: user.name,
-          matchupNumber: user.matchups[currentWeek.value - 1],
-          playerPoints: user.starterPoints[currentWeek.value - 1],
-          pointsScored: user.points[currentWeek.value - 1],
+          matchupNumber: user.matchups[week],
+          playerPoints: user.starterPoints[week],
+          pointsScored: user.points[week],
+          winner:
+            getMatchupWinner(user.matchups[week], week) === user.points[week],
           playerNames: playerNames.value[index],
           currentRecord: `${user.wins}-${user.losses}`,
           currentRank: user.regularSeasonRank,
