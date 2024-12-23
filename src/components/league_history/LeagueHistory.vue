@@ -106,13 +106,6 @@ const getPreviousLeagues = async (
   }
 };
 
-const medianScoring = computed(() => {
-  if (store.leagueInfo[store.currentLeagueIndex]) {
-    return store.leagueInfo[store.currentLeagueIndex].medianScoring === 1;
-  }
-  return false;
-});
-
 const currentLeague = computed(() => {
   if (
     store.leagueInfo[store.currentLeagueIndex] &&
@@ -255,7 +248,7 @@ const dataAllYears = computed(() => {
             league.users,
             league.rosters,
             league.weeklyPoints,
-            medianScoring.value
+            league.medianScoring && league.medianScoring === 1 ? true : false
           );
           localStorage.setItem(league.leagueId, JSON.stringify(tableData));
         }

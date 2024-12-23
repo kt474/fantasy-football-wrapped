@@ -5,6 +5,28 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "12/23/24",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Fixed an issue where the expected wins in league history were not being calculated correctly.",
+        ],
+      },
+    ],
+  },
+  {
+    date: "12/22/24",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "Updated the prompt and inputs for the AI generated weekly reports. The reports should no longer give incorrect winning teams. ",
+        ],
+      },
+    ],
+  },
+  {
     date: "12/20/24",
     content: [
       {
