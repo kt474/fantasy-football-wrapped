@@ -97,7 +97,11 @@ const mostTransactionsUser: any = computed(() => {
       <div class="flex justify-center -mt-0.5">
         <img
           alt="Most transactions user avatar"
-          v-if="mostTransactions && mostTransactionsUser.avatarImg"
+          v-if="
+            mostTransactions &&
+            mostTransactionsUser &&
+            mostTransactionsUser.avatarImg
+          "
           class="rounded-full w-7 h-7"
           :src="mostTransactionsUser.avatarImg"
         />
@@ -115,7 +119,7 @@ const mostTransactionsUser: any = computed(() => {
         </svg>
 
         <p
-          v-if="mostTransactions"
+          v-if="mostTransactions && mostTransactionsUser"
           class="mx-3 mt-0.5 text-gray-800 text-md dark:text-white"
         >
           {{ mostTransactionsUser.name }}
