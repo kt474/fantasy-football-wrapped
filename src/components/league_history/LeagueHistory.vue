@@ -200,15 +200,15 @@ const dataAllYears = computed(() => {
       : [
           {
             season: "2023",
-            points: [
-              parseFloat((Math.random() * (200 - 100) + 100).toFixed(2)),
-            ],
+            points: Array.from({ length: 5 }, () =>
+              parseFloat((Math.random() * (200 - 100) + 100).toFixed(2))
+            ),
           },
           {
             season: "2024",
-            points: [
-              parseFloat((Math.random() * (200 - 100) + 100).toFixed(2)),
-            ],
+            points: Array.from({ length: 5 }, () =>
+              parseFloat((Math.random() * (200 - 100) + 100).toFixed(2))
+            ),
           },
         ],
     avatarImg: user.avatarImg,
