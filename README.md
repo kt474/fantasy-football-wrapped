@@ -1,6 +1,6 @@
 # Fantasy Football Wrapped
 
-Detailed analysis and insights for your fantasy football league.
+Detailed analysis and insights for Sleeper fantasy football leagues.
 
 Current features:
 
@@ -11,9 +11,8 @@ Current features:
 - Roster management stats
 - Playoff projections
 - AI generated weekly reports
+- Draft grades
 - League history stats
-
-Only Sleeper leagues are supported at the moment.
 
 ## Run Locally
 
