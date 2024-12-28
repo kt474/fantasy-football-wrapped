@@ -16,7 +16,10 @@ const rawWeeklyReport: any = ref("");
 const playerNames = ref([]);
 
 const weeks = computed(() => {
-  if (store.leagueInfo.length == 0) {
+  if (
+    store.leagueInfo.length == 0 ||
+    !store.leagueInfo[store.currentLeagueIndex]
+  ) {
     return [...Array(15).keys()].slice(1).reverse();
   }
   if (props.tableData[0].matchups) {
@@ -36,7 +39,10 @@ const weeks = computed(() => {
 });
 
 const playoffWeeks = computed(() => {
-  if (store.leagueInfo.length > 0) {
+  if (
+    store.leagueInfo.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex]
+  ) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     const result: number[] = [];
     for (
@@ -103,13 +109,19 @@ onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
     props.tableData[0].matchups &&
+    store.leagueInfo[store.currentLeagueIndex] &&
     !store.leagueInfo[store.currentLeagueIndex].weeklyReport
   ) {
     await fetchPlayerNames();
     await getReport();
-  } else if (store.leagueInfo.length > 0) {
-    const savedText: any =
-      store.leagueInfo[store.currentLeagueIndex].weeklyReport;
+  } else if (
+    store.leagueInfo.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex]
+  ) {
+    const savedText: any = store.leagueInfo[store.currentLeagueIndex]
+      .weeklyReport
+      ? store.leagueInfo[store.currentLeagueIndex].weeklyReport
+      : "";
     weeklyReport.value = savedText;
     rawWeeklyReport.value = savedText
       .replace(/<b>(.*?)<\/b>/g, "**$1**")
@@ -199,6 +211,7 @@ const numOfMatchups = computed(() => {
 });
 
 const sortedTableData = computed(() => {
+  if (!props.tableData.every((obj) => obj.id !== null)) return [];
   return [...props.tableData].sort(
     (a, b) => a.points[currentWeek.value - 1] - b.points[currentWeek.value - 1]
   );
@@ -395,6 +408,7 @@ watch(
 const getRecord = (recordString: string, index: number) => {
   if (
     store.leagueInfo.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex] &&
     store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
   ) {
     index = index * 2;

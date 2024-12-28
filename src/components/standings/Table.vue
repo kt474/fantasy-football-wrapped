@@ -23,6 +23,8 @@ import Tabs from "../util/Tabs.vue";
 import Projections from "../power_rankings/Projections.vue";
 import PlayoffPercentages from "../playoffs/PlayoffPercentages.vue";
 import WeeklyReport from "../weekly_report/WeeklyReport.vue";
+import Draft from "../draft/Draft.vue";
+
 const tableOrder = ref("wins");
 const hover = ref("");
 const props = defineProps<{
@@ -594,6 +596,9 @@ const cardHeight = computed(() => {
         :regular-season-length="regularSeasonLength"
       />
       <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
+    </div>
+    <div v-if="store.currentTab === 'draft'">
+      <Draft class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">
       <LeagueHistory :tableData="tableData" />

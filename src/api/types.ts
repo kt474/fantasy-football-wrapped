@@ -29,6 +29,8 @@ export type LeagueInfoType = {
   weeklyReport?: string;
   yearEndReport?: string;
   playoffType: number;
+  draftId: string;
+  draftPicks: any[];
 };
 
 export type RosterType = {

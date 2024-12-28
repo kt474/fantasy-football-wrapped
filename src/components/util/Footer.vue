@@ -33,7 +33,7 @@
             href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing"
             title="PWA installation guide"
             target="_blank"
-            >PWA Compatible</a
+            >Add To Homescreen</a
           >
         </p>
         <p>

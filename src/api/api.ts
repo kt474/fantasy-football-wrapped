@@ -1,4 +1,9 @@
-import { getWeeklyPoints, getTotalTransactions, getTrades } from "./helper";
+import {
+  getWeeklyPoints,
+  getTotalTransactions,
+  getTrades,
+  calculateDraftRank,
+} from "./helper";
 import { round } from "lodash";
 
 export const seasonType: { [key: number]: string } = {
@@ -118,6 +123,24 @@ export const inputLeague = async (
   }
 };
 
+export const getStats = async (
+  player: string,
+  year: string,
+  scoringType: number
+) => {
+  let scoring = "pos_rank_ppr";
+  if (scoringType === 0) {
+    scoring = "pos_rank_std";
+  } else if (scoringType === 0.5) {
+    scoring = "pos_rank_half_ppr";
+  }
+  const response = await fetch(
+    `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}`
+  );
+  const result = await response.json();
+  return result ? result["stats"][scoring] : 0;
+};
+
 export const getWeeklyProjections = async (
   player: string,
   year: string,
@@ -204,6 +227,49 @@ export const getAllLeagues = async (userId: string, season: string) => {
   return await response.json();
 };
 
+export const getDraftPicks = async (
+  leagueId: string,
+  season: string,
+  scoringType: number,
+  seasonType: string
+) => {
+  const response = await fetch(
+    `https://api.sleeper.app/v1/draft/${leagueId}/picks`
+  );
+  const draftPicks = await response.json();
+
+  const picksWithStats = await Promise.all(
+    draftPicks.map(async (pick: any) => {
+      const playerStats = await getStats(
+        pick["player_id"],
+        season,
+        scoringType
+      );
+
+      return {
+        firstName: pick["metadata"]["first_name"],
+        lastName: pick["metadata"]["last_name"],
+        playerId: pick["player_id"],
+        position: pick["metadata"]["position"],
+        pickNumber: pick["pick_no"],
+        draftSlot: pick["draft_slot"],
+        team: pick["metadata"]["team"],
+        round: pick["round"],
+        rosterId: pick["roster_id"],
+        userId: pick["picked_by"],
+        rank: playerStats,
+        pickRank: calculateDraftRank(
+          pick["pick_no"],
+          seasonType === "Dynasty" ? playerStats / 6 : playerStats,
+          pick["round"],
+          pick["metadata"]["position"]
+        ),
+      };
+    })
+  );
+  return picksWithStats;
+};
+
 export const getLeague = async (leagueId: string) => {
   try {
     const response = await fetch(
@@ -226,6 +292,7 @@ export const getLeague = async (leagueId: string) => {
         rosterPositions: [],
         playoffTeams: 0,
         playoffType: 0,
+        draftId: "",
       };
     }
     const league = await response.json();
@@ -247,6 +314,7 @@ export const getLeague = async (leagueId: string) => {
       rosterPositions: league["roster_positions"],
       playoffTeams: league["settings"]["playoff_teams"],
       playoffType: league["settings"]["playoff_type"],
+      draftId: league["draft_id"],
     };
   } catch (error) {
     return error;

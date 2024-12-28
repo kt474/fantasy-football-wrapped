@@ -189,12 +189,12 @@ const dataAllYears = computed(() => {
     wins: user.wins,
     losses: user.losses,
     points: user.pointsFor,
-    pointsArr: [...user.points],
+    pointsArr: user.points ? [...user.points] : [],
     pointSeason: store.leagueInfo[store.currentLeagueIndex]
       ? [
           {
             season: store.leagueInfo[store.currentLeagueIndex].season,
-            points: [...user.points],
+            points: user.points ? [...user.points] : [],
           },
         ]
       : [
@@ -213,7 +213,7 @@ const dataAllYears = computed(() => {
         ],
     avatarImg: user.avatarImg,
     rosterId: user.rosterId,
-    matchups: [...user.matchups],
+    matchups: user.matchups ? [...user.matchups] : [],
     managerEfficiency: store.leagueInfo[store.currentLeagueIndex]
       ? user.managerEfficiency
       : 2 * user.managerEfficiency,

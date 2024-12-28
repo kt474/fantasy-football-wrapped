@@ -3,6 +3,82 @@ import { groupBy, flatten, zip, mean, max, min, countBy } from "lodash";
 import { getMatchup } from "./api";
 import { RosterType, UserType } from "./types";
 
+const getTierMultiplier = (position: string, rank: number) => {
+  switch (position) {
+    case "RB":
+      if (rank <= 6) return 2.0; // Elite RB1s
+      if (rank <= 12) return 1.7; // Strong RB1s
+      if (rank <= 18) return 1.4; // RB2s
+      if (rank <= 24) return 1.2; // Solid RB2s
+      if (rank <= 30) return 1.1; // RB3s
+      if (rank <= 36) return 1.0; // Bench RBs
+      return 0.8; // Deep bench
+
+    case "WR":
+      if (rank <= 6) return 1.8; // Elite WR1s
+      if (rank <= 12) return 1.5; // Strong WR1s
+      if (rank <= 18) return 1.3; // WR2s
+      if (rank <= 24) return 1.1; // Solid WR2s
+      if (rank <= 30) return 1.0; // WR3s
+      if (rank <= 36) return 0.9; // Bench WRs
+      return 0.7; // Deep bench
+
+    case "TE":
+      if (rank <= 3) return 2.5; // Elite TEs
+      if (rank <= 6) return 1.8; // Strong TE1s
+      if (rank <= 12) return 1.4; // Startable TEs
+      if (rank <= 18) return 1.1; // Backup TEs
+      return 0.8; // Deep bench
+
+    case "QB":
+      if (rank <= 3) return 1.6; // Elite QBs
+      if (rank <= 6) return 1.4; // Strong QB1s
+      if (rank <= 12) return 1.2; // Startable QBs
+      if (rank <= 18) return 1.0; // Backup QBs
+      return 0.7; // Deep bench
+
+    case "K":
+      if (rank <= 3) return 1.3;
+      return 1.0;
+
+    case "DEF":
+      if (rank <= 3) return 1.3;
+      return 1.0;
+    default:
+      return 1.0;
+  }
+};
+
+const roundToOneDecimal = (number: number) => {
+  const rounded = parseFloat(number.toFixed(1));
+  // If it's effectively zero after rounding, return 0.0
+  return rounded === 0 ? "0.0" : rounded.toFixed(1);
+};
+
+export const calculateDraftRank = (
+  pickNumber: number,
+  positionRank: number,
+  round: number,
+  position: string
+) => {
+  const roundMultiplier = 1 + 1 / Math.pow(1.5, round - 1);
+  const positionWeights: any = {
+    RB: 1.0,
+    WR: 0.9,
+    TE: 1.2,
+    QB: 0.7,
+    K: 0.4,
+    DEF: 0.4,
+  };
+  if (positionRank === 0) return roundToOneDecimal(-5); // player did not play
+  const rank =
+    ((pickNumber - positionRank) / pickNumber) *
+    roundMultiplier *
+    positionWeights[position] *
+    getTierMultiplier(position, positionRank);
+  return roundToOneDecimal(rank < -5 ? -5 : rank);
+};
+
 export const createTableData = (
   users: UserType[],
   rosters: RosterType[],

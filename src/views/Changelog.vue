@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "12/27/24",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added a new draft section where all draft picks along with a draft pick rank are shown in a table. Note that this feature is still a work in progress - the current ranks may be misleading on inaccruate.",
+        ],
+      },
+    ],
+  },
+  {
     date: "12/23/24",
     content: [
       {
