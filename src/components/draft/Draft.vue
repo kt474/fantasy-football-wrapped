@@ -130,7 +130,7 @@ const getValueColor = (value: number) => {
   if (value >= 2.5) return `bg-emerald-600 dark:bg-emerald-500 bg-opacity-80`;
   if (value >= 1.75) return `bg-emerald-500 dark:bg-emerald-600 bg-opacity-80`;
   if (value >= 0.75) return `bg-emerald-400 dark:bg-emerald-700 bg-opacity-100`;
-  if (value >= -0.75) return "bg-gray-400 bg-opacity-65";
+  if (value >= 0) return "bg-gray-400 bg-opacity-65";
   if (value >= -1.75) return `bg-rose-300 dark:bg-rose-800`;
   if (value >= -2.5) return `bg-rose-400 dark:bg-rose-700`;
   return `bg-rose-500 dark:bg-rose-600`;
