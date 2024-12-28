@@ -143,15 +143,16 @@ const getValueColor = (value: number) => {
     <h5
       class="mb-2 -mt-1.5 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
     >
-      Draft Recap
+      Draft Recap (Beta)
     </h5>
-    <p class="max-w-3xl mb-4 text-gray-900 dark:text-gray-300">
+    <p
+      class="max-w-3xl mb-4 text-sm text-gray-600 sm:text-base dark:text-gray-300"
+    >
       Draft pick scores are calculated based on each player's current positional
       rank compared to where they were drafted. The sum of these scores is
-      listed by each manager's name. Higher values (green) indicate better picks
-      (Note: these rankings are in beta, scores and pick order may be
-      misleading/inaccurate).
+      listed by each manager's name.
     </p>
+    <hr class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700" />
     <div v-if="data.length > 0">
       <div
         class="grid gap-0.5 mb-2 text-gray-900 dark:text-gray-200"
