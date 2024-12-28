@@ -71,8 +71,9 @@ export const calculateDraftRank = (
     DEF: 0.4,
   };
   if (positionRank === 0) return roundToOneDecimal(-5); // player did not play
+  const adjustRound1 = round === 1 ? 3 : 0;
   const rank =
-    ((pickNumber - positionRank) / pickNumber) *
+    ((pickNumber + adjustRound1 - positionRank) / pickNumber) *
     roundMultiplier *
     positionWeights[position] *
     getTierMultiplier(position, positionRank);
