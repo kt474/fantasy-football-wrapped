@@ -260,7 +260,9 @@ export const getDraftPicks = async (
         rank: playerStats,
         pickRank: calculateDraftRank(
           pick["pick_no"],
-          seasonType === "Dynasty" ? playerStats / 6 : playerStats,
+          seasonType === "Dynasty" && draftPicks.length < 100
+            ? playerStats / 6
+            : playerStats,
           pick["round"],
           pick["metadata"]["position"]
         ),
