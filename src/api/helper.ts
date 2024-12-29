@@ -71,13 +71,14 @@ export const calculateDraftRank = (
     DEF: 0.4,
   };
   if (positionRank === 0) return roundToOneDecimal(-5); // player did not play
+  const posWeightMultiplier =
+    position in positionWeights ? positionWeights[position] : 1;
   const adjustRound1 = round === 1 ? 3 : 0;
   const rank =
     ((pickNumber + adjustRound1 - positionRank) / pickNumber) *
     roundMultiplier *
-    positionWeights[position]
-      ? positionWeights[position]
-      : 1 * getTierMultiplier(position, positionRank);
+    posWeightMultiplier *
+    getTierMultiplier(position, positionRank);
   return roundToOneDecimal(rank < -5 ? -5 : rank);
 };
 
