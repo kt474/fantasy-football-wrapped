@@ -116,7 +116,7 @@ const getBgColor = (position: string) => {
   } else if (position === "DEF") {
     return "bg-rose-300 dark:bg-rose-800";
   } else {
-    return "bg-white dark:bg-gray-800";
+    return "bg-neutral-300 dark:bg-neutral-700";
   }
 };
 

@@ -75,8 +75,9 @@ export const calculateDraftRank = (
   const rank =
     ((pickNumber + adjustRound1 - positionRank) / pickNumber) *
     roundMultiplier *
-    positionWeights[position] *
-    getTierMultiplier(position, positionRank);
+    positionWeights[position]
+      ? positionWeights[position]
+      : 1 * getTierMultiplier(position, positionRank);
   return roundToOneDecimal(rank < -5 ? -5 : rank);
 };
 
