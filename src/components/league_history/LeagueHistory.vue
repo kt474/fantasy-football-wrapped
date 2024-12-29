@@ -10,6 +10,7 @@ import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
 import MostPoints from "./MostPoints.vue";
 import FewestPoints from "./FewestPoints.vue";
+import ManagerComparison from "./ManagerComparison.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -745,6 +746,7 @@ const worstManager = computed(() => {
     />
   </div>
   <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
+  <ManagerComparison v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
   <div v-if="!isLoading" class="flex flex-wrap mt-4 md:flex-nowrap">
     <MostPoints :tableData="dataAllYears" />
     <FewestPoints :tableData="dataAllYears" class="mt-4 ml-0 md:mt-0 md:ml-4" />

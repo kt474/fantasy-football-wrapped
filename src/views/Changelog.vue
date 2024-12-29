@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "12/29/24",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added a new manager comparison section in the league history tab to compare manager stats like record, points per game, championships, etc.",
+        ],
+      },
+    ],
+  },
+  {
     date: "12/27/24",
     content: [
       {
