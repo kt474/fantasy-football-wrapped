@@ -112,6 +112,19 @@ const manager2Champs = computed(() => {
   );
 });
 
+const seriesData = computed(() => {
+  return [
+    {
+      name: currentManager1.value.name,
+      data: currentManager1.value.pointSeason[0].points,
+    },
+    {
+      name: currentManager2.value.name,
+      data: currentManager2.value.pointSeason[0].points,
+    },
+  ];
+});
+
 watch(
   managers,
   (newManagers) => {
@@ -122,6 +135,155 @@ watch(
   },
   { immediate: true }
 );
+
+watch(
+  () => store.darkMode,
+  () => updateChartColor()
+);
+
+watch(
+  () => store.currentLeagueId,
+  () => updateChartColor()
+);
+
+const updateChartColor = () => {
+  chartOptions.value = {
+    ...chartOptions.value,
+    chart: {
+      height: 350,
+      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      type: "line",
+      zoom: {
+        enabled: false,
+      },
+      toolbar: {
+        show: false,
+      },
+      animations: {
+        enabled: false,
+      },
+    },
+    colors: ["#f97316", "#22c55e"],
+    tooltip: {
+      theme: store.darkMode ? "dark" : "light",
+    },
+    dataLabels: {
+      enabled: true,
+    },
+    stroke: {
+      curve: "smooth",
+    },
+    grid: {
+      borderColor: "#e7e7e7",
+      row: {
+        colors: store.darkMode
+          ? ["#374151", "transparent"]
+          : ["#f3f3f3", "transparent"],
+        opacity: 0.5,
+      },
+    },
+    markers: {
+      size: 1,
+    },
+    xaxis: {
+      title: {
+        text: "Week",
+        style: {
+          fontSize: "16px",
+          fontFamily:
+            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+          fontWeight: 600,
+        },
+      },
+    },
+    yaxis: {
+      title: {
+        text: "Points",
+        style: {
+          fontSize: "16px",
+          fontFamily:
+            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+          fontWeight: 600,
+        },
+      },
+    },
+    legend: {
+      position: "top",
+      horizontalAlign: "right",
+      floating: true,
+      offsetY: -25,
+      offsetX: -5,
+    },
+  };
+};
+
+const chartOptions = ref({
+  chart: {
+    height: 350,
+    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    type: "line",
+    zoom: {
+      enabled: false,
+    },
+    toolbar: {
+      show: false,
+    },
+    animations: {
+      enabled: false,
+    },
+  },
+  colors: ["#f97316", "#22c55e"],
+  tooltip: {
+    theme: store.darkMode ? "dark" : "light",
+  },
+  dataLabels: {
+    enabled: true,
+  },
+  stroke: {
+    curve: "smooth",
+  },
+  grid: {
+    borderColor: "#e7e7e7",
+    row: {
+      colors: store.darkMode
+        ? ["#374151", "transparent"]
+        : ["#f3f3f3", "transparent"],
+      opacity: 0.5,
+    },
+  },
+  markers: {
+    size: 1,
+  },
+  xaxis: {
+    title: {
+      text: "Week",
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
+    },
+  },
+  yaxis: {
+    title: {
+      text: "Points",
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
+    },
+  },
+  legend: {
+    position: "top",
+    horizontalAlign: "right",
+    floating: true,
+    offsetY: -25,
+    offsetX: -5,
+  },
+});
 </script>
 <template>
   <div class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6">
@@ -173,7 +335,9 @@ watch(
                     v-model="manager1"
                     class="block py-1.5 px-0 w-32 sm:w-60 truncate text-base text-gray-700 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-200 dark:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-200 peer -mt-2 ml-2"
                   >
-                    <option v-for="manager in managers">{{ manager }}</option>
+                    <option v-for="manager in managers" :value="manager">
+                      {{ manager }}
+                    </option>
                   </select>
                 </form>
               </div>
@@ -204,7 +368,9 @@ watch(
                     v-model="manager2"
                     class="block py-1.5 px-0 w-32 sm:w-60 truncate text-base text-gray-700 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-200 dark:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-200 peer -mt-2 ml-2"
                   >
-                    <option v-for="manager in managers">{{ manager }}</option>
+                    <option v-for="manager in managers" :value="manager">
+                      {{ manager }}
+                    </option>
                   </select>
                 </form>
               </div>
@@ -434,7 +600,7 @@ watch(
               </p>
             </td>
           </tr>
-          <tr class="bg-white dark:bg-gray-800">
+          <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th
               scope="row"
               class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
@@ -466,7 +632,17 @@ watch(
           </tr>
         </tbody>
       </table>
+      <p class="mt-4 ml-6 font-semibold text-gray-700 dark:text-gray-200">
+        Recent Performances
+      </p>
     </div>
+    <apexchart
+      class="mt-4"
+      type="line"
+      height="350"
+      :options="chartOptions"
+      :series="seriesData"
+    ></apexchart>
   </div>
 </template>
 <style scoped>
