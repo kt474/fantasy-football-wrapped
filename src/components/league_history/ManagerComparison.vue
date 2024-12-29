@@ -90,6 +90,28 @@ const matchupRecord2 = computed(() => {
   return `${losses}-${wins}`;
 });
 
+const manager1Champs = computed(() => {
+  return (
+    currentManager1.value.leagueWinner.filter(
+      (item: any) => item === currentManager1.value.rosterId
+    ).length >
+    currentManager2.value.leagueWinner.filter(
+      (item: any) => item === currentManager2.value.rosterId
+    ).length
+  );
+});
+
+const manager2Champs = computed(() => {
+  return (
+    currentManager2.value.leagueWinner.filter(
+      (item: any) => item === currentManager2.value.rosterId
+    ).length >
+    currentManager1.value.leagueWinner.filter(
+      (item: any) => item === currentManager1.value.rosterId
+    ).length
+  );
+});
+
 watch(
   managers,
   (newManagers) => {
@@ -197,7 +219,13 @@ watch(
             >
               Championships
             </th>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  manager1Champs,
+              }"
+            >
               <p class="text-center">
                 {{
                   currentManager1.leagueWinner.filter(
@@ -206,7 +234,13 @@ watch(
                 }}
               </p>
             </td>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  manager2Champs,
+              }"
+            >
               <p class="text-center">
                 {{
                   currentManager2.leagueWinner.filter(
@@ -223,12 +257,30 @@ watch(
             >
               Record
             </th>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  currentManager1.wins /
+                    (currentManager1.losses + currentManager1.wins) >
+                  currentManager2.wins /
+                    (currentManager2.losses + currentManager2.wins),
+              }"
+            >
               <p class="text-center">
                 {{ `${currentManager1.wins}-${currentManager1.losses}` }}
               </p>
             </td>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  currentManager1.wins /
+                    (currentManager1.losses + currentManager1.wins) <
+                  currentManager2.wins /
+                    (currentManager2.losses + currentManager2.wins),
+              }"
+            >
               <p class="text-center">
                 {{ `${currentManager2.wins}-${currentManager2.losses}` }}
               </p>
@@ -241,10 +293,22 @@ watch(
             >
               Total points
             </th>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  currentManager1.points > currentManager2.points,
+              }"
+            >
               <p class="text-center">{{ currentManager1.points }}</p>
             </td>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  currentManager1.points < currentManager2.points,
+              }"
+            >
               <p class="text-center">{{ currentManager2.points }}</p>
             </td>
           </tr>
@@ -255,7 +319,16 @@ watch(
             >
               Points per game
             </th>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  currentManager1.points /
+                    (currentManager1.wins + currentManager1.losses) >
+                  currentManager2.points /
+                    (currentManager2.wins + currentManager2.losses),
+              }"
+            >
               <p class="text-center">
                 {{
                   Math.round(
@@ -266,7 +339,16 @@ watch(
                 }}
               </p>
             </td>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  currentManager1.points /
+                    (currentManager1.wins + currentManager1.losses) <
+                  currentManager2.points /
+                    (currentManager2.wins + currentManager2.losses),
+              }"
+            >
               <p class="text-center">
                 {{
                   Math.round(
@@ -311,7 +393,16 @@ watch(
             >
               Manager efficiency
             </th>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  currentManager1.managerEfficiency /
+                    currentManager1.seasons.length >
+                  currentManager2.managerEfficiency /
+                    currentManager2.seasons.length,
+              }"
+            >
               <p class="text-center">
                 {{
                   (
@@ -322,7 +413,16 @@ watch(
                 }}%
               </p>
             </td>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  currentManager1.managerEfficiency /
+                    currentManager1.seasons.length <
+                  currentManager2.managerEfficiency /
+                    currentManager2.seasons.length,
+              }"
+            >
               <p class="text-center">
                 {{
                   (
@@ -341,12 +441,24 @@ watch(
             >
               H2H
             </th>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  Number(matchupRecord[0]) > Number(matchupRecord2[0]),
+              }"
+            >
               <p class="text-center">
                 {{ matchupRecord }}
               </p>
             </td>
-            <td class="px-3 py-4 sm:px-6">
+            <td
+              class="px-3 py-4 sm:px-6"
+              :class="{
+                'font-semibold text-gray-800 dark:text-gray-200 bg-blue-100 dark:bg-blue-800':
+                  Number(matchupRecord[0]) < Number(matchupRecord2[0]),
+              }"
+            >
               <p class="text-center">
                 {{ matchupRecord2 }}
               </p>
