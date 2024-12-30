@@ -632,10 +632,10 @@ const chartOptions = ref({
           </tr>
         </tbody>
       </table>
-      <p class="mt-4 ml-6 font-semibold text-gray-700 dark:text-gray-200">
-        Recent Performances
-      </p>
     </div>
+    <p class="mt-4 ml-3 font-semibold text-gray-700 sm:ml-6 dark:text-gray-200">
+      Recent Performances
+    </p>
     <apexchart
       class="mt-4"
       type="line"
