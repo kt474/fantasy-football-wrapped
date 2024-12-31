@@ -24,8 +24,8 @@ const getTierMultiplier = (position: string, rank: number) => {
       return 0.7; // Deep bench
 
     case "TE":
-      if (rank <= 3) return 2.5; // Elite TEs
-      if (rank <= 6) return 1.8; // Strong TE1s
+      if (rank <= 3) return 2.0; // Elite TEs
+      if (rank <= 6) return 1.6; // Strong TE1s
       if (rank <= 12) return 1.4; // Startable TEs
       if (rank <= 18) return 1.1; // Backup TEs
       return 0.8; // Deep bench
@@ -61,11 +61,10 @@ export const calculateDraftRank = (
   round: number,
   position: string
 ) => {
-  const roundMultiplier = 1 + 1 / Math.pow(1.5, round - 1);
   const positionWeights: any = {
     RB: 1.0,
     WR: 0.9,
-    TE: 1.2,
+    TE: 1.1,
     QB: 0.7,
     K: 0.4,
     DEF: 0.4,
@@ -76,7 +75,6 @@ export const calculateDraftRank = (
   const adjustRound1 = round === 1 ? 3 : 0;
   const rank =
     ((pickNumber + adjustRound1 - positionRank) / pickNumber) *
-    roundMultiplier *
     posWeightMultiplier *
     getTierMultiplier(position, positionRank);
   return roundToOneDecimal(rank < -5 ? -5 : rank);

@@ -82,7 +82,7 @@ const changeTab = (tab: string) => {
             store.currentTab === 'weeklyReport',
         }"
       >
-        <span class="hidden sm:inline">Weekly</span> Report
+        Weekly Report
       </button>
     </li>
     <li class="cursor-pointer me-2">
