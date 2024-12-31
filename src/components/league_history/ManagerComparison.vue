@@ -294,7 +294,7 @@ const chartOptions = ref({
     </h5>
     <div class="relative overflow-x-auto rounded-lg">
       <table
-        class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
+        class="w-full min-w-[648px] text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
       >
         <thead
           :class="
@@ -333,7 +333,7 @@ const chartOptions = ref({
                   <select
                     id="underline_select"
                     v-model="manager1"
-                    class="block py-1.5 px-0 w-32 sm:w-60 truncate text-base text-gray-700 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-200 dark:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-200 peer -mt-2 ml-2"
+                    class="block py-1.5 px-0 w-32 md:w-40 lg:w-48 xl:w-60 truncate text-base text-gray-700 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-200 dark:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-200 peer -mt-2 ml-2"
                   >
                     <option v-for="manager in managers" :value="manager">
                       {{ manager }}
@@ -343,7 +343,7 @@ const chartOptions = ref({
               </div>
             </th>
             <th scope="col" class="px-3 py-3 sm:px-6">
-              <div class="flex mt-1 ml-4 lg:ml-20">
+              <div class="flex mt-1 ml-0 lg:ml-20">
                 <img
                   alt="User avatar"
                   v-if="currentManager2.avatarImg"
@@ -366,7 +366,7 @@ const chartOptions = ref({
                   <select
                     id="underline_select"
                     v-model="manager2"
-                    class="block py-1.5 px-0 w-32 sm:w-60 truncate text-base text-gray-700 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-200 dark:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-200 peer -mt-2 ml-2"
+                    class="block py-1.5 px-0 w-32 md:w-40 lg:w-48 xl:w-60 truncate text-base text-gray-700 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-200 dark:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-200 peer -mt-2 ml-2"
                   >
                     <option v-for="manager in managers" :value="manager">
                       {{ manager }}
