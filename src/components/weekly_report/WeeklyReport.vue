@@ -612,7 +612,7 @@ watch(
         v-for="index in numOfMatchups"
         class="block px-4 py-2.5 my-2 mr-4 text-gray-600 bg-white border border-gray-200 rounded-lg shadow w-80 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
       >
-        <div v-for="(user, i) in sortedTableData">
+        <div v-for="user in sortedTableData">
           <div v-if="user.matchups[currentWeek - 1] == index">
             <div class="flex justify-between my-2">
               <div class="flex">
@@ -636,7 +636,7 @@ watch(
                 </svg>
                 <div>
                   <p class="px-2 -mt-1 truncate max-w-28 xl:max-w-44">
-                    {{ user.name ? user.name : `Team ${i}` }}
+                    {{ user.name ? user.name : "Ghost Roster" }}
                   </p>
                   <p class="ml-2 text-xs">
                     ({{ getRecord(user.recordByWeek, currentWeek) }})

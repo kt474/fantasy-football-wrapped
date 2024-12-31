@@ -184,7 +184,7 @@ const listPadding = computed(() => {
             :class="listPadding"
             class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-56 whitespace-nowrap dark:text-white"
           >
-            {{ item.name }}
+            {{ item.name ? item.name : "Ghost Roster" }}
           </th>
           <td
             class="py-2 pl-1 pr-3"

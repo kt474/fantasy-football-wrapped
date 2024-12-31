@@ -74,7 +74,8 @@ const listPadding = computed(() => {
               <p
                 class="w-48 text-sm font-medium text-gray-900 truncate dark:text-white"
               >
-                {{ index + 1 }}.&nbsp; {{ user.name }}
+                {{ index + 1 }}.&nbsp;
+                {{ user.name ? user.name : "Ghost Roster" }}
               </p>
             </div>
             <div

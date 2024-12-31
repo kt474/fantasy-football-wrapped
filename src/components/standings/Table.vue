@@ -421,7 +421,9 @@ const cardHeight = computed(() => {
                     />
                   </svg>
                   <p class="ml-2">{{ index + 1 }}.&nbsp;</p>
-                  <p class="truncate max-w-36 sm:max-w-48">{{ item.name }}</p>
+                  <p class="truncate max-w-36 sm:max-w-48">
+                    {{ item.name ? item.name : `Ghost Roster` }}
+                  </p>
                 </div>
               </th>
               <td
