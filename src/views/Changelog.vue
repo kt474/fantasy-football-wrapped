@@ -5,6 +5,18 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "1/3/24",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "For completed leagues the roster projections now show data from the entire season instead of data from only the remaining weeks.",
+          "Added better error handling so 2025 leagues are supported.",
+        ],
+      },
+    ],
+  },
+  {
     date: "12/29/24",
     content: [
       {
