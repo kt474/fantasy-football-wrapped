@@ -31,7 +31,7 @@ const tableData = computed(() => {
 });
 
 const getProbability = (actualWins: number, meanWins: number, std: number) => {
-  const zScore = (actualWins - meanWins) / std;
+  const zScore = std !== 0 ? (actualWins - meanWins) / std : 0;
   return zScoreToPValue(zScore);
 };
 

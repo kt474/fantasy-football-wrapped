@@ -14,6 +14,7 @@ const props = defineProps<{
 const weeklyReport: any = ref("");
 const rawWeeklyReport: any = ref("");
 const playerNames = ref([]);
+const loading = ref(false);
 
 const weeks = computed(() => {
   if (
@@ -112,8 +113,10 @@ onMounted(async () => {
     store.leagueInfo[store.currentLeagueIndex] &&
     !store.leagueInfo[store.currentLeagueIndex].weeklyReport
   ) {
+    loading.value = true;
     await fetchPlayerNames();
     await getReport();
+    loading.value = false;
   } else if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex]
@@ -211,9 +214,13 @@ const numOfMatchups = computed(() => {
 });
 
 const sortedTableData = computed(() => {
-  return [...props.tableData].sort(
-    (a, b) => a.points[currentWeek.value - 1] - b.points[currentWeek.value - 1]
-  );
+  if (props.tableData[0].points) {
+    return [...props.tableData].sort(
+      (a, b) =>
+        a.points[currentWeek.value - 1] - b.points[currentWeek.value - 1]
+    );
+  }
+  return [];
 });
 
 const seriesData = computed(() => {
@@ -391,8 +398,10 @@ watch(
     currentWeek.value = weeks.value[0];
     if (!store.leagueInfo[store.currentLeagueIndex].weeklyReport) {
       weeklyReport.value = "";
+      loading.value = true;
       await fetchPlayerNames();
       await getReport();
+      loading.value = false;
     }
     weeklyReport.value =
       store.leagueInfo[store.currentLeagueIndex].weeklyReport;
@@ -443,7 +452,6 @@ watch(
 </script>
 <template>
   <div
-    v-if="props.tableData[0].matchups"
     class="h-full px-6 pt-4 mt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex items-center justify-between mb-3">
@@ -532,7 +540,7 @@ watch(
           just in the kitchen.
         </p>
       </div>
-      <div v-else>
+      <div v-else-if="loading">
         <div role="status" class="space-y-2.5 animate-pulse max-w-lg mt-2.5">
           <p class="text-gray-900 dark:text-gray-300">Generating Summary...</p>
           <div class="flex items-center w-full">

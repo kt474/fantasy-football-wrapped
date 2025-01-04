@@ -8,6 +8,7 @@ import { fakeUsers } from "../../api/helper.ts";
 
 const store = useStore();
 const data: any = ref([]);
+const loading = ref(false);
 
 const draftOrder = computed(() => {
   if (data.value.length > 0) {
@@ -37,7 +38,9 @@ onMounted(async () => {
     store.leagueInfo[store.currentLeagueIndex] &&
     !store.leagueInfo[store.currentLeagueIndex].draftPicks
   ) {
+    loading.value = true;
     await getData();
+    loading.value = false;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
     data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks;
   } else if (store.leagueInfo.length == 0) {
@@ -50,7 +53,9 @@ watch(
   async () => {
     if (!store.leagueInfo[store.currentLeagueIndex].draftPicks) {
       data.value = [];
+      loading.value = true;
       await getData();
+      loading.value = false;
     }
     data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks;
   }
@@ -153,7 +158,7 @@ const getValueColor = (value: number) => {
       listed by each manager's name.
     </p>
     <hr class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700" />
-    <div v-if="data.length > 0">
+    <div v-if="!loading">
       <div
         class="grid gap-0.5 mb-2 text-gray-900 dark:text-gray-200"
         :style="{
