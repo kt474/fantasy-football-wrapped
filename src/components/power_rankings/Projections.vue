@@ -16,6 +16,7 @@ const categories = computed(() => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex] &&
     !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
   ) {
     loading.value = true;
@@ -27,6 +28,8 @@ onMounted(async () => {
 
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const lastScoredWeek =
+    currentLeague.status === "complete" ? 0 : currentLeague.lastScoredWeek;
   await Promise.all(
     currentLeague.rosters.map(async (roster: any) => {
       const singleRoster: any[] = [];
@@ -35,7 +38,7 @@ const getData = async () => {
         return getProjections(
           player,
           currentLeague.season,
-          currentLeague.lastScoredWeek ? currentLeague.lastScoredWeek : 0,
+          lastScoredWeek,
           currentLeague.scoringType
         );
       });
@@ -56,7 +59,10 @@ const getData = async () => {
 };
 
 const formattedData = computed(() => {
-  if (store.leagueInfo.length == 0) {
+  if (
+    store.leagueInfo.length == 0 ||
+    !store.leagueInfo[store.currentLeagueIndex]
+  ) {
     return fakeProjectionData;
   }
   const topPositions = ["RB", "WR"];
