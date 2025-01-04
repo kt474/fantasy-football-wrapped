@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { fakeDraftData } from "../../api/draft.ts";
 import { ref, onMounted, computed, watch } from "vue";
-import { getDraftPicks } from "../../api/api";
+import { getDraftPicks, getDraftMetadata } from "../../api/api";
 import { LeagueInfoType } from "../../api/types.ts";
 import { useStore } from "../../store/store";
 import { fakeUsers } from "../../api/helper.ts";
@@ -9,14 +9,31 @@ import { fakeUsers } from "../../api/helper.ts";
 const store = useStore();
 const data: any = ref([]);
 const loading = ref(false);
+const draftOrder: any = ref([]);
+const draftType = ref("snake");
+const roundReversal = ref(0);
 
-const draftOrder = computed(() => {
-  if (data.value.length > 0) {
-    return data.value.slice(0, draftSize.value).map((pick: any) => {
-      return getTeamName(pick.userId);
-    });
-  }
-});
+const getDraftOrder = async () => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const metadata: any = await getDraftMetadata(currentLeague.draftId);
+  const draftOrderData = metadata["draft_order"];
+  const result = Object.keys(draftOrderData).sort(
+    (a, b) => draftOrderData[a] - draftOrderData[b]
+  );
+  draftOrder.value = result.map((userId) => getTeamName(userId));
+  roundReversal.value = metadata["settings"]["reversal_round"];
+  draftType.value = metadata["type"];
+
+  store.addDraftMetadata(currentLeague.leagueId, {
+    order: draftOrder.value,
+    roundReversal: roundReversal.value,
+    draftType: draftType.value,
+  });
+  localStorage.setItem(
+    "leagueInfo",
+    JSON.stringify(store.leagueInfo as LeagueInfoType[])
+  );
+};
 
 const draftSize = computed(() => {
   if (store.leagueInfo && store.leagueInfo[store.currentLeagueIndex]) {
@@ -39,12 +56,22 @@ onMounted(async () => {
     !store.leagueInfo[store.currentLeagueIndex].draftPicks
   ) {
     loading.value = true;
+    await getDraftOrder();
     await getData();
     loading.value = false;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
     data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks;
+    draftOrder.value =
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata["order"];
+    roundReversal.value =
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata["roundReversal"];
+    draftType.value =
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata["draftType"];
   } else if (store.leagueInfo.length == 0) {
     data.value = fakeDraftData;
+    draftOrder.value = data.value.slice(0, draftSize.value).map((pick: any) => {
+      return getTeamName(pick.userId);
+    });
   }
 });
 
@@ -53,11 +80,19 @@ watch(
   async () => {
     if (!store.leagueInfo[store.currentLeagueIndex].draftPicks) {
       data.value = [];
+      draftOrder.value = [];
       loading.value = true;
+      await getDraftOrder();
       await getData();
       loading.value = false;
     }
     data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks;
+    draftOrder.value =
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata["order"];
+    roundReversal.value =
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata["roundReversal"];
+    draftType.value =
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata["draftType"];
   }
 );
 
@@ -69,20 +104,38 @@ const getData = async () => {
     currentLeague.scoringType,
     currentLeague.seasonType
   );
-  const roundGroups = draftPicks.reduce((acc: any, pick: any) => {
-    if (!acc[pick.round]) {
-      acc[pick.round] = [];
-    }
-    acc[pick.round].push(pick);
-    return acc;
-  }, {});
+  if (draftType.value === "snake") {
+    const roundGroups = draftPicks.reduce((acc: any, pick: any) => {
+      if (!acc[pick.round]) {
+        acc[pick.round] = [];
+      }
+      acc[pick.round].push(pick);
+      return acc;
+    }, {});
 
-  // Apply snake pattern and flatten
-  data.value = Object.entries(roundGroups)
-    .map(([round, picks]: [any, any]) => {
-      return parseInt(round) % 2 === 0 ? [...picks].reverse() : picks;
-    })
-    .flat();
+    data.value = Object.entries(roundGroups)
+      .map(([round, picks]: [any, any]) => {
+        const roundNum = parseInt(round);
+        if (roundReversal.value === 3) {
+          // For round 1: never reverse
+          // For rounds 2-3: reverse on even rounds
+          // For rounds 4+: reverse on odd rounds
+          if (roundNum === 1) {
+            return picks;
+          } else if (roundNum <= 2) {
+            return roundNum % 2 === 0 ? [...picks].reverse() : picks;
+          } else {
+            return roundNum % 2 === 1 ? [...picks].reverse() : picks;
+          }
+        } else {
+          // Regular snake: reverse every even round
+          return roundNum % 2 === 0 ? [...picks].reverse() : picks;
+        }
+      })
+      .flat();
+  } else {
+    data.value = draftPicks;
+  }
 
   store.addDraftPicks(currentLeague.leagueId, data.value);
   localStorage.setItem(
@@ -126,9 +179,21 @@ const getBgColor = (position: string) => {
 };
 
 const getRoundPick = (draftSlot: number, round: number) => {
-  if (round % 2 == 0) {
-    return Math.abs(draftSlot - draftSize.value) + 1;
-  } else return draftSlot;
+  if (roundReversal.value === 3) {
+    if (round <= 2) {
+      return round % 2 === 0
+        ? Math.abs(draftSlot - draftSize.value) + 1
+        : draftSlot;
+    } else {
+      return round % 2 === 1
+        ? Math.abs(draftSlot - draftSize.value) + 1
+        : draftSlot;
+    }
+  } else {
+    if (round % 2 == 0) {
+      return Math.abs(draftSlot - draftSize.value) + 1;
+    } else return draftSlot;
+  }
 };
 
 const getValueColor = (value: number) => {

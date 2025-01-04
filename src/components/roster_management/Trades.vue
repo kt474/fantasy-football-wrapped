@@ -13,6 +13,7 @@ interface Trade {
   adds: Record<number, any[]>;
   draft_picks: any[];
   waiver_budget: any[];
+  week: number;
 }
 
 const getData = async () => {
@@ -36,6 +37,7 @@ const getData = async () => {
       adds: grouped,
       draft_picks: trade.draft_picks ? trade.draft_picks : [],
       waiver_budget: trade.waiver_budget ? trade.waiver_budget : [],
+      week: trade.leg,
     };
   });
 
@@ -62,6 +64,7 @@ const getData = async () => {
           waiverBudget: trade.waiver_budget.filter(
             (budget) => budget.receiver === trade.roster_ids[1]
           ),
+          week: trade.week,
         },
         team2: {
           user: getRosterName(trade.roster_ids[0]),
@@ -72,6 +75,7 @@ const getData = async () => {
           waiverBudget: trade.waiver_budget.filter(
             (budget) => budget.receiver === trade.roster_ids[0]
           ),
+          week: trade.week,
         },
       };
     })

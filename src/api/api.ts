@@ -227,14 +227,19 @@ export const getAllLeagues = async (userId: string, season: string) => {
   return await response.json();
 };
 
+export const getDraftMetadata = async (draftId: string) => {
+  const response = await fetch(`https://api.sleeper.app/v1/draft/${draftId}`);
+  return await response.json();
+};
+
 export const getDraftPicks = async (
-  leagueId: string,
+  draftId: string,
   season: string,
   scoringType: number,
   seasonType: string
 ) => {
   const response = await fetch(
-    `https://api.sleeper.app/v1/draft/${leagueId}/picks`
+    `https://api.sleeper.app/v1/draft/${draftId}/picks`
   );
   const draftPicks = await response.json();
 

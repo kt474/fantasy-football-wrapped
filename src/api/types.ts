@@ -31,6 +31,7 @@ export type LeagueInfoType = {
   playoffType: number;
   draftId: string;
   draftPicks: any[];
+  draftMetadata: any;
 };
 
 export type RosterType = {
