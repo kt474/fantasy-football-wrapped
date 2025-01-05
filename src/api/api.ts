@@ -4,7 +4,7 @@ import {
   getTrades,
   calculateDraftRank,
 } from "./helper";
-import { round } from "lodash";
+import { round, mean } from "lodash";
 
 export const seasonType: { [key: number]: string } = {
   0: "Redraft",
@@ -147,6 +147,34 @@ export const getStats = async (
         ppg: result["stats"][ppg] / result["stats"]["gp"],
       }
     : 0;
+};
+
+export const getTradeValue = async (
+  player: string,
+  year: string,
+  weekTraded: number,
+  scoringType: number
+) => {
+  let rank = "pos_rank_ppr";
+  if (scoringType === 0) {
+    rank = "pos_rank_std";
+  } else if (scoringType === 0.5) {
+    rank = "pos_rank_half_ppr";
+  }
+  const response = await fetch(
+    `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
+  );
+  const result = await response.json();
+  const weeklyRanks = Object.values(result)
+    .slice(weekTraded)
+    .map((week: any) => {
+      return week && week["stats"] ? week["stats"][rank] : 0;
+    })
+    .filter((num) => num !== 0 && num !== 999);
+
+  return weeklyRanks.length > 1
+    ? parseFloat(mean(weeklyRanks).toFixed(1))
+    : null;
 };
 
 export const getWeeklyProjections = async (

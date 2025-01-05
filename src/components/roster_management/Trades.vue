@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { LeagueInfoType } from "../../api/types.ts";
-import { getPlayerNames } from "../../api/api.ts";
+import { getPlayerNames, getTradeValue } from "../../api/api.ts";
 import { fakeRosters, fakeTrades, fakeUsers } from "../../api/helper";
 import { useStore } from "../../store/store";
 
@@ -65,6 +65,18 @@ const getData = async () => {
             (budget) => budget.receiver === trade.roster_ids[1]
           ),
           week: trade.week,
+          value: trade.adds[trade.roster_ids[1]]
+            ? await Promise.all(
+                trade.adds[trade.roster_ids[1]].map((player) =>
+                  getTradeValue(
+                    player,
+                    currentLeague.season,
+                    trade.week,
+                    currentLeague.scoringType
+                  )
+                )
+              )
+            : [],
         },
         team2: {
           user: getRosterName(trade.roster_ids[0]),
@@ -76,6 +88,18 @@ const getData = async () => {
             (budget) => budget.receiver === trade.roster_ids[0]
           ),
           week: trade.week,
+          value: trade.adds[trade.roster_ids[0]]
+            ? await Promise.all(
+                trade.adds[trade.roster_ids[0]].map((player) =>
+                  getTradeValue(
+                    player,
+                    currentLeague.season,
+                    trade.week,
+                    currentLeague.scoringType
+                  )
+                )
+              )
+            : [],
         },
       };
     })
@@ -106,6 +130,16 @@ const getOrdinalSuffix = (number: number) => {
   const v = number % 100;
 
   return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+};
+
+const getValueColor = (value: number) => {
+  if (value <= 10) return `bg-emerald-600 dark:bg-emerald-500 bg-opacity-80`;
+  if (value <= 20) return `bg-emerald-500 dark:bg-emerald-600 bg-opacity-80`;
+  if (value <= 25) return `bg-emerald-400 dark:bg-emerald-700 bg-opacity-100`;
+  if (value <= 35) return "bg-gray-400 bg-opacity-65";
+  if (value <= 45) return `bg-rose-300 dark:bg-rose-800`;
+  if (value <= 55) return `bg-rose-400 dark:bg-rose-700`;
+  return `bg-rose-500 dark:bg-rose-600`;
 };
 
 onMounted(async () => {
@@ -142,11 +176,18 @@ watch(
     >
       League Trades
     </h1>
+    <p
+      class="max-w-xl mt-1 mb-3 text-sm text-gray-600 sm:text-base dark:text-gray-300"
+    >
+      Values next to each player are the average positional ranking for every
+      week after the trade date. Lower numbers indicate better performance.
+    </p>
     <div v-if="tradeData.length > 0" class="flex flex-wrap w-full">
       <div
         v-for="trade in tradeData"
-        class="block h-48 p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow w-80 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 sm:w-96"
+        class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow max-h-64 w-80 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 sm:w-96"
       >
+        <!-- Team name and avatar -->
         <div v-if="trade.team1" class="flex justify-between">
           <div v-if="trade.team1.user" class="flex w-40">
             <img
@@ -198,32 +239,41 @@ watch(
         <hr class="h-px mt-3 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
         <div v-if="trade.team2" class="flex justify-evenly">
           <div
-            class="ml-2 w-44"
+            class="w-44"
             :class="
-              trade.team2.players.length +
-                trade.team2.draftPicks.length +
-                trade.team2.waiverBudget.length >
+              trade.team1.players.length +
+                trade.team1.draftPicks.length +
+                trade.team1.waiverBudget.length >
               4
                 ? 'text-sm'
                 : 'text-base'
             "
           >
-            <p
-              v-for="player in trade.team2.players"
-              class="truncate max-w-28 sm:max-w-36"
+            <div
+              v-for="index in trade.team1.players.length"
+              class="flex justify-between mt-1.5 max-w-28 sm:max-w-36"
             >
-              {{ player }}
-            </p>
-            <p v-for="pick in trade.team2.draftPicks">
+              <p class="truncate max-w-24">
+                {{ trade.team1.players[index - 1] }}
+              </p>
+              <p
+                v-if="trade.team1.value[index - 1]"
+                class="p-1 font-semibold -mt-0.5 -mr-1 rounded-full"
+                :class="[getValueColor(trade.team1.value[index - 1])]"
+              >
+                {{ trade.team1.value[index - 1] }}
+              </p>
+            </div>
+            <p v-for="pick in trade.team1.draftPicks" class="mt-1.5">
               {{ pick ? pick.season : "" }}
               {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
             </p>
-            <p v-for="budget in trade.team2.waiverBudget">
+            <p v-for="budget in trade.team1.waiverBudget" class="mt-1.5">
               {{ budget ? `$${budget.amount} FAAB` : "" }}
             </p>
           </div>
           <svg
-            class="w-6 h-6 text-gray-900 dark:text-gray-300"
+            class="w-6 h-6 mt-1.5 -mr-3 text-gray-900 dark:text-gray-300"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -242,25 +292,34 @@ watch(
           <div
             class="ml-6 w-44"
             :class="
-              trade.team1.players.length +
-                trade.team1.draftPicks.length +
-                trade.team1.waiverBudget.length >
+              trade.team2.players.length +
+                trade.team2.draftPicks.length +
+                trade.team2.waiverBudget.length >
               4
                 ? 'text-sm'
                 : 'text-base'
             "
           >
-            <p
-              v-for="player in trade.team1.players"
-              class="truncate max-w-28 sm:max-w-36"
+            <div
+              v-for="index in trade.team2.players.length"
+              class="flex justify-between mt-1.5 max-w-28 sm:max-w-36"
             >
-              {{ player }}
-            </p>
-            <p v-for="pick in trade.team1.draftPicks">
+              <p class="truncate max-w-24">
+                {{ trade.team2.players[index - 1] }}
+              </p>
+              <p
+                v-if="trade.team2.value[index - 1]"
+                class="p-1 font-semibold -mt-0.5 -mr-1 rounded-full"
+                :class="[getValueColor(trade.team2.value[index - 1])]"
+              >
+                {{ trade.team2.value[index - 1] }}
+              </p>
+            </div>
+            <p v-for="pick in trade.team2.draftPicks" class="mt-1.5">
               {{ pick ? pick.season : "" }}
               {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
             </p>
-            <p v-for="budget in trade.team1.waiverBudget">
+            <p v-for="budget in trade.team2.waiverBudget" class="mt-1.5">
               {{ budget ? `$${budget.amount} FAAB` : "" }}
             </p>
           </div>

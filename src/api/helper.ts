@@ -369,6 +369,7 @@ export const fakeTrades = [
       players: ["J.K. Dobbins"],
       draftPicks: [],
       waiverBudget: [],
+      value: [19],
     },
     team2: {
       user: {
@@ -381,6 +382,7 @@ export const fakeTrades = [
       players: ["Zack Moss", "Tyler Allgeier"],
       draftPicks: [],
       waiverBudget: [],
+      value: [32.8, 41.2],
     },
   },
   {
@@ -395,6 +397,7 @@ export const fakeTrades = [
       players: ["Justice Hill"],
       draftPicks: [],
       waiverBudget: [],
+      value: [38.8],
     },
     team2: {
       user: {
@@ -407,6 +410,7 @@ export const fakeTrades = [
       players: ["Tyjae Spears"],
       draftPicks: [],
       waiverBudget: [],
+      value: [34],
     },
   },
   {
@@ -421,6 +425,7 @@ export const fakeTrades = [
       players: ["Tank Bigsby"],
       draftPicks: [],
       waiverBudget: [],
+      value: [40],
     },
     team2: {
       user: {
@@ -433,6 +438,7 @@ export const fakeTrades = [
       players: ["Jordan Love"],
       draftPicks: [],
       waiverBudget: [],
+      value: [17],
     },
   },
   {
@@ -447,6 +453,7 @@ export const fakeTrades = [
       players: ["Justice Hill", "Quentin Johnston", "Jayden Daniels"],
       draftPicks: [],
       waiverBudget: [],
+      value: [38.8, 44.4, 11.5],
     },
     team2: {
       user: {
@@ -459,6 +466,7 @@ export const fakeTrades = [
       players: ["Jalen Hurts", "Tank Dell", "Tyjae Spears"],
       draftPicks: [],
       waiverBudget: [],
+      value: [9.7, 37, 34],
     },
   },
   {
@@ -473,6 +481,7 @@ export const fakeTrades = [
       players: ["Aaron Jones", "Cam Akers", "Najee Harris", "Cedric Tillman"],
       draftPicks: [],
       waiverBudget: [],
+      value: [17.3, 44.5, 25.7, 49.6],
     },
     team2: {
       user: {
@@ -485,6 +494,7 @@ export const fakeTrades = [
       players: ["Alvin Kamara", "Bo Nix"],
       draftPicks: [],
       waiverBudget: [],
+      value: [16.3, 15],
     },
   },
   {
@@ -499,6 +509,7 @@ export const fakeTrades = [
       players: ["Nick Chubb", "Courtland Sutton", "James Cook", "Bucky Irving"],
       draftPicks: [],
       waiverBudget: [],
+      value: [30.5, 27.4, 13.4, 15.2],
     },
     team2: {
       user: {
@@ -516,6 +527,7 @@ export const fakeTrades = [
       ],
       draftPicks: [],
       waiverBudget: [],
+      value: [48.6, 46.2, 7.2, 53],
     },
   },
 ];

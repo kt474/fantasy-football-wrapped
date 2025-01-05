@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "1/5/24",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added rankings next to each player in the trades section. The value represents the average positional ranking for every week after the trade date. ",
+        ],
+      },
+    ],
+  },
+  {
     date: "1/4/24",
     content: [
       {
