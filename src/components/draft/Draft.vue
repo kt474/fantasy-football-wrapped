@@ -239,7 +239,7 @@ const getValueColor = (value: number) => {
           class="flex flex-wrap items-center justify-center"
         >
           <p v-if="team" class="mr-1.5 font-semibold">
-            {{ teamRanks[team.id].toFixed(1) }}
+            {{ teamRanks[team.id] ? teamRanks[team.id].toFixed(1) : "" }}
           </p>
           <img
             alt="User avatar"
