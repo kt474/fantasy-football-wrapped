@@ -78,7 +78,10 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
-    if (!store.leagueInfo[store.currentLeagueIndex].draftPicks) {
+    if (
+      store.leagueInfo[store.currentLeagueIndex] &&
+      !store.leagueInfo[store.currentLeagueIndex].draftPicks
+    ) {
       data.value = [];
       draftOrder.value = [];
       loading.value = true;
