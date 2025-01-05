@@ -128,17 +128,25 @@ export const getStats = async (
   year: string,
   scoringType: number
 ) => {
-  let scoring = "pos_rank_ppr";
+  let rank = "pos_rank_ppr";
+  let ppg = "pts_ppr";
   if (scoringType === 0) {
-    scoring = "pos_rank_std";
+    rank = "pos_rank_std";
+    ppg = "pts_std";
   } else if (scoringType === 0.5) {
-    scoring = "pos_rank_half_ppr";
+    rank = "pos_rank_half_ppr";
+    ppg = "pts_half_ppr";
   }
   const response = await fetch(
     `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}`
   );
   const result = await response.json();
-  return result ? result["stats"][scoring] : 0;
+  return result
+    ? {
+        rank: result["stats"][rank],
+        ppg: result["stats"][ppg] / result["stats"]["gp"],
+      }
+    : 0;
 };
 
 export const getWeeklyProjections = async (
@@ -245,7 +253,7 @@ export const getDraftPicks = async (
 
   const picksWithStats = await Promise.all(
     draftPicks.map(async (pick: any) => {
-      const playerStats = await getStats(
+      const playerStats: any = await getStats(
         pick["player_id"],
         season,
         scoringType
@@ -262,14 +270,14 @@ export const getDraftPicks = async (
         round: pick["round"],
         rosterId: pick["roster_id"],
         userId: pick["picked_by"],
-        rank: playerStats,
+        rank: playerStats["rank"],
         pickRank: calculateDraftRank(
           pick["pick_no"],
           seasonType === "Dynasty" && draftPicks.length < 100
-            ? playerStats / 6
-            : playerStats,
-          pick["round"],
-          pick["metadata"]["position"]
+            ? playerStats["rank"] / 6
+            : playerStats["rank"],
+          pick["metadata"]["position"],
+          playerStats["ppg"]
         ),
       };
     })

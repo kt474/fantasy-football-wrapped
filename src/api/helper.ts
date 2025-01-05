@@ -58,8 +58,8 @@ const roundToOneDecimal = (number: number) => {
 export const calculateDraftRank = (
   pickNumber: number,
   positionRank: number,
-  round: number,
-  position: string
+  position: string,
+  ppg: number
 ) => {
   const positionWeights: any = {
     RB: 1.0,
@@ -69,15 +69,15 @@ export const calculateDraftRank = (
     K: 0.4,
     DEF: 0.4,
   };
-  if (positionRank === 0) return roundToOneDecimal(-5); // player did not play
+  if (positionRank === 0) return roundToOneDecimal(0); // player did not play
   const posWeightMultiplier =
     position in positionWeights ? positionWeights[position] : 1;
-  const adjustRound1 = round === 1 ? 3 : 0;
-  const rank =
-    ((pickNumber + adjustRound1 - positionRank) / pickNumber) *
-    posWeightMultiplier *
-    getTierMultiplier(position, positionRank);
-  return roundToOneDecimal(rank < -5 ? -5 : rank);
+  const baseMultiplier =
+    posWeightMultiplier * getTierMultiplier(position, positionRank);
+  const rankScore = ((pickNumber - positionRank) / pickNumber) * baseMultiplier;
+  const ppgScore = (ppg / 25) * baseMultiplier; // 25 is generally around the max ppg for a season
+  const finalScore = roundToOneDecimal(rankScore * 0.7 + ppgScore * 0.3);
+  return Number(finalScore) > -3 ? finalScore : roundToOneDecimal(-3);
 };
 
 export const createTableData = (

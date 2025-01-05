@@ -5,6 +5,23 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "1/4/24",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Fixed the draft order to correctly support leagues that use a third round reversal.",
+        ],
+      },
+      {
+        type: "Update",
+        text: [
+          "The draft rank formula has been updated to take points per game into account.",
+        ],
+      },
+    ],
+  },
+  {
     date: "1/3/24",
     content: [
       {

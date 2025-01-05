@@ -11,7 +11,7 @@ export const fakeDraftData = [
     rosterId: 10,
     userId: "1",
     rank: 67,
-    pickRank: "-5.0",
+    pickRank: "-3.0",
   },
   {
     firstName: "CeeDee",
@@ -25,7 +25,7 @@ export const fakeDraftData = [
     rosterId: 8,
     userId: "2",
     rank: 4,
-    pickRank: "-3.2",
+    pickRank: "-1.4",
   },
   {
     firstName: "Bijan",
@@ -39,7 +39,7 @@ export const fakeDraftData = [
     rosterId: 3,
     userId: "3",
     rank: 4,
-    pickRank: "-1.3",
+    pickRank: "0.0",
   },
   {
     firstName: "Tyreek",
@@ -53,7 +53,7 @@ export const fakeDraftData = [
     rosterId: 6,
     userId: "4",
     rank: 22,
-    pickRank: "-5.0",
+    pickRank: "-2.6",
   },
   {
     firstName: "Ja'Marr",
@@ -81,7 +81,7 @@ export const fakeDraftData = [
     rosterId: 4,
     userId: "6",
     rank: 16,
-    pickRank: "-4.7",
+    pickRank: "-1.7",
   },
   {
     firstName: "Justin",
