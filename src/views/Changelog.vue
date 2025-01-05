@@ -219,7 +219,9 @@ const data = [
           <ul
             class="space-y-1 text-gray-800 list-disc list-inside dark:text-gray-300"
           >
-            <li v-for="text in content.text" class="text-base">{{ text }}</li>
+            <li v-for="text in content.text" class="my-1 text-base">
+              {{ text }}
+            </li>
           </ul>
         </div>
         <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
