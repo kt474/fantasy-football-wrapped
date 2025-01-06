@@ -49,6 +49,17 @@ const teamRanks = computed(() => {
   }, {});
 });
 
+const dynastyFormat = computed(() => {
+  if (
+    store.leagueInfo[store.currentLeagueIndex] &&
+    store.leagueInfo[store.currentLeagueIndex].seasonType === "Dynasty" &&
+    draftType.value === "linear"
+  ) {
+    return true;
+  }
+  return false;
+});
+
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
@@ -239,7 +250,7 @@ const getValueColor = (value: number) => {
           class="flex flex-wrap items-center justify-center"
         >
           <p v-if="team" class="mr-1.5 font-semibold">
-            {{ teamRanks[team.id] ? teamRanks[team.id].toFixed(1) : "" }}
+            {{ teamRanks[team.id] ? teamRanks[team.id].toFixed(1) : "0.0" }}
           </p>
           <img
             alt="User avatar"
@@ -272,6 +283,7 @@ const getValueColor = (value: number) => {
         }"
       >
         <div
+          v-if="!dynastyFormat"
           v-for="pick in data"
           class="block h-20 p-2.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
           :class="getBgColor(pick.position)"
@@ -290,6 +302,33 @@ const getValueColor = (value: number) => {
             >
               {{ pick.pickRank }}
             </p>
+          </div>
+        </div>
+        <div v-else v-for="team in draftOrder">
+          <div v-for="pick in data">
+            <div
+              v-if="team.id === pick.userId"
+              class="block h-20 p-2.5 mb-0.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
+              :class="getBgColor(pick.position)"
+            >
+              <p class="font-semibold truncate">
+                {{ `${pick.firstName.charAt(0)}. ${pick.lastName}` }}
+              </p>
+              <p>{{ `${pick.position} - ${pick.team}` }}</p>
+              <div class="flex justify-between text-sm">
+                <p>
+                  {{
+                    `${pick.round}.${getRoundPick(pick.draftSlot, pick.round)}`
+                  }}
+                </p>
+                <p
+                  class="p-1 font-semibold -mt-0.5 -mr-1 rounded-full"
+                  :class="[getValueColor(parseFloat(pick.pickRank))]"
+                >
+                  {{ pick.pickRank }}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
