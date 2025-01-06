@@ -49,7 +49,7 @@ const getTierMultiplier = (position: string, rank: number) => {
   }
 };
 
-const roundToOneDecimal = (number: number) => {
+export const roundToOneDecimal = (number: number) => {
   const rounded = parseFloat(number.toFixed(1));
   // If it's effectively zero after rounding, return 0.0
   return rounded === 0 ? "0.0" : rounded.toFixed(1);

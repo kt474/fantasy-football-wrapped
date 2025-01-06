@@ -2,7 +2,12 @@
 import { ref, onMounted, watch } from "vue";
 import { LeagueInfoType } from "../../api/types.ts";
 import { getPlayerNames, getTradeValue } from "../../api/api.ts";
-import { fakeRosters, fakeTrades, fakeUsers } from "../../api/helper";
+import {
+  fakeRosters,
+  fakeTrades,
+  fakeUsers,
+  roundToOneDecimal,
+} from "../../api/helper";
 import { useStore } from "../../store/store";
 
 const store = useStore();
@@ -177,10 +182,11 @@ watch(
       League Trades
     </h1>
     <p
-      class="max-w-xl mt-1 mb-3 text-sm text-gray-600 sm:text-base dark:text-gray-300"
+      class="max-w-2xl mt-1 mb-3 text-sm text-gray-600 sm:text-base dark:text-gray-300"
     >
       Values next to each player are the average positional ranking for every
-      week after the trade date. Lower numbers indicate better performance.
+      week after the trade date (only weeks played are counted). Lower numbers
+      indicate better performance.
     </p>
     <div v-if="tradeData.length > 0" class="flex flex-wrap w-full">
       <div
@@ -261,7 +267,7 @@ watch(
                 class="p-1 font-semibold -mt-0.5 -mr-1 rounded-full"
                 :class="[getValueColor(trade.team1.value[index - 1])]"
               >
-                {{ trade.team1.value[index - 1] }}
+                {{ roundToOneDecimal(trade.team1.value[index - 1]) }}
               </p>
             </div>
             <p v-for="pick in trade.team1.draftPicks" class="mt-1.5">
@@ -312,7 +318,7 @@ watch(
                 class="p-1 font-semibold -mt-0.5 -mr-1 rounded-full"
                 :class="[getValueColor(trade.team2.value[index - 1])]"
               >
-                {{ trade.team2.value[index - 1] }}
+                {{ roundToOneDecimal(trade.team2.value[index - 1]) }}
               </p>
             </div>
             <p v-for="pick in trade.team2.draftPicks" class="mt-1.5">
