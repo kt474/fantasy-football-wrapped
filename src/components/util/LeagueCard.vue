@@ -5,7 +5,9 @@ import { onMounted } from "vue";
 import { initFlowbite } from "flowbite";
 import { getData, inputLeague } from "../../api/api";
 import { LeagueInfoType } from "../../api/types";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 onMounted(() => {
   initFlowbite();
 });
@@ -71,11 +73,11 @@ const removeLeague = () => {
       delete currentData[props.leagueInfo.leagueId];
       if (Object.keys(currentData).length == 0) {
         localStorage.removeItem("originalData");
+        router.replace("/");
       } else {
         localStorage.originalData = JSON.stringify(currentData);
       }
     }
-    window.history.replaceState({}, document.title, window.location.pathname);
     setTimeout(() => {
       store.updateRemovedAlert(false);
     }, 3000);

@@ -286,7 +286,10 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <div class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6">
+  <div
+    v-if="manager1 && manager2"
+    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
+  >
     <h5
       class="-mt-1.5 mb-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
     >

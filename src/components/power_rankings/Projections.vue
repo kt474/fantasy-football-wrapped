@@ -353,7 +353,8 @@ const chartOptions = ref({
         <p
           class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
         >
-          Rest of season projected points data from the Sleeper API.
+          Rest of season projected points data from the Sleeper API. If the
+          season is complete, entire season projections are shown.
         </p>
       </div>
       <HeatMap :formattedData="formattedData" class="mt-4" />

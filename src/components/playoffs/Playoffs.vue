@@ -767,10 +767,10 @@ const numberOfLoserRounds = computed(() => {
   @media (width >= 1536px) {
     width: 17.5rem;
   }
-  @media (1300px <width < 1536px) {
+  @media (1280px <width < 1536px) {
     width: 16.5rem;
   }
-  @media (width <= 1300px) {
+  @media (width <= 1280) {
     width: 13rem;
   }
 }
