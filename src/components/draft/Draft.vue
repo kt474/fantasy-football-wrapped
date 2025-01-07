@@ -16,11 +16,15 @@ const roundReversal = ref(0);
 const getDraftOrder = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   const metadata: any = await getDraftMetadata(currentLeague.draftId);
-  const draftOrderData = metadata["draft_order"];
-  const result = Object.keys(draftOrderData).sort(
-    (a, b) => draftOrderData[a] - draftOrderData[b]
-  );
-  draftOrder.value = result.map((userId) => getTeamName(userId));
+  // sleeper api draft_order sometimes doesn't include all teams?
+  // using slot_to_roster_id instead
+  const draftOrderData = Object.values(metadata["slot_to_roster_id"]);
+  draftOrder.value = draftOrderData.map((rosterId) => {
+    return getTeamName(
+      currentLeague.rosters.find((roster) => roster.rosterId === rosterId).id
+    );
+  });
+
   roundReversal.value = metadata["settings"]["reversal_round"];
   draftType.value = metadata["type"];
 
@@ -49,15 +53,16 @@ const teamRanks = computed(() => {
   }, {});
 });
 
-const dynastyFormat = computed(() => {
+const snakeDraftFormat = computed(() => {
   if (
     store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].seasonType === "Dynasty" &&
-    draftType.value === "linear"
+    ((store.leagueInfo[store.currentLeagueIndex].seasonType === "Dynasty" &&
+      draftType.value === "linear") ||
+      draftType.value === "auction")
   ) {
-    return true;
+    return false;
   }
-  return false;
+  return true;
 });
 
 onMounted(async () => {
@@ -283,7 +288,7 @@ const getValueColor = (value: number) => {
         }"
       >
         <div
-          v-if="!dynastyFormat"
+          v-if="snakeDraftFormat"
           v-for="pick in data"
           class="block h-20 p-2.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
           :class="getBgColor(pick.position)"
@@ -304,6 +309,7 @@ const getValueColor = (value: number) => {
             </p>
           </div>
         </div>
+        <!-- auction or dynasy linear drafts  -->
         <div v-else v-for="team in draftOrder">
           <div v-for="pick in data">
             <div
