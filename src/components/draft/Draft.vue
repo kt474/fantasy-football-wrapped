@@ -18,11 +18,14 @@ const getDraftOrder = async () => {
   const metadata: any = await getDraftMetadata(currentLeague.draftId);
   // sleeper api draft_order sometimes doesn't include all teams?
   // using slot_to_roster_id instead
-  const draftOrderData = Object.values(metadata["slot_to_roster_id"]);
+  const draftOrderData = Object.values(metadata["slot_to_roster_id"]).filter(
+    (item) => item != null
+  );
   draftOrder.value = draftOrderData.map((rosterId) => {
-    return getTeamName(
-      currentLeague.rosters.find((roster) => roster.rosterId === rosterId).id
+    const rosterObj = currentLeague.rosters.find(
+      (roster) => roster.rosterId === rosterId
     );
+    if (rosterObj) return getTeamName(rosterObj.id);
   });
 
   roundReversal.value = metadata["settings"]["reversal_round"];
@@ -278,6 +281,7 @@ const getValueColor = (value: number) => {
           <p v-if="team" class="w-20 text-sm text-center truncate">
             {{ team.name }}
           </p>
+          <p v-else class="w-20 text-sm text-center truncate">No user</p>
         </div>
       </div>
       <div
