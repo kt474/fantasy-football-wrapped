@@ -235,7 +235,7 @@ const getValueColor = (value: number) => {
     <h5
       class="mb-2 -mt-1.5 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
     >
-      Draft Recap (Beta)
+      Draft Recap
     </h5>
     <p
       class="max-w-3xl mb-4 text-sm text-gray-600 sm:text-base dark:text-gray-300"

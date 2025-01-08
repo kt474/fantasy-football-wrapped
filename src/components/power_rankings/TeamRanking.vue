@@ -107,18 +107,18 @@ watch(
             <img
               v-if="player.position !== 'DEF'"
               alt="Player image"
-              class="object-cover w-16 mx-2"
+              class="object-cover w-16 h-16 mx-2 sm:h-auto"
               :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
             />
             <img
               v-else
               alt="Defense image"
-              class="object-cover w-16 mx-2"
+              class="object-cover w-16 h-16 mx-2 sm:h-auto"
               :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
             />
             <div class="w-full mt-0.5 ml-3">
               <div class="flex justify-between px-2 mt-1 mb-4">
-                <p class="text-lg font-semibold">
+                <p class="text-base font-semibold sm:text-lg">
                   {{ index + 1 }}.
                   {{
                     player.position !== "DEF" && player.firstName
@@ -128,7 +128,9 @@ watch(
                   {{ player.lastName }}
                 </p>
                 <div class="px-3 py-1 bg-gray-100 rounded-lg dark:bg-gray-900">
-                  <p class="truncate max-w-28">{{ getTeamName(player.id) }}</p>
+                  <p class="truncate max-w-24 sm:max-w-28">
+                    {{ getTeamName(player.id) }}
+                  </p>
                 </div>
               </div>
               <div class="flex">
@@ -136,7 +138,7 @@ watch(
                   class="w-full px-3 py-1 m-1 bg-gray-100 rounded-lg dark:bg-gray-900"
                 >
                   <p class="text-gray-600 dark:text-gray-500">Points:</p>
-                  <p class="text-lg font-semibold">
+                  <p class="text-base font-semibold sm:text-lg">
                     {{ player.points ? player.points.toFixed(1) : 0 }}
                   </p>
                 </div>
@@ -144,7 +146,7 @@ watch(
                   class="w-full px-3 py-1 m-1 bg-gray-100 rounded-lg dark:bg-gray-900"
                 >
                   <p class="text-gray-600 dark:text-gray-500">PPG:</p>
-                  <p class="text-lg font-semibold">
+                  <p class="text-base font-semibold sm:text-lg">
                     {{ player.ppg ? player.ppg.toFixed(1) : 0 }}
                   </p>
                 </div>

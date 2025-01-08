@@ -279,7 +279,7 @@ watch(
             </p>
           </div>
           <svg
-            class="w-6 h-6 mt-1.5 -mr-3 text-gray-900 dark:text-gray-300"
+            class="w-6 h-6 mt-1.5 sm:-mr-3 -mr-4 text-gray-900 dark:text-gray-300"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -339,7 +339,7 @@ watch(
         store.leagueInfo[store.currentLeagueIndex].trades.length === 0
       "
     >
-      <p>No trades have been made.</p>
+      <p class="text-gray-600 dark:text-gray-300">No trades have been made.</p>
     </div>
     <div v-else class="flex flex-wrap">
       <div
