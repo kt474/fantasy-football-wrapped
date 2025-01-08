@@ -24,6 +24,7 @@ import Projections from "../power_rankings/Projections.vue";
 import PlayoffPercentages from "../playoffs/PlayoffPercentages.vue";
 import WeeklyReport from "../weekly_report/WeeklyReport.vue";
 import Draft from "../draft/Draft.vue";
+import TeamRanking from "../power_rankings/TeamRanking.vue";
 
 const tableOrder = ref("wins");
 const hover = ref("");
@@ -571,6 +572,7 @@ const cardHeight = computed(() => {
         class="mt-4"
       />
       <Projections class="mt-4" />
+      <TeamRanking :tableData="tableData" class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'expectedWins'">
       <div class="flex flex-wrap md:flex-nowrap">

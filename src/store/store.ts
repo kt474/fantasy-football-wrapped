@@ -118,6 +118,12 @@ export const useStore = defineStore("main", {
         item.draftMetadata = payload;
       }
     },
+    addPlayerRankings(leagueId: string, payload: any) {
+      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      if (item) {
+        item.playerRankings = payload;
+      }
+    },
     addYearEndReport(leagueId: string, payload: string) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {

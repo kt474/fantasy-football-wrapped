@@ -32,6 +32,7 @@ export type LeagueInfoType = {
   draftId: string;
   draftPicks: any[];
   draftMetadata: any;
+  playerRankings: any;
 };
 
 export type RosterType = {

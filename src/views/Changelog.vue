@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "1/8/24",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added a new section in the power rankings tab to show top performers in each position.",
+        ],
+      },
+    ],
+  },
+  {
     date: "1/6/24",
     content: [
       {

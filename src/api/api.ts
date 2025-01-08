@@ -144,9 +144,15 @@ export const getStats = async (
   return result
     ? {
         rank: result["stats"][rank],
+        points: result["stats"][ppg],
         ppg: result["stats"][ppg] / result["stats"]["gp"],
+        firstName: result["player"]["first_name"],
+        lastName: result["player"]["last_name"],
+        position: result["player"]["position"],
+        team: result["player"]["position"],
+        id: result["player_id"],
       }
-    : 0;
+    : null;
 };
 
 export const getTradeValue = async (
