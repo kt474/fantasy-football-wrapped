@@ -49,7 +49,7 @@ const seriesData = computed(() => {
       if (user) {
         if (res.name === user.name) {
           res.data.push({
-            x: "Final Placement",
+            x: "Final Pos.",
             y: user.placement,
           });
         }

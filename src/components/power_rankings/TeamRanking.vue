@@ -101,7 +101,7 @@ watch(
         </div>
         <div
           v-for="(player, index) in players"
-          class="my-4 bg-white border rounded-lg shadow h-36 dark:bg-gray-800"
+          class="my-4 bg-white border border-gray-200 rounded-lg shadow dark:border-gray-700 h-36 dark:bg-gray-800"
         >
           <div class="flex p-1 mt-1">
             <img
@@ -118,7 +118,7 @@ watch(
             />
             <div class="w-full mt-0.5 ml-3">
               <div class="flex justify-between px-2 mt-1 mb-4">
-                <p class="text-base font-semibold sm:text-lg">
+                <p class="text-base font-semibold truncate sm:text-lg">
                   {{ index + 1 }}.
                   {{
                     player.position !== "DEF" && player.firstName
@@ -128,7 +128,7 @@ watch(
                   {{ player.lastName }}
                 </p>
                 <div class="px-3 py-1 bg-gray-100 rounded-lg dark:bg-gray-900">
-                  <p class="truncate max-w-24 sm:max-w-28">
+                  <p class="text-sm truncate sm:text-base max-w-16 sm:max-w-28">
                     {{ getTeamName(player.id) }}
                   </p>
                 </div>
