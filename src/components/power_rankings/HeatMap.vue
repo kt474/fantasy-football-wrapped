@@ -100,6 +100,14 @@ const updateChartColor = () => {
       colors: ["#fff"],
       width: 1,
     },
+    yaxis: {
+      labels: {
+        formatter: function (str: string) {
+          const n = 15;
+          return str.length > n ? str.slice(0, n - 1) + "..." : str;
+        },
+      },
+    },
     plotOptions: {
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       heatmap: {
@@ -202,6 +210,14 @@ const chartOptions = ref({
   },
   legend: {
     show: false,
+  },
+  yaxis: {
+    labels: {
+      formatter: function (str: string) {
+        const n = 15;
+        return str.length > n ? str.slice(0, n - 1) + "..." : str;
+      },
+    },
   },
 });
 </script>

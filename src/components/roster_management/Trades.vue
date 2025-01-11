@@ -174,7 +174,7 @@ watch(
 </script>
 <template>
   <div
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
+    class="w-full py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6"
   >
     <h1
       class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
@@ -182,7 +182,7 @@ watch(
       League Trades
     </h1>
     <p
-      class="max-w-2xl mt-1 mb-3 text-sm text-gray-600 sm:text-base dark:text-gray-300"
+      class="max-w-80 sm:max-w-2xl mt-1 mb-3 text-sm text-gray-600 sm:text-base dark:text-gray-300"
     >
       Values next to each player are the average positional ranking for every
       week after the trade date (only weeks played are counted). Lower numbers
@@ -191,7 +191,7 @@ watch(
     <div v-if="tradeData.length > 0" class="flex flex-wrap w-full">
       <div
         v-for="trade in tradeData"
-        class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow max-h-64 w-80 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 sm:w-96"
+        class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow max-h-64 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-width"
       >
         <!-- Team name and avatar -->
         <div v-if="trade.team1" class="flex justify-between">
@@ -257,7 +257,7 @@ watch(
           >
             <div
               v-for="index in trade.team1.players.length"
-              class="flex justify-between mt-1.5 max-w-28 sm:max-w-36"
+              class="flex justify-between mt-1.5 max-w-28 lg:max-w-36"
             >
               <p class="truncate max-w-24">
                 {{ trade.team1.players[index - 1] }}
@@ -308,7 +308,7 @@ watch(
           >
             <div
               v-for="index in trade.team2.players.length"
-              class="flex justify-between mt-1.5 max-w-28 sm:max-w-36"
+              class="flex justify-between mt-1.5 max-w-28 lg:max-w-36"
             >
               <p class="truncate max-w-24">
                 {{ trade.team2.players[index - 1] }}
@@ -384,3 +384,16 @@ watch(
     </div>
   </div>
 </template>
+<style scoped>
+.custom-width {
+  @media (width >= 1024px) {
+    width: 400px;
+  }
+  @media (width < 1024px) {
+    max-width: 345px;
+  }
+  @media (width >= 385px) {
+    min-width: 327px;
+  }
+}
+</style>

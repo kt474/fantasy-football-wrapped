@@ -34,7 +34,6 @@ const series = computed(() => {
   });
   return result;
 });
-
 const chartTextColor = computed(() => {
   return store.darkMode ? "#ffffff" : "#111827";
 });
@@ -181,6 +180,7 @@ const chartOptions = ref({
     <apexchart
       width="100%"
       height="475"
+      class="ml-4 sm:ml-0"
       :options="chartOptions"
       :series="series"
     ></apexchart>

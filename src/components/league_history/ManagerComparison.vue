@@ -636,7 +636,9 @@ const chartOptions = ref({
         </tbody>
       </table>
     </div>
-    <p class="mt-4 ml-3 font-semibold text-gray-700 sm:ml-6 dark:text-gray-200">
+    <p
+      class="mt-4 ml-3 font-semibold text-gray-700 sm:ml-6 sm:mb-0 mb-8 dark:text-gray-200"
+    >
       Recent Performances
     </p>
     <apexchart

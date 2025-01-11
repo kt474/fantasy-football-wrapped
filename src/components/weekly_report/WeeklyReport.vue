@@ -615,10 +615,10 @@ watch(
       <hr class="h-px mt-4 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
     </div>
     <p class="text-xl font-bold text-gray-900 dark:text-white">Matchups</p>
-    <div class="flex flex-wrap w-full mb-2 overflow-auto">
+    <div class="flex flex-wrap w-full mb-2 overflow-x-hidden">
       <div
         v-for="index in numOfMatchups"
-        class="block px-4 py-2.5 my-2 mr-4 text-gray-600 bg-white border border-gray-200 rounded-lg shadow w-80 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+        class="block px-4 py-2.5 my-2 mr-4 text-gray-600 bg-white border border-gray-200 rounded-lg shadow w-80 custom-min-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
       >
         <div v-for="user in sortedTableData">
           <div v-if="user.matchups[currentWeek - 1] == index">
@@ -685,3 +685,10 @@ watch(
     ></apexchart>
   </div>
 </template>
+<style scoped>
+.custom-min-width {
+  @media (width >= 390px) {
+    min-width: 306px;
+  }
+}
+</style>

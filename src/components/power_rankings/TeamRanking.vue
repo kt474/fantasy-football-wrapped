@@ -84,7 +84,7 @@ watch(
 </script>
 <template>
   <div
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
+    class="w-full py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6 min-w-80"
   >
     <h1
       class="pb-2 mb-4 text-3xl font-bold leading-none text-gray-900 dark:text-white"
@@ -95,7 +95,10 @@ watch(
       v-if="!loading"
       class="flex flex-wrap mt-2 text-gray-800 dark:text-gray-300"
     >
-      <div v-for="(players, position) in data" class="w-full mr-4 lg:w-96">
+      <div
+        v-for="(players, position) in data"
+        class="w-full mr-4 custom-min-width overflow-x-hidden"
+      >
         <div class="py-2 mb-4 bg-gray-200 rounded-lg dark:bg-gray-700">
           <p class="text-xl font-semibold text-center">{{ position }}</p>
         </div>
@@ -182,3 +185,13 @@ watch(
     </div>
   </div>
 </template>
+<style scoped>
+.custom-min-width {
+  @media (width >= 1024px) {
+    width: 400px;
+  }
+  @media (width >= 385px) {
+    min-width: 327px;
+  }
+}
+</style>
