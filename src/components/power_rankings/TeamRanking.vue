@@ -118,7 +118,9 @@ watch(
             />
             <div class="w-full mt-0.5 ml-3">
               <div class="flex justify-between px-2 mt-1 mb-4">
-                <p class="text-base font-semibold truncate sm:text-lg">
+                <p
+                  class="text-base font-semibold truncate sm:text-lg max-w-24 sm:max-w-32"
+                >
                   {{ index + 1 }}.
                   {{
                     player.position !== "DEF" && player.firstName

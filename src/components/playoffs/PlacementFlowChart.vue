@@ -150,7 +150,7 @@ watch(
       width="100%"
       :options="chartOptions"
       :series="seriesData"
-      class="flex justify-center lg:ml-3 xl:ml-6"
+      class="flex justify-center ml-3 xl:ml-4"
     ></apexchart>
     <div v-else class="text-gray-900 dark:text-white">
       <p class="pt-1 mt-2 border-t dark:bg-gray-800 dark:border-gray-700">
