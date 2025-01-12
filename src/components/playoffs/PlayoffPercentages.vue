@@ -245,6 +245,7 @@ const tableData = computed(() => {
   <div
     v-if="
       store.leagueInfo.length != 0 &&
+      store.leagueInfo[store.currentLeagueIndex] &&
       store.leagueInfo[store.currentLeagueIndex].status !== 'complete'
     "
   >

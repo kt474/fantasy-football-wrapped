@@ -125,6 +125,7 @@ const getRecord = (rosterId: number) => {
 const finalPlacements = computed(() => {
   if (
     store.leagueInfo.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex] &&
     store.leagueInfo[store.currentLeagueIndex].status != "complete"
   ) {
     return [];
@@ -188,8 +189,10 @@ const finalPlacements = computed(() => {
   }
   // some playoff formats leave teams out
   props.tableData.forEach((user) => {
-    if (!result.find((res: any) => res.id === user.id)) {
-      result.push(matchRosterId(user.rosterId, totalRosters.value / 2));
+    if (result.every((obj: any) => obj !== undefined)) {
+      if (!result.find((res: any) => res.id === user.id)) {
+        result.push(matchRosterId(user.rosterId, totalRosters.value / 2));
+      }
     }
   });
   return result.sort((a: any, b: any) => a.placement - b.placement);
