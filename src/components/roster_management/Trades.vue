@@ -243,7 +243,7 @@ watch(
           </div>
         </div>
         <hr class="h-px mt-3 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
-        <div v-if="trade.team2" class="flex justify-evenly">
+        <div v-if="trade.team2" class="flex justify-between">
           <div
             class="w-44"
             :class="
@@ -257,14 +257,14 @@ watch(
           >
             <div
               v-for="index in trade.team1.players.length"
-              class="flex justify-between mt-1.5 max-w-28 lg:max-w-36"
+              class="flex justify-between mt-1.5 max-w-32 lg:max-w-44"
             >
-              <p class="truncate max-w-24">
+              <p class="truncate max-w-28">
                 {{ trade.team1.players[index - 1] }}
               </p>
               <p
                 v-if="trade.team1.value[index - 1]"
-                class="p-1 font-semibold -mt-0.5 -mr-1 rounded-full"
+                class="p-1 font-semibold -mt-0.5 ml-1 rounded-full"
                 :class="[getValueColor(trade.team1.value[index - 1])]"
               >
                 {{ roundToOneDecimal(trade.team1.value[index - 1]) }}
@@ -279,7 +279,7 @@ watch(
             </p>
           </div>
           <svg
-            class="w-6 h-6 mt-1.5 sm:-mr-3 -mr-4 text-gray-900 dark:text-gray-300"
+            class="w-6 h-6 mt-1.5 mx-4 text-gray-900 dark:text-gray-300"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -296,7 +296,7 @@ watch(
             />
           </svg>
           <div
-            class="ml-6 w-44"
+            class="w-44"
             :class="
               trade.team2.players.length +
                 trade.team2.draftPicks.length +
@@ -308,14 +308,14 @@ watch(
           >
             <div
               v-for="index in trade.team2.players.length"
-              class="flex justify-between mt-1.5 max-w-28 lg:max-w-36"
+              class="flex justify-between mt-1.5 max-w-32 lg:max-w-44"
             >
-              <p class="truncate max-w-24">
+              <p class="truncate max-w-28">
                 {{ trade.team2.players[index - 1] }}
               </p>
               <p
                 v-if="trade.team2.value[index - 1]"
-                class="p-1 font-semibold -mt-0.5 -mr-1 rounded-full"
+                class="p-1 font-semibold -mt-0.5 ml-1 rounded-full"
                 :class="[getValueColor(trade.team2.value[index - 1])]"
               >
                 {{ roundToOneDecimal(trade.team2.value[index - 1]) }}
