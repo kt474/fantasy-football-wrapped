@@ -279,7 +279,7 @@ watch(
             </p>
           </div>
           <svg
-            class="w-6 h-6 mt-1.5 mx-4 text-gray-900 dark:text-gray-300"
+            class="w-6 h-6 mt-1.5 sm:mx-4 mx-2 text-gray-900 dark:text-gray-300 min-w-4"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
