@@ -55,7 +55,12 @@ onMounted(async () => {
     }
     const queryParams = new URLSearchParams(window.location.search);
     const leagueId = queryParams.get("leagueId");
-    if (leagueId && !store.leagueIds.includes(leagueId)) {
+    // sometimes on refresh the leagueId in the URL becomes undefined
+    if (
+      leagueId &&
+      leagueId !== "undefined" &&
+      !store.leagueIds.includes(leagueId)
+    ) {
       const checkInput: any = await getLeague(leagueId);
       if (checkInput["name"]) {
         store.updateCurrentLeagueId(leagueId);
@@ -71,6 +76,8 @@ onMounted(async () => {
         );
         store.updateLoadingLeague("");
       }
+    } else if (leagueId === "undefined") {
+      localStorage.clear(); // this might be an anti pattern
     }
   } catch {
     store.showLoadingAlert = true;

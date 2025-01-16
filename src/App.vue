@@ -28,9 +28,12 @@ watch(
     } else {
       localStorage.currentLeagueId = store.currentLeagueId;
       // update league id in url
-      const url: any = new URL(window.location.href);
-      url.searchParams.set("leagueId", store.currentLeagueId);
-      window.history.pushState({}, "", url.toString());
+      // sometimes errors to undefined, TODO
+      if (store.currentLeagueId !== "undefined") {
+        const url: any = new URL(window.location.href);
+        url.searchParams.set("leagueId", store.currentLeagueId);
+        window.history.pushState({}, "", url.toString());
+      }
     }
   }
 );
