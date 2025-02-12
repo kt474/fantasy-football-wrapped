@@ -5,7 +5,16 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
-    date: "1/8/24",
+    date: "2/11/25",
+    content: [
+      {
+        type: "Feature",
+        text: ["Draft picks can now be sorted by score."],
+      },
+    ],
+  },
+  {
+    date: "1/8/25",
     content: [
       {
         type: "Feature",
@@ -16,7 +25,7 @@ const data = [
     ],
   },
   {
-    date: "1/6/24",
+    date: "1/6/25",
     content: [
       {
         type: "Update",
@@ -27,7 +36,7 @@ const data = [
     ],
   },
   {
-    date: "1/5/24",
+    date: "1/5/25",
     content: [
       {
         type: "Feature",
@@ -38,7 +47,7 @@ const data = [
     ],
   },
   {
-    date: "1/4/24",
+    date: "1/4/25",
     content: [
       {
         type: "Fix",
@@ -55,7 +64,7 @@ const data = [
     ],
   },
   {
-    date: "1/3/24",
+    date: "1/3/25",
     content: [
       {
         type: "Fix",

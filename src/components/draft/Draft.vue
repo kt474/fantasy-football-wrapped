@@ -12,6 +12,16 @@ const loading = ref(false);
 const draftOrder: any = ref([]);
 const draftType = ref("snake");
 const roundReversal = ref(0);
+const sortOrder = ref("Draft Order");
+
+const sortedData = computed(() => {
+  if (sortOrder.value === "Draft Order") {
+    return data.value;
+  } else if (sortOrder.value === "Highest Score") {
+    return [...data.value].sort((a: any, b: any) => b.pickRank - a.pickRank);
+  }
+  return [...data.value].sort((a: any, b: any) => a.pickRank - b.pickRank);
+});
 
 const getDraftOrder = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
@@ -238,12 +248,28 @@ const getValueColor = (value: number) => {
       Draft Recap
     </h5>
     <p
-      class="max-w-3xl mb-4 text-sm text-gray-600 sm:text-base dark:text-gray-300"
+      class="max-w-3xl mb-2 text-sm text-gray-600 sm:text-base dark:text-gray-300"
     >
       Draft pick scores are calculated based on each player's current positional
       rank compared to where they were drafted. The sum of these scores is
       listed by each manager's name.
     </p>
+    <form class="max-w-sm mb-4">
+      <label
+        for="Sort order"
+        class="block text-sm mb-0.5 text-gray-600 dark:text-gray-300"
+        >Sort Picks</label
+      >
+      <select
+        id="sort order"
+        v-model="sortOrder"
+        class="bg-gray-50 border border-gray-300 text-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      >
+        <option selected>Draft Order</option>
+        <option>Highest Score</option>
+        <option>Lowest Score</option>
+      </select>
+    </form>
     <hr class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700" />
     <div v-if="!loading">
       <div
@@ -293,7 +319,7 @@ const getValueColor = (value: number) => {
       >
         <div
           v-if="snakeDraftFormat"
-          v-for="pick in data"
+          v-for="pick in sortedData"
           class="block h-20 p-2.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
           :class="getBgColor(pick.position)"
         >
