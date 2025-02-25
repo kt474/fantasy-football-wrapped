@@ -1,10 +1,3 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }],
-  "redirects": [
-    {
-      "source": "/blog/:path*",
-      "destination": "https://ffwrapped-blog.vercel.app/:path*",
-      "permanent": true
-    }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
