@@ -1,9 +1,9 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/" },
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }],
+  "redirects": [
     {
       "source": "/blog/:path*",
-      "destination": "https://ffwrapped-blog.vercel.app/:path*",
+      "destination": "https://your-vitepress-site.com/:path*",
       "permanent": true
     }
   ]
