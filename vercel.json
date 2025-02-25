@@ -3,7 +3,7 @@
   "redirects": [
     {
       "source": "/blog/:path*",
-      "destination": "https://your-vitepress-site.com/:path*",
+      "destination": "https://ffwrapped-blog.vercel.app/:path*",
       "permanent": true
     }
   ]
