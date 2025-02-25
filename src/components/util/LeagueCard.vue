@@ -67,13 +67,20 @@ const removeLeague = () => {
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentTab");
       store.currentTab = "standings";
+      // reset url if there are no leagues
+      router.replace({
+        path: "/",
+        query: {},
+      });
+      // sometimes the league id in the url persists
+      const baseUrl = window.location.origin + window.location.pathname;
+      window.history.pushState({}, "", baseUrl);
     }
     if (localStorage.originalData) {
       const currentData = JSON.parse(localStorage.originalData);
       delete currentData[props.leagueInfo.leagueId];
       if (Object.keys(currentData).length == 0) {
         localStorage.removeItem("originalData");
-        router.replace("/");
       } else {
         localStorage.originalData = JSON.stringify(currentData);
       }
