@@ -81,7 +81,7 @@ const extractRecord = (user: any, opponent: any) => {
           <tr>
             <th
               scope="col"
-              class="px-2 py-3 uppercase sm:px-6 w-60 dark:text-gray-200"
+              class="px-4 py-3 uppercase sm:px-6 w-60 dark:text-gray-200"
             >
               Team Name
             </th>
@@ -100,7 +100,7 @@ const extractRecord = (user: any, opponent: any) => {
           >
             <th
               scope="row"
-              class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
+              class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
             >
               {{ item.name ? item.name : "Ghost Roster" }}
             </th>

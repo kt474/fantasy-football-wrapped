@@ -308,7 +308,7 @@ const chartOptions = ref({
           <tr>
             <th
               scope="col"
-              class="px-3 py-3 text-gray-700 sm:px-6 dark:text-gray-200"
+              class="px-4 py-3 text-gray-700 sm:px-6 dark:text-gray-200"
             >
               Name
             </th>
@@ -384,7 +384,7 @@ const chartOptions = ref({
           <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th
               scope="row"
-              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+              class="px-4 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
             >
               Championships
             </th>
@@ -637,7 +637,7 @@ const chartOptions = ref({
       </table>
     </div>
     <p
-      class="mt-4 ml-3 font-semibold text-gray-700 sm:ml-6 sm:mb-0 mb-8 dark:text-gray-200"
+      class="mt-4 mb-8 ml-3 font-semibold text-gray-700 sm:ml-6 sm:mb-0 dark:text-gray-200"
     >
       Recent Performances
     </p>

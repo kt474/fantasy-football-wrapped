@@ -218,7 +218,7 @@ const cardHeight = computed(() => {
             class="text-xs text-gray-700 uppercase dark:text-gray-300"
           >
             <tr>
-              <th scope="col" class="px-2 py-3 sm:px-6 dark:text-gray-200">
+              <th scope="col" class="px-4 py-3 sm:px-6 dark:text-gray-200">
                 Team name
               </th>
               <th scope="col" class="px-2 py-3 sm:px-6">
@@ -400,7 +400,7 @@ const cardHeight = computed(() => {
             >
               <th
                 scope="row"
-                class="px-2 py-3 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+                class="px-4 py-3 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
               >
                 <div class="flex items-center">
                   <img

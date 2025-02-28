@@ -313,7 +313,7 @@ const tableData = computed(() => {
           class="text-xs text-gray-700 uppercase dark:text-gray-200"
         >
           <tr>
-            <th scope="col" class="px-2 py-3 sm:px-6 w-60 dark:text-gray-200">
+            <th scope="col" class="px-4 py-3 sm:px-6 w-60 dark:text-gray-200">
               Team Name
             </th>
             <th v-for="i in playoffTeams" scope="col" class="px-2 py-3">
@@ -343,7 +343,7 @@ const tableData = computed(() => {
           >
             <th
               scope="row"
-              class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
+              class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
             >
               {{ item.name }}
             </th>

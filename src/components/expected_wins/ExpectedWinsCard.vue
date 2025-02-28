@@ -75,7 +75,7 @@ const listPadding = computed(() => {
         class="text-xs text-gray-700 uppercase dark:text-gray-300"
       >
         <tr>
-          <th scope="col" class="px-2 py-3 sm:px-6 dark:text-gray-200">
+          <th scope="col" class="px-4 py-3 sm:px-6 dark:text-gray-200">
             Team Name
           </th>
 
@@ -193,7 +193,7 @@ const listPadding = computed(() => {
           <th
             scope="row"
             :class="listPadding"
-            class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-white"
+            class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-white"
           >
             {{ item.name ? item.name : "Ghost Roster" }}
           </th>
