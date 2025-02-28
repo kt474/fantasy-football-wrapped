@@ -75,7 +75,7 @@ const listPadding = computed(() => {
         class="text-xs text-gray-700 uppercase dark:text-gray-300"
       >
         <tr>
-          <th scope="col" class="px-2 py-3 sm:px-4 dark:text-gray-200">
+          <th scope="col" class="px-2 py-3 sm:px-6 dark:text-gray-200">
             Team Name
           </th>
 
@@ -89,7 +89,7 @@ const listPadding = computed(() => {
               Expected Wins
               <div>
                 <svg
-                  class="w-3 h-3 ms-1.5 fill-slate-400"
+                  class="w-3 h-3 ms-1.5 fill-slate-400 -ml-5"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50':
                       tableOrder == 'randomScheduleWins',
@@ -123,7 +123,7 @@ const listPadding = computed(() => {
               Wins above Expected
               <div>
                 <svg
-                  class="w-3 h-3 ms-1.5 fill-slate-400"
+                  class="w-3 h-3 ms-1.5 fill-slate-400 -ml-6"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50':
                       tableOrder == 'winsDifference',
@@ -193,7 +193,7 @@ const listPadding = computed(() => {
           <th
             scope="row"
             :class="listPadding"
-            class="px-2 font-medium text-gray-900 truncate sm:px-4 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-white"
+            class="px-2 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-white"
           >
             {{ item.name ? item.name : "Ghost Roster" }}
           </th>
