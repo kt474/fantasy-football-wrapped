@@ -78,12 +78,12 @@ const listPadding = computed(() => {
               @click="tableOrder = 'points'"
               @mouseover="hover = 'points'"
               @mouseleave="hover = ''"
-              class="flex items-center w-20 cursor-pointer dark:text-gray-200"
+              class="flex items-center w-16 mr-2 cursor-pointer sm:mr-0 sm:w-20 dark:text-gray-200"
             >
               Total Points
               <div>
                 <svg
-                  class="w-3 h-3 ms-1.5 fill-slate-400 -ml-5"
+                  class="w-3 h-3 ms-1.5 fill-slate-400 sm:-ml-5"
                   :class="{
                     'fill-slate-600 dark:fill-slate-50': tableOrder == 'points',
                   }"
