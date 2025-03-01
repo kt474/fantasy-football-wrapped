@@ -110,7 +110,7 @@ const listPadding = computed(() => {
               @click="tableOrder = 'potentialPoints'"
               @mouseover="hover = 'potentialPoints'"
               @mouseleave="hover = ''"
-              class="flex items-center w-24 cursor-pointer dark:text-gray-200"
+              class="flex items-center cursor-pointer xl:w-24 dark:text-gray-200"
             >
               Potential Points
               <div>
