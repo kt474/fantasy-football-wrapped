@@ -18,6 +18,16 @@
         </p>
         <p>
           <a
+            aria-label="ffwrapped blog page"
+            class="text-blue-700 dark:text-blue-500 hover:underline"
+            href="https://blog.ffwrapped.com/"
+            title="ffwrapped blog page"
+            target="_blank"
+            >Blog</a
+          >
+        </p>
+        <p>
+          <a
             aria-label="buymeacoffee donation page"
             class="text-blue-700 dark:text-blue-500 hover:underline"
             href="https://buymeacoffee.com/kt474"
