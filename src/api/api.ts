@@ -292,7 +292,6 @@ export const getDraftPicks = async (
         season,
         scoringType
       );
-
       return {
         firstName: pick["metadata"]["first_name"],
         lastName: pick["metadata"]["last_name"],
@@ -304,16 +303,18 @@ export const getDraftPicks = async (
         round: pick["round"],
         rosterId: pick["roster_id"],
         userId: pick["picked_by"],
-        rank: playerStats["rank"],
-        pickRank: calculateDraftRank(
-          pick["pick_no"],
-          seasonType === "Dynasty" && draftPicks.length < 100
-            ? playerStats["rank"] / 6
-            : playerStats["rank"],
-          pick["round"],
-          pick["metadata"]["position"],
-          playerStats["ppg"]
-        ),
+        rank: playerStats ? playerStats["rank"] : 0,
+        pickRank: playerStats
+          ? calculateDraftRank(
+              pick["pick_no"],
+              seasonType === "Dynasty" && draftPicks.length < 100
+                ? playerStats["rank"] / 6
+                : playerStats["rank"],
+              pick["round"],
+              pick["metadata"]["position"],
+              playerStats["ppg"]
+            )
+          : 0,
       };
     })
   );
@@ -454,7 +455,7 @@ export const getData = async (leagueId: string) => {
     any,
     any[],
     any[],
-    any[]
+    any[],
   ] = await Promise.all([
     getLeague(leagueId),
     getRosters(leagueId),
@@ -514,12 +515,15 @@ export const getData = async (leagueId: string) => {
   ]);
 
   // Combine all transactions
-  const transactions = transactionPromises.reduce((acc, obj) => {
-    Object.entries(obj).forEach(([id, value]) => {
-      acc[id] = (acc[id] || 0) + (value as number);
-    });
-    return acc;
-  }, {} as Record<string, number>);
+  const transactions = transactionPromises.reduce(
+    (acc, obj) => {
+      Object.entries(obj).forEach(([id, value]) => {
+        acc[id] = (acc[id] || 0) + (value as number);
+      });
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   return {
     ...newLeagueInfo,
