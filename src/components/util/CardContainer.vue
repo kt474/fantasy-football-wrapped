@@ -28,6 +28,7 @@ const showInput = () => {
       />
     </div>
     <button
+      v-if="!store.showInput"
       aria-label="Add additional league"
       @click="showInput()"
       type="button"
@@ -49,7 +50,32 @@ const showInput = () => {
           d="M9 1v16M1 9h16"
         />
       </svg>
-      <span class="sr-only">Icon description</span>
+      <span class="sr-only">Show input</span>
+    </button>
+    <button
+      v-else
+      aria-label="Add additional league"
+      @click="showInput()"
+      type="button"
+      class="h-9 mt-12 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+      :class="leagues.length > 1 ? 'ml-4 sm:ml-0' : ''"
+    >
+      <svg
+        class="w-4 h-4 text-white"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M5 12h14"
+        />
+      </svg>
+      <span class="sr-only">Close input</span>
     </button>
   </div>
 </template>
