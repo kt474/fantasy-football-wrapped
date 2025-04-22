@@ -122,6 +122,7 @@ const onSubmit = async () => {
         v-model="seasonYear"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height w-24 hidden sm:block"
       >
+        <option>2025</option>
         <option selected>2024</option>
         <option>2023</option>
         <option>2022</option>
@@ -133,7 +134,9 @@ const onSubmit = async () => {
           type="text"
           id="default-input"
           @keydown.enter="onSubmit()"
-          :placeholder="inputType"
+          :placeholder="
+            inputType === 'League ID' ? 'Enter League ID' : 'Enter Username'
+          "
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 min-w-20"
         />
         <p

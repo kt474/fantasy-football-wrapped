@@ -455,7 +455,9 @@ watch(
     class="h-full px-6 pt-4 mt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex items-center justify-between mb-3">
-      <h5 class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+      <h5
+        class="mr-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
+      >
         Weekly Report
       </h5>
       <select
