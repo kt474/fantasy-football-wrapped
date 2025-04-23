@@ -111,7 +111,7 @@ const onSubmit = async () => {
       <select
         aria-label="Input type"
         v-model="inputType"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height w-32"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height custom-drop-width"
       >
         <option selected>League ID</option>
         <option>Username</option>
@@ -120,7 +120,7 @@ const onSubmit = async () => {
         aria-label="Season year"
         v-if="inputType === 'Username'"
         v-model="seasonYear"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height w-24"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height custom-year-width"
       >
         <option>2025</option>
         <option selected>2024</option>
@@ -180,5 +180,11 @@ const onSubmit = async () => {
 <style scoped>
 .input-height {
   max-height: 42px;
+}
+.custom-year-width {
+  width: 85px;
+}
+.custom-drop-width {
+  width: 117px;
 }
 </style>

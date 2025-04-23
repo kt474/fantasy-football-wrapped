@@ -2,14 +2,14 @@
 <template>
   <div class="pt-20 text-center">
     <h1
-      class="px-1 font-bold tracking-tight text-center text-gray-900 custom-font-size sm:leading-none lg:px-24 xl:px-56 md:text-5xl lg:text-6xl dark:text-white"
+      class="px-3 font-bold tracking-tight text-center text-gray-900 custom-font-size sm:leading-none lg:px-24 xl:px-56 md:text-5xl lg:text-6xl dark:text-white"
     >
       All your
       <span
-        class="text-transparent bg-clip-text bg-gradient-to-r to-indigo-600 from-sky-500 dark:to-indigo-500 dark:from-sky-400"
+        class="text-transparent bg-clip-text bg-gradient-to-r to-indigo-600 from-sky-500 dark:to-indigo-500 dark:from-sky-400 whitespace-nowrap"
         >fantasy football</span
       >
-      league insights in one place
+      league insights <span class="whitespace-nowrap">in one place</span>
     </h1>
     <h2
       class="max-w-4xl mx-auto mt-5 mb-0 text-lg font-normal text-center text-gray-600 text-balance lg:text-xl sm:px-16 dark:text-gray-300"
@@ -38,7 +38,7 @@
 <style scoped>
 @media (max-width: 768px) {
   .custom-font-size {
-    font-size: 2.4rem;
+    font-size: 2.1rem;
     line-height: 2.5rem;
   }
 }
