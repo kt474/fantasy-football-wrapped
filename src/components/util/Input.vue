@@ -120,7 +120,7 @@ const onSubmit = async () => {
         aria-label="Season year"
         v-if="inputType === 'Username'"
         v-model="seasonYear"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height w-24 hidden sm:block"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height w-24"
       >
         <option>2025</option>
         <option selected>2024</option>
@@ -154,16 +154,26 @@ const onSubmit = async () => {
           Loading leagues...
         </p>
       </div>
-      <div class="ml-4">
+      <div class="sm:ml-4">
         <button
           aria-label="Button to submit league ID"
           @click="onSubmit()"
           type="submit"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 hidden sm:block"
         >
           Submit
         </button>
       </div>
+    </div>
+    <div class="">
+      <button
+        aria-label="Button to submit league ID"
+        @click="onSubmit()"
+        type="submit"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 block sm:hidden mt-4 w-full"
+      >
+        Submit
+      </button>
     </div>
   </div>
 </template>

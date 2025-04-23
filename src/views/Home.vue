@@ -183,7 +183,7 @@ onMounted(async () => {
 .custom-input-width {
   width: 18.5rem;
   @media (min-width: 640px) {
-    width: 25.8rem;
+    width: 29.1rem;
   }
 }
 .custom-background {
