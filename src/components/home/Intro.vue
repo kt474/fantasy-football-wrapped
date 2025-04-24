@@ -9,7 +9,7 @@
         class="text-transparent bg-clip-text bg-gradient-to-r to-indigo-600 from-sky-500 dark:to-indigo-500 dark:from-sky-400 whitespace-nowrap"
         >fantasy football</span
       >
-      league insights <span class="whitespace-nowrap">in one place</span>
+      league insights in <span class="whitespace-nowrap">one place</span>
     </h1>
     <h2
       class="max-w-4xl mx-auto mt-5 mb-0 text-lg font-normal text-center text-gray-600 text-balance lg:text-xl sm:px-16 dark:text-gray-300"
