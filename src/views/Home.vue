@@ -181,7 +181,7 @@ onMounted(async () => {
 </template>
 <style scoped>
 .custom-input-width {
-  width: 18.5rem;
+  width: 18.9rem;
   @media (min-width: 640px) {
     width: 29.1rem;
   }
