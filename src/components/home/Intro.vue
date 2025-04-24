@@ -4,12 +4,16 @@
     <h1
       class="px-3 font-bold tracking-tight text-center text-gray-900 custom-font-size sm:leading-none lg:px-24 xl:px-56 md:text-5xl lg:text-6xl dark:text-white"
     >
-      All your
+      All your <span class="inline sm:hidden">essential </span>
       <span
         class="text-transparent bg-clip-text bg-gradient-to-r to-indigo-600 from-sky-500 dark:to-indigo-500 dark:from-sky-400 whitespace-nowrap"
         >fantasy football</span
       >
-      league insights in <span class="whitespace-nowrap">one place</span>
+      <span class="hidden sm:inline"> league</span> insights in<span
+        class="whitespace-nowrap"
+      >
+        one place</span
+      >
     </h1>
     <h2
       class="max-w-4xl mx-auto mt-5 mb-0 text-lg font-normal text-center text-gray-600 text-balance lg:text-xl sm:px-16 dark:text-gray-300"
