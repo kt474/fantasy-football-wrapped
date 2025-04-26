@@ -107,7 +107,7 @@ const onSubmit = async () => {
 
 <template>
   <div class="container mt-4">
-    <div class="flex justify-start">
+    <div class="flex justify-start max-w-md mx-auto lg:max-w-xl xl:max-w-full">
       <select
         aria-label="Input type"
         v-model="inputType"
@@ -142,7 +142,7 @@ const onSubmit = async () => {
         <p
           v-if="showErrorMsg"
           id="helper-text-explanation"
-          class="mt-2 -mb-2 text-xs text-red-600 dark:text-red-500"
+          class="mt-1 ml-0.5 -mb-2 text-xs text-red-600 dark:text-red-500"
         >
           {{ errorMsg }}
         </p>
@@ -170,7 +170,7 @@ const onSubmit = async () => {
         aria-label="Button to submit league ID"
         @click="onSubmit()"
         type="submit"
-        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 block sm:hidden mt-4 w-full"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 block sm:hidden mt-4 w-full max-w-md mx-auto"
       >
         Submit
       </button>
