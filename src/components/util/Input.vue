@@ -107,7 +107,9 @@ const onSubmit = async () => {
 
 <template>
   <div class="container mt-4">
-    <div class="flex justify-start max-w-md mx-auto lg:max-w-xl xl:max-w-full">
+    <div
+      class="flex justify-start max-w-md mx-auto sm:max-w-lg lg:max-w-xl xl:max-w-full"
+    >
       <select
         aria-label="Input type"
         v-model="inputType"
