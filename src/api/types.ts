@@ -54,7 +54,7 @@ export type UserType = {
   avatar: string;
   avatarImg: string;
   name: string;
-  username: string;
+  username?: string;
 };
 
 export type TableDataType = {
