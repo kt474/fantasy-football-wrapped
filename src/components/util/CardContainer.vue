@@ -28,7 +28,7 @@ const showInput = () => {
       />
     </div>
     <button
-      v-if="!store.showInput"
+      v-if="!store.showInput && !store.showLeaguesList"
       aria-label="Add additional league"
       @click="showInput()"
       type="button"
@@ -53,7 +53,7 @@ const showInput = () => {
       <span class="sr-only">Show input</span>
     </button>
     <button
-      v-else
+      v-else-if="store.showInput || store.showLeaguesList"
       aria-label="Add additional league"
       @click="showInput()"
       type="button"

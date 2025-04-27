@@ -405,6 +405,7 @@ export const getUsers = async (leagueId: string) => {
     return {
       id: user["user_id"],
       name: user["metadata"]["team_name"] || user["display_name"],
+      username: user["display_name"],
       avatar: user["avatar"],
     };
   });
@@ -455,7 +456,7 @@ export const getData = async (leagueId: string) => {
     any,
     any[],
     any[],
-    any[],
+    any[]
   ] = await Promise.all([
     getLeague(leagueId),
     getRosters(leagueId),
@@ -515,15 +516,12 @@ export const getData = async (leagueId: string) => {
   ]);
 
   // Combine all transactions
-  const transactions = transactionPromises.reduce(
-    (acc, obj) => {
-      Object.entries(obj).forEach(([id, value]) => {
-        acc[id] = (acc[id] || 0) + (value as number);
-      });
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const transactions = transactionPromises.reduce((acc, obj) => {
+    Object.entries(obj).forEach(([id, value]) => {
+      acc[id] = (acc[id] || 0) + (value as number);
+    });
+    return acc;
+  }, {} as Record<string, number>);
 
   return {
     ...newLeagueInfo,
