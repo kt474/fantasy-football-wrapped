@@ -169,7 +169,7 @@ const reportPrompt = computed(() => {
       if (user.matchups[currentWeek.value - 1]) {
         const week: number = currentWeek.value - 1;
         result.push({
-          name: user.name,
+          name: store.showUsernames ? user.username : user.name,
           matchupNumber: user.matchups[week],
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
@@ -186,7 +186,7 @@ const reportPrompt = computed(() => {
       if (user.matchups[currentWeek.value - 1]) {
         const week: number = currentWeek.value - 1;
         result.push({
-          name: user.name,
+          name: store.showUsernames ? user.username : user.name,
           matchupNumber: user.matchups[week],
           playerPoints: user.starterPoints[week],
           pointsScored: user.points[week],

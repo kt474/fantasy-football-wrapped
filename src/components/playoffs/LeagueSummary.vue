@@ -77,17 +77,22 @@ const getSummary = async () => {
   if (props.finalPlacements.length > 0) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     const leagueMetadata = {
-      leagueWinner: props.finalPlacements.find((val) => val.placement === 1)
-        .name,
-      lastPlace: props.finalPlacements.find(
-        (val) => val.placement === currentLeague.totalRosters
-      ).name,
+      leagueWinner: store.showUsernames
+        ? props.finalPlacements.find((val) => val.placement === 1).username
+        : props.finalPlacements.find((val) => val.placement === 1).name,
+      lastPlace: store.showUsernames
+        ? props.finalPlacements.find(
+            (val) => val.placement === currentLeague.totalRosters
+          ).username
+        : props.finalPlacements.find(
+            (val) => val.placement === currentLeague.totalRosters
+          ).name,
       playoffTeams: currentLeague.playoffTeams,
       season: currentLeague.season,
     };
     const userData = props.tableData.map((user) => {
       return {
-        name: user.name,
+        name: store.showUsernames ? user.username : user.name,
         wins: user.wins,
         losses: user.losses,
         totalPoints: user.pointsFor,
