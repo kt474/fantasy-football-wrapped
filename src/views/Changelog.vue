@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "4/30/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "In the about button modal there is now a settings section. In the settings, there is a toggle to show usernames instead of team names. ",
+        ],
+      },
+    ],
+  },
+  {
     date: "2/11/25",
     content: [
       {
