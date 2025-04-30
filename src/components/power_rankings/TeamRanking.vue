@@ -46,7 +46,13 @@ const getTeamName = (playerId: string) => {
       roster.players.includes(playerId)
     );
     const user = currentLeague.users.find((user) => user?.id === roster?.id);
-    return user ? user.name : "";
+    if (user) {
+      if (store.showUsernames) {
+        return user.username ? user.username : "";
+      }
+      return user.name ? user.name : "";
+    }
+    return "";
   } else {
     return fakeUsers[Math.floor(Math.random() * fakeUsers.length)].name;
   }
@@ -97,7 +103,7 @@ watch(
     >
       <div
         v-for="(players, position) in data"
-        class="w-full mr-4 custom-min-width overflow-x-hidden"
+        class="w-full mr-4 overflow-x-hidden custom-min-width"
       >
         <div class="py-2 mb-4 bg-gray-200 rounded-lg dark:bg-gray-700">
           <p class="text-xl font-semibold text-center">{{ position }}</p>

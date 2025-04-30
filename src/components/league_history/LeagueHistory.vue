@@ -186,6 +186,7 @@ watch(
 const dataAllYears = computed(() => {
   let result = props.tableData.map((user) => ({
     name: user.name,
+    username: user.username,
     id: user.id,
     wins: user.wins,
     losses: user.losses,
@@ -574,7 +575,15 @@ const worstManager = computed(() => {
               </svg>
               <p class="ml-2">{{ index + 1 }}.&nbsp;</p>
               <p class="truncate max-w-36 sm:max-w-48">
-                {{ user.name ? user.name : "Ghost Roster" }}
+                {{
+                  store.showUsernames
+                    ? user.username
+                      ? user.username
+                      : "Ghost Roster"
+                    : user.name
+                    ? user.name
+                    : "Ghost Roster"
+                }}
               </p>
             </div>
           </th>

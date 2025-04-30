@@ -117,6 +117,15 @@ const getData = async () => {
       ])
     );
 
+    const userNameMapping: any = new Map(
+      store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
+        user.id,
+        user.username,
+      ])
+    );
+
+    console.log(userNameMapping);
+
     currentLeague.rosters.forEach((roster: RosterType) => {
       const winScore = roster.wins / currentLeague.lastScoredWeek;
       const pointScore = roster.pointsFor / maxPoints.value;
@@ -125,6 +134,7 @@ const getData = async () => {
         : 0;
       playoffOdds.value.push({
         name: nameMapping.get(roster.id),
+        username: userNameMapping.get(roster.id),
         id: roster.id,
         score: calculatePowerScore(winScore, pointScore, projectedScore),
         currentWins: roster.wins,
@@ -345,7 +355,7 @@ const tableData = computed(() => {
               scope="row"
               class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
             >
-              {{ item.name }}
+              {{ store.showUsernames ? item.username : item.name }}
             </th>
             <td v-for="i in playoffTeams" class="px-2 py-3">
               {{

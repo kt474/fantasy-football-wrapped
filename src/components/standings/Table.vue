@@ -196,6 +196,13 @@ const cardHeight = computed(() => {
   }
   return "h-52";
 });
+
+const getTeamName = (tableDataItem: any) => {
+  if (store.showUsernames) {
+    return tableDataItem.username ? tableDataItem.username : `Ghost Roster`;
+  }
+  return tableDataItem.name ? tableDataItem.name : `Ghost Roster`;
+};
 </script>
 <template>
   <div>
@@ -423,7 +430,7 @@ const cardHeight = computed(() => {
                   </svg>
                   <p class="ml-2">{{ index + 1 }}.&nbsp;</p>
                   <p class="truncate max-w-36 sm:max-w-48">
-                    {{ item.name ? item.name : `Ghost Roster` }}
+                    {{ getTeamName(item) }}
                   </p>
                 </div>
               </th>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useStore } from "../../store/store";
+const store = useStore();
 const props = defineProps<{
   rosters: any[];
 }>();
@@ -7,7 +9,7 @@ const props = defineProps<{
   <div
     class="w-full lg:w-1/4 px-6 pt-2.5 mt-4 lg:mt-0 lg:ml-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
   >
-    <div class="flex items-center justify-between sm:mt-1.5 mb-2">
+    <div class="flex items-center justify-between my-2">
       <h5
         class="w-20 text-2xl font-bold leading-none text-gray-900 dark:text-white text-pretty"
       >
@@ -26,7 +28,7 @@ const props = defineProps<{
                 <span class="font-medium text-black dark:text-white"
                   >{{ index + 1 }}.&nbsp;</span
                 >
-                {{ user.name }}
+                {{ store.showUsernames ? user.username : user.name }}
               </p>
             </div>
           </div>

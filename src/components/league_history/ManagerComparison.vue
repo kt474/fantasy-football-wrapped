@@ -11,18 +11,24 @@ const props = defineProps<{
 }>();
 
 const managers = computed(() => {
-  return props.tableData.map((user) => user.name);
+  return props.tableData.map((user) =>
+    store.showUsernames ? user.username : user.name
+  );
 });
 
 const currentManager1 = computed(() => {
-  return props.tableData.find(
-    (user) => user.name.trim() === manager1.value.trim()
+  return props.tableData.find((user) =>
+    store.showUsernames
+      ? user.username.trim() === manager1.value.trim()
+      : user.name.trim() === manager1.value.trim()
   );
 });
 
 const currentManager2 = computed(() => {
-  return props.tableData.find(
-    (user) => user.name.trim() === manager2.value.trim()
+  return props.tableData.find((user) =>
+    store.showUsernames
+      ? user.username.trim() === manager2.value.trim()
+      : user.name.trim() === manager2.value.trim()
   );
 });
 
@@ -115,11 +121,15 @@ const manager2Champs = computed(() => {
 const seriesData = computed(() => {
   return [
     {
-      name: currentManager1.value.name,
+      name: store.showUsernames
+        ? currentManager1.value.username
+        : currentManager1.value.name,
       data: currentManager1.value.pointSeason[0].points,
     },
     {
-      name: currentManager2.value.name,
+      name: store.showUsernames
+        ? currentManager2.value.username
+        : currentManager2.value.name,
       data: currentManager2.value.pointSeason[0].points,
     },
   ];

@@ -22,6 +22,10 @@ export const useStore = defineStore("main", {
     username: "",
     loadingLeague: "",
     loadingUserLeagues: false,
+    showUsernames: (() => {
+      const value = localStorage.getItem("showUsernames");
+      return value !== null ? (JSON.parse(value) as boolean) : false;
+    })(),
   }),
   getters: {
     transactions: (state) =>
@@ -43,6 +47,9 @@ export const useStore = defineStore("main", {
     },
   },
   actions: {
+    updateShowUsernames(payload: boolean) {
+      this.showUsernames = payload;
+    },
     updateLoadingUserLeagues(payload: boolean) {
       this.loadingUserLeagues = payload;
     },

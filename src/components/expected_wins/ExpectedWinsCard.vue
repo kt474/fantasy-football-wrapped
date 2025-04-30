@@ -60,6 +60,13 @@ const listPadding = computed(() => {
   }
   return "py-2.5";
 });
+
+const getTeamName = (tableDataItem: any) => {
+  if (store.showUsernames) {
+    return tableDataItem.username ? tableDataItem.username : `Ghost Roster`;
+  }
+  return tableDataItem.name ? tableDataItem.name : `Ghost Roster`;
+};
 </script>
 <template>
   <div
@@ -195,7 +202,7 @@ const listPadding = computed(() => {
             :class="listPadding"
             class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-white"
           >
-            {{ item.name ? item.name : "Ghost Roster" }}
+            {{ getTeamName(item) }}
           </th>
           <td
             class="px-2 py-2"

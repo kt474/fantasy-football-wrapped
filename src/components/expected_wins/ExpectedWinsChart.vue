@@ -12,7 +12,13 @@ const seriesData = computed(() => {
   const result: any[] = [];
   props.tableData.forEach((user: any) => {
     result.push({
-      x: user.name ? user.name : "",
+      x: store.showUsernames
+        ? user.username
+          ? user.username
+          : ""
+        : user.name
+        ? user.name
+        : "",
       y: user.wins,
       goals: [
         {
@@ -58,10 +64,9 @@ const updateChartColor = () => {
   };
 };
 
-watch(
-  () => store.darkMode,
-  () => updateChartColor()
-);
+watch([() => store.darkMode, () => store.showUsernames], () => {
+  updateChartColor();
+});
 
 const chartOptions = ref({
   chart: {

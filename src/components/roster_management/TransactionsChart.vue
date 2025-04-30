@@ -12,7 +12,7 @@ const transactionData = computed(() => {
     currentLeague.users.forEach((user: any) => {
       if (user.id in currentLeague.transactions) {
         result.push({
-          name: user.name,
+          name: store.showUsernames ? user.username : user.name,
           transactions: currentLeague.transactions[user.id],
         });
       }
@@ -35,12 +35,11 @@ const seriesData = computed(() => {
 });
 
 watch(
-  () => store.darkMode,
-  () => updateChartColor()
-);
-
-watch(
-  () => store.currentLeagueId,
+  [
+    () => store.darkMode,
+    () => store.currentLeagueId,
+    () => store.showUsernames,
+  ],
   () => updateChartColor()
 );
 

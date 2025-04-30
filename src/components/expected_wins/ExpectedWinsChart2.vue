@@ -24,7 +24,15 @@ const seriesData = computed(() => {
 });
 
 const categories = computed(() => {
-  return tableDataCopy.value.map((user) => (user.name ? user.name : ""));
+  return tableDataCopy.value.map((user) =>
+    store.showUsernames
+      ? user.username
+        ? user.username
+        : ""
+      : user.name
+      ? user.name
+      : ""
+  );
 });
 
 const maxWinDifference = computed(() => {
@@ -110,13 +118,14 @@ const updateChartColor = () => {
 };
 
 watch(
-  () => store.darkMode,
-  () => updateChartColor()
-);
-
-watch(
-  () => store.currentLeagueId,
-  () => updateChartColor()
+  [
+    () => store.darkMode,
+    () => store.showUsernames,
+    () => store.currentLeagueId,
+  ],
+  () => {
+    updateChartColor();
+  }
 );
 
 const chartOptions = ref({

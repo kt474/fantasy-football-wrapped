@@ -2,6 +2,9 @@
 import { computed } from "vue";
 import { maxBy, toPairs } from "lodash";
 import { UserType, RosterType } from "../../api/types";
+import { useStore } from "../../store/store";
+
+const store = useStore();
 
 const props = defineProps<{
   users: UserType[];
@@ -122,7 +125,11 @@ const mostTransactionsUser: any = computed(() => {
           v-if="mostTransactions && mostTransactionsUser"
           class="mx-3 mt-0.5 text-gray-800 text-md dark:text-white"
         >
-          {{ mostTransactionsUser.name }}
+          {{
+            store.showUsernames
+              ? mostTransactionsUser.username
+              : mostTransactionsUser.name
+          }}
         </p>
         <p v-else class="mx-3 mt-0.5 text-gray-800 text-md dark:text-white">
           Undecided

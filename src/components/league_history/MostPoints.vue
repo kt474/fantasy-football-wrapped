@@ -13,6 +13,7 @@ const mostPoints = computed(() => {
       seasonObj.points.map((point: number, index: number) => ({
         week: index + 1,
         name: obj.name,
+        username: obj.username,
         season: seasonObj.season,
         point,
       }))
@@ -75,7 +76,7 @@ const mostPoints = computed(() => {
             scope="row"
             class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-white"
           >
-            {{ item.name }}
+            {{ store.showUsernames ? item.username : item.name }}
           </th>
           <td class="px-2 py-3.5">
             {{ item.point }}

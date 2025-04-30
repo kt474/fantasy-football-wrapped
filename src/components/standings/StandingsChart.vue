@@ -69,9 +69,12 @@ const updateChartColor = () => {
       theme: store.darkMode ? "dark" : "light",
     },
     xaxis: {
-      categories: props.tableData.map((user: any) =>
-        user.name ? user.name : ""
-      ),
+      categories: props.tableData.map((user: any) => {
+        if (store.showUsernames) {
+          return user.username ? user.username : "";
+        }
+        return user.name ? user.name : "";
+      }),
       title: {
         text: "League Manager",
         offsetY: -5,
@@ -93,13 +96,14 @@ const updateChartColor = () => {
 };
 
 watch(
-  () => store.darkMode,
-  () => updateChartColor()
-);
-
-watch(
-  () => store.currentLeagueId,
-  () => updateChartColor()
+  [
+    () => store.darkMode,
+    () => store.showUsernames,
+    () => store.currentLeagueId,
+  ],
+  () => {
+    updateChartColor();
+  }
 );
 
 const chartOptions = ref({
@@ -135,9 +139,12 @@ const chartOptions = ref({
     colors: ["transparent"],
   },
   xaxis: {
-    categories: props.tableData.map((user: any) =>
-      user.name ? user.name : ""
-    ),
+    categories: props.tableData.map((user: any) => {
+      if (store.showUsernames) {
+        return user.username ? user.username : "";
+      }
+      return user.name ? user.name : "";
+    }),
     labels: {
       formatter: function (str: string) {
         const n = 17;

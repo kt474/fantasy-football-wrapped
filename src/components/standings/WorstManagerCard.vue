@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { RosterType, UserType } from "../../api/types";
+import { useStore } from "../../store/store";
+
+const store = useStore();
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
@@ -135,7 +138,11 @@ const worstManagerUser: any = computed(() => {
           v-if="worstManager && worstManagerUser"
           class="mx-3 mt-0.5 text-gray-800 text-md dark:text-white"
         >
-          {{ worstManagerUser.name }}
+          {{
+            store.showUsernames
+              ? worstManagerUser.username
+              : worstManagerUser.name
+          }}
         </p>
         <p v-else class="mx-3 mt-1 text-gray-800 text-md dark:text-white">
           Undecided

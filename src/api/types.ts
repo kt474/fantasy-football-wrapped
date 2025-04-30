@@ -59,6 +59,7 @@ export type UserType = {
 
 export type TableDataType = {
   name: string;
+  username: string;
   wins: number;
   losses: number;
   pointsFor: number;

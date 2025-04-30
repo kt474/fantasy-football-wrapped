@@ -276,7 +276,13 @@ const chartOptions = ref({
   },
   xaxis: {
     categories: sortedTableData.value.map((user) =>
-      user.name ? user.name : ""
+      store.showUsernames
+        ? user.username
+          ? user.username
+          : ""
+        : user.name
+        ? user.name
+        : ""
     ),
     labels: {
       formatter: function (str: string) {
@@ -347,7 +353,13 @@ const updateChartColor = () => {
     },
     xaxis: {
       categories: sortedTableData.value.map((user) =>
-        user.name ? user.name : ""
+        store.showUsernames
+          ? user.username
+            ? user.username
+            : ""
+          : user.name
+          ? user.name
+          : ""
       ),
       labels: {
         formatter: function (str: string) {
@@ -387,7 +399,7 @@ const updateChartColor = () => {
 };
 
 watch(
-  () => store.darkMode,
+  [() => store.darkMode, () => store.showUsernames, () => currentWeek.value],
   () => updateChartColor()
 );
 
@@ -406,11 +418,6 @@ watch(
     weeklyReport.value =
       store.leagueInfo[store.currentLeagueIndex].weeklyReport;
   }
-);
-
-watch(
-  () => currentWeek.value,
-  () => updateChartColor()
 );
 
 const getRecord = (recordString: string, index: number) => {
@@ -646,7 +653,15 @@ watch(
                 </svg>
                 <div>
                   <p class="px-2 -mt-1 truncate max-w-28 xl:max-w-44">
-                    {{ user.name ? user.name : "Ghost Roster" }}
+                    {{
+                      store.showUsernames
+                        ? user.username
+                          ? user.username
+                          : "Ghost Roster"
+                        : user.name
+                        ? user.name
+                        : "Ghost Roster"
+                    }}
                   </p>
                   <p class="ml-2 text-xs">
                     ({{ getRecord(user.recordByWeek, currentWeek) }})

@@ -87,7 +87,15 @@ const extractRecord = (user: any, opponent: any) => {
             </th>
             <th v-for="item in props.tableData" scope="col" class="px-2 py-3">
               <div class="flex items-center dark:text-gray-200 min-w-14">
-                {{ item.name ? item.name : "Ghost Roster" }}
+                {{
+                  store.showUsernames
+                    ? item.username
+                      ? item.username
+                      : "Ghost Roster"
+                    : item.name
+                    ? item.name
+                    : "Ghost Roster"
+                }}
               </div>
             </th>
           </tr>
@@ -102,7 +110,15 @@ const extractRecord = (user: any, opponent: any) => {
               scope="row"
               class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
             >
-              {{ item.name ? item.name : "Ghost Roster" }}
+              {{
+                store.showUsernames
+                  ? item.username
+                    ? item.username
+                    : "Ghost Roster"
+                  : item.name
+                  ? item.name
+                  : "Ghost Roster"
+              }}
             </th>
             <td
               v-for="(user, rowIndex) in matchupData"

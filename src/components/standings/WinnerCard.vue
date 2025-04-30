@@ -143,7 +143,7 @@ const winner: any = computed(() => {
         v-if="winner"
         class="mx-2 mt-0.5 text-gray-800 text-md dark:text-white"
       >
-        {{ winner.name }}
+        {{ store.showUsernames ? winner.username : winner.name }}
       </p>
       <p v-else class="mx-2 mt-0.5 text-gray-800 text-md dark:text-white">
         Undecided

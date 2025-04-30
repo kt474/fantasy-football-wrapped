@@ -305,7 +305,7 @@ const getValueColor = (value: number) => {
             />
           </svg>
           <p v-if="team" class="w-20 text-sm text-center truncate">
-            {{ team.name }}
+            {{ store.showUsernames ? team.username : team.name }}
           </p>
           <p v-else class="w-20 text-sm text-center truncate">No user</p>
         </div>

@@ -36,7 +36,7 @@ const powerRankings = computed(() => {
     }
     ratingsContainer.push(ratingArr);
     result.push({
-      name: value.name,
+      name: store.showUsernames ? value.username : value.name,
       type: "line",
       ratings: ratingArr,
     });
@@ -108,13 +108,14 @@ const updateChartColor = () => {
 };
 
 watch(
-  () => store.darkMode,
-  () => updateChartColor()
-);
-
-watch(
-  () => store.currentLeagueId,
-  () => updateChartColor()
+  [
+    () => store.darkMode,
+    () => store.showUsernames,
+    () => store.currentLeagueId,
+  ],
+  () => {
+    updateChartColor();
+  }
 );
 
 const chartOptions = ref({

@@ -182,7 +182,7 @@ watch(
       League Trades
     </h1>
     <p
-      class="max-w-80 sm:max-w-2xl mt-1 mb-3 text-sm text-gray-600 sm:text-base dark:text-gray-300"
+      class="mt-1 mb-3 text-sm text-gray-600 max-w-80 sm:max-w-2xl sm:text-base dark:text-gray-300"
     >
       Values next to each player are the average positional ranking for every
       week after the trade date (only weeks played are counted). Lower numbers
@@ -215,7 +215,11 @@ watch(
               />
             </svg>
             <h2 class="mt-0.5 ml-2 text-base font-semibold">
-              {{ trade.team1.user.name }}
+              {{
+                store.showUsernames
+                  ? trade.team1.user.username
+                  : trade.team1.user.name
+              }}
             </h2>
           </div>
           <div v-if="trade.team2.user" class="flex w-40">
@@ -238,7 +242,11 @@ watch(
               />
             </svg>
             <h2 class="mt-0.5 ml-2 text-base font-semibold">
-              {{ trade.team2.user.name }}
+              {{
+                store.showUsernames
+                  ? trade.team2.user.username
+                  : trade.team2.user.name
+              }}
             </h2>
           </div>
         </div>

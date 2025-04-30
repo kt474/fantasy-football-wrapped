@@ -25,7 +25,7 @@ const series = computed(() => {
   potentialPoints.sort((a, b) => b - a);
   props.tableData.forEach((team: any) => {
     result.push({
-      name: team.name,
+      name: store.showUsernames ? team.username : team.name,
       data: [
         points.indexOf(team.pointsFor) + 1,
         potentialPoints.indexOf(team.potentialPoints) + 1,
@@ -72,9 +72,8 @@ const updateChartColor = () => {
   };
 };
 
-watch(
-  () => store.darkMode,
-  () => updateChartColor()
+watch([() => store.darkMode, () => store.showUsernames], () =>
+  updateChartColor()
 );
 
 const chartOptions = ref({

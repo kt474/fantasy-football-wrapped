@@ -335,7 +335,11 @@ const numberOfLoserRounds = computed(() => {
                     </svg>
                     <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                        {{ matchRosterId(matchup.t1).name }}
+                        {{
+                          store.showUsernames
+                            ? matchRosterId(matchup.t1).username
+                            : matchRosterId(matchup.t1).name
+                        }}
                       </p>
                       <p class="ml-2 text-xs">({{ getRecord(matchup.t1) }})</p>
                     </div>
@@ -376,7 +380,11 @@ const numberOfLoserRounds = computed(() => {
                       </svg>
                       <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                          {{ matchRosterId(matchup.t2).name }}
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.t2).username
+                              : matchRosterId(matchup.t2).name
+                          }}
                         </p>
                         <p class="ml-2 text-xs">
                           ({{ getRecord(matchup.t2) }})
@@ -425,7 +433,11 @@ const numberOfLoserRounds = computed(() => {
                     </svg>
                     <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                        {{ matchRosterId(matchup.t1).name }}
+                        {{
+                          store.showUsernames
+                            ? matchRosterId(matchup.t1).username
+                            : matchRosterId(matchup.t1).name
+                        }}
                       </p>
                       <p class="ml-2 text-xs">({{ getRecord(matchup.t1) }})</p>
                     </div>
@@ -468,7 +480,11 @@ const numberOfLoserRounds = computed(() => {
                       </svg>
                       <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                          {{ matchRosterId(matchup.t2).name }}
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.t2).username
+                              : matchRosterId(matchup.t2).name
+                          }}
                         </p>
                         <p class="ml-2 text-xs">
                           ({{ getRecord(matchup.t2) }})
@@ -615,7 +631,11 @@ const numberOfLoserRounds = computed(() => {
                     </svg>
                     <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                        {{ matchRosterId(matchup.t1).name }}
+                        {{
+                          store.showUsernames
+                            ? matchRosterId(matchup.t1).username
+                            : matchRosterId(matchup.t1).name
+                        }}
                       </p>
                       <p class="ml-2 text-xs">({{ getRecord(matchup.t1) }})</p>
                     </div>
@@ -654,7 +674,11 @@ const numberOfLoserRounds = computed(() => {
                       </svg>
                       <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                          {{ matchRosterId(matchup.t2).name }}
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.t2).username
+                              : matchRosterId(matchup.t2).name
+                          }}
                         </p>
                         <p class="ml-2 text-xs">
                           ({{ getRecord(matchup.t2) }})
@@ -699,7 +723,11 @@ const numberOfLoserRounds = computed(() => {
                     </svg>
                     <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                        {{ matchRosterId(matchup.t1).name }}
+                        {{
+                          store.showUsernames
+                            ? matchRosterId(matchup.t1).username
+                            : matchRosterId(matchup.t1).name
+                        }}
                       </p>
                       <p class="ml-2 text-xs">({{ getRecord(matchup.t1) }})</p>
                     </div>
@@ -738,7 +766,11 @@ const numberOfLoserRounds = computed(() => {
                       </svg>
                       <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                          {{ matchRosterId(matchup.t2).name }}
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.t2).username
+                              : matchRosterId(matchup.t2).name
+                          }}
                         </p>
                         <p class="ml-2 text-xs">
                           ({{ getRecord(matchup.t2) }})

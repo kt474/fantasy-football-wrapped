@@ -66,6 +66,7 @@ const removeLeague = () => {
     store.updateRemovedAlert(true);
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentTab");
+      store.showUsernames = false;
       store.currentTab = "standings";
       // reset url if there are no leagues
       router.replace({

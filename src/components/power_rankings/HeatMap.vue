@@ -8,13 +8,14 @@ const props = defineProps<{
 }>();
 
 watch(
-  () => store.darkMode,
-  () => updateChartColor()
-);
-
-watch(
-  () => store.currentLeagueId,
-  () => updateChartColor()
+  [
+    () => store.darkMode,
+    () => store.showUsernames,
+    () => store.currentLeagueId,
+  ],
+  () => {
+    updateChartColor();
+  }
 );
 
 const totalRosters = computed(() => {
@@ -69,7 +70,10 @@ const seriesData = computed(() => {
           });
         }
       });
-      result.push({ data: data, name: roster.name });
+      result.push({
+        data: data,
+        name: store.showUsernames ? roster.username : roster.name,
+      });
     });
   }
   return result.reverse(); // heat map chart inputs backwards

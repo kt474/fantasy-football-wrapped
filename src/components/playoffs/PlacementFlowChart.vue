@@ -35,7 +35,7 @@ const seriesData = computed(() => {
   let result: any[] = [];
   props.tableData.forEach((user) => {
     result.push({
-      name: user.name,
+      name: store.showUsernames ? user.username : user.name,
       data: [
         {
           x: "Reg. Season",
@@ -47,11 +47,20 @@ const seriesData = computed(() => {
   props.finalPlacements.forEach((user: any) => {
     result.forEach((res) => {
       if (user) {
-        if (res.name === user.name) {
-          res.data.push({
-            x: "Final Pos.",
-            y: user.placement,
-          });
+        if (store.showUsernames) {
+          if (res.name === user.username) {
+            res.data.push({
+              x: "Final Pos.",
+              y: user.placement,
+            });
+          }
+        } else {
+          if (res.name === user.name) {
+            res.data.push({
+              x: "Final Pos.",
+              y: user.placement,
+            });
+          }
         }
       }
     });
@@ -139,7 +148,7 @@ watch(
     class="block w-full p-4 mt-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mt-0 lg:w-1/4 min-w-60 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
   >
     <h5
-      class="text-2xl font-bold leading-none text-gray-900 dark:text-white text-pretty"
+      class="ml-0.5 text-2xl font-bold leading-none text-gray-900 dark:text-white text-pretty"
     >
       Regular Season vs Final Placement
     </h5>

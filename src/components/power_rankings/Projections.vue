@@ -10,7 +10,15 @@ import HeatMap from "./HeatMap.vue";
 const store = useStore();
 const loading = ref(false);
 const categories = computed(() => {
-  return formattedData.value.map((user) => (user.name ? user.name : ""));
+  return formattedData.value.map((user: any) =>
+    store.showUsernames
+      ? user.username
+        ? user.username
+        : ""
+      : user.name
+      ? user.name
+      : ""
+  );
 });
 
 onMounted(async () => {
@@ -77,77 +85,87 @@ const formattedData = computed(() => {
       user.name,
     ])
   );
+
+  const userNameMapping: any = new Map(
+    store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
+      user.id,
+      user.username,
+    ])
+  );
   const mappedData: any[] = [];
   store.leagueInfo[store.currentLeagueIndex].rosters.forEach(
     (roster: RosterType) => {
       mappedData.push({
         name: nameMapping.get(roster.id),
+        username: userNameMapping.get(roster.id),
         data: roster.projections,
       });
     }
   );
+  const result = mappedData.map(
+    (roster: { name: string; data: any[]; username: string }) => {
+      const filteredData = roster.data ? roster.data : [];
 
-  const result = mappedData.map((roster: { name: string; data: any[] }) => {
-    const filteredData = roster.data ? roster.data : [];
+      const groupedAndSortedTopPositions = topPositions.reduce(
+        (acc: any, position: any) => {
+          const sortedByProjection = filteredData
+            .filter((item: any) => item.position === position)
+            .sort((a: any, b: any) => b.projection - a.projection);
 
-    const groupedAndSortedTopPositions = topPositions.reduce(
-      (acc: any, position: any) => {
-        const sortedByProjection = filteredData
-          .filter((item: any) => item.position === position)
-          .sort((a: any, b: any) => b.projection - a.projection);
+          acc[position] = sortedByProjection.slice(0, 3);
 
-        acc[position] = sortedByProjection.slice(0, 3);
+          return acc;
+        },
+        {}
+      );
 
-        return acc;
-      },
-      {}
-    );
+      const highestOtherPositions = otherPositions.reduce(
+        (acc: any, position) => {
+          const highest: number = filteredData
+            .filter((item: any) => item.position === position)
+            .sort((a: any, b: any) => b.projection - a.projection)[0];
 
-    const highestOtherPositions = otherPositions.reduce(
-      (acc: any, position) => {
-        const highest: number = filteredData
-          .filter((item: any) => item.position === position)
-          .sort((a: any, b: any) => b.projection - a.projection)[0];
+          if (highest) {
+            acc.push(highest);
+          } else {
+            acc.push({ position: position, projection: 0 });
+          }
 
-        if (highest) {
-          acc.push(highest);
-        } else {
-          acc.push({ position: position, projection: 0 });
+          return acc;
+        },
+        []
+      );
+
+      // Total top 3 RBs and WRs
+      let rbTotal = 0;
+      let wrTotal = 0;
+      groupedAndSortedTopPositions["RB"].forEach(
+        (player: { projection: number; position: number }) => {
+          rbTotal += player.projection;
         }
+      );
 
-        return acc;
-      },
-      []
-    );
+      groupedAndSortedTopPositions["WR"].forEach(
+        (player: { projection: number; position: number }) => {
+          wrTotal += player.projection;
+        }
+      );
 
-    // Total top 3 RBs and WRs
-    let rbTotal = 0;
-    let wrTotal = 0;
-    groupedAndSortedTopPositions["RB"].forEach(
-      (player: { projection: number; position: number }) => {
-        rbTotal += player.projection;
-      }
-    );
+      const topProjections = [
+        { position: "RB", projection: Math.round(rbTotal) },
+        { position: "WR", projection: Math.round(wrTotal) },
+      ];
 
-    groupedAndSortedTopPositions["WR"].forEach(
-      (player: { projection: number; position: number }) => {
-        wrTotal += player.projection;
-      }
-    );
+      const combined = [...topProjections, ...highestOtherPositions];
 
-    const topProjections = [
-      { position: "RB", projection: Math.round(rbTotal) },
-      { position: "WR", projection: Math.round(wrTotal) },
-    ];
-
-    const combined = [...topProjections, ...highestOtherPositions];
-
-    return {
-      name: roster.name,
-      data: [...combined],
-      total: combined.reduce((acc, obj) => acc + obj.projection, 0),
-    };
-  });
+      return {
+        name: roster.name,
+        username: roster.username,
+        data: [...combined],
+        total: combined.reduce((acc, obj) => acc + obj.projection, 0),
+      };
+    }
+  );
   return result.sort((a, b) => b.total - a.total);
 });
 
@@ -205,10 +223,9 @@ const seriesData = computed(() => {
   ];
 });
 
-watch(
-  () => store.darkMode,
-  () => updateChartColor()
-);
+watch([() => store.darkMode, () => store.showUsernames], () => {
+  updateChartColor();
+});
 
 watch(
   () => store.currentLeagueId,

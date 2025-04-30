@@ -29,6 +29,13 @@ const darkMode = computed(() => {
 const setColorMode = () => {
   clicked.value = !clicked.value;
 };
+
+watch(
+  () => store.showUsernames,
+  (newValue) => {
+    localStorage.setItem("showUsernames", JSON.stringify(newValue));
+  }
+);
 </script>
 <template>
   <nav
@@ -192,6 +199,33 @@ const setColorMode = () => {
                     >
                     would be greatly appreciated.
                   </p>
+                </div>
+                <div
+                  class="flex items-center justify-between p-4 border-b rounded-t md:p-5 dark:border-gray-600"
+                >
+                  <h3
+                    class="text-xl font-semibold text-gray-900 dark:text-white"
+                  >
+                    Settings
+                  </h3>
+                </div>
+                <div class="p-4 space-y-4 md:p-5">
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :disabled="store.leagueInfo.length == 0"
+                      value=""
+                      class="sr-only peer"
+                      v-model="store.showUsernames"
+                    />
+                    <div
+                      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"
+                    ></div>
+                    <span
+                      class="ml-3 text-base leading-relaxed text-gray-700 dark:text-gray-100"
+                      >Show usernames instead of team names</span
+                    >
+                  </label>
                 </div>
               </div>
             </div>
