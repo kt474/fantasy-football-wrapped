@@ -124,13 +124,19 @@ const seriesData = computed(() => {
       name: store.showUsernames
         ? currentManager1.value.username
         : currentManager1.value.name,
-      data: currentManager1.value.pointSeason[0].points,
+      data:
+        currentManager1.value.pointSeason[0].points.length > 0
+          ? currentManager1.value.pointSeason[0].points
+          : currentManager1.value.pointSeason[1].points,
     },
     {
       name: store.showUsernames
         ? currentManager2.value.username
         : currentManager2.value.name,
-      data: currentManager2.value.pointSeason[0].points,
+      data:
+        currentManager2.value.pointSeason[0].points.length > 0
+          ? currentManager2.value.pointSeason[0].points
+          : currentManager2.value.pointSeason[1].points,
     },
   ];
 });
