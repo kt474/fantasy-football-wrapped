@@ -26,12 +26,12 @@ onMounted(async () => {
             const diff = currentTime - league.lastUpdated;
             if (diff > 86400000) {
               // 1 day
+              showLoading.value = true;
               if (localStorage.originalData) {
                 const currentData = JSON.parse(localStorage.originalData);
                 delete currentData[league.leagueId];
                 localStorage.originalData = JSON.stringify(currentData);
               }
-              showLoading.value = true;
               store.updateLoadingLeague(league.name);
               const refreshedData = await getData(league.leagueId);
               store.updateLeagueInfo(refreshedData);
