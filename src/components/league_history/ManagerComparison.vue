@@ -127,7 +127,9 @@ const seriesData = computed(() => {
       data:
         currentManager1.value.pointSeason[0].points.length > 0
           ? currentManager1.value.pointSeason[0].points
-          : currentManager1.value.pointSeason[1].points,
+          : currentManager1.value.pointSeason[1]
+          ? currentManager1.value.pointSeason[1].points
+          : [],
     },
     {
       name: store.showUsernames
@@ -136,7 +138,9 @@ const seriesData = computed(() => {
       data:
         currentManager2.value.pointSeason[0].points.length > 0
           ? currentManager2.value.pointSeason[0].points
-          : currentManager2.value.pointSeason[1].points,
+          : currentManager2.value.pointSeason[1]
+          ? currentManager2.value.pointSeason[1].points
+          : [],
     },
   ];
 });
@@ -516,11 +520,13 @@ const chartOptions = ref({
             >
               <p class="text-center">
                 {{
-                  Math.round(
-                    (currentManager1.points /
-                      (currentManager1.wins + currentManager1.losses)) *
-                      100
-                  ) / 100
+                  currentManager1.wins + currentManager1.losses > 0
+                    ? Math.round(
+                        (currentManager1.points /
+                          (currentManager1.wins + currentManager1.losses)) *
+                          100
+                      ) / 100
+                    : 0
                 }}
               </p>
             </td>

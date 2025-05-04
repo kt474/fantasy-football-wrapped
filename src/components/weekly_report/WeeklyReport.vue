@@ -110,6 +110,7 @@ onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
     props.tableData[0].matchups &&
+    weeks.value.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
     !store.leagueInfo[store.currentLeagueIndex].weeklyReport
   ) {
@@ -408,7 +409,10 @@ watch(
   async () => {
     updateChartColor();
     currentWeek.value = weeks.value[0];
-    if (!store.leagueInfo[store.currentLeagueIndex].weeklyReport) {
+    if (
+      !store.leagueInfo[store.currentLeagueIndex].weeklyReport &&
+      weeks.value.length > 0
+    ) {
       weeklyReport.value = "";
       loading.value = true;
       await fetchPlayerNames();
@@ -503,6 +507,9 @@ watch(
           />
         </svg>
       </div>
+      <p v-if="weeks.length === 0" class="text-gray-600 dark:text-gray-300">
+        Please come back after week 1!
+      </p>
       <div
         v-if="weeklyReport"
         class="max-w-5xl text-gray-900 dark:text-gray-300"

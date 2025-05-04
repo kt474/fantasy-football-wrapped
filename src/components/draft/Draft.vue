@@ -310,6 +310,13 @@ const getValueColor = (value: number) => {
           <p v-else class="w-20 text-sm text-center truncate">No user</p>
         </div>
       </div>
+      <p
+        v-if="data.length === 0"
+        class="w-1/2 mt-3 ml-2 text-gray-600 dark:text-gray-300"
+      >
+        Draft has not happened yet. Please come back after draft is complete or
+        try looking at the previous league season.
+      </p>
       <div
         class="grid gap-0.5 text-sm"
         :style="{

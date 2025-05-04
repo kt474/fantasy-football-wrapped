@@ -97,8 +97,13 @@ watch(
     >
       Top Performers
     </h1>
+    <div v-if="Object.keys(data).length === 0">
+      <p class="text-gray-600 dark:text-gray-300">
+        Please come back after week 1!
+      </p>
+    </div>
     <div
-      v-if="!loading"
+      v-else-if="!loading"
       class="flex flex-wrap mt-2 text-gray-800 dark:text-gray-300"
     >
       <div

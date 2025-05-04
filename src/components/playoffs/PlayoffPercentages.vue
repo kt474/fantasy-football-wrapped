@@ -124,8 +124,6 @@ const getData = async () => {
       ])
     );
 
-    console.log(userNameMapping);
-
     currentLeague.rosters.forEach((roster: RosterType) => {
       const winScore = roster.wins / currentLeague.lastScoredWeek;
       const pointScore = roster.pointsFor / maxPoints.value;

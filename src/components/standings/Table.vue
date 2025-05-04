@@ -567,7 +567,7 @@ const getTeamName = (tableDataItem: any) => {
       <PowerRankingData
         v-if="store.currentLeagueId"
         :tableData="tableData"
-        :regularSeasonLength="regularSeasonLength"
+        :regularSeasonLength="regularSeasonLength ? regularSeasonLength : 15"
         :totalRosters="totalRosters"
         class="mt-4"
       />
@@ -604,7 +604,7 @@ const getTeamName = (tableDataItem: any) => {
       <WeeklyReport
         v-if="store.currentLeagueId"
         :tableData="tableData"
-        :regular-season-length="regularSeasonLength"
+        :regular-season-length="regularSeasonLength ? regularSeasonLength : 15"
       />
       <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
     </div>

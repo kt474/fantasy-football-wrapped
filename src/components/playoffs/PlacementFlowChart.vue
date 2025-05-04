@@ -161,7 +161,7 @@ watch(
       :series="seriesData"
       class="flex justify-center ml-3 xl:ml-4"
     ></apexchart>
-    <div v-else class="text-gray-900 dark:text-white">
+    <div v-else class="text-gray-600 dark:text-gray-300">
       <p class="pt-1 mt-2 border-t dark:bg-gray-800 dark:border-gray-700">
         Season in progress
       </p>
