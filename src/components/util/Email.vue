@@ -40,7 +40,7 @@ onMounted(() => {
     class="fixed hidden p-4 bg-white border border-gray-200 rounded-lg shadow-lg dark:border-gray-800 dark:bg-gray-700 bottom-4 right-4 w-80 sm:block"
   >
     <div class="flex items-center justify-between">
-      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">
         Join our Newsletter
       </h2>
       <button
@@ -64,7 +64,7 @@ onMounted(() => {
         </svg>
       </button>
     </div>
-    <p class="mt-2 text-sm text-gray-600 dark:text-gray-300 text-pretty">
+    <p class="mt-2 text-sm text-gray-600 dark:text-gray-200 text-pretty">
       Stay up to date with new features, announcements and weekly fantasy
       football insights.
     </p>
