@@ -20,6 +20,13 @@ const router = useRouter();
         <p class="my-3 text-xl font-semibold">Information Collection and Use</p>
         We do not collect any personal data from our users. You can browse and
         use our website without providing any personal information.
+        <p class="my-3 text-xl font-semibold">Email Collection</p>
+        If you choose to subscribe to our newsletter or updates, we will collect
+        your email address. Your email will only be used to send you the content
+        you subscribed to, such as updates, newsletters, or promotional
+        materials. We will not share or sell your email address to third
+        parties. You can unsubscribe at any time by clicking the "unsubscribe"
+        link in any email we send.
         <p class="my-3 text-xl font-semibold">Cookies</p>
         We do not use cookies on our website.
         <p class="my-3 text-xl font-semibold">Analytics</p>

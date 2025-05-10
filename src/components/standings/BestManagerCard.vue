@@ -30,7 +30,7 @@ const bestManagerUser: any = computed(() => {
 <template>
   <div
     :class="props.cardHeight"
-    class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow sm:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
+    class="block w-full p-2 bg-white border border-gray-200 rounded-lg shadow md:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56"
   >
     <svg
       :class="{

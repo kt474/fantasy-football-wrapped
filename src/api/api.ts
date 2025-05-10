@@ -95,6 +95,30 @@ export const inputUsername = async (username: string, year: string) => {
   }
 };
 
+export const inputEmail = async (
+  email: string,
+  league_id: string,
+  username: string
+) => {
+  try {
+    await fetch(import.meta.env.VITE_EMAIL_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data: {
+          email: email,
+          league_id: league_id,
+          username: username,
+        },
+      }),
+    });
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
 export const inputLeague = async (
   leagueId: string,
   name: string,
