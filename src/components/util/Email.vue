@@ -13,11 +13,11 @@ const closePopup = () => {
 
 const subscribe = async () => {
   if (email.value) {
-    email.value = "";
     isVisible.value = false;
     localStorage.setItem("subscribed", "true");
-    store.updateShowEmailAlert(true);
     await inputEmail(email.value, store.currentLeagueId, store.username);
+    email.value = "";
+    store.updateShowEmailAlert(true);
     setTimeout(() => {
       store.updateShowEmailAlert(false);
     }, 3000);
