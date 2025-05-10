@@ -37,10 +37,12 @@ onMounted(() => {
 <template>
   <div
     v-if="isVisible"
-    class="fixed hidden p-4 bg-white border border-gray-200 rounded-lg shadow-lg bottom-4 right-4 w-80 sm:block"
+    class="fixed hidden p-4 bg-white border border-gray-200 rounded-lg shadow-lg dark:border-gray-800 dark:bg-gray-700 bottom-4 right-4 w-80 sm:block"
   >
     <div class="flex items-center justify-between">
-      <h2 class="text-xl font-semibold text-gray-800">Join our Newsletter</h2>
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+        Join our Newsletter
+      </h2>
       <button
         @click="closePopup"
         class="text-gray-400 hover:text-gray-600 focus:outline-none"
@@ -79,7 +81,7 @@ onMounted(() => {
         </div>
         <button
           type="submit"
-          class="px-4 py-2.5 ml-2 text-white text-sm bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          class="px-4 py-2.5 ml-2 text-white text-sm bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
           Subscribe
         </button>
