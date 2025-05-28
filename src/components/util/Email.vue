@@ -37,7 +37,7 @@ onMounted(() => {
 <template>
   <div
     v-if="isVisible"
-    class="fixed hidden p-4 bg-white border border-gray-200 rounded-lg shadow-lg dark:border-gray-800 dark:bg-gray-700 bottom-4 right-4 w-80 sm:block"
+    class="fixed hidden px-4 pt-3.5 pb-4 bg-white border border-gray-200 rounded-lg shadow-lg dark:border-gray-800 dark:bg-gray-700 bottom-4 right-4 w-80 sm:block"
   >
     <div class="flex items-center justify-between">
       <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">

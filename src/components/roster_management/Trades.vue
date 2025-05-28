@@ -138,13 +138,19 @@ const getOrdinalSuffix = (number: number) => {
 };
 
 const getValueColor = (value: number) => {
-  if (value <= 10) return `bg-emerald-600 dark:bg-emerald-500 bg-opacity-80`;
-  if (value <= 20) return `bg-emerald-500 dark:bg-emerald-600 bg-opacity-80`;
-  if (value <= 25) return `bg-emerald-400 dark:bg-emerald-700 bg-opacity-100`;
-  if (value <= 35) return "bg-gray-400 bg-opacity-65";
-  if (value <= 45) return `bg-rose-300 dark:bg-rose-800`;
-  if (value <= 55) return `bg-rose-400 dark:bg-rose-700`;
-  return `bg-rose-500 dark:bg-rose-600`;
+  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600`;
+  if (value <= 25) return `bg-green-400 dark:bg-green-600`;
+  if (value <= 35) return "bg-yellow-300 dark-bg-yellow-600 dark:text-black";
+  if (value <= 45) return `bg-orange-400 dark:bg-orange-500`;
+  return `bg-red-400 dark:bg-red-600`;
+};
+
+const getRatingLabel = (value: number) => {
+  if (value <= 15) return "Excellent";
+  if (value <= 25) return "Good";
+  if (value <= 35) return "Average";
+  if (value <= 45) return "Below Avg";
+  return "Poor";
 };
 
 onMounted(async () => {
@@ -174,7 +180,7 @@ watch(
 </script>
 <template>
   <div
-    class="w-full py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6"
+    class="w-full py-4 pl-4 overflow-auto bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6"
   >
     <h1
       class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
@@ -191,10 +197,10 @@ watch(
     <div v-if="tradeData.length > 0" class="flex flex-wrap w-full">
       <div
         v-for="trade in tradeData"
-        class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow max-h-64 dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-width"
+        class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-width"
       >
         <!-- Team name and avatar -->
-        <div v-if="trade.team1" class="flex justify-between">
+        <div v-if="trade.team1" class="flex justify-between h-8">
           <div v-if="trade.team1.user" class="flex w-40">
             <img
               alt="User avatar"
@@ -214,7 +220,7 @@ watch(
                 d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
               />
             </svg>
-            <h2 class="mt-0.5 ml-2 text-base font-semibold">
+            <h2 class="mt-0.5 ml-2 text-sm sm:text-base font-semibold truncate">
               {{
                 store.showUsernames
                   ? trade.team1.user.username
@@ -222,6 +228,23 @@ watch(
               }}
             </h2>
           </div>
+          <svg
+            class="w-6 h-6 mx-2 mt-0.5 text-gray-700 sm:mx-4 dark:text-gray-300 min-w-4"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 16h13M4 16l4-4m-4 4 4 4M20 8H7m13 0-4 4m4-4-4-4"
+            />
+          </svg>
           <div v-if="trade.team2.user" class="flex w-40">
             <img
               alt="User avatar"
@@ -241,7 +264,7 @@ watch(
                 d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
               />
             </svg>
-            <h2 class="mt-0.5 ml-2 text-base font-semibold">
+            <h2 class="mt-0.5 ml-2 text-sm sm:text-base font-semibold truncate">
               {{
                 store.showUsernames
                   ? trade.team2.user.username
@@ -263,48 +286,42 @@ watch(
                 : 'text-base'
             "
           >
-            <div
-              v-for="index in trade.team1.players.length"
-              class="flex justify-between mt-1.5 max-w-32 lg:max-w-44"
-            >
-              <p class="truncate max-w-28">
+            <div v-for="index in trade.team1.players.length" class="mt-1.5">
+              <p class="text-sm font-medium">
                 {{ trade.team1.players[index - 1] }}
               </p>
-              <p
-                v-if="trade.team1.value[index - 1]"
-                class="p-1 font-semibold -mt-0.5 ml-1 rounded-full"
-                :class="[getValueColor(trade.team1.value[index - 1])]"
-              >
-                {{ roundToOneDecimal(trade.team1.value[index - 1]) }}
-              </p>
+              <div class="flex mt-1">
+                <span
+                  v-if="trade.team1.value[index - 1]"
+                  :class="[getValueColor(trade.team1.value[index - 1])]"
+                  class="text-xs me-2 px-2.5 py-1 rounded-full text-white"
+                  >{{ roundToOneDecimal(trade.team1.value[index - 1]) }}</span
+                >
+                <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                  {{
+                    trade.team1.value[index - 1]
+                      ? getRatingLabel(trade.team1.value[index - 1])
+                      : ""
+                  }}
+                </p>
+              </div>
             </div>
-            <p v-for="pick in trade.team1.draftPicks" class="mt-1.5">
+            <p
+              v-for="pick in trade.team1.draftPicks"
+              class="mt-1.5 text-sm font-medium"
+            >
               {{ pick ? pick.season : "" }}
               {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
             </p>
-            <p v-for="budget in trade.team1.waiverBudget" class="mt-1.5">
+            <p
+              v-for="budget in trade.team1.waiverBudget"
+              class="mt-1.5 text-sm font-medium"
+            >
               {{ budget ? `$${budget.amount} FAAB` : "" }}
             </p>
           </div>
-          <svg
-            class="w-6 h-6 mt-1.5 sm:mx-4 mx-2 text-gray-900 dark:text-gray-300 min-w-4"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16h13M4 16l4-4m-4 4 4 4M20 8H7m13 0-4 4m4-4-4-4"
-            />
-          </svg>
           <div
-            class="w-44"
+            class="ml-12 w-44"
             :class="
               trade.team2.players.length +
                 trade.team2.draftPicks.length +
@@ -314,26 +331,37 @@ watch(
                 : 'text-base'
             "
           >
-            <div
-              v-for="index in trade.team2.players.length"
-              class="flex justify-between mt-1.5 max-w-32 lg:max-w-44"
-            >
-              <p class="truncate max-w-28">
+            <div v-for="index in trade.team2.players.length" class="mt-1.5">
+              <p class="text-sm font-medium">
                 {{ trade.team2.players[index - 1] }}
               </p>
-              <p
-                v-if="trade.team2.value[index - 1]"
-                class="p-1 font-semibold -mt-0.5 ml-1 rounded-full"
-                :class="[getValueColor(trade.team2.value[index - 1])]"
-              >
-                {{ roundToOneDecimal(trade.team2.value[index - 1]) }}
-              </p>
+              <div class="flex mt-1">
+                <span
+                  v-if="trade.team2.value[index - 1]"
+                  :class="[getValueColor(trade.team2.value[index - 1])]"
+                  class="text-xs me-2 px-2.5 py-1 rounded-full text-white"
+                  >{{ roundToOneDecimal(trade.team2.value[index - 1]) }}</span
+                >
+                <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                  {{
+                    trade.team2.value[index - 1]
+                      ? getRatingLabel(trade.team2.value[index - 1])
+                      : ""
+                  }}
+                </p>
+              </div>
             </div>
-            <p v-for="pick in trade.team2.draftPicks" class="mt-1.5">
+            <p
+              v-for="pick in trade.team2.draftPicks"
+              class="mt-1.5 text-sm font-medium"
+            >
               {{ pick ? pick.season : "" }}
               {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
             </p>
-            <p v-for="budget in trade.team2.waiverBudget" class="mt-1.5">
+            <p
+              v-for="budget in trade.team2.waiverBudget"
+              class="mt-1.5 text-sm font-medium"
+            >
               {{ budget ? `$${budget.amount} FAAB` : "" }}
             </p>
           </div>
@@ -394,14 +422,16 @@ watch(
 </template>
 <style scoped>
 .custom-width {
-  @media (width >= 1024px) {
-    width: 400px;
+  width: 400px;
+  min-width: 327px;
+  /* @media (width >= 1024px) {
+    
   }
   @media (width < 1024px) {
     max-width: 345px;
   }
   @media (width >= 385px) {
     min-width: 327px;
-  }
+  } */
 }
 </style>
