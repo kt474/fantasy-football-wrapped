@@ -138,11 +138,11 @@ const getOrdinalSuffix = (number: number) => {
 };
 
 const getValueColor = (value: number) => {
-  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600`;
-  if (value <= 25) return `bg-green-400 dark:bg-green-600`;
-  if (value <= 35) return "bg-yellow-300 dark-bg-yellow-600 dark:text-black";
-  if (value <= 45) return `bg-orange-400 dark:bg-orange-500`;
-  return `bg-red-400 dark:bg-red-600`;
+  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-white`;
+  if (value <= 25) return `bg-green-400 dark:bg-green-600 text-white`;
+  if (value <= 35) return "bg-yellow-300 dark-bg-yellow-600 text-black";
+  if (value <= 45) return `bg-orange-400 dark:bg-orange-500 text-white`;
+  return `bg-red-400 dark:bg-red-600 text-white`;
 };
 
 const getRatingLabel = (value: number) => {
@@ -294,7 +294,7 @@ watch(
                 <span
                   v-if="trade.team1.value[index - 1]"
                   :class="[getValueColor(trade.team1.value[index - 1])]"
-                  class="text-xs me-2 px-2.5 py-1 rounded-full text-white"
+                  class="text-xs me-2 px-2.5 py-1 rounded-full"
                   >{{ roundToOneDecimal(trade.team1.value[index - 1]) }}</span
                 >
                 <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
@@ -339,7 +339,7 @@ watch(
                 <span
                   v-if="trade.team2.value[index - 1]"
                   :class="[getValueColor(trade.team2.value[index - 1])]"
-                  class="text-xs me-2 px-2.5 py-1 rounded-full text-white"
+                  class="text-xs me-2 px-2.5 py-1 rounded-full"
                   >{{ roundToOneDecimal(trade.team2.value[index - 1]) }}</span
                 >
                 <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">

@@ -235,7 +235,7 @@ const getValueColor = (value: number) => {
   if (value >= 0) return "bg-gray-400 bg-opacity-65";
   if (value >= -1.75) return `bg-rose-300 dark:bg-rose-800`;
   if (value >= -2.5) return `bg-rose-400 dark:bg-rose-700`;
-  return `bg-rose-500 dark:bg-rose-600`;
+  return `bg-red-400 dark:bg-red-600`;
 };
 </script>
 <template>
@@ -338,12 +338,12 @@ const getValueColor = (value: number) => {
             <p>
               {{ `${pick.round}.${getRoundPick(pick.draftSlot, pick.round)}` }}
             </p>
-            <p
-              class="p-1 font-semibold -mt-0.5 -mr-1 rounded-full"
+            <span
+              class="font-medium me-2 px-2 py-0.5 rounded-full custom-margin"
               :class="[getValueColor(parseFloat(pick.pickRank))]"
             >
               {{ pick.pickRank }}
-            </p>
+            </span>
           </div>
         </div>
         <!-- auction or dynasy linear drafts  -->
@@ -364,12 +364,12 @@ const getValueColor = (value: number) => {
                     `${pick.round}.${getRoundPick(pick.draftSlot, pick.round)}`
                   }}
                 </p>
-                <p
-                  class="p-1 font-semibold -mt-0.5 -mr-1 rounded-full"
+                <span
+                  class="font-medium me-2 px-2 py-0.5 rounded-full custom-margin"
                   :class="[getValueColor(parseFloat(pick.pickRank))]"
                 >
                   {{ pick.pickRank }}
-                </p>
+                </span>
               </div>
             </div>
           </div>
@@ -398,3 +398,8 @@ const getValueColor = (value: number) => {
     </div>
   </div>
 </template>
+<style lang="css" scoped>
+.custom-margin {
+  margin-right: -6px;
+}
+</style>
