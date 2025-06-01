@@ -9,6 +9,8 @@ export const fakePlayerRankings = {
       position: "K",
       team: "K",
       id: "1945",
+      gp: 17,
+      overallRank: 87,
     },
     {
       rank: 2,
@@ -19,6 +21,8 @@ export const fakePlayerRankings = {
       position: "K",
       team: "K",
       id: "11533",
+      gp: 17,
+      overallRank: 88,
     },
     {
       rank: 3,
@@ -29,6 +33,8 @@ export const fakePlayerRankings = {
       position: "K",
       team: "K",
       id: "3451",
+      gp: 17,
+      overallRank: 90,
     },
     {
       rank: 4,
@@ -39,6 +45,8 @@ export const fakePlayerRankings = {
       position: "K",
       team: "K",
       id: "8259",
+      gp: 17,
+      overallRank: 98,
     },
     {
       rank: 5,
@@ -49,6 +57,8 @@ export const fakePlayerRankings = {
       position: "K",
       team: "K",
       id: "5119",
+      gp: 17,
+      overallRank: 116,
     },
   ],
   QB: [
@@ -61,6 +71,8 @@ export const fakePlayerRankings = {
       position: "QB",
       team: "QB",
       id: "4881",
+      gp: 17,
+      overallRank: 1,
     },
     {
       rank: 2,
@@ -71,6 +83,8 @@ export const fakePlayerRankings = {
       position: "QB",
       team: "QB",
       id: "4984",
+      gp: 17,
+      overallRank: 2,
     },
     {
       rank: 3,
@@ -81,6 +95,8 @@ export const fakePlayerRankings = {
       position: "QB",
       team: "QB",
       id: "6770",
+      gp: 17,
+      overallRank: 3,
     },
     {
       rank: 4,
@@ -91,6 +107,8 @@ export const fakePlayerRankings = {
       position: "QB",
       team: "QB",
       id: "11566",
+      gp: 17,
+      overallRank: 4,
     },
     {
       rank: 5,
@@ -101,6 +119,8 @@ export const fakePlayerRankings = {
       position: "QB",
       team: "QB",
       id: "4892",
+      gp: 17,
+      overallRank: 5,
     },
   ],
   WR: [
@@ -113,6 +133,8 @@ export const fakePlayerRankings = {
       position: "WR",
       team: "WR",
       id: "7564",
+      gp: 17,
+      overallRank: 6,
     },
     {
       rank: 2,
@@ -123,6 +145,8 @@ export const fakePlayerRankings = {
       position: "WR",
       team: "WR",
       id: "6794",
+      gp: 17,
+      overallRank: 22,
     },
     {
       rank: 3,
@@ -133,6 +157,8 @@ export const fakePlayerRankings = {
       position: "WR",
       team: "WR",
       id: "7547",
+      gp: 17,
+      overallRank: 25,
     },
     {
       rank: 4,
@@ -143,6 +169,8 @@ export const fakePlayerRankings = {
       position: "WR",
       team: "WR",
       id: "11631",
+      gp: 17,
+      overallRank: 29,
     },
     {
       rank: 5,
@@ -153,6 +181,8 @@ export const fakePlayerRankings = {
       position: "WR",
       team: "WR",
       id: "6786",
+      gp: 17,
+      overallRank: 34,
     },
   ],
   TE: [
@@ -165,6 +195,8 @@ export const fakePlayerRankings = {
       position: "TE",
       team: "TE",
       id: "4217",
+      gp: 17,
+      overallRank: 45,
     },
     {
       rank: 2,
@@ -175,6 +207,8 @@ export const fakePlayerRankings = {
       position: "TE",
       team: "TE",
       id: "11604",
+      gp: 17,
+      overallRank: 54,
     },
     {
       rank: 3,
@@ -185,6 +219,8 @@ export const fakePlayerRankings = {
       position: "TE",
       team: "TE",
       id: "8130",
+      gp: 17,
+      overallRank: 56,
     },
     {
       rank: 4,
@@ -195,6 +231,8 @@ export const fakePlayerRankings = {
       position: "TE",
       team: "TE",
       id: "4144",
+      gp: 17,
+      overallRank: 72,
     },
     {
       rank: 5,
@@ -205,6 +243,8 @@ export const fakePlayerRankings = {
       position: "TE",
       team: "TE",
       id: "5012",
+      gp: 17,
+      overallRank: 93,
     },
   ],
   RB: [
@@ -217,6 +257,8 @@ export const fakePlayerRankings = {
       position: "RB",
       team: "RB",
       id: "4866",
+      gp: 17,
+      overallRank: 7,
     },
     {
       rank: 2,
@@ -227,6 +269,8 @@ export const fakePlayerRankings = {
       position: "RB",
       team: "RB",
       id: "3198",
+      gp: 17,
+      overallRank: 8,
     },
     {
       rank: 3,
@@ -237,6 +281,8 @@ export const fakePlayerRankings = {
       position: "RB",
       team: "RB",
       id: "9221",
+      gp: 17,
+      overallRank: 11,
     },
     {
       rank: 4,
@@ -247,6 +293,8 @@ export const fakePlayerRankings = {
       position: "RB",
       team: "RB",
       id: "9509",
+      gp: 17,
+      overallRank: 14,
     },
     {
       rank: 5,
@@ -257,6 +305,8 @@ export const fakePlayerRankings = {
       position: "RB",
       team: "RB",
       id: "5850",
+      gp: 17,
+      overallRank: 20,
     },
   ],
   DEF: [
@@ -269,6 +319,8 @@ export const fakePlayerRankings = {
       position: "DEF",
       team: "DEF",
       id: "DEN",
+      gp: 17,
+      overallRank: 64,
     },
     {
       rank: 2,
@@ -279,6 +331,8 @@ export const fakePlayerRankings = {
       position: "DEF",
       team: "DEF",
       id: "MIN",
+      gp: 17,
+      overallRank: 84,
     },
     {
       rank: 3,
@@ -289,6 +343,8 @@ export const fakePlayerRankings = {
       position: "DEF",
       team: "DEF",
       id: "PIT",
+      gp: 17,
+      overallRank: 99,
     },
     {
       rank: 5,
@@ -299,6 +355,8 @@ export const fakePlayerRankings = {
       position: "DEF",
       team: "DEF",
       id: "BUF",
+      gp: 17,
+      overallRank: 112,
     },
     {
       rank: 6,
@@ -309,6 +367,8 @@ export const fakePlayerRankings = {
       position: "DEF",
       team: "DEF",
       id: "PHI",
+      gp: 17,
+      overallRank: 113,
     },
   ],
 };

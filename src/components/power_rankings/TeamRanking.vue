@@ -12,8 +12,13 @@ const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
-const data: any = ref({});
+const data = ref<Record<string, any>>({});
 const loading = ref(false);
+const tab = ref("QB");
+
+const changeTab = (newTab: string) => {
+  tab.value = newTab;
+};
 
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
@@ -28,7 +33,7 @@ const getData = async () => {
   const sorted = Object.fromEntries(
     Object.entries(groupedPositions).map(([position, items]) => [
       position,
-      items.sort((a: any, b: any) => a.rank - b.rank).slice(0, 5), // Only keep top 5
+      items.sort((a: any, b: any) => a.rank - b.rank).slice(0, 10), // Only keep top 5
     ])
   );
   data.value = sorted;
@@ -106,14 +111,89 @@ watch(
       v-else-if="!loading"
       class="flex flex-wrap mt-2 text-gray-800 dark:text-gray-300"
     >
+      <ul
+        class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-300"
+      >
+        <li class="cursor-pointer me-2">
+          <button
+            @click="changeTab('QB')"
+            aria-current="page"
+            class="inline-block p-2 rounded-t-lg sm:p-4"
+            :class="{
+              ' text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
+                tab === 'QB',
+            }"
+          >
+            QB
+          </button>
+        </li>
+        <li class="cursor-pointer me-2">
+          <button
+            @click="changeTab('RB')"
+            class="inline-block p-2 rounded-t-lg sm:p-4"
+            :class="{
+              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
+                tab === 'RB',
+            }"
+          >
+            RB
+          </button>
+        </li>
+        <li class="cursor-pointer me-2">
+          <button
+            @click="changeTab('WR')"
+            class="inline-block p-2 rounded-t-lg sm:p-4"
+            :class="{
+              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
+                tab === 'WR',
+            }"
+          >
+            WR
+          </button>
+        </li>
+        <li class="cursor-pointer me-2">
+          <button
+            @click="changeTab('TE')"
+            class="inline-block p-2 rounded-t-lg sm:p-4"
+            :class="{
+              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
+                tab === 'TE',
+            }"
+          >
+            TE
+          </button>
+        </li>
+        <li class="cursor-pointer me-2">
+          <button
+            @click="changeTab('K')"
+            class="inline-block p-2 rounded-t-lg sm:p-4"
+            :class="{
+              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
+                tab === 'K',
+            }"
+          >
+            K
+          </button>
+        </li>
+        <li class="cursor-pointer me-2">
+          <button
+            @click="changeTab('DEF')"
+            class="inline-block p-2 rounded-t-lg sm:p-4"
+            :class="{
+              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
+                tab === 'DEF',
+            }"
+          >
+            DEF
+          </button>
+        </li>
+      </ul>
       <div
         v-for="(players, position) in data"
-        class="w-full mr-4 overflow-x-hidden custom-min-width"
+        class="w-full mr-4 overflow-x-hidden"
       >
-        <div class="py-2 mb-4 bg-gray-200 rounded-lg dark:bg-gray-700">
-          <p class="text-xl font-semibold text-center">{{ position }}</p>
-        </div>
         <div
+          v-if="position === tab"
           v-for="(player, index) in players"
           class="my-4 bg-white border border-gray-200 rounded-lg shadow dark:border-gray-700 h-36 dark:bg-gray-800"
         >
@@ -133,7 +213,7 @@ watch(
             <div class="w-full mt-0.5 ml-3">
               <div class="flex justify-between px-2 mt-1 mb-4">
                 <p
-                  class="text-base font-semibold truncate sm:text-lg max-w-24 sm:max-w-32"
+                  class="text-base font-semibold truncate sm:text-lg max-w-24 sm:max-w-52"
                 >
                   {{ index + 1 }}.
                   {{
@@ -144,7 +224,7 @@ watch(
                   {{ player.lastName }}
                 </p>
                 <div class="px-3 py-1 bg-gray-100 rounded-lg dark:bg-gray-900">
-                  <p class="text-sm truncate sm:text-base max-w-16 sm:max-w-28">
+                  <p class="text-sm truncate sm:text-base max-w-16 sm:max-w-52">
                     {{ getTeamName(player.id) }}
                   </p>
                 </div>
@@ -166,12 +246,29 @@ watch(
                     {{ player.ppg ? player.ppg.toFixed(1) : 0 }}
                   </p>
                 </div>
+                <div
+                  class="hidden w-full px-3 py-1 m-1 bg-gray-100 rounded-lg dark:bg-gray-900 sm:inline-block"
+                >
+                  <p class="text-gray-600 dark:text-gray-500">Overall Rank:</p>
+                  <p class="text-base font-semibold sm:text-lg">
+                    {{ player.overallRank }}
+                  </p>
+                </div>
+                <div
+                  class="hidden w-full px-3 py-1 m-1 bg-gray-100 rounded-lg dark:bg-gray-900 sm:inline-block"
+                >
+                  <p class="text-gray-600 dark:text-gray-500">Games Played:</p>
+                  <p class="text-base font-semibold sm:text-lg">
+                    {{ player.gp }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <!-- Loading div -->
     <div v-else role="status" class="max-w-sm animate-pulse">
       <p class="mb-2 text-gray-900 dark:text-gray-200">
         Loading player data...
@@ -196,13 +293,3 @@ watch(
     </div>
   </div>
 </template>
-<style scoped>
-.custom-min-width {
-  @media (width >= 1024px) {
-    width: 400px;
-  }
-  @media (width >= 385px) {
-    min-width: 327px;
-  }
-}
-</style>

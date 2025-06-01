@@ -154,12 +154,15 @@ export const getStats = async (
 ) => {
   let rank = "pos_rank_ppr";
   let ppg = "pts_ppr";
+  let overall_rank = "rank_ppr";
   if (scoringType === 0) {
     rank = "pos_rank_std";
     ppg = "pts_std";
+    overall_rank = "rank_std";
   } else if (scoringType === 0.5) {
     rank = "pos_rank_half_ppr";
     ppg = "pts_half_ppr";
+    overall_rank = "rank_half_ppr";
   }
   const response = await fetch(
     `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}`
@@ -169,12 +172,14 @@ export const getStats = async (
     ? {
         rank: result["stats"][rank],
         points: result["stats"][ppg],
+        overallRank: result["stats"][overall_rank],
         ppg: result["stats"][ppg] / result["stats"]["gp"],
         firstName: result["player"]["first_name"],
         lastName: result["player"]["last_name"],
         position: result["player"]["position"],
         team: result["player"]["position"],
         id: result["player_id"],
+        gp: result["stats"]["gp"],
       }
     : null;
 };
