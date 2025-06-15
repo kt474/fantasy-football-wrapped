@@ -7,7 +7,11 @@ export default {
     "./node_modules/flowbite/**/*.js",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        darkmodal: "#2D3540",
+      },
+    },
   },
   plugins: [require("flowbite/plugin"), require("tailwindcss-animate")],
 };
