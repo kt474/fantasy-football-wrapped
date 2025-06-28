@@ -77,7 +77,11 @@ onMounted(async () => {
         );
         store.updateLoadingLeague("");
       }
-    } else if (leagueId === null || leagueId === "undefined") {
+    } else if (leagueId === null && localStorage.getItem("currentLeagueId")) {
+      const url: any = new URL(window.location.href);
+      url.searchParams.set("leagueId", localStorage.getItem("currentLeagueId"));
+      window.history.pushState({}, "", url.toString());
+    } else if (leagueId === "undefined") {
       localStorage.clear(); // this might be an anti pattern
     }
   } catch {
