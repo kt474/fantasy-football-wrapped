@@ -38,12 +38,12 @@
         </p>
         <p>
           <a
-            aria-label="PWA installation guide"
+            aria-label="discord community invite"
             class="text-blue-700 dark:text-blue-500 hover:underline"
-            href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing"
-            title="PWA installation guide"
+            href="https://discord.gg/sSVwNhyv7U"
+            title="discord community invite"
             target="_blank"
-            >Add To Homescreen</a
+            >Discord Community</a
           >
         </p>
         <p>

@@ -165,13 +165,13 @@ watch(
                       href="https://github.com/kt474/fantasy-football-wrapped"
                       target="_blank"
                       >Github</a
-                    >. To report a bug or request new features, please open an
+                    >. To report a bug or request new features, please join our
                     <a
                       aria-label="Link to github issues page"
                       class="font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                      href="https://github.com/kt474/fantasy-football-wrapped/issues"
+                      href="https://discord.gg/sSVwNhyv7U"
                       target="_blank"
-                      >issue,</a
+                      >discord,</a
                     >
                     send an
                     <a
