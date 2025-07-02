@@ -6,6 +6,7 @@ import { seasonType, getData, inputLeague } from "../../api/api";
 const checkedLeagues = ref([]);
 const showError = ref(false);
 const duplicateLeagueError = ref(false);
+const leagueCountError = ref(false);
 const store = useStore();
 
 const updateURL = (leagueID: string) => {
@@ -21,6 +22,10 @@ const addLeagues = async () => {
   }
   if (checkedLeagues.value.some((league) => store.leagueIds.includes(league))) {
     duplicateLeagueError.value = true;
+    return;
+  }
+  if (checkedLeagues.value.length + store.leagueInfo.length > 5) {
+    leagueCountError.value = true;
     return;
   }
   if (checkedLeagues.value.length >= 1) {
@@ -116,6 +121,9 @@ const addLeagues = async () => {
     </p>
     <p v-if="duplicateLeagueError" class="-mt-1 text-red-600 dark:text-red-500">
       A selected league already exists
+    </p>
+    <p v-if="leagueCountError" class="-mt-1 text-red-600 dark:text-red-500">
+      A maximum of 5 leagues can be active. Please remove a league first.
     </p>
     <button
       v-if="store.leaguesList.length > 0"
