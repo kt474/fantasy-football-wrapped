@@ -266,14 +266,24 @@ export const getTotalTransactions = (transactions: any) => {
   }, {});
 };
 
-export const getTrades = (transactions: any) => {
-  const result: any[] = [];
+export const getWaiverMoves = (transactions: any) => {
+  const trades: any[] = [];
+  const waivers: any[] = [];
   transactions.forEach((transaction: any) => {
     if (transaction.status === "complete" && transaction.type === "trade") {
-      result.push(transaction);
+      trades.push(transaction);
+    } else if (
+      transaction.status === "complete" &&
+      ["free_agent", "waiver"].includes(transaction.type) &&
+      transaction.adds !== null
+    ) {
+      waivers.push(transaction);
     }
   });
-  return result;
+  return {
+    trades: trades,
+    waivers: waivers,
+  };
 };
 
 export const getPowerRanking = (
@@ -355,15 +365,30 @@ export const getWeeklyPoints = async (
   });
   return allTeams;
 };
-
+export const fakeWaiverMoves = {
+  "1": [
+    {
+      id: 1,
+      user: {
+        id: "1",
+        name: "Just the Tua Us",
+        username: "Just the Tua Us",
+        avatar: "3fd3d500b13b04926820e10e9306f6ab",
+        avatarImg: "../avatars/avatar1.svg",
+      },
+      adds: "Isaiah Likely",
+      week: 1,
+      value: 23.3,
+    },
+  ],
+};
 export const fakeTrades = [
   {
     team1: {
       user: {
         id: "1",
         name: "Just the Tua Us",
-        avatar: "3fd3d500b13b04926820e10e9306f6ab",
-        avatarImg: "../avatars/avatar1.svg",
+
         transactions: 14,
       },
       players: ["J.K. Dobbins"],

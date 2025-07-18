@@ -117,6 +117,12 @@ export const useStore = defineStore("main", {
         item.tradeNames = payload;
       }
     },
+    addWaiverMoves(leagueId: string, payload: any) {
+      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      if (item) {
+        item.waiverMoves = payload;
+      }
+    },
     addDraftPicks(leagueId: string, payload: any[]) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {

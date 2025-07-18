@@ -14,6 +14,7 @@ import WorstManagerCard from "../standings/WorstManagerCard.vue";
 import TransactionsCard from "../standings/TransactionsCard.vue";
 import TransactionsChart from "../roster_management/TransactionsChart.vue";
 import Trades from "../roster_management/Trades.vue";
+import Waivers from "../roster_management/Waivers.vue";
 import StandingsChart from "../standings/StandingsChart.vue";
 import ManagementCard from "../roster_management/ManagementCard.vue";
 import RankingGraph from "../roster_management/RankingGraph.vue";
@@ -595,6 +596,7 @@ const getTeamName = (tableDataItem: any) => {
       </div>
       <TransactionsChart class="mt-4" />
       <Trades class="mt-4" />
+      <Waivers class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'playoffs'">
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />

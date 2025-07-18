@@ -18,6 +18,8 @@ export type LeagueInfoType = {
   weeklyPoints: [];
   transactions: [];
   trades: [];
+  waivers: [];
+  waiverMoves: Record<string, WaiverMove[]>;
   tradeNames: any[];
   previousLeagues: any[];
   status: string;
@@ -48,6 +50,18 @@ export type RosterType = {
   players?: string[];
   projections?: { projection: number; position: string }[];
 };
+
+export interface WaiverMove {
+  id: number | string;
+  user: {
+    username: string;
+    avatarImg?: string;
+    name: string;
+  };
+  adds: string;
+  week: number;
+  value: number;
+}
 
 export type UserType = {
   id: string;

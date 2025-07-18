@@ -1,8 +1,8 @@
 import {
   getWeeklyPoints,
   getTotalTransactions,
-  getTrades,
   calculateDraftRank,
+  getWaiverMoves,
 } from "./helper";
 import { round, mean } from "lodash";
 
@@ -10,6 +10,41 @@ export const seasonType: { [key: number]: string } = {
   0: "Redraft",
   1: "Keeper",
   2: "Dynasty",
+};
+
+interface Player {
+  player_id: string;
+  position: string;
+  name: string;
+  team: string;
+}
+
+export const getPlayersByIdsMap = async (
+  playerIds: string[]
+): Promise<Map<string, Player>> => {
+  if (playerIds.length === 0) {
+    return new Map();
+  }
+  try {
+    const url = `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const result = await response.json();
+    const playersMap = new Map<string, Player>();
+    if (result.players && Array.isArray(result.players)) {
+      result.players.forEach((playerObj: any) => {
+        if (playerObj && playerObj.player_id) {
+          playersMap.set(playerObj.player_id, playerObj);
+        }
+      });
+    }
+    return playersMap;
+  } catch (error) {
+    console.error("Error fetching players by IDs:", error);
+    return new Map();
+  }
 };
 
 export const getPlayerNames = async (playerIds: string[]) => {
@@ -188,13 +223,21 @@ export const getTradeValue = async (
   player: string,
   year: string,
   weekTraded: number,
-  scoringType: number
+  scoringType: number,
+  position?: string
 ) => {
   let rank = "pos_rank_ppr";
   if (scoringType === 0) {
     rank = "pos_rank_std";
   } else if (scoringType === 0.5) {
     rank = "pos_rank_half_ppr";
+  }
+  if (position === "DEF" || position === "K") {
+    const response = await fetch(
+      `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}`
+    );
+    const result = await response.json();
+    return result && result["stats"] ? result["stats"][rank] : 0;
   }
   const response = await fetch(
     `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
@@ -522,13 +565,16 @@ export const getData = async (leagueId: string) => {
 
   // Parallel requests for weekly data
   const trades: any = [];
+  const waivers: any = [];
   const [weeklyPoints, users, transactionPromises] = await Promise.all([
     getWeeklyPoints(leagueId, currentWeek ?? newLeagueInfo.lastScoredWeek),
     getUsers(leagueId),
     Promise.all(
       Array.from({ length: numberOfWeeks + 1 }, async (_, i) => {
         const weeklyTransaction = await getTransactions(leagueId, i + 1);
-        trades.push(getTrades(weeklyTransaction));
+        const waiverMoves = getWaiverMoves(weeklyTransaction);
+        trades.push(waiverMoves["trades"]);
+        waivers.push(waiverMoves["waivers"]);
         return getTotalTransactions(weeklyTransaction);
       })
     ),
@@ -558,6 +604,7 @@ export const getData = async (leagueId: string) => {
     users: processedUsers,
     transactions,
     trades: trades.flat(),
+    waivers: waivers.flat(),
     legacyWinner: legacyWinner,
     lastUpdated: new Date().getTime(),
   };

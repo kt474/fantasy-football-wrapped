@@ -190,8 +190,8 @@ watch(
     <p
       class="mt-1 mb-3 text-sm text-gray-600 max-w-80 sm:max-w-2xl sm:text-base dark:text-gray-300"
     >
-      Values next to each player are the average positional ranking for every
-      week after the trade date (only weeks played are counted). Lower numbers
+      Values below each player are the average positional ranking for every week
+      after the trade date (only weeks played are counted). Lower numbers
       indicate better performance.
     </p>
     <div v-if="tradeData.length > 0" class="flex flex-wrap w-full">
@@ -428,14 +428,5 @@ watch(
 .custom-width {
   width: 400px;
   min-width: 327px;
-  /* @media (width >= 1024px) {
-    
-  }
-  @media (width < 1024px) {
-    max-width: 345px;
-  }
-  @media (width >= 385px) {
-    min-width: 327px;
-  } */
 }
 </style>
