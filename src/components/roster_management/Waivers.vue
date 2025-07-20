@@ -88,7 +88,7 @@ const managers = computed(() => {
     }
     return currentLeague.users.map((user) => user.name);
   } else if (store.leagueInfo.length == 0) {
-    return ["Just the Tua Us"];
+    return fakeUsers.map((user) => user.name);
   }
   return [];
 });
