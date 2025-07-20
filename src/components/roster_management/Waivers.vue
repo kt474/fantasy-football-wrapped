@@ -246,12 +246,6 @@ watch(
             </div>
           </div>
         </div>
-        <div v-else>
-          <p class="mt-1 text-gray-600 dark:text-gray-300">
-            {{ currentManager }}
-            has not added a player yet.
-          </p>
-        </div>
       </div>
     </div>
     <div
