@@ -400,14 +400,14 @@ watch(
             />
           </svg>
           <div>
-            <div
-              class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2"
-            ></div>
-            <p v-if="x === 1" class="text-gray-700 dark:text-gray-300">
-              Loading Trades...
+            <p v-if="x === 1" class="mb-1 text-gray-700 dark:text-gray-300">
+              Loading trades...
             </p>
             <div
               v-else
+              class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2"
+            ></div>
+            <div
               class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2"
             ></div>
           </div>
