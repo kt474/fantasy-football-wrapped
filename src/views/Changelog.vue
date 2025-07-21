@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/17/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added a new component in the roster management section that shows all waiver moves made by each manager. ",
+        ],
+      },
+    ],
+  },
+  {
     date: "4/30/25",
     content: [
       {

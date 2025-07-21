@@ -187,7 +187,7 @@ watch(
         {{ manager }}
       </option>
     </select>
-    <div v-if="Object.keys(waiverData).length > 0" class="flex flex-wrap w-2/3">
+    <div v-if="Object.keys(waiverData).length > 0" class="flex flex-wrap">
       <div v-for="(moves, index) in Object.values(waiverData)">
         <div
           v-if="
@@ -227,7 +227,9 @@ watch(
           <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
             <div v-for="move in moves">
               <div v-if="move.adds">
-                <p>{{ move.adds }} ({{ move.week }})</p>
+                <p class="text-sm font-medium">
+                  {{ move.adds }} ({{ move.week }})
+                </p>
                 <div class="flex mt-1">
                   <span
                     :class="[
@@ -300,6 +302,8 @@ watch(
 </template>
 <style scoped>
 .custom-width {
-  min-width: 327px;
+  @media (max-width: 475px) {
+    width: 327px;
+  }
 }
 </style>
