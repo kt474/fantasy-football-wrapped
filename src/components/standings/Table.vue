@@ -20,7 +20,6 @@ import ManagementCard from "../roster_management/ManagementCard.vue";
 import RankingGraph from "../roster_management/RankingGraph.vue";
 import Playoffs from "../playoffs/Playoffs.vue";
 import LeagueHistory from "../league_history/LeagueHistory.vue";
-import Tabs from "../util/Tabs.vue";
 import Projections from "../power_rankings/Projections.vue";
 import PlayoffPercentages from "../playoffs/PlayoffPercentages.vue";
 import WeeklyReport from "../weekly_report/WeeklyReport.vue";
@@ -207,7 +206,6 @@ const getTeamName = (tableDataItem: any) => {
 </script>
 <template>
   <div>
-    <Tabs />
     <div
       v-if="store.currentTab === 'standings'"
       class="flex flex-wrap justify-between h-full min-h-0 mt-4"

@@ -7,6 +7,7 @@ import { fakePoints, fakeRosters, fakeUsers } from "../api/helper";
 import Input from "../components/util/Input.vue";
 import Intro from "../components/home/Intro.vue";
 import Table from "../components/standings/Table.vue";
+import Tabs from "../components/util/Tabs.vue";
 import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../api/types";
@@ -112,8 +113,8 @@ onMounted(async () => {
         "
       >
         <CardContainer />
+        <Tabs class="mt-4" />
         <Table
-          class="mt-4"
           :users="store.leagueUsers[store.currentLeagueIndex]"
           :rosters="store.leagueRosters[store.currentLeagueIndex]"
           :points="store.weeklyPoints[store.currentLeagueIndex]"

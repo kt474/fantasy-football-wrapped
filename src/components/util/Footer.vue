@@ -63,6 +63,9 @@
             >Privacy Policy</router-link
           >
         </p>
+        <p class="mt-1 text-gray-700 dark:text-gray-300">
+          &copy; 2024-2025. Kevin Tian
+        </p>
       </div>
     </div>
   </div>
