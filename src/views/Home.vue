@@ -176,6 +176,7 @@ onMounted(async () => {
     <div v-else class="container mx-auto custom-background">
       <Intro />
       <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
+      <Tabs class="mt-4" />
       <Table
         class="mt-4"
         :users="fakeUsers"
