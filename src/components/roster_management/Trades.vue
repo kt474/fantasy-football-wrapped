@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { LeagueInfoType } from "../../api/types.ts";
-import { getPlayerNames, getTradeValue } from "../../api/api.ts";
+import { getPlayersByIdsMap, getTradeValue } from "../../api/api.ts";
 import {
   fakeRosters,
   fakeTrades,
@@ -46,18 +46,45 @@ const getData = async () => {
     };
   });
 
+  // 1. Collect all unique player IDs
+  const allUniquePlayerIds = new Set<string>();
+  temp.forEach((trade: Trade) => {
+    trade.roster_ids.forEach((rosterId) => {
+      const adds = trade.adds[rosterId];
+      if (adds) {
+        adds.forEach((playerId) => allUniquePlayerIds.add(playerId));
+      }
+    });
+  });
+
+  const uniquePlayerIdArray = Array.from(allUniquePlayerIds);
+
+  // 2. Fetch all player names at once
+  let playerLookupMap = new Map<string, any>();
+  if (uniquePlayerIdArray.length > 0) {
+    playerLookupMap = await getPlayersByIdsMap(uniquePlayerIdArray);
+  }
   // Use Promise.all to resolve all async operations
   tradeData.value = await Promise.all(
     temp.map(async (trade: Trade) => {
       // Fetch both teams' player names in parallel
-      const [team1Players, team2Players] = await Promise.all([
-        trade.adds[trade.roster_ids[1]]
-          ? getPlayerNames(trade.adds[trade.roster_ids[1]])
-          : Promise.resolve([]),
-        trade.adds[trade.roster_ids[0]]
-          ? getPlayerNames(trade.adds[trade.roster_ids[0]])
-          : Promise.resolve([]),
-      ]);
+      const team1Players = trade.adds[trade.roster_ids[1]]
+        ? trade.adds[trade.roster_ids[1]].map((id: string) => {
+            let playerObj = playerLookupMap.get(id);
+            return playerObj.name
+              ? playerObj.name
+              : `${playerObj.team} Defense`;
+          })
+        : [];
+
+      const team2Players = trade.adds[trade.roster_ids[0]]
+        ? trade.adds[trade.roster_ids[0]].map((id: string) => {
+            let playerObj = playerLookupMap.get(id);
+            return playerObj.name
+              ? playerObj.name
+              : `${playerObj.team} Defense`;
+          })
+        : [];
 
       return {
         team1: {
