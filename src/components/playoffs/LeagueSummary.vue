@@ -68,21 +68,20 @@ const fetchPlayerNames = async () => {
       playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
     }
 
-    const result: any = await Promise.all(
-      currentLeague.weeklyPoints.map(async (user: any) => {
-        const starterIds = user.starters.at(-1);
-        const starterNames = starterIds.map((id: string) =>
-          playerLookupMap.get(id)?.name
-            ? playerLookupMap.get(id)?.name
-            : playerLookupMap.get(id)?.team
-        );
-        return {
-          playerNames: starterNames,
-          rosterId: user.rosterId,
-          points: user.points,
-        };
-      })
-    );
+    const result: any = currentLeague.weeklyPoints.map((user: any) => {
+      const starterIds = user.starters.at(-1);
+      const starterNames = starterIds.map((id: string) =>
+        playerLookupMap.get(id)?.name
+          ? playerLookupMap.get(id)?.name
+          : playerLookupMap.get(id)?.team
+      );
+      return {
+        playerNames: starterNames,
+        rosterId: user.rosterId,
+        points: user.points,
+      };
+    });
+
     playoffPromptData.value = result;
   }
 };

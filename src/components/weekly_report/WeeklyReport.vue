@@ -2,7 +2,7 @@
 import { TableDataType, LeagueInfoType } from "../../api/types.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
-import { getPlayerNames, generateReport } from "../../api/api.ts";
+import { generateReport, getPlayersByIdsMap } from "../../api/api.ts";
 import { max } from "lodash";
 
 const store = useStore();
@@ -62,11 +62,22 @@ const currentWeek = ref(weeks.value[0]);
 
 const fetchPlayerNames = async () => {
   if (store.leagueIds.length > 0) {
-    const result: any = await Promise.all(
-      props.tableData.map(async (user: any) => {
-        return await getPlayerNames(user.starters[currentWeek.value - 1]);
-      })
-    );
+    const allPlayerIds = props.tableData
+      .map((user: any) => user.starters[currentWeek.value - 1])
+      .flat();
+    let playerLookupMap = new Map<string, any>();
+    if (allPlayerIds.length > 0) {
+      playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
+    }
+    const result: any = props.tableData.map((user: any) => {
+      const starterIds = user.starters[currentWeek.value - 1];
+      const starterNames = starterIds.map((id: string) =>
+        playerLookupMap.get(id)?.name
+          ? playerLookupMap.get(id)?.name
+          : playerLookupMap.get(id)?.team
+      );
+      return starterNames;
+    });
     playerNames.value = result;
   }
 };
