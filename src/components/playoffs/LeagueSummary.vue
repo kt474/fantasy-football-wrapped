@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TableDataType, LeagueInfoType } from "../../api/types";
-import { getPlayerNames, generateSummary } from "../../api/api.ts";
+import { generateSummary, getPlayersByIdsMap } from "../../api/api.ts";
 import { ref, onMounted, watch, computed } from "vue";
 import { useStore } from "../../store/store";
 
@@ -59,9 +59,23 @@ watch(
 const fetchPlayerNames = async () => {
   if (store.leagueIds.length > 0) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const allPlayerIds = currentLeague.weeklyPoints
+      .map((user: any) => user.starters.at(-1))
+      .flat();
+
+    let playerLookupMap = new Map<string, any>();
+    if (allPlayerIds.length > 0) {
+      playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
+    }
+
     const result: any = await Promise.all(
       currentLeague.weeklyPoints.map(async (user: any) => {
-        const starterNames = await getPlayerNames(user.starters.at(-1));
+        const starterIds = user.starters.at(-1);
+        const starterNames = starterIds.map((id: string) =>
+          playerLookupMap.get(id)?.name
+            ? playerLookupMap.get(id)?.name
+            : playerLookupMap.get(id)?.team
+        );
         return {
           playerNames: starterNames,
           rosterId: user.rosterId,
