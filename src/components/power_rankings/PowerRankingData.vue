@@ -209,7 +209,7 @@ const chartOptions = ref({
       <div class="flex justify-between">
         <div>
           <h1
-            class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+            class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
           >
             Power Rankings
           </h1>

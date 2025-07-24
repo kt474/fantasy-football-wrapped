@@ -255,7 +255,7 @@ const getTeamName = (tableDataItem: any) => {
                 </div>
                 <div
                   :class="hover === 'wins' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
                 >
                   Regular season wins and losses
                 </div>
@@ -288,7 +288,7 @@ const getTeamName = (tableDataItem: any) => {
                 </div>
                 <div
                   :class="hover === 'points' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
                 >
                   Total regular season points
                 </div>
@@ -321,7 +321,7 @@ const getTeamName = (tableDataItem: any) => {
                 </div>
                 <div
                   :class="hover === 'pointsAgainst' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-24 tooltip dark:bg-gray-600"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-24 tooltip dark:bg-gray-600"
                 >
                   Total regular season points against
                 </div>
@@ -356,7 +356,7 @@ const getTeamName = (tableDataItem: any) => {
                   :class="
                     hover === 'recordAgainstAll' ? 'visible' : 'invisible'
                   "
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
                 >
                   Team record if each team played every other team each week.
                 </div>
@@ -389,7 +389,7 @@ const getTeamName = (tableDataItem: any) => {
                 </div>
                 <div
                   :class="hover === 'medianRecord' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm -ml-14 sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm -ml-14 sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
                 >
                   Team record where a win is awarded if a team's weekly score is
                   higher than the league median, and a loss is added if the
@@ -406,7 +406,7 @@ const getTeamName = (tableDataItem: any) => {
             >
               <th
                 scope="row"
-                class="px-4 py-3 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+                class="px-4 py-3 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-gray-50"
               >
                 <div class="flex items-center">
                   <img
@@ -417,7 +417,7 @@ const getTeamName = (tableDataItem: any) => {
                   />
                   <svg
                     v-else
-                    class="w-8 h-8 text-gray-800 dark:text-white"
+                    class="w-8 h-8 text-gray-800 dark:text-gray-50"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="currentColor"

@@ -145,12 +145,14 @@ const copyReport = () => {
     class="h-full px-6 pt-4 mt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex justify-between">
-      <h5 class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+      <h5
+        class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
+      >
         League Recap
       </h5>
       <svg
         @click="copyReport()"
-        class="w-6 h-6 mt-2 text-gray-800 cursor-pointer dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
+        class="w-6 h-6 mt-2 text-gray-800 cursor-pointer dark:text-gray-50 hover:text-blue-600 dark:hover:text-blue-400"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"

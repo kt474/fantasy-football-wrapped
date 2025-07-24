@@ -11,7 +11,7 @@ const props = defineProps<{
   >
     <div class="flex items-center justify-between my-2">
       <h5
-        class="w-20 text-2xl font-bold leading-none text-gray-900 dark:text-white text-pretty"
+        class="w-20 text-2xl font-bold leading-none text-gray-900 dark:text-gray-50 text-pretty"
       >
         Final Placements
       </h5>
@@ -25,7 +25,7 @@ const props = defineProps<{
                 class="text-lg text-gray-600 truncate dark:text-gray-300"
                 :class="props.rosters.length <= 10 ? 'py-2.5' : 'py-1.5'"
               >
-                <span class="font-medium text-black dark:text-white"
+                <span class="font-medium text-black dark:text-gray-50"
                   >{{ index + 1 }}.&nbsp;</span
                 >
                 {{ store.showUsernames ? user.username : user.name }}

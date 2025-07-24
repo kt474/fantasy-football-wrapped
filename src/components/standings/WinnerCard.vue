@@ -110,13 +110,13 @@ const winner: any = computed(() => {
 
     <p
       v-if="!leagueStatusComplete"
-      class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
+      class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-gray-50"
     >
       Best Performing Team
     </p>
     <p
       v-else
-      class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
+      class="mt-3 text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-gray-200"
     >
       League Champ
     </p>
@@ -129,7 +129,7 @@ const winner: any = computed(() => {
       />
       <svg
         v-else
-        class="text-gray-800 w-7 h-7 dark:text-white"
+        class="text-gray-800 w-7 h-7 dark:text-gray-50"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"
@@ -141,11 +141,11 @@ const winner: any = computed(() => {
       </svg>
       <p
         v-if="winner"
-        class="mx-2 mt-0.5 text-gray-800 text-md dark:text-white"
+        class="mx-2 mt-0.5 text-gray-800 text-md dark:text-gray-200"
       >
         {{ store.showUsernames ? winner.username : winner.name }}
       </p>
-      <p v-else class="mx-2 mt-0.5 text-gray-800 text-md dark:text-white">
+      <p v-else class="mx-2 mt-0.5 text-gray-800 text-md dark:text-gray-200">
         Undecided
       </p>
     </div>

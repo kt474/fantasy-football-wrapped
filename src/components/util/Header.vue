@@ -61,7 +61,7 @@ watch(
           alt="Flowbite Logo"
         />
         <span
-          class="self-center -mb-1.5 custom-font whitespace-nowrap dark:text-white"
+          class="self-center -mb-1.5 custom-font whitespace-nowrap dark:text-gray-50"
           ><span class="text-blue-600 dark:text-blue-500">ff</span>wrapped</span
         >
       </div>
@@ -74,10 +74,10 @@ watch(
             data-modal-toggle="default-modal"
             data-tooltip-target="about-tooltip"
             data-tooltip-placement="bottom"
-            class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600 -mr-2 md:mr-2"
+            class="text-gray-50 bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600 -mr-2 md:mr-2"
           >
             <svg
-              class="w-5 h-5 text-gray-800 dark:text-white"
+              class="w-5 h-5 text-gray-800 dark:text-gray-50"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -91,7 +91,7 @@ watch(
           <div
             id="about-tooltip"
             role="tooltip"
-            class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
+            class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-50 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
           >
             About
             <div class="tooltip-arrow" data-popper-arrow></div>
@@ -110,14 +110,14 @@ watch(
                   class="flex items-center justify-between p-4 border-b rounded-t md:p-5 dark:border-gray-600"
                 >
                   <h3
-                    class="text-xl font-semibold text-gray-900 dark:text-white"
+                    class="text-xl font-semibold text-gray-900 dark:text-gray-50"
                   >
                     About
                   </h3>
                   <button
                     aria-label="Button to close info modal"
                     type="button"
-                    class="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900 ms-auto dark:hover:bg-gray-600 dark:hover:text-white"
+                    class="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900 ms-auto dark:hover:bg-gray-600 dark:hover:text-gray-50"
                     data-modal-hide="default-modal"
                   >
                     <svg
@@ -206,7 +206,7 @@ watch(
                   class="flex items-center justify-between p-4 border-b rounded-t md:p-5 dark:border-gray-600"
                 >
                   <h3
-                    class="text-xl font-semibold text-gray-900 dark:text-white"
+                    class="text-xl font-semibold text-gray-900 dark:text-gray-50"
                   >
                     Settings
                   </h3>
@@ -241,10 +241,10 @@ watch(
               aria-label="Button for github repository"
               data-tooltip-target="github-tooltip"
               data-tooltip-placement="bottom"
-              class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center hidden md:inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+              class="text-gray-50 bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center hidden md:inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
             >
               <svg
-                class="w-5 h-5 text-gray-800 dark:text-white"
+                class="w-5 h-5 text-gray-800 dark:text-gray-50"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -260,7 +260,7 @@ watch(
             <div
               id="github-tooltip"
               role="tooltip"
-              class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
+              class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-50 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
             >
               Github
               <div class="tooltip-arrow" data-popper-arrow></div>
@@ -272,11 +272,11 @@ watch(
             data-tooltip-target="tooltip-bottom"
             data-tooltip-placement="bottom"
             type="button"
-            class="text-white bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+            class="text-gray-50 bg-slate-50 hover:bg-slate-300 focus:ring focus:outline-none focus:ring-slate-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-slate-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           >
             <svg
               v-if="darkMode"
-              class="w-5 h-5 text-gray-800 dark:text-white"
+              class="w-5 h-5 text-gray-800 dark:text-gray-50"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -288,7 +288,7 @@ watch(
             </svg>
             <svg
               v-else
-              class="w-5 h-5 text-gray-800 dark:text-white"
+              class="w-5 h-5 text-gray-800 dark:text-gray-50"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -302,7 +302,7 @@ watch(
           <div
             id="tooltip-bottom"
             role="tooltip"
-            class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
+            class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-50 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-600"
           >
             Toggle dark mode
             <div class="tooltip-arrow" data-popper-arrow></div>

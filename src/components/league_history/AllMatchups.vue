@@ -108,7 +108,7 @@ const extractRecord = (user: any, opponent: any) => {
           >
             <th
               scope="row"
-              class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
+              class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-gray-50"
             >
               {{
                 store.showUsernames

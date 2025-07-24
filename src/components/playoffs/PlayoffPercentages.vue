@@ -351,7 +351,7 @@ const tableData = computed(() => {
           >
             <th
               scope="row"
-              class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-white"
+              class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-gray-50"
             >
               {{ store.showUsernames ? item.username : item.name }}
             </th>
@@ -404,7 +404,7 @@ const tableData = computed(() => {
       class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
     >
       <p
-        class="flex justify-center -mb-6 text-xl font-semibold text-gray-900 dark:text-white"
+        class="flex justify-center -mb-6 text-xl font-semibold text-gray-900 dark:text-gray-50"
       >
         Loading projection data...
       </p>

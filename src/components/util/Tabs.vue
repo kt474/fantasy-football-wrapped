@@ -9,7 +9,7 @@ const changeTab = (tab: string) => {
 </script>
 <template>
   <ul
-    class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-300"
+    class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-200"
   >
     <li class="cursor-pointer me-2">
       <button

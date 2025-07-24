@@ -100,7 +100,7 @@ const listPadding = computed(() => {
             </div>
             <div
               :class="hover === 'points' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-52 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm w-52 tooltip dark:bg-gray-600"
             >
               Total regular season points
             </div>
@@ -133,7 +133,7 @@ const listPadding = computed(() => {
             </div>
             <div
               :class="hover === 'potentialPoints' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
             >
               Maximum points possible if the best lineup was set each week
             </div>
@@ -166,7 +166,7 @@ const listPadding = computed(() => {
             </div>
             <div
               :class="hover === 'efficiency' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
             >
               Points / Potential Points
             </div>
@@ -182,7 +182,7 @@ const listPadding = computed(() => {
           <th
             scope="row"
             :class="listPadding"
-            class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-56 whitespace-nowrap dark:text-white"
+            class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-56 whitespace-nowrap dark:text-gray-50"
           >
             {{
               store.showUsernames

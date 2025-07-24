@@ -165,11 +165,11 @@ const getOrdinalSuffix = (number: number) => {
 };
 
 const getValueColor = (value: number) => {
-  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-white`;
-  if (value <= 25) return `bg-green-400 dark:bg-green-600 text-white`;
+  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
+  if (value <= 25) return `bg-green-400 dark:bg-green-600 text-gray-50`;
   if (value <= 35) return "bg-yellow-300 dark-bg-yellow-600 text-black";
-  if (value <= 45) return `bg-orange-400 dark:bg-orange-500 text-white`;
-  return `bg-red-400 dark:bg-red-600 text-white`;
+  if (value <= 45) return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
+  return `bg-red-400 dark:bg-red-600 text-gray-50`;
 };
 
 const getRatingLabel = (value: number) => {
@@ -210,7 +210,7 @@ watch(
     class="w-full py-4 pl-4 overflow-auto bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6"
   >
     <h1
-      class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+      class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
     >
       League Trades
     </h1>
@@ -224,7 +224,7 @@ watch(
     <div v-if="tradeData.length > 0" class="flex flex-wrap w-full">
       <div
         v-for="trade in tradeData"
-        class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-width"
+        class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 custom-width"
       >
         <!-- Team name and avatar -->
         <div v-if="trade.team1" class="flex justify-between h-8">
@@ -237,7 +237,7 @@ watch(
             />
             <svg
               v-else
-              class="w-8 h-8 text-gray-900 dark:text-gray-300"
+              class="w-8 h-8 text-gray-900 dark:text-gray-200"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -258,7 +258,7 @@ watch(
             </h2>
           </div>
           <svg
-            class="w-6 h-6 mx-2 mt-0.5 text-gray-700 sm:mx-4 dark:text-gray-300 min-w-4"
+            class="w-6 h-6 mx-2 mt-0.5 text-gray-700 sm:mx-4 dark:text-gray-200 min-w-4"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -283,7 +283,7 @@ watch(
             />
             <svg
               v-else
-              class="w-8 h-8 text-gray-900 dark:text-gray-300"
+              class="w-8 h-8 text-gray-900 dark:text-gray-200"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -406,7 +406,7 @@ watch(
         store.leagueInfo[store.currentLeagueIndex].trades.length === 0
       "
     >
-      <p class="text-gray-600 dark:text-gray-300">No trades have been made.</p>
+      <p class="text-gray-600 dark:text-gray-200">No trades have been made.</p>
     </div>
     <div v-else class="flex flex-wrap">
       <div
@@ -427,7 +427,7 @@ watch(
             />
           </svg>
           <div>
-            <p v-if="x === 1" class="mb-1 text-gray-700 dark:text-gray-300">
+            <p v-if="x === 1" class="mb-1 text-gray-700 dark:text-gray-200">
               Loading trades...
             </p>
             <div

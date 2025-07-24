@@ -98,21 +98,21 @@ watch(
     class="w-full py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6 min-w-80"
   >
     <h1
-      class="pb-2 mb-4 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+      class="pb-2 mb-4 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
     >
       Top Performers
     </h1>
     <div v-if="Object.keys(data).length === 0">
-      <p class="text-gray-600 dark:text-gray-300">
+      <p class="text-gray-600 dark:text-gray-200">
         Please come back after week 1!
       </p>
     </div>
     <div
       v-else-if="!loading"
-      class="flex flex-wrap mt-2 text-gray-800 dark:text-gray-300"
+      class="flex flex-wrap mt-2 text-gray-800 dark:text-gray-200"
     >
       <ul
-        class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-300"
+        class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-200"
       >
         <li class="cursor-pointer me-2">
           <button

@@ -66,21 +66,21 @@ const addLeagues = async () => {
 <template>
   <div class="w-full" :class="{ 'h-screen': !store.currentLeagueId }">
     <h3
-      class="my-4 text-2xl font-medium text-gray-900 dark:text-white"
+      class="my-4 text-2xl font-medium text-gray-900 dark:text-gray-50"
       :class="{ hidden: store.currentLeagueId }"
     >
       Welcome {{ store.username }}!
     </h3>
     <h3
       v-if="store.leaguesList.length > 0"
-      class="mb-2 text-xl font-medium text-gray-900 dark:text-white"
+      class="mb-2 text-xl font-medium text-gray-900 dark:text-gray-50"
       :class="{ 'mt-2': store.currentLeagueId }"
     >
       Select leagues:
     </h3>
     <h3
       v-else
-      class="mb-2 text-xl font-medium text-gray-900 dark:text-white"
+      class="mb-2 text-xl font-medium text-gray-900 dark:text-gray-50"
       :class="{ 'mt-2': store.currentLeagueId }"
     >
       No leagues available, please try another year
@@ -100,7 +100,7 @@ const addLeagues = async () => {
         >
           <div>
             <h5
-              class="mb-1 text-xl font-medium text-gray-900 truncate dark:text-white max-w-52"
+              class="mb-1 text-xl font-medium text-gray-900 truncate dark:text-gray-50 max-w-52"
             >
               {{ league.name }}
             </h5>
@@ -132,7 +132,7 @@ const addLeagues = async () => {
       type="submit"
       :disabled="checkedLeagues.length == 0"
       :class="{ 'cursor-not-allowed': checkedLeagues.length == 0 }"
-      class="text-white mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >
       Add
       <span
@@ -149,7 +149,7 @@ const addLeagues = async () => {
       "
       aria-label="Button to go back if there are no leagues"
       type="submit"
-      class="text-white mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >
       Back
     </button>

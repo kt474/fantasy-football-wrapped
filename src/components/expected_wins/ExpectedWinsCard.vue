@@ -114,7 +114,7 @@ const getTeamName = (tableDataItem: any) => {
             </div>
             <div
               :class="hover === 'randomScheduleWins' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-60 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm w-60 tooltip dark:bg-gray-600"
             >
               Average number of wins after simulating 10,000 randomized weekly
               matchups
@@ -148,7 +148,7 @@ const getTeamName = (tableDataItem: any) => {
             </div>
             <div
               :class="hover === 'winsDifference' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-12 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-12 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
             >
               Difference between expected wins and actual wins
             </div>
@@ -181,7 +181,7 @@ const getTeamName = (tableDataItem: any) => {
             </div>
             <div
               :class="hover === 'probability' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium text-white normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
             >
               If wins above expected is positive, this is the probability of
               having equal to or greater than the number of actual wins. If
@@ -200,7 +200,7 @@ const getTeamName = (tableDataItem: any) => {
           <th
             scope="row"
             :class="listPadding"
-            class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-white"
+            class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-gray-50"
           >
             {{ getTeamName(item) }}
           </th>

@@ -168,7 +168,7 @@ const chartOptions = ref({
     <div class="flex justify-between">
       <div>
         <h1
-          class="-mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+          class="-mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
         >
           Points vs Potential Points
         </h1>

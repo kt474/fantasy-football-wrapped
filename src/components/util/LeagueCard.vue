@@ -119,7 +119,7 @@ const shareLeague = () => {
     <div @click.self="selectLeague()" class="flex justify-between">
       <h5
         @click.self="selectLeague()"
-        class="mb-1 text-xl font-semibold tracking-tight text-gray-900 truncate dark:text-white"
+        class="mb-1 text-xl font-semibold tracking-tight text-gray-900 truncate dark:text-gray-50"
       >
         {{ props.leagueInfo.name }}
       </h5>
@@ -128,7 +128,7 @@ const shareLeague = () => {
           :aria-label="'Button to open dropdown menu' + props.dropdownIndex"
           id="dropdownMenuIconButton"
           :data-dropdown-toggle="props.dropdownIndex.toString()"
-          class="inline-flex items-center p-2 mb-1 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-200 focus:ring-2 focus:outline-none dark:text-white focus:ring-gray-100 dark:bg-gray-800 dark:hover:bg-gray-600 dark:focus:ring-gray-500"
+          class="inline-flex items-center p-2 mb-1 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-200 focus:ring-2 focus:outline-none dark:text-gray-50 focus:ring-gray-100 dark:bg-gray-800 dark:hover:bg-gray-600 dark:focus:ring-gray-500"
           type="button"
         >
           <svg
@@ -155,7 +155,7 @@ const shareLeague = () => {
               <button
                 aria-label="Refresh league data from API"
                 @click="refreshLeague()"
-                class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-gray-50"
               >
                 Refresh
               </button>
@@ -164,7 +164,7 @@ const shareLeague = () => {
               <button
                 aria-label="Remove league from dashboard"
                 @click="removeLeague()"
-                class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-gray-50"
               >
                 Remove
               </button>
@@ -173,7 +173,7 @@ const shareLeague = () => {
               <button
                 aria-label="Remove league from dashboard"
                 @click="shareLeague()"
-                class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                class="block w-full px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-gray-50"
               >
                 Share
               </button>

@@ -110,11 +110,11 @@ const getRosterName = (rosterId: number) => {
 };
 
 const getValueColor = (value: number) => {
-  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-white`;
-  if (value <= 25) return `bg-green-400 dark:bg-green-600 text-white`;
+  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
+  if (value <= 25) return `bg-green-400 dark:bg-green-600 text-gray-50`;
   if (value <= 35) return "bg-yellow-300 dark-bg-yellow-600 text-black";
-  if (value <= 45) return `bg-orange-400 dark:bg-orange-500 text-white`;
-  return `bg-red-400 dark:bg-red-600 text-white`;
+  if (value <= 45) return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
+  return `bg-red-400 dark:bg-red-600 text-gray-50`;
 };
 
 const getRatingLabel = (value: number) => {
@@ -161,7 +161,7 @@ watch(
     class="w-full py-4 pl-4 overflow-auto bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6"
   >
     <h1
-      class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+      class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
     >
       Waivers & Free Agent Adds
     </h1>
@@ -180,7 +180,7 @@ watch(
     <select
       aria-label="current week"
       id="Manager name"
-      class="block p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      class="block p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
       v-model="currentManager"
     >
       <option v-for="manager in managers" :key="manager" :value="manager">
@@ -194,7 +194,7 @@ watch(
             moves[index].user.username === currentManager ||
             moves[index].user.name === currentManager
           "
-          class="block w-full p-4 my-2 mr-4 overflow-auto text-gray-900 bg-white border border-gray-200 rounded-lg shadow custom-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+          class="block w-full p-4 my-2 mr-4 overflow-auto text-gray-900 bg-white border border-gray-200 rounded-lg shadow custom-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
         >
           <div class="flex mb-4">
             <img
@@ -257,7 +257,7 @@ watch(
         store.leagueInfo[store.currentLeagueIndex].waivers.length === 0
       "
     >
-      <p class="text-gray-600 dark:text-gray-300">
+      <p class="text-gray-600 dark:text-gray-200">
         No waiver moves have been made.
       </p>
     </div>
@@ -279,7 +279,7 @@ watch(
             />
           </svg>
           <div>
-            <p class="mb-1 text-gray-700 dark:text-gray-300">
+            <p class="mb-1 text-gray-700 dark:text-gray-200">
               Loading waiver moves...
             </p>
             <div

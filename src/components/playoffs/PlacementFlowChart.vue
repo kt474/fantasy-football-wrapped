@@ -145,10 +145,10 @@ watch(
 </script>
 <template>
   <div
-    class="block w-full p-4 mt-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mt-0 lg:w-1/4 min-w-60 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+    class="block w-full p-4 mt-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mt-0 lg:w-1/4 min-w-60 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-50"
   >
     <h5
-      class="ml-0.5 text-2xl font-bold leading-none text-gray-900 dark:text-white text-pretty"
+      class="ml-0.5 text-2xl font-bold leading-none text-gray-900 dark:text-gray-50 text-pretty"
     >
       Regular Season vs Final Placement
     </h5>

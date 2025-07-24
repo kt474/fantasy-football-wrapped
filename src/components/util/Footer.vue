@@ -6,7 +6,7 @@
   >
     <div class="flex justify-between max-w-screen-xl mx-auto">
       <div>
-        <p class="mb-2 font-bold text-black dark:text-white">
+        <p class="mb-2 font-bold text-black dark:text-gray-50">
           Support & Resources
         </p>
         <p>

@@ -74,7 +74,7 @@ const mostPoints = computed(() => {
         >
           <th
             scope="row"
-            class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-white"
+            class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-gray-50"
           >
             {{ store.showUsernames ? item.username : item.name }}
           </th>

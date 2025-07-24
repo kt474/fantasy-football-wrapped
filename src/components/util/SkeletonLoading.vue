@@ -10,7 +10,7 @@ const store = useStore();
       class="w-full p-4 space-y-4 border border-gray-200 divide-y divide-gray-200 rounded shadow lg:mr-4 lg:w-3/4 animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700"
     >
       <div class="flex items-center justify-between">
-        <p class="-mt-1 text-lg dark:text-white">
+        <p class="-mt-1 text-lg dark:text-gray-50">
           Loading {{ store.loadingLeague }}...
         </p>
         <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>

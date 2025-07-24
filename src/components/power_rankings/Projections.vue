@@ -371,7 +371,7 @@ const chartOptions = ref({
         <div class="flex justify-between">
           <div>
             <h1
-              class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-white"
+              class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
             >
               Roster Projections
             </h1>
@@ -398,7 +398,7 @@ const chartOptions = ref({
       class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
     >
       <p
-        class="flex justify-center -mb-6 text-xl font-semibold text-gray-900 dark:text-white"
+        class="flex justify-center -mb-6 text-xl font-semibold text-gray-900 dark:text-gray-50"
       >
         Loading projection data...
       </p>

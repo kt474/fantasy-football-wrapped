@@ -311,7 +311,7 @@ const chartOptions = ref({
     class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
   >
     <h5
-      class="-mt-1.5 mb-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
+      class="-mt-1.5 mb-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
     >
       Manager Comparison
     </h5>
@@ -342,7 +342,7 @@ const chartOptions = ref({
                 />
                 <svg
                   v-else
-                  class="w-8 h-8 -mt-0.5 text-gray-800 dark:text-white"
+                  class="w-8 h-8 -mt-0.5 text-gray-800 dark:text-gray-50"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -375,7 +375,7 @@ const chartOptions = ref({
                 />
                 <svg
                   v-else
-                  class="w-8 h-8 -mt-0.5 text-gray-800 dark:text-white"
+                  class="w-8 h-8 -mt-0.5 text-gray-800 dark:text-gray-50"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -404,7 +404,7 @@ const chartOptions = ref({
           <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th
               scope="row"
-              class="px-4 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+              class="px-4 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-gray-50"
             >
               Championships
             </th>
@@ -442,7 +442,7 @@ const chartOptions = ref({
           <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th
               scope="row"
-              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-gray-50"
             >
               Record
             </th>
@@ -478,7 +478,7 @@ const chartOptions = ref({
           <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th
               scope="row"
-              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-gray-50"
             >
               Total points
             </th>
@@ -504,7 +504,7 @@ const chartOptions = ref({
           <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th
               scope="row"
-              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-gray-50"
             >
               Points per game
             </th>
@@ -554,7 +554,7 @@ const chartOptions = ref({
           <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th
               scope="row"
-              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-gray-50"
             >
               Wins above expected
             </th>
@@ -580,7 +580,7 @@ const chartOptions = ref({
           <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th
               scope="row"
-              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-gray-50"
             >
               Manager efficiency
             </th>
@@ -628,7 +628,7 @@ const chartOptions = ref({
           <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th
               scope="row"
-              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-white"
+              class="px-3 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-gray-50"
             >
               H2H
             </th>

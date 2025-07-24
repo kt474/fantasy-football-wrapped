@@ -106,7 +106,7 @@ const worstManagerUser: any = computed(() => {
       </g>
     </svg>
     <p
-      class="text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-white"
+      class="text-xl font-semibold tracking-tight text-center text-gray-900 dark:text-gray-200"
     >
       Worst Manager
     </p>
@@ -123,7 +123,7 @@ const worstManagerUser: any = computed(() => {
         />
         <svg
           v-else
-          class="text-gray-800 w-7 h-7 dark:text-white"
+          class="text-gray-800 w-7 h-7 dark:text-gray-50"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
@@ -136,7 +136,7 @@ const worstManagerUser: any = computed(() => {
 
         <p
           v-if="worstManager && worstManagerUser"
-          class="mx-3 mt-0.5 text-gray-800 text-md dark:text-white"
+          class="mx-3 mt-0.5 text-gray-800 text-md dark:text-gray-200"
         >
           {{
             store.showUsernames
@@ -144,11 +144,13 @@ const worstManagerUser: any = computed(() => {
               : worstManagerUser.name
           }}
         </p>
-        <p v-else class="mx-3 mt-1 text-gray-800 text-md dark:text-white">
+        <p v-else class="mx-3 mt-1 text-gray-800 text-md dark:text-gray-200">
           Undecided
         </p>
       </div>
-      <p class="mx-auto mt-2 leading-5 text-gray-800 text-md dark:text-white">
+      <p
+        class="mx-auto mt-2 leading-5 text-gray-800 text-md dark:text-gray-200"
+      >
         <span v-if="worstManager && worstManagerUser" class="font-semibold"
           >{{ (worstManager.managerEfficiency * 100).toFixed(1) }}%</span
         >

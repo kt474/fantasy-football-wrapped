@@ -32,11 +32,11 @@ const showInput = () => {
       aria-label="Add additional league"
       @click="showInput()"
       type="button"
-      class="h-9 mt-12 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      class="h-9 mt-12 text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
       :class="leagues.length > 1 ? 'ml-4 sm:ml-0' : ''"
     >
       <svg
-        class="w-4 h-4 text-white"
+        class="w-4 h-4 text-gray-50"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -57,11 +57,11 @@ const showInput = () => {
       aria-label="Add additional league"
       @click="showInput()"
       type="button"
-      class="h-9 mt-12 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+      class="h-9 mt-12 text-gray-50 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
       :class="leagues.length > 1 ? 'ml-4 sm:ml-0' : ''"
     >
       <svg
-        class="w-4 h-4 text-white"
+        class="w-4 h-4 text-gray-50"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

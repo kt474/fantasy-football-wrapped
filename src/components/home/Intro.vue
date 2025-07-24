@@ -2,7 +2,7 @@
 <template>
   <div class="pt-20 text-center">
     <h1
-      class="px-4 font-bold tracking-tight text-center text-gray-900 custom-font-size sm:leading-none lg:px-24 xl:px-56 sm:text-5xl lg:text-6xl dark:text-white"
+      class="px-4 font-bold tracking-tight text-center text-gray-900 custom-font-size sm:leading-none lg:px-24 xl:px-56 sm:text-5xl lg:text-6xl dark:text-gray-50"
     >
       All your
       <span

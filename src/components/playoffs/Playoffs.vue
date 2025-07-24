@@ -215,7 +215,7 @@ const numberOfLoserRounds = computed(() => {
     <LeagueSummary :tableData="tableData" :finalPlacements="finalPlacements" />
     <div class="flex flex-wrap my-4 lg:flex-nowrap">
       <div
-        class="block w-full p-4 overflow-x-auto text-black bg-white border border-gray-200 rounded-lg shadow lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+        class="block w-full p-4 overflow-x-auto text-black bg-white border border-gray-200 rounded-lg shadow lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-50"
       >
         <p class="text-3xl font-bold">Winner's Bracket</p>
         <div class="flex flex-nowrap">
@@ -323,7 +323,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                     <svg
                       v-else
-                      class="w-8 h-8 text-gray-800 dark:text-white"
+                      class="w-8 h-8 text-gray-800 dark:text-gray-50"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -368,7 +368,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                       <svg
                         v-else
-                        class="w-8 h-8 text-gray-800 dark:text-white"
+                        class="w-8 h-8 text-gray-800 dark:text-gray-50"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -421,7 +421,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                     <svg
                       v-else
-                      class="w-8 h-8 text-gray-800 dark:text-white"
+                      class="w-8 h-8 text-gray-800 dark:text-gray-50"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -468,7 +468,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                       <svg
                         v-else
-                        class="w-8 h-8 text-gray-800 dark:text-white"
+                        class="w-8 h-8 text-gray-800 dark:text-gray-50"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -513,7 +513,7 @@ const numberOfLoserRounds = computed(() => {
     <!-- losers bracket -->
     <div class="flex flex-wrap lg:flex-nowrap">
       <div
-        class="block w-full p-4 overflow-x-auto text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+        class="block w-full p-4 overflow-x-auto text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-50"
       >
         <p class="text-3xl font-bold">Loser's Bracket</p>
         <div class="flex flex-nowrap">
@@ -619,7 +619,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                     <svg
                       v-else
-                      class="w-8 h-8 text-gray-800 dark:text-white"
+                      class="w-8 h-8 text-gray-800 dark:text-gray-50"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -662,7 +662,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                       <svg
                         v-else
-                        class="w-8 h-8 text-gray-800 dark:text-white"
+                        class="w-8 h-8 text-gray-800 dark:text-gray-50"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -711,7 +711,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                     <svg
                       v-else
-                      class="w-8 h-8 text-gray-800 dark:text-white"
+                      class="w-8 h-8 text-gray-800 dark:text-gray-50"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -754,7 +754,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                       <svg
                         v-else
-                        class="w-8 h-8 text-gray-800 dark:text-white"
+                        class="w-8 h-8 text-gray-800 dark:text-gray-50"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"

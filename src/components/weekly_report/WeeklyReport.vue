@@ -478,14 +478,14 @@ watch(
   >
     <div class="flex items-center justify-between mb-3">
       <h5
-        class="mr-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
+        class="mr-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
       >
         Weekly Report
       </h5>
       <select
         aria-label="current week"
         id="rankings"
-        class="block p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 custom-padding"
+        class="block p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 custom-padding"
         :class="playoffWeeks.includes(currentWeek) ? 'w-44' : 'w-28'"
         v-model="currentWeek"
       >
@@ -497,12 +497,12 @@ watch(
     <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
     <div v-if="currentWeek == weeks[0]">
       <div class="flex">
-        <p class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
+        <p class="mb-2 text-xl font-bold text-gray-900 dark:text-gray-50">
           Summary
         </p>
         <svg
           @click="copyReport()"
-          class="w-6 h-6 mt-0.5 ml-2 text-gray-800 cursor-pointer dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
+          class="w-6 h-6 mt-0.5 ml-2 text-gray-800 cursor-pointer dark:text-gray-50 hover:text-blue-600 dark:hover:text-blue-400"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -641,7 +641,7 @@ watch(
       </div>
       <hr class="h-px mt-4 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
     </div>
-    <p class="text-xl font-bold text-gray-900 dark:text-white">Matchups</p>
+    <p class="text-xl font-bold text-gray-900 dark:text-gray-50">Matchups</p>
     <div class="flex flex-wrap w-full mb-2 overflow-x-hidden">
       <div
         v-for="index in numOfMatchups"
@@ -659,7 +659,7 @@ watch(
                 />
                 <svg
                   v-else
-                  class="w-8 h-8 text-gray-800 dark:text-white"
+                  class="w-8 h-8 text-gray-800 dark:text-gray-50"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -710,7 +710,7 @@ watch(
       </div>
     </div>
     <hr class="h-px mt-4 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
-    <p class="text-xl font-bold text-gray-900 dark:text-white">Points</p>
+    <p class="text-xl font-bold text-gray-900 dark:text-gray-50">Points</p>
     <apexchart
       width="100%"
       height="475"
