@@ -83,9 +83,9 @@ const listPadding = computed(() => {
               Total Points
               <div>
                 <svg
-                  class="w-3 h-3 ms-1.5 fill-slate-400 sm:-ml-5"
+                  class="w-3 h-3 ms-1.5 fill-gray-400 sm:-ml-5"
                   :class="{
-                    'fill-slate-600 dark:fill-slate-50': tableOrder == 'points',
+                    'fill-gray-600 dark:fill-gray-50': tableOrder == 'points',
                   }"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
@@ -115,9 +115,9 @@ const listPadding = computed(() => {
               Potential Points
               <div>
                 <svg
-                  class="w-3 h-3 ms-1.5 fill-slate-400 xl:ml-0 -ml-5"
+                  class="w-3 h-3 ms-1.5 fill-gray-400 xl:ml-0 -ml-5"
                   :class="{
-                    'fill-slate-600 dark:fill-slate-50':
+                    'fill-gray-600 dark:fill-gray-50':
                       tableOrder == 'potentialPoints',
                   }"
                   aria-hidden="true"
@@ -148,9 +148,9 @@ const listPadding = computed(() => {
               Efficiency
               <div>
                 <svg
-                  class="w-3 h-3 ms-1.5 fill-slate-400"
+                  class="w-3 h-3 ms-1.5 fill-gray-400"
                   :class="{
-                    'fill-slate-600 dark:fill-slate-50':
+                    'fill-gray-600 dark:fill-gray-50':
                       tableOrder == 'efficiency',
                   }"
                   aria-hidden="true"

@@ -64,15 +64,15 @@ const setHtmlBackground = () => {
   const html = document.querySelector("html");
   if (html) {
     if (store.darkMode) {
-      html.style.backgroundColor = "#020617";
+      html.style.backgroundColor = "#030712";
       document
         .querySelector('meta[name="theme-color"]')
-        ?.setAttribute("content", "#020617");
+        ?.setAttribute("content", "#030712");
     } else {
-      html.style.backgroundColor = "#f8fafc";
+      html.style.backgroundColor = "#F9FAFB";
       document
         .querySelector('meta[name="theme-color"]')
-        ?.setAttribute("content", "#f8fafc");
+        ?.setAttribute("content", "#F9FAFB");
     }
   }
 };
@@ -80,12 +80,12 @@ const setHtmlBackground = () => {
 
 <template>
   <div :class="{ dark: store.darkMode }" class="h-screen">
-    <div class="h-full bg-slate-50 dark:bg-slate-950">
+    <div class="h-full bg-gray-50 dark:bg-gray-950">
       <Header />
-      <div class="w-full border-b border-slate-200 dark:border-slate-600"></div>
+      <div class="w-full border-b border-gray-200 dark:border-gray-600"></div>
       <RouterView />
       <div
-        class="w-full mt-16 border-b border-slate-200 dark:border-slate-600"
+        class="w-full mt-16 border-b border-gray-200 dark:border-gray-600"
       ></div>
       <Footer />
     </div>

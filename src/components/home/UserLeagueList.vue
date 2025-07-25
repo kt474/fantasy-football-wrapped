@@ -105,7 +105,7 @@ const addLeagues = async () => {
               {{ league.name }}
             </h5>
             <div
-              class="w-full border-b border-slate-200 dark:border-slate-600"
+              class="w-full border-b border-gray-200 dark:border-gray-600"
             ></div>
             <p class="mt-1 font-normal text-gray-700 dark:text-gray-300">
               {{ seasonType[league["settings"]["type"]] }}:

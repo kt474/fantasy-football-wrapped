@@ -237,10 +237,9 @@ const getTeamName = (tableDataItem: any) => {
                   Record
                   <div>
                     <svg
-                      class="w-3 h-3 ms-1.5 fill-slate-400"
+                      class="w-3 h-3 ms-1.5 fill-gray-400"
                       :class="{
-                        'fill-slate-600 dark:fill-slate-50':
-                          tableOrder == 'wins',
+                        'fill-gray-600 dark:fill-gray-50': tableOrder == 'wins',
                       }"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
@@ -270,9 +269,9 @@ const getTeamName = (tableDataItem: any) => {
                   Points
                   <div>
                     <svg
-                      class="w-3 h-3 ms-1.5 fill-slate-400"
+                      class="w-3 h-3 ms-1.5 fill-gray-400"
                       :class="{
-                        'fill-slate-600 dark:fill-slate-50':
+                        'fill-gray-600 dark:fill-gray-50':
                           tableOrder == 'points',
                       }"
                       aria-hidden="true"
@@ -303,9 +302,9 @@ const getTeamName = (tableDataItem: any) => {
                   Points Against
                   <div>
                     <svg
-                      class="w-3 h-3 ms-1.5 fill-slate-400"
+                      class="w-3 h-3 ms-1.5 fill-gray-400"
                       :class="{
-                        'fill-slate-600 dark:fill-slate-50':
+                        'fill-gray-600 dark:fill-gray-50':
                           tableOrder == 'pointsAgainst',
                       }"
                       aria-hidden="true"
@@ -336,9 +335,9 @@ const getTeamName = (tableDataItem: any) => {
                   Record vs. All
                   <div>
                     <svg
-                      class="w-3 h-3 ms-1.5 fill-slate-400"
+                      class="w-3 h-3 ms-1.5 fill-gray-400"
                       :class="{
-                        'fill-slate-600 dark:fill-slate-50':
+                        'fill-gray-600 dark:fill-gray-50':
                           tableOrder == 'recordAgainstAll',
                       }"
                       aria-hidden="true"
@@ -371,9 +370,9 @@ const getTeamName = (tableDataItem: any) => {
                   Median Record
                   <div>
                     <svg
-                      class="w-3 h-3 ms-1.5 fill-slate-400"
+                      class="w-3 h-3 ms-1.5 fill-gray-400"
                       :class="{
-                        'fill-slate-600 dark:fill-slate-50':
+                        'fill-gray-600 dark:fill-gray-50':
                           tableOrder == 'medianRecord',
                       }"
                       aria-hidden="true"
