@@ -254,7 +254,7 @@ const getTeamName = (tableDataItem: any) => {
                 </div>
                 <div
                   :class="hover === 'wins' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
                 >
                   Regular season wins and losses
                 </div>
@@ -287,7 +287,7 @@ const getTeamName = (tableDataItem: any) => {
                 </div>
                 <div
                   :class="hover === 'points' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
                 >
                   Total regular season points
                 </div>
@@ -320,7 +320,7 @@ const getTeamName = (tableDataItem: any) => {
                 </div>
                 <div
                   :class="hover === 'pointsAgainst' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-24 tooltip dark:bg-gray-600"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 sm:-ml-24 tooltip dark:bg-gray-600"
                 >
                   Total regular season points against
                 </div>
@@ -355,7 +355,7 @@ const getTeamName = (tableDataItem: any) => {
                   :class="
                     hover === 'recordAgainstAll' ? 'visible' : 'invisible'
                   "
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
                 >
                   Team record if each team played every other team each week.
                 </div>
@@ -388,7 +388,7 @@ const getTeamName = (tableDataItem: any) => {
                 </div>
                 <div
                   :class="hover === 'medianRecord' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm -ml-14 sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 -ml-14 sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
                 >
                   Team record where a win is awarded if a team's weekly score is
                   higher than the league median, and a loss is added if the

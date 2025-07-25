@@ -11,7 +11,7 @@ const router = useRouter();
       </h1>
 
       <div
-        class="max-w-4xl text-base leading-relaxed text-gray-700 dark:text-gray-100"
+        class="max-w-4xl text-base leading-relaxed text-gray-700 dark:text-gray-300"
       >
         <p class="mb-3 text-xl font-semibold">Introduction</p>
         ffwrapped ("we," "our," or "us") is committed to protecting your

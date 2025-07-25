@@ -83,10 +83,10 @@ const getData = async () => {
 const managers = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague) {
-    if (store.showUsernames) {
-      return currentLeague.users.map((user) => user.username);
-    }
-    return currentLeague.users.map((user) => user.name);
+    const currentRosterIds = currentLeague.rosters.map((roster) => roster.id);
+    return currentLeague.users
+      .filter((user) => currentRosterIds.includes(user.id))
+      .map((user) => (store.showUsernames ? user.username : user.name));
   } else if (store.leagueInfo.length == 0) {
     return fakeUsers.map((user) => user.name);
   }
@@ -147,6 +147,7 @@ watch(
       await getData();
     }
     waiverData.value = store.leagueInfo[store.currentLeagueIndex].waiverMoves;
+    currentManager.value = managers.value[0];
   }
 );
 watch(
@@ -191,8 +192,8 @@ watch(
       <div v-for="(moves, index) in Object.values(waiverData)">
         <div
           v-if="
-            moves[index].user.username === currentManager ||
-            moves[index].user.name === currentManager
+            moves[index]?.user.username === currentManager ||
+            moves[index]?.user.name === currentManager
           "
           class="block w-full p-4 my-2 mr-4 overflow-auto text-gray-900 bg-white border border-gray-200 rounded-lg shadow custom-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
         >
