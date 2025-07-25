@@ -109,11 +109,13 @@ const shareLeague = () => {
 <template>
   <div
     @click.self="selectLeague()"
-    :class="
-      props.leagueInfo.leagueId === store.currentLeagueId
-        ? 'border-b-4 border-b-blue-700 dark:border-b-blue-600'
-        : 'border-b-2'
-    "
+    :class="{
+      'border-b-4 border-b-blue-700 dark:border-b-blue-600':
+        props.leagueInfo.leagueId === store.currentLeagueId,
+      'border-b-2': props.leagueInfo.leagueId !== store.currentLeagueId,
+      'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700':
+        store.leagueInfo.length > 1,
+    }"
     class="block px-4 py-3 mt-4 mr-4 bg-white border border-gray-200 rounded-lg shadow card-width w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
   >
     <div @click.self="selectLeague()" class="flex justify-between">
