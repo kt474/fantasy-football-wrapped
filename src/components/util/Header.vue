@@ -212,8 +212,12 @@ watch(
                   </h3>
                 </div>
                 <div class="p-4 space-y-4 md:p-5">
-                  <label class="inline-flex items-center cursor-pointer">
+                  <label
+                    for="checkbox"
+                    class="inline-flex items-center cursor-pointer"
+                  >
                     <input
+                      id="checkbox"
                       type="checkbox"
                       :disabled="store.leagueInfo.length == 0"
                       value=""

@@ -256,7 +256,7 @@ const getValueColor = (value: number) => {
     </p>
     <form class="max-w-sm mb-4">
       <label
-        for="Sort order"
+        for="sort order"
         class="block text-sm mb-0.5 text-gray-600 dark:text-gray-300"
         >Sort Picks</label
       >

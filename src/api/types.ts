@@ -19,7 +19,7 @@ export type LeagueInfoType = {
   transactions: [];
   trades: [];
   waivers: [];
-  waiverMoves: Record<string, WaiverMove[]>;
+  waiverMoves: WaiverMove[];
   tradeNames: any[];
   previousLeagues: any[];
   status: string;
@@ -61,6 +61,7 @@ export interface WaiverMove {
   adds: string;
   week: number;
   value: number;
+  position: string;
 }
 
 export type UserType = {

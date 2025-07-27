@@ -365,101 +365,107 @@ export const getWeeklyPoints = async (
   });
   return allTeams;
 };
-export const fakeWaiverMoves = {
-  "1": [
-    {
-      id: 1,
-      user: {
-        id: "1",
-        name: "Just the Tua Us",
-        username: "Just the Tua Us",
-        avatar: "3fd3d500b13b04926820e10e9306f6ab",
-        avatarImg: "../avatars/avatar1.svg",
-      },
-      adds: "Isaiah Likely",
-      week: 1,
-      value: 23.3,
+export const fakeWaiverMoves = [
+  {
+    id: 1,
+    user: {
+      id: "1",
+      name: "Just the Tua Us",
+      username: "Just the Tua Us",
+      avatar: "3fd3d500b13b04926820e10e9306f6ab",
+      avatarImg: "../avatars/avatar1.svg",
     },
-    {
-      id: 1,
-      user: {
-        id: "1",
-        name: "Just the Tua Us",
-        username: "Just the Tua Us",
-        avatar: "3fd3d500b13b04926820e10e9306f6ab",
-        avatarImg: "../avatars/avatar1.svg",
-      },
-      adds: "Ray Davis",
-      week: 3,
-      value: 35.3,
+    adds: "Isaiah Likely",
+    week: 1,
+    value: 23.3,
+    position: "TE",
+  },
+  {
+    id: 1,
+    user: {
+      id: "1",
+      name: "Just the Tua Us",
+      username: "Just the Tua Us",
+      avatar: "3fd3d500b13b04926820e10e9306f6ab",
+      avatarImg: "../avatars/avatar1.svg",
     },
-    {
-      id: 1,
-      user: {
-        id: "1",
-        name: "Just the Tua Us",
-        username: "Just the Tua Us",
-        avatar: "3fd3d500b13b04926820e10e9306f6ab",
-        avatarImg: "../avatars/avatar1.svg",
-      },
-      adds: "Darnell Mooney",
-      week: 7,
-      value: 18.4,
+    adds: "Ray Davis",
+    week: 3,
+    value: 35.3,
+    position: "RB",
+  },
+  {
+    id: 1,
+    user: {
+      id: "1",
+      name: "Just the Tua Us",
+      username: "Just the Tua Us",
+      avatar: "3fd3d500b13b04926820e10e9306f6ab",
+      avatarImg: "../avatars/avatar1.svg",
     },
-    {
-      id: 1,
-      user: {
-        id: "1",
-        name: "Just the Tua Us",
-        username: "Just the Tua Us",
-        avatar: "3fd3d500b13b04926820e10e9306f6ab",
-        avatarImg: "../avatars/avatar1.svg",
-      },
-      adds: "Kimani Vidal",
-      week: 8,
-      value: 68.2,
+    adds: "Darnell Mooney",
+    week: 7,
+    value: 18.4,
+    position: "WR",
+  },
+  {
+    id: 1,
+    user: {
+      id: "1",
+      name: "Just the Tua Us",
+      username: "Just the Tua Us",
+      avatar: "3fd3d500b13b04926820e10e9306f6ab",
+      avatarImg: "../avatars/avatar1.svg",
     },
-    {
-      id: 1,
-      user: {
-        id: "1",
-        name: "Just the Tua Us",
-        username: "Just the Tua Us",
-        avatar: "3fd3d500b13b04926820e10e9306f6ab",
-        avatarImg: "../avatars/avatar1.svg",
-      },
-      adds: "CIN Defense",
-      week: 10,
-      value: 22.4,
+    adds: "Kimani Vidal",
+    week: 8,
+    value: 68.2,
+    position: "RB",
+  },
+  {
+    id: 1,
+    user: {
+      id: "1",
+      name: "Just the Tua Us",
+      username: "Just the Tua Us",
+      avatar: "3fd3d500b13b04926820e10e9306f6ab",
+      avatarImg: "../avatars/avatar1.svg",
     },
-    {
-      id: 1,
-      user: {
-        id: "1",
-        name: "Just the Tua Us",
-        username: "Just the Tua Us",
-        avatar: "3fd3d500b13b04926820e10e9306f6ab",
-        avatarImg: "../avatars/avatar1.svg",
-      },
-      adds: "Juwan Johnson",
-      week: 11,
-      value: 18.2,
+    adds: "CIN Defense",
+    week: 10,
+    value: 22.4,
+    position: "DEF",
+  },
+  {
+    id: 1,
+    user: {
+      id: "1",
+      name: "Just the Tua Us",
+      username: "Just the Tua Us",
+      avatar: "3fd3d500b13b04926820e10e9306f6ab",
+      avatarImg: "../avatars/avatar1.svg",
     },
-    {
-      id: 1,
-      user: {
-        id: "1",
-        name: "Just the Tua Us",
-        username: "Just the Tua Us",
-        avatar: "3fd3d500b13b04926820e10e9306f6ab",
-        avatarImg: "../avatars/avatar1.svg",
-      },
-      adds: "Stone Smartt",
-      week: 13,
-      value: 26,
+    adds: "Juwan Johnson",
+    week: 11,
+    value: 18.2,
+    position: "TE",
+  },
+  {
+    id: 1,
+    user: {
+      id: "1",
+      name: "Just the Tua Us",
+      username: "Just the Tua Us",
+      avatar: "3fd3d500b13b04926820e10e9306f6ab",
+      avatarImg: "../avatars/avatar1.svg",
     },
-  ],
-};
+    adds: "Stone Smartt",
+    week: 13,
+    value: 26,
+    position: "TE",
+  },
+];
+
 export const fakeTrades = [
   {
     team1: {
