@@ -253,10 +253,7 @@ watch(
         </p>
       </div>
       <div v-else class="flex flex-wrap">
-        <div
-          role="status"
-          class="max-w-md p-4 mt-4 mr-4 border border-gray-200 rounded shadow animate-pulse dark:border-gray-700"
-        >
+        <div role="status" class="max-w-md mt-4 animate-pulse">
           <div class="flex items-center mb-4">
             <svg
               class="w-10 h-10 text-gray-200 me-3 dark:text-gray-700"
@@ -305,6 +302,7 @@ watch(
         Best Adds
       </p>
       <div
+        v-if="orderedData.length > 0"
         v-for="(move, index) in orderedData"
         class="w-11/12 mb-4 dark:text-gray-200"
       >
@@ -361,6 +359,89 @@ watch(
           </div>
         </div>
         <hr class="h-px mt-2 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
+      </div>
+      <div
+        v-else-if="
+          store.leagueInfo.length > 0 &&
+          store.leagueInfo[store.currentLeagueIndex] &&
+          store.leagueInfo[store.currentLeagueIndex].waivers.length === 0
+        "
+      >
+        <p class="text-gray-600 dark:text-gray-200">
+          No waiver moves have been made.
+        </p>
+      </div>
+      <div
+        v-else
+        role="status"
+        class="max-w-md p-4 space-y-4 border-gray-200 divide-y divide-gray-200 animate-pulse dark:divide-gray-700 md:p-6"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <div
+              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+            ></div>
+            <div
+              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+            ></div>
+          </div>
+          <div
+            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+          ></div>
+        </div>
+        <div class="flex items-center justify-between pt-4">
+          <div>
+            <div
+              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+            ></div>
+            <div
+              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+            ></div>
+          </div>
+          <div
+            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+          ></div>
+        </div>
+        <div class="flex items-center justify-between pt-4">
+          <div>
+            <div
+              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+            ></div>
+            <div
+              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+            ></div>
+          </div>
+          <div
+            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+          ></div>
+        </div>
+        <div class="flex items-center justify-between pt-4">
+          <div>
+            <div
+              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+            ></div>
+            <div
+              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+            ></div>
+          </div>
+          <div
+            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+          ></div>
+        </div>
+        <div class="flex items-center justify-between pt-4">
+          <div>
+            <div
+              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+            ></div>
+            <div
+              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+            ></div>
+          </div>
+          <div
+            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+          ></div>
+        </div>
+        <span class="sr-only">Loading...</span>
       </div>
     </div>
   </div>

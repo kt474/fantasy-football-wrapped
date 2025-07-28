@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/27/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added a new component in the roster management section that shows the best waiver moves made across the whole season. Kickers and Defenses are not counted.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/17/25",
     content: [
       {
