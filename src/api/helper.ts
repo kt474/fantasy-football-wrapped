@@ -464,6 +464,62 @@ export const fakeWaiverMoves = [
     value: 26,
     position: "TE",
   },
+  {
+    id: 2,
+    user: {
+      id: "2",
+      name: "Bijan Mustard",
+      username: "Bijan Mustard",
+      avatar: "a77d198f5c82bd93d3da5bd10493f7cd",
+      avatarImg: "../avatars/avatar2.svg",
+    },
+    adds: "Baker Mayfield",
+    week: 2,
+    value: 10.4,
+    position: "QB",
+  },
+  {
+    id: 3,
+    user: {
+      id: "3",
+      name: "The Princess McBride",
+      username: "The Princess McBride",
+      avatar: "8eb8f8bf999945d523f2c4033f70473e",
+      avatarImg: "../avatars/avatar3.svg",
+    },
+    adds: "Jerome Ford",
+    week: 9,
+    value: 31.1,
+    position: "RB",
+  },
+  {
+    id: 4,
+    user: {
+      id: "4",
+      name: "Baby Back Gibbs",
+      username: "Baby Back Gibbs",
+      avatar: "15d7cf259bc30eab8f6120f45f652fb6",
+      avatarImg: "../avatars/avatar4.svg",
+    },
+    adds: "Cam Akers",
+    week: 3,
+    value: 40.6,
+    position: "RB",
+  },
+  {
+    id: 5,
+    user: {
+      id: "5",
+      name: "Pollard Greens",
+      username: "Pollard Greens",
+      avatar: "15d7cf259bc30eab8f6120f45f652fb6",
+      avatarImg: "../avatars/avatar5.svg",
+    },
+    adds: "Dalton Schultz",
+    week: 3,
+    value: 22.6,
+    position: "RB",
+  },
 ];
 
 export const fakeTrades = [
