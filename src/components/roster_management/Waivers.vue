@@ -64,6 +64,16 @@ const getData = async () => {
   );
 };
 
+const currentManagerMoves = computed(() => {
+  return Object.values(waiverData.value)
+    .flat()
+    .filter(
+      (move) =>
+        move.user.username === currentManager.value ||
+        move.user.name === currentManager.value
+    );
+});
+
 const waiverData: ComputedRef<WaiverData> = computed(() => {
   const sortedData = rawData.value.reduce((acc: any, move: any) => {
     const id = move.id;
@@ -203,38 +213,35 @@ watch(
           {{ manager }}
         </option>
       </select>
-      <div v-if="Object.keys(waiverData).length > 0" class="flex">
-        <div v-for="(moves, index) in Object.values(waiverData)">
-          <div
-            v-if="
-              moves[index]?.user.username === currentManager ||
-              moves[index]?.user.name === currentManager
-            "
-            class="block w-full my-2 overflow-auto text-gray-900 bg-white custom-width dark:bg-gray-800 dark:text-gray-200"
-          >
-            <hr
-              class="w-11/12 h-px mt-2 mb-3 bg-gray-200 border-0 dark:bg-gray-700"
-            />
-            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-              <div v-for="move in moves">
-                <div v-if="move.adds">
-                  <p class="text-sm font-medium">
-                    {{ move.adds }} ({{ move.week }})
+      <div v-if="currentManagerMoves.length > 0" class="flex">
+        <div
+          class="block w-full my-2 overflow-auto text-gray-900 bg-white custom-width dark:bg-gray-800 dark:text-gray-200"
+        >
+          <hr
+            class="w-11/12 h-px mt-2 mb-3 bg-gray-200 border-0 dark:bg-gray-700"
+          />
+          <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+            <div
+              v-for="move in currentManagerMoves"
+              :key="move.adds + move.week"
+            >
+              <div v-if="move.adds">
+                <p class="text-sm font-medium">
+                  {{ move.adds }} ({{ move.week }})
+                </p>
+                <div class="flex mt-1">
+                  <span
+                    :class="[
+                      move.value
+                        ? getValueColor(move.value)
+                        : 'bg-gray-300 dark:text-black',
+                    ]"
+                    class="text-xs me-2 px-2.5 py-1 rounded-full"
+                    >{{ move.value ? move.value : "N/A" }}</span
+                  >
+                  <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                    {{ move.value ? getRatingLabel(move.value) : "" }}
                   </p>
-                  <div class="flex mt-1">
-                    <span
-                      :class="[
-                        move.value
-                          ? getValueColor(move.value)
-                          : 'bg-gray-300 dark:text-black',
-                      ]"
-                      class="text-xs me-2 px-2.5 py-1 rounded-full"
-                      >{{ move.value ? move.value : "N/A" }}</span
-                    >
-                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                      {{ move.value ? getRatingLabel(move.value) : "" }}
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -252,7 +259,7 @@ watch(
           No waiver moves have been made.
         </p>
       </div>
-      <div v-else class="flex flex-wrap">
+      <div v-else-if="store.leagueInfo.length !== 0" class="flex flex-wrap">
         <div role="status" class="max-w-md mt-4 animate-pulse">
           <div class="flex items-center mb-4">
             <svg

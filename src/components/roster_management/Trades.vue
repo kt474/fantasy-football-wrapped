@@ -237,7 +237,7 @@ watch(
             />
             <svg
               v-else
-              class="w-8 h-8 text-gray-900 dark:text-gray-200"
+              class="flex-shrink-0 w-8 h-8 text-gray-900 dark:text-gray-200"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -283,7 +283,7 @@ watch(
             />
             <svg
               v-else
-              class="w-8 h-8 text-gray-900 dark:text-gray-200"
+              class="flex-shrink-0 w-8 h-8 text-gray-900 dark:text-gray-200"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
