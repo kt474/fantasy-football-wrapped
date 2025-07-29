@@ -308,7 +308,7 @@ const numberOfLoserRounds = computed(() => {
               <!-- championship matchup -->
               <div
                 v-if="index === matchup.r && matchup.p === 1"
-                class="block p-4 my-2 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-2 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -406,7 +406,7 @@ const numberOfLoserRounds = computed(() => {
               </div>
               <div
                 v-else-if="index === matchup.r"
-                class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -604,7 +604,7 @@ const numberOfLoserRounds = computed(() => {
               <!-- last place matchup -->
               <div
                 v-if="index === matchup.r && matchup.p === 1"
-                class="block p-4 my-2 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-2 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -696,7 +696,7 @@ const numberOfLoserRounds = computed(() => {
               </div>
               <div
                 v-else-if="index === matchup.r"
-                class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { LeagueInfoType } from "../../api/types.ts";
 import { getPlayersByIdsMap, getTradeValue } from "../../api/api.ts";
 import {
@@ -12,6 +12,7 @@ import { useStore } from "../../store/store";
 
 const store = useStore();
 const tradeData: any = ref([]);
+const showAllTrades = ref(false);
 
 interface Trade {
   roster_ids: number[];
@@ -20,6 +21,17 @@ interface Trade {
   waiver_budget: any[];
   week: number;
 }
+
+const toggleTrades = () => {
+  showAllTrades.value = !showAllTrades.value;
+};
+
+const slicedTradeData = computed(() => {
+  if (showAllTrades.value) {
+    return tradeData.value;
+  }
+  return tradeData.value.slice(0, 6);
+});
 
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
@@ -221,182 +233,198 @@ watch(
       after the trade date (only weeks played are counted). Lower numbers
       indicate better performance.
     </p>
-    <div v-if="tradeData.length > 0" class="flex flex-wrap w-full">
-      <div
-        v-for="trade in tradeData"
-        class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 custom-width"
-      >
-        <!-- Team name and avatar -->
-        <div v-if="trade.team1" class="flex justify-between h-8">
-          <div v-if="trade.team1.user" class="flex w-40">
-            <img
-              alt="User avatar"
-              v-if="trade.team1.user.avatarImg"
-              class="w-8 h-8 rounded-full"
-              :src="trade.team1.user.avatarImg"
-            />
+    <div v-if="tradeData.length > 0">
+      <div class="flex flex-wrap w-full">
+        <div
+          v-for="trade in slicedTradeData"
+          class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 custom-width"
+        >
+          <!-- Team name and avatar -->
+          <div v-if="trade.team1" class="flex justify-between h-8">
+            <div v-if="trade.team1.user" class="flex w-40">
+              <img
+                alt="User avatar"
+                v-if="trade.team1.user.avatarImg"
+                class="w-8 h-8 rounded-full"
+                :src="trade.team1.user.avatarImg"
+              />
+              <svg
+                v-else
+                class="flex-shrink-0 w-8 h-8 text-gray-900 dark:text-gray-200"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <h2
+                class="mt-0.5 ml-2 text-sm sm:text-base font-semibold truncate max-w-32 sm:max-w-44"
+              >
+                {{
+                  store.showUsernames
+                    ? trade.team1.user.username
+                    : trade.team1.user.name
+                }}
+              </h2>
+            </div>
             <svg
-              v-else
-              class="flex-shrink-0 w-8 h-8 text-gray-900 dark:text-gray-200"
+              class="w-6 h-6 mx-2 mt-0.5 text-gray-700 sm:mx-4 dark:text-gray-200 min-w-4"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
             >
               <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 16h13M4 16l4-4m-4 4 4 4M20 8H7m13 0-4 4m4-4-4-4"
               />
             </svg>
-            <h2
-              class="mt-0.5 ml-2 text-sm sm:text-base font-semibold truncate max-w-32 sm:max-w-44"
-            >
-              {{
-                store.showUsernames
-                  ? trade.team1.user.username
-                  : trade.team1.user.name
-              }}
-            </h2>
-          </div>
-          <svg
-            class="w-6 h-6 mx-2 mt-0.5 text-gray-700 sm:mx-4 dark:text-gray-200 min-w-4"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16h13M4 16l4-4m-4 4 4 4M20 8H7m13 0-4 4m4-4-4-4"
-            />
-          </svg>
-          <div v-if="trade.team2.user" class="flex w-40">
-            <img
-              alt="User avatar"
-              v-if="trade.team2.user.avatarImg"
-              class="w-8 h-8 rounded-full"
-              :src="trade.team2.user.avatarImg"
-            />
-            <svg
-              v-else
-              class="flex-shrink-0 w-8 h-8 text-gray-900 dark:text-gray-200"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+            <div v-if="trade.team2.user" class="flex w-40">
+              <img
+                alt="User avatar"
+                v-if="trade.team2.user.avatarImg"
+                class="w-8 h-8 rounded-full"
+                :src="trade.team2.user.avatarImg"
               />
-            </svg>
-            <h2
-              class="mt-0.5 ml-2 text-sm sm:text-base font-semibold truncate max-w-32 sm:max-w-44"
+              <svg
+                v-else
+                class="flex-shrink-0 w-8 h-8 text-gray-900 dark:text-gray-200"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <h2
+                class="mt-0.5 ml-2 text-sm sm:text-base font-semibold truncate max-w-32 sm:max-w-44"
+              >
+                {{
+                  store.showUsernames
+                    ? trade.team2.user.username
+                    : trade.team2.user.name
+                }}
+              </h2>
+            </div>
+          </div>
+          <hr class="h-px mt-3 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
+          <div v-if="trade.team2" class="flex justify-between">
+            <div
+              class="w-44"
+              :class="
+                trade.team1.players.length +
+                  trade.team1.draftPicks.length +
+                  trade.team1.waiverBudget.length >
+                4
+                  ? 'text-sm'
+                  : 'text-base'
+              "
             >
-              {{
-                store.showUsernames
-                  ? trade.team2.user.username
-                  : trade.team2.user.name
-              }}
-            </h2>
+              <div v-for="index in trade.team1.players.length" class="mt-1.5">
+                <p class="text-sm font-medium">
+                  {{ trade.team1.players[index - 1] }}
+                </p>
+                <div class="flex mt-1">
+                  <span
+                    v-if="trade.team1.value[index - 1]"
+                    :class="[getValueColor(trade.team1.value[index - 1])]"
+                    class="text-xs me-2 px-2.5 py-1 rounded-full"
+                    >{{ roundToOneDecimal(trade.team1.value[index - 1]) }}</span
+                  >
+                  <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                    {{
+                      trade.team1.value[index - 1]
+                        ? getRatingLabel(trade.team1.value[index - 1])
+                        : ""
+                    }}
+                  </p>
+                </div>
+              </div>
+              <p
+                v-for="pick in trade.team1.draftPicks"
+                class="mt-1.5 text-sm font-medium"
+              >
+                {{ pick ? pick.season : "" }}
+                {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+              </p>
+              <p
+                v-for="budget in trade.team1.waiverBudget"
+                class="mt-1.5 text-sm font-medium"
+              >
+                {{ budget ? `$${budget.amount} FAAB` : "" }}
+              </p>
+            </div>
+            <div
+              class="ml-12 w-44"
+              :class="
+                trade.team2.players.length +
+                  trade.team2.draftPicks.length +
+                  trade.team2.waiverBudget.length >
+                4
+                  ? 'text-sm'
+                  : 'text-base'
+              "
+            >
+              <div v-for="index in trade.team2.players.length" class="mt-1.5">
+                <p class="text-sm font-medium">
+                  {{ trade.team2.players[index - 1] }}
+                </p>
+                <div class="flex mt-1">
+                  <span
+                    v-if="trade.team2.value[index - 1]"
+                    :class="[getValueColor(trade.team2.value[index - 1])]"
+                    class="text-xs me-2 px-2.5 py-1 rounded-full"
+                    >{{ roundToOneDecimal(trade.team2.value[index - 1]) }}</span
+                  >
+                  <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                    {{
+                      trade.team2.value[index - 1]
+                        ? getRatingLabel(trade.team2.value[index - 1])
+                        : ""
+                    }}
+                  </p>
+                </div>
+              </div>
+              <p
+                v-for="pick in trade.team2.draftPicks"
+                class="mt-1.5 text-sm font-medium"
+              >
+                {{ pick ? pick.season : "" }}
+                {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+              </p>
+              <p
+                v-for="budget in trade.team2.waiverBudget"
+                class="mt-1.5 text-sm font-medium"
+              >
+                {{ budget ? `$${budget.amount} FAAB` : "" }}
+              </p>
+            </div>
           </div>
         </div>
-        <hr class="h-px mt-3 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
-        <div v-if="trade.team2" class="flex justify-between">
-          <div
-            class="w-44"
-            :class="
-              trade.team1.players.length +
-                trade.team1.draftPicks.length +
-                trade.team1.waiverBudget.length >
-              4
-                ? 'text-sm'
-                : 'text-base'
-            "
-          >
-            <div v-for="index in trade.team1.players.length" class="mt-1.5">
-              <p class="text-sm font-medium">
-                {{ trade.team1.players[index - 1] }}
-              </p>
-              <div class="flex mt-1">
-                <span
-                  v-if="trade.team1.value[index - 1]"
-                  :class="[getValueColor(trade.team1.value[index - 1])]"
-                  class="text-xs me-2 px-2.5 py-1 rounded-full"
-                  >{{ roundToOneDecimal(trade.team1.value[index - 1]) }}</span
-                >
-                <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                  {{
-                    trade.team1.value[index - 1]
-                      ? getRatingLabel(trade.team1.value[index - 1])
-                      : ""
-                  }}
-                </p>
-              </div>
-            </div>
-            <p
-              v-for="pick in trade.team1.draftPicks"
-              class="mt-1.5 text-sm font-medium"
-            >
-              {{ pick ? pick.season : "" }}
-              {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
-            </p>
-            <p
-              v-for="budget in trade.team1.waiverBudget"
-              class="mt-1.5 text-sm font-medium"
-            >
-              {{ budget ? `$${budget.amount} FAAB` : "" }}
-            </p>
-          </div>
-          <div
-            class="ml-12 w-44"
-            :class="
-              trade.team2.players.length +
-                trade.team2.draftPicks.length +
-                trade.team2.waiverBudget.length >
-              4
-                ? 'text-sm'
-                : 'text-base'
-            "
-          >
-            <div v-for="index in trade.team2.players.length" class="mt-1.5">
-              <p class="text-sm font-medium">
-                {{ trade.team2.players[index - 1] }}
-              </p>
-              <div class="flex mt-1">
-                <span
-                  v-if="trade.team2.value[index - 1]"
-                  :class="[getValueColor(trade.team2.value[index - 1])]"
-                  class="text-xs me-2 px-2.5 py-1 rounded-full"
-                  >{{ roundToOneDecimal(trade.team2.value[index - 1]) }}</span
-                >
-                <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                  {{
-                    trade.team2.value[index - 1]
-                      ? getRatingLabel(trade.team2.value[index - 1])
-                      : ""
-                  }}
-                </p>
-              </div>
-            </div>
-            <p
-              v-for="pick in trade.team2.draftPicks"
-              class="mt-1.5 text-sm font-medium"
-            >
-              {{ pick ? pick.season : "" }}
-              {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
-            </p>
-            <p
-              v-for="budget in trade.team2.waiverBudget"
-              class="mt-1.5 text-sm font-medium"
-            >
-              {{ budget ? `$${budget.amount} FAAB` : "" }}
-            </p>
-          </div>
-        </div>
+      </div>
+      <div v-if="tradeData.length > 6" class="flex justify-center mt-2">
+        <button
+          v-if="tradeData.length > 6"
+          @click="toggleTrades()"
+          aria-label="Button to show all trades"
+          class="text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-2"
+        >
+          {{
+            showAllTrades
+              ? "Show Fewer Trades"
+              : `Show All Trades (${tradeData.length})`
+          }}
+        </button>
       </div>
     </div>
     <div
