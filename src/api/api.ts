@@ -88,6 +88,15 @@ export const generateSummary = async (prompt: any, metadata: any) => {
   }
 };
 
+export const getLeagueCount = async () => {
+  try {
+    const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const generateReport = async (prompt: any, metadata: any) => {
   try {
     const response = await fetch(import.meta.env.VITE_WEEKLY_REPORT, {

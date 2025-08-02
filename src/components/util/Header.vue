@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from "vue";
 import { useStore } from "../../store/store";
+import { getLeagueCount } from "../../api/api";
 const store = useStore();
 const systemDarkMode = window.matchMedia(
   "(prefers-color-scheme: dark)"
 ).matches;
 const clicked = ref(systemDarkMode);
 
-onMounted(() => {
+const leagueCount = ref(0);
+
+onMounted(async () => {
   if (systemDarkMode && !localStorage.darkMode) {
     clicked.value = true;
     store.updateDarkMode(true);
@@ -15,6 +18,8 @@ onMounted(() => {
     clicked.value = JSON.parse(localStorage.darkMode);
     store.updateDarkMode(clicked.value);
   }
+  const data = await getLeagueCount();
+  leagueCount.value = data?.league_id_count;
 });
 
 watch(clicked, () => {
