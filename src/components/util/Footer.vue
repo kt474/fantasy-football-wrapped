@@ -1,20 +1,24 @@
 <script setup lang="ts">
 import { getLeagueCount } from "../../api/api";
 import { ref, onMounted } from "vue";
+import { useStore } from "../../store/store";
+const store = useStore();
 const leagueCount = ref(3796); // initial load current unique league count value 8/3/25
 
 onMounted(async () => {
-  const data = await getLeagueCount();
-  const newCount = data?.league_id_count;
-  if (newCount) {
-    leagueCount.value = newCount;
+  if (store.leagueInfo.length == 0) {
+    const data = await getLeagueCount();
+    const newCount = data?.league_id_count;
+    if (newCount) {
+      leagueCount.value = newCount;
+    }
   }
 });
 </script>
 
 <template>
   <div
-    class="w-full py-3 mt-24 text-sm text-gray-700 bg-gray-100 dark:bg-gray-900 dark:text-gray-300"
+    class="w-full py-1.5 mt-24 text-sm text-gray-700 bg-gray-100 dark:bg-gray-900 dark:text-gray-300"
   >
     <div class="container flex justify-between w-11/12 mx-auto">
       <div class="flex justify-between max-w-screen-xl mt-1">
@@ -78,7 +82,10 @@ onMounted(async () => {
           </p>
         </div>
       </div>
-      <div class="mt-2 text-center text-black w-36 sm:w-44 dark:text-gray-50">
+      <div
+        v-if="store.leagueInfo.length == 0"
+        class="mt-2 text-center text-black w-36 sm:w-44 dark:text-gray-50"
+      >
         <p class="mb-2 text-3xl font-semibold sm:text-4xl">
           {{ leagueCount.toLocaleString() }}+
         </p>
