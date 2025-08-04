@@ -20,7 +20,7 @@ onMounted(async () => {
   <div
     class="w-full py-1.5 mt-24 text-sm text-gray-700 bg-gray-100 dark:bg-gray-900 dark:text-gray-300"
   >
-    <div class="container flex justify-between w-11/12 mx-auto">
+    <div class="container flex justify-between w-11/12 max-w-screen-xl mx-auto">
       <div class="flex justify-between max-w-screen-xl mt-1">
         <div>
           <p class="mb-2 text-base font-semibold text-black dark:text-gray-50">
@@ -101,7 +101,7 @@ onMounted(async () => {
     <div
       class="w-full mt-2 mb-2.5 border-b border-gray-200 dark:border-gray-600"
     ></div>
-    <div class="container w-11/12 mx-auto">
+    <div class="container w-11/12 max-w-screen-xl mx-auto">
       <p class="mt-1 text-gray-700 dark:text-gray-300">
         &copy; 2024-2025. Kevin Tian
       </p>
