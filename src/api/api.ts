@@ -65,6 +65,15 @@ export const getPlayerNames = async (playerIds: string[]) => {
   }
 };
 
+export const getLeagueCount = async () => {
+  try {
+    const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const generateSummary = async (prompt: any, metadata: any) => {
   try {
     const response = await fetch(import.meta.env.VITE_LEAGUE_RECAP, {

@@ -84,9 +84,6 @@ const setHtmlBackground = () => {
       <Header />
       <div class="w-full border-b border-gray-200 dark:border-gray-600"></div>
       <RouterView />
-      <div
-        class="w-full mt-16 border-b border-gray-200 dark:border-gray-600"
-      ></div>
       <Footer />
     </div>
     <Email />
