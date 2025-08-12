@@ -8,7 +8,6 @@ import PowerRankingData from "../power_rankings/PowerRankingData.vue";
 import ExpectedWinsCard from "../expected_wins/ExpectedWinsCard.vue";
 import ExpectedWinsChart from "../expected_wins/ExpectedWinsChart.vue";
 import ExpectedWinsChart2 from "../expected_wins/ExpectedWinsChart2.vue";
-import WinnerCard from "../standings/WinnerCard.vue";
 import BestManagerCard from "../standings/BestManagerCard.vue";
 import WorstManagerCard from "../standings/WorstManagerCard.vue";
 import TransactionsCard from "../standings/TransactionsCard.vue";
@@ -25,6 +24,7 @@ import PlayoffPercentages from "../playoffs/PlayoffPercentages.vue";
 import WeeklyReport from "../weekly_report/WeeklyReport.vue";
 import Draft from "../draft/Draft.vue";
 import TeamRanking from "../power_rankings/TeamRanking.vue";
+import CurrentTrends from "./CurrentTrends.vue";
 
 const tableOrder = ref("wins");
 const hover = ref("");
@@ -150,20 +150,6 @@ const mostMedianLosses = computed(() => {
   return maxBy(originalData.value, "lossesWithMedian")?.lossesWithMedian;
 });
 
-const leagueWinner = computed(() => {
-  if (store.leagueInfo[store.currentLeagueIndex]) {
-    if (store.leagueInfo[store.currentLeagueIndex].status !== "complete") {
-      const projectedWinner = tableData.value.reduce((max: any, obj: any) =>
-        obj.winsAgainstAll > max.winsAgainstAll ? obj : max
-      );
-      return projectedWinner.rosterId;
-    }
-    return store.leagueInfo[store.currentLeagueIndex].leagueWinner
-      ? Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
-      : store.leagueInfo[store.currentLeagueIndex].legacyWinner;
-  }
-  return "";
-});
 const mostTransactions = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].transactions
@@ -188,15 +174,6 @@ const medianScoring = computed(() => {
   return false;
 });
 
-const cardHeight = computed(() => {
-  if (props.rosters.length <= 10) {
-    return "h-36";
-  } else if (props.rosters.length <= 12) {
-    return "h-44";
-  }
-  return "h-52";
-});
-
 const getTeamName = (tableDataItem: any) => {
   if (store.showUsernames) {
     return tableDataItem.username ? tableDataItem.username : `Ghost Roster`;
@@ -208,7 +185,7 @@ const getTeamName = (tableDataItem: any) => {
   <div>
     <div
       v-if="store.currentTab === 'standings'"
-      class="flex flex-wrap justify-between h-full min-h-0 mt-4"
+      class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"
     >
       <div
         class="relative w-full overflow-x-auto rounded-lg shadow-md xl:w-3/4 dark:bg-gray-900"
@@ -494,73 +471,57 @@ const getTeamName = (tableDataItem: any) => {
           </tbody>
         </table>
       </div>
-      <div
-        :class="{ 'custom-height': props.users.length <= 10 }"
-        class="flex flex-wrap justify-between w-full xl:w-fit xl:block xl:flex-grow xl:ml-4 xl:mt-0"
-      >
-        <WinnerCard
-          v-if="store.currentLeagueId"
-          :rosters="props.rosters"
-          :users="props.users"
-          :leagueWinner="leagueWinner"
-          :cardHeight="cardHeight"
-          class="mt-4 xl:mt-0"
-        />
-        <WinnerCard
-          v-else
-          :rosters="fakeRosters"
-          :users="fakeUsers"
-          :leagueWinner="6"
-          :cardHeight="cardHeight"
-          class="mt-4 xl:mt-0"
-        />
-        <BestManagerCard
-          v-if="store.currentLeagueId"
-          :rosters="props.rosters"
-          :users="props.users"
-          :cardHeight="cardHeight"
-          class="mt-4"
-        />
-        <BestManagerCard
-          v-else
-          :rosters="fakeRosters"
-          :users="fakeUsers"
-          :cardHeight="cardHeight"
-          class="mt-4"
-        />
-        <WorstManagerCard
-          v-if="store.currentLeagueId"
-          :rosters="props.rosters"
-          :users="props.users"
-          :cardHeight="cardHeight"
-          class="mt-4"
-        />
-        <WorstManagerCard
-          v-else
-          :rosters="fakeRosters"
-          :users="fakeUsers"
-          :cardHeight="cardHeight"
-          class="mt-4"
-        />
-        <TransactionsCard
-          v-if="store.currentLeagueId"
-          :users="props.users"
-          :mostTransactions="mostTransactions"
-          :cardHeight="cardHeight"
-          :rosters="props.rosters"
-          class="mt-4"
-        />
-        <TransactionsCard
-          v-else
-          :users="fakeUsers"
-          :mostTransactions="{ 1: 24 }"
-          :cardHeight="cardHeight"
-          :rosters="props.rosters"
-          class="mt-4"
-        />
+      <div class="flex flex-col flex-1 w-full mt-4 xl:w-fit xl:ml-4 xl:mt-0">
+        <CurrentTrends :tableData="tableData" />
+        <div
+          class="flex-1 px-2 py-3 mt-4 bg-white border border-gray-200 rounded-lg shadow md:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56 min-h-56"
+        >
+          <BestManagerCard
+            v-if="store.currentLeagueId"
+            :rosters="props.rosters"
+            :users="props.users"
+            class="mt-0.5"
+          />
+          <BestManagerCard
+            v-else
+            :rosters="fakeRosters"
+            :users="fakeUsers"
+            class="mt-0.5"
+          />
+          <WorstManagerCard
+            v-if="store.currentLeagueId"
+            :rosters="props.rosters"
+            :users="props.users"
+            class="mt-4"
+          />
+          <WorstManagerCard
+            v-else
+            :rosters="fakeRosters"
+            :users="fakeUsers"
+            class="mt-4"
+          />
+          <TransactionsCard
+            v-if="store.currentLeagueId"
+            :users="props.users"
+            :mostTransactions="mostTransactions"
+            :rosters="props.rosters"
+            class="mt-4"
+          />
+          <TransactionsCard
+            v-else
+            :users="fakeUsers"
+            :mostTransactions="{ 1: 24 }"
+            :rosters="props.rosters"
+            class="mt-4"
+          />
+        </div>
       </div>
-      <StandingsChart :tableData="tableData" class="mt-4" />
     </div>
+    <StandingsChart
+      v-if="store.currentTab === 'standings'"
+      :tableData="tableData"
+      class="mt-4"
+    />
     <div v-if="store.currentTab === 'powerRankings'">
       <PowerRankingData
         v-if="store.currentLeagueId"
