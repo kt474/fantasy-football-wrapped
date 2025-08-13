@@ -6,7 +6,9 @@ const store = useStore();
 const leagueCount = ref(3796); // initial load current unique league count value 8/3/25
 
 onMounted(async () => {
-  if (store.leagueInfo.length == 0) {
+  const queryParams = new URLSearchParams(window.location.search);
+  const leagueId = queryParams.get("leagueId");
+  if (!leagueId) {
     const data = await getLeagueCount();
     const newCount = data?.league_id_count;
     if (newCount) {

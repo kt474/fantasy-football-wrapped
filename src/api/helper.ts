@@ -365,6 +365,11 @@ export const getWeeklyPoints = async (
   });
   return allTeams;
 };
+
+export const fakeHighlights = [
+  "<b>Collard Greens</b> is the hottest team, riding a dominant 5-game win streak and averaging 132 points per game over that span, vaulting to 3rd place.",
+  "<b>Finding Deebo</b> leads the league in total points (1646) but just saw a 4-game win streak snapped, opening the door for surging contenders.",
+];
 export const fakeWaiverMoves = [
   {
     id: 1,
