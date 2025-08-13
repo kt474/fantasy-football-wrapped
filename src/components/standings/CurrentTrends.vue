@@ -136,7 +136,7 @@ const cardHeight = computed(() => {
     </h1>
     <div v-if="currentTrends">
       <ul
-        class="mr-0 space-y text-gray-800 dark:text-gray-200 divide-y divide-gray-300 dark:divide-gray-700"
+        class="mr-0 text-gray-800 divide-y divide-gray-300 space-y dark:text-gray-200 dark:divide-gray-700"
       >
         <li
           v-for="(trend, index) in currentTrends"
@@ -340,7 +340,7 @@ const cardHeight = computed(() => {
         !store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
       "
     >
-      <p class="text-gray-600 dark:text-gray-200">
+      <p class="mt-2 text-gray-600 dark:text-gray-200">
         Please come back after week 1!
       </p>
     </div>
