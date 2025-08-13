@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "8/12/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added a new 'League News' section in the standings tab that shows AI generated league trends and highlights.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/27/25",
     content: [
       {

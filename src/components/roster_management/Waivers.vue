@@ -255,7 +255,7 @@ watch(
           store.leagueInfo[store.currentLeagueIndex].waivers.length === 0
         "
       >
-        <p class="text-gray-600 dark:text-gray-200">
+        <p class="mt-4 text-gray-600 dark:text-gray-200">
           No waiver moves have been made.
         </p>
       </div>
