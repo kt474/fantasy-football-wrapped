@@ -58,7 +58,7 @@ const worstManagerUser: any = computed(() => {
 
             <p
               v-if="worstManager && worstManagerUser"
-              class="mx-3 text-gray-800 truncate text-md dark:text-gray-200 max-w-32"
+              class="mx-3 text-gray-800 xl:truncate text-md dark:text-gray-200 xl:max-w-32 max-w-52"
             >
               {{
                 store.showUsernames
@@ -79,7 +79,10 @@ const worstManagerUser: any = computed(() => {
         <p
           class="flex flex-col items-end ml-auto text-right text-gray-800 text-md dark:text-gray-200"
         >
-          <span v-if="worstManager && worstManagerUser" class="font-semibold">
+          <span
+            v-if="worstManager && worstManagerUser"
+            class="font-semibold text-gray-900 dark:text-gray-50"
+          >
             {{ (worstManager.managerEfficiency * 100).toFixed(1) }}%
           </span>
           <span v-else class="font-semibold">0%</span>

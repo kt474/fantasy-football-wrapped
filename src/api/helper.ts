@@ -369,7 +369,6 @@ export const getWeeklyPoints = async (
 export const fakeHighlights = [
   "<b>Collard Greens</b> is the hottest team, riding a dominant 5-game win streak and averaging 132 points per game over that span, vaulting to 3rd place.",
   "<b>Finding Deebo</b> leads the league in total points (1646) but just saw a 4-game win streak snapped, opening the door for surging contenders.",
-  "<b>Just the Tua Us</b> and <b>Dak to the Future</b> are in freefall, combining for just one win in the last 8 games.",
 ];
 export const fakeWaiverMoves = [
   {

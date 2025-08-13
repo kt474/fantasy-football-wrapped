@@ -474,7 +474,7 @@ const getTeamName = (tableDataItem: any) => {
       <div class="flex flex-col flex-1 w-full mt-4 xl:w-fit xl:ml-4 xl:mt-0">
         <CurrentTrends :tableData="tableData" />
         <div
-          class="flex-1 px-2 py-3 mt-4 bg-white border border-gray-200 rounded-lg shadow md:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56 min-h-56"
+          class="flex-1 px-3 py-3 mt-4 bg-white border border-gray-200 rounded-lg shadow md:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56 min-h-56"
         >
           <BestManagerCard
             v-if="store.currentLeagueId"

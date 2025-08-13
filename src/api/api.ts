@@ -74,24 +74,23 @@ export const getLeagueCount = async () => {
   }
 };
 
-export const generateTrends = async (data: any) => {
-  try {
-    const response = await fetch(import.meta.env.VITE_LEAGUE_RECAP, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data,
-      }),
-    });
-    return await response.json();
-  } catch (error) {
-    console.error("Error:", error);
-    return {
-      text: "Unable to generate report. Please try again later.",
-    };
-  }
+export const generateTrends = async (
+  data: any,
+  wordLimit: number,
+  bulletCount: number
+) => {
+  const response = await fetch(import.meta.env.VITE_TRENDS_RECAP, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      data,
+      wordLimit,
+      bulletCount,
+    }),
+  });
+  return await response.json();
 };
 
 export const generateSummary = async (prompt: any, metadata: any) => {

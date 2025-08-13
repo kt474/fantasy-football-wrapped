@@ -30,12 +30,10 @@ const mostTransactionsUser: any = computed(() => {
   <div>
     <div class="flex px-3">
       <div>
-        <p
-          class="text-lg font-semibold text-gray-900 truncate dark:text-gray-200"
-        >
+        <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">
           Most Active
         </p>
-        <div class="flex w-36">
+        <div class="flex xl:w-36 w-52">
           <img
             alt="Most transactions user avatar"
             v-if="
@@ -61,7 +59,7 @@ const mostTransactionsUser: any = computed(() => {
 
           <p
             v-if="mostTransactions && mostTransactionsUser"
-            class="ml-3 text-gray-800 truncate text-md dark:text-gray-50 max-w-32"
+            class="ml-3 text-gray-800 xl:truncate text-md dark:text-gray-50 xl:max-w-32 max-w-52"
           >
             {{
               store.showUsernames
@@ -81,7 +79,7 @@ const mostTransactionsUser: any = computed(() => {
         <p
           class="flex flex-col items-end ml-auto text-right text-gray-800 text-md dark:text-gray-200 text-pretty"
         >
-          <span class="font-semibold">
+          <span class="font-semibold text-gray-900 dark:text-gray-50">
             {{ mostTransactions ? mostTransactions[1] : "0" }}
           </span>
           <span class="text-sm">Roster moves</span>
