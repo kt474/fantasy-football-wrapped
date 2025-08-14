@@ -67,10 +67,7 @@ const mostTransactionsUser: any = computed(() => {
                 : mostTransactionsUser.name
             }}
           </p>
-          <p
-            v-else
-            class="mt-0.5 ml-3 text-gray-800 text-md dark:text-gray-200"
-          >
+          <p v-else class="ml-3 text-gray-800 text-md dark:text-gray-200">
             Undecided
           </p>
         </div>

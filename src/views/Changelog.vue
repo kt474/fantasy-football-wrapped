@@ -27,6 +27,17 @@ const data = [
     ],
   },
   {
+    date: "7/22/25",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Refactored the API calls that require player names to be much faster.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/17/25",
     content: [
       {
@@ -281,7 +292,7 @@ const data = [
       <h1 class="mb-4 text-3xl font-semibold text-gray-800 dark:text-gray-300">
         Changelog
       </h1>
-      <div v-for="entry in data" class="my-2">
+      <div v-for="entry in data" class="my-2 ml-1">
         <p class="mb-1 text-xl font-semibold text-gray-800 dark:text-gray-300">
           {{ entry.date }}
         </p>

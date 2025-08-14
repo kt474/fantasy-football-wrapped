@@ -252,7 +252,7 @@ watch(
         v-else-if="
           store.leagueInfo.length > 0 &&
           store.leagueInfo[store.currentLeagueIndex] &&
-          store.leagueInfo[store.currentLeagueIndex].waivers.length === 0
+          currentManagerMoves.length == 0
         "
       >
         <p class="mt-4 text-gray-600 dark:text-gray-200">
@@ -376,6 +376,17 @@ watch(
       >
         <p class="text-gray-600 dark:text-gray-200">
           No waiver moves have been made.
+        </p>
+      </div>
+      <div
+        v-else-if="
+          store.leagueInfo.length > 0 &&
+          store.leagueInfo[store.currentLeagueIndex] &&
+          !store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+        "
+      >
+        <p class="text-gray-600 dark:text-gray-200">
+          Please come back after week 1!
         </p>
       </div>
       <div

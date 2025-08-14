@@ -23,7 +23,10 @@ const weeks = computed(() => {
   ) {
     return [...Array(15).keys()].slice(1).reverse();
   }
-  if (props.tableData[0].matchups) {
+  if (
+    props.tableData[0].matchups &&
+    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+  ) {
     const recordLength = props.tableData[0].matchups.length + 1;
     const weeksList = [
       ...Array(

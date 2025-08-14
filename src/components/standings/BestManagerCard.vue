@@ -62,7 +62,7 @@ const bestManagerUser: any = computed(() => {
                 : bestManagerUser.name
             }}
           </p>
-          <p v-else class="mx-3 mt-1 text-gray-800 text-md dark:text-gray-200">
+          <p v-else class="mx-3 text-gray-800 text-md dark:text-gray-200">
             Undecided
           </p>
         </div>
