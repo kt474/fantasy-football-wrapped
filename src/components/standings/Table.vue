@@ -25,6 +25,7 @@ import WeeklyReport from "../weekly_report/WeeklyReport.vue";
 import Draft from "../draft/Draft.vue";
 import TeamRanking from "../power_rankings/TeamRanking.vue";
 import CurrentTrends from "./CurrentTrends.vue";
+import ScheduleStrength from "../expected_wins/ScheduleStrength.vue";
 
 const tableOrder = ref("wins");
 const hover = ref("");
@@ -545,7 +546,10 @@ const getTeamName = (tableDataItem: any) => {
         <ExpectedWinsCard :tableData="tableData" class="mt-4" />
         <ExpectedWinsChart :tableData="tableData" class="mt-4 md:ml-4" />
       </div>
-      <ExpectedWinsChart2 :tableData="tableData" class="mt-4" />
+      <div class="flex flex-wrap md:flex-nowrap">
+        <ExpectedWinsChart2 :tableData="tableData" class="mt-4" />
+        <ScheduleStrength :tableData="tableData" class="mt-4 md:ml-4" />
+      </div>
     </div>
     <div v-if="store.currentTab === 'managerEfficiency'">
       <div class="flex flex-wrap md:flex-nowrap">

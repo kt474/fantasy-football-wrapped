@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "8/16/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added a new strengh of schedule chart in the expected wins tab that shows each team's relative strength of schedule. This value is the average difference between a team’s opponents’ points per game and the league‑wide average points per game.",
+        ],
+      },
+    ],
+  },
+  {
     date: "8/12/25",
     content: [
       {
