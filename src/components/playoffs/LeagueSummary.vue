@@ -176,7 +176,8 @@ const copyReport = () => {
       ></p>
 
       <p class="mb-4 text-xs text-gray-500 dark:text-gray-300">
-        Generated using GPT-4o. Information provided may not always be accurate.
+        Generated using GPT-4.1. Information provided may not always be
+        accurate.
       </p>
     </div>
     <!-- Fake data for home page  -->

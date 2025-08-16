@@ -119,10 +119,11 @@ watch(
             @click="changeTab('QB')"
             aria-current="page"
             class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="{
-              ' text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-                tab === 'QB',
-            }"
+            :class="[
+              tab === 'QB'
+                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
+            ]"
           >
             QB
           </button>
@@ -131,10 +132,11 @@ watch(
           <button
             @click="changeTab('RB')"
             class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="{
-              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-                tab === 'RB',
-            }"
+            :class="[
+              tab === 'RB'
+                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
+            ]"
           >
             RB
           </button>
@@ -143,10 +145,11 @@ watch(
           <button
             @click="changeTab('WR')"
             class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="{
-              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-                tab === 'WR',
-            }"
+            :class="[
+              tab === 'WR'
+                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
+            ]"
           >
             WR
           </button>
@@ -155,10 +158,11 @@ watch(
           <button
             @click="changeTab('TE')"
             class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="{
-              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-                tab === 'TE',
-            }"
+            :class="[
+              tab === 'TE'
+                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
+            ]"
           >
             TE
           </button>
@@ -167,10 +171,11 @@ watch(
           <button
             @click="changeTab('K')"
             class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="{
-              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-                tab === 'K',
-            }"
+            :class="[
+              tab === 'K'
+                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
+            ]"
           >
             K
           </button>
@@ -179,10 +184,11 @@ watch(
           <button
             @click="changeTab('DEF')"
             class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="{
-              'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-                tab === 'DEF',
-            }"
+            :class="[
+              tab === 'DEF'
+                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
+            ]"
           >
             DEF
           </button>

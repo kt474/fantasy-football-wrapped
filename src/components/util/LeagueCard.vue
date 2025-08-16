@@ -116,12 +116,12 @@ const shareLeague = () => {
       'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700':
         store.leagueInfo.length > 1,
     }"
-    class="block px-4 py-3 mt-4 mr-4 bg-white border border-gray-200 rounded-lg shadow card-width w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
+    class="block px-4 py-2 mt-4 mr-4 bg-white border border-gray-200 rounded-lg shadow card-width w-80 min-w-60 dark:bg-gray-800 dark:border-gray-700"
   >
     <div @click.self="selectLeague()" class="flex justify-between">
       <h5
         @click.self="selectLeague()"
-        class="mb-1 text-xl font-semibold tracking-tight text-gray-900 truncate dark:text-gray-50"
+        class="text-lg font-semibold tracking-tight text-gray-900 truncate dark:text-gray-50"
       >
         {{ props.leagueInfo.name }}
       </h5>
@@ -130,7 +130,7 @@ const shareLeague = () => {
           :aria-label="'Button to open dropdown menu' + props.dropdownIndex"
           id="dropdownMenuIconButton"
           :data-dropdown-toggle="props.dropdownIndex.toString()"
-          class="inline-flex items-center p-2 mb-1 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-200 focus:ring-2 focus:outline-none dark:text-gray-50 focus:ring-gray-100 dark:bg-gray-800 dark:hover:bg-gray-600 dark:focus:ring-gray-500"
+          class="inline-flex items-center p-1.5 mb-1.5 text-xs font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-200 focus:ring-2 focus:outline-none dark:text-gray-50 focus:ring-gray-100 dark:bg-gray-800 dark:hover:bg-gray-600 dark:focus:ring-gray-500"
           type="button"
         >
           <svg
@@ -190,7 +190,7 @@ const shareLeague = () => {
     ></div>
     <p
       @click.self="selectLeague()"
-      class="font-normal text-gray-700 dark:text-gray-300 mt-1.5"
+      class="font-normal text-sm text-gray-600 dark:text-gray-300 mt-1.5"
     >
       {{
         props.leagueInfo.season +
@@ -205,6 +205,6 @@ const shareLeague = () => {
 </template>
 <style scoped>
 .card-width {
-  width: 19.4rem;
+  width: 17rem;
 }
 </style>

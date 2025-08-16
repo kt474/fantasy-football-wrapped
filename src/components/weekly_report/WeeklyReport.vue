@@ -530,7 +530,7 @@ watch(
       >
         <p v-html="weeklyReport" class="mb-3"></p>
         <p class="text-xs text-gray-500 dark:text-gray-300">
-          Generated using GPT-4o. Information provided may not always be
+          Generated using GPT-4.1. Information provided may not always be
           accurate.
         </p>
       </div>

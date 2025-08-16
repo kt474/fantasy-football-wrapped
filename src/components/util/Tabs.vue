@@ -16,10 +16,11 @@ const changeTab = (tab: string) => {
         @click="changeTab('standings')"
         aria-current="page"
         class="inline-block p-2 rounded-t-lg sm:p-4"
-        :class="{
-          ' text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-            store.currentTab === 'standings',
-        }"
+        :class="[
+          store.currentTab === 'standings'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
       >
         Standings
       </button>
@@ -28,10 +29,11 @@ const changeTab = (tab: string) => {
       <button
         @click="changeTab('powerRankings')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
-        :class="{
-          'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-            store.currentTab === 'powerRankings',
-        }"
+        :class="[
+          store.currentTab === 'powerRankings'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
       >
         <span class="block sm:hidden">Rankings</span>
         <span class="hidden sm:block">Power Rankings</span>
@@ -41,10 +43,11 @@ const changeTab = (tab: string) => {
       <button
         @click="changeTab('expectedWins')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
-        :class="{
-          'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-            store.currentTab === 'expectedWins',
-        }"
+        :class="[
+          store.currentTab === 'expectedWins'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
       >
         <span class="block sm:hidden">Exp. Wins</span>
         <span class="hidden sm:block">Expected Wins</span>
@@ -54,10 +57,11 @@ const changeTab = (tab: string) => {
       <button
         @click="changeTab('managerEfficiency')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
-        :class="{
-          'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-            store.currentTab === 'managerEfficiency',
-        }"
+        :class="[
+          store.currentTab === 'managerEfficiency'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
       >
         Roster
         <span class="hidden sm:inline">Management</span>
@@ -67,10 +71,11 @@ const changeTab = (tab: string) => {
       <button
         @click="changeTab('playoffs')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
-        :class="{
-          'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-            store.currentTab === 'playoffs',
-        }"
+        :class="[
+          store.currentTab === 'playoffs'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
       >
         Playoffs
       </button>
@@ -79,10 +84,11 @@ const changeTab = (tab: string) => {
       <button
         @click="changeTab('weeklyReport')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
-        :class="{
-          'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-            store.currentTab === 'weeklyReport',
-        }"
+        :class="[
+          store.currentTab === 'weeklyReport'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
       >
         Weekly Report
       </button>
@@ -91,10 +97,11 @@ const changeTab = (tab: string) => {
       <button
         @click="changeTab('draft')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
-        :class="{
-          'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-            store.currentTab === 'draft',
-        }"
+        :class="[
+          store.currentTab === 'draft'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
       >
         Draft
       </button>
@@ -103,10 +110,11 @@ const changeTab = (tab: string) => {
       <button
         @click="changeTab('leagueHistory')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
-        :class="{
-          'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700':
-            store.currentTab === 'leagueHistory',
-        }"
+        :class="[
+          store.currentTab === 'leagueHistory'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
       >
         <span class="hidden sm:inline">League</span> History
       </button>
