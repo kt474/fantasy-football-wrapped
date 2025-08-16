@@ -293,30 +293,33 @@ const data = [
         Changelog
       </h1>
       <div v-for="entry in data" class="my-2 ml-1">
-        <p class="mb-1 text-xl font-semibold text-gray-800 dark:text-gray-300">
-          {{ entry.date }}
-        </p>
-
+        <div class="flex">
+          <p
+            class="w-20 mb-1 mr-2 text-xl font-semibold text-gray-800 dark:text-gray-300"
+          >
+            {{ entry.date }}
+          </p>
+          <div v-for="content in entry.content" class="mt-0.5">
+            <span
+              v-if="content.type == 'Update'"
+              class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
+              >{{ content.type }}</span
+            >
+            <span
+              v-if="content.type == 'Feature'"
+              class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300"
+              >{{ content.type }}</span
+            >
+            <span
+              v-if="content.type == 'Fix'"
+              class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300"
+              >{{ content.type }}</span
+            >
+          </div>
+        </div>
         <div v-for="content in entry.content" class="max-w-4xl">
-          <span
-            v-if="content.type == 'Update'"
-            class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
-            >{{ content.type }}</span
-          >
-          <span
-            v-if="content.type == 'Feature'"
-            class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300"
-            >{{ content.type }}</span
-          >
-          <span
-            v-if="content.type == 'Fix'"
-            class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300"
-            >{{ content.type }}</span
-          >
-          <ul
-            class="space-y-1 text-gray-800 list-disc list-inside dark:text-gray-300"
-          >
-            <li v-for="text in content.text" class="my-1 text-base">
+          <ul class="space-y-1 text-gray-800 dark:text-gray-300">
+            <li v-for="text in content.text" class="px-2 my-1 ml-20 text-base">
               {{ text }}
             </li>
           </ul>

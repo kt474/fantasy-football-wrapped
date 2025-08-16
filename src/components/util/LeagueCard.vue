@@ -205,6 +205,6 @@ const shareLeague = () => {
 </template>
 <style scoped>
 .card-width {
-  width: 17rem;
+  width: 16rem;
 }
 </style>

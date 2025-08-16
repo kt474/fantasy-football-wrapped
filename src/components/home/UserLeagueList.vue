@@ -96,18 +96,20 @@ const addLeagues = async () => {
         />
         <label
           :for="'league-' + index"
-          class="inline-flex items-center justify-between w-full px-4 py-2.5 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-blue-600 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+          class="inline-flex items-center justify-between w-full px-4 py-2 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-blue-600 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
         >
           <div>
             <h5
-              class="mb-1 text-xl font-medium text-gray-900 truncate dark:text-gray-50 max-w-52"
+              class="mb-1 text-lg font-medium text-gray-900 truncate dark:text-gray-50 max-w-52"
             >
               {{ league.name }}
             </h5>
             <div
               class="w-full border-b border-gray-200 dark:border-gray-600"
             ></div>
-            <p class="mt-1 font-normal text-gray-700 dark:text-gray-300">
+            <p
+              class="mt-1 text-sm font-normal text-gray-600 dark:text-gray-300"
+            >
               {{ seasonType[league["settings"]["type"]] }}:
               {{ league.season }}
               {{ league.total_rosters }}-team
