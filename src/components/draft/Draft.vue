@@ -257,14 +257,14 @@ const getValueColor = (value: number) => {
         Draft {{ activeTab }}
       </h5>
       <div
-        class="inline-flex p-1 -mt-2 bg-gray-200 rounded-lg dark:bg-gray-600"
+        class="inline-flex p-1 -mt-1 bg-gray-200 rounded-lg sm:-mt-2 dark:bg-gray-600"
         role="tablist"
       >
         <button
           v-for="tab in tabs"
           :key="tab.key"
           @click="activeTab = tab.key"
-          class="px-4 py-2 text-sm font-medium transition-colors duration-200 rounded-md focus:outline-none"
+          class="px-2 py-1 text-sm font-medium transition-colors duration-200 rounded-md sm:px-4 sm:py-2 focus:outline-none"
           :class="
             activeTab === tab.key
               ? 'bg-gray-50 shadow text-gray-900 dark:bg-gray-900 dark:text-gray-100'
