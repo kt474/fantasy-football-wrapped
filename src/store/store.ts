@@ -141,6 +141,12 @@ export const useStore = defineStore("main", {
         item.draftMetadata = payload;
       }
     },
+    addDraftGrades(leagueId: string, payload: any[]) {
+      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      if (item) {
+        item.draftGrades = payload;
+      }
+    },
     addPlayerRankings(leagueId: string, payload: any) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {

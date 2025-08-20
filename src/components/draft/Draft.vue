@@ -5,6 +5,7 @@ import { getDraftPicks, getDraftMetadata } from "../../api/api";
 import { LeagueInfoType } from "../../api/types.ts";
 import { useStore } from "../../store/store";
 import { fakeUsers } from "../../api/helper.ts";
+import DraftGrades from "./DraftGrades.vue";
 
 const store = useStore();
 const data: any = ref([]);
@@ -13,6 +14,13 @@ const draftOrder: any = ref([]);
 const draftType = ref("snake");
 const roundReversal = ref(0);
 const sortOrder = ref("Draft Order");
+
+const tabs = [
+  { label: "Grades", key: "Grades" },
+  { label: "Recap", key: "Recap" },
+];
+
+const activeTab = ref("Recap");
 
 const sortedData = computed(() => {
   if (sortOrder.value === "Draft Order") {
@@ -242,160 +250,219 @@ const getValueColor = (value: number) => {
   <div
     class="w-full p-4 overflow-x-auto bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
   >
-    <h5
-      class="mb-2 -mt-1.5 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
-    >
-      Draft Recap
-    </h5>
-    <p
-      class="max-w-3xl mb-2 text-sm text-gray-600 sm:text-base dark:text-gray-300"
-    >
-      Draft pick scores are calculated based on each player's current positional
-      rank compared to where they were drafted. The sum of these scores is
-      listed by each manager's name.
-    </p>
-    <form class="max-w-sm mb-4">
-      <label
-        for="sort order"
-        class="block text-sm mb-0.5 text-gray-600 dark:text-gray-300"
-        >Sort Picks</label
+    <div class="flex mb-2">
+      <h5
+        class="w-48 -mt-1.5 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
       >
-      <select
-        id="sort order"
-        v-model="sortOrder"
-        class="bg-gray-50 border border-gray-300 text-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      >
-        <option selected>Draft Order</option>
-        <option>Highest Score</option>
-        <option>Lowest Score</option>
-      </select>
-    </form>
-    <hr class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700" />
-    <div v-if="!loading">
+        Draft {{ activeTab }}
+      </h5>
       <div
-        class="grid gap-0.5 mb-2 text-gray-900 dark:text-gray-200"
-        :style="{
-          'grid-template-columns': `repeat(${draftSize}, minmax(100px, 1fr))`,
-          'min-width': '100px',
-        }"
+        class="inline-flex p-1 -mt-2 bg-gray-200 rounded-lg dark:bg-gray-600"
+        role="tablist"
       >
-        <div
-          v-for="team in draftOrder"
-          class="flex flex-wrap items-center justify-center"
+        <button
+          v-for="tab in tabs"
+          :key="tab.key"
+          @click="activeTab = tab.key"
+          class="px-4 py-2 text-sm font-medium transition-colors duration-200 rounded-md focus:outline-none"
+          :class="
+            activeTab === tab.key
+              ? 'bg-gray-50 shadow text-gray-900 dark:bg-gray-900 dark:text-gray-100'
+              : 'text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200'
+          "
+          role="tab"
+          :aria-selected="activeTab === tab.key"
         >
-          <p v-if="team" class="mr-1.5 font-semibold">
-            {{ teamRanks[team.id] ? teamRanks[team.id].toFixed(1) : "0.0" }}
-          </p>
-          <img
-            alt="User avatar"
-            v-if="team && team.avatarImg"
-            class="w-8 h-8 rounded-full"
-            :src="team.avatarImg"
-          />
-          <svg
-            v-else
-            class="w-8 h-8 text-gray-900 dark:text-gray-200"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-            />
-          </svg>
-          <p v-if="team" class="w-20 text-sm text-center truncate">
-            {{ store.showUsernames ? team.username : team.name }}
-          </p>
-          <p v-else class="w-20 text-sm text-center truncate">No user</p>
-        </div>
+          {{ tab.label }}
+        </button>
       </div>
+    </div>
+    <div v-if="activeTab === 'Recap'">
       <p
-        v-if="data.length === 0"
-        class="w-1/2 mt-3 ml-2 text-gray-600 dark:text-gray-300 text-balance"
+        class="max-w-3xl mb-2 text-sm text-gray-600 sm:text-base dark:text-gray-300"
       >
-        Draft has not happened yet. Please come back after draft is complete or
-        try looking at the previous league season.
+        Draft pick scores are calculated based on each player's current
+        positional rank compared to where they were drafted. The sum of these
+        scores is listed by each manager's name.
       </p>
-      <div
-        class="grid gap-0.5 text-sm min-h-96"
-        :style="{
-          'grid-template-columns': `repeat(${draftSize}, minmax(100px, 1fr))`,
-          'min-width': '100px',
-        }"
-      >
-        <div
-          v-if="snakeDraftFormat"
-          v-for="pick in sortedData"
-          class="block h-20 p-2.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
-          :class="getBgColor(pick.position)"
+      <form class="max-w-sm mb-4">
+        <label
+          for="sort order"
+          class="block text-sm mb-0.5 text-gray-600 dark:text-gray-300"
+          >Sort Picks</label
         >
-          <p class="font-semibold truncate">
-            {{ `${pick.firstName.charAt(0)}. ${pick.lastName}` }}
-          </p>
-          <p>{{ `${pick.position} - ${pick.team}` }}</p>
-          <div class="flex justify-between text-sm">
-            <p>
-              {{ `${pick.round}.${getRoundPick(pick.draftSlot, pick.round)}` }}
+        <select
+          id="sort order"
+          v-model="sortOrder"
+          class="bg-gray-50 border border-gray-300 text-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        >
+          <option selected>Draft Order</option>
+          <option>Highest Score</option>
+          <option>Lowest Score</option>
+        </select>
+      </form>
+    </div>
+    <div v-else-if="activeTab === 'Grades'">
+      <p
+        class="max-w-3xl mb-2 text-sm text-gray-600 sm:text-base dark:text-gray-300"
+      >
+        Draft grades are calculated using each player's draft pick position,
+        ADP, and projections from Sleeper. Please remember that fantasy football
+        projections are rarely accurate, so these grades should be viewed as a
+        fun reference for preseason expectations and
+        <span class="italic">not</span> as an indicator for how well each team
+        will perform.
+      </p>
+      <div v-if="data.length === 0">
+        <hr class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700" />
+        <p class="w-1/2 mt-3 text-gray-600 dark:text-gray-300 text-balance">
+          Draft has not happened yet. Please come back after draft is complete
+          or try looking at the previous league season.
+        </p>
+      </div>
+    </div>
+    <hr
+      v-if="activeTab === 'Recap'"
+      class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700"
+    />
+    <div v-if="activeTab === 'Recap'">
+      <div v-if="!loading">
+        <div
+          class="grid gap-0.5 mb-2 text-gray-900 dark:text-gray-200"
+          :style="{
+            'grid-template-columns': `repeat(${draftSize}, minmax(100px, 1fr))`,
+            'min-width': '100px',
+          }"
+        >
+          <div
+            v-for="team in draftOrder"
+            class="flex flex-wrap items-center justify-center"
+          >
+            <p v-if="team" class="mr-1.5 font-semibold">
+              {{ teamRanks[team.id] ? teamRanks[team.id].toFixed(1) : "0.0" }}
             </p>
-            <span
-              class="font-medium me-2 px-2 py-0.5 rounded-full custom-margin"
-              :class="[getValueColor(parseFloat(pick.pickRank))]"
+            <img
+              alt="User avatar"
+              v-if="team && team.avatarImg"
+              class="w-8 h-8 rounded-full"
+              :src="team.avatarImg"
+            />
+            <svg
+              v-else
+              class="w-8 h-8 text-gray-900 dark:text-gray-200"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
             >
-              {{ pick.pickRank }}
-            </span>
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
+            <p v-if="team" class="w-20 text-sm text-center truncate">
+              {{ store.showUsernames ? team.username : team.name }}
+            </p>
+            <p v-else class="w-20 text-sm text-center truncate">No user</p>
           </div>
         </div>
-        <!-- auction or dynasy linear drafts  -->
-        <div v-else v-for="team in draftOrder">
-          <div v-for="pick in data">
-            <div
-              v-if="team.id === pick.userId"
-              class="block h-20 p-2.5 mb-0.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
-              :class="getBgColor(pick.position)"
-            >
-              <p class="font-semibold truncate">
-                {{ `${pick.firstName.charAt(0)}. ${pick.lastName}` }}
+        <p
+          v-if="data.length === 0"
+          class="w-1/2 mt-3 ml-2 text-gray-600 dark:text-gray-300 text-balance"
+        >
+          Draft has not happened yet. Please come back after draft is complete
+          or try looking at the previous league season.
+        </p>
+        <div
+          class="grid gap-0.5 text-sm min-h-96"
+          :style="{
+            'grid-template-columns': `repeat(${draftSize}, minmax(100px, 1fr))`,
+            'min-width': '100px',
+          }"
+        >
+          <div
+            v-if="snakeDraftFormat"
+            v-for="pick in sortedData"
+            class="block h-20 p-2.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
+            :class="getBgColor(pick.position)"
+          >
+            <p class="font-semibold truncate">
+              {{ `${pick.firstName.charAt(0)}. ${pick.lastName}` }}
+            </p>
+            <p>{{ `${pick.position} - ${pick.team}` }}</p>
+            <div class="flex justify-between text-sm">
+              <p>
+                {{
+                  `${pick.round}.${getRoundPick(pick.draftSlot, pick.round)}`
+                }}
               </p>
-              <p>{{ `${pick.position} - ${pick.team}` }}</p>
-              <div class="flex justify-between text-sm">
-                <p>
-                  {{
-                    `${pick.round}.${getRoundPick(pick.draftSlot, pick.round)}`
-                  }}
+              <span
+                class="font-medium me-2 px-2 py-0.5 rounded-full custom-margin"
+                :class="[getValueColor(parseFloat(pick.pickRank))]"
+              >
+                {{ pick.pickRank }}
+              </span>
+            </div>
+          </div>
+          <!-- auction or dynasy linear drafts  -->
+          <div v-else v-for="team in draftOrder">
+            <div v-for="pick in data">
+              <div
+                v-if="team.id === pick.userId"
+                class="block h-20 p-2.5 mb-0.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
+                :class="getBgColor(pick.position)"
+              >
+                <p class="font-semibold truncate">
+                  {{ `${pick.firstName.charAt(0)}. ${pick.lastName}` }}
                 </p>
-                <span
-                  class="font-medium me-2 px-2 py-0.5 rounded-full custom-margin"
-                  :class="[getValueColor(parseFloat(pick.pickRank))]"
-                >
-                  {{ pick.pickRank }}
-                </span>
+                <p>{{ `${pick.position} - ${pick.team}` }}</p>
+                <div class="flex justify-between text-sm">
+                  <p>
+                    {{
+                      `${pick.round}.${getRoundPick(
+                        pick.draftSlot,
+                        pick.round
+                      )}`
+                    }}
+                  </p>
+                  <span
+                    class="font-medium me-2 px-2 py-0.5 rounded-full custom-margin"
+                    :class="[getValueColor(parseFloat(pick.pickRank))]"
+                  >
+                    {{ pick.pickRank }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <div v-else role="status" class="max-w-sm animate-pulse">
+        <p class="mb-2 text-gray-900 dark:text-gray-200">
+          Loading draft data...
+        </p>
+        <div
+          class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"
+        ></div>
+        <div
+          class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px] mb-2.5"
+        ></div>
+        <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+        <div
+          class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[330px] mb-2.5"
+        ></div>
+        <div
+          class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5"
+        ></div>
+        <div
+          class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px]"
+        ></div>
+        <span class="sr-only">Loading...</span>
+      </div>
     </div>
-    <div v-else role="status" class="max-w-sm animate-pulse">
-      <p class="mb-2 text-gray-900 dark:text-gray-200">Loading draft data...</p>
-      <div
-        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"
-      ></div>
-      <div
-        class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px] mb-2.5"
-      ></div>
-      <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-      <div
-        class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[330px] mb-2.5"
-      ></div>
-      <div
-        class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5"
-      ></div>
-      <div
-        class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px]"
-      ></div>
-      <span class="sr-only">Loading...</span>
-    </div>
+    <DraftGrades
+      v-if="data.length > 0 && activeTab === 'Grades'"
+      :draft-data="data"
+    />
   </div>
 </template>
 <style lang="css" scoped>

@@ -1,5 +1,15 @@
 // helper methods
-import { groupBy, flatten, zip, mean, max, min, countBy } from "lodash";
+import {
+  groupBy,
+  flatten,
+  zip,
+  mean,
+  max,
+  min,
+  countBy,
+  map,
+  sum,
+} from "lodash";
 import { getMatchup } from "./api";
 import { RosterType, UserType } from "./types";
 
@@ -47,6 +57,13 @@ const getTierMultiplier = (position: string, rank: number) => {
     default:
       return 1.0;
   }
+};
+
+export const standardDeviation = (arr: number[]) => {
+  const avg = mean(arr);
+  const squaredDiffs = map(arr, (n) => Math.pow(n - avg, 2));
+  const variance = sum(squaredDiffs) / arr.length;
+  return Math.sqrt(variance);
 };
 
 export const roundToOneDecimal = (number: number) => {

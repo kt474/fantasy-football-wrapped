@@ -313,6 +313,54 @@ export const getWeeklyProjections = async (
   return Math.round(totalProjection);
 };
 
+export const getDraftProjections = async (
+  player: string,
+  year: string,
+  scoringType: number,
+  leagueType: string
+) => {
+  try {
+    let adpName;
+    let ptsName = "pts_ppr";
+    if (scoringType === 0.5) {
+      ptsName = "pts_half_ppr";
+    } else if (scoringType === 0) {
+      ptsName = "pts_std";
+    }
+    const baseMap: Record<number, string> = {
+      0: "adp_std",
+      0.5: "adp_half_ppr",
+      1: "adp_ppr",
+    };
+
+    const dynastyMap: Record<number, string> = {
+      0: "adp_dynasty_std",
+      0.5: "adp_dynasty_half_ppr",
+      1: "adp_dynasty_ppr",
+    };
+
+    if (leagueType === "Dynasty") {
+      adpName = dynastyMap[scoringType] || "adp_dynasty_ppr";
+    } else {
+      adpName = baseMap[scoringType] || "adp_ppr";
+    }
+    const response = await fetch(
+      `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
+    );
+    const playerInfo = await response.json();
+    return {
+      adp: playerInfo["stats"][adpName],
+      projectedPoints: playerInfo["stats"][ptsName],
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      adp: null,
+      projectedPoints: null,
+    };
+  }
+};
+
 export const getProjections = async (
   player: string,
   year: string,

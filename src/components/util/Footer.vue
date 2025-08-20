@@ -3,7 +3,7 @@ import { getLeagueCount } from "../../api/api";
 import { ref, onMounted } from "vue";
 import { useStore } from "../../store/store";
 const store = useStore();
-const leagueCount = ref(3796); // initial load current unique league count value 8/3/25
+const leagueCount = ref(3946); // initial load current unique league count value 8/19/25
 
 onMounted(async () => {
   const queryParams = new URLSearchParams(window.location.search);

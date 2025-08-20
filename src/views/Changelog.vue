@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "8/19/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added draft grades to the 'Draft' tab. Grades are only based on player pick position, ADP, and projected points (from Sleeper).",
+        ],
+      },
+    ],
+  },
+  {
     date: "8/16/25",
     content: [
       {
