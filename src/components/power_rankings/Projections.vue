@@ -37,7 +37,12 @@ onMounted(async () => {
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   const lastScoredWeek =
-    currentLeague.status === "complete" ? 0 : currentLeague.lastScoredWeek;
+    currentLeague.status === "complete"
+      ? 0
+      : currentLeague.lastScoredWeek
+      ? currentLeague.lastScoredWeek
+      : 0;
+
   await Promise.all(
     currentLeague.rosters.map(async (roster: any) => {
       const singleRoster: any[] = [];
