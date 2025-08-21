@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { generateTrends } from "../../api/api";
+import { getDraftProjections } from "../../api/api";
 import { TableDataType, LeagueInfoType } from "../../api/types";
 import { useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/helper";
@@ -24,6 +25,39 @@ const getFiveMostRecent = (str: string, n = 5) => {
   const wins = (recent.match(/W/g) || []).length;
   const losses = (recent.match(/L/g) || []).length;
   return `${wins}-${losses}`;
+};
+
+const getPreseasonData = async () => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  let result: any[] = [];
+  if (currentLeague?.draftPicks) {
+    const first2Rounds = currentLeague.draftPicks.slice(0, 24);
+    const promises = first2Rounds.map(async (pick) => {
+      const projections = await getDraftProjections(
+        pick.playerId,
+        currentLeague.season,
+        currentLeague.scoringType,
+        currentLeague.seasonType
+      );
+      return {
+        draftSlot: pick.draftSlot,
+        name: `${pick.firstName} ${pick.lastName}`,
+        position: pick.position,
+        projectedPoints: projections.projectedPoints,
+        userName: getNameFromId(pick.userId),
+      };
+    });
+
+    result = await Promise.all(promises);
+    console.log(result);
+  }
+};
+
+const getNameFromId = (userId: string) => {
+  const userObj = props.tableData.find((user) => user.id === userId);
+  if (userObj) {
+    return store.showUsernames ? userObj.username : userObj.name;
+  }
 };
 
 const formatData = async () => {
@@ -72,19 +106,18 @@ const formatData = async () => {
 };
 
 onMounted(async () => {
+  await getPreseasonData();
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].currentTrends &&
-    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+    !store.leagueInfo[store.currentLeagueIndex]?.currentTrends &&
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
     formatData();
   } else if (store.leagueInfo.length == 0) {
     currentTrends.value = fakeHighlights;
   } else if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
     const savedText: any = store.leagueInfo[store.currentLeagueIndex]
       .currentTrends
