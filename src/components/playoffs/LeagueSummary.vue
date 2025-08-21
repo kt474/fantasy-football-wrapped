@@ -30,7 +30,7 @@ const showSummary = computed(() => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    !store.leagueInfo[store.currentLeagueIndex].yearEndReport
+    !store.leagueInfo[store.currentLeagueIndex]?.yearEndReport
   ) {
     await fetchPlayerNames();
     await getSummary();
@@ -59,36 +59,38 @@ watch(
 const fetchPlayerNames = async () => {
   if (store.leagueIds.length > 0) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-    const allPlayerIds = currentLeague.weeklyPoints
-      .map((user: any) => user.starters.at(-1))
-      .flat();
+    if (currentLeague) {
+      const allPlayerIds = currentLeague.weeklyPoints
+        .map((user: any) => user.starters.at(-1))
+        .flat();
 
-    let playerLookupMap = new Map<string, any>();
-    if (allPlayerIds.length > 0) {
-      playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
+      let playerLookupMap = new Map<string, any>();
+      if (allPlayerIds.length > 0) {
+        playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
+      }
+
+      const result: any = currentLeague.weeklyPoints.map((user: any) => {
+        const starterIds = user.starters.at(-1);
+        const starterNames = starterIds.map((id: string) =>
+          playerLookupMap.get(id)?.name
+            ? playerLookupMap.get(id)?.name
+            : playerLookupMap.get(id)?.team
+        );
+        return {
+          playerNames: starterNames,
+          rosterId: user.rosterId,
+          points: user.points,
+        };
+      });
+
+      playoffPromptData.value = result;
     }
-
-    const result: any = currentLeague.weeklyPoints.map((user: any) => {
-      const starterIds = user.starters.at(-1);
-      const starterNames = starterIds.map((id: string) =>
-        playerLookupMap.get(id)?.name
-          ? playerLookupMap.get(id)?.name
-          : playerLookupMap.get(id)?.team
-      );
-      return {
-        playerNames: starterNames,
-        rosterId: user.rosterId,
-        points: user.points,
-      };
-    });
-
-    playoffPromptData.value = result;
   }
 };
 
 const getSummary = async () => {
-  if (props.finalPlacements.length > 0) {
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (currentLeague && props.finalPlacements.length > 0) {
     const leagueMetadata = {
       leagueWinner: store.showUsernames
         ? props.finalPlacements.find((val) => val.placement === 1).username
@@ -103,6 +105,7 @@ const getSummary = async () => {
       playoffTeams: currentLeague.playoffTeams,
       season: currentLeague.season,
     };
+
     const userData = props.tableData.map((user) => {
       return {
         name: store.showUsernames ? user.username : user.name,
