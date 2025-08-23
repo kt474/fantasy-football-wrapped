@@ -229,24 +229,38 @@ watch(
           Team Grade:
           {{ user.grade }}
         </p>
-        <div class="grid gap-2 sm:grid-cols-3">
+        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <div
             v-for="pick in user.picks"
             class="flex justify-between p-3 mb-1 align-middle rounded"
             :class="getBgColor(pick.draftPick.position)"
           >
-            <div>
-              <p class="font-semibold">
-                {{ pick.draftPick.firstName }} {{ pick.draftPick.lastName }}
-              </p>
-              <p>{{ pick.draftPick.position }} - {{ pick.draftPick.team }}</p>
-              <p>
-                Pick:
-                <span class="font-semibold">{{
-                  pick.draftPick.pickNumber
-                }}</span>
-                ADP: <span class="font-semibold">{{ pick.adp }}</span>
-              </p>
+            <div class="flex">
+              <img
+                v-if="pick.draftPick.position !== 'DEF'"
+                alt="Player image"
+                class="w-14 sm:h-auto object-cover mr-2.5"
+                :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.draftPick.playerId}.jpg`"
+              />
+              <img
+                v-else
+                alt="Defense image"
+                class="object-cover w-14 mr-2.5 sm:h-auto"
+                :src="`https://sleepercdn.com/images/team_logos/nfl/${pick.draftPick.playerId.toLowerCase()}.png`"
+              />
+              <div>
+                <p class="font-semibold">
+                  {{ pick.draftPick.firstName }} {{ pick.draftPick.lastName }}
+                </p>
+                <p>{{ pick.draftPick.position }} - {{ pick.draftPick.team }}</p>
+                <p>
+                  Pick:
+                  <span class="font-semibold">{{
+                    pick.draftPick.pickNumber
+                  }}</span>
+                  ADP: <span class="font-semibold">{{ pick.adp }}</span>
+                </p>
+              </div>
             </div>
             <p class="w-6 mt-5 mr-1 text-lg font-medium">
               {{

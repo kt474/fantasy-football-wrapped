@@ -80,11 +80,11 @@ const getPreseasonData = async () => {
     let response;
     try {
       if (currentLeague && currentLeague.rosters.length <= 8) {
-        response = await generateTrends(result, 60, 2, seasonState);
+        response = await generateTrends(result, 50, 2, seasonState);
       } else if (currentLeague && currentLeague.rosters.length <= 10) {
-        response = await generateTrends(result, 65, 2, seasonState);
+        response = await generateTrends(result, 55, 2, seasonState);
       } else {
-        response = await generateTrends(result, 75, 3, seasonState);
+        response = await generateTrends(result, 70, 3, seasonState);
       }
       currentTrends.value = response.bulletPoints.map((trend: string) =>
         trend.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
@@ -135,11 +135,11 @@ const formatData = async () => {
   try {
     let response;
     if (currentLeague.rosters.length <= 8) {
-      response = await generateTrends(userData, 60, 2);
+      response = await generateTrends(userData, 50, 2);
     } else if (currentLeague.rosters.length <= 10) {
-      response = await generateTrends(userData, 65, 2);
+      response = await generateTrends(userData, 55, 2);
     } else {
-      response = await generateTrends(userData, 75, 3);
+      response = await generateTrends(userData, 70, 3);
     }
     currentTrends.value = response.bulletPoints.map((trend: string) =>
       trend.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
