@@ -42,7 +42,7 @@ const getPreseasonData = async () => {
       currentLeague.scoringType,
       currentLeague.seasonType
     );
-    const first2Rounds = draftPicks.slice(0, 12);
+    const first2Rounds = draftPicks.slice(0, currentLeague.rosters.length);
     const qbs = currentLeague.rosterPositions.reduce(
       (sum, item) => sum + (item === "QB" || item === "SUPER_FLEX" ? 1 : 0),
       0
