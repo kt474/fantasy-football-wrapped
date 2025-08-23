@@ -77,7 +77,8 @@ export const getLeagueCount = async () => {
 export const generateTrends = async (
   data: any,
   wordLimit: number,
-  bulletCount: number
+  bulletCount: number,
+  leagueState: string = "in_season"
 ) => {
   const response = await fetch(import.meta.env.VITE_TRENDS_RECAP, {
     method: "POST",
@@ -88,6 +89,7 @@ export const generateTrends = async (
       data,
       wordLimit,
       bulletCount,
+      leagueState,
     }),
   });
   return await response.json();
@@ -317,7 +319,8 @@ export const getDraftProjections = async (
   player: string,
   year: string,
   scoringType: number,
-  leagueType: string
+  leagueType: string,
+  superFlex: boolean = false
 ) => {
   try {
     let adpName;
@@ -338,11 +341,14 @@ export const getDraftProjections = async (
       0.5: "adp_dynasty_half_ppr",
       1: "adp_dynasty_ppr",
     };
-
     if (leagueType === "Dynasty") {
-      adpName = dynastyMap[scoringType] || "adp_dynasty_ppr";
+      if (superFlex) {
+        adpName = "adp_dynasty_2qb";
+      } else adpName = dynastyMap[scoringType] || "adp_dynasty_ppr";
     } else {
-      adpName = baseMap[scoringType] || "adp_ppr";
+      if (superFlex) {
+        adpName = "adp_2qb";
+      } else adpName = baseMap[scoringType] || "adp_ppr";
     }
     const response = await fetch(
       `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`

@@ -33,14 +33,18 @@ const currentManager = ref(managers.value[0]);
 
 const getProjections = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-
+  const qbs = currentLeague.rosterPositions.reduce(
+    (sum, item) => sum + (item === "QB" || item === "SUPER_FLEX" ? 1 : 0),
+    0
+  );
   const result = await Promise.all(
     props.draftData.map(async (pick) => {
       const projections = await getDraftProjections(
         pick.playerId,
         currentLeague.season,
         currentLeague.scoringType,
-        currentLeague.seasonType
+        currentLeague.seasonType,
+        true ? qbs >= 2 : false
       );
       return {
         draftPick: pick,

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { generateTrends } from "../../api/api";
+import { getDraftProjections, getDraftPicks } from "../../api/api";
 import { TableDataType, LeagueInfoType } from "../../api/types";
 import { useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/helper";
@@ -24,6 +25,93 @@ const getFiveMostRecent = (str: string, n = 5) => {
   const wins = (recent.match(/W/g) || []).length;
   const losses = (recent.match(/L/g) || []).length;
   return `${wins}-${losses}`;
+};
+
+const getPreseasonData = async () => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const seasonState =
+    currentLeague?.seasonType === "Dynasty" && currentLeague?.previousLeagueId
+      ? "dynasty"
+      : "preseason";
+
+  let result: any[] = [];
+  if (currentLeague) {
+    const draftPicks = await getDraftPicks(
+      currentLeague.draftId,
+      currentLeague.season,
+      currentLeague.scoringType,
+      currentLeague.seasonType
+    );
+    const first2Rounds = draftPicks.slice(0, 12);
+    const qbs = currentLeague.rosterPositions.reduce(
+      (sum, item) => sum + (item === "QB" || item === "SUPER_FLEX" ? 1 : 0),
+      0
+    );
+    const promises = first2Rounds.map(async (pick) => {
+      const projections = await getDraftProjections(
+        pick.playerId,
+        currentLeague.season,
+        currentLeague.scoringType,
+        currentLeague.seasonType,
+        true ? qbs >= 2 : false
+      );
+      if (seasonState === "dynasty") {
+        return {
+          draftSlot: pick.draftSlot,
+          name: `${pick.firstName} ${pick.lastName}`,
+          position: pick.position,
+          projectedPoints: projections.projectedPoints,
+          userName: getNameFromId(pick.userId),
+          NFLTeam: pick.team,
+        };
+      }
+      return {
+        draftSlot: pick.draftSlot,
+        name: `${pick.firstName} ${pick.lastName}`,
+        position: pick.position,
+        projectedPoints: projections.projectedPoints,
+        userName: getNameFromId(pick.userId),
+        adp: projections.adp,
+      };
+    });
+    result = await Promise.all(promises);
+  }
+  if (result) {
+    let response;
+    try {
+      if (currentLeague && currentLeague.rosters.length <= 8) {
+        response = await generateTrends(result, 60, 2, seasonState);
+      } else if (currentLeague && currentLeague.rosters.length <= 10) {
+        response = await generateTrends(result, 65, 2, seasonState);
+      } else {
+        response = await generateTrends(result, 75, 3, seasonState);
+      }
+      currentTrends.value = response.bulletPoints.map((trend: string) =>
+        trend.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+      );
+      store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+      localStorage.setItem(
+        "leagueInfo",
+        JSON.stringify(store.leagueInfo as LeagueInfoType[])
+      );
+    } catch (e) {
+      currentTrends.value = [
+        "Unable to generate league news. Please try again later",
+      ];
+      store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+      localStorage.setItem(
+        "leagueInfo",
+        JSON.stringify(store.leagueInfo as LeagueInfoType[])
+      );
+    }
+  }
+};
+
+const getNameFromId = (userId: string) => {
+  const userObj = props.tableData.find((user) => user.id === userId);
+  if (userObj) {
+    return store.showUsernames ? userObj.username : userObj.name;
+  }
 };
 
 const formatData = async () => {
@@ -62,7 +150,9 @@ const formatData = async () => {
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
     );
   } catch {
-    currentTrends.value = ["Unable to generate trends. Please try again later"];
+    currentTrends.value = [
+      "Unable to generate league news. Please try again later",
+    ];
     store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
     localStorage.setItem(
       "leagueInfo",
@@ -74,17 +164,22 @@ const formatData = async () => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].currentTrends &&
-    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+    !store.leagueInfo[store.currentLeagueIndex]?.currentTrends &&
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
-    formatData();
+    await formatData();
+  } else if (
+    store.leagueInfo.length > 0 &&
+    !store.leagueInfo[store.currentLeagueIndex]?.currentTrends &&
+    store.leagueInfo[store.currentLeagueIndex]?.status !== "pre_draft"
+  ) {
+    await getPreseasonData();
   } else if (store.leagueInfo.length == 0) {
     currentTrends.value = fakeHighlights;
   } else if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+    (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek ||
+      store.leagueInfo[store.currentLeagueIndex]?.status === "in_season")
   ) {
     const savedText: any = store.leagueInfo[store.currentLeagueIndex]
       .currentTrends
@@ -337,7 +432,8 @@ const cardHeight = computed(() => {
     <div
       v-else-if="
         store.leagueInfo[store.currentLeagueIndex] &&
-        !store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+        !store.leagueInfo[store.currentLeagueIndex].lastScoredWeek &&
+        store.leagueInfo[store.currentLeagueIndex]?.status === 'pre_draft'
       "
     >
       <p class="mt-2 text-gray-600 dark:text-gray-200">
