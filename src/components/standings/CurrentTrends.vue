@@ -42,7 +42,7 @@ const getPreseasonData = async () => {
       currentLeague.scoringType,
       currentLeague.seasonType
     );
-    const first2Rounds = draftPicks.slice(0, currentLeague.rosters.length);
+    const first2Rounds = draftPicks.slice(0, 2 * currentLeague.rosters.length);
     const qbs = currentLeague.rosterPositions.reduce(
       (sum, item) => sum + (item === "QB" || item === "SUPER_FLEX" ? 1 : 0),
       0
@@ -57,7 +57,7 @@ const getPreseasonData = async () => {
       );
       if (seasonState === "dynasty") {
         return {
-          draftSlot: pick.draftSlot,
+          draftSlot: pick.pickNumber,
           name: `${pick.firstName} ${pick.lastName}`,
           position: pick.position,
           projectedPoints: projections.projectedPoints,
@@ -66,7 +66,7 @@ const getPreseasonData = async () => {
         };
       }
       return {
-        draftSlot: pick.draftSlot,
+        draftSlot: pick.pickNumber,
         name: `${pick.firstName} ${pick.lastName}`,
         position: pick.position,
         projectedPoints: projections.projectedPoints,
