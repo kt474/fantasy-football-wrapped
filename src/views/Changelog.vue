@@ -5,6 +5,18 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "8/23/25",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "The weekly report section now shows top performers, bottom performers, and top benchwarmers .",
+          "The power rankings now also include preseason rankings.",
+        ],
+      },
+    ],
+  },
+  {
     date: "8/22/25",
     content: [
       {

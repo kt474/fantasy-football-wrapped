@@ -17,7 +17,7 @@ const rankingValues = computed(() => {
 
 const weeks = computed(() => {
   const recordLength = props.powerRankings[0].data.length + 1;
-  const weeksList = [...Array(props.regularSeasonLength).keys()]
+  const weeksList = [...Array(props.regularSeasonLength + 1).keys()]
     .slice(1)
     .reverse();
   return recordLength < weeksList.length
@@ -49,7 +49,7 @@ const listPadding = computed(() => {
   <div
     class="px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
-    <div class="flex items-center justify-between sm:mt-1.5 mb-3">
+    <div class="flex items-center justify-between sm:mt-1.5 mb-1.5">
       <h5
         class="w-20 text-xl font-bold leading-none text-gray-900 dark:text-gray-50 text-pretty"
       >
@@ -62,7 +62,7 @@ const listPadding = computed(() => {
         v-model="currentWeek"
       >
         <option v-for="week in weeks" :key="week" :value="week">
-          Week {{ week }}
+          {{ week === 1 ? "Preseason" : `Week ${week - 1}` }}
         </option>
       </select>
     </div>

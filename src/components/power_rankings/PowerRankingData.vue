@@ -3,7 +3,7 @@ import { ref, computed, watch } from "vue";
 import { mean, max, min, zip } from "lodash";
 import { useStore } from "../../store/store";
 import { getPowerRanking, winsOnWeek } from "../../api/helper";
-import { TableDataType } from "../../api/types";
+import { RosterType, TableDataType } from "../../api/types";
 import PowerRankingCard from "./PowerRankingCard.vue";
 const store = useStore();
 
@@ -13,10 +13,58 @@ const props = defineProps<{
   totalRosters: number;
 }>();
 
+const preseasonRank = computed(() => {
+  type Position = "QB" | "WR" | "TE" | "RB";
+  const positions: Position[] = ["QB", "WR", "TE", "RB"];
+  type Top2Sums = Record<Position, number>;
+
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (currentLeague) {
+    return currentLeague.rosters.map((roster: RosterType) => {
+      const projections = roster.projections ?? [];
+      const sumTop2: Top2Sums = positions.reduce<Top2Sums>(
+        (acc, pos) => {
+          const filtered = projections.filter((item) => item.position === pos);
+          const sorted = filtered.sort((a, b) => b.projection - a.projection);
+          // For QB/TE, take only the top 1; for RB/WR, take top 3
+          const count = pos === "QB" || pos === "TE" ? 1 : 3;
+          const sum = sorted
+            .slice(0, count)
+            .reduce((s, item) => s + item.projection, 0);
+          acc[pos] = sum;
+          return acc;
+        },
+        { QB: 0, WR: 0, TE: 0, RB: 0 }
+      );
+      // Sum all positions for this roster
+      const totalSum = Object.values(sumTop2).reduce((a, b) => a + b, 0);
+      return {
+        rosterId: roster.rosterId,
+        preseasonScore: totalSum / 10,
+      };
+    });
+  } else if (store.leagueInfo.length === 0) {
+    // Fake data for homepage
+    return [
+      { rosterId: 1, preseasonScore: 100 },
+      { rosterId: 2, preseasonScore: 114 },
+      { rosterId: 3, preseasonScore: 126.3 },
+      { rosterId: 4, preseasonScore: 118.9 },
+      { rosterId: 5, preseasonScore: 154 },
+      { rosterId: 6, preseasonScore: 133 },
+      { rosterId: 7, preseasonScore: 127.8 },
+      { rosterId: 8, preseasonScore: 141.6 },
+      { rosterId: 9, preseasonScore: 129.1 },
+      { rosterId: 10, preseasonScore: 137 },
+    ];
+  }
+  return [];
+});
+
 const powerRankings = computed(() => {
   const result: any = [];
   const ratingsContainer: any = [];
-  props.tableData.forEach((value: any) => {
+  props.tableData.forEach((value: TableDataType) => {
     const ratingArr: number[] = [];
     if (value.recordByWeek && value.points) {
       value.points.forEach((_: number, week: number) => {
@@ -34,6 +82,11 @@ const powerRankings = computed(() => {
         }
       });
     }
+    // preseason rank
+    const preseasonScore = preseasonRank.value.find(
+      (user) => user.rosterId === value.rosterId
+    )?.preseasonScore;
+    ratingArr.unshift(preseasonScore || 0);
     ratingsContainer.push(ratingArr);
     result.push({
       name: store.showUsernames ? value.username : value.name,
@@ -145,7 +198,15 @@ const chartOptions = ref({
     "#f43f5e",
   ],
   xaxis: {
-    categories: [...Array(props.regularSeasonLength + 1).keys()].slice(1),
+    categories: [
+      "Preseason",
+      ...Array(props.regularSeasonLength)
+        .fill(0)
+        .map((_, i) => i + 1),
+    ],
+    labels: {
+      hideOverlappingLabels: false,
+    },
     title: {
       text: "Week",
       style: {
@@ -216,7 +277,7 @@ const chartOptions = ref({
         </div>
       </div>
       <apexchart
-        width="98%"
+        width="94%"
         height="475"
         type="line"
         :options="chartOptions"
