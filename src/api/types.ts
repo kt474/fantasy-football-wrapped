@@ -100,4 +100,6 @@ export type TableDataType = {
   players: string[];
   starters: string[];
   starterPoints: number[];
+  benchPlayers: string[];
+  benchPoints: number[];
 };

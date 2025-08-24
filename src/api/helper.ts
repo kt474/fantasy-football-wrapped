@@ -353,12 +353,16 @@ export const getWeeklyPoints = async (
           matchupId,
           starters,
           starterPoints,
+          benchPlayers,
+          benchPoints,
         }: {
           rosterId: number;
           points: number;
           matchupId: number;
           starters: number[];
           starterPoints: string[];
+          benchPlayers: string[];
+          benchPoints: number[];
         }
       ) => {
         if (!result[rosterId]) {
@@ -368,12 +372,16 @@ export const getWeeklyPoints = async (
             matchups: [],
             starters: [],
             starterPoints: [],
+            benchPlayers: [],
+            benchPoints: [],
           };
         }
         result[rosterId].points.push(points);
         result[rosterId].matchups.push(matchupId);
         result[rosterId].starters.push(starters);
         result[rosterId].starterPoints.push(starterPoints);
+        result[rosterId].benchPlayers.push(benchPlayers);
+        result[rosterId].benchPoints.push(benchPoints);
         return result;
       },
       {}
@@ -382,7 +390,136 @@ export const getWeeklyPoints = async (
   });
   return allTeams;
 };
+export const fakeTopPerformers = [
+  {
+    player: {
+      position: "QB",
+      player_id: "6770",
+      name: "Joe Burrow",
+      team: "CIN",
+    },
 
+    points: 36.98,
+    user: "The Princess McBride",
+  },
+  {
+    player: {
+      position: "WR",
+      player_id: "6801",
+      name: "Tee Higgins",
+      team: "CIN",
+    },
+    points: 34.6,
+    user: "LaPorta Potty",
+  },
+  {
+    player: {
+      position: "QB",
+      player_id: "11566",
+      name: "Jayden Daniels",
+      team: "WAS",
+    },
+    points: 31.78,
+    user: "Baby Back Gibbs",
+  },
+  {
+    player: {
+      position: "QB",
+      player_id: "8183",
+      name: "Brock Purdy",
+      team: "SF",
+    },
+    points: 30.28,
+    user: "Just the Tua Us",
+  },
+];
+
+export const fakeBottomPerformers = [
+  {
+    player: {
+      position: "DEF",
+      player_id: "IND",
+      name: null,
+      team: "IND",
+    },
+    points: -4,
+    user: "Pollard Greens",
+  },
+  {
+    player: {
+      position: "K",
+      player_id: "3451",
+      name: "Ka'imi Fairbairn",
+      team: "HOU",
+    },
+    points: 0,
+    user: "Bijan Mustard",
+  },
+  {
+    player: {
+      position: "WR",
+      player_id: "5927",
+      name: "Terry McLaurin",
+      team: "WAS",
+    },
+    points: 1,
+    user: "Finding Deebo",
+  },
+  {
+    player: {
+      position: "RB",
+      player_id: "9757",
+      name: "Kendre Miller",
+      team: "NO",
+    },
+    points: 2.4,
+    user: "Ja’Marr the Merrier",
+  },
+];
+
+export const fakeBenchPerformers = [
+  {
+    player: {
+      position: "QB",
+      player_id: "4046",
+      name: "Patrick Mahomes",
+      team: "KC",
+    },
+
+    points: 26,
+    user: "Bijan Mustard",
+  },
+  {
+    player: {
+      position: "QB",
+      player_id: "4943",
+      name: "Sam Darnold",
+      team: "SEA",
+    },
+    points: 24.78,
+    user: "Dak to the Future",
+  },
+  {
+    player: {
+      position: "TE",
+      player_id: "1339",
+      name: "Zach Ertz",
+      team: "WAS",
+    },
+    points: 22.2,
+    user: "Loud and Stroud",
+  },
+  {
+    player: {
+      position: "WR",
+      player_id: "8148",
+      name: "Jameson Williams",
+      team: "DET",
+    },
+    points: 22,
+    user: "Pollard Greens",
+  },
+];
 export const fakeHighlights = [
   "<b>Collard Greens</b> is the hottest team, riding a dominant 5-game win streak and averaging 132 points per game over that span, vaulting to 3rd place.",
   "<b>Finding Deebo</b> leads the league in total points (1646) but just saw a 4-game win streak snapped, opening the door for surging contenders.",

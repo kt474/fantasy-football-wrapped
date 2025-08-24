@@ -223,7 +223,11 @@ watch(
       </option>
     </select>
     <hr class="h-px mt-4 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
-    <div v-for="user in projectionData" class="my-2">
+    <div
+      v-if="projectionData.length > 0"
+      v-for="user in projectionData"
+      class="my-2"
+    >
       <div v-if="user.picks[0].draftPick.userId === currentManager.id">
         <p class="mb-2 text-xl font-medium">
           Team Grade:
@@ -274,6 +278,9 @@ watch(
           </div>
         </div>
       </div>
+    </div>
+    <div v-else>
+      <p class="text-gray-600 dark:text-gray-300">Loading draft grades...</p>
     </div>
   </div>
 </template>

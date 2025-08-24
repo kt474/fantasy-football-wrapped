@@ -13,7 +13,7 @@ import {
 const store = useStore();
 const leagueIdInput = ref("");
 const inputType = ref("League ID");
-const seasonYear = ref("2024");
+const seasonYear = ref("2025");
 const showErrorMsg = ref(false);
 const errorMsg = ref("");
 const showHelperMsg = ref(false);
@@ -124,8 +124,8 @@ const onSubmit = async () => {
         v-model="seasonYear"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height custom-year-width"
       >
-        <option>2025</option>
-        <option selected>2024</option>
+        <option selected>2025</option>
+        <option>2024</option>
         <option>2023</option>
         <option>2022</option>
         <option>2021</option>

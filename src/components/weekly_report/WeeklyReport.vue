@@ -4,6 +4,11 @@ import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { generateReport, getPlayersByIdsMap } from "../../api/api.ts";
 import { max } from "lodash";
+import {
+  fakeTopPerformers,
+  fakeBottomPerformers,
+  fakeBenchPerformers,
+} from "../../api/helper.ts";
 
 const store = useStore();
 const props = defineProps<{
@@ -13,8 +18,10 @@ const props = defineProps<{
 
 const weeklyReport: any = ref("");
 const rawWeeklyReport: any = ref("");
-const playerNames = ref([]);
+const playerNames: any = ref([]);
+const benchPlayerNames: any = ref([]);
 const loading = ref(false);
+const fetchingPlayers = ref(false);
 
 const weeks = computed(() => {
   if (
@@ -64,9 +71,14 @@ const playoffWeeks = computed(() => {
 const currentWeek = ref(weeks.value[0]);
 
 const fetchPlayerNames = async () => {
-  if (store.leagueIds.length > 0) {
+  if (
+    store.leagueIds.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek &&
+    weeks.value.length > 0
+  ) {
+    fetchingPlayers.value = true;
     const allPlayerIds = props.tableData
-      .map((user: any) => user.starters[currentWeek.value - 1])
+      .map((user) => [user.starters[currentWeek.value - 1]])
       .flat();
     let playerLookupMap = new Map<string, any>();
     if (allPlayerIds.length > 0) {
@@ -75,13 +87,28 @@ const fetchPlayerNames = async () => {
     const result: any = props.tableData.map((user: any) => {
       const starterIds = user.starters[currentWeek.value - 1];
       const starterNames = starterIds.map((id: string) =>
-        playerLookupMap.get(id)?.name
-          ? playerLookupMap.get(id)?.name
-          : playerLookupMap.get(id)?.team
+        playerLookupMap.get(id)
       );
       return starterNames;
     });
     playerNames.value = result;
+
+    const benchPlayerIds = props.tableData
+      .map((user) => [user.benchPlayers[currentWeek.value - 1]])
+      .flat();
+    let benchPlayerLookupMap = new Map<string, any>();
+    if (benchPlayerIds.length > 0) {
+      benchPlayerLookupMap = await getPlayersByIdsMap(benchPlayerIds);
+    }
+    const benchResult: any = props.tableData.map((user: any) => {
+      const benchIds = user.benchPlayers[currentWeek.value - 1];
+      const benchNames = benchIds.map((id: string) =>
+        benchPlayerLookupMap.get(id)
+      );
+      return benchNames;
+    });
+    benchPlayerNames.value = benchResult;
+    fetchingPlayers.value = false;
   }
 };
 
@@ -134,8 +161,10 @@ onMounted(async () => {
     loading.value = false;
   } else if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex]
+    store.leagueInfo[store.currentLeagueIndex] &&
+    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
   ) {
+    await fetchPlayerNames();
     const savedText: any = store.leagueInfo[store.currentLeagueIndex]
       .weeklyReport
       ? store.leagueInfo[store.currentLeagueIndex].weeklyReport
@@ -177,6 +206,103 @@ const winnersBracketIDs = computed(() => {
   return result;
 });
 
+const bestPerformers = computed(() => {
+  if (
+    playerNames.value.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+  ) {
+    const result: any[] = [];
+    props.tableData.forEach((user: TableDataType, index: number) => {
+      if (user.matchups[currentWeek.value - 1]) {
+        const week: number = currentWeek.value - 1;
+        result.push({
+          playerPoints: user.starterPoints[week],
+          playerNames: playerNames.value[index],
+          user: store.showUsernames ? user.username : user.name,
+        });
+      }
+    });
+    return result
+      .flatMap((group) =>
+        group.playerNames.map((player: string, idx: number) => ({
+          player,
+          points: group.playerPoints[idx],
+          user: group.user,
+        }))
+      )
+      .sort((a, b) => b.points - a.points)
+      .slice(0, 4);
+  } else if (store.leagueInfo.length === 0) {
+    return fakeTopPerformers;
+  }
+  return [];
+});
+
+const worstPerformers = computed(() => {
+  if (
+    playerNames.value.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+  ) {
+    const result: any[] = [];
+    props.tableData.forEach((user: TableDataType, index: number) => {
+      if (user.matchups[currentWeek.value - 1]) {
+        const week: number = currentWeek.value - 1;
+        result.push({
+          playerPoints: user.starterPoints[week],
+          playerNames: playerNames.value[index],
+          user: store.showUsernames ? user.username : user.name,
+        });
+      }
+    });
+    return result
+      .flatMap((group) =>
+        group.playerNames.map((player: string, idx: number) => ({
+          player,
+          points: group.playerPoints[idx],
+          user: group.user,
+        }))
+      )
+      .sort((a, b) => a.points - b.points)
+      .slice(0, 4);
+  } else if (store.leagueInfo.length === 0) {
+    return fakeBottomPerformers;
+  }
+  return [];
+});
+
+const benchPerformers = computed(() => {
+  if (
+    playerNames.value.length > 0 &&
+    benchPlayerNames.value.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+  ) {
+    const result: any[] = [];
+    props.tableData.forEach((user: TableDataType, index: number) => {
+      if (user.matchups[currentWeek.value - 1]) {
+        const week: number = currentWeek.value - 1;
+        result.push({
+          playerPoints: user.benchPoints[week],
+          playerNames: benchPlayerNames.value[index],
+          user: store.showUsernames ? user.username : user.name,
+        });
+      }
+    });
+    return result
+      .flatMap((group) =>
+        group.playerNames.map((player: string, idx: number) => ({
+          player,
+          points: group.playerPoints[idx],
+          user: group.user,
+        }))
+      )
+      .sort((a, b) => b.points - a.points)
+      .slice(0, 4);
+  } else if (store.leagueInfo.length === 0) {
+    return fakeBenchPerformers;
+  }
+  return [];
+});
+
 const reportPrompt = computed(() => {
   const result: any[] = [];
   if (isPlayoffs.value) {
@@ -189,7 +315,9 @@ const reportPrompt = computed(() => {
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
           playerPoints: user.starterPoints[week],
-          playerNames: playerNames.value[index],
+          playerNames: playerNames.value[index].map((player: any) =>
+            player.name ? player.name : `${player.team} Defense`
+          ),
           pointsScored: user.points[week],
           inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
           inWinnersBracket: winnersBracketIDs.value.includes(user.rosterId),
@@ -207,7 +335,9 @@ const reportPrompt = computed(() => {
           pointsScored: user.points[week],
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
-          playerNames: playerNames.value[index],
+          playerNames: playerNames.value[index].map((player: any) =>
+            player.name ? player.name : `${player.team} Defense`
+          ),
           currentRecord: `${user.wins}-${user.losses}`,
           currentRank: user.regularSeasonRank,
         });
@@ -432,6 +562,11 @@ watch(
       await fetchPlayerNames();
       await getReport();
       loading.value = false;
+    } else if (
+      store.leagueInfo[store.currentLeagueIndex].lastScoredWeek &&
+      weeks.value.length > 0
+    ) {
+      await fetchPlayerNames();
     }
     weeklyReport.value =
       store.leagueInfo[store.currentLeagueIndex].weeklyReport;
@@ -474,6 +609,7 @@ watch(
   () => props.regularSeasonLength,
   () => (currentWeek.value = weeks.value[0])
 );
+watch(() => currentWeek.value, fetchPlayerNames);
 </script>
 <template>
   <div
@@ -712,6 +848,150 @@ watch(
         </div>
       </div>
     </div>
+    <hr class="h-px mt-4 mb-2.5 bg-gray-200 border-0 dark:bg-gray-700" />
+
+    <div>
+      <p class="my-1.5 text-xl font-bold text-gray-900 dark:text-gray-50">
+        Top Performers
+      </p>
+      <div v-if="!fetchingPlayers" class="flex flex-wrap">
+        <div
+          v-for="player in bestPerformers"
+          class="px-4 py-3.5 my-2 mr-4 text-gray-600 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-player-card"
+        >
+          <div v-if="player.player" class="flex justify-between">
+            <div class="flex">
+              <img
+                v-if="player.player.position !== 'DEF'"
+                alt="Player image"
+                class="w-14 sm:h-auto object-cover mr-2.5"
+                :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player.player_id}.jpg`"
+              />
+              <img
+                v-else
+                alt="Defense image"
+                class="object-cover w-14 mr-2.5 sm:h-auto"
+                :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player.player_id.toLowerCase()}.png`"
+              />
+              <div>
+                <p
+                  class="font-semibold text-gray-900 truncate w-36 dark:text-gray-300"
+                >
+                  {{
+                    player.player.name
+                      ? player.player.name
+                      : `${player.player.team} Defense`
+                  }}
+                </p>
+                <p class="truncate w-36">{{ player.user }}</p>
+              </div>
+            </div>
+            <p class="mt-2 font-semibold text-gray-900 dark:text-gray-300">
+              {{ player.points }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        v-else
+        class="px-4 py-3.5 my-2 mr-4 h-20 text-gray-600 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-player-card"
+      ></div>
+    </div>
+    <div>
+      <p class="my-1 text-xl font-bold text-gray-900 dark:text-gray-50">
+        Bottom Performers
+      </p>
+      <div v-if="!fetchingPlayers" class="flex flex-wrap">
+        <div
+          v-for="player in worstPerformers"
+          class="px-4 py-3.5 my-2 mr-4 text-gray-600 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-player-card"
+        >
+          <div v-if="player.player" class="flex justify-between">
+            <div class="flex">
+              <img
+                v-if="player.player?.position !== 'DEF'"
+                alt="Player image"
+                class="w-14 sm:h-auto object-cover mr-2.5"
+                :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player.player_id}.jpg`"
+              />
+              <img
+                v-else
+                alt="Defense image"
+                class="object-cover w-14 mr-2.5 sm:h-auto"
+                :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player.player_id.toLowerCase()}.png`"
+              />
+              <div>
+                <p
+                  class="font-semibold text-gray-900 truncate w-36 dark:text-gray-300"
+                >
+                  {{
+                    player.player.name
+                      ? player.player.name
+                      : `${player.player.team} Defense`
+                  }}
+                </p>
+                <p class="truncate w-36">{{ player.user }}</p>
+              </div>
+            </div>
+            <p class="mt-3.5 font-semibold text-gray-900 dark:text-gray-300">
+              {{ player.points }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        v-else
+        class="px-4 py-3.5 my-2 mr-4 h-20 text-gray-600 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-player-card"
+      ></div>
+    </div>
+    <div>
+      <p class="my-1 text-xl font-bold text-gray-900 dark:text-gray-50">
+        Top Benchwarmers
+      </p>
+      <div v-if="!fetchingPlayers" class="flex flex-wrap">
+        <div
+          v-for="player in benchPerformers"
+          class="px-4 py-3.5 my-2 mr-4 text-gray-600 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-player-card"
+        >
+          <div v-if="player.player" class="flex justify-between">
+            <div class="flex">
+              <img
+                v-if="player.player?.position !== 'DEF'"
+                alt="Player image"
+                class="w-14 sm:h-auto object-cover mr-2.5"
+                :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player.player_id}.jpg`"
+              />
+              <img
+                v-else
+                alt="Defense image"
+                class="object-cover w-14 mr-2.5 sm:h-auto"
+                :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player.player_id.toLowerCase()}.png`"
+              />
+              <div>
+                <p
+                  class="font-semibold text-gray-900 truncate w-36 dark:text-gray-300"
+                >
+                  {{
+                    player.player.name
+                      ? player.player.name
+                      : `${player.player.team} Defense`
+                  }}
+                </p>
+                <p class="truncate w-36">{{ player.user }}</p>
+              </div>
+            </div>
+            <p class="mt-3 font-semibold text-gray-900 dark:text-gray-300">
+              {{ player.points }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        v-else
+        class="px-4 py-3.5 my-2 mr-4 h-20 text-gray-600 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 custom-player-card"
+      ></div>
+    </div>
+
     <hr class="h-px mt-4 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
     <p class="text-xl font-bold text-gray-900 dark:text-gray-50">Points</p>
     <apexchart
@@ -726,6 +1006,12 @@ watch(
 <style scoped>
 .custom-min-width {
   @media (width >= 390px) {
+    min-width: 306px;
+  }
+}
+.custom-player-card {
+  width: 291.5px;
+  @media (width <= 640px) {
     min-width: 306px;
   }
 }

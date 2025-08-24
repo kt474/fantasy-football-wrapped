@@ -193,6 +193,7 @@ watch(
   () => store.currentLeagueId,
   async () => {
     if (
+      store.leagueInfo[store.currentLeagueIndex] &&
       !store.leagueInfo[store.currentLeagueIndex].currentTrends &&
       store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
     ) {
