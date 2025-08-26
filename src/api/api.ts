@@ -320,7 +320,8 @@ export const getDraftProjections = async (
   year: string,
   scoringType: number,
   leagueType: string,
-  superFlex: boolean = false
+  superFlex: boolean = false,
+  idp: boolean = false
 ) => {
   try {
     let adpName;
@@ -341,14 +342,18 @@ export const getDraftProjections = async (
       0.5: "adp_dynasty_half_ppr",
       1: "adp_dynasty_ppr",
     };
-    if (leagueType === "Dynasty") {
-      if (superFlex) {
-        adpName = "adp_dynasty_2qb";
-      } else adpName = dynastyMap[scoringType] || "adp_dynasty_ppr";
+    if (idp) {
+      adpName = "adp_idp";
     } else {
-      if (superFlex) {
-        adpName = "adp_2qb";
-      } else adpName = baseMap[scoringType] || "adp_ppr";
+      if (leagueType === "Dynasty") {
+        if (superFlex) {
+          adpName = "adp_dynasty_2qb";
+        } else adpName = dynastyMap[scoringType] || "adp_dynasty_ppr";
+      } else {
+        if (superFlex) {
+          adpName = "adp_2qb";
+        } else adpName = baseMap[scoringType] || "adp_ppr";
+      }
     }
     const response = await fetch(
       `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`

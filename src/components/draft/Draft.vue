@@ -14,6 +14,7 @@ const draftOrder: any = ref([]);
 const draftType = ref("snake");
 const roundReversal = ref(0);
 const sortOrder = ref("Draft Order");
+const scoringType = ref(""); // idp
 
 const tabs = [
   { label: "Grades", key: "Grades" },
@@ -48,6 +49,7 @@ const getDraftOrder = async () => {
 
   roundReversal.value = metadata["settings"]["reversal_round"];
   draftType.value = metadata["type"];
+  scoringType.value = metadata["metadata"]["scoring_type"];
 
   store.addDraftMetadata(currentLeague.leagueId, {
     order: draftOrder.value,
@@ -462,6 +464,7 @@ const getValueColor = (value: number) => {
     <DraftGrades
       v-if="data.length > 0 && activeTab === 'Grades'"
       :draft-data="data"
+      :scoring-type="scoringType"
     />
   </div>
 </template>

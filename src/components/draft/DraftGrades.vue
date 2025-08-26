@@ -11,6 +11,7 @@ const store = useStore();
 const projectionData: any = ref([]);
 const props = defineProps<{
   draftData: any[];
+  scoringType: string;
 }>();
 
 const managers = computed(() => {
@@ -44,7 +45,8 @@ const getProjections = async () => {
         currentLeague.season,
         currentLeague.scoringType,
         currentLeague.seasonType,
-        true ? qbs >= 2 : false
+        true ? qbs >= 2 : false,
+        true ? props.scoringType === "idp" : false
       );
       return {
         draftPick: pick,
