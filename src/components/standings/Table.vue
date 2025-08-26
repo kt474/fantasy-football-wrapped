@@ -532,7 +532,7 @@ const getTeamName = (tableDataItem: any) => {
         class="mt-4"
       />
       <PowerRankingData
-        v-else
+        v-else-if="store.leagueInfo.length == 0"
         :tableData="tableData"
         :regularSeasonLength="15"
         :totalRosters="10"

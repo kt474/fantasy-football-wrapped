@@ -19,9 +19,16 @@ const preseasonRank = computed(() => {
   type Top2Sums = Record<Position, number>;
 
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  if (currentLeague) {
-    return currentLeague.rosters.map((roster: RosterType) => {
+  if (currentLeague?.rosters) {
+    const results = currentLeague.rosters.map((roster: RosterType) => {
       const projections = roster.projections ?? [];
+      const hasAllPositions = ["QB", "WR", "TE", "RB"].every((pos) =>
+        projections.some((p) => p.position === pos && p.projection > 0)
+      );
+
+      if (!hasAllPositions) {
+        return null; // Not ready yet
+      }
       const sumTop2: Top2Sums = positions.reduce<Top2Sums>(
         (acc, pos) => {
           const filtered = projections.filter((item) => item.position === pos);
@@ -43,6 +50,9 @@ const preseasonRank = computed(() => {
         preseasonScore: totalSum / 10,
       };
     });
+    if (results.every((r) => r !== null)) {
+      return results;
+    }
   } else if (store.leagueInfo.length === 0) {
     // Fake data for homepage
     return [
@@ -62,6 +72,12 @@ const preseasonRank = computed(() => {
 });
 
 const powerRankings = computed(() => {
+  if (
+    !preseasonRank.value.length ||
+    preseasonRank.value.length !== props.totalRosters
+  ) {
+    return [];
+  }
   const result: any = [];
   const ratingsContainer: any = [];
   props.tableData.forEach((value: TableDataType) => {
@@ -116,7 +132,7 @@ const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
-      width: "97%",
+      width: "98%",
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       id: "power-ranking",
       toolbar: {
@@ -277,7 +293,7 @@ const chartOptions = ref({
         </div>
       </div>
       <apexchart
-        width="94%"
+        width="98%"
         height="475"
         type="line"
         :options="chartOptions"

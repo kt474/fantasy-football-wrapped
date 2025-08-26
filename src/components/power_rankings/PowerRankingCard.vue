@@ -16,18 +16,21 @@ const rankingValues = computed(() => {
 });
 
 const weeks = computed(() => {
-  const recordLength = props.powerRankings[0].data.length + 1;
-  const weeksList = [...Array(props.regularSeasonLength + 1).keys()]
-    .slice(1)
-    .reverse();
-  return recordLength < weeksList.length
-    ? [...Array(recordLength).keys()].slice(1).reverse()
-    : weeksList;
+  if (props.powerRankings.length > 0) {
+    const recordLength = props.powerRankings[0].data.length + 1;
+    const weeksList = [...Array(props.regularSeasonLength + 1).keys()]
+      .slice(1)
+      .reverse();
+    return recordLength < weeksList.length
+      ? [...Array(recordLength).keys()].slice(1).reverse()
+      : weeksList;
+  }
+  return [];
 });
 const currentWeek = ref(weeks.value[0]);
 
 watch(
-  () => props.regularSeasonLength,
+  () => [props.regularSeasonLength, props.powerRankings],
   () => (currentWeek.value = weeks.value[0])
 );
 
