@@ -10,13 +10,15 @@ const props = defineProps<{
 const mostPoints = computed(() => {
   const allPointsWithDetails = props.tableData.flatMap((obj) =>
     obj.pointSeason.flatMap((seasonObj: any) =>
-      seasonObj.points.map((point: number, index: number) => ({
-        week: index + 1,
-        name: obj.name,
-        username: obj.username,
-        season: seasonObj.season,
-        point,
-      }))
+      seasonObj.points
+        .map((point: number, index: number) => ({
+          week: index + 1,
+          name: obj.name,
+          username: obj.username,
+          season: seasonObj.season,
+          point,
+        }))
+        .filter((entry: any) => entry.point !== 0)
     )
   );
 
