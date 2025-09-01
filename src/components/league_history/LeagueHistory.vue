@@ -613,7 +613,10 @@ const worstManager = computed(() => {
             }"
           >
             {{
-              Math.round((user.points / (user.wins + user.losses)) * 100) / 100
+              user.wins + user.losses > 0
+                ? Math.round((user.points / (user.wins + user.losses)) * 100) /
+                  100
+                : 0
             }}
           </td>
           <td

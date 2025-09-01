@@ -69,7 +69,7 @@ const listPadding = computed(() => {
         </option>
       </select>
     </div>
-    <div class="flow-root">
+    <div v-if="powerRankings.length > 0" class="flow-root">
       <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
         <li v-for="(user, index) in rankingValues" :class="listPadding">
           <div class="flex items-center">
@@ -89,6 +89,9 @@ const listPadding = computed(() => {
           </div>
         </li>
       </ul>
+    </div>
+    <div v-else>
+      <p class="mt-2 text-gray-600 dark:text-gray-200">Loading...</p>
     </div>
   </div>
 </template>
