@@ -5,12 +5,23 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "9/01/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "The weekly report tab now has a weekly preview section that shows weekly matchup previews with projection data from Sleeper.",
+        ],
+      },
+    ],
+  },
+  {
     date: "8/23/25",
     content: [
       {
         type: "Update",
         text: [
-          "The weekly report section now shows top performers, bottom performers, and top benchwarmers .",
+          "The weekly report section now shows top performers, bottom performers, and top benchwarmers.",
           "The power rankings now also include preseason rankings.",
         ],
       },
@@ -33,7 +44,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Added draft grades to the 'Draft' tab. Grades are only based on player pick position, ADP, and projected points (from Sleeper).",
+          "Added draft grades to the 'Draft' tab. Grades are only based on player pick position, ADP, and projected points from Sleeper.",
         ],
       },
     ],
