@@ -473,6 +473,7 @@ export const getDraftPicks = async (
         scoringType
       );
       return {
+        keeper: pick["is_keeper"],
         firstName: pick["metadata"]["first_name"],
         lastName: pick["metadata"]["last_name"],
         playerId: pick["player_id"],

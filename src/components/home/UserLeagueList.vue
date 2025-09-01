@@ -71,24 +71,29 @@ const addLeagues = async () => {
     >
       Welcome {{ store.username }}!
     </h3>
-    <p class="text-lg text-gray-700 dark:text-gray-300">
+    <p
+      class="text-lg text-gray-800 dark:text-gray-200"
+      :class="{ 'my-2': store.currentLeagueId }"
+    >
       Select the leagues you would like to add
     </p>
-    <h3
-      v-if="store.leaguesList.length > 0"
-      class="mb-2 text-lg text-gray-700 dark:text-gray-300"
-      :class="{ 'mt-2': store.currentLeagueId }"
-    >
-      <span class="font-semibold">{{ store.leaguesList.length }}</span>
-      available league<span v-if="store.leaguesList.length !== 1">s</span>:
-    </h3>
-    <h3
-      v-else
-      class="mb-2 text-xl font-medium text-gray-900 dark:text-gray-50"
-      :class="{ 'mt-2': store.currentLeagueId }"
-    >
-      No leagues available, please try another year
-    </h3>
+    <div v-if="!store.currentLeagueId">
+      <h3
+        v-if="store.leaguesList.length > 0"
+        class="mb-2 text-lg text-gray-800 dark:text-gray-200"
+        :class="{ 'mt-2': store.currentLeagueId }"
+      >
+        <span class="font-semibold">{{ store.leaguesList.length }}</span>
+        available league<span v-if="store.leaguesList.length !== 1">s</span>:
+      </h3>
+      <h3
+        v-else
+        class="mb-2 text-xl font-medium text-gray-900 dark:text-gray-50"
+        :class="{ 'mt-2': store.currentLeagueId }"
+      >
+        No leagues available, please try another year
+      </h3>
+    </div>
     <ul class="flex flex-wrap w-full overflow-auto rounded-lg max-h-96">
       <li v-for="(league, index) in store.leaguesList" class="w-64 mb-2 mr-2">
         <input

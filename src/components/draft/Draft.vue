@@ -385,7 +385,10 @@ const getValueColor = (value: number) => {
             v-if="snakeDraftFormat"
             v-for="pick in sortedData"
             class="block h-20 p-2.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
-            :class="getBgColor(pick.position)"
+            :class="[
+              getBgColor(pick.position),
+              pick.keeper ? 'border-red-500 border-t-4' : '',
+            ]"
           >
             <p class="font-semibold truncate">
               {{ `${pick.firstName.charAt(0)}. ${pick.lastName}` }}
@@ -411,7 +414,10 @@ const getValueColor = (value: number) => {
               <div
                 v-if="team.id === pick.userId"
                 class="block h-20 p-2.5 mb-0.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
-                :class="getBgColor(pick.position)"
+                :class="[
+                  getBgColor(pick.position),
+                  pick.keeper ? 'border-red-500 border-t-4' : '',
+                ]"
               >
                 <p class="font-semibold truncate">
                   {{ `${pick.firstName.charAt(0)}. ${pick.lastName}` }}
@@ -437,6 +443,14 @@ const getValueColor = (value: number) => {
             </div>
           </div>
         </div>
+        <p
+          v-if="
+            store.leagueInfo[store.currentLeagueIndex]?.seasonType === 'Keeper'
+          "
+          class="mt-4 text-xs text-gray-500 footer-font dark:text-gray-300"
+        >
+          Picks with a red top border are keepers.
+        </p>
       </div>
       <div v-else role="status" class="max-w-sm animate-pulse">
         <p class="mb-2 text-gray-900 dark:text-gray-200">
