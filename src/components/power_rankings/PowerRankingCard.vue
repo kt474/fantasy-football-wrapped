@@ -91,7 +91,7 @@ const listPadding = computed(() => {
       </ul>
     </div>
     <div v-else>
-      <p class="mt-2 text-gray-600 dark:text-gray-200">Loading...</p>
+      <p class="mt-2 mb-2 text-gray-600 dark:text-gray-200">Loading...</p>
     </div>
   </div>
 </template>

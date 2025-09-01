@@ -494,7 +494,9 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
           </div>
         </div>
       </div>
-      <p class="my-4 ml-4 font-semibold text-gray-700 dark:text-gray-200">
+      <p
+        class="my-4 mb-8 ml-4 font-semibold text-gray-700 sm:mb-0 dark:text-gray-200"
+      >
         Recent Performances
       </p>
       <apexchart

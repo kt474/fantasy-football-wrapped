@@ -71,12 +71,16 @@ const addLeagues = async () => {
     >
       Welcome {{ store.username }}!
     </h3>
+    <p class="text-lg text-gray-700 dark:text-gray-300">
+      Select the leagues you would like to add
+    </p>
     <h3
       v-if="store.leaguesList.length > 0"
-      class="mb-2 text-xl font-medium text-gray-900 dark:text-gray-50"
+      class="mb-2 text-lg text-gray-700 dark:text-gray-300"
       :class="{ 'mt-2': store.currentLeagueId }"
     >
-      Select leagues:
+      <span class="font-semibold">{{ store.leaguesList.length }}</span>
+      available league<span v-if="store.leaguesList.length !== 1">s</span>:
     </h3>
     <h3
       v-else
@@ -136,7 +140,7 @@ const addLeagues = async () => {
       :class="{ 'cursor-not-allowed': checkedLeagues.length == 0 }"
       class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >
-      Add
+      Continue
       <span
         class="inline-flex items-center justify-center w-4 h-4 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full ms-2"
       >
