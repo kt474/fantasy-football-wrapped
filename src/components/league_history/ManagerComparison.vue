@@ -156,14 +156,8 @@ watch(
   { immediate: true }
 );
 
-watch(
-  () => store.darkMode,
-  () => updateChartColor()
-);
-
-watch(
-  () => store.currentLeagueId,
-  () => updateChartColor()
+watch([() => store.currentLeagueId, () => store.darkMode], () =>
+  updateChartColor()
 );
 
 const updateChartColor = () => {

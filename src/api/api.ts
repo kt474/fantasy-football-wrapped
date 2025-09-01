@@ -285,6 +285,27 @@ export const getTradeValue = async (
     : null;
 };
 
+export const getSingleWeekProjection = async (
+  player: string,
+  year: string,
+  week: number,
+  scoringType: number
+) => {
+  const response = await fetch(
+    `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
+  );
+  const allWeeks = await response.json();
+  let scoring = "pts_ppr";
+  if (scoringType === 0) {
+    scoring = "pts_std";
+  } else if (scoringType === 0.5) {
+    scoring = "pts_half_ppr";
+  }
+  if (allWeeks[week] && allWeeks[week]["stats"][scoring]) {
+    return allWeeks[week]["stats"][scoring];
+  }
+};
+
 export const getWeeklyProjections = async (
   player: string,
   year: string,
