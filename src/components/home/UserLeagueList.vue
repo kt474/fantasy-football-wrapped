@@ -95,7 +95,9 @@ const addLeagues = async () => {
         No leagues available, please try another year
       </h3>
     </div>
-    <ul class="flex flex-wrap w-full overflow-auto rounded-lg max-h-96">
+    <ul
+      class="flex flex-wrap w-full overflow-auto rounded-lg custom-max-height"
+    >
       <li v-for="(league, index) in store.leaguesList" class="w-64 mb-2 mr-2">
         <input
           type="checkbox"
@@ -144,7 +146,7 @@ const addLeagues = async () => {
       type="submit"
       :disabled="checkedLeagues.length == 0 || showError || leagueCountError"
       :class="{ 'cursor-not-allowed': checkedLeagues.length == 0 }"
-      class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      class="text-gray-50 mt-4 sm:mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >
       Continue
       <span
@@ -167,3 +169,8 @@ const addLeagues = async () => {
     </button>
   </div>
 </template>
+<style scoped>
+.custom-max-height {
+  max-height: 26rem;
+}
+</style>

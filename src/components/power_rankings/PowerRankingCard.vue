@@ -50,7 +50,7 @@ const listPadding = computed(() => {
 </script>
 <template>
   <div
-    class="px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
+    class="px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow min-h-96 custom-width dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="flex items-center justify-between sm:mt-1.5 mb-1.5">
       <h5
