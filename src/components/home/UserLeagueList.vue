@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "../../store/store";
 import { seasonType, getData, inputLeague } from "../../api/api";
 
 const checkedLeagues = ref([]);
-const showError = ref(false);
 const duplicateLeagueError = ref(false);
-const leagueCountError = ref(false);
 const store = useStore();
 
 const updateURL = (leagueID: string) => {
@@ -15,17 +13,20 @@ const updateURL = (leagueID: string) => {
   window.history.pushState({}, "", url.toString());
 };
 
+const showError = computed(() => {
+  return checkedLeagues.value.length > 5 ? true : false;
+});
+
+const leagueCountError = computed(() => {
+  return checkedLeagues.value.length + store.leagueInfo.length > 5 &&
+    store.leagueInfo.length > 0
+    ? true
+    : false;
+});
+
 const addLeagues = async () => {
-  if (checkedLeagues.value.length > 5) {
-    showError.value = true;
-    return;
-  }
   if (checkedLeagues.value.some((league) => store.leagueIds.includes(league))) {
     duplicateLeagueError.value = true;
-    return;
-  }
-  if (checkedLeagues.value.length + store.leagueInfo.length > 5) {
-    leagueCountError.value = true;
     return;
   }
   if (checkedLeagues.value.length >= 1) {
@@ -141,7 +142,7 @@ const addLeagues = async () => {
       @click="addLeagues"
       aria-label="Button to add leagues"
       type="submit"
-      :disabled="checkedLeagues.length == 0"
+      :disabled="checkedLeagues.length == 0 || showError || leagueCountError"
       :class="{ 'cursor-not-allowed': checkedLeagues.length == 0 }"
       class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >

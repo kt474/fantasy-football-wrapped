@@ -370,7 +370,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 class="pb-1 mb-2 border-b-2 sm:w-44 w-28"
                 v-for="player in getStarters(matchup[0].rosterId)"
               >
-                <div v-if="player.name" class="flex">
+                <div v-if="player.name || player.team" class="flex">
                   <div>
                     <p
                       class="w-20 font-medium text-gray-800 truncate sm:w-28 dark:text-gray-50"
@@ -469,7 +469,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 class="justify-end pb-1 mb-2 border-b-2"
                 v-for="player in getStarters(matchup[1].rosterId)"
               >
-                <div class="flex justify-end" v-if="player.name">
+                <div class="flex justify-end" v-if="player.name || player.team">
                   <p class="mx-2">{{ player.projection }}</p>
                   <div>
                     <p

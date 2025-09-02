@@ -508,7 +508,10 @@ const numberOfLoserRounds = computed(() => {
           </div>
         </div>
       </div>
-      <FinalPlacements :rosters="finalPlacements" />
+      <FinalPlacements
+        :class="[finalPlacements.length === 0 ? 'hidden lg:block' : '']"
+        :rosters="finalPlacements"
+      />
     </div>
     <!-- losers bracket -->
     <div class="flex flex-wrap lg:flex-nowrap">
@@ -791,6 +794,7 @@ const numberOfLoserRounds = computed(() => {
         </div>
       </div>
       <PlacementFlowChart
+        :class="[finalPlacements.length === 0 ? 'hidden lg:block' : '']"
         :tableData="props.tableData"
         :finalPlacements="finalPlacements"
       />
