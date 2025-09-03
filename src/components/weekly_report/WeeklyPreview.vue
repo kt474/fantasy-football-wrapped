@@ -290,13 +290,13 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
   >
     <div
       v-for="matchup in matchups"
-      class="px-2 py-2.5 mt-2 text-gray-700 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 w-full xl:w-[calc(50%-.5rem)] overflow-auto"
+      class="sm:px-2 px-1 py-2.5 mt-2 text-gray-700 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 w-full xl:w-[calc(50%-.5rem)] overflow-auto"
     >
       <!-- Flex container for the two teams -->
       <div class="flex justify-between">
-        <div class="flex justify-between w-full p-2">
+        <div class="flex justify-between w-full sm:p-2">
           <!-- First team (index 0) -->
-          <div>
+          <div class="w-60">
             <div class="flex items-center mb-4">
               <img
                 v-if="matchup[0].avatarImg"
@@ -367,25 +367,32 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
             </div>
             <div>
               <div
-                class="pb-1 mb-2 border-b-2 sm:w-44 w-28"
+                class="pb-1 mb-2"
                 v-for="player in getStarters(matchup[0].rosterId)"
               >
-                <div v-if="player.name || player.team" class="flex">
+                <div
+                  v-if="player.name || player.team"
+                  class="flex justify-between px-4 py-2 mr-1 rounded bg-gray-50 dark:bg-gray-700"
+                >
                   <div>
                     <p
-                      class="w-20 font-medium text-gray-800 truncate sm:w-28 dark:text-gray-50"
+                      class="w-16 text-sm font-medium text-gray-800 truncate sm:text-base sm:w-28 dark:text-gray-50"
                     >
                       {{
                         player.name
                           ? formatName(player.name)
                           : `${player.team} Defense`
-                      }}:
+                      }}
                     </p>
-                    <p class="text-sm">
+                    <p class="text-xs">
                       {{ `${player.position} - ${player.team}` }}
                     </p>
                   </div>
-                  <p class="mx-2">{{ player.projection }}</p>
+                  <p
+                    class="mt-1.5 ml-2 font-medium text-gray-800 dark:text-gray-50 sm:text-base text-sm"
+                  >
+                    {{ player.projection }}
+                  </p>
                 </div>
                 <div v-else>
                   <p class="font-medium">Empty</p>
@@ -395,7 +402,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
           </div>
           <div class="flex w-px h-full bg-gray-300 dark:bg-gray-600"></div>
           <!-- Second team (index 1) -->
-          <div>
+          <div class="w-60">
             <div class="flex items-center justify-end mb-4">
               <div class="flex">
                 <div class="hidden sm:block">
@@ -464,16 +471,23 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
               </p>
               <p class="text-xs text-center">PROJ</p>
             </div>
-            <div class="float-right text-right sm:w-44 w-28">
+            <div class="ml-1 text-right sm:ml-0">
               <div
-                class="justify-end pb-1 mb-2 border-b-2"
+                class="justify-end pb-1 mb-2"
                 v-for="player in getStarters(matchup[1].rosterId)"
               >
-                <div class="flex justify-end" v-if="player.name || player.team">
-                  <p class="mx-2">{{ player.projection }}</p>
+                <div
+                  class="flex justify-between px-4 py-2 text-sm rounded bg-gray-50 dark:bg-gray-700 sm:text-base"
+                  v-if="player.name || player.team"
+                >
+                  <p
+                    class="mr-2 mt-1.5 font-medium text-gray-800 dark:text-gray-50 sm:text-base text-sm"
+                  >
+                    {{ player.projection }}
+                  </p>
                   <div>
                     <p
-                      class="w-20 font-medium text-gray-800 truncate sm:w-28 dark:text-gray-50"
+                      class="w-16 font-medium text-gray-800 truncate sm:w-28 dark:text-gray-50"
                     >
                       {{
                         player.name
@@ -481,7 +495,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           : `${player.team} Defense`
                       }}
                     </p>
-                    <p class="text-sm">
+                    <p class="text-xs">
                       {{ `${player.position} - ${player.team}` }}
                     </p>
                   </div>
