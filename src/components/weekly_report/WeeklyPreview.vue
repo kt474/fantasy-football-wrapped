@@ -566,13 +566,14 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
           </div>
         </div>
       </div>
-      <div class="px-4 py-8 mx-2 rounded bg-gray-50 dark:bg-gray-700">
+      <div class="px-4 py-8 mx-0 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700">
         <div class="flex justify-between mb-1">
           <span
             class="text-sm font-medium text-gray-800 sm:text-base dark:text-gray-50"
             >{{ getProjectedWinner(matchup[0], matchup[1]) }}</span
           >
-          <span class="text-sm font-medium text-blue-700 dark:text-gray-50"
+          <span
+            class="text-sm font-medium text-blue-700 sm:text-base dark:text-gray-50"
             >{{
               getWinPercentage(matchup[0].rosterId, matchup[1].rosterId)
             }}%</span

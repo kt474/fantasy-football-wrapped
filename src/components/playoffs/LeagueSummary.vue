@@ -189,7 +189,7 @@ const copyReport = () => {
       class="max-w-5xl text-gray-900 dark:text-gray-300"
     >
       <p class="mb-3">
-        <b>Saquon do </b> took the league by storm, riding Jalen Hurts and Kyren
+        <b>Saquondo </b> took the league by storm, riding Jalen Hurts and Kyren
         Williams to a championship like a cowboy on a rocket-powered steed. With
         1646 points and a 9-5 record, they left the competition eating dust and
         their own tears. <b>Baby Back Gibbs</b> tried to keep up, but even Lamar

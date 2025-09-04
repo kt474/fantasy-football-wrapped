@@ -731,7 +731,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
             team of underperformers.
           </p>
           <p class="mb-3">
-            <b>Saquon do </b> narrowly edged out <b>LaPorta Potty </b> in a
+            <b>Saquondo </b> narrowly edged out <b>LaPorta Potty </b> in a
             high-scoring showdown, 129.62 to 123.26. Deebo Samuel was the real
             MVP, putting up numbers like he was playing Madden on rookie mode.
             <b>Baby Back Gibbs</b> and <b>Bijan Mustard</b> had a snooze-fest,

@@ -1294,7 +1294,7 @@ export const fakeBottomPerformers = [
       team: "WAS",
     },
     points: 1,
-    user: "Saquon do ",
+    user: "Saquondo ",
   },
   {
     player: {
@@ -1353,7 +1353,7 @@ export const fakeBenchPerformers = [
 ];
 export const fakeHighlights = [
   "<b>Collard Greens</b> is the hottest team, riding a dominant 5-game win streak and averaging 132 points per game over that span, vaulting to 3rd place.",
-  "<b>Saquon do </b> leads the league in total points (1646) but just saw a 4-game win streak snapped, opening the door for surging contenders.",
+  "<b>Saquondo </b> leads the league in total points (1646) but just saw a 4-game win streak snapped, opening the door for surging contenders.",
 ];
 export const fakeWaiverMoves = [
   {
@@ -1601,7 +1601,7 @@ export const fakeTrades = [
     team1: {
       user: {
         id: "6",
-        name: "Saquon do ",
+        name: "Saquondo ",
         avatar: "d6ad9a18c52dcdb704399beed5d5b21f",
         avatarImg: "../avatars/avatar6.svg",
         transactions: 29,
@@ -1726,7 +1726,7 @@ export const fakeUsers = [
   },
   {
     id: "6",
-    name: "Saquon do ",
+    name: "Saquondo ",
     avatar: "d6ad9a18c52dcdb704399beed5d5b21f",
     avatarImg: "../avatars/avatar6.svg",
     transactions: 29,
@@ -2112,7 +2112,7 @@ export const fakeLosersBracket = [
 
 export const fakePlayoffData = [
   {
-    name: "Saquon do ",
+    name: "Saquondo ",
     placement: [100, 0, 0, 0, 0, 0],
   },
   {
@@ -2155,7 +2155,7 @@ export const fakePlayoffData = [
 
 export const fakeProjectionData = [
   {
-    name: "Saquon do ",
+    name: "Saquondo ",
     data: [
       { position: "RB", projection: 482 },
       { position: "WR", projection: 369 },
