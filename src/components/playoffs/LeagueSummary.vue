@@ -189,21 +189,21 @@ const copyReport = () => {
       class="max-w-5xl text-gray-900 dark:text-gray-300"
     >
       <p class="mb-3">
-        <b>Finding Deebo</b> took the league by storm, riding Jalen Hurts and
-        Kyren Williams to a championship like a cowboy on a rocket-powered
-        steed. With 1646 points and a 9-5 record, they left the competition
-        eating dust and their own tears. <b>Baby Back Gibbs</b> tried to keep
-        up, but even Lamar Jackson couldn't sprint past the finish line fast
-        enough, settling for a respectable second place.
+        <b>Saquon do </b> took the league by storm, riding Jalen Hurts and Kyren
+        Williams to a championship like a cowboy on a rocket-powered steed. With
+        1646 points and a 9-5 record, they left the competition eating dust and
+        their own tears. <b>Baby Back Gibbs</b> tried to keep up, but even Lamar
+        Jackson couldn't sprint past the finish line fast enough, settling for a
+        respectable second place.
       </p>
       <p class="mb-3">
-        <b>Pollard Greens</b> and <b>Ja’Marr the Merrier</b> showed up to the
+        <b>Breece's Puffs</b> and <b>Ja’Marr the Merrier</b> showed up to the
         playoffs like they were at a family reunion—happy to be there but not
         expecting much. Meanwhile, the <b>LaPorta Potty</b> seemed to take their
         name a bit too seriously, sleepwalking to a sixth-place finish.
         <b>The Princess McBride</b> dashed in and out of relevance, ending up
-        fifth, while <b>Just the Tua Us</b> and <b>Loud and Stroud</b> played
-        the role of lovable underdogs, ultimately barking up the wrong tree.
+        fifth, while <b>Just the Tua Us</b> and <b>Lamario Kart </b> played the
+        role of lovable underdogs, ultimately barking up the wrong tree.
       </p>
       <p class="mb-4">
         <b>Dak to the Future</b> was as unpredictable as a cat on catnip,

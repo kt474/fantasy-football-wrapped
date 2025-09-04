@@ -110,6 +110,52 @@ const getTotal = (id: number) => {
   return 0;
 };
 
+const getProjectedWinner = (user1: any, user2: any) => {
+  const playerObj1: any = playerNames.value.find(
+    (user: any) => user.id === user1.rosterId
+  );
+  const playerObj2: any = playerNames.value.find(
+    (user: any) => user.id === user2.rosterId
+  );
+  if (playerObj1 && playerObj2) {
+    if (store.showUsernames) {
+      return playerObj1?.total > playerObj2.total
+        ? `${user1.username} (+${
+            Math.round((playerObj1.total - playerObj2.total) * 100) / 100
+          })`
+        : `${user2.username} (+${
+            Math.round((playerObj2.total - playerObj1.total) * 100) / 100
+          })`;
+    }
+    return playerObj1?.total > playerObj2.total
+      ? `${user1.name} (+${
+          Math.round((playerObj1.total - playerObj2.total) * 100) / 100
+        })`
+      : `${user2.name} (+${
+          Math.round((playerObj2.total - playerObj1.total) * 100) / 100
+        })`;
+  }
+  return "";
+};
+
+const getWinPercentage = (id1: number, id2: number) => {
+  const playerObj1: any = playerNames.value.find(
+    (user: any) => user.id === id1
+  );
+  const playerObj2: any = playerNames.value.find(
+    (user: any) => user.id === id2
+  );
+  let result = 0;
+  if (playerObj1 && playerObj2) {
+    result =
+      playerObj1.total > playerObj2.total
+        ? playerObj1.total / (playerObj1.total + playerObj2.total)
+        : playerObj2.total / (playerObj1.total + playerObj2.total);
+  }
+
+  return Math.round(result * 100);
+};
+
 const formatName = (fullName: string) => {
   if (!fullName) return "";
   const parts = fullName.trim().split(/\s+/);
@@ -174,6 +220,7 @@ const updateChartColor = () => {
     xaxis: {
       title: {
         text: "Week",
+        offsetX: -18,
         style: {
           fontSize: "16px",
           fontFamily:
@@ -243,6 +290,7 @@ const chartOptions = ref({
   xaxis: {
     title: {
       text: "Week",
+      offsetX: -18,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -394,8 +442,13 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                     {{ player.projection }}
                   </p>
                 </div>
-                <div v-else>
-                  <p class="font-medium">Empty</p>
+                <div
+                  v-else
+                  class="px-4 py-4 mr-1 text-sm rounded bg-gray-50 dark:bg-gray-700"
+                >
+                  <p class="font-medium text-gray-800 dark:text-gray-50">
+                    Empty
+                  </p>
                 </div>
               </div>
             </div>
@@ -500,16 +553,44 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                     </p>
                   </div>
                 </div>
-                <div v-else>
-                  <p class="font-medium">Empty</p>
+                <div
+                  v-else
+                  class="px-4 py-4 text-sm rounded bg-gray-50 dark:bg-gray-700"
+                >
+                  <p class="font-medium text-gray-800 dark:text-gray-50">
+                    Empty
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <div class="px-4 py-8 mx-2 rounded bg-gray-50 dark:bg-gray-700">
+        <div class="flex justify-between mb-1">
+          <span
+            class="text-sm font-medium text-gray-800 sm:text-base dark:text-gray-50"
+            >{{ getProjectedWinner(matchup[0], matchup[1]) }}</span
+          >
+          <span class="text-sm font-medium text-blue-700 dark:text-gray-50"
+            >{{
+              getWinPercentage(matchup[0].rosterId, matchup[1].rosterId)
+            }}%</span
+          >
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-500">
+          <div
+            class="bg-blue-600 h-2.5 rounded-full"
+            :style="{
+              width:
+                getWinPercentage(matchup[0].rosterId, matchup[1].rosterId) +
+                '%',
+            }"
+          ></div>
+        </div>
+      </div>
       <p
-        class="my-4 mb-8 ml-4 font-semibold text-gray-700 sm:mb-0 dark:text-gray-200"
+        class="my-4 mb-8 ml-4 font-semibold text-gray-800 sm:mb-0 dark:text-gray-200"
       >
         Recent Performances
       </p>
@@ -523,7 +604,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
     </div>
   </div>
   <div v-else>
-    <p class="mb-4 text-gray-900 dark:text-gray-200">Loading...</p>
+    <p class="text-gray-900 mb-96 dark:text-gray-200">Loading...</p>
   </div>
 </template>
 <style scoped></style>

@@ -1274,7 +1274,7 @@ export const fakeBottomPerformers = [
       team: "IND",
     },
     points: -4,
-    user: "Pollard Greens",
+    user: "Breece's Puffs",
   },
   {
     player: {
@@ -1294,7 +1294,7 @@ export const fakeBottomPerformers = [
       team: "WAS",
     },
     points: 1,
-    user: "Finding Deebo",
+    user: "Saquon do ",
   },
   {
     player: {
@@ -1338,7 +1338,7 @@ export const fakeBenchPerformers = [
       team: "WAS",
     },
     points: 22.2,
-    user: "Loud and Stroud",
+    user: "Lamario Kart ",
   },
   {
     player: {
@@ -1348,12 +1348,12 @@ export const fakeBenchPerformers = [
       team: "DET",
     },
     points: 22,
-    user: "Pollard Greens",
+    user: "Breece's Puffs",
   },
 ];
 export const fakeHighlights = [
   "<b>Collard Greens</b> is the hottest team, riding a dominant 5-game win streak and averaging 132 points per game over that span, vaulting to 3rd place.",
-  "<b>Finding Deebo</b> leads the league in total points (1646) but just saw a 4-game win streak snapped, opening the door for surging contenders.",
+  "<b>Saquon do </b> leads the league in total points (1646) but just saw a 4-game win streak snapped, opening the door for surging contenders.",
 ];
 export const fakeWaiverMoves = [
   {
@@ -1500,8 +1500,8 @@ export const fakeWaiverMoves = [
     id: 5,
     user: {
       id: "5",
-      name: "Pollard Greens",
-      username: "Pollard Greens",
+      name: "Breece's Puffs",
+      username: "Breece's Puffs",
       avatar: "15d7cf259bc30eab8f6120f45f652fb6",
       avatarImg: "../avatars/avatar5.svg",
     },
@@ -1586,7 +1586,7 @@ export const fakeTrades = [
     team2: {
       user: {
         id: "5",
-        name: "Pollard Greens",
+        name: "Breece's Puffs",
         avatar: "15d7cf259bc30eab8f6120f45f652fb6",
         avatarImg: "../avatars/avatar5.svg",
         transactions: 38,
@@ -1601,7 +1601,7 @@ export const fakeTrades = [
     team1: {
       user: {
         id: "6",
-        name: "Finding Deebo",
+        name: "Saquon do ",
         avatar: "d6ad9a18c52dcdb704399beed5d5b21f",
         avatarImg: "../avatars/avatar6.svg",
         transactions: 29,
@@ -1614,7 +1614,7 @@ export const fakeTrades = [
     team2: {
       user: {
         id: "7",
-        name: "Loud and Stroud",
+        name: "Lamario Kart ",
         avatar: "3d8ea1e7289177ddf22dd57e107ee334",
         avatarImg: "../avatars/avatar7.svg",
         transactions: 19,
@@ -1719,21 +1719,21 @@ export const fakeUsers = [
   },
   {
     id: "5",
-    name: "Pollard Greens",
+    name: "Breece's Puffs",
     avatar: "15d7cf259bc30eab8f6120f45f652fb6",
     avatarImg: "../avatars/avatar5.svg",
     transactions: 38,
   },
   {
     id: "6",
-    name: "Finding Deebo",
+    name: "Saquon do ",
     avatar: "d6ad9a18c52dcdb704399beed5d5b21f",
     avatarImg: "../avatars/avatar6.svg",
     transactions: 29,
   },
   {
     id: "7",
-    name: "Loud and Stroud",
+    name: "Lamario Kart ",
     avatar: "3d8ea1e7289177ddf22dd57e107ee334",
     avatarImg: "../avatars/avatar7.svg",
     transactions: 19,
@@ -2112,11 +2112,11 @@ export const fakeLosersBracket = [
 
 export const fakePlayoffData = [
   {
-    name: "Finding Deebo",
+    name: "Saquon do ",
     placement: [100, 0, 0, 0, 0, 0],
   },
   {
-    name: "Pollard Greens",
+    name: "Breece's Puffs",
     placement: [0, 0, 100, 0, 0, 0],
   },
   {
@@ -2136,7 +2136,7 @@ export const fakePlayoffData = [
     placement: [0, 0, 0, 0, 0, 100],
   },
   {
-    name: "Loud and Stroud",
+    name: "Lamario Kart ",
     placement: [0, 0, 0, 0, 0, 0],
   },
   {
@@ -2155,7 +2155,7 @@ export const fakePlayoffData = [
 
 export const fakeProjectionData = [
   {
-    name: "Finding Deebo",
+    name: "Saquon do ",
     data: [
       { position: "RB", projection: 482 },
       { position: "WR", projection: 369 },
@@ -2167,7 +2167,7 @@ export const fakeProjectionData = [
     total: 1400,
   },
   {
-    name: "Pollard Greens",
+    name: "Breece's Puffs",
     data: [
       { position: "RB", projection: 410 },
       { position: "WR", projection: 427 },
@@ -2227,7 +2227,7 @@ export const fakeProjectionData = [
     total: 1263,
   },
   {
-    name: "Loud and Stroud",
+    name: "Lamario Kart ",
     data: [
       { position: "RB", projection: 422 },
       { position: "WR", projection: 331 },

@@ -731,7 +731,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
             team of underperformers.
           </p>
           <p class="mb-3">
-            <b>Finding Deebo</b> narrowly edged out <b>LaPorta Potty </b> in a
+            <b>Saquon do </b> narrowly edged out <b>LaPorta Potty </b> in a
             high-scoring showdown, 129.62 to 123.26. Deebo Samuel was the real
             MVP, putting up numbers like he was playing Madden on rookie mode.
             <b>Baby Back Gibbs</b> and <b>Bijan Mustard</b> had a snooze-fest,
@@ -740,8 +740,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
             Swiftly Disappointing."
           </p>
           <p class="mb-3">
-            In the battle of the lower ranks, <b>Pollard Greens</b> barely
-            squeaked by <b>Loud and Stroud</b> 94.82 to 90.44. Tony Pollard and
+            In the battle of the lower ranks, <b>Breece's Puffs</b> barely
+            squeaked by <b>Lamario Kart </b> 94.82 to 90.44. Tony Pollard and
             James Cook did just enough to save the day, proving that even a
             broken clock is right twice a day.
           </p>
