@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { TableDataType } from "../../api/types.ts";
 import { useStore } from "../../store/store";
 import { getPlayersByIdsMap, getSingleWeekProjection } from "../../api/api.ts";
-import { fakeWeeklyPreview } from "../../api/helper.ts";
+import { fakeWeeklyPreview, getWinProbability } from "../../api/helper.ts";
 
 const store = useStore();
 const props = defineProps<{
@@ -149,8 +149,8 @@ const getWinPercentage = (id1: number, id2: number) => {
   if (playerObj1 && playerObj2) {
     result =
       playerObj1.total > playerObj2.total
-        ? playerObj1.total / (playerObj1.total + playerObj2.total)
-        : playerObj2.total / (playerObj1.total + playerObj2.total);
+        ? getWinProbability((playerObj1.total - playerObj2.total) / 40)
+        : getWinProbability((playerObj2.total - playerObj1.total) / 40);
   }
 
   return Math.round(result * 100);

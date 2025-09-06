@@ -253,6 +253,10 @@ export const zScoreToPValue = (z: number) => {
   return 2 * (1 - 0.5 * (1 + erf(Math.abs(z) / Math.sqrt(2))));
 };
 
+export const getWinProbability = (z: number) => {
+  return 0.5 * (1 + erf(z / Math.sqrt(2)));
+};
+
 export const getRandomUser = (leagueSize: number, excludedIndex: number) => {
   let randomIndex;
   do {
