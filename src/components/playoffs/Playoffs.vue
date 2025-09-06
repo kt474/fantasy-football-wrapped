@@ -20,12 +20,16 @@ const store = useStore();
 const winnersBracket = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].winnersBracket
+      ? store.leagueInfo[store.currentLeagueIndex].winnersBracket
+      : []
     : fakeWinnersBracket;
 });
 
 const losersBracket = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].losersBracket
+      ? store.leagueInfo[store.currentLeagueIndex].losersBracket
+      : []
     : fakeLosersBracket;
 });
 

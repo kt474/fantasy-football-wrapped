@@ -161,7 +161,8 @@ onMounted(async () => {
     props.tableData[0].matchups &&
     weeks.value.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].weeklyReport
+    !store.leagueInfo[store.currentLeagueIndex].weeklyReport &&
+    store.leagueInfo[store.currentLeagueIndex].seasonType !== "Guillotine"
   ) {
     loading.value = true;
     await fetchPlayerNames();
@@ -566,6 +567,7 @@ watch(
     currentWeek.value = weeks.value[0];
     if (
       !store.leagueInfo[store.currentLeagueIndex].weeklyReport &&
+      store.leagueInfo[store.currentLeagueIndex].seasonType !== "Guillotine" &&
       weeks.value.length > 0
     ) {
       weeklyReport.value = "";
@@ -1062,7 +1064,12 @@ watch(() => currentWeek.value, fetchPlayerNames);
         :series="seriesData"
       ></apexchart>
     </div>
-    <div v-if="activeTab === 'Preview'">
+    <div
+      v-if="
+        activeTab === 'Preview' &&
+        store.leagueInfo[store.currentLeagueIndex].seasonType !== 'Guillotine'
+      "
+    >
       <WeeklyPreview
         :table-data="sortedTableData"
         :current-week="currentWeek ? currentWeek : 0"
