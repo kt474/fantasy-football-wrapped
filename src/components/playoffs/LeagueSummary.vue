@@ -71,7 +71,7 @@ const fetchPlayerNames = async () => {
 
       const result: any = currentLeague.weeklyPoints.map((user: any) => {
         const starterIds = user.starters.at(-1);
-        const starterNames = starterIds.map((id: string) =>
+        const starterNames = starterIds?.map((id: string) =>
           playerLookupMap.get(id)?.name
             ? playerLookupMap.get(id)?.name
             : playerLookupMap.get(id)?.team

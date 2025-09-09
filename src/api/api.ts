@@ -600,7 +600,7 @@ export const getMatchup = async (week: number, leagueId: string) => {
   const matchup = await response.json();
   return matchup.map((game: any) => {
     const benchPlayers = game["players"].filter(
-      (value: string) => !game["starters"].includes(value)
+      (value: string) => !game["starters"]?.includes(value)
     );
     const benchPoints = benchPlayers.map(
       (player: string) => game["players_points"][player]
