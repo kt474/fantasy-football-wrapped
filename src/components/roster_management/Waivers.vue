@@ -95,6 +95,20 @@ const waiverData: ComputedRef<WaiverData> = computed(() => {
 });
 
 const orderedData = computed(() => {
+  if (
+    rawData.value.filter(
+      (player: any) =>
+        !["K", "DEF"].includes(player.position) && player.value != null
+    ).length > 5
+  ) {
+    return rawData.value
+      .filter(
+        (player: any) =>
+          !["K", "DEF"].includes(player.position) && player.value != null
+      )
+      .sort((a: any, b: any) => a.value - b.value)
+      .slice(0, 10);
+  }
   return rawData.value
     .filter((player: any) => player.value != null)
     .sort((a: any, b: any) => a.value - b.value)
