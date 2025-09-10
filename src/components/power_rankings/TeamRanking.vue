@@ -4,8 +4,9 @@ import { groupBy } from "lodash";
 import { TableDataType, LeagueInfoType } from "../../api/types";
 import { getStats } from "../../api/api";
 import { useStore } from "../../store/store";
-import { fakePlayerRankings } from "../../api/playerRanks";
+import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
 import { fakeUsers } from "../../api/helper";
+import Roster from "./Roster.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -13,8 +14,16 @@ const props = defineProps<{
 }>();
 
 const data = ref<Record<string, any>>({});
+const allData = ref<Record<string, any>>({});
 const loading = ref(false);
 const tab = ref("QB");
+
+const switchTabs = [
+  { label: "All Rosters", key: "roster" },
+  { label: "Top Scorers", key: "score" },
+];
+
+const activeTab = ref("score");
 
 const changeTab = (newTab: string) => {
   tab.value = newTab;
@@ -22,18 +31,42 @@ const changeTab = (newTab: string) => {
 
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  const rosters = props.tableData.map((user) => user.players).flat();
-  const allPlayers = await Promise.all(
-    rosters.map((player: string) => {
-      return getStats(player, currentLeague.season, currentLeague.scoringType);
-    })
+  const rosterPlayers = props.tableData.flatMap((user) =>
+    user.players.map((player) => ({
+      rosterId: user.rosterId,
+      player,
+    }))
   );
-  const filtered = allPlayers.filter((item) => item !== null);
+
+  const allPlayers = await Promise.all(
+    rosterPlayers.map(({ player }) =>
+      getStats(player, currentLeague.season, currentLeague.scoringType)
+    )
+  );
+
+  const allPlayersWithRoster = allPlayers.map((stats, idx) => ({
+    ...stats,
+    rosterId: rosterPlayers[idx].rosterId,
+  }));
+
+  const filtered = allPlayersWithRoster.filter((item) => item !== null);
+
+  function groupByRosterId(arr: any[]) {
+    return arr.reduce((acc, item) => {
+      if (!acc[item.rosterId]) acc[item.rosterId] = [];
+      acc[item.rosterId].push(item);
+      return acc;
+    }, {});
+  }
+
+  allData.value = groupByRosterId(filtered);
+  store.addRosterRankings(currentLeague.leagueId, allData.value);
+
   const groupedPositions = groupBy(filtered, "position");
   const sorted = Object.fromEntries(
     Object.entries(groupedPositions).map(([position, items]) => [
       position,
-      items.sort((a: any, b: any) => a.rank - b.rank).slice(0, 5), // Only keep top 5
+      items.sort((a, b) => a.rank - b.rank).slice(0, 5),
     ])
   );
   data.value = sorted;
@@ -71,12 +104,15 @@ onMounted(async () => {
   ) {
     loading.value = true;
     data.value = {};
+    allData.value = {};
     await getData();
     loading.value = false;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
     data.value = store.leagueInfo[store.currentLeagueIndex].playerRankings;
+    allData.value = store.leagueInfo[store.currentLeagueIndex].rosterRankings;
   } else if (store.leagueInfo.length === 0) {
     data.value = fakePlayerRankings;
+    allData.value = fakeRosterData;
   }
 });
 
@@ -84,12 +120,14 @@ watch(
   () => store.currentLeagueId,
   async () => {
     if (!store.leagueInfo[store.currentLeagueIndex].playerRankings) {
-      data.value = [];
+      data.value = {};
+      allData.value = {};
       loading.value = true;
       await getData();
       loading.value = false;
     }
     data.value = store.leagueInfo[store.currentLeagueIndex].playerRankings;
+    allData.value = store.leagueInfo[store.currentLeagueIndex].rosterRankings;
   }
 );
 </script>
@@ -97,18 +135,40 @@ watch(
   <div
     class="w-full py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6 min-w-80"
   >
-    <h1
-      class="pb-2 mb-4 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-    >
-      Top Performers
-    </h1>
+    <div class="flex">
+      <h1
+        class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
+      >
+        Top Performers
+      </h1>
+      <div
+        class="inline-flex p-1 ml-4 mr-4 bg-gray-200 rounded-lg sm:-mt-2 dark:bg-gray-600"
+        role="tablist"
+      >
+        <button
+          v-for="tab2 in switchTabs"
+          :key="tab2.key"
+          @click="activeTab = tab2.key"
+          class="px-2 py-1 text-sm font-medium transition-colors duration-200 rounded-md sm:px-4 sm:py-2 focus:outline-none"
+          :class="
+            activeTab === tab2.key
+              ? 'bg-gray-50 shadow text-gray-900 dark:bg-gray-900 dark:text-gray-100'
+              : 'text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200'
+          "
+          role="tab"
+          :aria-selected="activeTab === tab2.key"
+        >
+          {{ tab2.label }}
+        </button>
+      </div>
+    </div>
     <div v-if="Object.keys(data).length === 0">
       <p class="text-gray-600 dark:text-gray-200">
         Please come back after week 1!
       </p>
     </div>
     <div
-      v-else-if="!loading"
+      v-else-if="!loading && activeTab == 'score'"
       class="flex flex-wrap mt-2 text-gray-800 dark:text-gray-200"
     >
       <ul
@@ -274,8 +334,13 @@ watch(
         </div>
       </div>
     </div>
+    <Roster
+      v-if="!loading && activeTab == 'roster' && allData"
+      :player-data="allData"
+      :table-data="tableData"
+    />
     <!-- Loading div -->
-    <div v-else role="status" class="max-w-sm animate-pulse">
+    <div v-else-if="loading" role="status" class="max-w-sm animate-pulse">
       <p class="mb-2 text-gray-900 dark:text-gray-200">
         Loading player data...
       </p>

@@ -37,6 +37,7 @@ export type LeagueInfoType = {
   draftMetadata: any;
   draftGrades: any[];
   playerRankings: any;
+  rosterRankings: any;
 };
 
 export type RosterType = {
