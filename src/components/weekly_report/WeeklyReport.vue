@@ -50,9 +50,18 @@ const weeks = computed(() => {
     ]
       .slice(1)
       .reverse();
-    return recordLength < weeksList.length
-      ? [...Array(recordLength).keys()].slice(1).reverse()
-      : weeksList;
+
+    const result =
+      recordLength < weeksList.length
+        ? [...Array(recordLength).keys()].slice(1).reverse()
+        : weeksList;
+    return activeTab.value === "Report"
+      ? result
+      : result.length === 17 ||
+        result.length === 18 ||
+        store.leagueInfo.length === 0
+      ? result
+      : (result.unshift(result[result.length - 1] + 1), result);
   }
   return [1];
 });
@@ -94,7 +103,7 @@ const fetchPlayerNames = async () => {
     }
     const result: any = props.tableData.map((user: any) => {
       const starterIds = user.starters[currentWeek.value - 1];
-      const starterNames = starterIds.map((id: string) =>
+      const starterNames = starterIds?.map((id: string) =>
         playerLookupMap.get(id)
       );
       return starterNames;
@@ -582,7 +591,7 @@ watch(
       await fetchPlayerNames();
     }
     weeklyReport.value =
-      store.leagueInfo[store.currentLeagueIndex].weeklyReport;
+      store.leagueInfo[store.currentLeagueIndex]?.weeklyReport;
   }
 );
 
@@ -619,7 +628,7 @@ const copyReport = () => {
 };
 
 watch(
-  () => props.regularSeasonLength,
+  [() => props.regularSeasonLength, () => activeTab.value],
   () => (currentWeek.value = weeks.value[0])
 );
 watch(() => currentWeek.value, fetchPlayerNames);
@@ -1067,7 +1076,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
     <div
       v-if="
         activeTab === 'Preview' &&
-        store.leagueInfo[store.currentLeagueIndex].seasonType !== 'Guillotine'
+        store.leagueInfo[store.currentLeagueIndex]?.seasonType !== 'Guillotine'
       "
     >
       <WeeklyPreview

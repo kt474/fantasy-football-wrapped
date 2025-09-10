@@ -62,29 +62,37 @@ const fetchPlayerNames = async () => {
       props.tableData.map(async (user: any) => {
         const starterIds = user.starters[previewWeek.value];
         // For each starter, fetch player and projection
-        const starterNames = await Promise.all(
-          starterIds.map(async (id: string) => {
-            const player = playerLookupMap.get(id);
-            const projection = await getSingleWeekProjection(
-              id,
-              currentLeague.season,
-              previewWeek.value + 1,
-              currentLeague.scoringType
-            );
-            return {
-              ...player,
-              projection,
-            };
-          })
-        );
-        return {
-          id: user.rosterId,
-          players: starterNames,
-          total: starterNames.reduce((sum, obj) => {
-            const value = Number(obj.projection);
-            return sum + (isFinite(value) ? value : 0);
-          }, 0),
-        };
+        if (starterIds) {
+          const starterNames = await Promise.all(
+            starterIds.map(async (id: string) => {
+              const player = playerLookupMap.get(id);
+              const projection = await getSingleWeekProjection(
+                id,
+                currentLeague.season,
+                previewWeek.value + 1,
+                currentLeague.scoringType
+              );
+              return {
+                ...player,
+                projection,
+              };
+            })
+          );
+          return {
+            id: user.rosterId,
+            players: starterNames,
+            total: starterNames.reduce((sum, obj) => {
+              const value = Number(obj.projection);
+              return sum + (isFinite(value) ? value : 0);
+            }, 0),
+          };
+        } else {
+          return {
+            id: user.rosterId,
+            players: [],
+            total: 0,
+          };
+        }
       })
     );
 
