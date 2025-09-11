@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../api/types";
+import { fakeUsers } from "../../api/helper";
 
 const store = useStore();
 const props = defineProps<{
@@ -13,13 +14,6 @@ const getNameFromId = (rosterId: number) => {
   const userObj = props.tableData.find((user) => user.rosterId === rosterId);
   if (userObj) {
     return store.showUsernames ? userObj.username : userObj.name;
-  }
-};
-
-const getImgFromId = (rosterId: number) => {
-  const userObj = props.tableData.find((user) => user.rosterId === rosterId);
-  if (userObj) {
-    return userObj.avatarImg;
   }
 };
 
@@ -47,6 +41,21 @@ const groupedPlayerData = computed(() => {
   return result;
 });
 
+const managers = computed(() => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (currentLeague) {
+    const currentRosterIds = currentLeague.rosters.map((roster) => roster.id);
+    return currentLeague.users
+      .filter((user) => currentRosterIds.includes(user.id))
+      .map((user) => (store.showUsernames ? user.username : user.name));
+  } else if (store.leagueInfo.length == 0) {
+    return fakeUsers.map((user) => user.name);
+  }
+  return [];
+});
+
+const currentManager = ref(managers.value[0]);
+
 const getValueColor = (value: number) => {
   if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
   if (value <= 25) return `bg-green-400 dark:bg-green-600 text-gray-50`;
@@ -56,71 +65,70 @@ const getValueColor = (value: number) => {
 };
 </script>
 <template>
-  <div
-    v-for="(positions, userId) in groupedPlayerData"
-    :key="userId"
-    class="h-auto px-4 py-3.5 my-4 mr-4 md:mr-6 bg-white border border-gray-200 rounded-lg shadow dark:border-gray-700 dark:bg-gray-800"
-  >
-    <div class="flex mb-2">
-      <img
-        v-if="getImgFromId(Number(userId))"
-        alt="User avatar"
-        class="w-8 h-8 rounded-full"
-        :src="getImgFromId(Number(userId))"
-      />
-      <svg
-        v-else
-        class="w-8 h-8 text-gray-800 dark:text-gray-50"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path
-          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-        />
-      </svg>
-      <p class="mb-2 ml-2 text-xl font-medium text-gray-900 dark:text-gray-50">
-        {{ getNameFromId(Number(userId)) }}
-      </p>
-    </div>
-    <hr class="h-px mt-3 mb-2.5 bg-gray-200 border-0 dark:bg-gray-700" />
-    <div class="flex flex-wrap gap-4 sm:gap-12">
+  <div>
+    <label
+      for="Manager name"
+      class="block mb-1 text-sm text-gray-600 dark:text-gray-300"
+      >Manager</label
+    >
+    <select
+      aria-label="current week"
+      id="Manager name"
+      class="block p-2 text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      v-model="currentManager"
+    >
+      <option v-for="manager in managers" :key="manager" :value="manager">
+        {{ manager }}
+      </option>
+    </select>
+    <hr class="h-px mr-6 my-4 mb-2.5 bg-gray-200 border-0 dark:bg-gray-700" />
+    <div
+      v-for="(positions, userId) in groupedPlayerData"
+      :key="userId"
+      class=""
+    >
       <div
-        class="w-72 sm:w-40"
-        v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
-        :key="position"
+        v-if="getNameFromId(Number(userId)) === currentManager"
+        class="flex flex-wrap gap-4 sm:gap-12"
       >
-        <template v-if="positions[position] && positions[position].length">
-          <p class="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-50">
-            {{ position }}
-          </p>
-          <div class="gap-2 text-gray-700 dark:text-gray-300">
-            <div
-              v-for="player in positions[position]"
-              :key="player.id"
-              class="flex mb-1.5 justify-between"
+        <div
+          class="w-72 sm:w-40"
+          v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
+          :key="position"
+        >
+          <template v-if="positions[position] && positions[position].length">
+            <p
+              class="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-50"
             >
-              <p class="w-auto truncate sm:w-28">
-                {{
-                  player.position !== "DEF" && player.firstName
-                    ? `${player.firstName[0]}.`
-                    : ""
-                }}
-                {{ player.lastName }}
-              </p>
-              <span
-                :class="[
-                  player.rank
-                    ? getValueColor(player.rank)
-                    : 'bg-gray-300 dark:text-black',
-                ]"
-                class="text-xs px-2.5 py-1 mb-1 rounded-full float-end ml-2"
-                >{{ player.rank ? player.rank : "N/A" }}</span
+              {{ position }}
+            </p>
+            <div class="gap-2 text-gray-700 dark:text-gray-300">
+              <div
+                v-for="player in positions[position]"
+                :key="player.id"
+                class="flex mb-1.5 justify-between"
               >
+                <p class="w-auto truncate sm:w-28">
+                  {{
+                    player.position !== "DEF" && player.firstName
+                      ? `${player.firstName[0]}.`
+                      : ""
+                  }}
+                  {{ player.lastName }}
+                </p>
+                <span
+                  :class="[
+                    player.rank
+                      ? getValueColor(player.rank)
+                      : 'bg-gray-300 dark:text-black',
+                  ]"
+                  class="text-xs px-2.5 py-1 mb-1 rounded-full float-end ml-2"
+                  >{{ player.rank ? player.rank : "N/A" }}</span
+                >
+              </div>
             </div>
-          </div>
-        </template>
+          </template>
+        </div>
       </div>
     </div>
   </div>
