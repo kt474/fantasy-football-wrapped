@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "9/10/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "The power rankings tab now has a rosters section that shows ranking scores from every player on each team.",
+        ],
+      },
+    ],
+  },
+  {
     date: "9/01/25",
     content: [
       {
