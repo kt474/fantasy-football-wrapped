@@ -252,14 +252,14 @@ const getValueColor = (value: number) => {
   <div
     class="w-full p-4 overflow-x-auto bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
   >
-    <div class="flex mb-2">
+    <div class="flex justify-between mb-2">
       <h5
         class="w-48 -mt-1.5 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
       >
         Draft {{ activeTab }}
       </h5>
       <div
-        class="inline-flex p-1 -mt-1 bg-gray-200 rounded-lg sm:-mt-2 dark:bg-gray-600"
+        class="inline-flex p-1 -mt-1 bg-gray-200 rounded-lg sm:-mt-1.5 dark:bg-gray-600"
         role="tablist"
       >
         <button

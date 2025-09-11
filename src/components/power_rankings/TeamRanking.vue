@@ -19,8 +19,8 @@ const loading = ref(false);
 const tab = ref("QB");
 
 const switchTabs = [
-  { label: "All Rosters", key: "roster" },
-  { label: "Top Scorers", key: "score" },
+  { label: "By Roster", key: "roster" },
+  { label: "Overall", key: "score" },
 ];
 
 const activeTab = ref("score");
@@ -135,14 +135,14 @@ watch(
   <div
     class="w-full py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6 min-w-80"
   >
-    <div class="flex">
+    <div class="flex justify-between">
       <h1
         class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
       >
-        Top Performers
+        Player Rankings
       </h1>
       <div
-        class="inline-flex p-1 ml-4 mr-4 bg-gray-200 rounded-lg sm:-mt-2 dark:bg-gray-600"
+        class="inline-flex p-1 mr-4 bg-gray-200 rounded-lg md:mr-6 dark:bg-gray-600"
         role="tablist"
       >
         <button
@@ -256,7 +256,7 @@ watch(
       </ul>
       <div
         v-for="(players, position) in data"
-        class="w-full mr-4 overflow-x-hidden"
+        class="w-full mr-4 overflow-x-hidden md:mr-6"
       >
         <div
           v-if="position === tab"

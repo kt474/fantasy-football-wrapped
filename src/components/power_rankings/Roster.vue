@@ -59,7 +59,7 @@ const getValueColor = (value: number) => {
   <div
     v-for="(positions, userId) in groupedPlayerData"
     :key="userId"
-    class="h-auto px-4 py-3.5 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow dark:border-gray-700 dark:bg-gray-800"
+    class="h-auto px-4 py-3.5 my-4 mr-4 md:mr-6 bg-white border border-gray-200 rounded-lg shadow dark:border-gray-700 dark:bg-gray-800"
   >
     <div class="flex mb-2">
       <img
@@ -87,21 +87,21 @@ const getValueColor = (value: number) => {
     <hr class="h-px mt-3 mb-2.5 bg-gray-200 border-0 dark:bg-gray-700" />
     <div class="flex flex-wrap gap-4 sm:gap-12">
       <div
-        class="w-40"
+        class="w-72 sm:w-40"
         v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
         :key="position"
       >
         <template v-if="positions[position] && positions[position].length">
-          <p class="mb-2 font-semibold text-gray-900 dark:text-gray-50">
+          <p class="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-50">
             {{ position }}
           </p>
-          <div class="gap-2 text-gray-800 dark:text-gray-200">
+          <div class="gap-2 text-gray-700 dark:text-gray-300">
             <div
               v-for="player in positions[position]"
               :key="player.id"
-              class="flex mb-1.5"
+              class="flex mb-1.5 justify-between"
             >
-              <p class="truncate w-28">
+              <p class="w-auto truncate sm:w-28">
                 {{
                   player.position !== "DEF" && player.firstName
                     ? `${player.firstName[0]}.`

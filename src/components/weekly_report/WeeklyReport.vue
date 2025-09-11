@@ -637,22 +637,22 @@ watch(() => currentWeek.value, fetchPlayerNames);
   <div
     class="h-full px-6 pt-4 mt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex flex-wrap sm:flex-nowrap">
-        <h5
-          class="mr-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
-        >
-          Weekly {{ activeTab }}
-        </h5>
+    <div class="flex justify-between w-full mb-3">
+      <h5
+        class="mr-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
+      >
+        Weekly {{ activeTab }}
+      </h5>
+      <div class="flex flex-wrap justify-end align-middle">
         <div
-          class="inline-flex px-1 pb-1 pt-1.5 bg-gray-200 rounded-lg dark:bg-gray-600 mt-1.5 sm:-mt-1"
+          class="inline-flex custom-margins px-1 pb-1 pt-1.5 bg-gray-200 rounded-lg dark:bg-gray-600"
           role="tablist"
         >
           <button
             v-for="tab in tabs"
             :key="tab.key"
             @click="activeTab = tab.key"
-            class="px-2 py-1 -mt-0.5 text-sm font-medium transition-colors duration-200 rounded-md sm:px-4 sm:py-2 focus:outline-none"
+            class="px-2 py-1 -mt-0.5 text-sm font-medium transition-colors duration-200 rounded-md sm:px-4 sm:py-1.5 focus:outline-none"
             :class="
               activeTab === tab.key
                 ? 'bg-gray-50 shadow text-gray-900 dark:bg-gray-900 dark:text-gray-100'
@@ -664,23 +664,24 @@ watch(() => currentWeek.value, fetchPlayerNames);
             {{ tab.label }}
           </button>
         </div>
-      </div>
-      <select
-        aria-label="current week"
-        id="rankings"
-        class="block p-2 mb-8 text-sm text-gray-900 border border-gray-300 rounded-lg sm:mb-0 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 custom-padding"
-        :class="playoffWeeks.includes(currentWeek) ? 'w-44' : 'w-28'"
-        v-model="currentWeek"
-      >
-        <option
-          v-if="weeks.length > 0"
-          v-for="week in weeks"
-          :key="week"
-          :value="week"
+        <select
+          aria-label="current week"
+          id="rankings"
+          class="items-center block p-2 text-sm text-gray-900 border border-gray-300 rounded-lg sm:mb-0 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 custom-padding"
+          :class="playoffWeeks.includes(currentWeek) ? 'w-44' : 'w-28'"
+          v-model="currentWeek"
         >
-          Week {{ week }} {{ playoffWeeks.includes(week) ? "(playoffs)" : "" }}
-        </option>
-      </select>
+          <option
+            v-if="weeks.length > 0"
+            v-for="week in weeks"
+            :key="week"
+            :value="week"
+          >
+            Week {{ week }}
+            {{ playoffWeeks.includes(week) ? "(playoffs)" : "" }}
+          </option>
+        </select>
+      </div>
     </div>
     <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
     <div v-if="activeTab === 'Report'">
@@ -1096,6 +1097,18 @@ watch(() => currentWeek.value, fetchPlayerNames);
   width: 291.5px;
   @media (width <= 640px) {
     min-width: 306px;
+  }
+}
+
+.custom-margins {
+  margin-right: 0rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 530px) {
+  .custom-margins {
+    margin-right: 0.5rem;
+    margin-bottom: 0rem;
   }
 }
 </style>
