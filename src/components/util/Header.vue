@@ -191,18 +191,19 @@ watch(
                     class="text-base leading-relaxed text-gray-700 dark:text-gray-100"
                   >
                     Using this site will always be completely free (and ad free)
-                    but if you would like to support this project, any
-                    <a
-                      href="https://buymeacoffee.com/kt474"
-                      class="font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                      target="_blank"
-                      >donations</a
-                    >
+                    but if you would like to support this project, any donations
                     would be greatly appreciated.
                   </p>
+                  <a href="https://www.buymeacoffee.com/kt474" target="_blank"
+                    ><img
+                      src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+                      alt="Buy Me A Coffee"
+                      style="height: 55px !important; width: 217px !important"
+                      class="mx-auto mt-6"
+                  /></a>
                 </div>
                 <div
-                  class="flex items-center justify-between p-4 border-b rounded-t md:p-5 dark:border-gray-600"
+                  class="flex items-center justify-between p-4 -mt-4 border-b rounded-t md:p-5 dark:border-gray-600"
                 >
                   <h3
                     class="text-xl font-semibold text-gray-900 dark:text-gray-50"
