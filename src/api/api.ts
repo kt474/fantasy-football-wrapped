@@ -275,13 +275,13 @@ export const getTradeValue = async (
   );
   const result = await response.json();
   const weeklyRanks = Object.values(result)
-    .slice(weekTraded)
+    .slice(weekTraded - 1)
     .map((week: any) => {
       return week && week["stats"] ? week["stats"][rank] : 0;
     })
     .filter((num) => num !== 0 && num !== 999);
 
-  return weeklyRanks.length > 1
+  return weeklyRanks.length >= 1
     ? parseFloat(mean(weeklyRanks).toFixed(1))
     : null;
 };

@@ -92,7 +92,7 @@ const getValueColor = (value: number) => {
         class="flex flex-wrap gap-4 sm:gap-12"
       >
         <div
-          class="w-72 sm:w-40"
+          class="overflow-x-hidden w-80 sm:w-40"
           v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
           :key="position"
         >

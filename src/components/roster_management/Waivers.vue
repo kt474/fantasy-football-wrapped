@@ -322,7 +322,7 @@ watch(
       <div
         v-if="orderedData.length > 0"
         v-for="(move, index) in orderedData"
-        class="w-11/12 mb-4 dark:text-gray-200"
+        class="pr-6 mb-4 dark:text-gray-200"
       >
         <div class="flex justify-between">
           <div class="flex mb-1">
