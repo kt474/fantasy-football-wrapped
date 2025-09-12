@@ -84,7 +84,11 @@ const powerRankings = computed(() => {
     const ratingArr: number[] = [];
     if (value.recordByWeek && value.points) {
       value.points.forEach((_: number, week: number) => {
-        if (week < value.recordByWeek.length) {
+        const weekLength =
+          store.leagueInfo[store.currentLeagueIndex]?.medianScoring === 1
+            ? value.recordByWeek.length / 2
+            : value.recordByWeek.length;
+        if (week < weekLength) {
           const currentWins = winsOnWeek(value.recordByWeek, week);
           const currentLosses = week + 1 - currentWins;
           ratingArr.push(
