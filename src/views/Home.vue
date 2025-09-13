@@ -97,11 +97,6 @@ onMounted(async () => {
 <template>
   <div class="container w-11/12 max-w-screen-xl mx-auto">
     <div v-if="store.currentLeagueId" class="container mx-auto">
-      <label
-        v-if="store.showInput"
-        class="block mt-3 -mb-3 text-sm font-medium text-gray-900 dark:text-gray-50"
-        >Add League</label
-      >
       <Input v-if="store.showInput" class="custom-input-width" />
       <div v-if="store.showLeaguesList" class="container mx-auto">
         <UserLeagueList />

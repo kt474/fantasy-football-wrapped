@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { seasonType, getData, inputLeague } from "../../api/api";
 
@@ -63,6 +63,9 @@ const addLeagues = async () => {
     }, 3000);
   }
 };
+onMounted(() => {
+  window.scrollTo(0, 0);
+});
 </script>
 <template>
   <div class="w-full" :class="{ 'h-screen': !store.currentLeagueId }">
