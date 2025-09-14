@@ -7,7 +7,9 @@ import Email from "./components/util/Email.vue";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./api/types";
 import { inject } from "@vercel/analytics";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const store = useStore();
 
 onMounted(async () => {
@@ -31,9 +33,7 @@ watch(
       // update league id in url
       // sometimes errors to undefined, TODO
       if (store.currentLeagueId !== "undefined") {
-        const url: any = new URL(window.location.href);
-        url.searchParams.set("leagueId", store.currentLeagueId);
-        window.history.pushState({}, "", url.toString());
+        router.replace({ query: { leagueId: store.currentLeagueId } });
       }
     }
   }

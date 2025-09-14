@@ -2,12 +2,14 @@
 import { getLeagueCount } from "../../api/api";
 import { ref, onMounted } from "vue";
 import { useStore } from "../../store/store";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 const store = useStore();
-const leagueCount = ref(4324); // initial load current unique league count value 9/1/25
+const leagueCount = ref(4883); // initial load current unique league count value 9/14/25
 
 onMounted(async () => {
-  const queryParams = new URLSearchParams(window.location.search);
-  const leagueId = queryParams.get("leagueId");
+  const leagueId = route.query.leagueId;
   if (!leagueId) {
     const data = await getLeagueCount();
     const newCount = data?.league_id_count;

@@ -17,15 +17,15 @@ const seasonYear = ref("2025");
 const showErrorMsg = ref(false);
 const errorMsg = ref("");
 const showHelperMsg = ref(false);
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const leagueIds = computed(() => {
   return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
 });
 
 const updateURL = (leagueID: string) => {
-  const url: any = new URL(window.location.href);
-  url.searchParams.set("leagueId", leagueID);
-  window.history.pushState({}, "", url.toString());
+  router.replace({ query: { leagueId: leagueID } });
 };
 
 onMounted(() => {

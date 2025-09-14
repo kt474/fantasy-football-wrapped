@@ -73,9 +73,6 @@ const removeLeague = () => {
         path: "/",
         query: {},
       });
-      // sometimes the league id in the url persists
-      const baseUrl = window.location.origin + window.location.pathname;
-      window.history.pushState({}, "", baseUrl);
     }
     if (localStorage.originalData) {
       const currentData = JSON.parse(localStorage.originalData);

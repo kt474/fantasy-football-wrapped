@@ -2,15 +2,15 @@
 import { ref, computed, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { seasonType, getData, inputLeague } from "../../api/api";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const checkedLeagues = ref([]);
 const duplicateLeagueError = ref(false);
 const store = useStore();
 
 const updateURL = (leagueID: string) => {
-  const url: any = new URL(window.location.href);
-  url.searchParams.set("leagueId", leagueID);
-  window.history.pushState({}, "", url.toString());
+  router.replace({ query: { leagueId: leagueID } });
 };
 
 const showError = computed(() => {
