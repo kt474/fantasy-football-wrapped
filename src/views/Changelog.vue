@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "9/14/24",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "All of the url logic has been refactored to use vue-router. This should fix issues with getting stuck on the loading screen.",
+        ],
+      },
+    ],
+  },
+  {
     date: "9/10/25",
     content: [
       {

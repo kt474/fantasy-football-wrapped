@@ -50,13 +50,10 @@ onMounted(async () => {
             >
           </p>
           <p class="mb-1">
-            <a
-              aria-label="ffwrapped blog page"
+            <router-link
+              :to="{ path: '/contact', query: $route.query }"
               class="text-blue-700 dark:text-blue-500 hover:underline"
-              href="https://blog.ffwrapped.com/"
-              title="ffwrapped blog page"
-              target="_blank"
-              >Blog</a
+              >Email Newsletter</router-link
             >
           </p>
           <p class="mb-1">

@@ -10,6 +10,7 @@ import App from "./App.vue";
 import posthogPlugin from "../plugins/posthog";
 import ChangelogPage from "./views/Changelog.vue";
 import PrivacyPolicy from "./views/PrivacyPolicy.vue";
+import Contact from "./views/Contact.vue";
 import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
 
@@ -17,6 +18,7 @@ const routes = [
   { path: "/", component: Home },
   { path: "/changelog", component: ChangelogPage },
   { path: "/privacy", component: PrivacyPolicy },
+  { path: "/contact", component: Contact },
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",

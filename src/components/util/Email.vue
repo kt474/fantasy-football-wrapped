@@ -65,7 +65,7 @@ onMounted(() => {
       </button>
     </div>
     <p class="mt-2 text-sm text-gray-600 dark:text-gray-200 text-pretty">
-      Stay up to date with new features, announcements and weekly fantasy
+      Stay up to date with new features, announcements, and weekly fantasy
       football insights.
     </p>
     <form @submit.prevent="subscribe" class="mt-4">
