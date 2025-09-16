@@ -620,7 +620,9 @@ const getMatchupWinner = (matchupIndex: number, currentWeek: number) => {
 };
 
 const copyReport = () => {
-  navigator.clipboard.writeText(rawWeeklyReport.value);
+  navigator.clipboard.writeText(
+    rawWeeklyReport.value + "\n\nCreated with https://ffwrapped.com"
+  );
   store.showCopyReport = true;
   setTimeout(() => {
     store.showCopyReport = false;

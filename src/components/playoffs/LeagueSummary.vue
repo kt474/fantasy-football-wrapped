@@ -135,7 +135,9 @@ const getSummary = async () => {
   }
 };
 const copyReport = () => {
-  navigator.clipboard.writeText(rawSummary.value);
+  navigator.clipboard.writeText(
+    rawSummary.value + +"\n\nCreated with https://ffwrapped.com"
+  );
   store.showCopyReport = true;
   setTimeout(() => {
     store.showCopyReport = false;
