@@ -66,6 +66,7 @@ const removeLeague = () => {
     store.updateRemovedAlert(true);
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentTab");
+      removeHistoryLeagues();
       store.showUsernames = false;
       store.currentTab = "standings";
       // reset url if there are no leagues
@@ -101,6 +102,21 @@ const shareLeague = () => {
   setTimeout(() => {
     store.showCopiedAlert = false;
   }, 3000);
+};
+
+const removeHistoryLeagues = () => {
+  // Regular expression to match keys starting with a digit
+  const numberStartRegex = /^[0-9]/;
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && numberStartRegex.test(key)) {
+      keysToRemove.push(key);
+    }
+  }
+  for (const key of keysToRemove) {
+    localStorage.removeItem(key);
+  }
 };
 </script>
 <template>
