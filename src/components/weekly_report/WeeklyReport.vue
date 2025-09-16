@@ -61,7 +61,7 @@ const weeks = computed(() => {
         result.length === 18 ||
         store.leagueInfo.length === 0
       ? result
-      : (result.unshift(result[result.length - 1] + 1), result);
+      : (result.unshift(result[result.length - 1] + result.length), result);
   }
   return [1];
 });

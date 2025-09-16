@@ -29,13 +29,13 @@ const refreshLeague = async () => {
       (item: any) => item.leagueId !== props.leagueInfo.leagueId
     );
   });
-  store.updateLoadingLeague(props.leagueInfo.name);
-  store.updateLeagueInfo(await getData(props.leagueInfo.leagueId));
   if (localStorage.originalData) {
     const currentData = JSON.parse(localStorage.originalData);
     delete currentData[props.leagueInfo.leagueId];
     localStorage.originalData = JSON.stringify(currentData);
   }
+  store.updateLoadingLeague(props.leagueInfo.name);
+  store.updateLeagueInfo(await getData(props.leagueInfo.leagueId));
   store.showRefreshAlert = true;
   store.updateLoadingLeague("");
   setTimeout(() => {
