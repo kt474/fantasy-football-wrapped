@@ -58,7 +58,7 @@ watch(
           width="24"
           src="../../assets/football-helmet.png"
           class="h-6"
-          alt="Flowbite Logo"
+          alt="ffwrapped logo"
         />
         <span
           class="self-center -mb-1.5 custom-font whitespace-nowrap dark:text-gray-50"

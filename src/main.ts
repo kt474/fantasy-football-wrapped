@@ -16,9 +16,30 @@ import Home from "./views/Home.vue";
 
 const routes = [
   { path: "/", component: Home },
-  { path: "/changelog", component: ChangelogPage },
-  { path: "/privacy", component: PrivacyPolicy },
-  { path: "/contact", component: Contact },
+  {
+    path: "/changelog",
+    component: ChangelogPage,
+    meta: {
+      title: "Changelog",
+      description: "A log of major updates",
+    },
+  },
+  {
+    path: "/privacy",
+    component: PrivacyPolicy,
+    meta: {
+      title: "Privacy Policy",
+      description: "We don’t collect or store your personal information.",
+    },
+  },
+  {
+    path: "/contact",
+    component: Contact,
+    meta: {
+      title: "Newsletter",
+      description: "Subscribe to our newsletter for updates and announcements.",
+    },
+  },
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
