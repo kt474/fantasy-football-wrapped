@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { maxBy, minBy } from "lodash";
 import { fakeRosters, fakeUsers, createTableData } from "../../api/helper";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, defineAsyncComponent } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType, UserType, RosterType } from "../../api/types";
 import PowerRankingData from "../power_rankings/PowerRankingData.vue";
@@ -27,6 +27,7 @@ import TeamRanking from "../power_rankings/TeamRanking.vue";
 import CurrentTrends from "./CurrentTrends.vue";
 import ScheduleStrength from "../expected_wins/ScheduleStrength.vue";
 
+const Wrapped = defineAsyncComponent(() => import("../wrapped/Wrapped.vue"));
 const tableOrder = ref("wins");
 const hover = ref("");
 const props = defineProps<{
@@ -577,6 +578,9 @@ const getTeamName = (tableDataItem: any) => {
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">
       <LeagueHistory :tableData="tableData" />
+    </div>
+    <div v-if="store.currentTab === 'wrapped'" class="mt-4">
+      <Wrapped />
     </div>
   </div>
 </template>
