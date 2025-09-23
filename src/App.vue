@@ -34,6 +34,13 @@ watch(
       // sometimes errors to undefined, TODO
       if (store.currentLeagueId !== "undefined") {
         router.replace({ query: { leagueId: store.currentLeagueId } });
+      } else {
+        localStorage.removeItem("currentLeagueId");
+        localStorage.removeItem("leagueInfo");
+        store.showLoadingAlert = true;
+        setTimeout(() => {
+          store.showLoadingAlert = false;
+        }, 8000);
       }
     }
   }
@@ -120,6 +127,11 @@ const setHtmlBackground = () => {
     <Alert
       v-if="store.showLoadingAlert"
       alert-msg="Error fetching data. Please try refreshing the page."
+      type="error"
+    />
+    <Alert
+      v-if="store.showInvalidLeagueAlert"
+      alert-msg="Invalid League ID."
       type="error"
     />
   </div>

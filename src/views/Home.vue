@@ -75,9 +75,19 @@ onMounted(async () => {
           league.season
         );
         store.updateLoadingLeague("");
+      } else {
+        store.showInvalidLeagueAlert = true;
+        setTimeout(() => {
+          store.showInvalidLeagueAlert = false;
+        }, 8000);
       }
     } else if (leagueId === "undefined") {
-      localStorage.clear(); // this might be an anti pattern
+      localStorage.removeItem("currentLeagueId");
+      localStorage.removeItem("leagueInfo");
+      store.showLoadingAlert = true;
+      setTimeout(() => {
+        store.showLoadingAlert = false;
+      }, 8000);
     }
   } catch {
     store.showLoadingAlert = true;

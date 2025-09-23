@@ -455,15 +455,12 @@ export const fakeRosterData = {
     },
     {
       rank: 1118,
-      points: "__vue_devtool_undefined__",
       overallRank: 6115,
-      ppg: "__vue_devtool_nan__",
       firstName: "Brandon",
       lastName: "Aiyuk",
       position: "WR",
       team: "WR",
       id: "6803",
-      gp: "__vue_devtool_undefined__",
       rosterId: 1,
     },
     {
@@ -559,15 +556,12 @@ export const fakeRosterData = {
     },
     {
       rank: 1077,
-      points: "__vue_devtool_undefined__",
       overallRank: 5618,
-      ppg: "__vue_devtool_nan__",
       firstName: "Jordan",
       lastName: "Addison",
       position: "WR",
       team: "WR",
       id: "9756",
-      gp: "__vue_devtool_undefined__",
       rosterId: 1,
     },
     {
@@ -1376,9 +1370,7 @@ export const fakeRosterData = {
     },
     {
       rank: 1211,
-      points: "__vue_devtool_undefined__",
       overallRank: 7168,
-      ppg: "__vue_devtool_nan__",
       firstName: "Xavier",
       lastName: "Worthy",
       position: "WR",
@@ -1519,15 +1511,12 @@ export const fakeRosterData = {
     },
     {
       rank: 547,
-      points: "__vue_devtool_undefined__",
       overallRank: 5620,
-      ppg: "__vue_devtool_nan__",
       firstName: "Tyjae",
       lastName: "Spears",
       position: "RB",
       team: "RB",
       id: "9508",
-      gp: "__vue_devtool_undefined__",
       rosterId: 6,
     },
     {
@@ -1796,9 +1785,7 @@ export const fakeRosterData = {
     },
     {
       rank: 597,
-      points: "__vue_devtool_undefined__",
       overallRank: 7157,
-      ppg: "__vue_devtool_nan__",
       firstName: "Isaac",
       lastName: "Guerendo",
       position: "RB",
@@ -1861,15 +1848,12 @@ export const fakeRosterData = {
     },
     {
       rank: 574,
-      points: "__vue_devtool_undefined__",
       overallRank: 6422,
-      ppg: "__vue_devtool_nan__",
       firstName: "Joe",
       lastName: "Mixon",
       position: "RB",
       team: "RB",
       id: "4018",
-      gp: "__vue_devtool_undefined__",
       rosterId: 8,
     },
     {
@@ -1926,9 +1910,7 @@ export const fakeRosterData = {
     },
     {
       rank: 502,
-      points: "__vue_devtool_undefined__",
       overallRank: 5835,
-      ppg: "__vue_devtool_nan__",
       firstName: "Cade",
       lastName: "Otton",
       position: "TE",
@@ -2020,9 +2002,7 @@ export const fakeRosterData = {
     },
     {
       rank: 588,
-      points: "__vue_devtool_undefined__",
       overallRank: 6888,
-      ppg: "__vue_devtool_nan__",
       firstName: "Quinshon",
       lastName: "Judkins",
       position: "RB",
@@ -2153,15 +2133,12 @@ export const fakeRosterData = {
   "10": [
     {
       rank: 1234,
-      points: "__vue_devtool_undefined__",
       overallRank: 7418,
-      ppg: "__vue_devtool_nan__",
       firstName: "Rashee",
       lastName: "Rice",
       position: "WR",
       team: "WR",
       id: "10229",
-      gp: "__vue_devtool_undefined__",
       rosterId: 10,
     },
     {
