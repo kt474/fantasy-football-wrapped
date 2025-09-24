@@ -11,6 +11,7 @@ const data = [
         type: "Feature",
         text: [
           "The weekly preview section now shows the best and worst possible placement outcomes after each matchup.",
+          "Added projected record to the playoff odds section.",
         ],
       },
     ],
