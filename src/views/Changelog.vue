@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "9/24/24",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "The weekly preview section now shows the best and worst possible placement outcomes after each matchup.",
+        ],
+      },
+    ],
+  },
+  {
     date: "9/14/24",
     content: [
       {

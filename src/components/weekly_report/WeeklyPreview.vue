@@ -9,6 +9,7 @@ const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
   currentWeek: number;
+  isPlayoffs: boolean;
 }>();
 const playerNames: any = ref([]);
 const loading = ref(false);
@@ -27,6 +28,10 @@ const matchups = computed<TableDataType[][]>(() => {
     return acc;
   }, {});
   return Object.values(groups);
+});
+
+const cases = computed(() => {
+  return simulateStandings(matchups.value, previewWeek.value);
 });
 
 const getRecord = (recordString: string, index: number) => {
@@ -327,6 +332,118 @@ const chartOptions = ref({
   },
 });
 
+const rankTeams = (teams: any[]) => {
+  return [...teams].sort((a, b) => {
+    if (b.wins !== a.wins) return b.wins - a.wins;
+    if (b.pointsFor !== a.pointsFor) return b.pointsFor - a.pointsFor;
+    return a.losses - b.losses;
+  });
+};
+
+const assignRanks = (sortedTeams: any[]) => {
+  return sortedTeams.map((team, i) => ({
+    ...team,
+    rank: i + 1,
+  }));
+};
+
+// derive record up to a given week based on recordByWeek string
+const getRecordThroughWeek = (team: any, week: number) => {
+  const recStr = team.recordByWeek || "";
+  let wins = 0,
+    losses = 0,
+    ties = 0;
+
+  for (let i = 0; i < week && i < recStr.length; i++) {
+    if (recStr[i] === "W") wins++;
+    else if (recStr[i] === "L") losses++;
+    else if (recStr[i] === "T") ties++;
+  }
+
+  return { wins, losses, ties };
+};
+
+const simulateStandings = (matchups: any[], week: number) => {
+  // Build base team objects with records THROUGH this week
+  let allTeams = matchups.flat().map((team) => {
+    const rec = getRecordThroughWeek(team, week);
+    return {
+      ...team,
+      wins: rec.wins,
+      losses: rec.losses,
+      ties: rec.ties,
+    };
+  });
+
+  // ---- BASE CASE ----
+  let baseSorted = assignRanks(rankTeams(allTeams));
+  let results: any = {};
+  for (let team of baseSorted) {
+    results[team.id] = {
+      team: team.name,
+      baseCase: { wins: team.wins, losses: team.losses, rank: team.rank },
+      bestCase: { wins: team.wins, losses: team.losses, rank: team.rank },
+      worstCase: { wins: team.wins, losses: team.losses, rank: team.rank },
+    };
+  }
+
+  // ---- PER MATCHUP SCENARIOS ----
+  matchups.forEach(([teamA, teamB]) => {
+    // Note: make new arrays from base state each time
+    let teamsAWin = allTeams.map((t) => ({ ...t }));
+    let a = teamsAWin.find((t) => t.id === teamA.id);
+    let b = teamsAWin.find((t) => t.id === teamB.id);
+    a.wins++;
+    b.losses++;
+    let rankedAWin = assignRanks(rankTeams(teamsAWin));
+
+    let teamsBWin = allTeams.map((t) => ({ ...t }));
+    let a2 = teamsBWin.find((t) => t.id === teamA.id);
+    let b2 = teamsBWin.find((t) => t.id === teamB.id);
+    b2.wins++;
+    a2.losses++;
+    let rankedBWin = assignRanks(rankTeams(teamsBWin));
+
+    // Update best/worst results
+    [...rankedAWin, ...rankedBWin].forEach((scenarioTeam) => {
+      const res = results[scenarioTeam.id];
+
+      // Best = smaller rank number
+      if (scenarioTeam.rank < res.bestCase.rank) {
+        res.bestCase = {
+          wins: scenarioTeam.wins,
+          losses: scenarioTeam.losses,
+          rank: scenarioTeam.rank,
+        };
+      }
+
+      // Worst = larger rank number
+      if (scenarioTeam.rank > res.worstCase.rank) {
+        res.worstCase = {
+          wins: scenarioTeam.wins,
+          losses: scenarioTeam.losses,
+          rank: scenarioTeam.rank,
+        };
+      }
+    });
+  });
+
+  return results;
+};
+
+const getOrdinalSuffix = (number: number) => {
+  const suffixes = ["th", "st", "nd", "rd"];
+  const v = number % 100;
+
+  return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+};
+
+const generateString = (recordObj: any) => {
+  const bestCase = getOrdinalSuffix(recordObj.bestCase.rank);
+  const worstCase = getOrdinalSuffix(recordObj.worstCase.rank);
+  return `Placement Range: ${bestCase} - ${worstCase}`;
+};
+
 onMounted(async () => {
   fetchPlayerNames();
 });
@@ -596,6 +713,39 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 '%',
             }"
           ></div>
+        </div>
+      </div>
+      <div
+        v-if="!isPlayoffs"
+        class="flex justify-between px-4 py-4 mx-0 mt-4 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700"
+      >
+        <div class="mr-2">
+          <p class="font-semibold text-gray-800 dark:text-gray-50">
+            {{
+              store.showUsernames
+                ? matchup[0].username
+                  ? matchup[0].username
+                  : "Ghost Roster"
+                : matchup[0].name
+                ? matchup[0].name
+                : "Ghost Roster"
+            }}
+          </p>
+          {{ generateString(cases[matchup[0].id]) }}
+        </div>
+        <div>
+          <p class="font-semibold text-gray-800 dark:text-gray-50">
+            {{
+              store.showUsernames
+                ? matchup[1].username
+                  ? matchup[1].username
+                  : "Ghost Roster"
+                : matchup[1].name
+                ? matchup[1].name
+                : "Ghost Roster"
+            }}
+          </p>
+          {{ generateString(cases[matchup[1].id]) }}
         </div>
       </div>
       <p

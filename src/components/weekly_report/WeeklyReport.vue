@@ -196,7 +196,7 @@ onMounted(async () => {
 
 const isPlayoffs = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  if (currentWeek.value > currentLeague.regularSeasonLength) {
+  if (currentWeek.value > currentLeague?.regularSeasonLength) {
     return true;
   }
   return false;
@@ -1085,6 +1085,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
       <WeeklyPreview
         :table-data="sortedTableData"
         :current-week="currentWeek ? currentWeek : 0"
+        :is-playoffs="isPlayoffs"
       />
     </div>
   </div>
