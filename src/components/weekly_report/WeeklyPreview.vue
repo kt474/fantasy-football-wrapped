@@ -720,7 +720,9 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
         class="flex justify-between px-4 py-4 mx-0 mt-4 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700"
       >
         <div class="mr-2">
-          <p class="font-semibold text-gray-800 dark:text-gray-50">
+          <p
+            class="w-32 font-semibold text-gray-800 truncate sm:w-auto dark:text-gray-50"
+          >
             {{
               store.showUsernames
                 ? matchup[0].username
@@ -734,7 +736,9 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
           {{ generateString(cases[matchup[0].id]) }}
         </div>
         <div>
-          <p class="font-semibold text-gray-800 dark:text-gray-50">
+          <p
+            class="w-32 font-semibold text-gray-800 truncate sm:w-auto dark:text-gray-50"
+          >
             {{
               store.showUsernames
                 ? matchup[1].username
