@@ -243,7 +243,7 @@ export const getStats = async (
         firstName: result["player"]["first_name"],
         lastName: result["player"]["last_name"],
         position: result["player"]["position"],
-        team: result["player"]["position"],
+        team: result["team"],
         id: result["player_id"],
         gp: result["stats"]["gp"],
       }

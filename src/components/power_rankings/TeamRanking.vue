@@ -66,7 +66,7 @@ const getData = async () => {
   const sorted = Object.fromEntries(
     Object.entries(groupedPositions).map(([position, items]) => [
       position,
-      items.sort((a, b) => a.rank - b.rank).slice(0, 5),
+      items.sort((a, b) => b.points - a.points).slice(0, 5),
     ])
   );
   data.value = sorted;
