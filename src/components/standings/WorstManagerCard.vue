@@ -34,7 +34,7 @@ const worstManagerUser: any = computed(() => {
           Worst Manager
         </p>
         <div>
-          <div class="flex justify-center">
+          <div class="flex">
             <img
               alt="Worst manager user avatar"
               v-if="
