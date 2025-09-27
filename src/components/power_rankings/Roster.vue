@@ -45,9 +45,11 @@ const managers = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague) {
     const currentRosterIds = currentLeague.rosters.map((roster) => roster.id);
-    return currentLeague.users
+    const result = currentLeague.users
       .filter((user) => currentRosterIds.includes(user.id))
       .map((user) => (store.showUsernames ? user.username : user.name));
+    result.unshift("All Managers");
+    return result;
   } else if (store.leagueInfo.length == 0) {
     return fakeUsers.map((user) => user.name);
   }
@@ -129,6 +131,52 @@ const getValueColor = (value: number) => {
             </div>
           </template>
         </div>
+      </div>
+      <div v-else-if="currentManager === 'All Managers'">
+        <p class="mb-1 text-lg font-semibold">
+          {{ getNameFromId(Number(userId)) }}
+        </p>
+        <div class="flex flex-wrap gap-4 sm:gap-12">
+          <div
+            class="overflow-x-hidden w-80 sm:w-40"
+            v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
+            :key="position"
+          >
+            <template v-if="positions[position] && positions[position].length">
+              <p
+                class="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-50"
+              >
+                {{ position }}
+              </p>
+              <div class="gap-2 text-gray-700 dark:text-gray-300">
+                <div
+                  v-for="player in positions[position]"
+                  :key="player.id"
+                  class="flex mb-1.5 justify-between"
+                >
+                  <p class="w-auto truncate sm:w-28">
+                    {{
+                      player.position !== "DEF" && player.firstName
+                        ? `${player.firstName[0]}.`
+                        : ""
+                    }}
+                    {{ player.lastName }}
+                  </p>
+                  <span
+                    :class="[
+                      player.rank
+                        ? getValueColor(player.rank)
+                        : 'bg-gray-300 dark:text-black',
+                    ]"
+                    class="text-xs px-2.5 py-1 mb-1 rounded-full float-end ml-2"
+                    >{{ player.rank ? player.rank : "N/A" }}</span
+                  >
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+        <hr class="h-px my-4 mr-6 bg-gray-200 border-0 dark:bg-gray-700" />
       </div>
     </div>
   </div>
