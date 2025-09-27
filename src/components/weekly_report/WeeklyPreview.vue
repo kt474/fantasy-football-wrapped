@@ -21,11 +21,13 @@ const previewWeek = computed(() => {
 const matchups = computed<TableDataType[][]>(() => {
   const groups = props.tableData.reduce((acc: any, obj) => {
     const key = obj.matchups[previewWeek.value];
-    if (!acc[key]) {
-      acc[key] = [];
+    if (key) {
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(obj);
+      return acc;
     }
-    acc[key].push(obj);
-    return acc;
   }, {});
   return Object.values(groups);
 });

@@ -369,7 +369,7 @@ const reportPrompt = computed(() => {
 });
 
 const numOfMatchups = computed(() => {
-  const result: number[] = [];
+  const result: (number | null)[] = [];
   sortedTableData.value.forEach((user) => {
     const matchupIndex = user.matchups[currentWeek.value - 1];
     if (matchupIndex && !result.includes(matchupIndex)) {
@@ -611,7 +611,7 @@ const getRecord = (recordString: string, index: number) => {
   return "0-0";
 };
 
-const getMatchupWinner = (matchupIndex: number, currentWeek: number) => {
+const getMatchupWinner = (matchupIndex: number | null, currentWeek: number) => {
   const opponents = sortedTableData.value.filter(
     (user) => user.matchups[currentWeek] === matchupIndex
   );
