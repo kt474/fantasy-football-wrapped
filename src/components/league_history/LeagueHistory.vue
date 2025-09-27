@@ -285,6 +285,12 @@ const dataAllYears = computed(() => {
             }
           }
         });
+        const maxLength = Math.max(...result.map((obj) => obj.matchups.length));
+        result.forEach((obj) => {
+          while (obj.matchups.length < maxLength) {
+            obj.matchups.push(null);
+          }
+        });
       }
     );
   } else if (!store.leagueInfo[store.currentLeagueIndex]) {

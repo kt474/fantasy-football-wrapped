@@ -90,7 +90,7 @@ export type TableDataType = {
   randomScheduleWins: number;
   avatarImg: string;
   points: number[];
-  matchups: number[];
+  matchups: (number | null)[];
   potentialPoints: number;
   managerEfficiency: number;
   regularSeasonRank: number;

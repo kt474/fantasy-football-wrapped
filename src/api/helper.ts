@@ -1699,10 +1699,12 @@ export const fakeUsers = [
     avatar: "3fd3d500b13b04926820e10e9306f6ab",
     avatarImg: "../avatars/avatar1.svg",
     transactions: 14,
+    username: "Just the Tua Us",
   },
   {
     id: "2",
     name: "Bijan Mustard",
+    username: "Bijan Mustard",
     avatar: "a77d198f5c82bd93d3da5bd10493f7cd",
     avatarImg: "../avatars/avatar2.svg",
     transactions: 10,
@@ -1710,6 +1712,7 @@ export const fakeUsers = [
   {
     id: "3",
     name: "The Princess McBride",
+    username: "The Princess McBride",
     avatar: "8eb8f8bf999945d523f2c4033f70473e",
     avatarImg: "../avatars/avatar3.svg",
     transactions: 25,
@@ -1717,6 +1720,7 @@ export const fakeUsers = [
   {
     id: "4",
     name: "Baby Back Gibbs",
+    username: "Baby Back Gibbs",
     avatar: "15d7cf259bc30eab8f6120f45f652fb6",
     avatarImg: "../avatars/avatar4.svg",
     transactions: 31,
@@ -1724,20 +1728,23 @@ export const fakeUsers = [
   {
     id: "5",
     name: "Breece's Puffs",
+    username: "Breece's Puffs",
     avatar: "15d7cf259bc30eab8f6120f45f652fb6",
     avatarImg: "../avatars/avatar5.svg",
     transactions: 38,
   },
   {
     id: "6",
-    name: "Saquondo ",
+    name: "Saquondo",
+    username: "Saquondo",
     avatar: "d6ad9a18c52dcdb704399beed5d5b21f",
     avatarImg: "../avatars/avatar6.svg",
     transactions: 29,
   },
   {
     id: "7",
-    name: "Lamario Kart ",
+    name: "Lamario Kart",
+    username: "Lamario Kart",
     avatar: "3d8ea1e7289177ddf22dd57e107ee334",
     avatarImg: "../avatars/avatar7.svg",
     transactions: 19,
@@ -1745,6 +1752,7 @@ export const fakeUsers = [
   {
     id: "8",
     name: "Ja’Marr the Merrier",
+    username: "Ja’Marr the Merrier",
     avatar: "4f4090e5e9c3941414db40a871e3e909",
     avatarImg: "../avatars/avatar8.svg",
     transactions: 40,
@@ -1752,6 +1760,7 @@ export const fakeUsers = [
   {
     id: "9",
     name: "Dak to the Future",
+    username: "Dak to the Future",
     avatar: "b3338675f635c2c1f42b469621d38ec6",
     avatarImg: "../avatars/avatar9.svg",
     transactions: 33,
@@ -1759,6 +1768,7 @@ export const fakeUsers = [
   {
     id: "10",
     name: "LaPorta Potty",
+    username: "LaPorta Potty",
     avatar: "81d984f3556782876d25195356b0ab58",
     avatarImg: "../avatars/avatar10.svg",
     transactions: 42,

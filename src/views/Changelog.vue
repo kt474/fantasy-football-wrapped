@@ -5,7 +5,18 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
-    date: "9/24/24",
+    date: "9/26/25",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Fixed an issue with the all time H2H table, managers that did not play in every year resulted in incorrect records.",
+        ],
+      },
+    ],
+  },
+  {
+    date: "9/24/25",
     content: [
       {
         type: "Feature",
@@ -17,7 +28,7 @@ const data = [
     ],
   },
   {
-    date: "9/14/24",
+    date: "9/14/25",
     content: [
       {
         type: "Fix",
