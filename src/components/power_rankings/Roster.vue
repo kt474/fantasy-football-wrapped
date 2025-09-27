@@ -133,7 +133,7 @@ const getValueColor = (value: number) => {
         </div>
       </div>
       <div v-else-if="currentManager === 'All Managers'">
-        <p class="mb-1 text-lg font-semibold">
+        <p class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
           {{ getNameFromId(Number(userId)) }}
         </p>
         <div class="flex flex-wrap gap-4 sm:gap-12">
@@ -176,7 +176,7 @@ const getValueColor = (value: number) => {
             </template>
           </div>
         </div>
-        <hr class="h-px my-4 mr-6 bg-gray-200 border-0 dark:bg-gray-700" />
+        <hr class="h-px my-3 mr-6 bg-gray-200 border-0 dark:bg-gray-700" />
       </div>
     </div>
   </div>

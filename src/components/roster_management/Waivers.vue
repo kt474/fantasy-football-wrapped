@@ -119,16 +119,18 @@ const managers = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague) {
     const currentRosterIds = currentLeague.rosters.map((roster) => roster.id);
-    return currentLeague.users
+    const result = currentLeague.users
       .filter((user) => currentRosterIds.includes(user.id))
       .map((user) => (store.showUsernames ? user.username : user.name));
+    result.unshift("All Managers");
+    return result;
   } else if (store.leagueInfo.length == 0) {
     return fakeUsers.map((user) => user.name);
   }
   return [];
 });
 
-const currentManager = ref(managers.value[0]);
+const currentManager = ref(managers.value[1]);
 
 const getRosterName = (rosterId: number) => {
   const rosters = store.leagueInfo[store.currentLeagueIndex]
@@ -238,6 +240,39 @@ watch(
             >
               <div v-if="move.adds">
                 <p class="text-sm font-medium">
+                  {{ move.adds }} ({{ move.week }})
+                </p>
+                <div class="flex mt-1">
+                  <span
+                    :class="[
+                      move.value
+                        ? getValueColor(move.value)
+                        : 'bg-gray-300 dark:text-black',
+                    ]"
+                    class="text-xs me-2 px-2.5 py-1 rounded-full"
+                    >{{ move.value ? move.value : "N/A" }}</span
+                  >
+                  <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                    {{ move.value ? getRatingLabel(move.value) : "" }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else-if="currentManager === 'All Managers'">
+        <div v-for="(moves, id) in waiverData">
+          <hr class="h-px mt-4 mb-3 bg-gray-200 border-0 dark:bg-gray-700" />
+          <p class="my-2 text-lg font-semibold text-gray-900 dark:text-gray-50">
+            {{ getRosterName(Number(id)).username }}
+          </p>
+          <div
+            class="grid grid-cols-2 gap-2 mb-8 sm:grid-cols-3 md:grid-cols-4"
+          >
+            <div v-for="move in moves" class="">
+              <div v-if="move.adds">
+                <p class="text-sm font-medium text-gray-900 dark:text-gray-50">
                   {{ move.adds }} ({{ move.week }})
                 </p>
                 <div class="flex mt-1">

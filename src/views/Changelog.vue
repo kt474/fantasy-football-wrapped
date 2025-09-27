@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "9/27/25",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "The player rankings and wavier moves can now be all viewed at once instead of only selecting a single manager.",
+        ],
+      },
+    ],
+  },
+  {
     date: "9/26/25",
     content: [
       {
