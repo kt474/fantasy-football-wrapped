@@ -100,7 +100,7 @@ export type TableDataType = {
   recordByWeek: string;
   players: string[];
   starters: string[];
-  starterPoints: number[];
+  starterPoints: number[][];
   benchPlayers: string[];
   benchPoints: number[];
 };
