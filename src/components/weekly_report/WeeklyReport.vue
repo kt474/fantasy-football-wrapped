@@ -332,10 +332,12 @@ const reportPrompt = computed(() => {
           matchupNumber: user.matchups[week],
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
-          playerPoints: user.starterPoints[week],
-          playerNames: playerNames.value[index].map((player: any) =>
-            player.name ? player.name : `${player.team} Defense`
-          ),
+          playerPoints: user.starterPoints[week].slice(0, 7),
+          playerNames: playerNames.value[index]
+            .map((player: any) =>
+              player.name ? player.name : `${player.team} Defense`
+            )
+            .slice(0, 7),
           pointsScored: user.points[week],
           inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
           inWinnersBracket: winnersBracketIDs.value.includes(user.rosterId),
@@ -349,15 +351,17 @@ const reportPrompt = computed(() => {
         result.push({
           name: store.showUsernames ? user.username : user.name,
           matchupNumber: user.matchups[week],
-          playerPoints: user.starterPoints[week],
+          playerPoints: user.starterPoints[week].slice(0, 7),
           pointsScored: user.points[week],
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
           playerNames:
             playerNames.value.length > 0
-              ? playerNames.value[index].map((player: any) =>
-                  player?.name ? player.name : `${player.team} Defense`
-                )
+              ? playerNames.value[index]
+                  .map((player: any) =>
+                    player?.name ? player.name : `${player.team} Defense`
+                  )
+                  .slice(0, 7)
               : [],
           currentRecord: `${user.wins}-${user.losses}`,
           currentRank: user.regularSeasonRank,
