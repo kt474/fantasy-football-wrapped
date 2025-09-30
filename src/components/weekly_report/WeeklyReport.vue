@@ -103,9 +103,11 @@ const fetchPlayerNames = async () => {
     }
     const result: any = props.tableData.map((user: any) => {
       const starterIds = user.starters[currentWeek.value - 1];
-      const starterNames = starterIds?.map((id: string) =>
-        playerLookupMap.get(id)
-      );
+      const starterNames = starterIds
+        ?.map((id: string) => {
+          playerLookupMap.get(id);
+        })
+        .filter((player: any) => player !== undefined);
       return starterNames;
     });
     playerNames.value = result;
@@ -356,7 +358,7 @@ const reportPrompt = computed(() => {
           playerNames:
             playerNames.value.length > 0
               ? playerNames.value[index].map((player: any) =>
-                  player.name ? player.name : `${player.team} Defense`
+                  player?.name ? player.name : `${player.team} Defense`
                 )
               : [],
           currentRecord: `${user.wins}-${user.losses}`,
