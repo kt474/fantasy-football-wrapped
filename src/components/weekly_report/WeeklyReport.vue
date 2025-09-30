@@ -104,9 +104,7 @@ const fetchPlayerNames = async () => {
     const result: any = props.tableData.map((user: any) => {
       const starterIds = user.starters[currentWeek.value - 1];
       const starterNames = starterIds
-        ?.map((id: string) => {
-          playerLookupMap.get(id);
-        })
+        ?.map((id: string) => playerLookupMap.get(id))
         .filter((player: any) => player !== undefined);
       return starterNames;
     });
