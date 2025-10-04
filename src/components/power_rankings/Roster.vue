@@ -94,7 +94,7 @@ const getValueColor = (value: number) => {
         class="flex flex-wrap gap-4 sm:gap-12"
       >
         <div
-          class="overflow-x-hidden w-80 sm:w-40"
+          class="overflow-x-hidden w-80 sm:w-48"
           v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
           :key="position"
         >
@@ -108,8 +108,20 @@ const getValueColor = (value: number) => {
               <div
                 v-for="player in positions[position]"
                 :key="player.id"
-                class="flex mb-1.5 justify-between"
+                class="flex justify-between mb-2"
               >
+                <img
+                  v-if="player.position !== 'DEF'"
+                  class="object-cover w-12 mr-2 -mt-1 -ml-2 rounded-full"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
+                  alt="Player avatar"
+                />
+                <img
+                  v-else
+                  class="w-8 mx-2 rounded-full h-7"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
+                  alt="Team avatar"
+                />
                 <p class="w-auto truncate sm:w-28">
                   {{
                     player.position !== "DEF" && player.firstName
@@ -138,7 +150,7 @@ const getValueColor = (value: number) => {
         </p>
         <div class="flex flex-wrap gap-4 sm:gap-12">
           <div
-            class="overflow-x-hidden w-80 sm:w-40"
+            class="overflow-x-hidden w-80 sm:w-48"
             v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
             :key="position"
           >
@@ -152,8 +164,20 @@ const getValueColor = (value: number) => {
                 <div
                   v-for="player in positions[position]"
                   :key="player.id"
-                  class="flex mb-1.5 justify-between"
+                  class="flex justify-between mb-2"
                 >
+                  <img
+                    v-if="player.position !== 'DEF'"
+                    class="object-cover w-12 mr-2 -mt-1 -ml-2 rounded-full"
+                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
+                    alt="Player avatar"
+                  />
+                  <img
+                    v-else
+                    class="w-8 mx-2 rounded-full h-7"
+                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
+                    alt="Team avatar"
+                  />
                   <p class="w-auto truncate sm:w-28">
                     {{
                       player.position !== "DEF" && player.firstName

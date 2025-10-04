@@ -367,7 +367,7 @@ watch(
               <img
                 alt="User avatar"
                 v-if="move.position !== 'DEF'"
-                class="h-10 rounded-full w-14"
+                class="object-cover rounded-full w-14"
                 :src="`https://sleepercdn.com/content/nfl/players/thumb/${move.player_id}.jpg`"
               />
               <img

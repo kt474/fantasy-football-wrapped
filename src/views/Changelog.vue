@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "10/03/25",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "Added player images to the roster previews, player rankings, and best adds sections.",
+        ],
+      },
+    ],
+  },
+  {
     date: "9/27/25",
     content: [
       {

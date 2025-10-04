@@ -552,7 +552,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   <div class="flex items-center gap-1">
                     <img
                       v-if="player.position !== 'DEF'"
-                      class="hidden h-10 rounded-full w-14 sm:block"
+                      class="hidden object-cover rounded-full w-14 sm:block"
                       :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
                       alt="Player avatar"
                     />
@@ -697,7 +697,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                     </div>
                     <img
                       v-if="player.position !== 'DEF'"
-                      class="hidden h-10 rounded-full w-14 sm:block"
+                      class="hidden object-cover rounded-full w-14 sm:block"
                       :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
                       alt="Player avatar"
                     />
