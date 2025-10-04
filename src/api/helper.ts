@@ -1373,6 +1373,7 @@ export const fakeWaiverMoves = [
     week: 1,
     value: 23.3,
     position: "TE",
+    player_id: "8131",
   },
   {
     id: 1,
@@ -1387,6 +1388,7 @@ export const fakeWaiverMoves = [
     week: 3,
     value: 35.3,
     position: "RB",
+    player_id: "11575",
   },
   {
     id: 1,
@@ -1401,6 +1403,7 @@ export const fakeWaiverMoves = [
     week: 7,
     value: 18.4,
     position: "WR",
+    player_id: "7090",
   },
   {
     id: 1,
@@ -1415,6 +1418,7 @@ export const fakeWaiverMoves = [
     week: 8,
     value: 68.2,
     position: "RB",
+    player_id: "11647",
   },
   {
     id: 1,
@@ -1429,6 +1433,7 @@ export const fakeWaiverMoves = [
     week: 10,
     value: 22.4,
     position: "DEF",
+    player_id: "100",
   },
   {
     id: 1,
@@ -1443,6 +1448,7 @@ export const fakeWaiverMoves = [
     week: 11,
     value: 18.2,
     position: "TE",
+    player_id: "7002",
   },
   {
     id: 1,
@@ -1457,6 +1463,7 @@ export const fakeWaiverMoves = [
     week: 13,
     value: 26,
     position: "TE",
+    player_id: "8583",
   },
   {
     id: 2,
@@ -1471,6 +1478,7 @@ export const fakeWaiverMoves = [
     week: 2,
     value: 10.4,
     position: "QB",
+    player_id: "4892",
   },
   {
     id: 3,
@@ -1485,6 +1493,7 @@ export const fakeWaiverMoves = [
     week: 9,
     value: 31.1,
     position: "RB",
+    player_id: "8143",
   },
   {
     id: 4,
@@ -1499,6 +1508,7 @@ export const fakeWaiverMoves = [
     week: 3,
     value: 40.6,
     position: "RB",
+    player_id: "6938",
   },
   {
     id: 5,
@@ -1513,6 +1523,7 @@ export const fakeWaiverMoves = [
     week: 3,
     value: 22.6,
     position: "RB",
+    player_id: "5001",
   },
 ];
 

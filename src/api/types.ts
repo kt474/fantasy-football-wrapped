@@ -65,6 +65,7 @@ export interface WaiverMove {
   week: number;
   value: number;
   position: string;
+  player_id: string;
 }
 
 export type UserType = {

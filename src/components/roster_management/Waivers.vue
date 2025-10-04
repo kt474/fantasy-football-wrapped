@@ -53,6 +53,7 @@ const getData = async () => {
           addsPlayer.position
         ),
         position: addsPlayer.position,
+        player_id: addsPlayer.player_id,
       };
     })
   );
@@ -365,9 +366,15 @@ watch(
             <div class="mt-1 mr-2">
               <img
                 alt="User avatar"
-                v-if="move.user.avatarImg"
-                class="w-8 h-8 rounded-full"
-                :src="move.user.avatarImg"
+                v-if="move.position !== 'DEF'"
+                class="h-10 rounded-full w-14"
+                :src="`https://sleepercdn.com/content/nfl/players/thumb/${move.player_id}.jpg`"
+              />
+              <img
+                alt="User avatar"
+                v-else-if="move.position === 'DEF'"
+                class="h-10 rounded-full w-14"
+                :src="`https://sleepercdn.com/images/team_logos/nfl/${move.player_id.toLowerCase()}.png`"
               />
               <svg
                 v-else
