@@ -547,21 +547,35 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
               >
                 <div
                   v-if="player.name || player.team"
-                  class="flex justify-between px-4 py-2 mr-1 rounded bg-gray-50 dark:bg-gray-700"
+                  class="flex justify-between py-2 pl-4 pr-4 mr-1 rounded sm:pl-1 bg-gray-50 dark:bg-gray-700"
                 >
-                  <div>
-                    <p
-                      class="w-16 text-sm font-medium text-gray-800 truncate sm:text-base sm:w-28 dark:text-gray-50"
-                    >
-                      {{
-                        player.name
-                          ? formatName(player.name)
-                          : `${player.team} Defense`
-                      }}
-                    </p>
-                    <p class="text-xs">
-                      {{ `${player.position} - ${player.team}` }}
-                    </p>
+                  <div class="flex items-center gap-1">
+                    <img
+                      v-if="player.position !== 'DEF'"
+                      class="hidden h-10 rounded-full w-14 sm:block"
+                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                      alt="Player avatar"
+                    />
+                    <img
+                      v-else
+                      class="hidden w-10 h-10 mx-2 rounded-full sm:block"
+                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                      alt="Team avatar"
+                    />
+                    <div>
+                      <p
+                        class="w-16 text-sm font-medium text-gray-800 truncate sm:text-base sm:w-28 dark:text-gray-50"
+                      >
+                        {{
+                          player.name
+                            ? formatName(player.name)
+                            : `${player.team}`
+                        }}
+                      </p>
+                      <p class="text-xs">
+                        {{ `${player.position} - ${player.team}` }}
+                      </p>
+                    </div>
                   </div>
                   <p
                     class="mt-1.5 ml-2 font-medium text-gray-800 dark:text-gray-50 sm:text-base text-sm"
@@ -657,7 +671,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 v-for="player in getStarters(matchup[1].rosterId)"
               >
                 <div
-                  class="flex justify-between px-4 py-2 text-sm rounded bg-gray-50 dark:bg-gray-700 sm:text-base"
+                  class="flex justify-between py-2 pl-4 pr-4 text-sm rounded sm:pr-1 bg-gray-50 dark:bg-gray-700 sm:text-base"
                   v-if="player.name || player.team"
                 >
                   <p
@@ -665,19 +679,34 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   >
                     {{ player.projection }}
                   </p>
-                  <div>
-                    <p
-                      class="w-16 font-medium text-gray-800 truncate sm:w-28 dark:text-gray-50"
-                    >
-                      {{
-                        player.name
-                          ? formatName(player.name)
-                          : `${player.team} Defense`
-                      }}
-                    </p>
-                    <p class="text-xs">
-                      {{ `${player.position} - ${player.team}` }}
-                    </p>
+
+                  <div class="flex items-center gap-1">
+                    <div>
+                      <p
+                        class="w-16 font-medium text-gray-800 truncate sm:w-28 dark:text-gray-50"
+                      >
+                        {{
+                          player.name
+                            ? formatName(player.name)
+                            : `${player.team}`
+                        }}
+                      </p>
+                      <p class="text-xs">
+                        {{ `${player.position} - ${player.team}` }}
+                      </p>
+                    </div>
+                    <img
+                      v-if="player.position !== 'DEF'"
+                      class="hidden h-10 rounded-full w-14 sm:block"
+                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                      alt="Player avatar"
+                    />
+                    <img
+                      v-else
+                      class="hidden w-10 h-10 mx-2 rounded-full sm:block"
+                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                      alt="Team avatar"
+                    />
                   </div>
                 </div>
                 <div
