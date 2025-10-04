@@ -18,6 +18,7 @@ const getData = async () => {
         roster_id: waiver.roster_ids[0],
         adds: Object.keys(waiver.adds)[0],
         week: waiver.leg,
+        bid: waiver.settings?.waiver_bid,
       };
     }
   });
@@ -54,6 +55,7 @@ const getData = async () => {
         ),
         position: addsPlayer.position,
         player_id: addsPlayer.player_id,
+        bid: trade.bid ? trade.bid : null,
       };
     })
   );
@@ -209,8 +211,8 @@ watch(
         class="mt-1 mb-3 text-sm text-gray-600 max-w-80 sm:max-w-2xl sm:text-base dark:text-gray-300"
       >
         Values below each player are the average positional ranking for every
-        week after the player was added. The week of the transaction is also
-        listed next to each player.
+        week after the player was added. If applicable, the winning bid (FAAB)
+        is also listed next to each player.
       </p>
       <label
         for="Manager name"
@@ -241,7 +243,7 @@ watch(
             >
               <div v-if="move.adds">
                 <p class="text-sm font-medium">
-                  {{ move.adds }} ({{ move.week }})
+                  {{ move.adds }} <span v-if="move.bid">(${{ move.bid }})</span>
                 </p>
                 <div class="flex mt-1">
                   <span
@@ -274,7 +276,7 @@ watch(
             <div v-for="move in moves" class="">
               <div v-if="move.adds">
                 <p class="text-sm font-medium text-gray-900 dark:text-gray-50">
-                  {{ move.adds }} ({{ move.week }})
+                  {{ move.adds }} <span v-if="move.bid">(${{ move.bid }})</span>
                 </p>
                 <div class="flex mt-1">
                   <span
