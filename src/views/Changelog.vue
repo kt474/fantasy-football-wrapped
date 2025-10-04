@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "10/04/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "For leagues that play with FAAB waivers, total budget spent and failed bids are now shown in the waivers section.",
+        ],
+      },
+    ],
+  },
+  {
     date: "10/03/25",
     content: [
       {

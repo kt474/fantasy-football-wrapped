@@ -526,6 +526,7 @@ export const getLeague = async (leagueId: string) => {
         playoffTeams: 0,
         playoffType: 0,
         draftId: "",
+        waiverType: 0,
       };
     }
     const league = await response.json();
@@ -548,6 +549,7 @@ export const getLeague = async (leagueId: string) => {
       playoffTeams: league["settings"]["playoff_teams"],
       playoffType: league["settings"]["playoff_type"],
       draftId: league["draft_id"],
+      waiverType: league["settings"]["waiver_type"],
     };
   } catch (error) {
     return error;

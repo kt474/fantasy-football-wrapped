@@ -38,6 +38,7 @@ export type LeagueInfoType = {
   draftGrades: any[];
   playerRankings: any;
   rosterRankings: any;
+  waiverType: number;
 };
 
 export type RosterType = {
@@ -67,6 +68,7 @@ export interface WaiverMove {
   position: string;
   player_id: string;
   bid: number | null;
+  status: string;
 }
 
 export type UserType = {

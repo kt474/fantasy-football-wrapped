@@ -293,11 +293,7 @@ export const getWaiverMoves = (transactions: any) => {
   transactions.forEach((transaction: any) => {
     if (transaction.status === "complete" && transaction.type === "trade") {
       trades.push(transaction);
-    } else if (
-      transaction.status === "complete" &&
-      ["free_agent", "waiver"].includes(transaction.type) &&
-      transaction.adds !== null
-    ) {
+    } else if (["free_agent", "waiver"].includes(transaction.type)) {
       waivers.push(transaction);
     }
   });
@@ -1375,6 +1371,7 @@ export const fakeWaiverMoves = [
     position: "TE",
     player_id: "8131",
     bid: 5,
+    status: "complete",
   },
   {
     id: 1,
@@ -1391,6 +1388,7 @@ export const fakeWaiverMoves = [
     position: "RB",
     player_id: "11575",
     bid: 1,
+    status: "complete",
   },
   {
     id: 1,
@@ -1407,6 +1405,7 @@ export const fakeWaiverMoves = [
     position: "WR",
     player_id: "7090",
     bid: 2,
+    status: "complete",
   },
   {
     id: 1,
@@ -1423,6 +1422,7 @@ export const fakeWaiverMoves = [
     position: "RB",
     player_id: "11647",
     bid: 1,
+    status: "complete",
   },
   {
     id: 1,
@@ -1439,6 +1439,7 @@ export const fakeWaiverMoves = [
     position: "DEF",
     player_id: "100",
     bid: 1,
+    status: "complete",
   },
   {
     id: 1,
@@ -1455,6 +1456,7 @@ export const fakeWaiverMoves = [
     position: "TE",
     player_id: "7002",
     bid: 3,
+    status: "complete",
   },
   {
     id: 1,
@@ -1471,6 +1473,7 @@ export const fakeWaiverMoves = [
     position: "TE",
     player_id: "8583",
     bid: 1,
+    status: "complete",
   },
   {
     id: 2,
@@ -1487,6 +1490,7 @@ export const fakeWaiverMoves = [
     position: "QB",
     player_id: "4892",
     bid: 6,
+    status: "complete",
   },
   {
     id: 3,
@@ -1503,6 +1507,7 @@ export const fakeWaiverMoves = [
     position: "RB",
     player_id: "8143",
     bid: 2,
+    status: "complete",
   },
   {
     id: 4,
@@ -1519,6 +1524,7 @@ export const fakeWaiverMoves = [
     position: "RB",
     player_id: "6938",
     bid: 3,
+    status: "complete",
   },
   {
     id: 5,
@@ -1535,6 +1541,7 @@ export const fakeWaiverMoves = [
     position: "RB",
     player_id: "5001",
     bid: 5,
+    status: "complete",
   },
 ];
 

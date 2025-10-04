@@ -12,16 +12,15 @@ const rawData = ref<WaiverMove[]>([]);
 
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  const temp = currentLeague.waivers.map((waiver: any) => {
-    if (waiver.adds) {
-      return {
-        roster_id: waiver.roster_ids[0],
-        adds: Object.keys(waiver.adds)[0],
-        week: waiver.leg,
-        bid: waiver.settings?.waiver_bid,
-      };
-    }
-  });
+  const temp = currentLeague.waivers
+    .filter((waiver: any) => waiver.adds)
+    .map((waiver: any) => ({
+      roster_id: waiver.roster_ids[0],
+      adds: Object.keys(waiver.adds)[0],
+      week: waiver.leg,
+      bid: waiver.settings?.waiver_bid,
+      status: waiver.status,
+    }));
 
   // Step 1: Collect all unique player IDs from all trades
   const allUniquePlayerIds = new Set<string>();
@@ -56,6 +55,7 @@ const getData = async () => {
         position: addsPlayer.position,
         player_id: addsPlayer.player_id,
         bid: trade.bid ? trade.bid : null,
+        status: trade.status,
       };
     })
   );
@@ -75,6 +75,12 @@ const currentManagerMoves = computed(() => {
         move.user.username === currentManager.value ||
         move.user.name === currentManager.value
     );
+});
+
+const totalSpent = computed(() => {
+  return currentManagerMoves.value
+    .filter((m) => m.status === "complete")
+    .reduce((sum, m) => sum + (m.bid || 0), 0);
 });
 
 const waiverData: ComputedRef<WaiverData> = computed(() => {
@@ -147,6 +153,12 @@ const getRosterName = (rosterId: number) => {
     const userObject = users.find((user) => user.id === userId.id);
     return userObject;
   }
+};
+
+const getAllMangersSpend = (groupedMoves: WaiverMove[]) => {
+  return groupedMoves
+    .filter((m) => m.status === "complete")
+    .reduce((sum, m) => sum + (m.bid || 0), 0);
 };
 
 const getValueColor = (value: number) => {
@@ -237,11 +249,11 @@ watch(
             class="w-11/12 h-px mt-2 mb-3 bg-gray-200 border-0 dark:bg-gray-700"
           />
           <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-            <div
+            <template
               v-for="move in currentManagerMoves"
               :key="move.adds + move.week"
             >
-              <div v-if="move.adds">
+              <div v-if="move.adds && move.status === 'complete'">
                 <p class="text-sm font-medium">
                   {{ move.adds }} <span v-if="move.bid">(${{ move.bid }})</span>
                 </p>
@@ -260,6 +272,25 @@ watch(
                   </p>
                 </div>
               </div>
+            </template>
+          </div>
+          <div
+            v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
+            class="text-sm"
+          >
+            <p class="mt-5 font-medium">
+              Budget spent:
+              <span class="font-normal">${{ totalSpent }}</span>
+            </p>
+            <div class="flex mt-1">
+              <p class="font-medium min-w-20">Failed bids:</p>
+              <div class="flex flex-wrap gap-x-2 gap-y-0">
+                <template v-for="move in currentManagerMoves">
+                  <div v-if="move.status === 'failed' && move.bid">
+                    <p class="">{{ move.adds }} (${{ move.bid }})</p>
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
         </div>
@@ -268,13 +299,17 @@ watch(
         <div v-for="(moves, id) in waiverData">
           <hr class="h-px mt-4 mb-3 bg-gray-200 border-0 dark:bg-gray-700" />
           <p class="my-2 text-lg font-semibold text-gray-900 dark:text-gray-50">
-            {{ getRosterName(Number(id)).username }}
+            {{
+              store.showUsernames
+                ? getRosterName(Number(id)).username
+                : getRosterName(Number(id)).name
+            }}
           </p>
           <div
             class="grid grid-cols-2 gap-2 mb-8 sm:grid-cols-3 md:grid-cols-4"
           >
-            <div v-for="move in moves" class="">
-              <div v-if="move.adds">
+            <template v-for="move in moves" class="">
+              <div v-if="move.adds && move.status === 'complete'">
                 <p class="text-sm font-medium text-gray-900 dark:text-gray-50">
                   {{ move.adds }} <span v-if="move.bid">(${{ move.bid }})</span>
                 </p>
@@ -292,6 +327,25 @@ watch(
                     {{ move.value ? getRatingLabel(move.value) : "" }}
                   </p>
                 </div>
+              </div>
+            </template>
+          </div>
+          <div
+            v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
+            class="text-sm text-gray-900 dark:text-gray-50"
+          >
+            <p class="mt-5 font-medium">
+              Budget spent:
+              <span class="font-normal">${{ getAllMangersSpend(moves) }}</span>
+            </p>
+            <div class="flex mt-1">
+              <p class="font-medium min-w-20">Failed bids:</p>
+              <div class="flex flex-wrap gap-x-2 gap-y-0">
+                <template v-for="move in moves">
+                  <div v-if="move.status === 'failed' && move.bid">
+                    <p class="">{{ move.adds }} (${{ move.bid }})</p>
+                  </div>
+                </template>
               </div>
             </div>
           </div>
