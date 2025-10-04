@@ -216,11 +216,10 @@ onMounted(async () => {
   }
 }
 .custom-background {
-  background: rgb(36, 19, 0);
   background: linear-gradient(
     90deg,
     rgba(36, 19, 0, 0) 0%,
-    rgba(161, 108, 233, 0.115) 54%,
+    rgba(90, 140, 255, 0.12) 54%,
     rgba(0, 187, 255, 0) 100%
   );
 }

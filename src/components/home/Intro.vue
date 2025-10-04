@@ -6,7 +6,7 @@
     >
       All your
       <span
-        class="text-transparent bg-clip-text bg-gradient-to-r to-indigo-600 from-sky-500 dark:to-indigo-500 dark:from-sky-400 whitespace-nowrap"
+        class="text-transparent bg-clip-text bg-gradient-to-r to-blue-500 from-sky-500 dark:to-blue-400 dark:from-sky-400 whitespace-nowrap"
         >fantasy football</span
       >
       league insights in<span class="whitespace-nowrap"> one place</span>
