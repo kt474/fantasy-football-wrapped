@@ -31,8 +31,8 @@ const router = useRouter();
         We do not use cookies on our website.
         <p class="my-3 text-xl font-semibold">Analytics</p>
         To improve user experience and understand how our website is used, we
-        utilize PostHog and Vercel Web Analytics. These services helps us
-        analyze traffic and usage patterns on our site without collecting any
+        utilize PostHog, Umami, and Vercel Web Analytics. These services helps
+        us analyze traffic and usage patterns on our site without collecting any
         personal data. The information collected is purely for the purpose of
         understanding user behavior and enhancing our services. Neither of these
         services use cookies.
@@ -43,7 +43,7 @@ const router = useRouter();
         <p class="my-3 text-xl font-semibold">Changes to This Privacy Policy</p>
         We may update this Privacy Policy from time to time. Any changes will be
         posted on this page, and the "Last updated" date will be revised
-        accordingly. Last updated: December 22, 2024.
+        accordingly. Last updated: October 4, 2025.
         <p class="my-3 text-xl font-semibold">Contact Us</p>
         If you have any questions or concerns about this Privacy Policy, please
         contact us at this
