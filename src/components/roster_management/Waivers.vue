@@ -276,18 +276,21 @@ watch(
           </div>
           <div
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="text-sm"
+            class="flex mt-4 mr-4 p-3 text-sm border-gray-100 dark:border-gray-800 border-2 rounded-lg bg-gray-50 dark:bg-gray-700"
           >
-            <p class="mt-5 font-medium">
-              Budget spent:
-              <span class="font-normal">${{ totalSpent }}</span>
-            </p>
-            <div class="flex mt-1">
-              <p class="font-medium min-w-20">Failed bids:</p>
+            <div class="mr-4">
+              <p class="min-w-32">Budget spent:</p>
+              <p class="font-semibold text-2xl mt-1">${{ totalSpent }}</p>
+            </div>
+            <div class="">
+              <p class="min-w-20">Failed bids:</p>
               <div class="flex flex-wrap gap-x-2 gap-y-0">
                 <template v-for="move in currentManagerMoves">
-                  <div v-if="move.status === 'failed' && move.bid">
-                    <p class="">{{ move.adds }} (${{ move.bid }})</p>
+                  <div
+                    v-if="move.status === 'failed' && move.bid"
+                    class="rounded-lg bg-gray-200 dark:bg-gray-800 p-1.5 mt-1.5"
+                  >
+                    <p class="font-medium">{{ move.adds }} (${{ move.bid }})</p>
                   </div>
                 </template>
               </div>
@@ -332,18 +335,23 @@ watch(
           </div>
           <div
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="text-sm text-gray-900 dark:text-gray-50"
+            class="flex dark:text-gray-200 mt-4 mr-4 p-3 text-sm border-gray-100 dark:border-gray-800 border-2 rounded-lg bg-gray-50 dark:bg-gray-700"
           >
-            <p class="mt-5 font-medium">
-              Budget spent:
-              <span class="font-normal">${{ getAllMangersSpend(moves) }}</span>
-            </p>
-            <div class="flex mt-1">
-              <p class="font-medium min-w-20">Failed bids:</p>
+            <div class="mr-4">
+              <p class="min-w-32">Budget spent:</p>
+              <p class="font-semibold text-2xl mt-1">
+                ${{ getAllMangersSpend(moves) }}
+              </p>
+            </div>
+            <div>
+              <p class="min-w-20">Failed bids:</p>
               <div class="flex flex-wrap gap-x-2 gap-y-0">
                 <template v-for="move in moves">
-                  <div v-if="move.status === 'failed' && move.bid">
-                    <p class="">{{ move.adds }} (${{ move.bid }})</p>
+                  <div
+                    v-if="move.status === 'failed' && move.bid"
+                    class="rounded-lg bg-gray-200 dark:bg-gray-800 p-1.5 mt-1.5"
+                  >
+                    <p class="font-medium">{{ move.adds }} (${{ move.bid }})</p>
                   </div>
                 </template>
               </div>
