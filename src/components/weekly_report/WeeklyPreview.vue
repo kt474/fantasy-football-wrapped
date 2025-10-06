@@ -9,6 +9,7 @@ const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
   currentWeek: number;
+  isPlayoffs: boolean;
 }>();
 const playerNames: any = ref([]);
 const loading = ref(false);
@@ -20,13 +21,19 @@ const previewWeek = computed(() => {
 const matchups = computed<TableDataType[][]>(() => {
   const groups = props.tableData.reduce((acc: any, obj) => {
     const key = obj.matchups[previewWeek.value];
-    if (!acc[key]) {
-      acc[key] = [];
+    if (key) {
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(obj);
+      return acc;
     }
-    acc[key].push(obj);
-    return acc;
   }, {});
   return Object.values(groups);
+});
+
+const cases = computed(() => {
+  return simulateStandings(matchups.value, previewWeek.value);
 });
 
 const getRecord = (recordString: string, index: number) => {
@@ -327,6 +334,118 @@ const chartOptions = ref({
   },
 });
 
+const rankTeams = (teams: any[]) => {
+  return [...teams].sort((a, b) => {
+    if (b.wins !== a.wins) return b.wins - a.wins;
+    if (b.pointsFor !== a.pointsFor) return b.pointsFor - a.pointsFor;
+    return a.losses - b.losses;
+  });
+};
+
+const assignRanks = (sortedTeams: any[]) => {
+  return sortedTeams.map((team, i) => ({
+    ...team,
+    rank: i + 1,
+  }));
+};
+
+// derive record up to a given week based on recordByWeek string
+const getRecordThroughWeek = (team: any, week: number) => {
+  const recStr = team.recordByWeek || "";
+  let wins = 0,
+    losses = 0,
+    ties = 0;
+
+  for (let i = 0; i < week && i < recStr.length; i++) {
+    if (recStr[i] === "W") wins++;
+    else if (recStr[i] === "L") losses++;
+    else if (recStr[i] === "T") ties++;
+  }
+
+  return { wins, losses, ties };
+};
+
+const simulateStandings = (matchups: any[], week: number) => {
+  // Build base team objects with records THROUGH this week
+  let allTeams = matchups.flat().map((team) => {
+    const rec = getRecordThroughWeek(team, week);
+    return {
+      ...team,
+      wins: rec.wins,
+      losses: rec.losses,
+      ties: rec.ties,
+    };
+  });
+
+  // ---- BASE CASE ----
+  let baseSorted = assignRanks(rankTeams(allTeams));
+  let results: any = {};
+  for (let team of baseSorted) {
+    results[team.id] = {
+      team: team.name,
+      baseCase: { wins: team.wins, losses: team.losses, rank: team.rank },
+      bestCase: { wins: team.wins, losses: team.losses, rank: team.rank },
+      worstCase: { wins: team.wins, losses: team.losses, rank: team.rank },
+    };
+  }
+
+  // ---- PER MATCHUP SCENARIOS ----
+  matchups.forEach(([teamA, teamB]) => {
+    // Note: make new arrays from base state each time
+    let teamsAWin = allTeams.map((t) => ({ ...t }));
+    let a = teamsAWin.find((t) => t.id === teamA.id);
+    let b = teamsAWin.find((t) => t.id === teamB.id);
+    a.wins++;
+    b.losses++;
+    let rankedAWin = assignRanks(rankTeams(teamsAWin));
+
+    let teamsBWin = allTeams.map((t) => ({ ...t }));
+    let a2 = teamsBWin.find((t) => t.id === teamA.id);
+    let b2 = teamsBWin.find((t) => t.id === teamB.id);
+    b2.wins++;
+    a2.losses++;
+    let rankedBWin = assignRanks(rankTeams(teamsBWin));
+
+    // Update best/worst results
+    [...rankedAWin, ...rankedBWin].forEach((scenarioTeam) => {
+      const res = results[scenarioTeam.id];
+
+      // Best = smaller rank number
+      if (scenarioTeam.rank < res.bestCase.rank) {
+        res.bestCase = {
+          wins: scenarioTeam.wins,
+          losses: scenarioTeam.losses,
+          rank: scenarioTeam.rank,
+        };
+      }
+
+      // Worst = larger rank number
+      if (scenarioTeam.rank > res.worstCase.rank) {
+        res.worstCase = {
+          wins: scenarioTeam.wins,
+          losses: scenarioTeam.losses,
+          rank: scenarioTeam.rank,
+        };
+      }
+    });
+  });
+
+  return results;
+};
+
+const getOrdinalSuffix = (number: number) => {
+  const suffixes = ["th", "st", "nd", "rd"];
+  const v = number % 100;
+
+  return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+};
+
+const generateString = (recordObj: any) => {
+  const bestCase = getOrdinalSuffix(recordObj.bestCase.rank);
+  const worstCase = getOrdinalSuffix(recordObj.worstCase.rank);
+  return `Placement Range: ${bestCase} - ${worstCase}`;
+};
+
 onMounted(async () => {
   fetchPlayerNames();
 });
@@ -428,21 +547,35 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
               >
                 <div
                   v-if="player.name || player.team"
-                  class="flex justify-between px-4 py-2 mr-1 rounded bg-gray-50 dark:bg-gray-700"
+                  class="flex justify-between py-2 pl-4 pr-4 mr-1 rounded sm:pl-1 bg-gray-50 dark:bg-gray-700"
                 >
-                  <div>
-                    <p
-                      class="w-16 text-sm font-medium text-gray-800 truncate sm:text-base sm:w-28 dark:text-gray-50"
-                    >
-                      {{
-                        player.name
-                          ? formatName(player.name)
-                          : `${player.team} Defense`
-                      }}
-                    </p>
-                    <p class="text-xs">
-                      {{ `${player.position} - ${player.team}` }}
-                    </p>
+                  <div class="flex items-center gap-1">
+                    <img
+                      v-if="player.position !== 'DEF'"
+                      class="hidden object-cover rounded-full w-14 sm:block"
+                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                      alt="Player avatar"
+                    />
+                    <img
+                      v-else
+                      class="hidden w-10 h-10 mx-2 rounded-full sm:block"
+                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                      alt="Team avatar"
+                    />
+                    <div>
+                      <p
+                        class="w-16 text-sm font-medium text-gray-800 truncate sm:text-base sm:w-28 dark:text-gray-50"
+                      >
+                        {{
+                          player.name
+                            ? formatName(player.name)
+                            : `${player.team}`
+                        }}
+                      </p>
+                      <p class="text-xs">
+                        {{ `${player.position} - ${player.team}` }}
+                      </p>
+                    </div>
                   </div>
                   <p
                     class="mt-1.5 ml-2 font-medium text-gray-800 dark:text-gray-50 sm:text-base text-sm"
@@ -538,7 +671,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 v-for="player in getStarters(matchup[1].rosterId)"
               >
                 <div
-                  class="flex justify-between px-4 py-2 text-sm rounded bg-gray-50 dark:bg-gray-700 sm:text-base"
+                  class="flex justify-between py-2 pl-4 pr-4 text-sm rounded sm:pr-1 bg-gray-50 dark:bg-gray-700 sm:text-base"
                   v-if="player.name || player.team"
                 >
                   <p
@@ -546,19 +679,34 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   >
                     {{ player.projection }}
                   </p>
-                  <div>
-                    <p
-                      class="w-16 font-medium text-gray-800 truncate sm:w-28 dark:text-gray-50"
-                    >
-                      {{
-                        player.name
-                          ? formatName(player.name)
-                          : `${player.team} Defense`
-                      }}
-                    </p>
-                    <p class="text-xs">
-                      {{ `${player.position} - ${player.team}` }}
-                    </p>
+
+                  <div class="flex items-center gap-1">
+                    <div>
+                      <p
+                        class="w-16 font-medium text-gray-800 truncate sm:w-28 dark:text-gray-50"
+                      >
+                        {{
+                          player.name
+                            ? formatName(player.name)
+                            : `${player.team}`
+                        }}
+                      </p>
+                      <p class="text-xs">
+                        {{ `${player.position} - ${player.team}` }}
+                      </p>
+                    </div>
+                    <img
+                      v-if="player.position !== 'DEF'"
+                      class="hidden object-cover rounded-full w-14 sm:block"
+                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                      alt="Player avatar"
+                    />
+                    <img
+                      v-else
+                      class="hidden w-10 h-10 mx-2 rounded-full sm:block"
+                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                      alt="Team avatar"
+                    />
                   </div>
                 </div>
                 <div
@@ -596,6 +744,43 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 '%',
             }"
           ></div>
+        </div>
+      </div>
+      <div
+        v-if="!isPlayoffs"
+        class="flex justify-between px-4 py-4 mx-0 mt-4 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700"
+      >
+        <div class="mr-2">
+          <p
+            class="w-32 font-semibold text-gray-800 truncate sm:w-auto dark:text-gray-50"
+          >
+            {{
+              store.showUsernames
+                ? matchup[0].username
+                  ? matchup[0].username
+                  : "Ghost Roster"
+                : matchup[0].name
+                ? matchup[0].name
+                : "Ghost Roster"
+            }}
+          </p>
+          {{ generateString(cases[matchup[0].id]) }}
+        </div>
+        <div>
+          <p
+            class="w-32 font-semibold text-gray-800 truncate sm:w-auto dark:text-gray-50"
+          >
+            {{
+              store.showUsernames
+                ? matchup[1].username
+                  ? matchup[1].username
+                  : "Ghost Roster"
+                : matchup[1].name
+                ? matchup[1].name
+                : "Ghost Roster"
+            }}
+          </p>
+          {{ generateString(cases[matchup[1].id]) }}
         </div>
       </div>
       <p

@@ -38,6 +38,7 @@ export type LeagueInfoType = {
   draftGrades: any[];
   playerRankings: any;
   rosterRankings: any;
+  waiverType: number;
 };
 
 export type RosterType = {
@@ -65,6 +66,9 @@ export interface WaiverMove {
   week: number;
   value: number;
   position: string;
+  player_id: string;
+  bid: number | null;
+  status: string;
 }
 
 export type UserType = {
@@ -90,7 +94,7 @@ export type TableDataType = {
   randomScheduleWins: number;
   avatarImg: string;
   points: number[];
-  matchups: number[];
+  matchups: (number | null)[];
   potentialPoints: number;
   managerEfficiency: number;
   regularSeasonRank: number;
@@ -100,7 +104,7 @@ export type TableDataType = {
   recordByWeek: string;
   players: string[];
   starters: string[];
-  starterPoints: number[];
+  starterPoints: number[][];
   benchPlayers: string[];
   benchPoints: number[];
 };

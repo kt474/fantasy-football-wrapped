@@ -58,12 +58,21 @@ const playoffArray = computed(() => {
   return Array.from({ length: playoffTeams.value }, (_, i) => i + 1);
 });
 
-function getOrdinalSuffix(number: number) {
+const getOrdinalSuffix = (number: number) => {
   const suffixes = ["th", "st", "nd", "rd"];
   const v = number % 100;
 
   return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
-}
+};
+
+const getRecord = (wins: number) => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (currentLeague) {
+    const wholeWins = Math.round(wins);
+    const losses = currentLeague.regularSeasonLength - wholeWins;
+    return `${wholeWins} - ${losses}`;
+  }
+};
 
 const numSimulations = 2000;
 
@@ -140,6 +149,7 @@ const getData = async () => {
           originalWins: roster.wins,
           placement: [],
           playoffPercentage: 0,
+          projectedWinsTotal: 0,
         });
       });
 
@@ -173,6 +183,7 @@ const getData = async () => {
             (obj: any) => obj.id === roster.id
           );
           roster.placement.push(placement + 1);
+          roster.projectedWinsTotal += roster.currentWins / 2000;
           roster.currentWins = roster.originalWins;
           if (placement + 1 <= playoffTeams.value) {
             roster.playoffPercentage += 1;
@@ -337,9 +348,12 @@ const tableData = computed(() => {
             </th>
             <th
               scope="col"
-              class="py-3 pl-3 pr-3 sm:pr-0 md:pl-10 lg:pl-20 xl:pl-52"
+              class="py-3 pl-5 sm:pl-8 md:pl-14 lg:pl-24 xl:pl-32"
             >
               Total
+            </th>
+            <th class="py-3 pl-5 min-w-24 lg:pl-0" scope="col">
+              <span class="hidden lg:inline">Proj</span> Record
             </th>
           </tr>
         </thead>
@@ -374,7 +388,7 @@ const tableData = computed(() => {
               }}%
             </td>
             <td
-              class="py-3 pl-3 pr-0 border-l sm:pr-3 md:pl-10 lg:pl-20 xl:pl-52 dark:bg-gray-800 dark:border-gray-700"
+              class="py-3 pl-5 border-l sm:pl-8 md:pl-14 lg:pl-24 xl:pl-32 dark:bg-gray-800 dark:border-gray-700"
             >
               {{
                 store.leagueInfo.length > 0
@@ -389,6 +403,7 @@ const tableData = computed(() => {
                   : sum(item.placement)
               }}%
             </td>
+            <td class="pl-7">{{ getRecord(item.projectedWinsTotal) }}</td>
           </tr>
         </tbody>
       </table>

@@ -5,7 +5,63 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
-    date: "9/14/24",
+    date: "10/04/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "For leagues that play with FAAB waivers, total budget spent and failed bids are now shown in the waivers section.",
+        ],
+      },
+    ],
+  },
+  {
+    date: "10/03/25",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "Added player images to the roster previews, player rankings, and best adds sections.",
+        ],
+      },
+    ],
+  },
+  {
+    date: "9/27/25",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "The player rankings and wavier moves can now be all viewed at once instead of only selecting a single manager.",
+        ],
+      },
+    ],
+  },
+  {
+    date: "9/26/25",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Fixed an issue with the all time H2H table, managers that did not play in every year resulted in incorrect records.",
+        ],
+      },
+    ],
+  },
+  {
+    date: "9/24/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "The weekly preview section now shows the best and worst possible placement outcomes after each matchup.",
+          "Added projected record to the playoff odds section.",
+        ],
+      },
+    ],
+  },
+  {
+    date: "9/14/25",
     content: [
       {
         type: "Fix",

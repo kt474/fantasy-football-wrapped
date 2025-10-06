@@ -103,9 +103,9 @@ const fetchPlayerNames = async () => {
     }
     const result: any = props.tableData.map((user: any) => {
       const starterIds = user.starters[currentWeek.value - 1];
-      const starterNames = starterIds?.map((id: string) =>
-        playerLookupMap.get(id)
-      );
+      const starterNames = starterIds
+        ?.map((id: string) => playerLookupMap.get(id))
+        .filter((player: any) => player !== undefined);
       return starterNames;
     });
     playerNames.value = result;
@@ -196,7 +196,7 @@ onMounted(async () => {
 
 const isPlayoffs = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  if (currentWeek.value > currentLeague.regularSeasonLength) {
+  if (currentWeek.value > currentLeague?.regularSeasonLength) {
     return true;
   }
   return false;
@@ -332,10 +332,12 @@ const reportPrompt = computed(() => {
           matchupNumber: user.matchups[week],
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
-          playerPoints: user.starterPoints[week],
-          playerNames: playerNames.value[index].map((player: any) =>
-            player.name ? player.name : `${player.team} Defense`
-          ),
+          playerPoints: user.starterPoints[week].slice(0, 7),
+          playerNames: playerNames.value[index]
+            .map((player: any) =>
+              player.name ? player.name : `${player.team} Defense`
+            )
+            .slice(0, 7),
           pointsScored: user.points[week],
           inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
           inWinnersBracket: winnersBracketIDs.value.includes(user.rosterId),
@@ -349,15 +351,17 @@ const reportPrompt = computed(() => {
         result.push({
           name: store.showUsernames ? user.username : user.name,
           matchupNumber: user.matchups[week],
-          playerPoints: user.starterPoints[week],
+          playerPoints: user.starterPoints[week].slice(0, 7),
           pointsScored: user.points[week],
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
           playerNames:
             playerNames.value.length > 0
-              ? playerNames.value[index].map((player: any) =>
-                  player.name ? player.name : `${player.team} Defense`
-                )
+              ? playerNames.value[index]
+                  .map((player: any) =>
+                    player?.name ? player.name : `${player.team} Defense`
+                  )
+                  .slice(0, 7)
               : [],
           currentRecord: `${user.wins}-${user.losses}`,
           currentRank: user.regularSeasonRank,
@@ -369,7 +373,7 @@ const reportPrompt = computed(() => {
 });
 
 const numOfMatchups = computed(() => {
-  const result: number[] = [];
+  const result: (number | null)[] = [];
   sortedTableData.value.forEach((user) => {
     const matchupIndex = user.matchups[currentWeek.value - 1];
     if (matchupIndex && !result.includes(matchupIndex)) {
@@ -611,7 +615,7 @@ const getRecord = (recordString: string, index: number) => {
   return "0-0";
 };
 
-const getMatchupWinner = (matchupIndex: number, currentWeek: number) => {
+const getMatchupWinner = (matchupIndex: number | null, currentWeek: number) => {
   const opponents = sortedTableData.value.filter(
     (user) => user.matchups[currentWeek] === matchupIndex
   );
@@ -1085,6 +1089,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
       <WeeklyPreview
         :table-data="sortedTableData"
         :current-week="currentWeek ? currentWeek : 0"
+        :is-playoffs="isPlayoffs"
       />
     </div>
   </div>

@@ -12,32 +12,44 @@ const matchupData = computed(() => {
   props.tableData.forEach((user) => {
     const currentUser: any = [];
     user.matchups.forEach((matchupId: number, index: number) => {
-      const opponentList = props.tableData.filter(
-        (opp) => opp.matchups[index] == matchupId
-      );
-      const opponent = opponentList.find((opp) => opp.name != user.name);
-      if (opponent) {
-        if (!currentUser.map((opp: any) => opp.name).includes(opponent.name)) {
-          if (user.pointsArr[index] > opponent.pointsArr[index]) {
-            currentUser.push({
-              name: opponent.name,
-              record: { wins: 1, losses: 0 },
-            });
+      if (matchupId !== null) {
+        const opponentList = props.tableData.filter(
+          (opp) => opp.matchups[index] == matchupId
+        );
+        const opponent = opponentList.find(
+          (opp) => opp.username != user.username
+        );
+        if (
+          opponent &&
+          opponent.pointsArr[index] !== 0 &&
+          user.pointsArr[index] !== 0
+        ) {
+          if (
+            !currentUser
+              .map((opp: any) => opp.username)
+              .includes(opponent.username)
+          ) {
+            if (user.pointsArr[index] > opponent.pointsArr[index]) {
+              currentUser.push({
+                username: opponent.username,
+                record: { wins: 1, losses: 0 },
+              });
+            } else {
+              currentUser.push({
+                username: opponent.username,
+                record: { losses: 1, wins: 0 },
+              });
+            }
           } else {
-            currentUser.push({
-              name: opponent.name,
-              record: { losses: 1, wins: 0 },
-            });
-          }
-        } else {
-          if (user.pointsArr[index] > opponent.pointsArr[index]) {
-            currentUser.find((opp: any) => opp.name == opponent.name)[
-              "record"
-            ].wins += 1;
-          } else {
-            currentUser.find((opp: any) => opp.name == opponent.name)[
-              "record"
-            ].losses += 1;
+            if (user.pointsArr[index] > opponent.pointsArr[index]) {
+              currentUser.find((opp: any) => opp.username == opponent.username)[
+                "record"
+              ].wins += 1;
+            } else {
+              currentUser.find((opp: any) => opp.username == opponent.username)[
+                "record"
+              ].losses += 1;
+            }
           }
         }
       }
@@ -48,7 +60,7 @@ const matchupData = computed(() => {
 });
 
 const extractRecord = (user: any, opponent: any) => {
-  const opp = user.find((opp: any) => opp.name == opponent.name);
+  const opp = user.find((opp: any) => opp.username == opponent.username);
   // This is backwards but the chart is read horizontally
   return opp ? `${opp.record.losses} - ${opp.record.wins}` : "0 - 0";
 };

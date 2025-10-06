@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
-import { generateTrends } from "../../api/api";
+import { generateTrends, getPlayersByIdsMap } from "../../api/api";
 import { getDraftProjections, getDraftPicks } from "../../api/api";
 import { TableDataType, LeagueInfoType } from "../../api/types";
 import { useStore } from "../../store/store";
@@ -114,9 +114,38 @@ const getNameFromId = (userId: string) => {
   }
 };
 
+const getMaxIndex = (arr: number[]): number => {
+  return arr.reduce(
+    (bestIndex, value, i, src) => (value > src[bestIndex] ? i : bestIndex),
+    0
+  );
+};
+
 const formatData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const weekIndex = currentLeague.lastScoredWeek - 1;
+
+  const bestStarters = props.tableData.map((user) => {
+    const starterPoints = user.starterPoints[weekIndex];
+    const maxIndex = getMaxIndex(starterPoints);
+    return user.starters[weekIndex][maxIndex];
+  });
+
+  let playerLookupMap = new Map<string, any>();
+  if (bestStarters.length > 0) {
+    playerLookupMap = await getPlayersByIdsMap(bestStarters);
+  }
+
   const userData = props.tableData.map((user) => {
+    const starterPoints = user.starterPoints[weekIndex];
+    const maxIndex = getMaxIndex(starterPoints);
+
+    const bestStarter = {
+      name: playerLookupMap.get(String(user.starters[weekIndex][maxIndex]))
+        .name,
+      points: starterPoints[maxIndex],
+    };
+
     return {
       name: store.showUsernames ? user.username : user.name,
       record: `${user.wins}-${user.losses}`,
@@ -129,6 +158,7 @@ const formatData = async () => {
         : "",
       lastFiveScores: user.points ? user.points.slice(-5) : [],
       currentRanking: user.regularSeasonRank,
+      topScoringPlayer: bestStarter,
     };
   });
 

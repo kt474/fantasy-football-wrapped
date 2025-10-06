@@ -243,7 +243,7 @@ export const getStats = async (
         firstName: result["player"]["first_name"],
         lastName: result["player"]["last_name"],
         position: result["player"]["position"],
-        team: result["player"]["position"],
+        team: result["team"],
         id: result["player_id"],
         gp: result["stats"]["gp"],
       }
@@ -526,6 +526,7 @@ export const getLeague = async (leagueId: string) => {
         playoffTeams: 0,
         playoffType: 0,
         draftId: "",
+        waiverType: 0,
       };
     }
     const league = await response.json();
@@ -548,6 +549,7 @@ export const getLeague = async (leagueId: string) => {
       playoffTeams: league["settings"]["playoff_teams"],
       playoffType: league["settings"]["playoff_type"],
       draftId: league["draft_id"],
+      waiverType: league["settings"]["waiver_type"],
     };
   } catch (error) {
     return error;

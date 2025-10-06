@@ -75,9 +75,19 @@ onMounted(async () => {
           league.season
         );
         store.updateLoadingLeague("");
+      } else {
+        store.showInvalidLeagueAlert = true;
+        setTimeout(() => {
+          store.showInvalidLeagueAlert = false;
+        }, 8000);
       }
     } else if (leagueId === "undefined") {
-      localStorage.clear(); // this might be an anti pattern
+      localStorage.removeItem("currentLeagueId");
+      localStorage.removeItem("leagueInfo");
+      store.showLoadingAlert = true;
+      setTimeout(() => {
+        store.showLoadingAlert = false;
+      }, 8000);
     }
   } catch {
     store.showLoadingAlert = true;
@@ -206,11 +216,10 @@ onMounted(async () => {
   }
 }
 .custom-background {
-  background: rgb(36, 19, 0);
   background: linear-gradient(
     90deg,
     rgba(36, 19, 0, 0) 0%,
-    rgba(161, 108, 233, 0.115) 54%,
+    rgba(90, 140, 255, 0.1) 54%,
     rgba(0, 187, 255, 0) 100%
   );
 }
