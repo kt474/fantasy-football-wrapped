@@ -49,7 +49,6 @@ watch(
           store.leaguesList = [];
           store.showLeaguesList = false;
         "
-        aria-label="Logo"
         :class="{ 'cursor-pointer': store.showLeaguesList }"
         class="flex items-center space-x-3 rtl:space-x-reverse"
       >
@@ -58,7 +57,6 @@ watch(
           width="24"
           src="../../assets/football-helmet.png"
           class="h-6"
-          alt="ffwrapped logo"
         />
         <span
           class="self-center -mb-1.5 custom-font whitespace-nowrap dark:text-gray-50"
@@ -135,7 +133,6 @@ watch(
                         d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
                       />
                     </svg>
-                    <span class="sr-only">Close modal</span>
                   </button>
                 </div>
                 <div class="p-4 space-y-4 md:p-5">
