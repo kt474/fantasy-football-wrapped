@@ -8,8 +8,16 @@ const store = useStore();
 Best/worst draft picks
 Best/worst trades 
 Best/worst waiver moves
+Most/fewest moves 
 Biggest blowouts
 Unluckiest/luckiest
+Most points left on bench (potential points)
+Players drafted still on team 
+Total players used 
+
+If multiple years, show all time record
+
+Points gained from waivers? (difficult)
 
 Overall League recap
 League Champ
