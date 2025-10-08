@@ -130,7 +130,8 @@ export const createTableData = (
 
     const pointsArr: any[] = [];
     combinedPoints.forEach((value: any) => {
-      const weekLength = value.recordByWeek ? value.recordByWeek.length : 0;
+      let weekLength = value.recordByWeek ? value.recordByWeek.length : 0;
+      if (medianScoring) weekLength = weekLength / 2;
       const pointsList = value.points ? value.points : [];
       pointsArr.push(pointsList.slice(0, weekLength));
       value["winsAgainstAll"] = 0;
