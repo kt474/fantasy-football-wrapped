@@ -107,13 +107,17 @@ const orderedData = computed(() => {
   if (
     rawData.value.filter(
       (player: any) =>
-        !["K", "DEF"].includes(player.position) && player.value != null
+        !["K", "DEF"].includes(player.position) &&
+        player.value != null &&
+        player.status === "complete"
     ).length > 5
   ) {
     return rawData.value
       .filter(
         (player: any) =>
-          !["K", "DEF"].includes(player.position) && player.value != null
+          !["K", "DEF"].includes(player.position) &&
+          player.value != null &&
+          player.status === "complete"
       )
       .sort((a: any, b: any) => a.value - b.value)
       .slice(0, 10);
@@ -276,11 +280,11 @@ watch(
           </div>
           <div
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="flex mt-4 mr-4 p-3 text-sm border-gray-100 dark:border-gray-800 border-2 rounded-lg bg-gray-50 dark:bg-gray-700"
+            class="flex p-3 mt-4 mr-4 text-sm border-2 border-gray-100 rounded-lg dark:border-gray-800 bg-gray-50 dark:bg-gray-700"
           >
             <div class="mr-4">
               <p class="min-w-32">Budget spent:</p>
-              <p class="font-semibold text-2xl mt-1">${{ totalSpent }}</p>
+              <p class="mt-1 text-2xl font-semibold">${{ totalSpent }}</p>
             </div>
             <div class="">
               <p class="min-w-20">Failed bids:</p>
@@ -335,11 +339,11 @@ watch(
           </div>
           <div
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="flex dark:text-gray-200 mt-4 mr-4 p-3 text-sm border-gray-100 dark:border-gray-800 border-2 rounded-lg bg-gray-50 dark:bg-gray-700"
+            class="flex p-3 mt-4 mr-4 text-sm border-2 border-gray-100 rounded-lg dark:text-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-700"
           >
             <div class="mr-4">
               <p class="min-w-32">Budget spent:</p>
-              <p class="font-semibold text-2xl mt-1">
+              <p class="mt-1 text-2xl font-semibold">
                 ${{ getAllMangersSpend(moves) }}
               </p>
             </div>
