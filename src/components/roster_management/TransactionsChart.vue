@@ -1,37 +1,101 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
-import { fakeUsers } from "../../api/helper";
+import { fakeUsers, fakeTransactions } from "../../api/helper";
+import { RosterType } from "../../api/types";
 
 const store = useStore();
 
 const transactionData = computed(() => {
   const currentLeague: any = store.leagueInfo[store.currentLeagueIndex];
-  const result: any[] = [];
   if (currentLeague) {
-    currentLeague.users.forEach((user: any) => {
-      if (user.id in currentLeague.transactions) {
-        result.push({
-          name: store.showUsernames ? user.username : user.name,
-          transactions: currentLeague.transactions[user.id],
+    let trades: any[] = [];
+    currentLeague.trades.forEach((trade: any) => {
+      trade.roster_ids.forEach((id: number) => {
+        trades.push({
+          adds: trade.adds,
+          draft_picks: trade.draft_picks,
+          waiver_budget: trade.waiver_budget,
+          status: trade.status,
+          type: trade.type,
+          creator: currentLeague.rosters.find(
+            (roster: RosterType) => roster.rosterId === id
+          )?.id,
         });
-      }
+      });
     });
-    return result.sort((a, b) => a.transactions - b.transactions);
-  }
-  const fakeData = fakeUsers.map((user) => {
-    return { name: user.name, transactions: user.transactions };
-  });
-  return fakeData.sort((a, b) => a.transactions - b.transactions);
-});
 
-const seriesData = computed(() => {
-  return [
-    {
-      name: "Transactions",
-      data: transactionData.value.map((user) => user.transactions),
-    },
-  ];
+    const allMoves = [...(currentLeague.waivers || []), ...trades];
+
+    const groupedMoves = allMoves
+      .filter(
+        (item) =>
+          item.status === "complete" &&
+          (item.adds || item.draft_picks || item.waiver_budget)
+      )
+      .reduce((acc, item) => {
+        const creatorId = item.creator;
+        let type = item.type;
+
+        if (!acc[creatorId]) {
+          acc[creatorId] = {};
+        }
+
+        acc[creatorId][type] = (acc[creatorId][type] || 0) + 1;
+
+        return acc;
+      }, {});
+
+    const creatorTotals = Object.entries(groupedMoves).map(
+      ([creatorId, types]) => {
+        const total = Object.values(types as Record<string, number>).reduce(
+          (sum, count) => sum + count,
+          0
+        );
+        return { creatorId, total };
+      }
+    );
+
+    creatorTotals.sort((a, b) => a.total - b.total);
+
+    const sortedCategories = creatorTotals.map((entry) => entry.creatorId);
+
+    const categories = sortedCategories;
+
+    const transactionTypes = ["waiver", "free_agent", "trade"];
+
+    const series = transactionTypes.map((type) => {
+      return {
+        name: formatTypeName(type),
+        data: categories.map((creatorId) => {
+          return groupedMoves[creatorId]?.[type] || 0;
+        }),
+      };
+    });
+
+    function formatTypeName(type: string): string {
+      switch (type) {
+        case "waiver":
+          return "Waiver Claims";
+        case "free_agent":
+          return "Free Agents";
+        case "trade":
+          return "Trades";
+        default:
+          return type
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+      }
+    }
+
+    return { series, categories };
+  } else {
+    return {
+      series: fakeTransactions,
+      categories: fakeUsers.map((user) => user.username),
+    };
+  }
 });
 
 watch(
@@ -42,12 +106,21 @@ watch(
   ],
   () => updateChartColor()
 );
-
+const getNameFromId = (userId: string) => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (currentLeague) {
+    const userObj = currentLeague.users.find((user) => user.id === userId);
+    if (userObj) {
+      return store.showUsernames ? userObj.username : userObj.name;
+    }
+  } else return userId;
+};
 const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
       type: "bar",
+      stacked: true,
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       toolbar: {
         show: false,
@@ -75,7 +148,9 @@ const updateChartColor = () => {
       },
     },
     xaxis: {
-      categories: transactionData.value.map((user) => user.name),
+      categories: transactionData.value.categories.map((id) =>
+        getNameFromId(id)
+      ),
       labels: {
         formatter: function (str: string) {
           const n = 17;
@@ -84,7 +159,7 @@ const updateChartColor = () => {
       },
       title: {
         text: "League Manager",
-        offsetY: 3,
+        offsetY: -10,
         style: {
           fontSize: "16px",
           fontFamily:
@@ -112,6 +187,7 @@ const chartOptions = ref({
   chart: {
     foreColor: store.darkMode ? "#ffffff" : "#111827",
     type: "bar",
+    stacked: true,
     toolbar: {
       show: false,
     },
@@ -127,7 +203,7 @@ const chartOptions = ref({
       columnWidth: "75%",
     },
   },
-  colors: ["#22c55e"],
+  colors: ["#0ea5e9", "#22c55e", "#eab308"],
   dataLabels: {
     enabled: false,
   },
@@ -147,7 +223,7 @@ const chartOptions = ref({
     },
   },
   xaxis: {
-    categories: transactionData.value.map((user) => user.name),
+    categories: transactionData.value.categories.map((id) => getNameFromId(id)),
     labels: {
       formatter: function (str: string) {
         const n = 17;
@@ -156,7 +232,7 @@ const chartOptions = ref({
     },
     title: {
       text: "League Manager",
-      offsetY: 3,
+      offsetY: -10,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -197,7 +273,7 @@ const chartOptions = ref({
       height="475"
       type="bar"
       :options="chartOptions"
-      :series="seriesData"
+      :series="transactionData.series"
     ></apexchart>
     <p
       class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"

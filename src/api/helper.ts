@@ -1722,6 +1722,12 @@ export const fakeTrades = [
   },
 ];
 
+export const fakeTransactions = [
+  { name: "Waiver Claims", data: [1, 6, 3, 3, 7, 6, 4, 3, 10, 9] },
+  { name: "Free Agents", data: [4, 2, 6, 7, 3, 6, 9, 13, 7, 10] },
+  { name: "Trades", data: [0, 0, 0, 0, 0, 0, 0, 1, 1, 0] },
+];
+
 export const fakeUsers = [
   {
     id: "1",
