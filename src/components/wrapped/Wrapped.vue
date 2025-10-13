@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, computed } from "vue";
 import { useStore } from "../../store/store";
-
+import { TableDataType } from "../../api/types.ts";
+const props = defineProps<{
+  tableData: TableDataType[];
+}>();
 const store = useStore();
 
 /*
@@ -25,6 +28,7 @@ League Champ
 
 const data = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  let result = [];
 });
 const slides = [
   {
