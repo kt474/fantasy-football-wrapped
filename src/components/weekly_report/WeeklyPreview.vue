@@ -19,19 +19,22 @@ const previewWeek = computed(() => {
 });
 
 const matchups = computed<TableDataType[][]>(() => {
-  const groups = props.tableData.reduce((acc: any, obj) => {
-    const key = obj.matchups[previewWeek.value];
-    if (key) {
-      if (!acc[key]) {
-        acc[key] = [];
+  const groups = props.tableData.reduce(
+    (acc: Record<string, TableDataType[]>, obj) => {
+      const key = obj.matchups?.[previewWeek.value];
+      if (key) {
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(obj);
       }
-      acc[key].push(obj);
       return acc;
-    }
-  }, {});
+    },
+    {}
+  );
+
   return Object.values(groups);
 });
-
 const cases = computed(() => {
   return simulateStandings(matchups.value, previewWeek.value);
 });
@@ -502,8 +505,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           ? matchup[0].username
                           : "Ghost Roster"
                         : matchup[0].name
-                        ? matchup[0].name
-                        : "Ghost Roster"
+                          ? matchup[0].name
+                          : "Ghost Roster"
                     }}
                   </p>
                   <p class="ml-2 text-xs">
@@ -623,8 +626,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           ? matchup[1].username
                           : "Ghost Roster"
                         : matchup[1].name
-                        ? matchup[1].name
-                        : "Ghost Roster"
+                          ? matchup[1].name
+                          : "Ghost Roster"
                     }}
                   </p>
                   <p class="mr-2 text-xs float-end">
@@ -760,8 +763,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   ? matchup[0].username
                   : "Ghost Roster"
                 : matchup[0].name
-                ? matchup[0].name
-                : "Ghost Roster"
+                  ? matchup[0].name
+                  : "Ghost Roster"
             }}
           </p>
           {{ generateString(cases[matchup[0].id]) }}
@@ -776,8 +779,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   ? matchup[1].username
                   : "Ghost Roster"
                 : matchup[1].name
-                ? matchup[1].name
-                : "Ghost Roster"
+                  ? matchup[1].name
+                  : "Ghost Roster"
             }}
           </p>
           {{ generateString(cases[matchup[1].id]) }}
