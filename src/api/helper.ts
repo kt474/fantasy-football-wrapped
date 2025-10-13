@@ -130,7 +130,8 @@ export const createTableData = (
 
     const pointsArr: any[] = [];
     combinedPoints.forEach((value: any) => {
-      const weekLength = value.recordByWeek ? value.recordByWeek.length : 0;
+      let weekLength = value.recordByWeek ? value.recordByWeek.length : 0;
+      if (medianScoring) weekLength = weekLength / 2;
       const pointsList = value.points ? value.points : [];
       pointsArr.push(pointsList.slice(0, weekLength));
       value["winsAgainstAll"] = 0;
@@ -1719,6 +1720,12 @@ export const fakeTrades = [
       value: [48.6, 46.2, 7.2, 53],
     },
   },
+];
+
+export const fakeTransactions = [
+  { name: "Waiver Claims", data: [1, 6, 3, 3, 7, 6, 4, 3, 10, 9] },
+  { name: "Free Agents", data: [4, 2, 6, 7, 3, 6, 9, 13, 7, 10] },
+  { name: "Trades", data: [0, 0, 0, 0, 0, 0, 0, 1, 1, 0] },
 ];
 
 export const fakeUsers = [

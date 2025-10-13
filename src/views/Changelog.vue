@@ -5,6 +5,17 @@ const router = useRouter();
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "10/12/25",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "The league transactions chart has been updated to show the type of transaction: waiver claim, free agent, or trade.",
+        ],
+      },
+    ],
+  },
+  {
     date: "10/04/25",
     content: [
       {

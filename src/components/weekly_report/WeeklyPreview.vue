@@ -471,7 +471,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
       <div class="flex justify-between">
         <div class="flex justify-between w-full sm:p-2">
           <!-- First team (index 0) -->
-          <div class="w-60">
+          <div class="w-60 sm:w-64">
             <div class="flex items-center mb-4">
               <img
                 v-if="matchup[0].avatarImg"
@@ -596,7 +596,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
           </div>
           <div class="flex w-px h-full bg-gray-300 dark:bg-gray-600"></div>
           <!-- Second team (index 1) -->
-          <div class="w-60">
+          <div class="w-60 sm:w-64">
             <div class="flex items-center justify-end mb-4">
               <div class="flex">
                 <div class="hidden sm:block">
