@@ -255,7 +255,7 @@ watch(
           <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
             <template
               v-for="move in currentManagerMoves"
-              :key="move.adds + move.week"
+              :key="move.adds + move.week + move.user.username"
             >
               <div v-if="move.adds && move.status === 'complete'">
                 <p class="text-sm font-medium">

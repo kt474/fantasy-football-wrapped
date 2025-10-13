@@ -21,6 +21,7 @@ const transactionData = computed(() => {
           creator: currentLeague.rosters.find(
             (roster: RosterType) => roster.rosterId === id
           )?.id,
+          roster_ids: [id],
         });
       });
     });
@@ -30,11 +31,13 @@ const transactionData = computed(() => {
     const groupedMoves = allMoves
       .filter(
         (item) =>
-          item.status === "complete" &&
-          (item.adds || item.draft_picks || item.waiver_budget)
+          (item.status === "complete" && item.adds) ||
+          (item.type === "trade" &&
+            item.status === "complete" &&
+            (item.adds || item.draft_picks || item.waiver_budget))
       )
       .reduce((acc, item) => {
-        const creatorId = item.creator;
+        const creatorId = item.roster_ids[0];
         let type = item.type;
 
         if (!acc[creatorId]) {
@@ -106,14 +109,19 @@ watch(
   ],
   () => updateChartColor()
 );
-const getNameFromId = (userId: string) => {
+const getNameFromId = (rosterId: string) => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague) {
-    const userObj = currentLeague.users.find((user) => user.id === userId);
-    if (userObj) {
+    const rosterObj = currentLeague.rosters.find(
+      (roster) => roster.rosterId == rosterId
+    );
+    if (rosterObj) {
+      const userObj = currentLeague.users.find(
+        (user) => user.id == rosterObj.id
+      );
       return store.showUsernames ? userObj.username : userObj.name;
     }
-  } else return userId;
+  } else return rosterId;
 };
 const updateChartColor = () => {
   chartOptions.value = {
@@ -159,7 +167,7 @@ const updateChartColor = () => {
       },
       title: {
         text: "League Manager",
-        offsetY: -10,
+        offsetY: -5,
         style: {
           fontSize: "16px",
           fontFamily:
@@ -232,7 +240,7 @@ const chartOptions = ref({
     },
     title: {
       text: "League Manager",
-      offsetY: -10,
+      offsetY: -5,
       style: {
         fontSize: "16px",
         fontFamily:
