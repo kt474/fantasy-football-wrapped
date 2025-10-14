@@ -66,7 +66,13 @@ const getData = async () => {
   const sorted = Object.fromEntries(
     Object.entries(groupedPositions).map(([position, items]) => [
       position,
-      items.sort((a, b) => b.points - a.points).slice(0, 5),
+      items
+        .sort((a, b) => {
+          const pointsA = typeof a.points === "number" ? a.points : 0;
+          const pointsB = typeof b.points === "number" ? b.points : 0;
+          return pointsB - pointsA;
+        })
+        .slice(0, 5),
     ])
   );
   data.value = sorted;
@@ -273,7 +279,7 @@ watch(
             <img
               v-else
               alt="Defense image"
-              class="object-cover w-16 h-16 mx-2 sm:h-auto"
+              class="w-16 h-16 object-cover my-auto ml-2"
               :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
             />
             <div class="w-full mt-0.5 ml-3">
