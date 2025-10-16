@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useStore } from "../store/store";
 import { inputEmail } from "../api/api";
 const router = useRouter();
+const route = useRoute();
 const store = useStore();
 const email = ref("");
 
@@ -17,6 +18,11 @@ const subscribe = async () => {
       store.updateShowEmailAlert(false);
     }, 3000);
   }
+};
+
+const goBackToHome = () => {
+  const currentQueryParams = route.query;
+  router.push({ path: "/", query: currentQueryParams });
 };
 </script>
 <template>
@@ -56,7 +62,7 @@ const subscribe = async () => {
           </form>
           <button
             aria-label="Button to go back one page"
-            @click="router.back()"
+            @click="goBackToHome()"
             class="text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-base w-full sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-4"
           >
             Back

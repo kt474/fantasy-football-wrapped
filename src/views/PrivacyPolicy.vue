@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const router = useRouter();
+const route = useRoute();
+
+const goBackToHome = () => {
+  const currentQueryParams = route.query;
+  router.push({ path: "/", query: currentQueryParams });
+};
 </script>
 <template>
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto">
@@ -56,7 +62,7 @@ const router = useRouter();
 
       <button
         aria-label="Button to go back one page"
-        @click="router.back()"
+        @click="goBackToHome()"
         class="text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-4"
       >
         Back
