@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from "vue-router";
+import { onMounted } from "vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -7,6 +8,15 @@ const goBackToHome = () => {
   const currentQueryParams = route.query;
   router.push({ path: "/", query: currentQueryParams });
 };
+
+onMounted(() => {
+  // this league has somehow been cached in google sitelinks
+  if (route.query.leagueId === "1057743221285101568") {
+    const newQuery = { ...route.query };
+    delete newQuery.leagueId;
+    router.replace({ path: route.path, query: newQuery });
+  }
+});
 
 // this should eventually be moved to the server side
 const data = [
