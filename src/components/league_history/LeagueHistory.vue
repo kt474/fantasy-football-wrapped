@@ -11,6 +11,7 @@ import AllMatchups from "./AllMatchups.vue";
 import MostPoints from "./MostPoints.vue";
 import FewestPoints from "./FewestPoints.vue";
 import ManagerComparison from "./ManagerComparison.vue";
+import CloseMatchups from "./CloseMatchups.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -588,8 +589,8 @@ const worstManager = computed(() => {
                       ? user.username
                       : "Ghost Roster"
                     : user.name
-                    ? user.name
-                    : "Ghost Roster"
+                      ? user.name
+                      : "Ghost Roster"
                 }}
               </p>
             </div>
@@ -771,6 +772,9 @@ const worstManager = computed(() => {
   <div v-if="!isLoading" class="flex flex-wrap mt-4 md:flex-nowrap">
     <MostPoints :tableData="dataAllYears" />
     <FewestPoints :tableData="dataAllYears" class="mt-4 ml-0 md:mt-0 md:ml-4" />
+  </div>
+  <div v-if="!isLoading">
+    <CloseMatchups :tableData="dataAllYears" />
   </div>
   <div class="h-screen" v-else>
     <svg

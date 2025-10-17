@@ -21,6 +21,17 @@ onMounted(() => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "10/17/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "The league history section now shows the all time closest matchups and biggest blowouts.",
+        ],
+      },
+    ],
+  },
+  {
     date: "10/12/25",
     content: [
       {
