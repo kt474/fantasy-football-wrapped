@@ -132,7 +132,7 @@ const getWeek = (seasonsData: any[], index: number) => {
             {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
           </p>
 
-          <div class="flex mt-1">
+          <div class="flex mt-1 justify-between mr-1">
             <div class="text-center mb-2 mr-4">
               <p class="font-semibold text-gray-900 dark:text-gray-50 text-2xl">
                 {{ matchup.difference.toFixed(2) }}
@@ -197,7 +197,7 @@ const getWeek = (seasonsData: any[], index: number) => {
             {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
           </p>
 
-          <div class="flex mt-1">
+          <div class="flex mt-1 justify-between mr-1">
             <div class="text-center mb-2 mr-4">
               <p class="font-semibold text-gray-900 dark:text-gray-50 text-2xl">
                 {{ matchup.difference.toFixed(2) }}
