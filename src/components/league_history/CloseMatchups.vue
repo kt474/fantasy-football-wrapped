@@ -122,120 +122,128 @@ const getWeek = (seasonsData: any[], index: number) => {
     <div
       class="bg-white dark:bg-gray-800 rounded-lg shadow px-6 py-4 mr-0 md:mr-4 w-full"
     >
-      <h5 class="font-bold text-2xl mb-3 sm:text-3xl">Closest Matchups</h5>
+      <h5 class="font-bold text-2xl mb-4 sm:text-3xl">Closest Matchups</h5>
       <div
         v-for="matchup in closestMatchups"
         class="border border-gray-200 dark:border-gray-700 dark:shadow-gray-600 rounded-lg shadow p-4 mb-4"
       >
-        <div class="mb-2">
+        <div class="">
           <p class="mb-2 font-medium">
             {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
           </p>
 
-          <div class="text-center mb-2">
-            <p class="font-semibold text-gray-900 dark:text-gray-50 text-2xl">
-              {{ matchup.difference.toFixed(2) }}
-            </p>
-            <p class="text-gray-700 dark:text-gray-200">Point Difference</p>
-          </div>
-
-          <div class="">
-            <div class="flex justify-between mb-2">
-              <p class="text-gray-700 dark:text-gray-200">
-                {{
-                  store.showUsernames
-                    ? matchup.teamA.username
-                    : matchup.teamA.name
-                }}
+          <div class="flex mt-1">
+            <div class="text-center mb-2 mr-4">
+              <p class="font-semibold text-gray-900 dark:text-gray-50 text-2xl">
+                {{ matchup.difference.toFixed(2) }}
               </p>
-              <p
-                class="font-semibold"
-                :class="{
-                  'text-blue-600 dark:text-blue-500':
-                    matchup.scoreA > matchup.scoreB,
-                }"
-              >
-                {{ matchup.scoreA }}
+              <p class="text-gray-700 dark:text-gray-200">
+                <span class="sm:inline hidden">Point</span
+                ><span class="sm:hidden inline">Pt.</span> Diff
               </p>
             </div>
-            <div class="flex justify-between">
-              <p class="text-gray-700 dark:text-gray-200">
-                {{
-                  store.showUsernames
-                    ? matchup.teamB.username
-                    : matchup.teamB.name
-                }}
-              </p>
-              <p
-                class="font-semibold text"
-                :class="{
-                  'text-blue-600 dark:text-blue-500':
-                    matchup.scoreB > matchup.scoreA,
-                }"
-              >
-                {{ matchup.scoreB }}
-              </p>
+            <div class="w-4/5">
+              <div class="flex justify-between mb-2">
+                <p class="text-gray-700 dark:text-gray-200">
+                  {{
+                    store.showUsernames
+                      ? matchup.teamA.username
+                      : matchup.teamA.name
+                  }}
+                </p>
+                <p
+                  class="font-semibold"
+                  :class="{
+                    'text-blue-600 dark:text-blue-500':
+                      matchup.scoreA > matchup.scoreB,
+                  }"
+                >
+                  {{ matchup.scoreA }}
+                </p>
+              </div>
+              <div class="flex justify-between">
+                <p class="text-gray-700 dark:text-gray-200">
+                  {{
+                    store.showUsernames
+                      ? matchup.teamB.username
+                      : matchup.teamB.name
+                  }}
+                </p>
+                <p
+                  class="font-semibold text"
+                  :class="{
+                    'text-blue-600 dark:text-blue-500':
+                      matchup.scoreB > matchup.scoreA,
+                  }"
+                >
+                  {{ matchup.scoreB }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div
-      class="bg-white dark:bg-gray-800 rounded-lg shadow px-6 py-4 w-full mt-4 md:mt-0"
+      class="bg-white dark:bg-gray-800 rounded-lg shadow px-6 py-4 mt-4 md:mt-0 w-full"
     >
-      <h5 class="font-bold text-2xl mb-3 sm:text-3xl">Biggest Blowouts</h5>
+      <h5 class="font-bold text-2xl mb-4 sm:text-3xl">Biggest Blowouts</h5>
       <div
         v-for="matchup in farthestMatchups"
         class="border border-gray-200 dark:border-gray-700 dark:shadow-gray-600 rounded-lg shadow p-4 mb-4"
       >
-        <div class="mb-2">
+        <div class="">
           <p class="mb-2 font-medium">
             {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
           </p>
 
-          <div class="text-center mb-2">
-            <p class="font-semibold text-gray-900 dark:text-gray-50 text-2xl">
-              {{ matchup.difference.toFixed(2) }}
-            </p>
-            <p class="text-gray-700 dark:text-gray-200">Point Difference</p>
-          </div>
-
-          <div class="">
-            <div class="flex justify-between mb-2">
-              <p class="text-gray-700 dark:text-gray-200">
-                {{
-                  store.showUsernames
-                    ? matchup.teamA.username
-                    : matchup.teamA.name
-                }}
+          <div class="flex mt-1">
+            <div class="text-center mb-2 mr-4">
+              <p class="font-semibold text-gray-900 dark:text-gray-50 text-2xl">
+                {{ matchup.difference.toFixed(2) }}
               </p>
-              <p
-                class="font-semibold"
-                :class="{
-                  'text-blue-600 dark:text-blue-500':
-                    matchup.scoreA > matchup.scoreB,
-                }"
-              >
-                {{ matchup.scoreA }}
+              <p class="text-gray-700 dark:text-gray-200">
+                <span class="sm:inline hidden">Point</span
+                ><span class="sm:hidden inline">Pt.</span> Diff
               </p>
             </div>
-            <div class="flex justify-between">
-              <p class="text-gray-700 dark:text-gray-200">
-                {{
-                  store.showUsernames
-                    ? matchup.teamB.username
-                    : matchup.teamB.name
-                }}
-              </p>
-              <p
-                class="font-semibold text"
-                :class="{
-                  'text-blue-600 dark:text-blue-500':
-                    matchup.scoreB > matchup.scoreA,
-                }"
-              >
-                {{ matchup.scoreB }}
-              </p>
+            <div class="w-4/5">
+              <div class="flex justify-between mb-2">
+                <p class="text-gray-700 dark:text-gray-200">
+                  {{
+                    store.showUsernames
+                      ? matchup.teamA.username
+                      : matchup.teamA.name
+                  }}
+                </p>
+                <p
+                  class="font-semibold"
+                  :class="{
+                    'text-blue-600 dark:text-blue-500':
+                      matchup.scoreA > matchup.scoreB,
+                  }"
+                >
+                  {{ matchup.scoreA }}
+                </p>
+              </div>
+              <div class="flex justify-between">
+                <p class="text-gray-700 dark:text-gray-200">
+                  {{
+                    store.showUsernames
+                      ? matchup.teamB.username
+                      : matchup.teamB.name
+                  }}
+                </p>
+                <p
+                  class="font-semibold text"
+                  :class="{
+                    'text-blue-600 dark:text-blue-500':
+                      matchup.scoreB > matchup.scoreA,
+                  }"
+                >
+                  {{ matchup.scoreB }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
