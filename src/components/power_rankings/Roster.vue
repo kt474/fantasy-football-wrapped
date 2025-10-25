@@ -114,7 +114,7 @@ const getValueColor = (value: number) => {
                   v-if="player.position !== 'DEF'"
                   class="object-cover w-12 mr-2 -mt-1 -ml-2 rounded-full"
                   :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
-                  alt="Player avatar"
+                  alt="player_img"
                 />
                 <img
                   v-else
@@ -170,7 +170,7 @@ const getValueColor = (value: number) => {
                     v-if="player.position !== 'DEF'"
                     class="object-cover w-12 mr-2 -mt-1 -ml-2 rounded-full"
                     :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
-                    alt="Player avatar"
+                    alt="player_img"
                   />
                   <img
                     v-else

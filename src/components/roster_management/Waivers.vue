@@ -467,7 +467,7 @@ watch(
                     store.showUsernames ? move.user.username : move.user.name
                   }}
                 </p>
-                <p class="">&#183; Week {{ move.week }}</p>
+                <p class="ml-1">&#183; Week {{ move.week }}</p>
               </div>
             </div>
           </div>
