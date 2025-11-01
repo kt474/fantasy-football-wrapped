@@ -178,6 +178,14 @@ const formatDate = (dateStr: string) => {
   return date.toLocaleDateString();
 };
 
+const getValueColor = (value: number) => {
+  if (value <= 12) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
+  if (value <= 24) return `bg-green-400 dark:bg-green-600 text-gray-50`;
+  if (value <= 36) return "bg-yellow-300 dark-bg-yellow-600 text-black";
+  if (value <= 48) return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
+  return `bg-red-400 dark:bg-red-600 text-gray-50`;
+};
+
 onMounted(async () => {
   loading.value = true;
   await Promise.all([fetchPlayerNames(), getData()]);
@@ -270,8 +278,8 @@ watch(
                       player.projection?.away === true
                         ? "@ "
                         : player.projection?.away === false
-                        ? "vs "
-                        : "BYE"
+                          ? "vs "
+                          : "BYE"
                     }}{{ player.projection?.opponent }}</span
                   >
                 </p>
@@ -293,12 +301,12 @@ watch(
                             index -
                             1
                           : store.leagueInfo[store.currentLeagueIndex]
-                              ?.lastScoredWeek
-                          ? store.leagueInfo[store.currentLeagueIndex]
-                              ?.lastScoredWeek -
-                            index -
-                            1
-                          : 17 - index
+                                ?.lastScoredWeek
+                            ? store.leagueInfo[store.currentLeagueIndex]
+                                ?.lastScoredWeek -
+                              index -
+                              1
+                            : 17 - index
                       }}
                     </p>
                     <p class="my-1">{{ score }}</p>
@@ -306,7 +314,12 @@ watch(
                       v-if="
                         player.stats?.ranks[index] !== 999 && score !== 'DNP'
                       "
-                      class="text-xs text-gray-700 dark:text-gray-300"
+                      :class="[
+                        player.stats?.ranks[index]
+                          ? getValueColor(player.stats?.ranks[index])
+                          : 'bg-gray-300 dark:text-black',
+                      ]"
+                      class="text-xs rounded-full p-0.5 mt-1.5"
                     >
                       Rank: {{ player.stats?.ranks[index] }}
                     </p>
