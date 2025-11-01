@@ -290,9 +290,11 @@ watch(
                 <div class="flex">
                   <div
                     v-for="(score, index) in player.stats?.points"
-                    class="p-2 mr-2 text-center border rounded-md lg:w-20 dark:border-gray-700"
+                    class="p-2 mr-2 text-center border rounded-md w-14 sm:w-20 dark:border-gray-700"
                   >
-                    <p class="text-xs text-gray-700 dark:text-gray-300">
+                    <p
+                      class="text-xs text-gray-700 dark:text-gray-300 text-nowrap"
+                    >
                       Week
                       {{
                         store.leagueInfo[store.currentLeagueIndex]?.currentWeek
@@ -319,9 +321,10 @@ watch(
                           ? getValueColor(player.stats?.ranks[index])
                           : 'bg-gray-300 dark:text-black',
                       ]"
-                      class="text-xs rounded-full p-0.5 mt-1.5"
+                      class="text-xs rounded-full p-0.5 mt-1.5 text-nowrap"
                     >
-                      Rank: {{ player.stats?.ranks[index] }}
+                      <span class="sm:inline hidden">Rank:</span>
+                      {{ player.stats?.ranks[index] }}
                     </p>
                     <p v-else class="py-1.5"></p>
                   </div>
@@ -404,5 +407,8 @@ watch(
 <style scoped>
 .custom-max-width {
   max-width: 475px;
+  @media (max-width: 768px) {
+    max-width: 325px;
+  }
 }
 </style>
