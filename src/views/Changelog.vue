@@ -21,6 +21,17 @@ onMounted(() => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "11/01/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "There is a new Start/Sit tab that shows player projections, past performances, and news fetched from Bluesky.",
+        ],
+      },
+    ],
+  },
+  {
     date: "10/17/25",
     content: [
       {

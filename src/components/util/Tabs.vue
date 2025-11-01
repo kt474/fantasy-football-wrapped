@@ -90,7 +90,8 @@ const changeTab = (tab: string) => {
             : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
         ]"
       >
-        Weekly Report
+        <span class="hidden sm:inline">Weekly</span>
+        Report
       </button>
     </li>
     <li class="cursor-pointer me-2">

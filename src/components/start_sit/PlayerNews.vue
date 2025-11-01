@@ -262,7 +262,7 @@ watch(
                 class="mx-2 rounded-full h-14 mt-2.5"
                 :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
               />
-              <div class="ml-8 md:ml-0">
+              <div class="ml-4 md:ml-0">
                 <p class="text-xl font-medium md:text-base md:mb-2">
                   {{ player.name ? player.name : player.team }}
                 </p>
