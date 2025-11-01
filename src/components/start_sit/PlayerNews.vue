@@ -290,7 +290,7 @@ watch(
                 <div class="flex">
                   <div
                     v-for="(score, index) in player.stats?.points"
-                    class="p-2 mr-2 text-center border rounded-md w-14 sm:w-20 dark:border-gray-700"
+                    class="p-2 mr-2 text-center border rounded-md custom-width dark:border-gray-700"
                   >
                     <p
                       class="text-xs text-gray-700 dark:text-gray-300 text-nowrap"
@@ -408,7 +408,13 @@ watch(
 .custom-max-width {
   max-width: 475px;
   @media (max-width: 768px) {
-    max-width: 325px;
+    max-width: 335px;
+  }
+}
+.custom-width {
+  width: 80px;
+  @media (max-width: 639px) {
+    width: 61px;
   }
 }
 </style>
