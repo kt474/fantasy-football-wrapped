@@ -19,6 +19,16 @@ interface Player {
   name: string;
   team: string;
 }
+export const getPlayerNews = async (playerNames: string[]) => {
+  let url = import.meta.env.VITE_PLAYER_NEWS;
+
+  if (playerNames && playerNames.length > 0) {
+    url += `?keywords=${playerNames.join(",")}`;
+  }
+  const response = await fetch(url);
+  const result = await response.json();
+  return result;
+};
 
 export const getPlayersByIdsMap = async (
   playerIds: string[]
@@ -303,8 +313,53 @@ export const getSingleWeekProjection = async (
     scoring = "pts_half_ppr";
   }
   if (allWeeks[week] && allWeeks[week]["stats"][scoring]) {
-    return allWeeks[week]["stats"][scoring];
+    return {
+      stats: allWeeks[week]["stats"][scoring],
+      opponent: allWeeks[week]["opponent"],
+      away: allWeeks[week]["is_away_team"],
+    };
   }
+};
+
+export const getSingleWeekStats = async (
+  player: string,
+  year: string,
+  week: number,
+  scoringType: number
+) => {
+  const response = await fetch(
+    `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
+  );
+  const allWeeks = await response.json();
+
+  let scoringKey = "pts_ppr";
+  let rankKey = "pos_rank_ppr";
+  if (scoringType === 0) {
+    scoringKey = "pts_std";
+    rankKey = "pos_rank_std";
+  } else if (scoringType === 0.5) {
+    scoringKey = "pts_half_ppr";
+    rankKey = "pos_rank_half_ppr";
+  }
+
+  const points: (number | string | undefined)[] = [];
+  const ranks: (number | string | undefined)[] = [];
+
+  for (let i = 0; i < 5; i++) {
+    const currentWeek = week - i;
+    if (allWeeks[currentWeek] && allWeeks[currentWeek]["stats"]) {
+      points.push(allWeeks[currentWeek]["stats"][scoringKey]);
+      ranks.push(allWeeks[currentWeek]["stats"][rankKey]);
+    } else {
+      points.push("DNP");
+      ranks.push("DNP");
+    }
+  }
+
+  return {
+    points,
+    ranks,
+  };
 };
 
 export const getWeeklyProjections = async (

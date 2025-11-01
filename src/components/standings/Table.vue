@@ -26,6 +26,7 @@ import Draft from "../draft/Draft.vue";
 import TeamRanking from "../power_rankings/TeamRanking.vue";
 import CurrentTrends from "./CurrentTrends.vue";
 import ScheduleStrength from "../expected_wins/ScheduleStrength.vue";
+import PlayerNews from "../start_sit/PlayerNews.vue";
 
 const tableOrder = ref("wins");
 const hover = ref("");
@@ -574,6 +575,9 @@ const getTeamName = (tableDataItem: any) => {
     </div>
     <div v-if="store.currentTab === 'draft'">
       <Draft class="mt-4" />
+    </div>
+    <div v-if="store.currentTab === 'startSit'">
+      <PlayerNews :tableData="tableData" class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">
       <LeagueHistory :tableData="tableData" />

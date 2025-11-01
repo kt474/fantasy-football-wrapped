@@ -95,6 +95,19 @@ const changeTab = (tab: string) => {
     </li>
     <li class="cursor-pointer me-2">
       <button
+        @click="changeTab('startSit')"
+        class="inline-block p-2 rounded-t-lg sm:p-4"
+        :class="[
+          store.currentTab === 'startSit'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
+      >
+        Start/Sit
+      </button>
+    </li>
+    <li class="cursor-pointer me-2">
+      <button
         @click="changeTab('draft')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
         :class="[
