@@ -339,7 +339,7 @@ watch(
         </h2>
         <div v-for="post in data">
           <div
-            class="p-4 mb-3 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            class="p-4 mb-3 bg-white custom-max-width border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
           >
             <!-- Author Header -->
             <div class="flex items-center gap-3 mb-3">
@@ -401,3 +401,8 @@ watch(
     <div v-else class="text-gray-900 mb-96 dark:text-gray-200">Loading...</div>
   </div>
 </template>
+<style scoped>
+.custom-max-width {
+  max-width: 475px;
+}
+</style>
