@@ -15,10 +15,15 @@ import { fakePosts, fakeStartSit, fakeUsers } from "../../api/helper";
 const data: any = ref([]);
 const playerNames: any = ref([]);
 const loading: any = ref(false);
+const expanded = ref<Record<number, boolean>>({});
 const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
+
+const toggle = (id: number) => {
+  expanded.value[id] = !expanded.value[id];
+};
 
 const managers = computed(() => {
   if (store.leagueInfo.length > 0) {
@@ -282,19 +287,63 @@ watch(
                     >
                   </p>
                 </div>
-                <div v-if="player.projection?.stats">
-                  <p class="font-normal text-gray-700 dark:text-gray-300">
-                    Projected
-                  </p>
-                  <p
-                    class="text-xl font-semibold text-right text-gray-900 dark:text-gray-50"
+                <div class="flex">
+                  <div v-if="player.projection?.stats" class="mr-2 sm:mr-4">
+                    <p class="font-normal text-gray-700 dark:text-gray-300">
+                      Projected
+                    </p>
+                    <p
+                      class="text-xl font-semibold text-right text-gray-900 dark:text-gray-50"
+                    >
+                      {{ player.projection?.stats }}
+                    </p>
+                  </div>
+                  <button
+                    @click="toggle(player.player_id)"
+                    aria-label="Button to show all trades"
+                    class="flex max-h-7 sm:max-h-16 text-gray-900 mt-2 bg-gray-100 border border-gray-300 focus:outline-none hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 font-medium rounded-lg text-sm px-0.5 sm:px-3 py-0.5 sm:py-2.5 me-2 mb-2 dark:bg-gray-700 dark:text-white dark:border-gray-800 dark:hover:bg-gray-600 dark:hover:border-gray-600 dark:focus:ring-gray-600"
                   >
-                    {{ player.projection?.stats }}
-                  </p>
+                    <svg
+                      v-if="expanded[player.player_id]"
+                      class="w-5 h-5 text-gray-900 dark:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="m5 15 7-7 7 7"
+                      />
+                    </svg>
+                    <svg
+                      v-else
+                      class="w-5 h-5 text-gray-900 dark:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="m19 9-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
-            <div class="mt-4">
+            <div v-show="expanded[player.player_id]" class="mt-4">
               <div>
                 <div class="flex sm:justify-end">
                   <div
