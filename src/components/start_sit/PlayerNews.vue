@@ -240,57 +240,66 @@ watch(
       Roster
     </h2>
     <div v-if="!loading" class="flex flex-wrap justify-between xl:flex-nowrap">
-      <div v-if="currentRoster" class="text-gray-900 dark:text-gray-200">
+      <div
+        v-if="currentRoster"
+        class="w-full max-w-3xl text-gray-900 dark:text-gray-200"
+      >
         <div v-for="(player, index) in currentRoster.players" class="">
           <div v-if="index === starterSize" class="w-full my-4">
             <p class="text-xl font-medium">BENCH</p>
           </div>
           <div
-            class="flex flex-wrap pb-4 mb-3 mr-4 border-b md:flex-nowrap dark:border-gray-700"
+            class="pb-4 mb-3 mr-4 border-b md:flex-nowrap dark:border-gray-700"
           >
-            <div class="flex mr-8 md:w-64">
-              <p class="w-8 font-semibold mt-7">{{ player.position }}</p>
+            <div class="flex w-full">
+              <p class="w-8 mt-4 font-semibold">{{ player.position }}</p>
               <img
                 v-if="player.position !== 'DEF'"
                 alt="Player image"
-                class="object-cover mx-2 mt-2.5 rounded-full w-14 h-14"
+                class="object-cover mx-2 rounded-full w-14 h-14"
                 :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
               />
               <img
                 v-else
                 alt="Defense image"
-                class="mx-2 rounded-full h-14 mt-2.5"
+                class="mx-2 rounded-full h-14"
                 :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
               />
-              <div class="ml-4 md:ml-0">
-                <p class="text-xl font-medium md:text-base md:mb-2">
-                  {{ player.name ? player.name : player.team }}
-                </p>
-                <p class="font-medium">
-                  Projected:
-                  <span class="font-normal text-gray-700 dark:text-gray-300">{{
-                    player.projection?.stats
-                  }}</span>
-                </p>
-                <p class="font-medium">
-                  <span class="font-normal text-gray-700 dark:text-gray-300"
-                    >{{
-                      player.projection?.away === true
-                        ? "@ "
-                        : player.projection?.away === false
+              <div class="flex justify-between w-full">
+                <div class="ml-4 md:ml-0">
+                  <p class="text-lg font-medium md:text-base">
+                    {{ player.name ? player.name : player.team }}
+                  </p>
+                  <p class="font-medium">
+                    <span class="font-normal text-gray-700 dark:text-gray-300"
+                      >{{
+                        player.projection?.away === true
+                          ? "@ "
+                          : player.projection?.away === false
                           ? "vs "
                           : "BYE"
-                    }}{{ player.projection?.opponent }}</span
+                      }}{{ player.projection?.opponent }}</span
+                    >
+                  </p>
+                </div>
+                <div v-if="player.projection?.stats">
+                  <p class="font-normal text-gray-700 dark:text-gray-300">
+                    Projected
+                  </p>
+                  <p
+                    class="text-xl font-semibold text-right text-gray-900 dark:text-gray-50"
                   >
-                </p>
+                    {{ player.projection?.stats }}
+                  </p>
+                </div>
               </div>
             </div>
-            <div class="mt-4 md:mt-0">
+            <div class="mt-4">
               <div>
-                <div class="flex">
+                <div class="flex sm:justify-end">
                   <div
                     v-for="(score, index) in player.stats?.points"
-                    class="p-2 mr-2 text-center border rounded-md custom-width dark:border-gray-700"
+                    class="p-2 ml-1 text-center border rounded-md sm:ml-2 sm:w-28 dark:border-gray-700"
                   >
                     <p
                       class="text-xs text-gray-700 dark:text-gray-300 text-nowrap"
@@ -303,12 +312,12 @@ watch(
                             index -
                             1
                           : store.leagueInfo[store.currentLeagueIndex]
-                                ?.lastScoredWeek
-                            ? store.leagueInfo[store.currentLeagueIndex]
-                                ?.lastScoredWeek -
-                              index -
-                              1
-                            : 17 - index
+                              ?.lastScoredWeek
+                          ? store.leagueInfo[store.currentLeagueIndex]
+                              ?.lastScoredWeek -
+                            index -
+                            1
+                          : 17 - index
                       }}
                     </p>
                     <p class="my-1">{{ score }}</p>
@@ -323,10 +332,237 @@ watch(
                       ]"
                       class="text-xs rounded-full p-0.5 mt-1.5 text-nowrap"
                     >
-                      <span class="sm:inline hidden">Rank:</span>
+                      <span class="hidden sm:inline">Rank:</span>
                       {{ player.stats?.ranks[index] }}
                     </p>
-                    <p v-else class="py-1.5"></p>
+
+                    <div
+                      class="mt-2 text-xs"
+                      v-if="player.position === 'QB' && score !== 'DNP'"
+                    >
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Pass Yd:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["pass_yd"] }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Pass Td:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["pass_td"] }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rush Yd:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["rush_yd"] }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rush Td:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["rush_td"]
+                              ? player.stats?.stats[index]["rush_td"]
+                              : 0
+                          }}</span
+                        >
+                      </p>
+                    </div>
+                    <div
+                      class="mt-2 text-xs"
+                      v-if="player.position === 'RB' && score !== 'DNP'"
+                    >
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rush Att:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["rush_att"] }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rush Yd:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["rush_yd"] }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rush Td:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["rush_td"]
+                              ? player.stats?.stats[index]["rush_td"]
+                              : 0
+                          }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rec:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["rec"]
+                              ? player.stats?.stats[index]["rec"]
+                              : 0
+                          }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rec Yd:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["rec_yd"]
+                              ? player.stats?.stats[index]["rec_yd"]
+                              : 0
+                          }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Snaps:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["team_snaps"]
+                              ? (
+                                  (player.stats?.stats[index]["snaps"] /
+                                    player.stats?.stats[index]["team_snaps"]) *
+                                  100
+                                ).toFixed(0)
+                              : 0
+                          }}%</span
+                        >
+                      </p>
+                    </div>
+                    <div
+                      class="mt-2 text-xs"
+                      v-if="
+                        (player.position === 'WR' ||
+                          player.position === 'TE') &&
+                        score !== 'DNP'
+                      "
+                    >
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rec:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["rec"] }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rec Yd:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["rec_yd"] }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Rec Td:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["rec_td"]
+                              ? player.stats?.stats[index]["rec_td"]
+                              : 0
+                          }}</span
+                        >
+                      </p>
+
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Snaps:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["team_snaps"]
+                              ? (
+                                  (player.stats?.stats[index]["snaps"] /
+                                    player.stats?.stats[index]["team_snaps"]) *
+                                  100
+                                ).toFixed(0)
+                              : 0
+                          }}%</span
+                        >
+                      </p>
+                    </div>
+                    <div
+                      class="mt-2 text-xs"
+                      v-if="player.position === 'K' && score !== 'DNP'"
+                    >
+                      <p class="text-gray-700 dark:text-gray-300">
+                        FG:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["fgm"] }} /
+                          {{ player.stats?.stats[index]["fga"] }}</span
+                        >
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        XP:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["xpm"] }} /
+                          {{ player.stats?.stats[index]["xpa"] }}</span
+                        >
+                      </p>
+                    </div>
+                    <div
+                      class="mt-2 text-xs"
+                      v-if="player.position === 'DEF' && score !== 'DNP'"
+                    >
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Pts Allow:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["pts_allow"] }}
+                        </span>
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Yds Allow:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{ player.stats?.stats[index]["yds_allow"] }}
+                        </span>
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Sack:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["sack"]
+                              ? player.stats?.stats[index]["sack"]
+                              : 0
+                          }}
+                        </span>
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        Int:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["int"]
+                              ? player.stats?.stats[index]["int"]
+                              : 0
+                          }}
+                        </span>
+                      </p>
+                      <p class="text-gray-700 dark:text-gray-300">
+                        FF:
+                        <span
+                          class="font-semibold text-gray-900 dark:text-gray-50"
+                          >{{
+                            player.stats?.stats[index]["ff"]
+                              ? player.stats?.stats[index]["ff"]
+                              : 0
+                          }}
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -342,7 +578,7 @@ watch(
         </h2>
         <div v-for="post in data">
           <div
-            class="p-4 mb-3 bg-white custom-max-width border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            class="p-4 mb-3 bg-white border border-gray-200 rounded-lg shadow custom-max-width dark:bg-gray-800 dark:border-gray-700"
           >
             <!-- Author Header -->
             <div class="flex items-center gap-3 mb-3">
@@ -409,12 +645,6 @@ watch(
   max-width: 475px;
   @media (max-width: 768px) {
     max-width: 335px;
-  }
-}
-.custom-width {
-  width: 80px;
-  @media (max-width: 639px) {
-    width: 61px;
   }
 }
 </style>

@@ -21,6 +21,15 @@ onMounted(() => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "11/09/25",
+    content: [
+      {
+        type: "Feature",
+        text: ["Added more player stats to the start/sit section."],
+      },
+    ],
+  },
+  {
     date: "11/01/25",
     content: [
       {

@@ -331,7 +331,6 @@ export const getSingleWeekStats = async (
     `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
   );
   const allWeeks = await response.json();
-
   let scoringKey = "pts_ppr";
   let rankKey = "pos_rank_ppr";
   if (scoringType === 0) {
@@ -344,21 +343,45 @@ export const getSingleWeekStats = async (
 
   const points: (number | string | undefined)[] = [];
   const ranks: (number | string | undefined)[] = [];
+  const stats = [];
 
   for (let i = 0; i < 5; i++) {
     const currentWeek = week - i;
     if (allWeeks[currentWeek] && allWeeks[currentWeek]["stats"]) {
       points.push(allWeeks[currentWeek]["stats"][scoringKey]);
       ranks.push(allWeeks[currentWeek]["stats"][rankKey]);
+      stats.push({
+        rec: allWeeks[currentWeek]["stats"]["rec"],
+        rec_yd: allWeeks[currentWeek]["stats"]["rec_yd"],
+        rush_att: allWeeks[currentWeek]["stats"]["rush_att"],
+        rush_yd: allWeeks[currentWeek]["stats"]["rush_yd"],
+        rush_td: allWeeks[currentWeek]["stats"]["rush_td"],
+        pass_td: allWeeks[currentWeek]["stats"]["pass_td"],
+        rec_td: allWeeks[currentWeek]["stats"]["rec_td"],
+        pass_yd: allWeeks[currentWeek]["stats"]["pass_yd"],
+        snaps: allWeeks[currentWeek]["stats"]["off_snp"],
+        team_snaps: allWeeks[currentWeek]["stats"]["tm_off_snp"],
+        fgm: allWeeks[currentWeek]["stats"]["fgm"],
+        fga: allWeeks[currentWeek]["stats"]["fga"],
+        xpm: allWeeks[currentWeek]["stats"]["xpm"],
+        xpa: allWeeks[currentWeek]["stats"]["xpa"],
+        sack: allWeeks[currentWeek]["stats"]["sack"],
+        int: allWeeks[currentWeek]["stats"]["int"],
+        ff: allWeeks[currentWeek]["stats"]["ff"],
+        pts_allow: allWeeks[currentWeek]["stats"]["pts_allow"],
+        yds_allow: allWeeks[currentWeek]["stats"]["yds_allow"],
+      });
     } else {
       points.push("DNP");
       ranks.push("DNP");
+      stats.push({});
     }
   }
 
   return {
     points,
     ranks,
+    stats,
   };
 };
 
