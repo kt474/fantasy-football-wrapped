@@ -547,16 +547,34 @@ watch(
                         FG:
                         <span
                           class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{ player.stats?.stats[index]["fgm"] }} /
-                          {{ player.stats?.stats[index]["fga"] }}</span
+                          >{{
+                            player.stats?.stats[index]["fgm"]
+                              ? player.stats?.stats[index]["fgm"]
+                              : 0
+                          }}
+                          /
+                          {{
+                            player.stats?.stats[index]["fga"]
+                              ? player.stats?.stats[index]["fga"]
+                              : 0
+                          }}</span
                         >
                       </p>
                       <p class="text-gray-700 dark:text-gray-300">
                         XP:
                         <span
                           class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{ player.stats?.stats[index]["xpm"] }} /
-                          {{ player.stats?.stats[index]["xpa"] }}</span
+                          >{{
+                            player.stats?.stats[index]["xpm"]
+                              ? player.stats?.stats[index]["xpm"]
+                              : 0
+                          }}
+                          /
+                          {{
+                            player.stats?.stats[index]["xpa"]
+                              ? player.stats?.stats[index]["xpa"]
+                              : 0
+                          }}</span
                         >
                       </p>
                     </div>
