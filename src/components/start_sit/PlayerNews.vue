@@ -11,6 +11,7 @@ import {
 import { TableDataType } from "../../api/types";
 import { difference } from "lodash";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/helper";
+import { max, min } from "lodash";
 
 const data: any = ref([]);
 const playerNames: any = ref([]);
@@ -191,6 +192,46 @@ const getValueColor = (value: number) => {
   return `bg-red-400 dark:bg-red-600 text-gray-50`;
 };
 
+function getAverage(arr: any[]) {
+  const numbers = arr
+    .filter((item) => item && item !== "DNP" && item !== 999)
+    .map((item) => Number(item));
+
+  if (numbers.length === 0) {
+    return 0;
+  }
+
+  const sum = numbers.reduce(
+    (accumulator, currentValue) => accumulator + currentValue,
+    0
+  );
+  return Math.round((sum * 100) / numbers.length) / 100;
+}
+
+function getMax(arr: any[]) {
+  const numbers = arr
+    .filter((item) => item && item !== "DNP")
+    .map((item) => Number(item));
+
+  if (numbers.length === 0) {
+    return 0;
+  }
+
+  return max(numbers);
+}
+
+function getMin(arr: any[]) {
+  const numbers = arr
+    .filter((item) => item && item !== "DNP")
+    .map((item) => Number(item));
+
+  if (numbers.length === 0) {
+    return 0;
+  }
+
+  return min(numbers);
+}
+
 onMounted(async () => {
   loading.value = true;
   await Promise.all([fetchPlayerNames(), getData()]);
@@ -301,7 +342,7 @@ watch(
                   <button
                     @click="toggle(player.player_id)"
                     aria-label="Button to show all trades"
-                    class="flex max-h-7 sm:max-h-16 text-gray-900 mt-2 bg-gray-100 border border-gray-300 focus:outline-none hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 font-medium rounded-lg text-sm px-0.5 sm:px-3 py-0.5 sm:py-2.5 me-2 mb-2 dark:bg-gray-700 dark:text-white dark:border-gray-800 dark:hover:bg-gray-600 dark:hover:border-gray-600 dark:focus:ring-gray-600"
+                    class="flex max-h-7 sm:max-h-16 text-gray-900 mt-2 bg-gray-100 border border-gray-300 focus:outline-none hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 font-medium rounded-lg text-sm px-0.5 sm:px-3 py-0.5 sm:py-2.5 mb-2 dark:bg-gray-700 dark:text-white dark:border-gray-800 dark:hover:bg-gray-600 dark:hover:border-gray-600 dark:focus:ring-gray-600"
                   >
                     <svg
                       v-if="expanded[player.player_id]"
@@ -343,12 +384,68 @@ watch(
                 </div>
               </div>
             </div>
+            <div class="px-4 py-2 mt-2 bg-gray-100 rounded dark:bg-gray-700">
+              <div class="flex justify-between">
+                <p class="mr-2 text-sm text-balance sm:text-base">
+                  Recent <br />
+                  Performances
+                </p>
+                <div class="text-center">
+                  <p
+                    class="text-xs text-gray-700 sm:text-sm dark:text-gray-200"
+                  >
+                    Avg Pts
+                  </p>
+                  <p class="text-sm font-semibold sm:text-base">
+                    {{ getAverage(player.stats.points) }}
+                  </p>
+                </div>
+                <div class="text-center">
+                  <p
+                    class="text-xs text-gray-700 sm:text-sm dark:text-gray-200"
+                  >
+                    High
+                  </p>
+                  <p class="text-sm font-semibold sm:text-base">
+                    {{ getMax(player.stats.points) }}
+                  </p>
+                </div>
+                <div class="text-center">
+                  <p
+                    class="text-xs text-gray-700 sm:text-sm dark:text-gray-200"
+                  >
+                    Low
+                  </p>
+                  <p class="text-sm font-semibold sm:text-base">
+                    {{ getMin(player.stats.points) }}
+                  </p>
+                </div>
+                <div
+                  v-if="player.position !== 'K' && player.position !== 'DEF'"
+                  class="text-center"
+                >
+                  <p
+                    class="text-xs text-gray-700 sm:text-sm dark:text-gray-200"
+                  >
+                    Avg Rank
+                  </p>
+                  <p
+                    class="mt-0.5 text-sm font-semibold rounded-full sm:text-base"
+                    :class="[getValueColor(getAverage(player.stats.ranks))]"
+                  >
+                    {{ getAverage(player.stats.ranks) }}
+                  </p>
+                </div>
+              </div>
+            </div>
             <div v-show="expanded[player.player_id]" class="mt-4">
               <div>
-                <div class="flex sm:justify-end">
+                <div
+                  class="flex space-x-1 overflow-x-auto sm:justify-end sm:space-x-2"
+                >
                   <div
                     v-for="(score, index) in player.stats?.points"
-                    class="p-2 ml-1 text-center border rounded-md sm:ml-2 sm:w-28 dark:border-gray-700"
+                    class="flex-1 p-2 text-center border rounded-md dark:border-gray-700"
                   >
                     <p
                       class="text-xs text-gray-700 dark:text-gray-300 text-nowrap"
@@ -712,6 +809,11 @@ watch(
   max-width: 475px;
   @media (max-width: 768px) {
     max-width: 335px;
+  }
+}
+.custom-card-width {
+  @media (min-width: 640px) {
+    width: 6.1rem;
   }
 }
 </style>

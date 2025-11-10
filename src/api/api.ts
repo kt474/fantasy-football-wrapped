@@ -345,7 +345,7 @@ export const getSingleWeekStats = async (
   const ranks: (number | string | undefined)[] = [];
   const stats = [];
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 7; i++) {
     const currentWeek = week - i;
     if (allWeeks[currentWeek] && allWeeks[currentWeek]["stats"]) {
       points.push(allWeeks[currentWeek]["stats"][scoringKey]);
