@@ -82,6 +82,8 @@ const updateChartColor = () => {
     },
     xaxis: {
       categories: categories.value,
+      tickAmount: categories.value.length - 1,
+      hideOverlappingLabels: false,
       labels: {
         formatter: function (str: string) {
           const n = 17;
@@ -169,6 +171,8 @@ const chartOptions = ref({
   },
   xaxis: {
     categories: categories.value,
+    tickAmount: categories.value.length - 1,
+    hideOverlappingLabels: false,
     labels: {
       formatter: function (str: string) {
         const n = 17;

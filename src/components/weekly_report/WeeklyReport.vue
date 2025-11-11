@@ -454,6 +454,8 @@ const chartOptions = ref({
         ? user.name
         : ""
     ),
+    tickAmount: sortedTableData.value.length - 1,
+    hideOverlappingLabels: false,
     labels: {
       formatter: function (str: string) {
         const n = 17;
@@ -531,6 +533,8 @@ const updateChartColor = () => {
           ? user.name
           : ""
       ),
+      tickAmount: sortedTableData.value.length - 1,
+      hideOverlappingLabels: false,
       labels: {
         formatter: function (str: string) {
           const n = 17;

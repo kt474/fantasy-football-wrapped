@@ -21,6 +21,17 @@ onMounted(() => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "11/11/25",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Team names on the x-axis of charts should no longer randomly disappear.",
+        ],
+      },
+    ],
+  },
+  {
     date: "11/09/25",
     content: [
       {

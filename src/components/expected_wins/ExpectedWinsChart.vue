@@ -104,6 +104,8 @@ const chartOptions = ref({
     },
   },
   xaxis: {
+    tickAmount: seriesData.value[0].data.length - 1,
+    hideOverlappingLabels: false,
     labels: {
       formatter: function (str: string) {
         const n = 17;

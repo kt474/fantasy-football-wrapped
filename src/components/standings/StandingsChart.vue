@@ -75,6 +75,8 @@ const updateChartColor = () => {
         }
         return user.name ? user.name : "";
       }),
+      tickAmount: props.tableData.length - 1,
+      hideOverlappingLabels: false,
       title: {
         text: "League Manager",
         offsetY: -5,
@@ -145,6 +147,8 @@ const chartOptions = ref({
       }
       return user.name ? user.name : "";
     }),
+    tickAmount: props.tableData.length - 1,
+    hideOverlappingLabels: false,
     labels: {
       formatter: function (str: string) {
         const n = 17;

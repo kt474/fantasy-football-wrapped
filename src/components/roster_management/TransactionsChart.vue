@@ -159,6 +159,8 @@ const updateChartColor = () => {
       categories: transactionData.value.categories.map((id) =>
         getNameFromId(id)
       ),
+      tickAmount: transactionData.value.categories.length - 1,
+      hideOverlappingLabels: false,
       labels: {
         formatter: function (str: string) {
           const n = 17;
@@ -232,6 +234,8 @@ const chartOptions = ref({
   },
   xaxis: {
     categories: transactionData.value.categories.map((id) => getNameFromId(id)),
+    tickAmount: transactionData.value.categories.length - 1,
+    hideOverlappingLabels: false,
     labels: {
       formatter: function (str: string) {
         const n = 17;
