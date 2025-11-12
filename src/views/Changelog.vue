@@ -21,6 +21,17 @@ onMounted(() => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "11/12/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "In the 'Expected Wins' tab there is now a schedule analysis section. The goal of this component is to show which weeks were especialy lucky/unlucky.",
+        ],
+      },
+    ],
+  },
+  {
     date: "11/11/25",
     content: [
       {
