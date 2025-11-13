@@ -37,7 +37,10 @@ const luckAnalysis = computed(() => {
   teams.forEach((team, teamIndex) => {
     for (
       let week = 0;
-      week < store.leagueInfo[store.currentLeagueIndex].lastScoredWeek;
+      week <
+      (store.leagueInfo.length > 0
+        ? store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+        : 17);
       week++
     ) {
       const opponentId = team.matchups[week];
@@ -178,19 +181,19 @@ function getRankSuffix(rank: number): string {
     class="w-full p-4 mt-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
   >
     <h1
-      class="pb-2 mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
+      class="pb-2 mb-3 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
     >
       Schedule Analysis (Beta)
     </h1>
 
     <div class="flex flex-wrap justify-start lg:flex-nowrap">
-      <div class="mr-4">
+      <div class="mr-4 lg:w-1/2">
         <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600"
+          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52"
           v-for="team in luckAnalysis.luckiest"
           :key="team.teamName"
         >
-          <h3 class="mb-2 text-lg font-semibold dark:text-gray-200">
+          <h3 class="mb-2 text-xl font-semibold dark:text-gray-200">
             {{ team.teamName }}
           </h3>
           <div class="flex justify-between mb-3 text-center w-52">
@@ -225,15 +228,22 @@ function getRankSuffix(rank: number): string {
               }}) vs {{ week.opponentName }}
             </li>
           </ul>
+          <div v-if="team.luckyWeeks.length === 0">
+            <p class="text-gray-600 dark:text-gray-300">
+              <b>{{ team.teamName }}</b> did not have any individual weeks where
+              they won with a particularly low score. Their luck came from
+              facing opponents with below average scores.
+            </p>
+          </div>
         </div>
       </div>
-      <div>
+      <div class="lg:w-1/2">
         <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600"
+          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52"
           v-for="team in luckAnalysis.unluckiest"
           :key="team.teamName"
         >
-          <h3 class="mb-2 text-lg font-semibold dark:text-gray-200">
+          <h3 class="mb-2 text-xl font-semibold dark:text-gray-200">
             {{ team.teamName }}
           </h3>
           <div class="flex justify-between mb-3 text-center w-52">
@@ -268,6 +278,13 @@ function getRankSuffix(rank: number): string {
               }}) vs {{ week.opponentName }}
             </li>
           </ul>
+          <div v-if="team.unluckyWeeks.length === 0">
+            <p class="text-gray-600 dark:text-gray-300">
+              <b>{{ team.teamName }}</b> did not have any individual weeks where
+              they lost with a particularly high score. Their bad luck came from
+              facing opponents with above average scores.
+            </p>
+          </div>
         </div>
       </div>
     </div>
