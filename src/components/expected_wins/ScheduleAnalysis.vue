@@ -189,7 +189,7 @@ function getRankSuffix(rank: number): string {
     <div class="flex flex-wrap justify-start lg:flex-nowrap">
       <div class="mr-4 lg:w-1/2">
         <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52"
+          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52 custom-min-width"
           v-for="team in luckAnalysis.luckiest"
           :key="team.teamName"
         >
@@ -239,7 +239,7 @@ function getRankSuffix(rank: number): string {
       </div>
       <div class="lg:w-1/2">
         <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52"
+          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52 custom-min-width"
           v-for="team in luckAnalysis.unluckiest"
           :key="team.teamName"
         >
@@ -310,3 +310,8 @@ function getRankSuffix(rank: number): string {
     </div> -->
   </div>
 </template>
+<style scoped>
+.custom-min-width {
+  min-width: 306px;
+}
+</style>
