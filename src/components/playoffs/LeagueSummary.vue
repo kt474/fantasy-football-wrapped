@@ -184,6 +184,18 @@ const copyReport = () => {
         Generated using GPT-4.1. Information provided may not always be
         accurate.
       </p>
+      <p class="text-xs text-gray-500 dark:text-gray-300">
+        If you've enjoyed using ffwrapped this season please consider
+        <a
+          aria-label="buymeacoffee donation page"
+          class="text-blue-700 dark:text-blue-500 hover:underline"
+          href="https://buymeacoffee.com/kt474"
+          title="buymeacofee donation page"
+          target="_blank"
+          >supporting</a
+        >
+        this project.
+      </p>
     </div>
     <!-- Fake data for home page  -->
     <div
