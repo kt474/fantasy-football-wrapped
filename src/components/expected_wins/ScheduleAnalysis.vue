@@ -112,59 +112,59 @@ const luckAnalysis = computed(() => {
   };
 });
 
-// const scheduleAnalysis = computed(() => {
-//   const teams = promptData.value;
+const scheduleAnalysis = computed(() => {
+  const teams = promptData.value;
 
-//   return teams.map((team) => {
-//     let bestRecord = team.actualWins;
-//     let worstRecord = team.actualWins;
-//     let bestScheduleTeam = team.teamName;
-//     let worstScheduleTeam = team.teamName;
+  return teams.map((team) => {
+    let bestRecord = team.actualWins;
+    let worstRecord = team.actualWins;
+    let bestScheduleTeam = team.teamName;
+    let worstScheduleTeam = team.teamName;
 
-//     // Try each other team's schedule
-//     teams.forEach((otherTeam) => {
-//       if (otherTeam.teamName === team.teamName) return;
+    // Try each other team's schedule
+    teams.forEach((otherTeam) => {
+      if (otherTeam.teamName === team.teamName) return;
 
-//       let winsWithThisSchedule = 0;
+      let winsWithThisSchedule = 0;
 
-//       // Play this team's points against the other team's opponents
-//       for (let week = 0; week < 10; week++) {
-//         const opponentId = otherTeam.matchups[week];
-//         const opponent = teams.find(
-//           (t) => t.matchups[week] === opponentId && t !== otherTeam
-//         );
+      // Play this team's points against the other team's opponents
+      for (let week = 0; week < 10; week++) {
+        const opponentId = otherTeam.matchups[week];
+        const opponent = teams.find(
+          (t) => t.matchups[week] === opponentId && t !== otherTeam
+        );
 
-//         if (!opponent) continue;
+        if (!opponent) continue;
 
-//         // Would this team have won with their points against this opponent?
-//         if (team.points[week] > opponent.points[week]) {
-//           winsWithThisSchedule++;
-//         }
-//       }
+        // Would this team have won with their points against this opponent?
+        if (team.points[week] > opponent.points[week]) {
+          winsWithThisSchedule++;
+        }
+      }
 
-//       // Track best and worst possible records
-//       if (winsWithThisSchedule > bestRecord) {
-//         bestRecord = winsWithThisSchedule;
-//         bestScheduleTeam = otherTeam.teamName;
-//       }
+      // Track best and worst possible records
+      if (winsWithThisSchedule > bestRecord) {
+        bestRecord = winsWithThisSchedule;
+        bestScheduleTeam = otherTeam.teamName;
+      }
 
-//       if (winsWithThisSchedule < worstRecord) {
-//         worstRecord = winsWithThisSchedule;
-//         worstScheduleTeam = otherTeam.teamName;
-//       }
-//     });
+      if (winsWithThisSchedule < worstRecord) {
+        worstRecord = winsWithThisSchedule;
+        worstScheduleTeam = otherTeam.teamName;
+      }
+    });
 
-//     return {
-//       teamName: team.teamName,
-//       actualWins: team.actualWins,
-//       bestPossibleRecord: bestRecord,
-//       worstPossibleRecord: worstRecord,
-//       bestScheduleTeam,
-//       worstScheduleTeam,
-//       recordRange: bestRecord - worstRecord,
-//     };
-//   });
-// });
+    return {
+      teamName: team.teamName,
+      actualWins: team.actualWins,
+      bestPossibleRecord: bestRecord,
+      worstPossibleRecord: worstRecord,
+      bestScheduleTeam,
+      worstScheduleTeam,
+      recordRange: bestRecord - worstRecord,
+    };
+  });
+});
 
 // Helper function for ordinal suffix
 function getRankSuffix(rank: number): string {
@@ -185,11 +185,13 @@ function getRankSuffix(rank: number): string {
     >
       Schedule Analysis (Beta)
     </h1>
-
+    <h2 class="mb-3 text-xl font-bold dark:text-gray-50">
+      Luckiest/Unluckiest Teams
+    </h2>
     <div class="flex flex-wrap justify-start lg:flex-nowrap">
-      <div class="mr-4 lg:w-1/2">
+      <div class="lg:mr-4 lg:w-1/2">
         <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52 custom-min-width"
+          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52"
           v-for="team in luckAnalysis.luckiest"
           :key="team.teamName"
         >
@@ -239,7 +241,7 @@ function getRankSuffix(rank: number): string {
       </div>
       <div class="lg:w-1/2">
         <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52 custom-min-width"
+          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52"
           v-for="team in luckAnalysis.unluckiest"
           :key="team.teamName"
         >
@@ -288,30 +290,44 @@ function getRankSuffix(rank: number): string {
         </div>
       </div>
     </div>
-    <!-- <div>
-      <h2>Schedule Impact Analysis</h2>
-      <div v-for="team in scheduleAnalysis" :key="team.teamName">
-        <h3>{{ team.teamName }}</h3>
-        <p>Actual Record: {{ team.actualWins }}-{{ 10 - team.actualWins }}</p>
+    <h2 class="mb-3 text-xl font-bold dark:text-gray-50">
+      Best/Worst Possible Records
+    </h2>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 dark:text-gray-300">
+      <div
+        v-for="team in scheduleAnalysis"
+        :key="team.teamName"
+        class="px-4 py-3 border rounded-lg shadow dark:border-gray-600"
+      >
+        <h3 class="mb-2 text-xl font-semibold dark:text-gray-200">
+          {{ team.teamName }}
+        </h3>
         <p>
-          Best Possible: {{ team.bestPossibleRecord }}-{{
-            10 - team.bestPossibleRecord
-          }}
+          Actual Record:
+          <span class="font-semibold"
+            >{{ team.actualWins }}-{{ 10 - team.actualWins }}</span
+          >
+        </p>
+        <p>
+          Best Possible:
+          <span class="font-semibold text-green-500"
+            >{{ team.bestPossibleRecord }}-{{
+              10 - team.bestPossibleRecord
+            }}</span
+          >
           (with {{ team.bestScheduleTeam }}'s schedule)
         </p>
         <p>
-          Worst Possible: {{ team.worstPossibleRecord }}-{{
-            10 - team.worstPossibleRecord
-          }}
+          Worst Possible:
+          <span class="font-semibold text-red-500"
+            >{{ team.worstPossibleRecord }}-{{
+              10 - team.worstPossibleRecord
+            }}</span
+          >
           (with {{ team.worstScheduleTeam }}'s schedule)
         </p>
-        <p>Record Swing: {{ team.recordRange }} games</p>
       </div>
-    </div> -->
+    </div>
   </div>
 </template>
-<style scoped>
-.custom-min-width {
-  min-width: 306px;
-}
-</style>
+<style scoped></style>
