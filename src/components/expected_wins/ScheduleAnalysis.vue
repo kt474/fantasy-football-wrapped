@@ -185,13 +185,14 @@ function getRankSuffix(rank: number): string {
     >
       Schedule Analysis (Beta)
     </h1>
-    <h2 class="mb-3 text-xl font-bold dark:text-gray-50">
+    <hr class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700" />
+    <h2 class="mb-4 text-xl font-bold dark:text-gray-50">
       Luckiest/Unluckiest Teams
     </h2>
     <div class="flex flex-wrap justify-start lg:flex-nowrap">
       <div class="lg:mr-4 lg:w-1/2">
         <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52"
+          class="px-4 py-3 mb-4 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 min-h-52"
           v-for="team in luckAnalysis.luckiest"
           :key="team.teamName"
         >
@@ -231,7 +232,7 @@ function getRankSuffix(rank: number): string {
             </li>
           </ul>
           <div v-if="team.luckyWeeks.length === 0">
-            <p class="text-gray-600 dark:text-gray-300">
+            <p class="text-gray-700 dark:text-gray-300">
               <b>{{ team.teamName }}</b> did not have any individual weeks where
               they won with a particularly low score. Their luck came from
               facing opponents with below average scores.
@@ -241,7 +242,7 @@ function getRankSuffix(rank: number): string {
       </div>
       <div class="lg:w-1/2">
         <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:border-gray-600 min-h-52"
+          class="px-4 py-3 mb-4 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 min-h-52"
           v-for="team in luckAnalysis.unluckiest"
           :key="team.teamName"
         >
@@ -281,7 +282,7 @@ function getRankSuffix(rank: number): string {
             </li>
           </ul>
           <div v-if="team.unluckyWeeks.length === 0">
-            <p class="text-gray-600 dark:text-gray-300">
+            <p class="text-gray-700 dark:text-gray-300">
               <b>{{ team.teamName }}</b> did not have any individual weeks where
               they lost with a particularly high score. Their bad luck came from
               facing opponents with above average scores.
@@ -290,14 +291,15 @@ function getRankSuffix(rank: number): string {
         </div>
       </div>
     </div>
-    <h2 class="mb-3 text-xl font-bold dark:text-gray-50">
+    <hr class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700" />
+    <h2 class="mb-4 text-xl font-bold dark:text-gray-50">
       Best/Worst Possible Records
     </h2>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 dark:text-gray-300">
       <div
         v-for="team in scheduleAnalysis"
         :key="team.teamName"
-        class="px-4 py-3 border rounded-lg shadow dark:border-gray-600"
+        class="px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600"
       >
         <h3 class="mb-2 text-xl font-semibold dark:text-gray-200">
           {{ team.teamName }}
