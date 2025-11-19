@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, Ref } from "vue";
 import { maxBy, minBy } from "lodash";
-import { TableDataType } from "../../api/types.ts";
 import { useStore } from "../../store/store.ts";
 import { getData, inputLeague, getLeague } from "../../api/api.ts";
-import { LeagueInfoType } from "../../api/types.ts";
-import Alert from "../util/Alert.vue";
+import { LeagueInfoType, TableDataType } from "../../api/types.ts";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
 import MostPoints from "./MostPoints.vue";
 import FewestPoints from "./FewestPoints.vue";
 import ManagerComparison from "./ManagerComparison.vue";
 import CloseMatchups from "./CloseMatchups.vue";
+import Alert from "../util/Alert.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -191,6 +190,7 @@ const dataAllYears = computed(() => {
     id: user.id,
     wins: user.wins,
     losses: user.losses,
+    ties: user.ties,
     points: user.pointsFor,
     pointsArr: user.points ? [...user.points] : [],
     pointSeason: store.leagueInfo[store.currentLeagueIndex]
@@ -589,8 +589,8 @@ const worstManager = computed(() => {
                       ? user.username
                       : "Ghost Roster"
                     : user.name
-                      ? user.name
-                      : "Ghost Roster"
+                    ? user.name
+                    : "Ghost Roster"
                 }}
               </p>
             </div>
@@ -605,6 +605,7 @@ const worstManager = computed(() => {
             }"
           >
             {{ user.wins }} - {{ user.losses }}
+            {{ user.ties != 0 ? `- ${user.ties}` : "" }}
           </td>
           <td
             class="px-2 py-3 sm:px-6"
