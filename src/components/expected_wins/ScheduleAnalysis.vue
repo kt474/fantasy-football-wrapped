@@ -192,13 +192,18 @@ const getDotPosition = (value: number, min: number, max: number) => {
     class="w-full p-4 mt-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
   >
     <h1
-      class="pb-2 mb-4 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
+      class="pb-2 mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
     >
       Luckiest/Unluckiest Teams
     </h1>
+    <p
+      class="max-w-3xl mb-4 text-sm text-gray-600 sm:text-base dark:text-gray-300"
+    >
+      Highlighting the specific weeks teams had lucky/unlucky matchups.
+    </p>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div
-        class="px-4 py-3 mb-4 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 flex flex-col"
+        class="px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 flex flex-col"
         v-for="team in luckAnalysis.luckiest"
         :key="team.teamName"
       >
@@ -240,11 +245,12 @@ const getDotPosition = (value: number, min: number, max: number) => {
             class="p-2.5 mb-2 bg-gray-50 rounded dark:bg-gray-700 dark:text-gray-200"
           >
             <p class="font-semibold">Week {{ week.week }}</p>
-            <p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
               Won with
-              <span class="font-semibold">{{ week.points }}</span> pts ({{
-                week.rankText
-              }}) vs {{ week.opponentName }}
+              <span class="font-semibold text-gray-800 dark:text-gray-200">{{
+                week.points
+              }}</span>
+              pts ({{ week.rankText }}) vs {{ week.opponentName }}
             </p>
           </li>
         </ul>
@@ -257,7 +263,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
         </div>
       </div>
       <div
-        class="px-4 py-3 mb-4 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 flex flex-col"
+        class="px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 flex flex-col"
         v-for="team in luckAnalysis.unluckiest"
         :key="team.teamName"
       >
@@ -299,11 +305,12 @@ const getDotPosition = (value: number, min: number, max: number) => {
             class="p-2.5 mb-2 bg-gray-50 rounded dark:bg-gray-700 dark:text-gray-200"
           >
             <p class="font-semibold">Week {{ week.week }}</p>
-            <p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
               Won with
-              <span class="font-semibold">{{ week.points }}</span> pts ({{
-                week.rankText
-              }}) vs {{ week.opponentName }}
+              <span class="font-semibold text-gray-800 dark:text-gray-200">{{
+                week.points
+              }}</span>
+              pts ({{ week.rankText }}) vs {{ week.opponentName }}
             </p>
           </li>
         </ul>
@@ -321,10 +328,18 @@ const getDotPosition = (value: number, min: number, max: number) => {
     class="w-full p-4 mt-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
   >
     <h1
-      class="pb-2 mb-4 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
+      class="pb-2 mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
     >
-      Best/Worst Possible Schedules
+      Schedule Analysis
     </h1>
+    <p
+      class="max-w-3xl mb-4 text-sm text-gray-600 sm:text-base dark:text-gray-300"
+    >
+      Actual record, expected number of wins, and best/worst possible records
+      (team names in parentheses indicate the teams with the schedule that would
+      achieve those records).
+    </p>
+
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 dark:text-gray-300">
       <div
         v-for="team in scheduleAnalysis"
@@ -348,7 +363,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
               },
               {
                 key: 'actual',
-                color: 'bg-gray-800',
+                color: 'bg-gray-900 p-2 border-fuchsia-300 dark:bg-gray-200',
                 label: 'Actual',
                 value: team.actualWins,
               },
@@ -385,44 +400,46 @@ const getDotPosition = (value: number, min: number, max: number) => {
             ></div>
           </div>
         </div>
-        <p>
-          Actual Record:
-          <span class="font-semibold"
-            >{{ team.actualWins }}-{{
-              (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                : 17) - team.actualWins
-            }}</span
-          >
-        </p>
-        <p>
-          Expected Wins:
-          <span class="font-semibold text-blue-500">{{
-            team.expectedWins.toFixed(2)
-          }}</span>
-        </p>
-        <p>
-          Best:
-          <span class="font-semibold text-green-500"
-            >{{ team.bestPossibleRecord }}-{{
-              (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                : 17) - team.bestPossibleRecord
-            }}</span
-          >
-          (with {{ team.bestScheduleTeam }}'s schedule)
-        </p>
-        <p>
-          Worst:
-          <span class="font-semibold text-red-500"
-            >{{ team.worstPossibleRecord }}-{{
-              (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                : 17) - team.worstPossibleRecord
-            }}</span
-          >
-          (with {{ team.worstScheduleTeam }}'s schedule)
-        </p>
+        <div class="flex justify-between text-center">
+          <div class="flex-1">
+            <p class="text-gray-600 dark:text-gray-300">Actual</p>
+            <p class="font-semibold text-xl">
+              {{ team.actualWins }}-{{
+                (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                  ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                  : 17) - team.actualWins
+              }}
+            </p>
+          </div>
+          <div class="flex-1">
+            <p class="text-gray-600 dark:text-gray-300">Exp. Wins</p>
+            <p class="font-semibold text-blue-500 text-xl">
+              {{ team.expectedWins.toFixed(2) }}
+            </p>
+          </div>
+          <div class="flex-1">
+            <p class="text-gray-600 dark:text-gray-300">Best</p>
+            <p class="font-semibold text-green-500 text-xl">
+              {{ team.bestPossibleRecord }}-{{
+                (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                  ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                  : 17) - team.bestPossibleRecord
+              }}
+            </p>
+            <p class="text-xs mt-1">({{ team.bestScheduleTeam }})</p>
+          </div>
+          <div class="flex-1">
+            <p class="text-gray-600 dark:text-gray-300">Worst</p>
+            <p class="font-semibold text-red-500 text-xl">
+              {{ team.worstPossibleRecord }}-{{
+                (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                  ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                  : 17) - team.worstPossibleRecord
+              }}
+            </p>
+            <p class="text-xs mt-1">({{ team.worstScheduleTeam }})</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
