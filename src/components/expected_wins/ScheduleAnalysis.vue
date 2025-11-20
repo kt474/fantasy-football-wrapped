@@ -157,6 +157,7 @@ const scheduleAnalysis = computed(() => {
     return {
       teamName: team.teamName,
       actualWins: team.actualWins,
+      expectedWins: team.expectedWins,
       bestPossibleRecord: bestRecord,
       worstPossibleRecord: worstRecord,
       bestScheduleTeam,
@@ -167,28 +168,34 @@ const scheduleAnalysis = computed(() => {
 });
 
 // Helper function for ordinal suffix
-function getRankSuffix(rank: number): string {
+const getRankSuffix = (rank: number) => {
   const j = rank % 10;
   const k = rank % 100;
   if (j === 1 && k !== 11) return "st";
   if (j === 2 && k !== 12) return "nd";
   if (j === 3 && k !== 13) return "rd";
   return "th";
-}
+};
+
+// Returns a css value like "53%" for position of a dot
+const getDotPosition = (value: number, min: number, max: number) => {
+  if (max === min) return "50%"; // Prevent divide by zero
+  const marginPercent = 4; // Change this for more/less side margin
+  const percent =
+    marginPercent + ((value - min) / (max - min)) * (100 - 2 * marginPercent);
+  // Clamp between 0 and 100 just in case
+  return `${Math.max(0, Math.min(100, percent))}%`;
+};
 </script>
 <template>
   <div
     class="w-full p-4 mt-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
   >
     <h1
-      class="pb-2 mb-3 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
+      class="pb-2 mb-4 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
     >
-      Schedule Analysis (Beta)
-    </h1>
-    <hr class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700" />
-    <h2 class="mb-4 text-xl font-bold dark:text-gray-50">
       Luckiest/Unluckiest Teams
-    </h2>
+    </h1>
     <div class="flex flex-wrap justify-start lg:flex-nowrap">
       <div class="lg:mr-4 lg:w-1/2">
         <div
@@ -196,7 +203,7 @@ function getRankSuffix(rank: number): string {
           v-for="team in luckAnalysis.luckiest"
           :key="team.teamName"
         >
-          <h3 class="mb-2 text-xl font-semibold dark:text-gray-200">
+          <h3 class="mb-3 text-xl font-semibold dark:text-gray-200">
             {{ team.teamName }}
           </h3>
           <div class="flex mb-3 text-center justify-evenly">
@@ -257,7 +264,7 @@ function getRankSuffix(rank: number): string {
           v-for="team in luckAnalysis.unluckiest"
           :key="team.teamName"
         >
-          <h3 class="mb-2 text-xl font-semibold dark:text-gray-200">
+          <h3 class="mb-3 text-xl font-semibold dark:text-gray-200">
             {{ team.teamName }}
           </h3>
           <div class="flex mb-3 text-center justify-evenly">
@@ -313,10 +320,15 @@ function getRankSuffix(rank: number): string {
         </div>
       </div>
     </div>
-    <hr class="h-px mt-1 mb-4 bg-gray-200 border-0 dark:bg-gray-700" />
-    <h2 class="mb-4 text-xl font-bold dark:text-gray-50">
-      Best/Worst Possible Records
-    </h2>
+  </div>
+  <div
+    class="w-full p-4 mt-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
+  >
+    <h1
+      class="pb-2 mb-4 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
+    >
+      Best/Worst Possible Schedules
+    </h1>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 dark:text-gray-300">
       <div
         v-for="team in scheduleAnalysis"
@@ -326,26 +338,91 @@ function getRankSuffix(rank: number): string {
         <h3 class="mb-2 text-xl font-semibold dark:text-gray-200">
           {{ team.teamName }}
         </h3>
+        <div class="relative w-full mt-4 h-10">
+          <div
+            class="absolute mx-3 left-0 right-0 h-4 bg-gray-100 dark:bg-gray-700 rounded-lg"
+          ></div>
+          <div
+            v-for="dot in [
+              {
+                key: 'worst',
+                color: 'bg-red-500',
+                label: 'Worst',
+                value: team.worstPossibleRecord,
+              },
+              {
+                key: 'actual',
+                color: 'bg-gray-800',
+                label: 'Actual',
+                value: team.actualWins,
+              },
+              {
+                key: 'best',
+                color: 'bg-green-500',
+                label: 'Best',
+                value: team.bestPossibleRecord,
+              },
+              {
+                key: 'expected',
+                color: 'bg-blue-500',
+                label: 'Expected',
+                value: team.expectedWins,
+              },
+            ]"
+            :key="dot.key"
+            class="absolute flex flex-col items-center"
+            :style="{
+              left: getDotPosition(
+                dot.value,
+                team.worstPossibleRecord,
+                team.bestPossibleRecord
+              ),
+              top: '20%',
+              transform: 'translate(-50%, -50%)',
+            }"
+          >
+            <div
+              :class="[
+                'w-4 h-4 rounded-full border-2 border-white shadow',
+                dot.color,
+              ]"
+            ></div>
+          </div>
+        </div>
         <p>
           Actual Record:
           <span class="font-semibold"
-            >{{ team.actualWins }}-{{ 10 - team.actualWins }}</span
+            >{{ team.actualWins }}-{{
+              (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                : 17) - team.actualWins
+            }}</span
           >
         </p>
         <p>
-          Best Possible:
+          Expected Wins:
+          <span class="font-semibold text-blue-500">{{
+            team.expectedWins.toFixed(2)
+          }}</span>
+        </p>
+        <p>
+          Best:
           <span class="font-semibold text-green-500"
             >{{ team.bestPossibleRecord }}-{{
-              10 - team.bestPossibleRecord
+              (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                : 17) - team.bestPossibleRecord
             }}</span
           >
           (with {{ team.bestScheduleTeam }}'s schedule)
         </p>
         <p>
-          Worst Possible:
+          Worst:
           <span class="font-semibold text-red-500"
             >{{ team.worstPossibleRecord }}-{{
-              10 - team.worstPossibleRecord
+              (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                : 17) - team.worstPossibleRecord
             }}</span
           >
           (with {{ team.worstScheduleTeam }}'s schedule)
@@ -354,4 +431,3 @@ function getRankSuffix(rank: number): string {
     </div>
   </div>
 </template>
-<style scoped></style>
