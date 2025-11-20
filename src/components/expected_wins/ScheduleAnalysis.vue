@@ -196,127 +196,123 @@ const getDotPosition = (value: number, min: number, max: number) => {
     >
       Luckiest/Unluckiest Teams
     </h1>
-    <div class="flex flex-wrap justify-start lg:flex-nowrap">
-      <div class="lg:mr-4 lg:w-1/2">
-        <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 min-h-52"
-          v-for="team in luckAnalysis.luckiest"
-          :key="team.teamName"
-        >
-          <h3 class="mb-3 text-xl font-semibold dark:text-gray-200">
-            {{ team.teamName }}
-          </h3>
-          <div class="flex mb-3 text-center justify-evenly">
-            <div>
-              <p class="text-gray-600 dark:text-gray-300">Wins</p>
-              <p class="font-semibold dark:text-gray-200 text-2xl">
-                {{ team.actualWins }}
-              </p>
-            </div>
-            <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
-            <div>
-              <p class="text-gray-600 dark:text-gray-300">Expected</p>
-              <p class="font-semibold dark:text-gray-200 text-2xl">
-                {{ team.expectedWins.toFixed(2) }}
-              </p>
-            </div>
-            <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
-            <div>
-              <p class="text-gray-600 dark:text-gray-300">Luck</p>
-              <p class="font-semibold text-green-500 text-2xl">
-                +{{ team.luckDiff.toFixed(2) }}
-              </p>
-            </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div
+        class="px-4 py-3 mb-4 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 flex flex-col"
+        v-for="team in luckAnalysis.luckiest"
+        :key="team.teamName"
+      >
+        <h3 class="mb-3 text-xl font-semibold dark:text-gray-200">
+          {{ team.teamName }}
+        </h3>
+        <div class="flex mb-3 text-center justify-evenly">
+          <div>
+            <p class="text-gray-600 dark:text-gray-300">Wins</p>
+            <p class="font-semibold dark:text-gray-200 text-2xl">
+              {{ team.actualWins }}
+            </p>
           </div>
-          <h4
-            v-if="team.luckyWeeks.length > 0"
-            class="my-2 text-gray-600 dark:text-gray-300"
-          >
-            Key Matchups
-          </h4>
-          <ul>
-            <li
-              v-for="week in team.luckyWeeks"
-              :key="week.week"
-              class="p-2.5 mb-2 bg-gray-50 rounded dark:bg-gray-700 dark:text-gray-200"
-            >
-              <p class="font-semibold">Week {{ week.week }}</p>
-              <p>
-                Won with
-                <span class="font-semibold">{{ week.points }}</span> pts ({{
-                  week.rankText
-                }}) vs {{ week.opponentName }}
-              </p>
-            </li>
-          </ul>
-          <div v-if="team.luckyWeeks.length === 0">
-            <p class="text-gray-800 dark:text-gray-200">
-              <b>{{ team.teamName }}</b> did not have any individual weeks where
-              they won with a particularly low score. Their luck came from
-              facing opponents with below average scores.
+          <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
+          <div>
+            <p class="text-gray-600 dark:text-gray-300">Expected</p>
+            <p class="font-semibold dark:text-gray-200 text-2xl">
+              {{ team.expectedWins.toFixed(2) }}
+            </p>
+          </div>
+          <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
+          <div>
+            <p class="text-gray-600 dark:text-gray-300">Luck</p>
+            <p class="font-semibold text-green-500 text-2xl">
+              +{{ team.luckDiff.toFixed(2) }}
             </p>
           </div>
         </div>
-      </div>
-      <div class="lg:w-1/2">
-        <div
-          class="px-4 py-3 mb-4 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 min-h-52"
-          v-for="team in luckAnalysis.unluckiest"
-          :key="team.teamName"
+        <h4
+          v-if="team.luckyWeeks.length > 0"
+          class="my-2 text-gray-600 dark:text-gray-300"
         >
-          <h3 class="mb-3 text-xl font-semibold dark:text-gray-200">
-            {{ team.teamName }}
-          </h3>
-          <div class="flex mb-3 text-center justify-evenly">
-            <div>
-              <p class="text-gray-600 dark:text-gray-300">Wins</p>
-              <p class="font-semibold dark:text-gray-200 text-2xl">
-                {{ team.actualWins }}
-              </p>
-            </div>
-            <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
-            <div>
-              <p class="text-gray-600 dark:text-gray-300">Expected</p>
-              <p class="font-semibold dark:text-gray-200 text-2xl">
-                {{ team.expectedWins.toFixed(2) }}
-              </p>
-            </div>
-            <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
-            <div>
-              <p class="text-gray-600 dark:text-gray-300">Luck</p>
-              <p class="font-semibold text-red-500 text-2xl">
-                {{ team.luckDiff.toFixed(2) }}
-              </p>
-            </div>
-          </div>
-          <h4
-            v-if="team.unluckyWeeks.length > 0"
-            class="my-2 text-gray-600 dark:text-gray-300"
+          Key Matchups
+        </h4>
+        <ul>
+          <li
+            v-for="week in team.luckyWeeks"
+            :key="week.week"
+            class="p-2.5 mb-2 bg-gray-50 rounded dark:bg-gray-700 dark:text-gray-200"
           >
-            Key Matchups
-          </h4>
-          <ul>
-            <li
-              v-for="week in team.unluckyWeeks"
-              :key="week.week"
-              class="p-2.5 mb-2 bg-gray-50 rounded dark:bg-gray-700 dark:text-gray-200"
-            >
-              <p class="font-semibold">Week {{ week.week }}</p>
-              <p>
-                Won with
-                <span class="font-semibold">{{ week.points }}</span> pts ({{
-                  week.rankText
-                }}) vs {{ week.opponentName }}
-              </p>
-            </li>
-          </ul>
-          <div v-if="team.unluckyWeeks.length === 0">
-            <p class="text-gray-800 dark:text-gray-200">
-              <b>{{ team.teamName }}</b> did not have any individual weeks where
-              they lost with a particularly high score. Their bad luck came from
-              facing opponents with above average scores.
+            <p class="font-semibold">Week {{ week.week }}</p>
+            <p>
+              Won with
+              <span class="font-semibold">{{ week.points }}</span> pts ({{
+                week.rankText
+              }}) vs {{ week.opponentName }}
+            </p>
+          </li>
+        </ul>
+        <div v-if="team.luckyWeeks.length === 0">
+          <p class="text-gray-800 dark:text-gray-200">
+            <b>{{ team.teamName }}</b> did not have any individual weeks where
+            they won with a particularly low score. Their luck came from facing
+            opponents with below average scores.
+          </p>
+        </div>
+      </div>
+      <div
+        class="px-4 py-3 mb-4 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 flex flex-col"
+        v-for="team in luckAnalysis.unluckiest"
+        :key="team.teamName"
+      >
+        <h3 class="mb-3 text-xl font-semibold dark:text-gray-200">
+          {{ team.teamName }}
+        </h3>
+        <div class="flex mb-3 text-center justify-evenly">
+          <div>
+            <p class="text-gray-600 dark:text-gray-300">Wins</p>
+            <p class="font-semibold dark:text-gray-200 text-2xl">
+              {{ team.actualWins }}
             </p>
           </div>
+          <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
+          <div>
+            <p class="text-gray-600 dark:text-gray-300">Expected</p>
+            <p class="font-semibold dark:text-gray-200 text-2xl">
+              {{ team.expectedWins.toFixed(2) }}
+            </p>
+          </div>
+          <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
+          <div>
+            <p class="text-gray-600 dark:text-gray-300">Luck</p>
+            <p class="font-semibold text-red-500 text-2xl">
+              {{ team.luckDiff.toFixed(2) }}
+            </p>
+          </div>
+        </div>
+        <h4
+          v-if="team.unluckyWeeks.length > 0"
+          class="my-2 text-gray-600 dark:text-gray-300"
+        >
+          Key Matchups
+        </h4>
+        <ul>
+          <li
+            v-for="week in team.unluckyWeeks"
+            :key="week.week"
+            class="p-2.5 mb-2 bg-gray-50 rounded dark:bg-gray-700 dark:text-gray-200"
+          >
+            <p class="font-semibold">Week {{ week.week }}</p>
+            <p>
+              Won with
+              <span class="font-semibold">{{ week.points }}</span> pts ({{
+                week.rankText
+              }}) vs {{ week.opponentName }}
+            </p>
+          </li>
+        </ul>
+        <div v-if="team.unluckyWeeks.length === 0">
+          <p class="text-gray-800 dark:text-gray-200">
+            <b>{{ team.teamName }}</b> did not have any individual weeks where
+            they lost with a particularly high score. Their bad luck came from
+            facing opponents with above average scores.
+          </p>
         </div>
       </div>
     </div>
