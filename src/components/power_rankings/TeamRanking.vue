@@ -295,7 +295,7 @@ watch(
                   }}
                   {{ player.lastName }}
                 </p>
-                <div class="px-3 py-1 bg-gray-100 rounded-lg dark:bg-gray-900">
+                <div class="px-3 py-1 bg-gray-50 rounded-lg dark:bg-gray-900">
                   <p class="text-sm truncate sm:text-base max-w-16 sm:max-w-52">
                     {{ getTeamName(player.id) }}
                   </p>
@@ -303,7 +303,7 @@ watch(
               </div>
               <div class="flex">
                 <div
-                  class="w-full px-3 py-1 m-1 bg-gray-100 rounded-lg dark:bg-gray-900"
+                  class="w-full px-3 py-1 m-1 bg-gray-50 rounded-lg dark:bg-gray-900"
                 >
                   <p class="text-gray-600 dark:text-gray-400">Points:</p>
                   <p class="text-base font-semibold sm:text-lg">
@@ -311,7 +311,7 @@ watch(
                   </p>
                 </div>
                 <div
-                  class="w-full px-3 py-1 m-1 bg-gray-100 rounded-lg dark:bg-gray-900"
+                  class="w-full px-3 py-1 m-1 bg-gray-50 rounded-lg dark:bg-gray-900"
                 >
                   <p class="text-gray-600 dark:text-gray-400">PPG:</p>
                   <p class="text-base font-semibold sm:text-lg">
@@ -319,7 +319,7 @@ watch(
                   </p>
                 </div>
                 <div
-                  class="hidden w-full px-3 py-1 m-1 bg-gray-100 rounded-lg dark:bg-gray-900 sm:inline-block"
+                  class="hidden w-full px-3 py-1 m-1 bg-gray-50 rounded-lg dark:bg-gray-900 sm:inline-block"
                 >
                   <p class="text-gray-600 dark:text-gray-400">Overall Rank:</p>
                   <p class="text-base font-semibold sm:text-lg">
@@ -327,7 +327,7 @@ watch(
                   </p>
                 </div>
                 <div
-                  class="hidden w-full px-3 py-1 m-1 bg-gray-100 rounded-lg dark:bg-gray-900 sm:inline-block"
+                  class="hidden w-full px-3 py-1 m-1 bg-gray-50 rounded-lg dark:bg-gray-900 sm:inline-block"
                 >
                   <p class="text-gray-600 dark:text-gray-400">Games Played:</p>
                   <p class="text-base font-semibold sm:text-lg">

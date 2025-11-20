@@ -322,8 +322,8 @@ watch(
                         player.projection?.away === true
                           ? "@ "
                           : player.projection?.away === false
-                          ? "vs "
-                          : "BYE"
+                            ? "vs "
+                            : "BYE"
                       }}{{ player.projection?.opponent }}</span
                     >
                   </p>
@@ -342,7 +342,7 @@ watch(
                   <button
                     @click="toggle(player.player_id)"
                     aria-label="Button to show all trades"
-                    class="flex max-h-7 sm:max-h-16 text-gray-900 mt-2 bg-gray-100 border border-gray-300 focus:outline-none hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 font-medium rounded-lg text-sm px-0.5 sm:px-3 py-0.5 sm:py-2.5 mb-2 dark:bg-gray-700 dark:text-white dark:border-gray-800 dark:hover:bg-gray-600 dark:hover:border-gray-600 dark:focus:ring-gray-600"
+                    class="flex max-h-7 sm:max-h-16 text-gray-900 mt-2 bg-gray-50 border border-gray-300 focus:outline-none hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 font-medium rounded-lg text-sm px-0.5 sm:px-3 py-0.5 sm:py-2.5 mb-2 dark:bg-gray-700 dark:text-white dark:border-gray-800 dark:hover:bg-gray-600 dark:hover:border-gray-600 dark:focus:ring-gray-600"
                   >
                     <svg
                       v-if="expanded[player.player_id]"
@@ -384,7 +384,7 @@ watch(
                 </div>
               </div>
             </div>
-            <div class="px-4 py-2 mt-2 bg-gray-100 rounded dark:bg-gray-700">
+            <div class="px-4 py-2 mt-2 bg-gray-50 rounded dark:bg-gray-700">
               <div class="flex justify-between">
                 <p class="mr-2 text-sm text-balance sm:text-base">
                   Recent <br />
@@ -458,12 +458,12 @@ watch(
                             index -
                             1
                           : store.leagueInfo[store.currentLeagueIndex]
-                              ?.lastScoredWeek
-                          ? store.leagueInfo[store.currentLeagueIndex]
-                              ?.lastScoredWeek -
-                            index -
-                            1
-                          : 17 - index
+                                ?.lastScoredWeek
+                            ? store.leagueInfo[store.currentLeagueIndex]
+                                ?.lastScoredWeek -
+                              index -
+                              1
+                            : 17 - index
                       }}
                     </p>
                     <p class="my-1">{{ score }}</p>
