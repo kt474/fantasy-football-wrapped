@@ -21,6 +21,17 @@ onMounted(() => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "11/20/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "The weekly preview section now has AI generated matchup previews for each matchup.",
+        ],
+      },
+    ],
+  },
+  {
     date: "11/18/25",
     content: [
       {
