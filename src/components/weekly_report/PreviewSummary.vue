@@ -65,7 +65,7 @@ const promptData = computed(() => {
 });
 </script>
 <template>
-  <div class="bg-gray-50 mt-4 rounded dark:bg-gray-700 mx-2 p-4">
+  <div class="bg-gray-50 mt-3 rounded dark:bg-gray-700 mx-0 sm:mx-2 p-4">
     <h3 class="font-semibold text-gray-800 dark:text-gray-50">
       Matchup Preview
     </h3>
@@ -78,7 +78,10 @@ const promptData = computed(() => {
     </button>
     <div v-if="preview" class="mt-1">
       <p>{{ preview }}</p>
-      <p class="text-xs text-gray-500 dark:text-gray-300 mt-1">
+      <p
+        v-if="preview !== 'Unable to generate preview. Please try again later.'"
+        class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+      >
         Generated using GPT-4.1-mini. Information provided may not always be
         accurate.
       </p>

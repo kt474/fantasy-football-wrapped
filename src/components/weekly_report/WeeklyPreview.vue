@@ -752,7 +752,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
       </div>
       <div
         v-if="!isPlayoffs"
-        class="flex justify-between p-4 mx-0 mt-4 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700"
+        class="flex justify-between p-4 mx-0 mt-3 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700"
       >
         <div class="mr-2">
           <p
@@ -788,6 +788,10 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
         </div>
       </div>
       <PreviewSummary
+        v-if="
+          currentWeek ===
+          store.leagueInfo[store.currentLeagueIndex]?.currentWeek
+        "
         :matchup1="matchup[0]"
         :matchup2="matchup[1]"
         :playerNames="playerNames"
