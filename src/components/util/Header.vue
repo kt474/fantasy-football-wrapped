@@ -205,7 +205,7 @@ watch(
                       class=""
                     >
                       <img
-                        src="../../../public/Venmo_Logo_Blue.png"
+                        src="/Venmo_Logo_Blue.png"
                         alt="Venmo"
                         style="height: 45px !important; width: 210px !important"
                         class="mt-7"
