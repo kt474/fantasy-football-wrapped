@@ -66,10 +66,10 @@ const luckAnalysis = computed(() => {
         ranking <= 3
           ? `${ranking}${getRankSuffix(ranking)} highest`
           : ranking >= totalTeams - 2
-            ? `${totalTeams - ranking + 1}${getRankSuffix(
-                totalTeams - ranking + 1
-              )} lowest`
-            : `${ranking}${getRankSuffix(ranking)}`;
+          ? `${totalTeams - ranking + 1}${getRankSuffix(
+              totalTeams - ranking + 1
+            )} lowest`
+          : `${ranking}${getRankSuffix(ranking)}`;
 
       const wouldBeat = teams.filter((t) => teamPoints > t.points[week]).length;
       const wouldLose = teams.filter((t) => teamPoints < t.points[week]).length;
@@ -201,9 +201,9 @@ const getDotPosition = (value: number, min: number, max: number) => {
     >
       Highlighting the specific weeks teams had lucky/unlucky matchups.
     </p>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div
-        class="px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 flex flex-col"
+        class="flex flex-col px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600"
         v-for="team in luckAnalysis.luckiest"
         :key="team.teamName"
       >
@@ -213,21 +213,21 @@ const getDotPosition = (value: number, min: number, max: number) => {
         <div class="flex mb-3 text-center justify-evenly">
           <div>
             <p class="text-gray-600 dark:text-gray-300">Wins</p>
-            <p class="font-semibold dark:text-gray-200 text-2xl">
+            <p class="text-2xl font-semibold dark:text-gray-200">
               {{ team.actualWins }}
             </p>
           </div>
-          <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
+          <div class="w-px mx-4 bg-gray-200 dark:bg-gray-700"></div>
           <div>
             <p class="text-gray-600 dark:text-gray-300">Expected</p>
-            <p class="font-semibold dark:text-gray-200 text-2xl">
+            <p class="text-2xl font-semibold dark:text-gray-200">
               {{ team.expectedWins.toFixed(2) }}
             </p>
           </div>
-          <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
+          <div class="w-px mx-4 bg-gray-200 dark:bg-gray-700"></div>
           <div>
             <p class="text-gray-600 dark:text-gray-300">Luck</p>
-            <p class="font-semibold text-green-500 text-2xl">
+            <p class="text-2xl font-semibold text-green-500">
               +{{ team.luckDiff.toFixed(2) }}
             </p>
           </div>
@@ -263,7 +263,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
         </div>
       </div>
       <div
-        class="px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600 flex flex-col"
+        class="flex flex-col px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600"
         v-for="team in luckAnalysis.unluckiest"
         :key="team.teamName"
       >
@@ -273,21 +273,21 @@ const getDotPosition = (value: number, min: number, max: number) => {
         <div class="flex mb-3 text-center justify-evenly">
           <div>
             <p class="text-gray-600 dark:text-gray-300">Wins</p>
-            <p class="font-semibold dark:text-gray-200 text-2xl">
+            <p class="text-2xl font-semibold dark:text-gray-200">
               {{ team.actualWins }}
             </p>
           </div>
-          <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
+          <div class="w-px mx-4 bg-gray-200 dark:bg-gray-700"></div>
           <div>
             <p class="text-gray-600 dark:text-gray-300">Expected</p>
-            <p class="font-semibold dark:text-gray-200 text-2xl">
+            <p class="text-2xl font-semibold dark:text-gray-200">
               {{ team.expectedWins.toFixed(2) }}
             </p>
           </div>
-          <div class="w-px bg-gray-200 dark:bg-gray-700 mx-4"></div>
+          <div class="w-px mx-4 bg-gray-200 dark:bg-gray-700"></div>
           <div>
             <p class="text-gray-600 dark:text-gray-300">Luck</p>
-            <p class="font-semibold text-red-500 text-2xl">
+            <p class="text-2xl font-semibold text-red-500">
               {{ team.luckDiff.toFixed(2) }}
             </p>
           </div>
@@ -306,7 +306,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
           >
             <p class="font-semibold">Week {{ week.week }}</p>
             <p class="text-sm text-gray-600 dark:text-gray-300">
-              Won with
+              Lost with
               <span class="font-semibold text-gray-800 dark:text-gray-200">{{
                 week.points
               }}</span>
@@ -349,9 +349,9 @@ const getDotPosition = (value: number, min: number, max: number) => {
         <h3 class="mb-2 text-xl font-semibold dark:text-gray-200">
           {{ team.teamName }}
         </h3>
-        <div class="relative w-full mt-4 h-10">
+        <div class="relative w-full h-10 mt-4">
           <div
-            class="absolute mx-3 left-0 right-0 h-4 bg-gray-100 dark:bg-gray-700 rounded-lg"
+            class="absolute left-0 right-0 h-4 mx-3 bg-gray-100 rounded-lg dark:bg-gray-700"
           ></div>
           <div
             v-for="dot in [
@@ -403,7 +403,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
         <div class="flex justify-between text-center">
           <div class="flex-1">
             <p class="text-gray-600 dark:text-gray-300">Actual</p>
-            <p class="font-semibold text-xl">
+            <p class="text-xl font-semibold">
               {{ team.actualWins }}-{{
                 (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
                   ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
@@ -413,31 +413,31 @@ const getDotPosition = (value: number, min: number, max: number) => {
           </div>
           <div class="flex-1">
             <p class="text-gray-600 dark:text-gray-300">Exp. Wins</p>
-            <p class="font-semibold text-blue-500 text-xl">
+            <p class="text-xl font-semibold text-blue-500">
               {{ team.expectedWins.toFixed(2) }}
             </p>
           </div>
           <div class="flex-1">
             <p class="text-gray-600 dark:text-gray-300">Best</p>
-            <p class="font-semibold text-green-500 text-xl">
+            <p class="text-xl font-semibold text-green-500">
               {{ team.bestPossibleRecord }}-{{
                 (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
                   ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
                   : 17) - team.bestPossibleRecord
               }}
             </p>
-            <p class="text-xs mt-1">({{ team.bestScheduleTeam }})</p>
+            <p class="mt-1 text-xs">({{ team.bestScheduleTeam }})</p>
           </div>
           <div class="flex-1">
             <p class="text-gray-600 dark:text-gray-300">Worst</p>
-            <p class="font-semibold text-red-500 text-xl">
+            <p class="text-xl font-semibold text-red-500">
               {{ team.worstPossibleRecord }}-{{
                 (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
                   ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
                   : 17) - team.worstPossibleRecord
               }}
             </p>
-            <p class="text-xs mt-1">({{ team.worstScheduleTeam }})</p>
+            <p class="mt-1 text-xs">({{ team.worstScheduleTeam }})</p>
           </div>
         </div>
       </div>
