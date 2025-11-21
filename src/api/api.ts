@@ -152,6 +152,26 @@ export const generateReport = async (prompt: any, metadata: any) => {
   }
 };
 
+export const generatePreview = async (prompt: any) => {
+  try {
+    const response = await fetch(import.meta.env.VITE_WEEKLY_PREVIEW, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data: prompt,
+      }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error:", error);
+    return {
+      text: "Unable to generate preview. Please try again later.",
+    };
+  }
+};
+
 export const inputUsername = async (username: string, year: string) => {
   try {
     await fetch(import.meta.env.VITE_USERNAME_URL, {
@@ -726,7 +746,7 @@ export const getData = async (leagueId: string) => {
     any,
     any[],
     any[],
-    any[]
+    any[],
   ] = await Promise.all([
     getLeague(leagueId),
     getRosters(leagueId),
@@ -789,12 +809,15 @@ export const getData = async (leagueId: string) => {
   ]);
 
   // Combine all transactions
-  const transactions = transactionPromises.reduce((acc, obj) => {
-    Object.entries(obj).forEach(([id, value]) => {
-      acc[id] = (acc[id] || 0) + (value as number);
-    });
-    return acc;
-  }, {} as Record<string, number>);
+  const transactions = transactionPromises.reduce(
+    (acc, obj) => {
+      Object.entries(obj).forEach(([id, value]) => {
+        acc[id] = (acc[id] || 0) + (value as number);
+      });
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   return {
     ...newLeagueInfo,

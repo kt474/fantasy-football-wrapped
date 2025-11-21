@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PreviewSummary from "./PreviewSummary.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { TableDataType } from "../../api/types.ts";
 import { useStore } from "../../store/store";
@@ -505,8 +506,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           ? matchup[0].username
                           : "Ghost Roster"
                         : matchup[0].name
-                        ? matchup[0].name
-                        : "Ghost Roster"
+                          ? matchup[0].name
+                          : "Ghost Roster"
                     }}
                   </p>
                   <p class="ml-2 text-xs">
@@ -626,8 +627,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           ? matchup[1].username
                           : "Ghost Roster"
                         : matchup[1].name
-                        ? matchup[1].name
-                        : "Ghost Roster"
+                          ? matchup[1].name
+                          : "Ghost Roster"
                     }}
                   </p>
                   <p class="mr-2 text-xs float-end">
@@ -751,7 +752,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
       </div>
       <div
         v-if="!isPlayoffs"
-        class="flex justify-between px-4 py-4 mx-0 mt-4 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700"
+        class="flex justify-between p-4 mx-0 mt-4 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700"
       >
         <div class="mr-2">
           <p
@@ -763,8 +764,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   ? matchup[0].username
                   : "Ghost Roster"
                 : matchup[0].name
-                ? matchup[0].name
-                : "Ghost Roster"
+                  ? matchup[0].name
+                  : "Ghost Roster"
             }}
           </p>
           {{ generateString(cases[matchup[0].id]) }}
@@ -779,13 +780,18 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   ? matchup[1].username
                   : "Ghost Roster"
                 : matchup[1].name
-                ? matchup[1].name
-                : "Ghost Roster"
+                  ? matchup[1].name
+                  : "Ghost Roster"
             }}
           </p>
           {{ generateString(cases[matchup[1].id]) }}
         </div>
       </div>
+      <PreviewSummary
+        :matchup1="matchup[0]"
+        :matchup2="matchup[1]"
+        :playerNames="playerNames"
+      />
       <p
         class="my-4 mb-8 ml-4 font-semibold text-gray-800 sm:mb-0 dark:text-gray-200"
       >
