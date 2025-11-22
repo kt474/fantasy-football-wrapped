@@ -75,8 +75,8 @@ const originalData = computed(() => {
   return [];
 });
 
-const sortedPropsTableData = computed(() => {
-  return originalData.value.sort((a: any, b: any) => {
+const sortedPropsTableData = computed<TableDataType[]>(() => {
+  return [...originalData.value].sort((a: TableDataType, b: TableDataType) => {
     if (a.wins !== b.wins) {
       return b.wins - a.wins;
     }
@@ -86,27 +86,28 @@ const sortedPropsTableData = computed(() => {
 
 // sorted version of originalData
 const tableData: any = computed(() => {
+  const data = [...originalData.value];
   if (tableOrder.value === "wins") {
-    return originalData.value.sort((a: any, b: any) => {
+    return data.sort((a: any, b: any) => {
       if (a.wins !== b.wins) {
         return b.wins - a.wins;
       }
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "points") {
-    return originalData.value.sort((a: any, b: any) => {
+    return data.sort((a: any, b: any) => {
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "pointsAgainst") {
-    return originalData.value.sort((a: any, b: any) => {
+    return data.sort((a: any, b: any) => {
       return b.pointsAgainst - a.pointsAgainst;
     });
   } else if (tableOrder.value === "rating") {
-    return originalData.value.sort((a: any, b: any) => {
+    return data.sort((a: any, b: any) => {
       return b.rating - a.rating;
     });
   } else if (tableOrder.value === "recordAgainstAll") {
-    return originalData.value.sort((a: any, b: any) => {
+    return data.sort((a: any, b: any) => {
       if (a.winsAgainstAll !== b.winsAgainstAll) {
         return b.winsAgainstAll - a.winsAgainstAll;
       }
@@ -480,41 +481,21 @@ const getTeamName = (tableDataItem: any) => {
           class="flex-1 px-3 py-3 mt-4 bg-white border border-gray-200 rounded-lg shadow md:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56 min-h-56"
         >
           <BestManagerCard
-            v-if="store.currentLeagueId"
-            :rosters="props.rosters"
-            :users="props.users"
-            class="mt-0.5"
-          />
-          <BestManagerCard
-            v-else
-            :rosters="fakeRosters"
-            :users="fakeUsers"
+            :rosters="store.currentLeagueId ? props.rosters : fakeRosters"
+            :users="store.currentLeagueId ? props.users : fakeUsers"
             class="mt-0.5"
           />
           <WorstManagerCard
-            v-if="store.currentLeagueId"
-            :rosters="props.rosters"
-            :users="props.users"
-            class="mt-4"
-          />
-          <WorstManagerCard
-            v-else
-            :rosters="fakeRosters"
-            :users="fakeUsers"
+            :rosters="store.currentLeagueId ? props.rosters : fakeRosters"
+            :users="store.currentLeagueId ? props.users : fakeUsers"
             class="mt-4"
           />
           <TransactionsCard
-            v-if="store.currentLeagueId"
-            :users="props.users"
-            :mostTransactions="mostTransactions"
-            :rosters="props.rosters"
-            class="mt-4"
-          />
-          <TransactionsCard
-            v-else
-            :users="fakeUsers"
-            :mostTransactions="{ 1: 24 }"
-            :rosters="props.rosters"
+            :users="store.currentLeagueId ? props.users : fakeUsers"
+            :mostTransactions="
+              store.currentLeagueId ? mostTransactions : { 1: 24 }
+            "
+            :rosters="store.currentLeagueId ? props.rosters : fakeRosters"
             class="mt-4"
           />
         </div>
