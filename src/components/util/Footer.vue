@@ -6,7 +6,7 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const store = useStore();
-const leagueCount = ref(6227); // initial load current unique league count value 11/09/25
+const leagueCount = ref(6678); // initial load current unique league count value 11/23/25
 
 onMounted(async () => {
   const leagueId = route.query.leagueId;

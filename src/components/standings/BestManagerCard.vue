@@ -9,7 +9,7 @@ const props = defineProps<{
   rosters: RosterType[];
 }>();
 
-const bestManager: any = computed(() => {
+const bestManager = computed<RosterType | null>(() => {
   const rosterEfficiency = props.rosters.reduce(
     (highestValue: any, roster: RosterType) => {
       return roster.managerEfficiency > highestValue.managerEfficiency
@@ -20,10 +20,10 @@ const bestManager: any = computed(() => {
   return rosterEfficiency.managerEfficiency ? rosterEfficiency : null;
 });
 
-const bestManagerUser: any = computed(() => {
-  return props.users.filter(
-    (user: any) => user.id === bestManager.value["id"]
-  )[0];
+const bestManagerUser = computed<UserType | null>(() => {
+  const manager = bestManager.value;
+  if (!manager) return null;
+  return props.users.find((user) => user.id === manager.id) ?? null;
 });
 </script>
 <template>
