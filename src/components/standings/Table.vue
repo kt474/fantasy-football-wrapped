@@ -157,7 +157,7 @@ const mostMedianLosses = computed(() => {
 const mostTransactions = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].transactions
-    : [];
+    : {};
 });
 
 const regularSeasonLength = computed(() => {
