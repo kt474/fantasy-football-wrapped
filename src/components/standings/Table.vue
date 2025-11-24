@@ -26,6 +26,7 @@ import Draft from "../draft/Draft.vue";
 import TeamRanking from "../power_rankings/TeamRanking.vue";
 import CurrentTrends from "./CurrentTrends.vue";
 import WeeklyHighScores from "./WeeklyHighScores.vue";
+import LeagueOverview from "../overview/LeagueOverview.vue";
 import ScheduleStrength from "../expected_wins/ScheduleStrength.vue";
 import PlayerNews from "../start_sit/PlayerNews.vue";
 import ScheduleAnalysis from "../expected_wins/ScheduleAnalysis.vue";
@@ -570,6 +571,11 @@ const getTeamName = (tableDataItem: any) => {
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">
       <LeagueHistory :tableData="tableData" />
+    </div>
+    <div v-if="store.currentTab === 'leagueOverview'">
+      <LeagueOverview
+        :league="store.currentLeagueId ? store.leagueInfo[store.currentLeagueIndex] : undefined"
+      />
     </div>
   </div>
 </template>
