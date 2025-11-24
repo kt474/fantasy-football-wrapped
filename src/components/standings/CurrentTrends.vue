@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
-import { generateTrends, getPlayersByIdsMap } from "../../api/api";
+import { generateTrends, getPlayersByIdsMap, Player } from "../../api/api";
 import { getDraftProjections, getDraftPicks } from "../../api/api";
 import { TableDataType, LeagueInfoType } from "../../api/types";
 import { useStore } from "../../store/store";
@@ -11,15 +11,15 @@ const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
-const currentTrends: any = ref("");
+const currentTrends = ref<string[]>([]);
 
-const getCurrentStreak = (str: string) => {
+const getCurrentStreak = (str: string): string => {
   const match = str.match(/([WL])\1*$/);
   if (!match) return "";
   return match[1] + match[0].length;
 };
 
-const getFiveMostRecent = (str: string, n = 5) => {
+const getFiveMostRecent = (str: string, n = 5): string => {
   const recent = str.slice(-n);
 
   const wins = (recent.match(/W/g) || []).length;
@@ -34,7 +34,7 @@ const getPreseasonData = async () => {
       ? "dynasty"
       : "preseason";
 
-  let result: any[] = [];
+  let result: Record<string, unknown>[] = [];
   if (currentLeague) {
     const draftPicks = await getDraftPicks(
       currentLeague.draftId,
@@ -107,11 +107,10 @@ const getPreseasonData = async () => {
   }
 };
 
-const getNameFromId = (userId: string) => {
+const getNameFromId = (userId: string): string => {
   const userObj = props.tableData.find((user) => user.id === userId);
-  if (userObj) {
-    return store.showUsernames ? userObj.username : userObj.name;
-  }
+  if (!userObj) return "";
+  return store.showUsernames ? userObj.username : userObj.name;
 };
 
 const getMaxIndex = (arr: number[]): number => {
@@ -131,7 +130,7 @@ const formatData = async () => {
     return user.starters[weekIndex][maxIndex];
   });
 
-  let playerLookupMap = new Map<string, any>();
+  let playerLookupMap = new Map<string, Player>();
   if (bestStarters.length > 0) {
     playerLookupMap = await getPlayersByIdsMap(bestStarters);
   }
@@ -142,7 +141,7 @@ const formatData = async () => {
 
     const bestStarter = {
       name: playerLookupMap.get(String(user.starters[weekIndex][maxIndex]))
-        .name,
+        ?.name,
       points: starterPoints[maxIndex],
     };
 
@@ -211,10 +210,8 @@ onMounted(async () => {
     (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek ||
       store.leagueInfo[store.currentLeagueIndex]?.status === "in_season")
   ) {
-    const savedText: any = store.leagueInfo[store.currentLeagueIndex]
-      .currentTrends
-      ? store.leagueInfo[store.currentLeagueIndex].currentTrends
-      : "";
+    const savedText: string[] =
+      store.leagueInfo[store.currentLeagueIndex].currentTrends ?? [];
     currentTrends.value = savedText;
   }
 });
@@ -227,11 +224,11 @@ watch(
       !store.leagueInfo[store.currentLeagueIndex].currentTrends &&
       store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
     ) {
-      currentTrends.value = "";
+      currentTrends.value = [];
       await formatData();
     }
     currentTrends.value =
-      store.leagueInfo[store.currentLeagueIndex].currentTrends;
+      store.leagueInfo[store.currentLeagueIndex].currentTrends ?? [];
   }
 );
 

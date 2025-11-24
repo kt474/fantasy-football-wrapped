@@ -13,7 +13,7 @@ export const seasonType: { [key: number]: string } = {
   3: "Guillotine",
 };
 
-interface Player {
+export interface Player {
   player_id: string;
   position: string;
   name: string;
