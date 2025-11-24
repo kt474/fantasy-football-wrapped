@@ -13,6 +13,13 @@ const props = defineProps<{
   totalRosters: number;
 }>();
 
+type PowerRankingEntry = {
+  name: string;
+  type: string;
+  ratings: number[];
+  data?: number[];
+};
+
 const preseasonRank = computed(() => {
   type Position = "QB" | "WR" | "TE" | "RB";
   const positions: Position[] = ["QB", "WR", "TE", "RB"];
@@ -78,8 +85,8 @@ const powerRankings = computed(() => {
   ) {
     return [];
   }
-  const result: any = [];
-  const ratingsContainer: any = [];
+  const result: PowerRankingEntry[] = [];
+  const ratingsContainer: number[][] = [];
   props.tableData.forEach((value: TableDataType) => {
     const ratingArr: number[] = [];
     if (value.recordByWeek && value.points) {
@@ -114,12 +121,12 @@ const powerRankings = computed(() => {
       ratings: ratingArr,
     });
   });
-  const orderedArrs = zip(...ratingsContainer);
-  orderedArrs.forEach((arr: any[]) => {
-    arr.sort((a: number, b: number) => b - a);
+  const orderedArrs = zip(...ratingsContainer) as number[][];
+  orderedArrs.forEach((arr) => {
+    arr.sort((a, b) => b - a);
   });
-  result.forEach((user: any) => {
-    const data: any[] = [];
+  result.forEach((user) => {
+    const data: number[] = [];
     user.ratings.forEach((value: number, index: number) => {
       data.push(orderedArrs[index].indexOf(value) + 1);
     });
