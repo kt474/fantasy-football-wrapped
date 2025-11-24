@@ -48,7 +48,7 @@ const getData = async () => {
         value: await getTradeValue(
           trade.adds,
           currentLeague.season,
-          trade.week,
+          trade.week + 1,
           currentLeague.scoringType,
           addsPlayer.position
         ),
