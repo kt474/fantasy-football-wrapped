@@ -44,7 +44,8 @@ watch(
     <div
       class="flex flex-wrap items-center justify-between max-w-screen-xl py-2 mx-auto"
     >
-      <div
+      <RouterLink
+        to="/"
         @click="
           store.leaguesList = [];
           store.showLeaguesList = false;
@@ -62,10 +63,16 @@ watch(
           class="self-center -mb-1.5 custom-font whitespace-nowrap dark:text-gray-50"
           ><span class="text-blue-600 dark:text-blue-500">ff</span>wrapped</span
         >
-      </div>
+      </RouterLink>
 
       <div class="block w-auto" id="navbar-default">
         <div class="flex flex-row p-0 mt-0 space-x-2 font-medium rounded-lg">
+          <RouterLink
+            to="/"
+            class="px-3 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          >
+            Home
+          </RouterLink>
           <RouterLink
             to="/rosters"
             class="px-3 py-2 text-sm font-semibold text-emerald-700 bg-white border border-emerald-100 rounded-lg shadow-sm hover:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-200 dark:border-gray-700"
