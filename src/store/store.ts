@@ -112,7 +112,7 @@ export const useStore = defineStore("main", {
         item.weeklyReport = payload;
       }
     },
-    addCurrentTrends(leagueId: string, payload: string) {
+    addCurrentTrends(leagueId: string, payload: string[]) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
         item.currentTrends = payload;
