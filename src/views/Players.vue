@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import {
   getPlayerWeeklyFantasyStats,
   getStats,
@@ -7,6 +7,7 @@ import {
   searchPlayers,
 } from "../api/api";
 import { useStore } from "../store/store";
+import { useRoute } from "vue-router";
 
 type PlayerResult = {
   id: string;
@@ -16,6 +17,7 @@ type PlayerResult = {
 };
 
 const store = useStore();
+const route = useRoute();
 
 const query = ref("");
 const selectedPlayer = ref<PlayerResult | null>(null);
@@ -62,7 +64,7 @@ const fetchSeasonYear = async () => {
   }
 };
 
-const loadPlayer = async (player: PlayerResult) => {
+const setPlayerFromStats = async (player: PlayerResult) => {
   selectedPlayer.value = player;
   suggestions.value = [];
   errorMessage.value = "";
@@ -73,17 +75,29 @@ const loadPlayer = async (player: PlayerResult) => {
       getStats(player.id, seasonYear.value, scoringType.value),
       getPlayerWeeklyFantasyStats(player.id, seasonYear.value, scoringType.value),
     ]);
+    if (!seasonStats && weeklyStats.length === 0) {
+      errorMessage.value = "No stats available for this player.";
+    }
+    const displayName = seasonStats
+      ? `${seasonStats.firstName} ${seasonStats.lastName}`.trim()
+      : player.name;
+    const displayTeam = seasonStats?.team || player.team;
+    const displayPos = seasonStats?.position || player.position;
+    selectedPlayer.value = {
+      id: player.id,
+      name: displayName || player.name,
+      position: displayPos || "",
+      team: displayTeam,
+    };
     seasonLine.value = {
       points: seasonStats?.points,
       ppg: seasonStats?.ppg ? Number(seasonStats.ppg.toFixed(2)) : undefined,
       rank: seasonStats?.rank,
       overallRank: seasonStats?.overallRank,
-      team: seasonStats?.team || player.team,
-      position: seasonStats?.position || player.position,
+      team: displayTeam,
+      position: displayPos,
       gp: seasonStats?.gp,
-      name: seasonStats
-        ? `${seasonStats.firstName} ${seasonStats.lastName}`.trim()
-        : player.name,
+      name: displayName,
     };
     weeklyRows.value = weeklyStats;
   } catch (error) {
@@ -95,6 +109,20 @@ const loadPlayer = async (player: PlayerResult) => {
     loading.value = false;
     weeklyLoading.value = false;
   }
+};
+
+const loadPlayer = async (player: PlayerResult) => {
+  await setPlayerFromStats(player);
+};
+
+const loadPlayerById = async (playerId: string) => {
+  if (!playerId) return;
+  await setPlayerFromStats({
+    id: playerId,
+    name: "",
+    position: "",
+    team: "",
+  });
 };
 
 const search = async () => {
@@ -116,7 +144,23 @@ const search = async () => {
 
 onMounted(async () => {
   await fetchSeasonYear();
+  const playerId = Array.isArray(route.query.playerId)
+    ? route.query.playerId[0]
+    : route.query.playerId;
+  if (playerId) {
+    await loadPlayerById(playerId);
+  }
 });
+
+watch(
+  () => route.query.playerId,
+  async (newId) => {
+    const playerId = Array.isArray(newId) ? newId[0] : newId;
+    if (playerId) {
+      await loadPlayerById(playerId);
+    }
+  }
+);
 </script>
 
 <template>

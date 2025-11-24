@@ -14,6 +14,7 @@ import Contact from "./views/Contact.vue";
 import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
 import Players from "./views/Players.vue";
+import Rosters from "./views/Rosters.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -23,6 +24,15 @@ const routes = [
     meta: {
       title: "Player Stats",
       description: "Weekly and season fantasy stats for any NFL player.",
+    },
+  },
+  {
+    path: "/rosters",
+    component: Rosters,
+    meta: {
+      title: "Rosters",
+      description:
+        "Browse each roster and drill into player fantasy production.",
     },
   },
   {

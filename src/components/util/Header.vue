@@ -67,6 +67,12 @@ watch(
       <div class="block w-auto" id="navbar-default">
         <div class="flex flex-row p-0 mt-0 space-x-2 font-medium rounded-lg">
           <RouterLink
+            to="/rosters"
+            class="px-3 py-2 text-sm font-semibold text-emerald-700 bg-white border border-emerald-100 rounded-lg shadow-sm hover:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-200 dark:border-gray-700"
+          >
+            Rosters
+          </RouterLink>
+          <RouterLink
             to="/players"
             class="px-3 py-2 text-sm font-semibold text-blue-700 bg-white border border-blue-100 rounded-lg shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-blue-300 dark:border-gray-700"
           >

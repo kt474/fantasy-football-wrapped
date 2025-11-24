@@ -9,6 +9,7 @@ Current features:
 - Pre-season and in season projections
 - Expected wins and strength of schedule (measuring luck)
 - Roster management stats, trade rankings, and waiver wire moves
+- Roster explorer with per-player fantasy stats and click-through to weekly breakdowns
 - Playoff projections
 - AI generated weekly reports, summary of matchups and top/bottom performers from each week
 - Weekly high score tracker for each played week (top starter score per week)

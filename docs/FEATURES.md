@@ -17,7 +17,13 @@ Snapshot of the main user-facing modules, what they do, and when they were last 
 ## Player Stats Explorer
 - What it does: Search any NFL player and view season totals, PPG, positional rank, team, and week-by-week fantasy points.
 - Data: Sleeper player stats endpoints (`stats/nfl/player/:id` grouping=week), player directory (`players/nfl`), current NFL state for default season.
-- Key UI: `views/Players.vue`; helper APIs in `api/api.ts` (`searchPlayers`, `getPlayerWeeklyFantasyStats`, `getStats`).
+- Key UI: `views/Players.vue`; helper APIs in `api/api.ts` (`searchPlayers`, `getPlayerWeeklyFantasyStats`, `getStats`). Accessible directly via `/players?playerId=<id>` and linked from the Rosters table.
+- Last updated: 2025-11-24.
+
+## Rosters
+- What it does: Lets you switch between league rosters and see each rostered player's team, season points, PPG, positional rank, and games played. Rows link to the Player Stats page for weekly breakdowns.
+- Data: Current league rosters and users (`leagueInfo.rosters`/`users`), per-player season stats via `getStats`.
+- Key UI: `views/Rosters.vue`; navigation link in `components/util/Header.vue`.
 - Last updated: 2025-11-24.
 
 ## Power Rankings
