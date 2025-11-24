@@ -25,6 +25,7 @@ import WeeklyReport from "../weekly_report/WeeklyReport.vue";
 import Draft from "../draft/Draft.vue";
 import TeamRanking from "../power_rankings/TeamRanking.vue";
 import CurrentTrends from "./CurrentTrends.vue";
+import WeeklyHighScores from "./WeeklyHighScores.vue";
 import ScheduleStrength from "../expected_wins/ScheduleStrength.vue";
 import PlayerNews from "../start_sit/PlayerNews.vue";
 import ScheduleAnalysis from "../expected_wins/ScheduleAnalysis.vue";
@@ -501,6 +502,11 @@ const getTeamName = (tableDataItem: any) => {
         </div>
       </div>
     </div>
+    <WeeklyHighScores
+      v-if="store.currentTab === 'standings'"
+      :tableData="tableData"
+      class="mt-4"
+    />
     <StandingsChart
       v-if="store.currentTab === 'standings'"
       :tableData="tableData"

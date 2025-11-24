@@ -15,9 +15,37 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const store = useStore();
+const defaultLeagueId = import.meta.env.VITE_DEFAULT_LEAGUE_ID;
 
 const showLoading = ref(false);
 const isInitialLoading = ref(true);
+
+const loadLeagueById = async (leagueId: string) => {
+  const checkInput: any = await getLeague(leagueId);
+  if (!checkInput["name"]) {
+    store.showInvalidLeagueAlert = true;
+    setTimeout(() => {
+      store.showInvalidLeagueAlert = false;
+    }, 8000);
+    return false;
+  }
+  try {
+    store.updateCurrentLeagueId(leagueId);
+    store.updateLoadingLeague(checkInput["name"]);
+    const league = await getData(leagueId);
+    store.updateLeagueInfo(league);
+    await inputLeague(
+      leagueId,
+      league.name,
+      league.totalRosters,
+      league.seasonType,
+      league.season
+    );
+    return true;
+  } finally {
+    store.updateLoadingLeague("");
+  }
+};
 
 onMounted(async () => {
   try {
@@ -60,34 +88,22 @@ onMounted(async () => {
       ? route.query.leagueId[0]
       : route.query.leagueId;
     // sometimes on refresh the leagueId in the URL becomes undefined
-    if (leagueId && !store.leagueIds.includes(leagueId)) {
-      const checkInput: any = await getLeague(leagueId);
-      if (checkInput["name"]) {
-        store.updateCurrentLeagueId(leagueId);
-        store.updateLoadingLeague(checkInput["name"]);
-        const league = await getData(leagueId);
-        store.updateLeagueInfo(league);
-        await inputLeague(
-          leagueId,
-          league.name,
-          league.totalRosters,
-          league.seasonType,
-          league.season
-        );
-        store.updateLoadingLeague("");
-      } else {
-        store.showInvalidLeagueAlert = true;
-        setTimeout(() => {
-          store.showInvalidLeagueAlert = false;
-        }, 8000);
-      }
-    } else if (leagueId === "undefined") {
+    if (leagueId === "undefined") {
       localStorage.removeItem("currentLeagueId");
       localStorage.removeItem("leagueInfo");
       store.showLoadingAlert = true;
       setTimeout(() => {
         store.showLoadingAlert = false;
       }, 8000);
+    } else if (leagueId && !store.leagueIds.includes(leagueId)) {
+      await loadLeagueById(leagueId);
+    }
+    if (
+      !store.currentLeagueId &&
+      defaultLeagueId &&
+      !store.leagueIds.includes(defaultLeagueId)
+    ) {
+      await loadLeagueById(defaultLeagueId);
     }
   } catch {
     store.showLoadingAlert = true;
