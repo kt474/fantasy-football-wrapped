@@ -76,6 +76,46 @@ export const getPlayerNames = async (playerIds: string[]) => {
   }
 };
 
+let cachedPlayers: any[] | null = null;
+
+export const searchPlayers = async (query: string) => {
+  if (!query || query.length < 2) return [];
+  try {
+    if (!cachedPlayers) {
+      const response = await fetch("https://api.sleeper.com/players/nfl");
+      const result = await response.json();
+      cachedPlayers = Object.values(result);
+    }
+    const lower = query.toLowerCase();
+    const positions = ["QB", "RB", "WR", "TE", "K", "DEF"];
+    return cachedPlayers
+      .filter((player: any) => {
+        const fullName = `${player.first_name || ""} ${
+          player.last_name || ""
+        }`.trim();
+        const nameMatch = fullName.toLowerCase().includes(lower);
+        const searchName =
+          player.search_full_name &&
+          player.search_full_name.toLowerCase().includes(lower);
+        return (
+          (nameMatch || searchName) &&
+          player.position &&
+          positions.includes(player.position)
+        );
+      })
+      .slice(0, 12)
+      .map((p: any) => ({
+        id: p.player_id,
+        name: `${p.first_name || ""} ${p.last_name || ""}`.trim(),
+        position: p.position,
+        team: p.team,
+      }));
+  } catch (error) {
+    console.error("Error searching players:", error);
+    return [];
+  }
+};
+
 export const getLeagueCount = async () => {
   try {
     const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);
@@ -403,6 +443,46 @@ export const getSingleWeekStats = async (
     ranks,
     stats,
   };
+};
+
+export const getPlayerWeeklyFantasyStats = async (
+  playerId: string,
+  year: string,
+  scoringType: number
+) => {
+  const response = await fetch(
+    `https://api.sleeper.com/stats/nfl/player/${playerId}?season_type=regular&season=${year}&grouping=week`
+  );
+  const allWeeks = await response.json();
+  let scoringKey = "pts_ppr";
+  let rankKey = "pos_rank_ppr";
+  if (scoringType === 0) {
+    scoringKey = "pts_std";
+    rankKey = "pos_rank_std";
+  } else if (scoringType === 0.5) {
+    scoringKey = "pts_half_ppr";
+    rankKey = "pos_rank_half_ppr";
+  }
+  const rows = Object.entries(allWeeks || {})
+    .map(([week, data]: any) => {
+      const points = data?.stats?.[scoringKey];
+      if (points === undefined || points === null) return null;
+      return {
+        week: Number(week),
+        points: Number(points.toFixed(2)),
+        opponent: data?.opponent || "",
+        rank: data?.stats?.[rankKey],
+        snaps: data?.stats?.off_snp,
+      };
+    })
+    .filter(Boolean) as {
+    week: number;
+    points: number;
+    opponent: string;
+    rank: number;
+    snaps: number;
+  }[];
+  return rows.sort((a, b) => a.week - b.week);
 };
 
 export const getWeeklyProjections = async (

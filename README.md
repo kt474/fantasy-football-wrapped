@@ -12,6 +12,7 @@ Current features:
 - Playoff projections
 - AI generated weekly reports, summary of matchups and top/bottom performers from each week
 - Weekly high score tracker for each played week (top starter score per week)
+- Player stats explorer (search any NFL player for season/weekly fantasy points)
 - Draft grades and recap
 - League history stats
 

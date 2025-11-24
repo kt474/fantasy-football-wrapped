@@ -13,9 +13,18 @@ import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import Contact from "./views/Contact.vue";
 import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
+import Players from "./views/Players.vue";
 
 const routes = [
   { path: "/", component: Home },
+  {
+    path: "/players",
+    component: Players,
+    meta: {
+      title: "Player Stats",
+      description: "Weekly and season fantasy stats for any NFL player.",
+    },
+  },
   {
     path: "/changelog",
     component: ChangelogPage,

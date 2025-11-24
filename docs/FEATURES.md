@@ -14,6 +14,12 @@ Snapshot of the main user-facing modules, what they do, and when they were last 
 - Key UI: `components/standings/WeeklyHighScores.vue`.
 - Last updated: 2025-11-24.
 
+## Player Stats Explorer
+- What it does: Search any NFL player and view season totals, PPG, positional rank, team, and week-by-week fantasy points.
+- Data: Sleeper player stats endpoints (`stats/nfl/player/:id` grouping=week), player directory (`players/nfl`), current NFL state for default season.
+- Key UI: `views/Players.vue`; helper APIs in `api/api.ts` (`searchPlayers`, `getPlayerWeeklyFantasyStats`, `getStats`).
+- Last updated: 2025-11-24.
+
 ## Power Rankings
 - What it does: Ranks teams using blended scoring (average, high/low, win percentage) plus roster projections.
 - Data: `createTableData` output, projection data when available (`addProjectionData`).

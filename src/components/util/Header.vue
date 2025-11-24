@@ -66,6 +66,12 @@ watch(
 
       <div class="block w-auto" id="navbar-default">
         <div class="flex flex-row p-0 mt-0 space-x-2 font-medium rounded-lg">
+          <RouterLink
+            to="/players"
+            class="px-3 py-2 text-sm font-semibold text-blue-700 bg-white border border-blue-100 rounded-lg shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-blue-300 dark:border-gray-700"
+          >
+            Player Stats
+          </RouterLink>
           <button
             aria-label="Button to show info modal"
             data-modal-target="default-modal"
