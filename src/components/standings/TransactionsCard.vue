@@ -9,21 +9,17 @@ const store = useStore();
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
-  mostTransactions: object;
+  mostTransactions: Record<string, number>;
 }>();
 
-const mostTransactions: any = computed(() => {
-  return maxBy(toPairs(props.mostTransactions), ([, value]) => value);
-});
+const mostTransactions = computed<[string, number] | null>(
+  () => maxBy(toPairs(props.mostTransactions), ([, value]) => value) ?? null
+);
 
-const mostTransactionsUser: any = computed(() => {
-  if (mostTransactions.value) {
-    return props.users.filter(
-      (user: any) => user.id === mostTransactions.value[0]
-    )[0];
-  } else {
-    return props.users[0];
-  }
+const mostTransactionsUser = computed<UserType | null>(() => {
+  const entry = mostTransactions.value;
+  if (!entry) return null;
+  return props.users.find((user) => user.id === entry[0]) ?? null;
 });
 </script>
 <template>

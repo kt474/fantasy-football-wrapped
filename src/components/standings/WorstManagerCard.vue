@@ -9,21 +9,17 @@ const props = defineProps<{
   rosters: RosterType[];
 }>();
 
-const worstManager: any = computed(() => {
-  const rosterEfficiency = props.rosters.reduce(
-    (highestValue: any, roster: RosterType) => {
-      return roster.managerEfficiency < highestValue.managerEfficiency
-        ? roster
-        : highestValue;
-    }
+const worstManager = computed<RosterType | null>(() => {
+  if (!props.rosters.length) return null;
+  return props.rosters.reduce((worst, roster) =>
+    roster.managerEfficiency < worst.managerEfficiency ? roster : worst
   );
-  return rosterEfficiency.managerEfficiency ? rosterEfficiency : null;
 });
 
-const worstManagerUser: any = computed(() => {
-  return props.users.filter(
-    (user: any) => user.id === worstManager.value["id"]
-  )[0];
+const worstManagerUser = computed<UserType | null>(() => {
+  const manager = worstManager.value;
+  if (!manager) return null;
+  return props.users.find((user) => user.id === manager.id) ?? null;
 });
 </script>
 <template>

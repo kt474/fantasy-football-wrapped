@@ -8,152 +8,67 @@ const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
-const seriesData = computed(() => {
-  const winPercentage: number[] = [];
-  const winPercentageAll: number[] = [];
-  const winPercentageMedian: number[] = [];
-  props.tableData.forEach((user: any) => {
-    winPercentage.push(
-      parseFloat((user.wins / (user.losses + user.wins)).toFixed(2))
-    );
-    winPercentageAll.push(
-      parseFloat(
-        (
-          user.winsAgainstAll /
-          (user.lossesAgainstAll + user.winsAgainstAll)
-        ).toFixed(2)
-      )
-    );
-    winPercentageMedian.push(
-      parseFloat(
-        (
-          user.winsWithMedian /
-          (user.lossesWithMedian + user.winsWithMedian)
-        ).toFixed(2)
-      )
-    );
-  });
-  return [
-    {
-      name: "Win Percentage",
-      data: winPercentage,
-    },
-    {
-      name: "Record vs. All Win Percentage",
-      data: winPercentageAll,
-    },
-    {
-      name: "Median Record Win Percentage",
-      data: winPercentageMedian,
-    },
-  ];
-});
-
-const updateChartColor = () => {
-  chartOptions.value = {
-    ...chartOptions.value,
-    chart: {
-      type: "bar",
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
-      toolbar: {
-        show: false,
-      },
-      zoom: {
-        enabled: false,
-      },
-      animations: {
-        enabled: false,
-      },
-    },
-    tooltip: {
-      theme: store.darkMode ? "dark" : "light",
-    },
-    xaxis: {
-      categories: props.tableData.map((user: any) => {
-        if (store.showUsernames) {
-          return user.username ? user.username : "";
-        }
-        return user.name ? user.name : "";
-      }),
-      tickAmount: props.tableData.length - 1,
-      hideOverlappingLabels: false,
-      title: {
-        text: "League Manager",
-        offsetY: -5,
-        style: {
-          fontSize: "16px",
-          fontFamily:
-            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
-          fontWeight: 600,
-        },
-      },
-      labels: {
-        formatter: function (str: string) {
-          const n = 17;
-          return str.length > n ? str.slice(0, n - 1) + "..." : str;
-        },
-      },
-    },
-  };
+const winPct = (wins: number, losses: number): number => {
+  const total = wins + losses;
+  return total === 0 ? 0 : parseFloat((wins / total).toFixed(2));
 };
 
-watch(
-  [
-    () => store.darkMode,
-    () => store.showUsernames,
-    () => store.currentLeagueId,
-  ],
-  () => {
-    updateChartColor();
-  }
+const seriesData = computed(() => [
+  {
+    name: "Win Percentage",
+    data: props.tableData.map((u) => winPct(u.wins, u.losses)),
+  },
+  {
+    name: "Record vs. All Win Percentage",
+    data: props.tableData.map((u) =>
+      winPct(u.winsAgainstAll, u.lossesAgainstAll)
+    ),
+  },
+  {
+    name: "Median Record Win Percentage",
+    data: props.tableData.map((u) =>
+      winPct(u.winsWithMedian, u.lossesWithMedian)
+    ),
+  },
+]);
+
+const userLabelList = computed(() =>
+  props.tableData.map((user) => {
+    const label = store.showUsernames
+      ? (user.username ?? "")
+      : (user.name ?? "");
+    const n = 17;
+    return label.length > n ? label.slice(0, n - 1) + "..." : label;
+  })
 );
 
-const chartOptions = ref({
+const chartOptions = ref({});
+
+const buildChartOptions = () => ({
   chart: {
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
     type: "bar",
-    toolbar: {
-      show: false,
-    },
-    zoom: {
-      enabled: false,
-    },
-    animations: {
-      enabled: false,
-    },
+    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    toolbar: { show: false },
+    zoom: { enabled: false },
+    animations: { enabled: false },
   },
   colors: ["#f97316", "#22c55e", "#0ea5e9"],
-  tooltip: {
-    theme: store.darkMode ? "dark" : "light",
-  },
+  tooltip: { theme: store.darkMode ? "dark" : "light" },
   plotOptions: {
     bar: {
       horizontal: false,
       columnWidth: "60%",
     },
   },
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    show: true,
-    width: 2,
-    colors: ["transparent"],
-  },
+  dataLabels: { enabled: false },
+  stroke: { show: true, width: 2, colors: ["transparent"] },
   xaxis: {
-    categories: props.tableData.map((user: any) => {
-      if (store.showUsernames) {
-        return user.username ? user.username : "";
-      }
-      return user.name ? user.name : "";
-    }),
-    tickAmount: props.tableData.length - 1,
+    categories: userLabelList.value,
+    tickAmount: userLabelList.value.length - 1,
     hideOverlappingLabels: false,
     labels: {
-      formatter: function (str: string) {
-        const n = 17;
-        return str.length > n ? str.slice(0, n - 1) + "..." : str;
-      },
+      // label formatting already handled above
+      formatter: (str: string) => str,
     },
     title: {
       text: "League Manager",
@@ -181,13 +96,22 @@ const chartOptions = ref({
       },
     },
   },
-  fill: {
-    opacity: 1,
-  },
-  legend: {
-    offsetX: 20,
-  },
+  fill: { opacity: 1 },
+  legend: { offsetX: 20 },
 });
+
+watch(
+  [
+    () => store.darkMode,
+    () => store.showUsernames,
+    () => store.currentLeagueId,
+    () => props.tableData,
+  ],
+  () => {
+    chartOptions.value = buildChartOptions();
+  },
+  { immediate: true }
+);
 </script>
 <template>
   <div

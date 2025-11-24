@@ -11,25 +11,18 @@ const props = defineProps<{
   cardHeight: string;
 }>();
 
-const leagueStatusComplete = computed(() => {
-  if (store.leagueInfo[store.currentLeagueIndex]) {
-    if (store.leagueInfo[store.currentLeagueIndex].status == "complete") {
-      return true;
-    }
-  } else {
-    return true;
-  }
-  return false;
+const leagueStatusComplete = computed((): boolean => {
+  const info = store.leagueInfo[store.currentLeagueIndex];
+  return info ? info.status === "complete" : true;
 });
 
-const winner: any = computed(() => {
-  if (props.leagueWinner) {
-    const winnerId = props.rosters.filter(
-      (roster: RosterType) => roster.rosterId === props.leagueWinner
-    )[0]["id"];
-    return props.users.filter((user: UserType) => user.id === winnerId)[0];
-  }
-  return null;
+const winner = computed<UserType | null>(() => {
+  if (props.leagueWinner == null) return null; // covers null/undefined/0
+  const winningRoster = props.rosters.find(
+    (roster) => roster.rosterId === props.leagueWinner
+  );
+  if (!winningRoster) return null;
+  return props.users.find((user) => user.id === winningRoster.id) ?? null;
 });
 </script>
 <template>
