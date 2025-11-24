@@ -11,8 +11,11 @@ Current features:
 - Roster management stats, trade rankings, and waiver wire moves
 - Playoff projections
 - AI generated weekly reports, summary of matchups and top/bottom performers from each week
+- Weekly high score tracker for each played week (top starter score per week)
 - Draft grades and recap
 - League history stats
+
+See `docs/FEATURES.md` for a feature-by-feature guide and last updated dates.
 
 ## Contributing 
 
