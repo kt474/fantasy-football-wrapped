@@ -28,7 +28,7 @@ const payoutPlan = [
     detail: "Highest total points in the regular season",
   },
   {
-    label: "Weekly Bonuses + Fun Awards",
+    label: "Weekly + Seasonal Bonuses & Honors",
     amount: 360,
     detail: "Weekly high-score bonuses plus five season-long mini awards",
   },
