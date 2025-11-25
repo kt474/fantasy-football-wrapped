@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useStore } from "../../store/store";
+import { useAwardsStore } from "../../store/awards";
 import { LeagueInfoType, TableDataType } from "../../api/types";
 
 const props = defineProps<{
@@ -9,6 +10,7 @@ const props = defineProps<{
 }>();
 
 const store = useStore();
+const awardsStore = useAwardsStore();
 
 const seasonYear = computed(() => props.league?.season || "");
 const showTracker = computed(() => Boolean(seasonYear.value));
@@ -60,6 +62,36 @@ const formatTeamName = (user: any) => {
 
 const leagueInfo = computed(() => store.leagueInfo[store.currentLeagueIndex]);
 
+const awardFallbackTitles: Record<string, string> = {
+  "award-i": "Award I",
+  "award-ii": "Award II",
+  "award-iii": "Award III",
+  "award-iv": "Award IV",
+  "award-v": "Award V",
+};
+
+const awardFallbackLabels: Record<string, string> = {
+  "award-i": "Acting Coach",
+  "award-ii": "In the House",
+  "award-iii": "Nahbers",
+  "award-iv": "Sticklemonsters",
+  "award-v": "Wonderful Team",
+};
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+const formatDefinition = (value?: string) => {
+  if (!value) return "";
+  const escaped = escapeHtml(value);
+  return escaped.replace(/\*(.*?)\*/g, "<em>$1</em>");
+};
+
 const managerNames = computed(() => {
   if (props.league?.users?.length) {
     const names = props.league.users
@@ -88,6 +120,11 @@ const findUserByRosterId = (rosterId?: number) => {
   const roster = props.league.rosters.find((r: any) => r.rosterId === rosterId);
   if (!roster) return null;
   return props.league.users.find((user: any) => user.id === roster.id);
+};
+
+const findUserByUserId = (userId?: string | null) => {
+  if (!userId || !props.league?.users) return null;
+  return props.league.users.find((user: any) => user.id === userId);
 };
 
 const resolveNameByRosterId = (rosterId?: number) => {
@@ -127,7 +164,28 @@ const weeklyBonusWinners = computed(() => {
 const totalWeeklyBonuses = computed(() => weeklyBonusWinners.value.length);
 const weeklyPoolTotal = computed(() => totalWeeklyBonuses.value * 15);
 
-const seasonalAwards = computed(() => {
+const buildCustomAwardName = (award: any) => {
+  const title =
+    (award.title && award.title.trim()) ||
+    awardFallbackTitles[award.id] ||
+    "Seasonal award";
+  const informal =
+    (award.informalLabel && award.informalLabel.trim()) ||
+    awardFallbackLabels[award.id] ||
+    "";
+  return informal ? `${title} — ${informal}` : title;
+};
+
+const resolveCustomWinner = (award: any) => {
+  if (award.winnerOwnerId) {
+    const user = findUserByUserId(award.winnerOwnerId);
+    if (user) return formatTeamName(user);
+  }
+  if (award.winnerNameOverride) return award.winnerNameOverride;
+  return "Pending";
+};
+
+const coreSeasonalAwards = computed(() => {
   const seasonComplete = props.league?.status === "complete";
   const championshipMatch = props.league?.winnersBracket?.find(
     (matchup: any) => matchup.p === 1
@@ -149,21 +207,37 @@ const seasonalAwards = computed(() => {
     : mostPointsPendingLabel;
 
   return [
-    { award: "Champion", winner: championName, amount: 1000, pending: championName === "Pending" },
-    { award: "Runner-Up", winner: runnerUpName, amount: 680, pending: runnerUpName === "Pending" },
+    { award: "Champion", winner: championName, amount: 1000, pending: championName === "Pending", definition: "" },
+    { award: "Runner-Up", winner: runnerUpName, amount: 680, pending: runnerUpName === "Pending", definition: "" },
     {
       award: "Most Points (Regular Season)",
       winner: mostPointsName,
       amount: 360,
       pending: !seasonComplete,
+      definition: "",
     },
-    { award: "Award I - Acting Coach", winner: "Pending", amount: 25, pending: true },
-    { award: "Award II - In the House", winner: "Pending", amount: 25, pending: true },
-    { award: "Award III - Nahbers", winner: "Pending", amount: 25, pending: true },
-    { award: "Award IV - Sticklemonsters", winner: "Pending", amount: 15, pending: true },
-    { award: "Award V - Wonderful Team", winner: "Pending", amount: 15, pending: true },
   ];
 });
+
+const customSeasonalAwards = computed(() =>
+  awardsStore.awards.map((award) => {
+    const winner = resolveCustomWinner(award);
+    return {
+      id: award.id,
+      award: buildCustomAwardName(award),
+      informalLabel: award.informalLabel,
+      definition: award.definition,
+      winner,
+      amount: award.amount,
+      pending: winner === "Pending",
+    };
+  })
+);
+
+const seasonalAwards = computed(() => [
+  ...coreSeasonalAwards.value,
+  ...customSeasonalAwards.value,
+]);
 
 const totalPot = computed(
   () => payoutPlan.reduce((sum, item) => sum + item.amount, 0) || 0
@@ -461,7 +535,7 @@ const managerTotals = computed(() => {
         </div>
 
         <div
-          class="overflow-hidden border border-gray-200 rounded-xl shadow-sm dark:border-gray-700 bg-white dark:bg-gray-800"
+          class="border border-gray-200 rounded-xl shadow-sm dark:border-gray-700 bg-white dark:bg-gray-800 overflow-visible"
         >
           <div
             class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
@@ -484,10 +558,30 @@ const managerTotals = computed(() => {
               :key="award.award"
               class="flex items-center justify-between px-4 py-3"
             >
-              <div>
-                <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                  {{ award.award }}
-                </p>
+              <div class="relative group">
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                    {{ award.award }}
+                  </p>
+                  <span
+                    v-if="award.definition"
+                    class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-100"
+                  >
+                    i
+                  </span>
+                </div>
+                <div
+                  v-if="award.definition"
+                  class="absolute z-20 hidden max-w-xs p-3 mt-2 text-xs leading-relaxed text-gray-800 bg-white border border-gray-200 rounded-lg shadow-lg group-hover:block dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                >
+                  <p class="font-semibold text-gray-900 dark:text-gray-50">
+                    {{ award.award }}
+                  </p>
+                  <p
+                    class="mt-1 text-gray-700 dark:text-gray-200"
+                    v-html="formatDefinition(award.definition)"
+                  />
+                </div>
                 <p
                   class="text-xs"
                   :class="[

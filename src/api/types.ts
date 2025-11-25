@@ -109,3 +109,15 @@ export type TableDataType = {
   benchPlayers: string[];
   benchPoints: number[];
 };
+
+export type SeasonalAwardId = "award-i" | "award-ii" | "award-iii" | "award-iv" | "award-v";
+
+export type SeasonalAward = {
+  id: SeasonalAwardId;
+  title: string;
+  informalLabel: string;
+  definition: string;
+  amount: number;
+  winnerOwnerId?: string | null;
+  winnerNameOverride?: string | null;
+};

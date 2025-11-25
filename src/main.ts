@@ -15,6 +15,7 @@ import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
 import Players from "./views/Players.vue";
 import Rosters from "./views/Rosters.vue";
+import AdminAwards from "./views/AdminAwards.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -57,6 +58,14 @@ const routes = [
     meta: {
       title: "Newsletter",
       description: "Subscribe to our newsletter for updates and announcements.",
+    },
+  },
+  {
+    path: "/admin/awards",
+    component: AdminAwards,
+    meta: {
+      title: "Admin: Awards",
+      description: "Manage custom seasonal award titles, definitions, and winners.",
     },
   },
   {

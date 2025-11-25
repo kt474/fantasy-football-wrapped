@@ -85,6 +85,12 @@ watch(
           >
             Player Stats
           </RouterLink>
+          <RouterLink
+            to="/admin/awards"
+            class="px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          >
+            Admin: Awards
+          </RouterLink>
           <button
             aria-label="Button to show info modal"
             data-modal-target="default-modal"
