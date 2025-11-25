@@ -58,6 +58,8 @@ const formatTeamName = (user: any) => {
   return user.name || user.username || "Pending";
 };
 
+const leagueInfo = computed(() => store.leagueInfo[store.currentLeagueIndex]);
+
 const managerNames = computed(() => {
   if (props.league?.users?.length) {
     const names = props.league.users
@@ -75,6 +77,12 @@ const weeksPlayed = computed(() => {
   );
 });
 
+const scoredWeeks = computed(() => {
+  const lastScored = leagueInfo.value?.lastScoredWeek || 0;
+  if (lastScored > 0) return Math.min(lastScored, weeksPlayed.value);
+  return weeksPlayed.value;
+});
+
 const findUserByRosterId = (rosterId?: number) => {
   if (!rosterId || !props.league?.users || !props.league?.rosters) return null;
   const roster = props.league.rosters.find((r: any) => r.rosterId === rosterId);
@@ -89,18 +97,21 @@ const resolveNameByRosterId = (rosterId?: number) => {
 };
 
 const weeklyBonusWinners = computed(() => {
-  const limit = Math.max(17, weeksPlayed.value || 0);
+  const seasonLength = props.league?.regularSeasonLength || 0;
+  const limit = Math.max(seasonLength || 0, weeksPlayed.value || 0);
   const winners: { week: number; winner: string; amount: number; score: number | null }[] = [];
   for (let i = 0; i < limit; i++) {
     let bestTeam: TableDataType | undefined;
     let bestScore = -Infinity;
-    props.tableData?.forEach((team) => {
-      const score = team.points?.[i];
-      if (score !== undefined && score !== null && score > bestScore) {
-        bestScore = score;
-        bestTeam = team;
-      }
-    });
+    if (i < scoredWeeks.value) {
+      props.tableData?.forEach((team) => {
+        const score = team.points?.[i];
+        if (score !== undefined && score !== null && score > bestScore) {
+          bestScore = score;
+          bestTeam = team;
+        }
+      });
+    }
     const hasScore = bestTeam && isFinite(bestScore);
     const winner = hasScore ? formatTeamName(bestTeam) : "Pending";
     winners.push({
@@ -112,6 +123,9 @@ const weeklyBonusWinners = computed(() => {
   }
   return winners;
 });
+
+const totalWeeklyBonuses = computed(() => weeklyBonusWinners.value.length);
+const weeklyPoolTotal = computed(() => totalWeeklyBonuses.value * 15);
 
 const seasonalAwards = computed(() => {
   const seasonComplete = props.league?.status === "complete";
@@ -208,6 +222,11 @@ const managerTotals = computed(() => {
         total: 0,
       };
     entry.weeklyBonuses += 1;
+    // track weeks won so we can list them in the table
+    (entry as any).bonusWeeks = Array.isArray((entry as any).bonusWeeks)
+      ? (entry as any).bonusWeeks
+      : [];
+    (entry as any).bonusWeeks.push(bonus.week);
     entry.total += bonus.amount;
     totals.set(bonus.winner, entry);
   });
@@ -352,9 +371,9 @@ const managerTotals = computed(() => {
             </div>
           </div>
           <div class="flex items-center justify-between mt-4 text-xs text-gray-500 dark:text-gray-300">
-            <span>Weekly pool (17 x $15)</span>
+            <span>Weekly pool ({{ totalWeeklyBonuses }} x $15)</span>
             <span class="font-semibold text-gray-800 dark:text-gray-50">
-              {{ formatCurrency(255) }}
+              {{ formatCurrency(weeklyPoolTotal) }}
             </span>
           </div>
         </div>
@@ -376,7 +395,7 @@ const managerTotals = computed(() => {
               </p>
             </div>
             <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full dark:bg-blue-900 dark:text-blue-100">
-              {{ completedWeeklyAwards }} / 17 awarded
+              {{ completedWeeklyAwards }} / {{ totalWeeklyBonuses }} awarded
             </span>
           </div>
           <div class="overflow-x-auto">
@@ -547,6 +566,12 @@ const managerTotals = computed(() => {
                 </td>
                 <td class="px-4 py-2 text-sm text-gray-700 dark:text-gray-100">
                   x{{ manager.weeklyBonuses }}
+                  <span
+                    v-if="(manager as any).bonusWeeks?.length"
+                    class="text-xs text-gray-500 dark:text-gray-300 ml-1"
+                  >
+                    (W{{ (manager as any).bonusWeeks.sort((a: number, b: number) => a - b).join(', W') }})
+                  </span>
                 </td>
                 <td class="px-4 py-2 text-sm text-gray-700 dark:text-gray-100">
                   <span
