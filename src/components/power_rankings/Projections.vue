@@ -9,6 +9,11 @@ import HeatMap from "./HeatMap.vue";
 
 const store = useStore();
 const loading = ref(false);
+const featureDisabled = ref(false);
+const errorMessage = ref("");
+const projectionsEnabled =
+  Boolean(import.meta.env.VITE_PROJECTIONS) ||
+  Boolean(import.meta.env.VITE_PROJECTION_API);
 const categories = computed(() => {
   return formattedData.value.map((user: any) =>
     store.showUsernames
@@ -22,6 +27,10 @@ const categories = computed(() => {
 });
 
 onMounted(async () => {
+  if (!projectionsEnabled) {
+    featureDisabled.value = true;
+    return;
+  }
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
@@ -35,40 +44,46 @@ onMounted(async () => {
 });
 
 const getData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  const lastScoredWeek =
-    currentLeague.status === "complete"
-      ? 0
-      : currentLeague.lastScoredWeek
-      ? currentLeague.lastScoredWeek
-      : 0;
+  try {
+    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const lastScoredWeek =
+      currentLeague.status === "complete"
+        ? 0
+        : currentLeague.lastScoredWeek
+        ? currentLeague.lastScoredWeek
+        : 0;
 
-  await Promise.all(
-    currentLeague.rosters.map(async (roster: any) => {
-      const singleRoster: any[] = [];
-      if (!roster.players) return [];
-      const projectionPromises = roster.players.map((player: any) => {
-        return getProjections(
-          player,
-          currentLeague.season,
-          lastScoredWeek,
-          currentLeague.scoringType
+    await Promise.all(
+      currentLeague.rosters.map(async (roster: any) => {
+        const singleRoster: any[] = [];
+        if (!roster.players) return [];
+        const projectionPromises = roster.players.map((player: any) => {
+          return getProjections(
+            player,
+            currentLeague.season,
+            lastScoredWeek,
+            currentLeague.scoringType
+          );
+        });
+
+        const projections = await Promise.all(projectionPromises);
+        singleRoster.push(...projections);
+        store.addProjectionData(
+          store.currentLeagueIndex,
+          roster.id,
+          singleRoster
         );
-      });
-
-      const projections = await Promise.all(projectionPromises);
-      singleRoster.push(...projections);
-      store.addProjectionData(
-        store.currentLeagueIndex,
-        roster.id,
-        singleRoster
-      );
-    })
-  );
-  localStorage.setItem(
-    "leagueInfo",
-    JSON.stringify(store.leagueInfo as LeagueInfoType[])
-  );
+      })
+    );
+    localStorage.setItem(
+      "leagueInfo",
+      JSON.stringify(store.leagueInfo as LeagueInfoType[])
+    );
+  } catch (error) {
+    console.error(error);
+    errorMessage.value =
+      "Projections are unavailable right now. Check your projection API key or try again later.";
+  }
 };
 
 const formattedData = computed(() => {
@@ -369,89 +384,104 @@ const chartOptions = ref({
 </script>
 <template>
   <div>
-    <div v-if="!loading">
-      <div
-        class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
-      >
-        <div class="flex justify-between">
-          <div>
-            <h1
-              class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-            >
-              Roster Projections
-            </h1>
-          </div>
-        </div>
-        <apexchart
-          type="bar"
-          height="350"
-          :options="chartOptions"
-          :series="seriesData"
-        ></apexchart>
-        <p
-          class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
-        >
-          Rest of season projected points data from the Sleeper API. If the
-          season is complete, entire season projections are shown.
-        </p>
-      </div>
-      <HeatMap :formattedData="formattedData" class="mt-4" />
+    <div
+      v-if="featureDisabled"
+      class="p-4 mb-4 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-900/40 dark:text-amber-100 dark:border-amber-800"
+    >
+      Projections are disabled because no projection API key is configured
+      (<code>VITE_PROJECTIONS</code>). Add a key to enable this section.
     </div>
     <div
-      v-else
-      role="status"
-      class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
+      v-else-if="errorMessage"
+      class="p-4 mb-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/40 dark:text-red-100 dark:border-red-800"
     >
-      <p
-        class="flex justify-center -mb-6 text-xl font-semibold text-gray-900 dark:text-gray-50"
-      >
-        Loading projection data...
-      </p>
-      <div
-        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2.5"
-      ></div>
-      <div
-        class="w-48 h-2 mb-10 bg-gray-200 rounded-full dark:bg-gray-700"
-      ></div>
-      <div class="flex items-baseline mt-4">
+      {{ errorMessage }}
+    </div>
+    <div v-else>
+      <div v-if="!loading">
         <div
-          class="w-full h-40 bg-gray-200 rounded-t-lg dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full bg-gray-200 rounded-t-lg h-60 ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full h-40 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full h-32 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full bg-gray-200 rounded-t-lg h-36 ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full bg-gray-200 rounded-t-lg h-72 ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
-        ></div>
-        <div
-          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
-        ></div>
+          class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
+        >
+          <div class="flex justify-between">
+            <div>
+              <h1
+                class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
+              >
+                Roster Projections
+              </h1>
+            </div>
+          </div>
+          <apexchart
+            type="bar"
+            height="350"
+            :options="chartOptions"
+            :series="seriesData"
+          ></apexchart>
+          <p
+            class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
+          >
+            Rest of season projected points data from the Sleeper API. If the
+            season is complete, entire season projections are shown.
+          </p>
+        </div>
+        <HeatMap :formattedData="formattedData" class="mt-4" />
       </div>
-      <span class="sr-only">Loading...</span>
+      <div
+        v-else
+        role="status"
+        class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
+      >
+        <p
+          class="flex justify-center -mb-6 text-xl font-semibold text-gray-900 dark:text-gray-50"
+        >
+          Loading projection data...
+        </p>
+        <div
+          class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2.5"
+        ></div>
+        <div
+          class="w-48 h-2 mb-10 bg-gray-200 rounded-full dark:bg-gray-700"
+        ></div>
+        <div class="flex items-baseline mt-4">
+          <div
+            class="w-full h-40 bg-gray-200 rounded-t-lg dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full bg-gray-200 rounded-t-lg h-60 ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full h-40 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full h-32 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full bg-gray-200 rounded-t-lg h-36 ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full bg-gray-200 rounded-t-lg h-72 ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+          ></div>
+          <div
+            class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+          ></div>
+        </div>
+        <span class="sr-only">Loading...</span>
+      </div>
     </div>
   </div>
 </template>

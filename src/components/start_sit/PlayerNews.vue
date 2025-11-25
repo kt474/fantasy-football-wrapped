@@ -17,7 +17,9 @@ const data: any = ref([]);
 const playerNames: any = ref([]);
 const loading: any = ref(false);
 const expanded = ref<Record<number, boolean>>({});
+const featureDisabled = ref(false);
 const store = useStore();
+const newsEnabled = Boolean(import.meta.env.VITE_PLAYER_NEWS);
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
@@ -233,6 +235,11 @@ function getMin(arr: any[]) {
 }
 
 onMounted(async () => {
+  if (!newsEnabled) {
+    featureDisabled.value = true;
+    loading.value = false;
+    return;
+  }
   loading.value = true;
   await Promise.all([fetchPlayerNames(), getData()]);
   loading.value = false;
@@ -241,6 +248,7 @@ onMounted(async () => {
 watch(
   () => [currentManager.value, store.currentLeagueId],
   async () => {
+    if (featureDisabled.value) return;
     loading.value = true;
     await Promise.all([fetchPlayerNames(), getData()]);
     loading.value = false;
@@ -251,6 +259,15 @@ watch(
   <div
     class="py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6"
   >
+    <div
+      v-if="featureDisabled"
+      class="p-4 mb-4 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-900/40 dark:text-amber-100 dark:border-amber-800"
+    >
+      Player news/start-sit is disabled because no API key is configured
+      (<code>VITE_PLAYER_NEWS</code>). Add a key to enable this feed, or skip
+      this section for now.
+    </div>
+    <div v-else>
     <p class="text-3xl font-bold leading-none text-gray-900 dark:text-gray-50">
       Start/Sit (Beta)
     </p>
@@ -802,6 +819,7 @@ watch(
       </div>
     </div>
     <div v-else class="text-gray-900 mb-96 dark:text-gray-200">Loading...</div>
+    </div>
   </div>
 </template>
 <style scoped>

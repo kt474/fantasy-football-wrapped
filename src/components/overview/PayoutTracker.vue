@@ -10,6 +10,9 @@ const props = defineProps<{
 
 const store = useStore();
 
+const seasonYear = computed(() => props.league?.season || "");
+const showTracker = computed(() => Boolean(seasonYear.value));
+
 const payoutPlan = [
   { label: "1st Place (Champion)", amount: 1000, detail: "Playoff winner" },
   { label: "2nd Place (Runner-Up)", amount: 680, detail: "Title game runner-up" },
@@ -232,6 +235,7 @@ const managerTotals = computed(() => {
 
 <template>
   <div
+    v-if="showTracker"
     class="mt-6 overflow-hidden border border-gray-200 rounded-2xl shadow-sm dark:border-gray-700"
   >
     <div
@@ -242,9 +246,12 @@ const managerTotals = computed(() => {
           <p class="text-xs font-semibold tracking-wide uppercase text-gray-300">
             League Payouts
           </p>
-          <p class="text-2xl font-bold">2025 Payout Tracker</p>
+          <p class="text-2xl font-bold">
+            {{ seasonYear ? `${seasonYear} Payout Tracker` : "Payout Tracker" }}
+          </p>
           <p class="text-sm text-gray-300">
-            Same payout map as 2024, with open slots marked as pending for the new season.
+            Season-aware tracker with open slots marked as pending until results
+            are recorded.
           </p>
         </div>
         <div class="text-right">
@@ -496,7 +503,7 @@ const managerTotals = computed(() => {
             </p>
           </div>
           <span class="px-2 py-1 text-xs font-semibold bg-purple-100 text-purple-800 rounded-full dark:bg-purple-900 dark:text-purple-100">
-            Same payout totals as 2024
+            Season plan: {{ seasonYear || "current" }}
           </span>
         </div>
         <div class="overflow-x-auto">
@@ -570,5 +577,11 @@ const managerTotals = computed(() => {
         </div>
       </div>
     </div>
+  </div>
+  <div
+    v-else
+    class="p-4 mt-6 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200"
+  >
+    Payout tracker is hidden until a season is available for this league.
   </div>
 </template>

@@ -30,6 +30,8 @@ const tabs = [
 ];
 
 const activeTab = ref("Report");
+const featureDisabled = ref(false);
+const reportEnabled = Boolean(import.meta.env.VITE_WEEKLY_REPORT);
 
 const weeks = computed(() => {
   if (
@@ -165,6 +167,10 @@ const getReport = async () => {
 };
 
 onMounted(async () => {
+  if (!reportEnabled) {
+    featureDisabled.value = true;
+    return;
+  }
   if (
     store.leagueInfo.length > 0 &&
     props.tableData[0].matchups &&
@@ -647,6 +653,15 @@ watch(() => currentWeek.value, fetchPlayerNames);
   <div
     class="h-full px-6 pt-4 mt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
   >
+    <div
+      v-if="featureDisabled"
+      class="p-4 mb-4 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-900/40 dark:text-amber-100 dark:border-amber-800"
+    >
+      Weekly reports are disabled because no API key is configured
+      (<code>VITE_WEEKLY_REPORT</code>). Add a key to enable automatic AI
+      summaries, or skip this section for now.
+    </div>
+    <div v-else>
     <div class="flex justify-between w-full mb-3">
       <h5
         class="mr-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
@@ -1107,6 +1122,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
         :current-week="currentWeek ? currentWeek : 0"
         :is-playoffs="isPlayoffs"
       />
+    </div>
     </div>
   </div>
 </template>

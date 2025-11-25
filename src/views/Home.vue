@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import CardContainer from "../components/util/CardContainer.vue";
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
@@ -19,6 +19,7 @@ const defaultLeagueId = import.meta.env.VITE_DEFAULT_LEAGUE_ID;
 
 const showLoading = ref(false);
 const isInitialLoading = ref(true);
+const selectedSeasonLeagueId = ref<string>("");
 
 const loadLeagueById = async (leagueId: string) => {
   const checkInput: any = await getLeague(leagueId);
@@ -114,6 +115,35 @@ onMounted(async () => {
     isInitialLoading.value = false;
   }
 });
+
+watch(
+  () => store.currentLeagueId,
+  (newId) => {
+    if (newId && newId !== "undefined") {
+      selectedSeasonLeagueId.value = newId;
+    }
+  },
+  { immediate: true }
+);
+
+const seasonOptions = computed(() => {
+  return store.leagueInfo
+    .map((league) => ({
+      label: league.season ? `Season ${league.season}` : league.name,
+      value: league.leagueId,
+    }))
+    .sort((a, b) => (b.label || "").localeCompare(a.label || ""));
+});
+
+const handleSeasonChange = async (leagueId: string) => {
+  if (!leagueId || leagueId === store.currentLeagueId) return;
+  const existing = store.leagueInfo.find((l) => l.leagueId === leagueId);
+  if (existing) {
+    store.updateCurrentLeagueId(leagueId);
+  } else {
+    await loadLeagueById(leagueId);
+  }
+};
 </script>
 
 <template>
@@ -124,6 +154,27 @@ onMounted(async () => {
         <Input v-if="store.showInput" class="custom-input-width" />
         <div v-if="store.showLeaguesList" class="container mx-auto">
           <UserLeagueList />
+        </div>
+        <div
+          v-if="seasonOptions.length > 0"
+          class="flex flex-wrap items-center justify-between gap-2 mt-4"
+        >
+          <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            Season view
+          </p>
+          <select
+            v-model="selectedSeasonLeagueId"
+            @change="handleSeasonChange(selectedSeasonLeagueId)"
+            class="px-3 py-2 text-sm text-gray-800 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-50"
+          >
+            <option
+              v-for="opt in seasonOptions"
+              :key="opt.value"
+              :value="opt.value"
+            >
+              {{ opt.label }}
+            </option>
+          </select>
         </div>
         <div
           v-if="

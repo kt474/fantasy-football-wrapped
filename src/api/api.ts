@@ -118,6 +118,10 @@ export const searchPlayers = async (query: string) => {
 
 export const getLeagueCount = async () => {
   try {
+    if (!import.meta.env.VITE_LEAGUE_COUNT) {
+      console.warn("VITE_LEAGUE_COUNT not configured; skipping fetch.");
+      return {};
+    }
     const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);
     return await response.json();
   } catch (error) {

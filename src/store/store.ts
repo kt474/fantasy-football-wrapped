@@ -170,7 +170,13 @@ export const useStore = defineStore("main", {
       this.showInput = payload;
     },
     updateCurrentLeagueId(payload: string) {
-      this.currentLeagueId = payload;
+      if (!payload || payload === "undefined") {
+        this.currentLeagueId = "";
+        localStorage.removeItem("currentLeagueId");
+        localStorage.removeItem("leagueInfo");
+      } else {
+        this.currentLeagueId = payload;
+      }
     },
     updateShowLeaguesList(payload: boolean) {
       this.showLeaguesList = payload;

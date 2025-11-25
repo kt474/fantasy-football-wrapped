@@ -156,6 +156,34 @@ const mostMedianLosses = computed(() => {
   return maxBy(originalData.value, "lossesWithMedian")?.lossesWithMedian;
 });
 
+const seasonLabel = computed(() => {
+  if (store.currentLeagueId && store.leagueInfo[store.currentLeagueIndex]) {
+    return `Season ${store.leagueInfo[store.currentLeagueIndex].season}`;
+  }
+  return "Season";
+});
+
+const scoringLabel = computed(() => {
+  if (store.currentLeagueId && store.leagueInfo[store.currentLeagueIndex]) {
+    const scoring = store.leagueInfo[store.currentLeagueIndex].scoringType;
+    if (scoring === 0) return "Standard";
+    if (scoring === 0.5) return "Half-PPR";
+    if (scoring === 1) return "PPR";
+    if (typeof scoring === "number") return `${scoring} scoring`;
+  }
+  return "Scoring";
+});
+
+const weekLabel = computed(() => {
+  if (store.currentLeagueId && store.leagueInfo[store.currentLeagueIndex]) {
+    const league = store.leagueInfo[store.currentLeagueIndex];
+    if (league.lastScoredWeek) {
+      return `Last scored: Week ${league.lastScoredWeek}`;
+    }
+  }
+  return "Latest";
+});
+
 const mostTransactions = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].transactions
@@ -189,6 +217,26 @@ const getTeamName = (tableDataItem: any) => {
 </script>
 <template>
   <div>
+    <div
+      class="flex flex-wrap items-center gap-2 mt-4 text-xs text-gray-700 dark:text-gray-200"
+      v-if="tableData.length > 0 || store.currentLeagueId"
+    >
+      <span
+        class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 font-semibold"
+      >
+        {{ seasonLabel }}
+      </span>
+      <span
+        class="px-3 py-1 rounded-full bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
+      >
+        {{ scoringLabel }}
+      </span>
+      <span
+        class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100"
+      >
+        {{ weekLabel }}
+      </span>
+    </div>
     <div
       v-if="store.currentTab === 'standings'"
       class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"
