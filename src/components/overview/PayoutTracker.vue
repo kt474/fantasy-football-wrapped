@@ -561,12 +561,12 @@ const managerTotals = computed(() => {
           </div>
           <div class="divide-y divide-gray-100 dark:divide-gray-700">
             <div
-              v-for="award in seasonalAwards"
-              :key="award.id || award.title"
+              v-for="award in coreSeasonalAwards"
+              :key="award.id"
               class="flex items-center justify-between px-4 py-3"
             >
               <div class="relative group">
-                <div class="flex items-center gap-2">
+                <div class="flex items-top gap-2">
                   <div class="flex flex-col">
                     <span class="text-sm font-semibold text-gray-900 dark:text-gray-50">
                       {{ award.title }}
@@ -614,6 +614,75 @@ const managerTotals = computed(() => {
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-50">
                 {{ formatCurrency(award.amount) }}
               </span>
+            </div>
+          </div>
+
+          <div
+            class="mt-3 pt-3 border-t-2 border-indigo-100 dark:border-indigo-800 bg-gradient-to-r from-sky-50 via-indigo-50 to-white dark:from-indigo-950 dark:via-slate-900 dark:to-gray-900 rounded-lg shadow-inner ring-1 ring-indigo-100/70 dark:ring-indigo-800/60 custom-seasonal-awards"
+          >
+            <div class="flex items-center justify-between px-4 pb-2">
+              <span class="text-[11px] font-semibold tracking-wide uppercase text-indigo-700 dark:text-indigo-200">
+                League honors
+              </span>
+            </div>
+            <div
+              class="divide-y divide-indigo-100 dark:divide-indigo-800 bg-white/80 dark:bg-gray-900/70 rounded-lg"
+            >
+              <div
+                v-for="award in customSeasonalAwards"
+                :key="award.id"
+                class="flex items-center justify-between px-4 py-3"
+              >
+                <div class="relative group">
+                  <div class="flex items-top gap-2">
+                    <div class="flex flex-col">
+                      <span class="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                        {{ award.title }}
+                      </span>
+                      <span
+                        v-if="award.informalLabel"
+                        class="text-[11px] text-gray-500 dark:text-gray-300"
+                      >
+                        {{ award.informalLabel }}
+                      </span>
+                    </div>
+                    <span
+                      v-if="award.definition"
+                      class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-100"
+                    >
+                      i
+                    </span>
+                  </div>
+                  <div
+                    v-if="award.definition"
+                    class="absolute z-20 hidden max-w-xs p-3 mt-2 text-xs leading-relaxed text-gray-800 bg-white border border-gray-200 rounded-lg shadow-lg group-hover:block dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  >
+                    <p class="font-semibold text-gray-900 dark:text-gray-50">
+                      {{ award.title }}
+                    </p>
+                    <p v-if="award.informalLabel" class="text-[11px] text-gray-500 dark:text-gray-300">
+                      {{ award.informalLabel }}
+                    </p>
+                    <p
+                      class="mt-1 text-gray-700 dark:text-gray-200"
+                      v-html="formatDefinition(award.definition)"
+                    />
+                  </div>
+                  <p
+                    class="text-xs"
+                    :class="[
+                      award.pending
+                        ? 'text-amber-600 dark:text-amber-300'
+                        : 'text-gray-600 dark:text-gray-200',
+                    ]"
+                  >
+                    {{ award.winner }}
+                  </p>
+                </div>
+                <span class="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                  {{ formatCurrency(award.amount) }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
