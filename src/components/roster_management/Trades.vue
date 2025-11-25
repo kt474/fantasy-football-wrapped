@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { LeagueInfoType } from "../../api/types.ts";
-import { getPlayersByIdsMap, getTradeValue } from "../../api/api.ts";
+import { getPlayersByIdsMap, getTradeValue, getStats } from "../../api/api.ts";
 import {
   fakeRosters,
   fakeTrades,
@@ -76,25 +76,50 @@ const getData = async () => {
   if (uniquePlayerIdArray.length > 0) {
     playerLookupMap = await getPlayersByIdsMap(uniquePlayerIdArray);
   }
+
+   // Fallback: fetch missing player info from Sleeper stats if not in the lookup map
+   const missingIds = uniquePlayerIdArray.filter((id) => !playerLookupMap.get(id));
+   if (missingIds.length > 0) {
+     const missingStats = await Promise.all(
+       missingIds.map((id) =>
+         getStats(
+           id,
+           currentLeague.season,
+           currentLeague.scoringType
+         )
+       )
+     );
+     missingStats.forEach((stats, idx) => {
+       if (stats) {
+         playerLookupMap.set(missingIds[idx], {
+           name: `${stats.firstName} ${stats.lastName}`.trim() || stats.team,
+           team: stats.team,
+           position: stats.position,
+           player_id: stats.id,
+         });
+       }
+     });
+   }
+
+  const resolvePlayerName = (id: string) => {
+    const playerObj = playerLookupMap.get(id);
+    if (!playerObj) return "Unknown player";
+    return playerObj.name ? playerObj.name : `${playerObj.team} Defense`;
+  };
+
   // Use Promise.all to resolve all async operations
   tradeData.value = await Promise.all(
     temp.map(async (trade: Trade) => {
       // Fetch both teams' player names in parallel
       const team1Players = trade.adds[trade.roster_ids[1]]
         ? trade.adds[trade.roster_ids[1]].map((id: string) => {
-            let playerObj = playerLookupMap.get(id);
-            return playerObj.name
-              ? playerObj.name
-              : `${playerObj.team} Defense`;
+            return resolvePlayerName(id);
           })
         : [];
 
       const team2Players = trade.adds[trade.roster_ids[0]]
         ? trade.adds[trade.roster_ids[0]].map((id: string) => {
-            let playerObj = playerLookupMap.get(id);
-            return playerObj.name
-              ? playerObj.name
-              : `${playerObj.team} Defense`;
+            return resolvePlayerName(id);
           })
         : [];
 

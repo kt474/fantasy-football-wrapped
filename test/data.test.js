@@ -1,7 +1,12 @@
 import { expect, test } from "vitest";
 import { getData } from "../src/api/api.ts";
 
-test("Retrieving league data", async () => {
+// Optional integration test. Enable with RUN_INTEGRATION_TESTS=1 (requires network).
+const shouldRunIntegration = process.env.RUN_INTEGRATION_TESTS === "1";
+
+const maybeTest = shouldRunIntegration ? test : test.skip;
+
+maybeTest("Retrieving league data", async () => {
   let data = await getData("992195707941212160");
   expect(data.regularSeasonLength).toBe(14);
   expect(data.lastScoredWeek).toBe(17);

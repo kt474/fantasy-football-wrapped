@@ -20,14 +20,23 @@ export interface Player {
   team: string;
 }
 export const getPlayerNews = async (playerNames: string[]) => {
-  let url = import.meta.env.VITE_PLAYER_NEWS;
-
-  if (playerNames && playerNames.length > 0) {
-    url += `?keywords=${playerNames.join(",")}`;
+  const baseUrl = import.meta.env.VITE_PLAYER_NEWS;
+  if (!baseUrl) {
+    console.warn("VITE_PLAYER_NEWS not configured; skipping player news fetch.");
+    return [];
   }
-  const response = await fetch(url);
-  const result = await response.json();
-  return result;
+  try {
+    const url = new URL(baseUrl);
+    if (playerNames && playerNames.length > 0) {
+      url.searchParams.set("keywords", playerNames.join(","));
+    }
+    const response = await fetch(url.toString());
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error fetching player news:", error);
+    return [];
+  }
 };
 
 export const getPlayersByIdsMap = async (
@@ -36,9 +45,15 @@ export const getPlayersByIdsMap = async (
   if (playerIds.length === 0) {
     return new Map();
   }
+  if (!import.meta.env.VITE_PLAYERS_URL) {
+    console.warn("VITE_PLAYERS_URL not configured; skipping player lookup.");
+    return new Map();
+  }
   try {
-    const url = `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`;
-    const response = await fetch(url);
+    const url = new URL(
+      `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`
+    );
+    const response = await fetch(url.toString());
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -59,6 +74,10 @@ export const getPlayersByIdsMap = async (
 };
 
 export const getPlayerNames = async (playerIds: string[]) => {
+  if (!import.meta.env.VITE_PLAYERS_URL) {
+    console.warn("VITE_PLAYERS_URL not configured; skipping player names fetch.");
+    return [];
+  }
   try {
     const response = await fetch(
       `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`

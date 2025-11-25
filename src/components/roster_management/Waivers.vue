@@ -39,21 +39,40 @@ const getData = async () => {
   // Step 3: Map `temp` data, using the pre-fetched `playerLookupMap`
   rawData.value = await Promise.all(
     temp.map(async (trade: any) => {
-      const addsPlayer = playerLookupMap.get(trade.adds);
+      let addsPlayer = playerLookupMap.get(trade.adds);
+      if (!addsPlayer) {
+        const stats = await getStats(
+          trade.adds,
+          currentLeague.season,
+          currentLeague.scoringType
+        );
+        if (stats) {
+          addsPlayer = {
+            name: `${stats.firstName} ${stats.lastName}`.trim() || stats.team,
+            team: stats.team,
+            position: stats.position,
+            player_id: stats.id,
+          };
+        }
+      }
+      const displayName =
+        addsPlayer && (addsPlayer.name || addsPlayer.team)
+          ? addsPlayer.name || `${addsPlayer.team} Defense`
+          : "Unknown player";
       return {
         id: trade.roster_id,
         user: getRosterName(trade.roster_id),
-        adds: addsPlayer.name ? addsPlayer.name : `${addsPlayer.team} Defense`,
+        adds: displayName,
         week: trade.week,
         value: await getTradeValue(
           trade.adds,
           currentLeague.season,
           trade.week + 1,
           currentLeague.scoringType,
-          addsPlayer.position
+          addsPlayer ? addsPlayer.position : undefined
         ),
-        position: addsPlayer.position,
-        player_id: addsPlayer.player_id,
+        position: addsPlayer ? addsPlayer.position : "N/A",
+        player_id: addsPlayer ? addsPlayer.player_id : trade.adds,
         bid: trade.bid ? trade.bid : null,
         status: trade.status,
       };
