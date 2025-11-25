@@ -1,0 +1,13 @@
+name = "fantasy-football-wrapped"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-11-18"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ffw-awards"
+database_id = "<replace-with-d1-database-id>"
+
+# Optional KV fallback; uncomment and set ids if used.
+# [[kv_namespaces]]
+# binding = "AWARDS_KV"
+# id = "<replace-with-kv-id>"
