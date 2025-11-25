@@ -87,7 +87,7 @@ const resolveNameByRosterId = (rosterId?: number) => {
 
 const weeklyBonusWinners = computed(() => {
   const limit = Math.max(17, weeksPlayed.value || 0);
-  const winners: { week: number; winner: string; amount: number }[] = [];
+  const winners: { week: number; winner: string; amount: number; score: number | null }[] = [];
   for (let i = 0; i < limit; i++) {
     let bestTeam: TableDataType | undefined;
     let bestScore = -Infinity;
@@ -98,20 +98,20 @@ const weeklyBonusWinners = computed(() => {
         bestTeam = team;
       }
     });
-    const winner =
-      bestTeam && isFinite(bestScore)
-        ? formatTeamName(bestTeam)
-        : "Pending";
+    const hasScore = bestTeam && isFinite(bestScore);
+    const winner = hasScore ? formatTeamName(bestTeam) : "Pending";
     winners.push({
       week: i + 1,
       winner,
       amount: 15,
+      score: hasScore ? Number(bestScore.toFixed(2)) : null,
     });
   }
   return winners;
 });
 
 const seasonalAwards = computed(() => {
+  const seasonComplete = props.league?.status === "complete";
   const championshipMatch = props.league?.winnersBracket?.find(
     (matchup: any) => matchup.p === 1
   );
@@ -124,19 +124,27 @@ const seasonalAwards = computed(() => {
   const mostPointsTeam = props.tableData?.length
     ? [...props.tableData].sort((a, b) => (b.pointsFor || 0) - (a.pointsFor || 0))[0]
     : undefined;
-  const mostPointsName = mostPointsTeam
-    ? formatTeamName(mostPointsTeam)
+  const mostPointsPendingLabel = mostPointsTeam
+    ? `Pending (current leader: ${formatTeamName(mostPointsTeam)})`
     : "Pending";
+  const mostPointsName = seasonComplete && mostPointsTeam
+    ? formatTeamName(mostPointsTeam)
+    : mostPointsPendingLabel;
 
   return [
-    { award: "Champion", winner: championName, amount: 1000 },
-    { award: "Runner-Up", winner: runnerUpName, amount: 680 },
-    { award: "Most Points (Regular Season)", winner: mostPointsName, amount: 360 },
-    { award: "Award I - Acting Coach", winner: "Pending", amount: 25 },
-    { award: "Award II - In the House", winner: "Pending", amount: 25 },
-    { award: "Award III - Nahbers", winner: "Pending", amount: 25 },
-    { award: "Award IV - Sticklemonsters", winner: "Pending", amount: 15 },
-    { award: "Award V - Wonderful Team", winner: "Pending", amount: 15 },
+    { award: "Champion", winner: championName, amount: 1000, pending: championName === "Pending" },
+    { award: "Runner-Up", winner: runnerUpName, amount: 680, pending: runnerUpName === "Pending" },
+    {
+      award: "Most Points (Regular Season)",
+      winner: mostPointsName,
+      amount: 360,
+      pending: !seasonComplete,
+    },
+    { award: "Award I - Acting Coach", winner: "Pending", amount: 25, pending: true },
+    { award: "Award II - In the House", winner: "Pending", amount: 25, pending: true },
+    { award: "Award III - Nahbers", winner: "Pending", amount: 25, pending: true },
+    { award: "Award IV - Sticklemonsters", winner: "Pending", amount: 15, pending: true },
+    { award: "Award V - Wonderful Team", winner: "Pending", amount: 15, pending: true },
   ];
 });
 
@@ -154,7 +162,7 @@ const awardedTotal = computed(() => {
     .filter((bonus) => bonus.winner !== "Pending")
     .reduce((sum, bonus) => sum + bonus.amount, 0);
   const seasonal = seasonalAwards.value
-    .filter((award) => award.winner !== "Pending")
+    .filter((award) => !award.pending)
     .reduce((sum, award) => sum + award.amount, 0);
   return weekly + seasonal;
 });
@@ -168,7 +176,7 @@ const completedWeeklyAwards = computed(
 );
 
 const completedSeasonalAwards = computed(
-  () => seasonalAwards.value.filter((award) => award.winner !== "Pending").length
+  () => seasonalAwards.value.filter((award) => !award.pending).length
 );
 
 const managerTotals = computed(() => {
@@ -202,7 +210,7 @@ const managerTotals = computed(() => {
   });
 
   seasonalAwards.value.forEach((award) => {
-    if (award.winner === "Pending") return;
+    if (award.pending) return;
     const entry =
       totals.get(award.winner) ||
       {
@@ -384,6 +392,12 @@ const managerTotals = computed(() => {
                     scope="col"
                     class="px-4 py-2 text-xs font-semibold tracking-wide text-right text-gray-600 uppercase dark:text-gray-200"
                   >
+                    Points
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-4 py-2 text-xs font-semibold tracking-wide text-right text-gray-600 uppercase dark:text-gray-200"
+                  >
                     Amount
                   </th>
                 </tr>
@@ -407,6 +421,9 @@ const managerTotals = computed(() => {
                     >
                       {{ bonus.winner }}
                     </span>
+                  </td>
+                  <td class="px-4 py-2 text-sm text-right text-gray-800 dark:text-gray-50">
+                    {{ bonus.score !== null ? bonus.score.toFixed(2) : "-" }}
                   </td>
                   <td class="px-4 py-2 text-sm text-right text-gray-800 dark:text-gray-50">
                     {{ formatCurrency(bonus.amount) }}
@@ -448,7 +465,7 @@ const managerTotals = computed(() => {
                 <p
                   class="text-xs"
                   :class="[
-                    award.winner === 'Pending'
+                    award.pending
                       ? 'text-amber-600 dark:text-amber-300'
                       : 'text-gray-600 dark:text-gray-200',
                   ]"
