@@ -30,7 +30,7 @@ const payoutPlan = [
   {
     label: "Weekly + Seasonal Bonuses & Honors",
     amount: 360,
-    detail: "Weekly high-score bonuses plus five season-long mini awards",
+    detail: "Weekly high-score bonuses plus five season-long league honors",
   },
 ];
 
