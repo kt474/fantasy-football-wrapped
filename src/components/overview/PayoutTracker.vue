@@ -168,17 +168,15 @@ const weeklyBonusWinners = computed(() => {
 const totalWeeklyBonuses = computed(() => weeklyBonusWinners.value.length);
 const weeklyPoolTotal = computed(() => totalWeeklyBonuses.value * 15);
 
-const buildCustomAwardName = (award: any) => {
-  const title =
-    (award.title && award.title.trim()) ||
-    awardFallbackTitles[award.id] ||
-    "Seasonal award";
-  const informal =
-    (award.informalLabel && award.informalLabel.trim()) ||
-    awardFallbackLabels[award.id] ||
-    "";
-  return informal ? `${title} — ${informal}` : title;
-};
+const normalizeAwardTitle = (award: any) =>
+  (award.title && award.title.trim()) ||
+  awardFallbackTitles[award.id] ||
+  "Seasonal award";
+
+const normalizeAwardInformal = (award: any) =>
+  (award.informalLabel && award.informalLabel.trim()) ||
+  awardFallbackLabels[award.id] ||
+  "";
 
 const resolveCustomWinner = (award: any) => {
   if (award.winnerOwnerId) {
@@ -211,10 +209,12 @@ const coreSeasonalAwards = computed(() => {
     : mostPointsPendingLabel;
 
   return [
-    { award: "Champion", winner: championName, amount: 1000, pending: championName === "Pending", definition: "" },
-    { award: "Runner-Up", winner: runnerUpName, amount: 680, pending: runnerUpName === "Pending", definition: "" },
+    { id: "champion", title: "Champion", informalLabel: "", winner: championName, amount: 1000, pending: championName === "Pending", definition: "" },
+    { id: "runner-up", title: "Runner-Up", informalLabel: "", winner: runnerUpName, amount: 680, pending: runnerUpName === "Pending", definition: "" },
     {
-      award: "Most Points (Regular Season)",
+      id: "most-points",
+      title: "Most Points (Regular Season)",
+      informalLabel: "",
       winner: mostPointsName,
       amount: 360,
       pending: !seasonComplete,
@@ -228,8 +228,8 @@ const customSeasonalAwards = computed(() =>
     const winner = resolveCustomWinner(award);
     return {
       id: award.id,
-      award: buildCustomAwardName(award),
-      informalLabel: award.informalLabel,
+      title: normalizeAwardTitle(award),
+      informalLabel: normalizeAwardInformal(award),
       definition: award.definition,
       winner,
       amount: award.amount,
@@ -319,7 +319,10 @@ const managerTotals = computed(() => {
         seasonalAwards: [],
         total: 0,
       };
-    entry.seasonalAwards.push(award.award);
+    const label = award.informalLabel
+      ? `${award.title} (${award.informalLabel})`
+      : award.title;
+    entry.seasonalAwards.push(label);
     entry.total += award.amount;
     totals.set(award.winner, entry);
   });
@@ -559,14 +562,22 @@ const managerTotals = computed(() => {
           <div class="divide-y divide-gray-100 dark:divide-gray-700">
             <div
               v-for="award in seasonalAwards"
-              :key="award.award"
+              :key="award.id || award.title"
               class="flex items-center justify-between px-4 py-3"
             >
               <div class="relative group">
                 <div class="flex items-center gap-2">
-                  <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                    {{ award.award }}
-                  </p>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                      {{ award.title }}
+                    </span>
+                    <span
+                      v-if="award.informalLabel"
+                      class="text-[11px] text-gray-500 dark:text-gray-300"
+                    >
+                      {{ award.informalLabel }}
+                    </span>
+                  </div>
                   <span
                     v-if="award.definition"
                     class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-100"
@@ -579,7 +590,10 @@ const managerTotals = computed(() => {
                   class="absolute z-20 hidden max-w-xs p-3 mt-2 text-xs leading-relaxed text-gray-800 bg-white border border-gray-200 rounded-lg shadow-lg group-hover:block dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 >
                   <p class="font-semibold text-gray-900 dark:text-gray-50">
-                    {{ award.award }}
+                    {{ award.title }}
+                  </p>
+                  <p v-if="award.informalLabel" class="text-[11px] text-gray-500 dark:text-gray-300">
+                    {{ award.informalLabel }}
                   </p>
                   <p
                     class="mt-1 text-gray-700 dark:text-gray-200"
