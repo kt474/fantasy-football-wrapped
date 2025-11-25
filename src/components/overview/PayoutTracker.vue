@@ -457,9 +457,9 @@ const managerTotals = computed(() => {
         </div>
       </div>
 
-      <div class="grid gap-4 xl:grid-cols-3">
+      <div class="grid gap-4 xl:grid-cols-[3fr_2fr]">
         <div
-          class="xl:col-span-2 overflow-hidden border border-gray-200 rounded-xl shadow-sm dark:border-gray-700 bg-white dark:bg-gray-800"
+          class="overflow-hidden border border-gray-200 rounded-xl shadow-sm dark:border-gray-700 bg-white dark:bg-gray-800"
         >
           <div
             class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
@@ -605,9 +605,9 @@ const managerTotals = computed(() => {
         </div>
       </div>
 
-      <div
-        class="overflow-hidden border border-gray-200 rounded-xl shadow-sm dark:border-gray-700 bg-white dark:bg-gray-800"
-      >
+        <div
+          class="overflow-hidden border border-gray-200 rounded-xl shadow-sm dark:border-gray-700 bg-white dark:bg-gray-800"
+        >
         <div
           class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
         >
