@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { fetchAwards, saveAwards } from "../api/awardsClient";
 import { SeasonalAward, SeasonalAwardId } from "../api/types";
 
 const STORAGE_KEY = "ffwrappedSeasonalAwards";
@@ -83,13 +84,41 @@ export const useAwardsStore = defineStore("awards", {
   state: () => ({
     awards: readFromStorage(),
     loading: false,
-    error: "" as string | null,
+    initialized: false,
+    error: null as string | null,
     adminEnabled: import.meta.env.VITE_ENABLE_ADMIN_AWARDS !== "false",
   }),
   actions: {
+    async hydrateFromApi() {
+      if (this.loading) return;
+      this.loading = true;
+      this.error = null;
+      const remote = await fetchAwards();
+      if (remote && Array.isArray(remote) && remote.length) {
+        this.awards = remote;
+        persistToStorage(remote);
+      } else {
+        // fall back to local cache if remote is unavailable
+        this.awards = readFromStorage();
+        this.error = "Using local awards cache (remote unavailable).";
+      }
+      this.loading = false;
+      this.initialized = true;
+    },
     setAwards(awards: SeasonalAward[]) {
       this.awards = awards;
       persistToStorage(awards);
+    },
+    async saveAll(awards: SeasonalAward[]) {
+      this.loading = true;
+      this.error = null;
+      const ok = await saveAwards(awards);
+      if (!ok) {
+        this.error = "Failed to save awards to server; changes kept locally.";
+      }
+      this.setAwards(awards);
+      this.loading = false;
+      return ok;
     },
     updateAward(id: SeasonalAwardId, updates: Partial<SeasonalAward>) {
       const nextAwards = this.awards.map((award) =>

@@ -33,6 +33,12 @@ Fork this repository and then clone the fork. To run the project locally, you'll
 ```
 None of the environment variables are required to get the project running locally but some features like the AI generated summaries are hidden behind an API. 
 
+#### Running with the Awards admin API
+- Install the Vercel CLI if you want the `/api/awards` function locally: `npm install -g vercel`
+- Ensure `.env.local` includes `VITE_AWARDS_API_URL=http://localhost:3000`
+- Start the app with the API available: `vercel dev`
+  - If you instead run `npm run dev`, the awards API won’t be available; point `VITE_AWARDS_API_URL` at a deployed URL in that case.
+
 ### Technologies
 It would also be helpful to familiarize yourself with the technologies used in this project:
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useAwardsStore } from "../store/awards";
 import { useStore } from "../store/store";
 import type { SeasonalAward, SeasonalAwardId } from "../api/types";
@@ -107,6 +107,7 @@ const handleSave = async (id: SeasonalAwardId) => {
   saving[id] = true;
   saved[id] = false;
   awardsStore.updateAward(id, current);
+  await awardsStore.saveAll(awardsStore.awards);
   saved[id] = true;
   saving[id] = false;
   setTimeout(() => {
@@ -124,9 +125,8 @@ const handleSaveAll = async () => {
     })
     .filter((item) => item.errors.length);
   if (invalid.length) return;
-  awardsStore.setAwards(
-    awardsStore.awards.map((award) => normalizeAward(formState[award.id]))
-  );
+  const next = awardsStore.awards.map((award) => normalizeAward(formState[award.id]));
+  await awardsStore.saveAll(next);
   Object.keys(saved).forEach((key) => {
     saved[key as SeasonalAwardId] = true;
     setTimeout(() => {
@@ -137,6 +137,7 @@ const handleSaveAll = async () => {
 
 const handleReset = () => {
   awardsStore.resetAwards();
+  awardsStore.saveAll(awardsStore.awards);
 };
 
 const pendingOwnerLabel = computed(() =>
@@ -155,6 +156,17 @@ const formatDefinition = (value: string) => {
   const escaped = escapeHtml(value || "");
   return escaped.replace(/\*(.*?)\*/g, "<em>$1</em>");
 };
+
+const hydrate = async () => {
+  if (!awardsStore.initialized) {
+    await awardsStore.hydrateFromApi();
+  }
+  hydrateForm();
+};
+
+onMounted(() => {
+  hydrate();
+});
 </script>
 
 <template>
@@ -182,9 +194,11 @@ const formatDefinition = (value: string) => {
         <button
           type="button"
           class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          :disabled="awardsStore.loading"
           @click="handleSaveAll"
         >
-          Save all
+          <span v-if="awardsStore.loading">Saving…</span>
+          <span v-else>Save all</span>
         </button>
       </div>
     </div>
@@ -196,6 +210,13 @@ const formatDefinition = (value: string) => {
       Admin awards editing is currently disabled. Set
       <code class="px-1 py-0.5 text-xs bg-gray-100 rounded dark:bg-gray-800">VITE_ENABLE_ADMIN_AWARDS=true</code>
       to enable it.
+    </div>
+
+    <div
+      v-if="awardsStore.error"
+      class="p-4 mt-4 text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg dark:bg-gray-900 dark:text-amber-200 dark:border-amber-800"
+    >
+      {{ awardsStore.error }}
     </div>
 
     <div v-if="awardsStore.adminEnabled" class="grid gap-4 mt-4">

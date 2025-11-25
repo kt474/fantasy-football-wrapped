@@ -12,6 +12,10 @@ const props = defineProps<{
 const store = useStore();
 const awardsStore = useAwardsStore();
 
+if (!awardsStore.initialized) {
+  awardsStore.hydrateFromApi();
+}
+
 const seasonYear = computed(() => props.league?.season || "");
 const showTracker = computed(() => Boolean(seasonYear.value));
 
