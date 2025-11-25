@@ -575,6 +575,7 @@ const getTeamName = (tableDataItem: any) => {
     <div v-if="store.currentTab === 'leagueOverview'">
       <LeagueOverview
         :league="store.currentLeagueId ? store.leagueInfo[store.currentLeagueIndex] : undefined"
+        :tableData="tableData"
       />
     </div>
   </div>

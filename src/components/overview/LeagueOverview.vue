@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { LeagueInfoType } from "../../api/types";
+import { LeagueInfoType, TableDataType } from "../../api/types";
 import { useStore } from "../../store/store";
+import PayoutTracker from "./PayoutTracker.vue";
 
 const props = defineProps<{
   league?: LeagueInfoType;
+  tableData?: TableDataType[];
 }>();
 
 const store = useStore();
@@ -189,6 +191,7 @@ const rosterCounts = computed(() => {
           </div>
         </div>
       </div>
+      <PayoutTracker :league="league || undefined" :tableData="props.tableData" />
     </div>
   </div>
 </template>

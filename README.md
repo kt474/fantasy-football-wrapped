@@ -10,7 +10,7 @@ Current features:
 - Expected wins and strength of schedule (measuring luck)
 - Roster management stats, trade rankings, and waiver wire moves
 - Roster explorer with per-player fantasy stats and click-through to weekly breakdowns
-- League overview tab with roster/scoring/playoff settings at a glance
+- League overview tab with roster/scoring/playoff settings and a 2025 payout tracker
 - Playoff projections
 - AI generated weekly reports, summary of matchups and top/bottom performers from each week
 - Weekly high score tracker for each played week (top starter score per week)

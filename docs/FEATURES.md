@@ -27,10 +27,10 @@ Snapshot of the main user-facing modules, what they do, and when they were last 
 - Last updated: 2025-11-24.
 
 ## League Overview
-- What it does: Summarizes league settings—teams, season length, scoring type/median scoring, playoff and waiver formats, roster slots, and current status/week.
-- Data: `leagueInfo` for the active league (roster positions, scoringType, playoff settings, waiverType, status).
-- Key UI: `components/overview/LeagueOverview.vue` (tab: Overview).
-- Last updated: 2025-11-24.
+- What it does: Summarizes league settings—teams, season length, scoring type/median scoring, playoff and waiver formats, roster slots, current status/week, plus a 2025 payout tracker that auto-fills weekly bonus winners, champion/runner-up, and most points when data is available.
+- Data: `leagueInfo` for the active league (roster positions, scoringType, playoff settings, waiverType, status), table data for weekly scores and totals, and static 2025 payout configuration for the tracker.
+- Key UI: `components/overview/LeagueOverview.vue` (tab: Overview), `components/overview/PayoutTracker.vue`.
+- Last updated: 2025-01-05.
 
 ## Power Rankings
 - What it does: Ranks teams using blended scoring (average, high/low, win percentage) plus roster projections.
