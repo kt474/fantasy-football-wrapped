@@ -214,6 +214,23 @@ const getTeamName = (tableDataItem: any) => {
   }
   return tableDataItem.name ? tableDataItem.name : `Ghost Roster`;
 };
+
+const getGamesPlayed = (tableDataItem: any) => {
+  const pointsPlayed = Array.isArray(tableDataItem.points)
+    ? tableDataItem.points.filter(
+        (p: any) => typeof p === "number" && isFinite(p)
+      ).length
+    : 0;
+  const leagueLastScored =
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek || 0;
+  return Math.max(pointsPlayed, leagueLastScored);
+};
+
+const getPointsPerGame = (tableDataItem: any) => {
+  const gamesPlayed = getGamesPlayed(tableDataItem);
+  if (!gamesPlayed) return 0;
+  return Number((tableDataItem.pointsFor / gamesPlayed).toFixed(2));
+};
 </script>
 <template>
   <div>
@@ -319,15 +336,25 @@ const getTeamName = (tableDataItem: any) => {
                 <div
                   :class="hover === 'points' ? 'visible' : 'invisible'"
                   class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
-                >
-                  Total regular season points
-                </div>
-              </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
-                <div
-                  @click="tableOrder = 'pointsAgainst'"
-                  @mouseover="hover = 'pointsAgainst'"
-                  @mouseleave="hover = ''"
+              >
+                Total regular season points
+              </div>
+            </th>
+            <th scope="col" class="px-2 py-3 sm:px-6">
+              <div class="flex items-center w-16 dark:text-gray-200">
+                PPG
+              </div>
+              <div
+                class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
+              >
+                Points per game
+              </div>
+            </th>
+            <th scope="col" class="px-2 py-3 sm:px-6">
+              <div
+                @click="tableOrder = 'pointsAgainst'"
+                @mouseover="hover = 'pointsAgainst'"
+                @mouseleave="hover = ''"
                   class="flex items-center w-20 cursor-pointer dark:text-gray-200"
                 >
                   Points Against
@@ -485,6 +512,9 @@ const getTeamName = (tableDataItem: any) => {
                 }"
               >
                 {{ item.pointsFor }}
+              </td>
+              <td class="px-2 py-3 sm:px-6">
+                {{ getPointsPerGame(item) }}
               </td>
               <td
                 class="px-2 py-3 sm:px-6"
