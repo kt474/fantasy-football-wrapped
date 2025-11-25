@@ -16,6 +16,7 @@ import Home from "./views/Home.vue";
 import Players from "./views/Players.vue";
 import Rosters from "./views/Rosters.vue";
 import AdminAwards from "./views/AdminAwards.vue";
+import ScoringSettings from "./views/ScoringSettings.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -66,6 +67,14 @@ const routes = [
     meta: {
       title: "Admin: Awards",
       description: "Manage custom seasonal award titles, definitions, and winners.",
+    },
+  },
+  {
+    path: "/admin/scoring-settings",
+    component: ScoringSettings,
+    meta: {
+      title: "Admin: Scoring Settings",
+      description: "Debug view of the full scoring_settings object for the active league.",
     },
   },
   {
