@@ -762,14 +762,34 @@ export const getRosters = async (leagueId: string) => {
     `https://api.sleeper.app/v1/league/${leagueId}/rosters`
   );
   const rosters = await response.json();
+  const parseSleeperPoints = (whole: any, decimal: any) => {
+    const base = Number(whole) || 0;
+    const frac =
+      decimal !== undefined && decimal !== null
+        ? Number(`0.${String(decimal).padStart(2, "0")}`)
+        : 0;
+    return Number((base + frac).toFixed(3));
+  };
   return rosters.map((roster: any) => {
+    const pointsFor = parseSleeperPoints(
+      roster["settings"]["fpts"],
+      roster["settings"]["fpts_decimal"]
+    );
+    const pointsAgainst = parseSleeperPoints(
+      roster["settings"]["fpts_against"],
+      roster["settings"]["fpts_against_decimal"]
+    );
+    const potentialPoints = parseSleeperPoints(
+      roster["settings"]["ppts"],
+      roster["settings"]["ppts_decimal"]
+    );
     return {
       id: roster["owner_id"],
-      pointsFor: roster["settings"]["fpts"],
-      pointsAgainst: roster["settings"]["fpts_against"],
-      potentialPoints: roster["settings"]["ppts"],
-      managerEfficiency: roster["settings"]["ppts"]
-        ? round(roster["settings"]["fpts"] / roster["settings"]["ppts"], 3)
+      pointsFor,
+      pointsAgainst,
+      potentialPoints,
+      managerEfficiency: potentialPoints
+        ? round(pointsFor / potentialPoints, 3)
         : 0,
       wins: roster["settings"]["wins"],
       losses: roster["settings"]["losses"],

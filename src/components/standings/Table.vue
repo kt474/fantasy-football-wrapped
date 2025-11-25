@@ -115,13 +115,10 @@ const tableData: any = computed(() => {
       }
       return b.pointsFor - a.pointsFor;
     });
-  } else if (tableOrder.value === "medianRecord") {
-    return originalData.value.sort((a: any, b: any) => {
-      if (a.winsWithMedian !== b.winsWithMedian) {
-        return b.winsWithMedian - a.winsWithMedian;
-      }
-      return b.pointsFor - a.pointsFor;
-    });
+  } else if (tableOrder.value === "ppg") {
+    return data.sort(
+      (a: any, b: any) => getPointsPerGame(b) - getPointsPerGame(a)
+    );
   }
 });
 
@@ -149,13 +146,6 @@ const mostWinsAgainstAll = computed(() => {
 const mostLossesAgainstAll = computed(() => {
   return maxBy(originalData.value, "lossesAgainstAll")?.lossesAgainstAll;
 });
-const mostMedianWins = computed(() => {
-  return maxBy(originalData.value, "winsWithMedian")?.winsWithMedian;
-});
-const mostMedianLosses = computed(() => {
-  return maxBy(originalData.value, "lossesWithMedian")?.lossesWithMedian;
-});
-
 const seasonLabel = computed(() => {
   if (store.currentLeagueId && store.leagueInfo[store.currentLeagueIndex]) {
     return `Season ${store.leagueInfo[store.currentLeagueIndex].season}`;
@@ -221,15 +211,56 @@ const getGamesPlayed = (tableDataItem: any) => {
         (p: any) => typeof p === "number" && isFinite(p)
       ).length
     : 0;
+  const recordGames =
+    (tableDataItem.wins || 0) +
+    (tableDataItem.losses || 0) +
+    (tableDataItem.ties || 0);
   const leagueLastScored =
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek || 0;
-  return Math.max(pointsPlayed, leagueLastScored);
+
+  if (leagueLastScored > 0) {
+    return leagueLastScored;
+  }
+  if (pointsPlayed > 0) {
+    return pointsPlayed;
+  }
+  return recordGames;
 };
 
 const getPointsPerGame = (tableDataItem: any) => {
   const gamesPlayed = getGamesPlayed(tableDataItem);
   if (!gamesPlayed) return 0;
   return Number((tableDataItem.pointsFor / gamesPlayed).toFixed(2));
+};
+
+const getHeadToHeadRecord = (team: any) => {
+  let wins = 0;
+  let losses = 0;
+  let ties = 0;
+  if (!team.matchups || !team.points) return "0-0";
+  const opponents = originalData.value;
+  const lastScored =
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek || 0;
+  team.matchups.forEach((matchupId: number, idx: number) => {
+    // Only count completed weeks
+    if (lastScored && idx + 1 > lastScored) return;
+    if (!matchupId || team.points[idx] === undefined || team.points[idx] === null)
+      return;
+    const opponent = opponents.find(
+      (o: any) =>
+        o.rosterId !== team.rosterId &&
+        o.matchups &&
+        o.matchups[idx] === matchupId
+    );
+    if (!opponent || opponent.points[idx] === undefined || opponent.points[idx] === null)
+      return;
+    const myPts = team.points[idx];
+    const oppPts = opponent.points[idx];
+    if (myPts > oppPts) wins += 1;
+    else if (myPts < oppPts) losses += 1;
+    else ties += 1;
+  });
+  return `${wins}-${losses}${ties ? `-${ties}` : ""}`;
 };
 </script>
 <template>
@@ -336,30 +367,50 @@ const getPointsPerGame = (tableDataItem: any) => {
                 <div
                   :class="hover === 'points' ? 'visible' : 'invisible'"
                   class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
-              >
-                Total regular season points
-              </div>
-            </th>
-            <th scope="col" class="px-2 py-3 sm:px-6">
-              <div class="flex items-center w-16 dark:text-gray-200">
-                PPG
-              </div>
-              <div
-                class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
-              >
-                Points per game
-              </div>
-            </th>
+                >
+                  Total regular season points
+                </div>
+              </th>
+              <th scope="col" class="px-2 py-3 sm:px-6">
+                <div
+                  @click="tableOrder = 'ppg'"
+                  @mouseover="hover = 'ppg'"
+                  @mouseleave="hover = ''"
+                  class="flex items-center w-16 cursor-pointer dark:text-gray-200"
+                >
+                  PPG
+                  <svg
+                    class="w-3 h-3 ms-1.5 fill-gray-400"
+                    :class="{
+                      'fill-gray-600 dark:fill-gray-50': tableOrder == 'ppg',
+                    }"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                    />
+                  </svg>
+                </div>
+                <div
+                  :class="hover === 'ppg' ? 'visible' : 'invisible'"
+                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
+                >
+                  Points per game
+                </div>
+              </th>
             <th scope="col" class="px-2 py-3 sm:px-6">
               <div
                 @click="tableOrder = 'pointsAgainst'"
                 @mouseover="hover = 'pointsAgainst'"
                 @mouseleave="hover = ''"
                   class="flex items-center w-20 cursor-pointer dark:text-gray-200"
-                >
-                  Points Against
-                  <div>
-                    <svg
+              >
+                Points Against
+                <div>
+                  <svg
                       class="w-3 h-3 ms-1.5 fill-gray-400"
                       :class="{
                         'fill-gray-600 dark:fill-gray-50':
@@ -418,41 +469,6 @@ const getPointsPerGame = (tableDataItem: any) => {
                   Team record if each team played every other team each week.
                 </div>
               </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
-                <div
-                  @click="tableOrder = 'medianRecord'"
-                  @mouseover="hover = 'medianRecord'"
-                  @mouseleave="hover = ''"
-                  class="flex items-center w-20 cursor-pointer dark:text-gray-200"
-                >
-                  Median Record
-                  <div>
-                    <svg
-                      class="w-3 h-3 ms-1.5 fill-gray-400"
-                      :class="{
-                        'fill-gray-600 dark:fill-gray-50':
-                          tableOrder == 'medianRecord',
-                      }"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div
-                  :class="hover === 'medianRecord' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 -ml-14 sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
-                >
-                  Team record where a win is awarded if a team's weekly score is
-                  higher than the league median, and a loss is added if the
-                  score is less than the median.
-                </div>
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -501,6 +517,9 @@ const getPointsPerGame = (tableDataItem: any) => {
               >
                 {{ item.wins }} - {{ item.losses }}
                 {{ item.ties != 0 ? `- ${item.ties}` : "" }}
+                <span class="text-xs text-gray-500 dark:text-gray-300">
+                  (H2H: {{ getHeadToHeadRecord(item) }})
+                </span>
               </td>
               <td
                 class="px-2 py-3 sm:px-6"
@@ -511,7 +530,7 @@ const getPointsPerGame = (tableDataItem: any) => {
                     item.pointsFor === leastPoints,
                 }"
               >
-                {{ item.pointsFor }}
+                {{ item.pointsFor.toFixed ? item.pointsFor.toFixed(2) : item.pointsFor }}
               </td>
               <td class="px-2 py-3 sm:px-6">
                 {{ getPointsPerGame(item) }}
@@ -539,21 +558,9 @@ const getPointsPerGame = (tableDataItem: any) => {
                 {{ item.winsAgainstAll }} -
                 {{ item.lossesAgainstAll }}
               </td>
-              <td
-                class="px-2 py-3 sm:px-6"
-                :class="{
-                  'text-blue-600 font-semibold dark:text-blue-500':
-                    item.winsWithMedian === mostMedianWins,
-                  'text-red-600 dark:text-red-500 font-semibold':
-                    item.lossesWithMedian === mostMedianLosses,
-                }"
-              >
-                {{ item.winsWithMedian ? item.winsWithMedian : 0 }} -
-                {{ item.lossesWithMedian ? item.lossesWithMedian : 0 }}
-              </td>
             </tr>
-          </tbody>
-        </table>
+         </tbody>
+       </table>
       </div>
       <div class="flex flex-col flex-1 w-full mt-4 xl:w-fit xl:ml-4 xl:mt-0">
         <CurrentTrends :tableData="tableData" />
