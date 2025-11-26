@@ -2,7 +2,8 @@
 import { computed } from "vue";
 import { useStore } from "../../store/store";
 import { useAwardsStore } from "../../store/awards";
-import { LeagueInfoType, TableDataType } from "../../api/types";
+import { useWeeklyBonusStore } from "../../store/weeklyBonuses";
+import { LeagueInfoType, TableDataType, WeeklyBonus } from "../../api/types";
 
 const props = defineProps<{
   league?: LeagueInfoType;
@@ -11,9 +12,13 @@ const props = defineProps<{
 
 const store = useStore();
 const awardsStore = useAwardsStore();
+const weeklyBonusStore = useWeeklyBonusStore();
 
 if (!awardsStore.initialized) {
   awardsStore.hydrateFromApi();
+}
+if (!weeklyBonusStore.initialized) {
+  weeklyBonusStore.hydrateFromApi();
 }
 
 const seasonYear = computed(() => props.league?.season || "");
@@ -137,9 +142,10 @@ const resolveNameByRosterId = (rosterId?: number) => {
   return rosterId ? `Roster #${rosterId}` : "Pending";
 };
 
-const weeklyBonusWinners = computed(() => {
-  const seasonLength = props.league?.regularSeasonLength || 0;
-  const limit = Math.max(seasonLength || 0, weeksPlayed.value || 0);
+const regularWeeklyBonusWinners = computed(() => {
+  // cap at 14 regular-season weeks; playoff bonuses handled separately
+  const regularSeasonWeeks = 14;
+  const limit = regularSeasonWeeks;
   const winners: { week: number; winner: string; amount: number; score: number | null }[] = [];
   for (let i = 0; i < limit; i++) {
     let bestTeam: TableDataType | undefined;
@@ -165,8 +171,41 @@ const weeklyBonusWinners = computed(() => {
   return winners;
 });
 
+const playoffWeeklyBonuses = computed(() => {
+  const manual = weeklyBonusStore.bonuses || [];
+  const resolved = manual.map((bonus: WeeklyBonus) => {
+    let winnerLabel = "Pending";
+    if (bonus.winnerOwnerId) {
+      const user = findUserByUserId(bonus.winnerOwnerId);
+      if (user) winnerLabel = formatTeamName(user);
+    }
+    if (bonus.winnerNameOverride) {
+      winnerLabel = bonus.winnerNameOverride;
+    }
+    return {
+      week: bonus.week,
+      winner: winnerLabel,
+      amount: bonus.amount ?? 15,
+      score:
+        bonus.score === null || bonus.score === undefined
+          ? null
+          : Number(bonus.score),
+      label: bonus.label,
+      note: bonus.note,
+    };
+  });
+  return resolved.sort((a, b) => a.week - b.week);
+});
+
+const weeklyBonusWinners = computed(() => [
+  ...regularWeeklyBonusWinners.value,
+  ...playoffWeeklyBonuses.value,
+]);
+
 const totalWeeklyBonuses = computed(() => weeklyBonusWinners.value.length);
-const weeklyPoolTotal = computed(() => totalWeeklyBonuses.value * 15);
+const weeklyPoolTotal = computed(
+  () => weeklyBonusWinners.value.reduce((sum, bonus) => sum + (bonus.amount || 0), 0) || 0
+);
 
 const normalizeAwardTitle = (award: any) =>
   (award.title && award.title.trim()) ||
@@ -516,8 +555,8 @@ const managerTotals = computed(() => {
               </thead>
               <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                 <tr
-                  v-for="bonus in weeklyBonusWinners"
-                  :key="bonus.week"
+                  v-for="bonus in regularWeeklyBonusWinners"
+                  :key="`regular-${bonus.week}`"
                   class="hover:bg-gray-50 dark:hover:bg-gray-900"
                 >
                   <td class="px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-50">
@@ -533,6 +572,47 @@ const managerTotals = computed(() => {
                     >
                       {{ bonus.winner }}
                     </span>
+                  </td>
+                  <td class="px-4 py-2 text-sm text-right text-gray-800 dark:text-gray-50">
+                    {{ bonus.score !== null ? bonus.score.toFixed(2) : "-" }}
+                  </td>
+                  <td class="px-4 py-2 text-sm text-right text-gray-800 dark:text-gray-50">
+                    {{ formatCurrency(bonus.amount) }}
+                  </td>
+                </tr>
+
+                <tr class="bg-gray-100 dark:bg-gray-900/70">
+                  <td colspan="4" class="px-4 py-3 text-xs font-semibold tracking-wide text-gray-700 uppercase dark:text-gray-200">
+                    Playoffs (Weeks 15–17) — manually set via admin; $15 each
+                  </td>
+                </tr>
+
+                <tr
+                  v-for="bonus in playoffWeeklyBonuses"
+                  :key="`playoff-${bonus.week}`"
+                  class="hover:bg-gray-50 dark:hover:bg-gray-900"
+                >
+                  <td class="px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-50">
+                    {{ bonus.week.toString().padStart(2, "0") }}*
+                  </td>
+                  <td class="px-4 py-2 text-sm text-gray-700 dark:text-gray-100">
+                    <div class="flex flex-col">
+                      <span
+                        :class="[
+                          bonus.winner === 'Pending'
+                            ? 'text-amber-600 dark:text-amber-300'
+                            : 'text-gray-800 dark:text-gray-50 font-semibold',
+                        ]"
+                      >
+                        {{ bonus.winner }}
+                      </span>
+                      <span class="text-[11px] text-gray-500 dark:text-gray-300">
+                        {{ bonus.label }}
+                      </span>
+                      <span v-if="bonus.note" class="text-[10px] text-gray-400 dark:text-gray-400">
+                        {{ bonus.note }}
+                      </span>
+                    </div>
                   </td>
                   <td class="px-4 py-2 text-sm text-right text-gray-800 dark:text-gray-50">
                     {{ bonus.score !== null ? bonus.score.toFixed(2) : "-" }}

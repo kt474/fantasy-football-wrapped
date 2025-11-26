@@ -122,3 +122,13 @@ export type SeasonalAward = {
   winnerOwnerId?: string | null;
   winnerNameOverride?: string | null;
 };
+
+export type WeeklyBonus = {
+  week: number;
+  label: string;
+  note?: string;
+  amount: number;
+  winnerOwnerId?: string | null;
+  winnerNameOverride?: string | null;
+  score?: number | null;
+};

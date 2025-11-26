@@ -128,7 +128,7 @@ Plan assumes D1; note a KV alternative where relevant.
 ## 11) Post-deploy checklist (do this after completing steps above)
 - Replace placeholder IDs in `wrangler.toml` with real D1 (and optional KV) IDs after provisioning.
 - In Cloudflare Pages settings, add the D1 binding name `DB` (and optional `AWARDS_KV`) and set `VITE_AWARDS_API_URL=/api/awards`.
-- Deploy via Pages (GitHub hook or manual) and run the migration: `npx wrangler d1 execute <db-name> --file migrations/0001_awards.sql --remote`.
+- Deploy via Pages (GitHub hook or manual) and run the migrations: `npx wrangler d1 execute <db-name> --file migrations/0001_awards.sql --remote` and `npx wrangler d1 execute <db-name> --file migrations/0002_weekly_bonuses.sql --remote`.
 - Seed awards once (optional): send a `PUT` to `/api/awards` with the default awards array to populate the table.
 - Smoke-test on the Pages URL: load site, hit awards admin, save, refresh to confirm persistence, and verify CORS is clean.
 
