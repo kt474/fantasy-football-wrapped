@@ -4,8 +4,8 @@ compatibility_date = "2024-11-18"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "ffw-awards"
-database_id = "<replace-with-d1-database-id>"
+database_name = "kbkh-awards"
+database_id = "4597d0e2-8c60-4607-ab39-1fc5907643ad"
 
 # Optional KV fallback; uncomment and set ids if used.
 # [[kv_namespaces]]
