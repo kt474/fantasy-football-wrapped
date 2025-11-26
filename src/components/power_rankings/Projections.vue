@@ -11,10 +11,9 @@ const store = useStore();
 const loading = ref(false);
 const featureDisabled = ref(false);
 const errorMessage = ref("");
-const projectionsEnabled =
-  Boolean(import.meta.env.VITE_PROJECTIONS) ||
-  Boolean(import.meta.env.VITE_PROJECTION_API);
-const useBatchProxy = Boolean(import.meta.env.VITE_PROJECTION_API);
+const projectionApiBase = (import.meta.env.VITE_PROJECTION_API || "/api").replace(/\/$/, "");
+const projectionsEnabled = true; // default on; can disable with env if needed
+const useBatchProxy = Boolean(projectionApiBase);
 const categories = computed(() => {
   return formattedData.value.map((user: any) =>
     store.showUsernames

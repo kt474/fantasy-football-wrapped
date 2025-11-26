@@ -661,8 +661,8 @@ export const fetchProjectionsBatch = async (
   week: number,
   scoringType: number
 ) => {
-  if (!import.meta.env.VITE_PROJECTION_API) return null;
-  const base = import.meta.env.VITE_PROJECTION_API.replace(/\/$/, "");
+  const base =
+    (import.meta.env.VITE_PROJECTION_API || "/api").replace(/\/$/, "");
   try {
     const response = await fetch(`${base}/api/projections`, {
       method: "POST",
