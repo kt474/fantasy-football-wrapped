@@ -297,14 +297,14 @@ const managerTotals = computed(() => {
 
   weeklyBonusWinners.value.forEach((bonus) => {
     if (bonus.winner === "Pending") return;
-    const entry =
+    const entry: ManagerTotalsEntry =
       totals.get(bonus.winner) ||
       {
         name: bonus.winner,
         weeklyBonuses: 0,
-        seasonalAwards: [],
+        seasonalAwards: [] as string[],
         total: 0,
-        bonusWeeks: [],
+        bonusWeeks: [] as number[],
       };
     entry.weeklyBonuses += 1;
     entry.bonusWeeks = Array.isArray(entry.bonusWeeks) ? entry.bonusWeeks : [];
@@ -315,14 +315,14 @@ const managerTotals = computed(() => {
 
   seasonalAwards.value.forEach((award) => {
     if (award.pending) return;
-    const entry =
+    const entry: ManagerTotalsEntry =
       totals.get(award.winner) ||
       {
         name: award.winner,
         weeklyBonuses: 0,
-        seasonalAwards: [],
+        seasonalAwards: [] as string[],
         total: 0,
-        bonusWeeks: [],
+        bonusWeeks: [] as number[],
       };
     const label = award.informalLabel
       ? `${award.title} (${award.informalLabel})`
