@@ -601,6 +601,35 @@ export const getProjections = async (
   week: number,
   scoringType: number
 ) => {
+  // If a projection API proxy is configured, prefer that.
+  if (import.meta.env.VITE_PROJECTION_API) {
+    try {
+      const base = import.meta.env.VITE_PROJECTION_API.replace(/\/$/, "");
+      const response = await fetch(`${base}/api/projections`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          playerIds: [player],
+          season: year,
+          week,
+          scoringType,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const result = Array.isArray(data?.projections) ? data.projections[0] : null;
+        if (result) {
+          return {
+            projection: result.projection ?? 0,
+            position: result.position ?? "",
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("Projection proxy failed; falling back to Sleeper", err);
+    }
+  }
+
   try {
     const response = await fetch(
       `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
@@ -623,6 +652,39 @@ export const getProjections = async (
       projection: 0,
       position: "",
     };
+  }
+};
+
+export const fetchProjectionsBatch = async (
+  playerIds: string[],
+  year: string,
+  week: number,
+  scoringType: number
+) => {
+  if (!import.meta.env.VITE_PROJECTION_API) return null;
+  const base = import.meta.env.VITE_PROJECTION_API.replace(/\/$/, "");
+  try {
+    const response = await fetch(`${base}/api/projections`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        playerIds,
+        season: year,
+        week,
+        scoringType,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`Projection proxy failed: ${response.status}`);
+    }
+    const data = await response.json();
+    if (data && Array.isArray(data.projections)) {
+      return data.projections as { playerId: string; projection: number; position: string }[];
+    }
+    return null;
+  } catch (err) {
+    console.warn("Projection batch proxy failed", err);
+    return null;
   }
 };
 export const getWinnersBracket = async (leagueId: string) => {
