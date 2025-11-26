@@ -11,9 +11,12 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const store = useStore();
+const vercelAnalyticsEnabled = import.meta.env.VITE_VERCEL_ANALYTICS === "true";
 
 onMounted(async () => {
-  inject();
+  if (vercelAnalyticsEnabled) {
+    inject();
+  }
   setHtmlBackground();
 });
 
