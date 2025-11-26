@@ -699,10 +699,10 @@ export const getMatchup = async (week: number, leagueId: string) => {
   );
   const matchup = await response.json();
   return matchup.map((game: any) => {
-    const benchPlayers = game["players"].filter(
+    const benchPlayers = game["players"]?.filter(
       (value: string) => !game["starters"]?.includes(value)
     );
-    const benchPoints = benchPlayers.map(
+    const benchPoints = benchPlayers?.map(
       (player: string) => game["players_points"][player]
     );
     return {
@@ -746,7 +746,7 @@ export const getData = async (leagueId: string) => {
     any,
     any[],
     any[],
-    any[],
+    any[]
   ] = await Promise.all([
     getLeague(leagueId),
     getRosters(leagueId),
@@ -809,15 +809,12 @@ export const getData = async (leagueId: string) => {
   ]);
 
   // Combine all transactions
-  const transactions = transactionPromises.reduce(
-    (acc, obj) => {
-      Object.entries(obj).forEach(([id, value]) => {
-        acc[id] = (acc[id] || 0) + (value as number);
-      });
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const transactions = transactionPromises.reduce((acc, obj) => {
+    Object.entries(obj).forEach(([id, value]) => {
+      acc[id] = (acc[id] || 0) + (value as number);
+    });
+    return acc;
+  }, {} as Record<string, number>);
 
   return {
     ...newLeagueInfo,

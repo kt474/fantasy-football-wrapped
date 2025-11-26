@@ -302,7 +302,7 @@ const updateChartColor = () => {
       labels: {
         formatter: function (str: string) {
           const n = 15;
-          return str.length > n ? str.slice(0, n - 1) + "..." : str;
+          return str?.length > n ? str.slice(0, n - 1) + "..." : str;
         },
       },
     },

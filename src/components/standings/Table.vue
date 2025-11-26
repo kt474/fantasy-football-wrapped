@@ -160,6 +160,12 @@ const mostTransactions = computed(() => {
     : {};
 });
 
+const seasonType = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].seasonType
+    : "";
+});
+
 const regularSeasonLength = computed(() => {
   if (store.leagueInfo[store.currentLeagueIndex].status == "in_season") {
     return store.leagueInfo[store.currentLeagueIndex].lastScoredWeek + 1;
@@ -522,7 +528,11 @@ const getTeamName = (tableDataItem: any) => {
         class="mt-4"
       />
       <Projections class="mt-4" />
-      <TeamRanking :tableData="tableData" class="mt-4" />
+      <TeamRanking
+        v-if="seasonType !== 'Guillotine'"
+        :tableData="tableData"
+        class="mt-4"
+      />
     </div>
     <div v-if="store.currentTab === 'expectedWins'">
       <div class="flex flex-wrap md:flex-nowrap">
