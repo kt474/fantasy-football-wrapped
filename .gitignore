@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 .env
 .vercel
+/src/components/power_rankings/Projections-original.vue
