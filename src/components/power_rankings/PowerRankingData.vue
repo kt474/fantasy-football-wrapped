@@ -3,7 +3,11 @@ import { ref, computed, watch } from "vue";
 import { mean, max, min, zip } from "lodash";
 import { useStore } from "../../store/store";
 import { getPowerRanking, winsOnWeek } from "../../api/helper";
-import { RosterType, TableDataType } from "../../api/types";
+import {
+  RosterType,
+  TableDataType,
+  PowerRankingEntry,
+} from "../../types/types";
 import PowerRankingCard from "./PowerRankingCard.vue";
 const store = useStore();
 
@@ -12,13 +16,6 @@ const props = defineProps<{
   regularSeasonLength: number;
   totalRosters: number;
 }>();
-
-type PowerRankingEntry = {
-  name: string;
-  type: string;
-  ratings: number[];
-  data?: number[];
-};
 
 const preseasonRank = computed(() => {
   type Position = "QB" | "WR" | "TE" | "RB";

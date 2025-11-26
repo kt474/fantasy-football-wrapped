@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
-import { LeagueInfoType } from "../../api/types";
+import { LeagueInfoType } from "../../types/types";
 import {
   getData,
   getLeague,

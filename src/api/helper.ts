@@ -11,7 +11,7 @@ import {
   sum,
 } from "lodash";
 import { getMatchup } from "./api";
-import { RosterType, UserType } from "./types";
+import { RosterType, UserType } from "../types/types";
 
 const getTierMultiplier = (position: string, rank: number) => {
   switch (position) {

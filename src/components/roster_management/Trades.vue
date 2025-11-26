@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
-import { LeagueInfoType } from "../../api/types.ts";
+import { LeagueInfoType } from "../../types/types.ts";
 import { getPlayersByIdsMap, getTradeValue } from "../../api/api.ts";
 import {
   fakeRosters,

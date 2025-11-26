@@ -2,7 +2,7 @@
 import { intersection } from "lodash";
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
-import { RosterType, LeagueInfoType } from "../../api/types";
+import { RosterType, LeagueInfoType } from "../../types/types";
 import { fakeProjectionData } from "../../api/helper";
 import { getProjections } from "../../api/api";
 import HeatMap from "./HeatMap.vue";

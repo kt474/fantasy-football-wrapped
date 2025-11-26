@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TableDataType, LeagueInfoType } from "../../api/types.ts";
+import { TableDataType, LeagueInfoType } from "../../types/types.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { generateReport, getPlayersByIdsMap } from "../../api/api.ts";

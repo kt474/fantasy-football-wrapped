@@ -109,3 +109,10 @@ export type TableDataType = {
   benchPlayers: string[];
   benchPoints: number[];
 };
+
+export type PowerRankingEntry = {
+  name: string;
+  type: string;
+  ratings: number[];
+  data?: number[];
+};

@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { maxBy, sum } from "lodash";
 import { useStore } from "../../store/store";
-import { RosterType, LeagueInfoType, TableDataType } from "../../api/types";
+import { RosterType, LeagueInfoType, TableDataType } from "../../types/types";
 import { getProjections } from "../../api/api";
 import { fakePlayoffData } from "../../api/helper";
 const store = useStore();

@@ -3,7 +3,7 @@ import { maxBy, minBy } from "lodash";
 import { fakeRosters, fakeUsers, createTableData } from "../../api/helper";
 import { computed, onMounted, ref } from "vue";
 import { useStore } from "../../store/store";
-import { TableDataType, UserType, RosterType } from "../../api/types";
+import { TableDataType, UserType, RosterType } from "../../types/types";
 import PowerRankingData from "../power_rankings/PowerRankingData.vue";
 import ExpectedWinsCard from "../expected_wins/ExpectedWinsCard.vue";
 import ExpectedWinsChart from "../expected_wins/ExpectedWinsChart.vue";

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import PreviewSummary from "./PreviewSummary.vue";
 import { computed, onMounted, ref, watch } from "vue";
-import { TableDataType } from "../../api/types.ts";
+import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { getPlayersByIdsMap, getSingleWeekProjection } from "../../api/api.ts";
 import { fakeWeeklyPreview, getWinProbability } from "../../api/helper.ts";
@@ -506,8 +506,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           ? matchup[0].username
                           : "Ghost Roster"
                         : matchup[0].name
-                          ? matchup[0].name
-                          : "Ghost Roster"
+                        ? matchup[0].name
+                        : "Ghost Roster"
                     }}
                   </p>
                   <p class="ml-2 text-xs">
@@ -627,8 +627,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           ? matchup[1].username
                           : "Ghost Roster"
                         : matchup[1].name
-                          ? matchup[1].name
-                          : "Ghost Roster"
+                        ? matchup[1].name
+                        : "Ghost Roster"
                     }}
                   </p>
                   <p class="mr-2 text-xs float-end">
@@ -764,8 +764,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   ? matchup[0].username
                   : "Ghost Roster"
                 : matchup[0].name
-                  ? matchup[0].name
-                  : "Ghost Roster"
+                ? matchup[0].name
+                : "Ghost Roster"
             }}
           </p>
           {{ generateString(cases[matchup[0].id]) }}
@@ -780,8 +780,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   ? matchup[1].username
                   : "Ghost Roster"
                 : matchup[1].name
-                  ? matchup[1].name
-                  : "Ghost Roster"
+                ? matchup[1].name
+                : "Ghost Roster"
             }}
           </p>
           {{ generateString(cases[matchup[1].id]) }}

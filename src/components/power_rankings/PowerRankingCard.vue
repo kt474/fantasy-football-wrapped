@@ -1,23 +1,26 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
+import { PowerRankingEntry } from "../../types/types";
 
 const store = useStore();
 
 const props = defineProps<{
-  powerRankings: any[];
+  powerRankings: PowerRankingEntry[];
   regularSeasonLength: number;
 }>();
 
 const rankingValues = computed(() => {
-  return props.powerRankings.sort((a, b) => {
+  return [...props.powerRankings].sort((a, b) => {
     return b.ratings[currentWeek.value - 1] - a.ratings[currentWeek.value - 1];
   });
 });
 
 const weeks = computed(() => {
   if (props.powerRankings.length > 0) {
-    const recordLength = props.powerRankings[0].data.length + 1;
+    const recordLength = props.powerRankings[0].data
+      ? props.powerRankings[0].data.length + 1
+      : 0;
     const weeksList = [...Array(props.regularSeasonLength + 1).keys()]
       .slice(1)
       .reverse();

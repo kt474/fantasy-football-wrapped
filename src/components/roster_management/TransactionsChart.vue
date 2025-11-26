@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
 import { fakeUsers, fakeTransactions } from "../../api/helper";
-import { RosterType } from "../../api/types";
+import { RosterType } from "../../types/types";
 
 const store = useStore();
 

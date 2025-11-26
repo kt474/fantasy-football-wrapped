@@ -2,7 +2,7 @@
 import { mean } from "lodash";
 import { ref, onMounted, computed, watch } from "vue";
 import { getDraftProjections } from "../../api/api";
-import { LeagueInfoType } from "../../api/types.ts";
+import { LeagueInfoType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { standardDeviation, fakeUsers } from "../../api/helper";
 import { fakeDraftGrades } from "../../api/draft.ts";

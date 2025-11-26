@@ -2,7 +2,7 @@
 import { cloneDeep, maxBy, minBy } from "lodash";
 import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
-import { TableDataType } from "../../api/types";
+import { TableDataType } from "../../types/types";
 import { zScoreToPValue } from "../../api/helper";
 const store = useStore();
 const tableOrder = ref("winsDifference");

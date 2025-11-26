@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { maxBy, toPairs } from "lodash";
-import { UserType, RosterType } from "../../api/types";
+import { UserType, RosterType } from "../../types/types";
 import { useStore } from "../../store/store";
 
 const store = useStore();

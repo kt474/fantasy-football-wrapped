@@ -3,7 +3,7 @@ import { ref, onMounted, computed, watch, Ref } from "vue";
 import { maxBy, minBy } from "lodash";
 import { useStore } from "../../store/store.ts";
 import { getData, inputLeague, getLeague } from "../../api/api.ts";
-import { LeagueInfoType, TableDataType } from "../../api/types.ts";
+import { LeagueInfoType, TableDataType } from "../../types/types.ts";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
 import MostPoints from "./MostPoints.vue";

@@ -5,21 +5,11 @@ import {
   getWaiverMoves,
 } from "./helper";
 import { round, mean } from "lodash";
+import { seasonType, Player, LeagueCountResponse } from "../types/apiTypes";
 
-export const seasonType: { [key: number]: string } = {
-  0: "Redraft",
-  1: "Keeper",
-  2: "Dynasty",
-  3: "Guillotine",
-};
-
-export interface Player {
-  player_id: string;
-  position: string;
-  name: string;
-  team: string;
-}
-export const getPlayerNews = async (playerNames: string[]) => {
+export const getPlayerNews = async (
+  playerNames: string[]
+): Promise<Record<string, unknown>[]> => {
   let url = import.meta.env.VITE_PLAYER_NEWS;
 
   if (playerNames && playerNames.length > 0) {
@@ -58,30 +48,13 @@ export const getPlayersByIdsMap = async (
   }
 };
 
-export const getPlayerNames = async (playerIds: string[]) => {
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`
-    );
-    const result = await response.json();
-    return result.players.map((playerObj: any) => {
-      if (playerObj) {
-        return playerObj.name ? playerObj.name : playerObj.team;
-      }
-      return "";
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    return [];
-  }
-};
-
-export const getLeagueCount = async () => {
+export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
   try {
     const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);
     return await response.json();
   } catch (error) {
     console.error(error);
+    return { league_id_count: 0 };
   }
 };
 

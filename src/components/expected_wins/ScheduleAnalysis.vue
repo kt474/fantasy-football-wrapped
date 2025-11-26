@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { TableDataType } from "../../api/types";
+import { TableDataType } from "../../types/types";
 import { useStore } from "../../store/store";
 
 const store = useStore();
@@ -66,10 +66,10 @@ const luckAnalysis = computed(() => {
         ranking <= 3
           ? `${ranking}${getRankSuffix(ranking)} highest`
           : ranking >= totalTeams - 2
-            ? `${totalTeams - ranking + 1}${getRankSuffix(
-                totalTeams - ranking + 1
-              )} lowest`
-            : `${ranking}${getRankSuffix(ranking)}`;
+          ? `${totalTeams - ranking + 1}${getRankSuffix(
+              totalTeams - ranking + 1
+            )} lowest`
+          : `${ranking}${getRankSuffix(ranking)}`;
 
       const wouldBeat = teams.filter((t) => teamPoints > t.points[week]).length;
       const wouldLose = teams.filter((t) => teamPoints < t.points[week]).length;

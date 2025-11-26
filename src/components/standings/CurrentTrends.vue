@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
-import { generateTrends, getPlayersByIdsMap, Player } from "../../api/api";
-import { getDraftProjections, getDraftPicks } from "../../api/api";
-import { TableDataType, LeagueInfoType } from "../../api/types";
+import {
+  generateTrends,
+  getPlayersByIdsMap,
+  getDraftProjections,
+  getDraftPicks,
+} from "../../api/api";
+import { TableDataType, LeagueInfoType } from "../../types/types";
+import { Player } from "../../types/apiTypes";
 import { useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/helper";
 
@@ -228,7 +233,7 @@ watch(
       await formatData();
     }
     currentTrends.value =
-      store.leagueInfo[store.currentLeagueIndex].currentTrends ?? [];
+      store.leagueInfo[store.currentLeagueIndex]?.currentTrends ?? [];
   }
 );
 

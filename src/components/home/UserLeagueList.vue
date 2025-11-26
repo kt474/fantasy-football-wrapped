@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useStore } from "../../store/store";
-import { seasonType, getData, inputLeague } from "../../api/api";
+import { getData, inputLeague } from "../../api/api";
+import { seasonType } from "../../types/apiTypes";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
