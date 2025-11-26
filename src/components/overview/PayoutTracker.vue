@@ -392,7 +392,7 @@ const managerTotals = computed(() => {
               <span class="font-semibold">{{ formatCurrency(15) }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <span>Season fun awards bucket</span>
+              <span>Seasonal league honors bucket</span>
               <span class="font-semibold">{{ formatCurrency(105) }}</span>
             </div>
           </div>
