@@ -35,8 +35,8 @@ const changeTab = (tab: string) => {
             : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
         ]"
       >
-        <span class="block sm:hidden">Rankings</span>
-        <span class="hidden sm:block">Power Rankings</span>
+        <span class="block xl:hidden">Rankings</span>
+        <span class="hidden xl:block">Power Rankings</span>
       </button>
     </li>
     <li class="cursor-pointer me-2">
@@ -64,7 +64,7 @@ const changeTab = (tab: string) => {
         ]"
       >
         Roster
-        <span class="hidden sm:inline">Management</span>
+        <span class="hidden xl:inline">Management</span>
       </button>
     </li>
     <li class="cursor-pointer me-2">

@@ -253,7 +253,7 @@ const calculatePowerScore = (
 ) => {
   return (
     Math.round(
-      (0.4 * winScore + 0.3 * pointScore + 0.3 * projectedScore) * 1000
+      (0.6 * winScore + 0.2 * pointScore + 0.2 * projectedScore) * 1000
     ) / 1000
   );
 };
