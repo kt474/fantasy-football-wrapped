@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, watch } from "vue";
 import { useAwardsStore } from "../store/awards";
 import { useStore } from "../store/store";
 import type { SeasonalAward, SeasonalAwardId } from "../api/types";

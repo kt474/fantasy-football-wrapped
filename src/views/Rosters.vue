@@ -85,7 +85,7 @@ const loadRosterPlayers = async () => {
       playerIds.map((id) => getStats(id, seasonYear.value, scoringType.value))
     );
     rosterPlayers.value = stats
-      .map((stat: any, idx: number) => {
+      .map((stat: any) => {
         if (!stat) return null;
         return {
           playerId: stat.id,

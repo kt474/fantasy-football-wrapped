@@ -274,11 +274,16 @@ const completedSeasonalAwards = computed(
   () => seasonalAwards.value.filter((award) => !award.pending).length
 );
 
+type ManagerTotalsEntry = {
+  name: string;
+  weeklyBonuses: number;
+  seasonalAwards: string[];
+  total: number;
+  bonusWeeks: number[];
+};
+
 const managerTotals = computed(() => {
-  const totals = new Map<
-    string,
-    { name: string; weeklyBonuses: number; seasonalAwards: string[]; total: number }
-  >();
+  const totals = new Map<string, ManagerTotalsEntry>();
 
   managerNames.value.forEach((name) => {
     totals.set(name, {
@@ -286,6 +291,7 @@ const managerTotals = computed(() => {
       weeklyBonuses: 0,
       seasonalAwards: [],
       total: 0,
+      bonusWeeks: [],
     });
   });
 
@@ -298,13 +304,11 @@ const managerTotals = computed(() => {
         weeklyBonuses: 0,
         seasonalAwards: [],
         total: 0,
+        bonusWeeks: [],
       };
     entry.weeklyBonuses += 1;
-    // track weeks won so we can list them in the table
-    (entry as any).bonusWeeks = Array.isArray((entry as any).bonusWeeks)
-      ? (entry as any).bonusWeeks
-      : [];
-    (entry as any).bonusWeeks.push(bonus.week);
+    entry.bonusWeeks = Array.isArray(entry.bonusWeeks) ? entry.bonusWeeks : [];
+    entry.bonusWeeks.push(bonus.week);
     entry.total += bonus.amount;
     totals.set(bonus.winner, entry);
   });
@@ -318,6 +322,7 @@ const managerTotals = computed(() => {
         weeklyBonuses: 0,
         seasonalAwards: [],
         total: 0,
+        bonusWeeks: [],
       };
     const label = award.informalLabel
       ? `${award.title} (${award.informalLabel})`
