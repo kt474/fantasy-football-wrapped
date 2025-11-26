@@ -166,18 +166,23 @@ const pendingOwnerLabel = computed(() =>
   ownerOptions.value.length ? "Select an owner" : "Winner (free text allowed)"
 );
 
-const normalizeBonus = (bonus: WeeklyBonus) => ({
-  ...bonus,
-  label: (bonus.label || "").trim(),
-  note: bonus.note?.trim() || "",
-  winnerOwnerId: bonus.winnerOwnerId || null,
-  winnerNameOverride: bonus.winnerNameOverride?.trim() || null,
-  score:
-    bonus.score === null || bonus.score === undefined || bonus.score === ""
+const normalizeBonus = (bonus: WeeklyBonus) => {
+  const rawScore = (bonus as any).score;
+  const parsedScore =
+    rawScore === null || rawScore === undefined || rawScore === ""
       ? null
-      : Number(bonus.score),
-  amount: bonus.amount ?? 15,
-});
+      : Number(rawScore);
+
+  return {
+    ...bonus,
+    label: (bonus.label || "").trim(),
+    note: bonus.note?.trim() || "",
+    winnerOwnerId: bonus.winnerOwnerId || null,
+    winnerNameOverride: bonus.winnerNameOverride?.trim() || null,
+    score: Number.isNaN(parsedScore) ? null : parsedScore,
+    amount: bonus.amount ?? 15,
+  };
+};
 
 const validateBonus = (bonus: WeeklyBonus) => {
   const errors: string[] = [];
@@ -635,7 +640,7 @@ onMounted(() => {
                   Score (optional)
                 </label>
                 <input
-                  v-model="playoffForm[bonus.week].score"
+                  v-model.number="playoffForm[bonus.week].score"
                   type="number"
                   step="0.01"
                   class="w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:text-gray-50 dark:border-gray-700"
