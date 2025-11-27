@@ -31,6 +31,7 @@ onMounted(async () => {
     featureDisabled.value = true;
     return;
   }
+  console.debug("[Projections] mount: leagueInfo size", store.leagueInfo.length, "useBatchProxy", useBatchProxy);
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
@@ -46,6 +47,10 @@ onMounted(async () => {
 const getData = async () => {
   try {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    if (!currentLeague) {
+      console.debug("[Projections] no current league");
+      return;
+    }
     const lastScoredWeek =
       currentLeague.status === "complete"
         ? 0
@@ -53,11 +58,21 @@ const getData = async () => {
         ? currentLeague.lastScoredWeek
         : 0;
 
+    console.debug("[Projections] fetching data", {
+      leagueId: currentLeague.leagueId,
+      season: currentLeague.season,
+      lastScoredWeek,
+      scoringType: currentLeague.scoringType,
+      useBatchProxy,
+      proxyBase: projectionApiBase,
+    });
+
     if (useBatchProxy) {
       const uniquePlayers = new Set<string>();
       currentLeague.rosters.forEach((roster: any) => {
         roster.players?.forEach((player: string) => uniquePlayers.add(player));
       });
+      console.debug("[Projections] batch proxy player count", uniquePlayers.size);
       const batch = await fetchProjectionsBatch(
         Array.from(uniquePlayers),
         currentLeague.season,
@@ -86,6 +101,7 @@ const getData = async () => {
         store.addProjectionData(store.currentLeagueIndex, roster.id, singleRoster);
       });
     } else {
+      console.debug("[Projections] per-player mode");
       await Promise.all(
         currentLeague.rosters.map(async (roster: any) => {
           const singleRoster: any[] = [];
@@ -100,6 +116,11 @@ const getData = async () => {
           });
 
           const projections = await Promise.all(projectionPromises);
+          console.debug("[Projections] roster projections fetched", {
+            rosterId: roster.id,
+            players: roster.players?.length || 0,
+            projections: projections.length,
+          });
           singleRoster.push(...projections);
           store.addProjectionData(
             store.currentLeagueIndex,
@@ -114,7 +135,7 @@ const getData = async () => {
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
     );
   } catch (error) {
-    console.error(error);
+    console.error("[Projections] fetch error", error);
     errorMessage.value =
       "Projections are unavailable right now. Check your projection API key or try again later.";
   }
