@@ -123,6 +123,8 @@ export const searchPlayers = async (query: string) => {
     console.error("Error searching players:", error);
     return [];
   }
+};
+
 export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
   try {
     if (!import.meta.env.VITE_LEAGUE_COUNT) {
