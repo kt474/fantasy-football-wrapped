@@ -11,7 +11,7 @@ const store = useStore();
 const loading = ref(false);
 const featureDisabled = ref(false);
 const errorMessage = ref("");
-const projectionApiBase = (import.meta.env.VITE_PROJECTION_API || "/api").replace(/\/$/, "");
+const projectionApiBase = (import.meta.env.VITE_PROJECTION_API || "").replace(/\/$/, "");
 const projectionsEnabled = true; // default on; can disable with env if needed
 const useBatchProxy = Boolean(projectionApiBase);
 const categories = computed(() => {
