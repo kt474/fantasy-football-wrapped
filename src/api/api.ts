@@ -604,7 +604,8 @@ export const getProjections = async (
   // If a projection API proxy is configured, prefer that.
   if (import.meta.env.VITE_PROJECTION_API) {
     try {
-      const base = import.meta.env.VITE_PROJECTION_API.replace(/\/$/, "");
+      const rawBase = import.meta.env.VITE_PROJECTION_API.replace(/\/$/, "");
+      const base = rawBase.endsWith("/api") ? rawBase.replace(/\/api$/, "") : rawBase;
       const response = await fetch(`${base}/api/projections`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -661,7 +662,8 @@ export const fetchProjectionsBatch = async (
   week: number,
   scoringType: number
 ) => {
-  const base = (import.meta.env.VITE_PROJECTION_API || "").replace(/\/$/, "");
+  const rawBase = (import.meta.env.VITE_PROJECTION_API || "").replace(/\/$/, "");
+  const base = rawBase.endsWith("/api") ? rawBase.replace(/\/api$/, "") : rawBase;
   try {
     const response = await fetch(`${base}/api/projections`, {
       method: "POST",
