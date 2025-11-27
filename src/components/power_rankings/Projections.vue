@@ -14,6 +14,17 @@ const errorMessage = ref("");
 const projectionApiBase = (import.meta.env.VITE_PROJECTION_API || "").replace(/\/$/, "");
 const projectionsEnabled = true; // default on; can disable with env if needed
 const useBatchProxy = Boolean(projectionApiBase);
+
+const shouldLoadProjections = (league: any) => {
+  const firstRoster = league?.rosters?.[0];
+  const projections = firstRoster?.projections;
+  if (!Array.isArray(projections) || projections.length === 0) return true;
+  const hasNonZero = projections.some(
+    (p: any) => p && Number.isFinite(p.projection) && Number(p.projection) > 0
+  );
+  return !hasNonZero;
+};
+
 const categories = computed(() => {
   return formattedData.value.map((user: any) =>
     store.showUsernames
@@ -50,12 +61,13 @@ onMounted(async () => {
         ? firstRoster?.projections.length
         : null,
       projectionsValue: firstRoster?.projections,
+      shouldLoad: shouldLoadProjections(store.leagueInfo[store.currentLeagueIndex]),
     });
   }
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections?.length
+    shouldLoadProjections(store.leagueInfo[store.currentLeagueIndex])
   ) {
     loading.value = true;
     await getData();
@@ -332,7 +344,7 @@ watch(
   async () => {
     if (
       store.leagueInfo.length > 0 &&
-      !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections?.length
+      shouldLoadProjections(store.leagueInfo[store.currentLeagueIndex])
     ) {
       loading.value = true;
       await getData();
