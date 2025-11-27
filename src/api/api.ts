@@ -129,7 +129,7 @@ export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
   try {
     if (!import.meta.env.VITE_LEAGUE_COUNT) {
       console.warn("VITE_LEAGUE_COUNT not configured; skipping fetch.");
-      return {};
+      return { league_id_count: 0 };
     }
     const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);
     return await response.json();

@@ -1,4 +1,4 @@
-import type { SeasonalAward } from "./types";
+import type { SeasonalAward } from "../types/types";
 
 const getBaseUrl = () => {
   const envUrl = import.meta.env.VITE_AWARDS_API_URL;

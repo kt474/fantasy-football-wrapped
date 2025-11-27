@@ -1,4 +1,4 @@
-import type { WeeklyBonus } from "./types";
+import type { WeeklyBonus } from "../types/types";
 
 const getBaseUrl = () => {
   const envUrl = import.meta.env.VITE_AWARDS_API_URL;
