@@ -34,7 +34,7 @@ onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
+    !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections?.length
   ) {
     loading.value = true;
     await getData();
@@ -286,7 +286,7 @@ watch(
   async () => {
     if (
       store.leagueInfo.length > 0 &&
-      !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
+      !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections?.length
     ) {
       loading.value = true;
       await getData();
