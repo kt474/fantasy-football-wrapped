@@ -64,7 +64,14 @@ const fetchProjection = async (
     ]);
     const seasonJson = await seasonRes.json();
     const weeklyJson = await weeklyRes.json();
-    const projection = computeWeeklyProjection(weeklyJson, week, scoringKey);
+    let projection = computeWeeklyProjection(weeklyJson, week, scoringKey);
+    // Fallback: if the weekly projection is empty, use the season aggregate for the scoring key.
+    if (
+      (!Number.isFinite(projection) || projection === 0) &&
+      seasonJson?.stats?.[scoringKey] !== undefined
+    ) {
+      projection = Number(seasonJson.stats[scoringKey]) || 0;
+    }
     const position = seasonJson?.player?.position || "";
     return { playerId, projection, position };
   } catch (error) {
