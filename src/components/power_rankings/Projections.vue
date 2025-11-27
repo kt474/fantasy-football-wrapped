@@ -125,6 +125,30 @@ const getData = async () => {
         });
       }
 
+      // If the proxy failed or missed players, fall back to per-player fetches for the gaps.
+      const missingIds = Array.from(uniquePlayers).filter((id) => !projectionMap.has(id));
+      if (missingIds.length) {
+        console.warn("[Projections] proxy missing players, falling back", {
+          missing: missingIds.length,
+        });
+        const fallback = await Promise.all(
+          missingIds.map((id) =>
+            getProjections(
+              id,
+              currentLeague.season,
+              lastScoredWeek,
+              currentLeague.scoringType
+            )
+          )
+        );
+        fallback.forEach((res, idx) => {
+          projectionMap.set(missingIds[idx], {
+            projection: res?.projection ?? 0,
+            position: res?.position ?? "",
+          });
+        });
+      }
+
       currentLeague.rosters.forEach((roster: any) => {
         const singleRoster: any[] =
           roster.players?.map((playerId: string) => {
