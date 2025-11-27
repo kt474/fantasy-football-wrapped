@@ -15,7 +15,9 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const store = useStore();
-const defaultLeagueId = import.meta.env.VITE_DEFAULT_LEAGUE_ID;
+const enforcedLeagueId =
+  import.meta.env.VITE_DEFAULT_LEAGUE_ID || "1257507151190958081";
+const singleLeagueMode = Boolean(enforcedLeagueId);
 
 const showLoading = ref(false);
 const isInitialLoading = ref(true);
@@ -85,26 +87,27 @@ onMounted(async () => {
       store.updateCurrentLeagueId(localStorage.currentLeagueId);
       store.updateLoadingLeague("");
     }
-    const leagueId = Array.isArray(route.query.leagueId)
-      ? route.query.leagueId[0]
-      : route.query.leagueId;
-    // sometimes on refresh the leagueId in the URL becomes undefined
-    if (leagueId === "undefined") {
-      localStorage.removeItem("currentLeagueId");
-      localStorage.removeItem("leagueInfo");
-      store.showLoadingAlert = true;
-      setTimeout(() => {
-        store.showLoadingAlert = false;
-      }, 8000);
-    } else if (leagueId && !store.leagueIds.includes(leagueId)) {
-      await loadLeagueById(leagueId);
-    }
-    if (
-      !store.currentLeagueId &&
-      defaultLeagueId &&
-      !store.leagueIds.includes(defaultLeagueId)
-    ) {
-      await loadLeagueById(defaultLeagueId);
+    if (singleLeagueMode) {
+      if (!store.leagueIds.includes(enforcedLeagueId)) {
+        await loadLeagueById(enforcedLeagueId);
+      } else {
+        store.updateCurrentLeagueId(enforcedLeagueId);
+      }
+    } else {
+      const leagueId = Array.isArray(route.query.leagueId)
+        ? route.query.leagueId[0]
+        : route.query.leagueId;
+      // sometimes on refresh the leagueId in the URL becomes undefined
+      if (leagueId === "undefined") {
+        localStorage.removeItem("currentLeagueId");
+        localStorage.removeItem("leagueInfo");
+        store.showLoadingAlert = true;
+        setTimeout(() => {
+          store.showLoadingAlert = false;
+        }, 8000);
+      } else if (leagueId && !store.leagueIds.includes(leagueId)) {
+        await loadLeagueById(leagueId);
+      }
     }
   } catch {
     store.showLoadingAlert = true;
@@ -198,8 +201,8 @@ const handleSeasonChange = async (leagueId: string) => {
       <!-- show loading screen on auto 24 hr refresh -->
       <SkeletonLoading v-else-if="showLoading" />
       <div v-else class="container mx-auto custom-background">
-        <Intro />
-        <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
+        <Intro v-if="!singleLeagueMode" />
+        <Input v-if="!singleLeagueMode" class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
         <Tabs class="mt-4" />
         <Table :users="fakeUsers" :rosters="fakeRosters" :points="fakePoints" />
       </div>
