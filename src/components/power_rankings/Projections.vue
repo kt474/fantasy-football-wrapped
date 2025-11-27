@@ -31,7 +31,27 @@ onMounted(async () => {
     featureDisabled.value = true;
     return;
   }
-  console.debug("[Projections] mount: leagueInfo size", store.leagueInfo.length, "useBatchProxy", useBatchProxy);
+  console.debug(
+    "[Projections] mount:",
+    "leagueInfo size",
+    store.leagueInfo.length,
+    "useBatchProxy",
+    useBatchProxy,
+    "proxyBase",
+    projectionApiBase
+  );
+  if (store.leagueInfo.length > 0 && store.leagueInfo[store.currentLeagueIndex]) {
+    const firstRoster = store.leagueInfo[store.currentLeagueIndex].rosters?.[0];
+    console.debug("[Projections] guard check", {
+      hasRosters: Boolean(firstRoster),
+      firstRosterId: firstRoster?.id,
+      projectionsType: typeof firstRoster?.projections,
+      projectionsLen: Array.isArray(firstRoster?.projections)
+        ? firstRoster?.projections.length
+        : null,
+      projectionsValue: firstRoster?.projections,
+    });
+  }
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
@@ -79,6 +99,10 @@ const getData = async () => {
         lastScoredWeek,
         currentLeague.scoringType
       );
+      console.debug("[Projections] batch proxy result", {
+        received: Boolean(batch),
+        length: batch?.length,
+      });
       const projectionMap = new Map<string, { projection: number; position: string }>();
       if (batch) {
         batch.forEach((item) => {
@@ -130,6 +154,7 @@ const getData = async () => {
         })
       );
     }
+    console.debug("[Projections] data stored to localStorage");
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
