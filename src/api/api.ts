@@ -5,7 +5,14 @@ import {
   getWaiverMoves,
 } from "./helper";
 import { round, mean } from "lodash";
-import { seasonType, Player, LeagueCountResponse } from "../types/apiTypes";
+import {
+  seasonType,
+  Player,
+  LeagueCountResponse,
+  WeeklyStats,
+  SingleWeekProjection,
+  SingleWeekStats,
+} from "../types/apiTypes";
 
 export const getPlayerNews = async (
   playerNames: string[]
@@ -63,7 +70,7 @@ export const generateTrends = async (
   wordLimit: number,
   bulletCount: number,
   leagueState: string = "in_season"
-) => {
+): Promise<Record<string, []>> => {
   const response = await fetch(import.meta.env.VITE_TRENDS_RECAP, {
     method: "POST",
     headers: {
@@ -79,7 +86,10 @@ export const generateTrends = async (
   return await response.json();
 };
 
-export const generateSummary = async (prompt: any, metadata: any) => {
+export const generateSummary = async (
+  prompt: any,
+  metadata: any
+): Promise<Record<string, string>> => {
   try {
     const response = await fetch(import.meta.env.VITE_LEAGUE_RECAP, {
       method: "POST",
@@ -102,7 +112,10 @@ export const generateSummary = async (prompt: any, metadata: any) => {
   }
 };
 
-export const generateReport = async (prompt: any, metadata: any) => {
+export const generateReport = async (
+  prompt: any,
+  metadata: any
+): Promise<Record<string, string>> => {
   try {
     const response = await fetch(import.meta.env.VITE_WEEKLY_REPORT, {
       method: "POST",
@@ -125,7 +138,9 @@ export const generateReport = async (prompt: any, metadata: any) => {
   }
 };
 
-export const generatePreview = async (prompt: any) => {
+export const generatePreview = async (
+  prompt: any
+): Promise<Record<string, string>> => {
   try {
     const response = await fetch(import.meta.env.VITE_WEEKLY_PREVIEW, {
       method: "POST",
@@ -145,7 +160,10 @@ export const generatePreview = async (prompt: any) => {
   }
 };
 
-export const inputUsername = async (username: string, year: string) => {
+export const inputUsername = async (
+  username: string,
+  year: string
+): Promise<void> => {
   try {
     await fetch(import.meta.env.VITE_USERNAME_URL, {
       method: "POST",
@@ -168,7 +186,7 @@ export const inputEmail = async (
   email: string,
   league_id: string,
   username: string
-) => {
+): Promise<void> => {
   try {
     await fetch(import.meta.env.VITE_EMAIL_URL, {
       method: "POST",
@@ -194,7 +212,7 @@ export const inputLeague = async (
   size: number,
   type: string,
   year: string
-) => {
+): Promise<void> => {
   try {
     await fetch(import.meta.env.VITE_LEAGUE_URL, {
       method: "POST",
@@ -220,7 +238,7 @@ export const getStats = async (
   player: string,
   year: string,
   scoringType: number
-) => {
+): Promise<WeeklyStats | null> => {
   let rank = "pos_rank_ppr";
   let ppg = "pts_ppr";
   let overall_rank = "rank_ppr";
@@ -259,7 +277,7 @@ export const getTradeValue = async (
   weekTraded: number,
   scoringType: number,
   position?: string
-) => {
+): Promise<number | null> => {
   let rank = "pos_rank_ppr";
   if (scoringType === 0) {
     rank = "pos_rank_std";
@@ -294,7 +312,7 @@ export const getSingleWeekProjection = async (
   year: string,
   week: number,
   scoringType: number
-) => {
+): Promise<SingleWeekProjection> => {
   const response = await fetch(
     `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
   );
@@ -312,6 +330,11 @@ export const getSingleWeekProjection = async (
       away: allWeeks[week]["is_away_team"],
     };
   }
+  return {
+    stats: 0,
+    opponent: "",
+    away: true,
+  };
 };
 
 export const getSingleWeekStats = async (
@@ -319,7 +342,7 @@ export const getSingleWeekStats = async (
   year: string,
   week: number,
   scoringType: number
-) => {
+): Promise<SingleWeekStats> => {
   const response = await fetch(
     `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
   );
@@ -383,7 +406,7 @@ export const getWeeklyProjections = async (
   year: string,
   week: number,
   scoringType: number
-) => {
+): Promise<number> => {
   const response = await fetch(
     `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
   );

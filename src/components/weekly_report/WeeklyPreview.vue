@@ -77,7 +77,7 @@ const fetchPlayerNames = async () => {
           const starterNames = await Promise.all(
             starterIds.map(async (id: string) => {
               const player = playerLookupMap.get(id);
-              const projection: any = await getSingleWeekProjection(
+              const projection = await getSingleWeekProjection(
                 id,
                 currentLeague.season,
                 previewWeek.value + 1,
