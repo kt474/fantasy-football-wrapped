@@ -5,7 +5,7 @@ import Footer from "./components/util/Footer.vue";
 import Alert from "./components/util/Alert.vue";
 import Email from "./components/util/Email.vue";
 import { useStore } from "./store/store";
-import { LeagueInfoType } from "./api/types";
+import { LeagueInfoType } from "./types/types";
 import { inject } from "@vercel/analytics";
 import { useRouter } from "vue-router";
 

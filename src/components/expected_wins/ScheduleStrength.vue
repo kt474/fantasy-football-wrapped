@@ -2,7 +2,7 @@
 import { cloneDeep } from "lodash";
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
-import { TableDataType } from "../../api/types";
+import { TableDataType } from "../../types/types";
 const store = useStore();
 
 const props = defineProps<{

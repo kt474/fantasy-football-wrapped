@@ -5,21 +5,11 @@ import {
   getWaiverMoves,
 } from "./helper";
 import { round, mean } from "lodash";
+import { seasonType, Player, LeagueCountResponse } from "../types/apiTypes";
 
-export const seasonType: { [key: number]: string } = {
-  0: "Redraft",
-  1: "Keeper",
-  2: "Dynasty",
-  3: "Guillotine",
-};
-
-export interface Player {
-  player_id: string;
-  position: string;
-  name: string;
-  team: string;
-}
-export const getPlayerNews = async (playerNames: string[]) => {
+export const getPlayerNews = async (
+  playerNames: string[]
+): Promise<Record<string, unknown>[]> => {
   const baseUrl = import.meta.env.VITE_PLAYER_NEWS;
   if (!baseUrl) {
     console.warn("VITE_PLAYER_NEWS not configured; skipping player news fetch.");
@@ -133,9 +123,7 @@ export const searchPlayers = async (query: string) => {
     console.error("Error searching players:", error);
     return [];
   }
-};
-
-export const getLeagueCount = async () => {
+export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
   try {
     if (!import.meta.env.VITE_LEAGUE_COUNT) {
       console.warn("VITE_LEAGUE_COUNT not configured; skipping fetch.");
@@ -145,6 +133,7 @@ export const getLeagueCount = async () => {
     return await response.json();
   } catch (error) {
     console.error(error);
+    return { league_id_count: 0 };
   }
 };
 
@@ -887,10 +876,10 @@ export const getMatchup = async (week: number, leagueId: string) => {
   );
   const matchup = await response.json();
   return matchup.map((game: any) => {
-    const benchPlayers = game["players"].filter(
+    const benchPlayers = game["players"]?.filter(
       (value: string) => !game["starters"]?.includes(value)
     );
-    const benchPoints = benchPlayers.map(
+    const benchPoints = benchPlayers?.map(
       (player: string) => game["players_points"][player]
     );
     return {
@@ -934,7 +923,7 @@ export const getData = async (leagueId: string) => {
     any,
     any[],
     any[],
-    any[],
+    any[]
   ] = await Promise.all([
     getLeague(leagueId),
     getRosters(leagueId),
@@ -997,15 +986,12 @@ export const getData = async (leagueId: string) => {
   ]);
 
   // Combine all transactions
-  const transactions = transactionPromises.reduce(
-    (acc, obj) => {
-      Object.entries(obj).forEach(([id, value]) => {
-        acc[id] = (acc[id] || 0) + (value as number);
-      });
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const transactions = transactionPromises.reduce((acc, obj) => {
+    Object.entries(obj).forEach(([id, value]) => {
+      acc[id] = (acc[id] || 0) + (value as number);
+    });
+    return acc;
+  }, {} as Record<string, number>);
 
   return {
     ...newLeagueInfo,

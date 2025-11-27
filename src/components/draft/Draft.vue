@@ -2,7 +2,7 @@
 import { fakeDraftData } from "../../api/draft.ts";
 import { ref, onMounted, computed, watch } from "vue";
 import { getDraftPicks, getDraftMetadata } from "../../api/api";
-import { LeagueInfoType } from "../../api/types.ts";
+import { LeagueInfoType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { fakeUsers } from "../../api/helper.ts";
 import DraftGrades from "./DraftGrades.vue";

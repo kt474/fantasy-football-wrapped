@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
-import { TableDataType } from "../../api/types";
+import { TableDataType } from "../../types/types";
 const store = useStore();
 
 const props = defineProps<{
@@ -34,9 +34,7 @@ const seriesData = computed(() => [
 
 const userLabelList = computed(() =>
   props.tableData.map((user) => {
-    const label = store.showUsernames
-      ? (user.username ?? "")
-      : (user.name ?? "");
+    const label = store.showUsernames ? user.username ?? "" : user.name ?? "";
     const n = 17;
     return label.length > n ? label.slice(0, n - 1) + "..." : label;
   })

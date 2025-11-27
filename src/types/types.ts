@@ -111,7 +111,12 @@ export type TableDataType = {
   benchPoints: number[];
 };
 
-export type SeasonalAwardId = "award-i" | "award-ii" | "award-iii" | "award-iv" | "award-v";
+export type SeasonalAwardId =
+  | "award-i"
+  | "award-ii"
+  | "award-iii"
+  | "award-iv"
+  | "award-v";
 
 export type SeasonalAward = {
   id: SeasonalAwardId;
@@ -131,4 +136,11 @@ export type WeeklyBonus = {
   winnerOwnerId?: string | null;
   winnerNameOverride?: string | null;
   score?: number | null;
+};
+
+export type PowerRankingEntry = {
+  name: string;
+  type: string;
+  ratings: number[];
+  data?: number[];
 };

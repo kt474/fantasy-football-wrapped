@@ -3,7 +3,7 @@ import { computed } from "vue";
 import { useStore } from "../../store/store";
 import { useAwardsStore } from "../../store/awards";
 import { useWeeklyBonusStore } from "../../store/weeklyBonuses";
-import { LeagueInfoType, TableDataType, WeeklyBonus } from "../../api/types";
+import { LeagueInfoType, TableDataType, WeeklyBonus } from "../../types/types";
 
 const props = defineProps<{
   league?: LeagueInfoType;

@@ -10,7 +10,7 @@ import Table from "../components/standings/Table.vue";
 import Tabs from "../components/util/Tabs.vue";
 import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
-import { LeagueInfoType } from "../api/types";
+import { LeagueInfoType } from "../types/types";
 import { useRoute } from "vue-router";
 
 const route = useRoute();

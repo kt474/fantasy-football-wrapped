@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { findIndex } from "lodash";
-import { LeagueInfoType, RosterType } from "../api/types";
+import { LeagueInfoType, RosterType } from "../types/types";
 
 export const useStore = defineStore("main", {
   state: () => ({

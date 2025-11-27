@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
-import { generateTrends, getPlayersByIdsMap, Player } from "../../api/api";
-import { getDraftProjections, getDraftPicks } from "../../api/api";
-import { TableDataType, LeagueInfoType } from "../../api/types";
+import {
+  generateTrends,
+  getPlayersByIdsMap,
+  getDraftProjections,
+  getDraftPicks,
+} from "../../api/api";
+import { TableDataType, LeagueInfoType } from "../../types/types";
+import { Player } from "../../types/apiTypes";
 import { useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/helper";
 
@@ -228,7 +233,7 @@ watch(
       await formatData();
     }
     currentTrends.value =
-      store.leagueInfo[store.currentLeagueIndex].currentTrends ?? [];
+      store.leagueInfo[store.currentLeagueIndex]?.currentTrends ?? [];
   }
 );
 
@@ -257,7 +262,7 @@ const cardHeight = computed(() => {
     <h1 class="-mt-0.5 text-2xl font-semibold text-gray-900 dark:text-gray-50">
       League News
     </h1>
-    <div v-if="currentTrends">
+    <div v-if="currentTrends.length > 0">
       <ul
         class="mr-0 text-gray-800 divide-y divide-gray-300 space-y dark:text-gray-200 dark:divide-gray-700"
       >
@@ -468,7 +473,7 @@ const cardHeight = computed(() => {
         Please come back after week 1!
       </p>
     </div>
-    <div v-else class="w-64">
+    <div v-else-if="currentTrends.length === 0" class="w-64">
       <div role="status" class="space-y-2.5 animate-pulse max-w-lg mb-6 px-2">
         <p class="mt-4 text-gray-900 dark:text-gray-300">Analyzing League...</p>
         <div class="flex items-center w-full">

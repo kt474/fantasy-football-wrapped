@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { TableDataType } from "../../api/types";
+import { TableDataType } from "../../types/types";
 import { useStore } from "../../store/store";
 
 const store = useStore();
@@ -40,7 +40,7 @@ const luckAnalysis = computed(() => {
       week <
       (store.leagueInfo.length > 0
         ? store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
-        : 17);
+        : 14);
       week++
     ) {
       const opponentId = team.matchups[week];
@@ -128,7 +128,14 @@ const scheduleAnalysis = computed(() => {
       let winsWithThisSchedule = 0;
 
       // Play this team's points against the other team's opponents
-      for (let week = 0; week < 10; week++) {
+      for (
+        let week = 0;
+        week <
+        (store.leagueInfo.length > 0
+          ? store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+          : 14);
+        week++
+      ) {
         const opponentId = otherTeam.matchups[week];
         const opponent = teams.find(
           (t) => t.matchups[week] === opponentId && t !== otherTeam
@@ -407,7 +414,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
               {{ team.actualWins }}-{{
                 (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
                   ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                  : 17) - team.actualWins
+                  : 14) - team.actualWins
               }}
             </p>
           </div>
@@ -423,7 +430,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
               {{ team.bestPossibleRecord }}-{{
                 (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
                   ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                  : 17) - team.bestPossibleRecord
+                  : 14) - team.bestPossibleRecord
               }}
             </p>
             <p class="mt-1 text-xs">({{ team.bestScheduleTeam }})</p>
@@ -434,7 +441,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
               {{ team.worstPossibleRecord }}-{{
                 (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
                   ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                  : 17) - team.worstPossibleRecord
+                  : 14) - team.worstPossibleRecord
               }}
             </p>
             <p class="mt-1 text-xs">({{ team.worstScheduleTeam }})</p>

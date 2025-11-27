@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { WeeklyBonus } from "../api/types";
+import type { WeeklyBonus } from "../types/types";
 import { fetchWeeklyBonuses, saveWeeklyBonuses } from "../api/weeklyBonusesClient";
 
 const STORAGE_KEY = "ffwrappedWeeklyBonuses";

@@ -2,7 +2,7 @@
 import { intersection } from "lodash";
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
-import { RosterType, LeagueInfoType } from "../../api/types";
+import { RosterType, LeagueInfoType } from "../../types/types";
 import { fakeProjectionData } from "../../api/helper";
 import { getProjections, fetchProjectionsBatch } from "../../api/api";
 import HeatMap from "./HeatMap.vue";
@@ -409,7 +409,7 @@ const updateChartColor = () => {
       labels: {
         formatter: function (str: string) {
           const n = 15;
-          return str.length > n ? str.slice(0, n - 1) + "..." : str;
+          return str?.length > n ? str.slice(0, n - 1) + "..." : str;
         },
       },
     },

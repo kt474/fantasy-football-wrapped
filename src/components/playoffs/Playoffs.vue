@@ -11,7 +11,7 @@ import {
   fakeUsers,
   fakePoints,
 } from "../../api/helper";
-import { RosterType, TableDataType } from "../../api/types";
+import { RosterType, TableDataType } from "../../types/types";
 const props = defineProps<{
   tableData: TableDataType[];
 }>();

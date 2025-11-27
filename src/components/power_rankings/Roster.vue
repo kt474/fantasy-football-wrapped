@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
-import { TableDataType } from "../../api/types";
+import { TableDataType } from "../../types/types";
 import { fakeUsers } from "../../api/helper";
 
 const store = useStore();

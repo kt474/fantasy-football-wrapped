@@ -8,7 +8,7 @@ import {
   getSingleWeekProjection,
   getSingleWeekStats,
 } from "../../api/api";
-import { TableDataType } from "../../api/types";
+import { TableDataType } from "../../types/types";
 import { difference } from "lodash";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/helper";
 import { max, min } from "lodash";
@@ -339,8 +339,8 @@ watch(
                         player.projection?.away === true
                           ? "@ "
                           : player.projection?.away === false
-                            ? "vs "
-                            : "BYE"
+                          ? "vs "
+                          : "BYE"
                       }}{{ player.projection?.opponent }}</span
                     >
                   </p>
@@ -401,7 +401,7 @@ watch(
                 </div>
               </div>
             </div>
-            <div class="px-4 py-2 mt-2 bg-gray-50 rounded dark:bg-gray-700">
+            <div class="px-4 py-2 mt-2 rounded bg-gray-50 dark:bg-gray-700">
               <div class="flex justify-between">
                 <p class="mr-2 text-sm text-balance sm:text-base">
                   Recent <br />
@@ -475,12 +475,12 @@ watch(
                             index -
                             1
                           : store.leagueInfo[store.currentLeagueIndex]
-                                ?.lastScoredWeek
-                            ? store.leagueInfo[store.currentLeagueIndex]
-                                ?.lastScoredWeek -
-                              index -
-                              1
-                            : 17 - index
+                              ?.lastScoredWeek
+                          ? store.leagueInfo[store.currentLeagueIndex]
+                              ?.lastScoredWeek -
+                            index -
+                            1
+                          : 17 - index
                       }}
                     </p>
                     <p class="my-1">{{ score }}</p>

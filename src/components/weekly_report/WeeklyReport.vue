@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TableDataType, LeagueInfoType } from "../../api/types.ts";
+import { TableDataType, LeagueInfoType } from "../../types/types.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { generateReport, getPlayersByIdsMap } from "../../api/api.ts";
@@ -121,7 +121,7 @@ const fetchPlayerNames = async () => {
     }
     const benchResult: any = props.tableData.map((user: any) => {
       const benchIds = user.benchPlayers[currentWeek.value - 1];
-      const benchNames = benchIds.map((id: string) =>
+      const benchNames = benchIds?.map((id: string) =>
         benchPlayerLookupMap.get(id)
       );
       return benchNames;
@@ -313,7 +313,7 @@ const benchPerformers = computed(() => {
     });
     return result
       .flatMap((group) =>
-        group.playerNames.map((player: string, idx: number) => ({
+        group.playerNames?.map((player: string, idx: number) => ({
           player,
           points: group.playerPoints[idx],
           user: group.user,

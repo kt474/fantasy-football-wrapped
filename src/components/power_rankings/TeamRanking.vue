@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { groupBy } from "lodash";
-import { TableDataType, LeagueInfoType } from "../../api/types";
+import { TableDataType, LeagueInfoType } from "../../types/types";
 import { getStats } from "../../api/api";
 import { useStore } from "../../store/store";
 import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";

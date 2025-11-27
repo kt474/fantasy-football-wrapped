@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, watch } from "vue";
 import { useAwardsStore } from "../store/awards";
 import { useWeeklyBonusStore } from "../store/weeklyBonuses";
 import { useStore } from "../store/store";
-import type { SeasonalAward, SeasonalAwardId, WeeklyBonus } from "../api/types";
+import type { SeasonalAward, SeasonalAwardId, WeeklyBonus } from "../types/types";
 
 const awardsStore = useAwardsStore();
 const weeklyBonusStore = useWeeklyBonusStore();

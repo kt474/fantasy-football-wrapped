@@ -3,7 +3,7 @@ import { maxBy, minBy } from "lodash";
 import { fakeRosters, fakeUsers, createTableData } from "../../api/helper";
 import { computed, onMounted, ref } from "vue";
 import { useStore } from "../../store/store";
-import { TableDataType, UserType, RosterType } from "../../api/types";
+import { TableDataType, UserType, RosterType } from "../../types/types";
 import PowerRankingData from "../power_rankings/PowerRankingData.vue";
 import ExpectedWinsCard from "../expected_wins/ExpectedWinsCard.vue";
 import ExpectedWinsChart from "../expected_wins/ExpectedWinsChart.vue";
@@ -178,6 +178,12 @@ const mostTransactions = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].transactions
     : {};
+});
+
+const seasonType = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].seasonType
+    : "";
 });
 
 const regularSeasonLength = computed(() => {
@@ -614,7 +620,11 @@ const getHeadToHeadRecord = (team: any) => {
         class="mt-4"
       />
       <Projections class="mt-4" />
-      <TeamRanking :tableData="tableData" class="mt-4" />
+      <TeamRanking
+        v-if="seasonType !== 'Guillotine'"
+        :tableData="tableData"
+        class="mt-4"
+      />
     </div>
     <div v-if="store.currentTab === 'expectedWins'">
       <div class="flex flex-wrap md:flex-nowrap">

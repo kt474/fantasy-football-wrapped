@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { TableDataType } from "../../api/types";
+import { TableDataType } from "../../types/types";
 import { useStore } from "../../store/store";
 
 const props = defineProps<{

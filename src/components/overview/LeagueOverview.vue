@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { LeagueInfoType, TableDataType } from "../../api/types";
+import { LeagueInfoType, TableDataType } from "../../types/types";
 import { useStore } from "../../store/store";
 import PayoutTracker from "./PayoutTracker.vue";
 
