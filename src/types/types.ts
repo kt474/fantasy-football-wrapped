@@ -64,7 +64,7 @@ export interface WaiverMove {
   };
   adds: string;
   week: number;
-  value: number;
+  value: number | null;
   position: string;
   player_id: string;
   bid: number | null;
