@@ -17,14 +17,23 @@ import {
 export const getPlayerNews = async (
   playerNames: string[]
 ): Promise<Record<string, unknown>[]> => {
-  let url = import.meta.env.VITE_PLAYER_NEWS;
-
-  if (playerNames && playerNames.length > 0) {
-    url += `?keywords=${playerNames.join(",")}`;
+  const baseUrl = import.meta.env.VITE_PLAYER_NEWS;
+  if (!baseUrl) {
+    console.warn("VITE_PLAYER_NEWS not configured; skipping player news fetch.");
+    return [];
   }
-  const response = await fetch(url);
-  const result = await response.json();
-  return result;
+  try {
+    const url = new URL(baseUrl);
+    if (playerNames && playerNames.length > 0) {
+      url.searchParams.set("keywords", playerNames.join(","));
+    }
+    const response = await fetch(url.toString());
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error fetching player news:", error);
+    return [];
+  }
 };
 
 export const getPlayersByIdsMap = async (
@@ -33,9 +42,15 @@ export const getPlayersByIdsMap = async (
   if (playerIds.length === 0) {
     return new Map();
   }
+  if (!import.meta.env.VITE_PLAYERS_URL) {
+    console.warn("VITE_PLAYERS_URL not configured; skipping player lookup.");
+    return new Map();
+  }
   try {
-    const url = `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`;
-    const response = await fetch(url);
+    const url = new URL(
+      `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`
+    );
+    const response = await fetch(url.toString());
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -55,8 +70,74 @@ export const getPlayersByIdsMap = async (
   }
 };
 
+export const getPlayerNames = async (playerIds: string[]) => {
+  if (!import.meta.env.VITE_PLAYERS_URL) {
+    console.warn("VITE_PLAYERS_URL not configured; skipping player names fetch.");
+    return [];
+  }
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`
+    );
+    const result = await response.json();
+    return result.players.map((playerObj: any) => {
+      if (playerObj) {
+        return playerObj.name ? playerObj.name : playerObj.team;
+      }
+      return "";
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return [];
+  }
+};
+
+let cachedPlayers: any[] | null = null;
+
+export const searchPlayers = async (query: string) => {
+  if (!query || query.length < 2) return [];
+  try {
+    if (!cachedPlayers) {
+      const response = await fetch("https://api.sleeper.com/players/nfl");
+      const result = await response.json();
+      cachedPlayers = Object.values(result);
+    }
+    const lower = query.toLowerCase();
+    const positions = ["QB", "RB", "WR", "TE", "K", "DEF"];
+    return cachedPlayers
+      .filter((player: any) => {
+        const fullName = `${player.first_name || ""} ${
+          player.last_name || ""
+        }`.trim();
+        const nameMatch = fullName.toLowerCase().includes(lower);
+        const searchName =
+          player.search_full_name &&
+          player.search_full_name.toLowerCase().includes(lower);
+        return (
+          (nameMatch || searchName) &&
+          player.position &&
+          positions.includes(player.position)
+        );
+      })
+      .slice(0, 12)
+      .map((p: any) => ({
+        id: p.player_id,
+        name: `${p.first_name || ""} ${p.last_name || ""}`.trim(),
+        position: p.position,
+        team: p.team,
+      }));
+  } catch (error) {
+    console.error("Error searching players:", error);
+    return [];
+  }
+};
+
 export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
   try {
+    if (!import.meta.env.VITE_LEAGUE_COUNT) {
+      console.warn("VITE_LEAGUE_COUNT not configured; skipping fetch.");
+      return { league_id_count: 0 };
+    }
     const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);
     return await response.json();
   } catch (error) {
@@ -401,6 +482,46 @@ export const getSingleWeekStats = async (
   };
 };
 
+export const getPlayerWeeklyFantasyStats = async (
+  playerId: string,
+  year: string,
+  scoringType: number
+) => {
+  const response = await fetch(
+    `https://api.sleeper.com/stats/nfl/player/${playerId}?season_type=regular&season=${year}&grouping=week`
+  );
+  const allWeeks = await response.json();
+  let scoringKey = "pts_ppr";
+  let rankKey = "pos_rank_ppr";
+  if (scoringType === 0) {
+    scoringKey = "pts_std";
+    rankKey = "pos_rank_std";
+  } else if (scoringType === 0.5) {
+    scoringKey = "pts_half_ppr";
+    rankKey = "pos_rank_half_ppr";
+  }
+  const rows = Object.entries(allWeeks || {})
+    .map(([week, data]: any) => {
+      const points = data?.stats?.[scoringKey];
+      if (points === undefined || points === null) return null;
+      return {
+        week: Number(week),
+        points: Number(points.toFixed(2)),
+        opponent: data?.opponent || "",
+        rank: data?.stats?.[rankKey],
+        snaps: data?.stats?.off_snp,
+      };
+    })
+    .filter(Boolean) as {
+    week: number;
+    points: number;
+    opponent: string;
+    rank: number;
+    snaps: number;
+  }[];
+  return rows.sort((a, b) => a.week - b.week);
+};
+
 export const getWeeklyProjections = async (
   player: string,
   year: string,
@@ -494,6 +615,36 @@ export const getProjections = async (
   week: number,
   scoringType: number
 ) => {
+  // If a projection API proxy is configured, prefer that.
+  if (import.meta.env.VITE_PROJECTION_API) {
+    try {
+      const rawBase = import.meta.env.VITE_PROJECTION_API.replace(/\/$/, "");
+      const base = rawBase.endsWith("/api") ? rawBase.replace(/\/api$/, "") : rawBase;
+      const response = await fetch(`${base}/api/projections`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          playerIds: [player],
+          season: year,
+          week,
+          scoringType,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const result = Array.isArray(data?.projections) ? data.projections[0] : null;
+        if (result) {
+          return {
+            projection: result.projection ?? 0,
+            position: result.position ?? "",
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("Projection proxy failed; falling back to Sleeper", err);
+    }
+  }
+
   try {
     const response = await fetch(
       `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
@@ -516,6 +667,39 @@ export const getProjections = async (
       projection: 0,
       position: "",
     };
+  }
+};
+
+export const fetchProjectionsBatch = async (
+  playerIds: string[],
+  year: string,
+  week: number,
+  scoringType: number
+) => {
+  const rawBase = (import.meta.env.VITE_PROJECTION_API || "").replace(/\/$/, "");
+  const base = rawBase.endsWith("/api") ? rawBase.replace(/\/api$/, "") : rawBase;
+  try {
+    const response = await fetch(`${base}/api/projections`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        playerIds,
+        season: year,
+        week,
+        scoringType,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`Projection proxy failed: ${response.status}`);
+    }
+    const data = await response.json();
+    if (data && Array.isArray(data.projections)) {
+      return data.projections as { playerId: string; projection: number; position: string }[];
+    }
+    return null;
+  } catch (err) {
+    console.warn("Projection batch proxy failed", err);
+    return null;
   }
 };
 export const getWinnersBracket = async (leagueId: string) => {
@@ -616,6 +800,7 @@ export const getLeague = async (leagueId: string) => {
         lastScoredWeek: 0,
         status: "",
         scoringType: 1,
+        scoringSettings: {},
         rosterPositions: [],
         playoffTeams: 0,
         playoffType: 0,
@@ -639,6 +824,7 @@ export const getLeague = async (leagueId: string) => {
       previousLeagueId: league["previous_league_id"],
       status: league["status"],
       scoringType: league["scoring_settings"]["rec"],
+      scoringSettings: league["scoring_settings"] || {},
       rosterPositions: league["roster_positions"],
       playoffTeams: league["settings"]["playoff_teams"],
       playoffType: league["settings"]["playoff_type"],
@@ -655,14 +841,34 @@ export const getRosters = async (leagueId: string) => {
     `https://api.sleeper.app/v1/league/${leagueId}/rosters`
   );
   const rosters = await response.json();
+  const parseSleeperPoints = (whole: any, decimal: any) => {
+    const base = Number(whole) || 0;
+    const frac =
+      decimal !== undefined && decimal !== null
+        ? Number(`0.${String(decimal).padStart(2, "0")}`)
+        : 0;
+    return Number((base + frac).toFixed(3));
+  };
   return rosters.map((roster: any) => {
+    const pointsFor = parseSleeperPoints(
+      roster["settings"]["fpts"],
+      roster["settings"]["fpts_decimal"]
+    );
+    const pointsAgainst = parseSleeperPoints(
+      roster["settings"]["fpts_against"],
+      roster["settings"]["fpts_against_decimal"]
+    );
+    const potentialPoints = parseSleeperPoints(
+      roster["settings"]["ppts"],
+      roster["settings"]["ppts_decimal"]
+    );
     return {
       id: roster["owner_id"],
-      pointsFor: roster["settings"]["fpts"],
-      pointsAgainst: roster["settings"]["fpts_against"],
-      potentialPoints: roster["settings"]["ppts"],
-      managerEfficiency: roster["settings"]["ppts"]
-        ? round(roster["settings"]["fpts"] / roster["settings"]["ppts"], 3)
+      pointsFor,
+      pointsAgainst,
+      potentialPoints,
+      managerEfficiency: potentialPoints
+        ? round(pointsFor / potentialPoints, 3)
         : 0,
       wins: roster["settings"]["wins"],
       losses: roster["settings"]["losses"],

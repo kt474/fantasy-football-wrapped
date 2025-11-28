@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import CardContainer from "../components/util/CardContainer.vue";
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
@@ -15,9 +15,40 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const store = useStore();
+const enforcedLeagueId =
+  import.meta.env.VITE_DEFAULT_LEAGUE_ID || "1257507151190958081";
+const singleLeagueMode = Boolean(enforcedLeagueId);
 
 const showLoading = ref(false);
 const isInitialLoading = ref(true);
+const selectedSeasonLeagueId = ref<string>("");
+
+const loadLeagueById = async (leagueId: string) => {
+  const checkInput: any = await getLeague(leagueId);
+  if (!checkInput["name"]) {
+    store.showInvalidLeagueAlert = true;
+    setTimeout(() => {
+      store.showInvalidLeagueAlert = false;
+    }, 8000);
+    return false;
+  }
+  try {
+    store.updateCurrentLeagueId(leagueId);
+    store.updateLoadingLeague(checkInput["name"]);
+    const league = await getData(leagueId);
+    store.updateLeagueInfo(league);
+    await inputLeague(
+      leagueId,
+      league.name,
+      league.totalRosters,
+      league.seasonType,
+      league.season
+    );
+    return true;
+  } finally {
+    store.updateLoadingLeague("");
+  }
+};
 
 onMounted(async () => {
   try {
@@ -56,38 +87,27 @@ onMounted(async () => {
       store.updateCurrentLeagueId(localStorage.currentLeagueId);
       store.updateLoadingLeague("");
     }
-    const leagueId = Array.isArray(route.query.leagueId)
-      ? route.query.leagueId[0]
-      : route.query.leagueId;
-    // sometimes on refresh the leagueId in the URL becomes undefined
-    if (leagueId && !store.leagueIds.includes(leagueId)) {
-      const checkInput: any = await getLeague(leagueId);
-      if (checkInput["name"]) {
-        store.updateCurrentLeagueId(leagueId);
-        store.updateLoadingLeague(checkInput["name"]);
-        const league = await getData(leagueId);
-        store.updateLeagueInfo(league);
-        await inputLeague(
-          leagueId,
-          league.name,
-          league.totalRosters,
-          league.seasonType,
-          league.season
-        );
-        store.updateLoadingLeague("");
+    if (singleLeagueMode) {
+      if (!store.leagueIds.includes(enforcedLeagueId)) {
+        await loadLeagueById(enforcedLeagueId);
       } else {
-        store.showInvalidLeagueAlert = true;
-        setTimeout(() => {
-          store.showInvalidLeagueAlert = false;
-        }, 8000);
+        store.updateCurrentLeagueId(enforcedLeagueId);
       }
-    } else if (leagueId === "undefined") {
-      localStorage.removeItem("currentLeagueId");
-      localStorage.removeItem("leagueInfo");
-      store.showLoadingAlert = true;
-      setTimeout(() => {
-        store.showLoadingAlert = false;
-      }, 8000);
+    } else {
+      const leagueId = Array.isArray(route.query.leagueId)
+        ? route.query.leagueId[0]
+        : route.query.leagueId;
+      // sometimes on refresh the leagueId in the URL becomes undefined
+      if (leagueId === "undefined") {
+        localStorage.removeItem("currentLeagueId");
+        localStorage.removeItem("leagueInfo");
+        store.showLoadingAlert = true;
+        setTimeout(() => {
+          store.showLoadingAlert = false;
+        }, 8000);
+      } else if (leagueId && !store.leagueIds.includes(leagueId)) {
+        await loadLeagueById(leagueId);
+      }
     }
   } catch {
     store.showLoadingAlert = true;
@@ -98,6 +118,35 @@ onMounted(async () => {
     isInitialLoading.value = false;
   }
 });
+
+watch(
+  () => store.currentLeagueId,
+  (newId) => {
+    if (newId && newId !== "undefined") {
+      selectedSeasonLeagueId.value = newId;
+    }
+  },
+  { immediate: true }
+);
+
+const seasonOptions = computed(() => {
+  return store.leagueInfo
+    .map((league) => ({
+      label: league.season ? `Season ${league.season}` : league.name,
+      value: league.leagueId,
+    }))
+    .sort((a, b) => (b.label || "").localeCompare(a.label || ""));
+});
+
+const handleSeasonChange = async (leagueId: string) => {
+  if (!leagueId || leagueId === store.currentLeagueId) return;
+  const existing = store.leagueInfo.find((l) => l.leagueId === leagueId);
+  if (existing) {
+    store.updateCurrentLeagueId(leagueId);
+  } else {
+    await loadLeagueById(leagueId);
+  }
+};
 </script>
 
 <template>
@@ -108,6 +157,27 @@ onMounted(async () => {
         <Input v-if="store.showInput" class="custom-input-width" />
         <div v-if="store.showLeaguesList" class="container mx-auto">
           <UserLeagueList />
+        </div>
+        <div
+          v-if="seasonOptions.length > 0"
+          class="flex flex-wrap items-center justify-between gap-2 mt-4"
+        >
+          <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            Season view
+          </p>
+          <select
+            v-model="selectedSeasonLeagueId"
+            @change="handleSeasonChange(selectedSeasonLeagueId)"
+            class="px-3 py-2 text-sm text-gray-800 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-50"
+          >
+            <option
+              v-for="opt in seasonOptions"
+              :key="opt.value"
+              :value="opt.value"
+            >
+              {{ opt.label }}
+            </option>
+          </select>
         </div>
         <div
           v-if="
@@ -131,8 +201,8 @@ onMounted(async () => {
       <!-- show loading screen on auto 24 hr refresh -->
       <SkeletonLoading v-else-if="showLoading" />
       <div v-else class="container mx-auto custom-background">
-        <Intro />
-        <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
+        <Intro v-if="!singleLeagueMode" />
+        <Input v-if="!singleLeagueMode" class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
         <Tabs class="mt-4" />
         <Table :users="fakeUsers" :rosters="fakeRosters" :points="fakePoints" />
       </div>

@@ -9,8 +9,22 @@ const changeTab = (tab: string) => {
 </script>
 <template>
   <ul
-    class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-200"
+    class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-200 sticky top-0 z-30 bg-gray-50/95 backdrop-blur dark:bg-gray-950/95"
   >
+    <li class="cursor-pointer me-2">
+      <button
+        @click="changeTab('leagueOverview')"
+        aria-current="page"
+        class="inline-block p-2 rounded-t-lg sm:p-4"
+        :class="[
+          store.currentTab === 'leagueOverview'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
+      >
+        Overview
+      </button>
+    </li>
     <li class="cursor-pointer me-2">
       <button
         @click="changeTab('standings')"

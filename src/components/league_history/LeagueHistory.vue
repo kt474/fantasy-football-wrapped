@@ -317,7 +317,10 @@ const tableDataAllYears = computed(() => {
     });
   } else if (tableOrder.value === "points") {
     return dataAllYears.value.sort((a: any, b: any) => {
-      return b.points / (b.wins + b.losses) - a.points / (a.wins + a.losses);
+      return (
+        b.points / (getGamesPlayed(b) || 1) -
+        a.points / (getGamesPlayed(a) || 1)
+      );
     });
   } else if (tableOrder.value === "expectedWins") {
     return dataAllYears.value.sort((a: any, b: any) => {
@@ -343,16 +346,12 @@ const worstRecord = computed(() => {
 });
 
 const mostPoints = computed(() => {
-  const user = maxBy(dataAllYears.value, (a) => a.points / (a.wins + a.losses));
-  return user
-    ? Math.round((user.points * 100) / (user.wins + user.losses)) / 100
-    : null;
+  const user = maxBy(dataAllYears.value, (a) => a.points / (getGamesPlayed(a) || 1));
+  return user ? getPointsPerGame(user) : null;
 });
 const leastPoints = computed(() => {
-  const user = minBy(dataAllYears.value, (a) => a.points / (a.wins + a.losses));
-  return user
-    ? Math.round((user.points * 100) / (user.wins + user.losses)) / 100
-    : null;
+  const user = minBy(dataAllYears.value, (a) => a.points / (getGamesPlayed(a) || 1));
+  return user ? getPointsPerGame(user) : null;
 });
 
 const mostLucky = computed(() => {
@@ -389,6 +388,26 @@ const worstManager = computed(() => {
       ).toFixed(1)
     : null;
 });
+
+const getGamesPlayed = (user: any) => {
+  const pointsPlayed = Array.isArray(user.pointsArr)
+    ? user.pointsArr.filter(
+        (p: any) => typeof p === "number" && isFinite(p)
+      ).length
+    : 0;
+  const matchupsPlayed = Array.isArray(user.matchups)
+    ? user.matchups.filter((m: any) => m !== null).length
+    : 0;
+  const leagueLastScored =
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek || 0;
+  return Math.max(pointsPlayed, matchupsPlayed, leagueLastScored);
+};
+
+const getPointsPerGame = (user: any) => {
+  const games = getGamesPlayed(user);
+  if (!games) return 0;
+  return Number((user.points / games).toFixed(2));
+};
 </script>
 <template>
   <div
@@ -611,20 +630,13 @@ const worstManager = computed(() => {
             class="px-2 py-3 sm:px-6"
             :class="{
               'text-blue-600 dark:text-blue-500 font-semibold':
-                Math.round((user.points / (user.wins + user.losses)) * 100) /
-                  100 ===
-                mostPoints,
+                getPointsPerGame(user) === mostPoints,
               'text-red-600 dark:text-red-500 font-semibold':
-                Math.round((user.points / (user.wins + user.losses)) * 100) /
-                  100 ===
-                leastPoints,
+                getPointsPerGame(user) === leastPoints,
             }"
           >
             {{
-              user.wins + user.losses > 0
-                ? Math.round((user.points / (user.wins + user.losses)) * 100) /
-                  100
-                : 0
+              getPointsPerGame(user)
             }}
           </td>
           <td

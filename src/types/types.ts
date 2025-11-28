@@ -25,6 +25,7 @@ export type LeagueInfoType = {
   status: string;
   currentWeek: number;
   scoringType: number;
+  scoringSettings: Record<string, number>;
   rosterPositions: string[];
   playoffTeams: number;
   playoffProjections?: any[];
@@ -108,6 +109,33 @@ export type TableDataType = {
   starterPoints: number[][];
   benchPlayers: string[];
   benchPoints: number[];
+};
+
+export type SeasonalAwardId =
+  | "award-i"
+  | "award-ii"
+  | "award-iii"
+  | "award-iv"
+  | "award-v";
+
+export type SeasonalAward = {
+  id: SeasonalAwardId;
+  title: string;
+  informalLabel: string;
+  definition: string;
+  amount: number;
+  winnerOwnerId?: string | null;
+  winnerNameOverride?: string | null;
+};
+
+export type WeeklyBonus = {
+  week: number;
+  label: string;
+  note?: string;
+  amount: number;
+  winnerOwnerId?: string | null;
+  winnerNameOverride?: string | null;
+  score?: number | null;
 };
 
 export type PowerRankingEntry = {

@@ -13,9 +13,30 @@ import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import Contact from "./views/Contact.vue";
 import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
+import Players from "./views/Players.vue";
+import Rosters from "./views/Rosters.vue";
+import AdminAwards from "./views/AdminAwards.vue";
+import ScoringSettings from "./views/ScoringSettings.vue";
 
 const routes = [
   { path: "/", component: Home },
+  {
+    path: "/players",
+    component: Players,
+    meta: {
+      title: "Player Stats",
+      description: "Weekly and season fantasy stats for any NFL player.",
+    },
+  },
+  {
+    path: "/rosters",
+    component: Rosters,
+    meta: {
+      title: "Rosters",
+      description:
+        "Browse each roster and drill into player fantasy production.",
+    },
+  },
   {
     path: "/changelog",
     component: ChangelogPage,
@@ -38,6 +59,22 @@ const routes = [
     meta: {
       title: "Newsletter",
       description: "Subscribe to our newsletter for updates and announcements.",
+    },
+  },
+  {
+    path: "/admin/awards",
+    component: AdminAwards,
+    meta: {
+      title: "Admin: Awards",
+      description: "Manage custom seasonal award titles, definitions, and winners.",
+    },
+  },
+  {
+    path: "/admin/scoring-settings",
+    component: ScoringSettings,
+    meta: {
+      title: "Admin: Scoring Settings",
+      description: "Debug view of the full scoring_settings object for the active league.",
     },
   },
   {
