@@ -62,3 +62,32 @@ export interface SingleWeekStats {
   ranks: (number | string | undefined)[];
   stats: WeekStat[];
 }
+
+export interface Draft {
+  draft_id: string;
+  draft_slot: number;
+  is_keeper: null;
+  metadata: DraftMetadata;
+  pick_no: number;
+  picked_by: string;
+  player_id: string;
+  reactions: null;
+  roster_id: number;
+  round: number;
+}
+
+export interface DraftMetadata {
+  first_name: string;
+  injury_status: string;
+  last_name: string;
+  news_updated: string;
+  number: string;
+  player_id: string;
+  position: string;
+  sport: string;
+  status: string;
+  team: string;
+  team_abbr: string;
+  team_changed_at: string;
+  years_exp: string;
+}

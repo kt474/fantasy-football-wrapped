@@ -12,6 +12,7 @@ import {
   WeeklyStats,
   SingleWeekProjection,
   SingleWeekStats,
+  Draft,
 } from "../types/apiTypes";
 
 export const getPlayerNews = async (
@@ -42,7 +43,7 @@ export const getPlayersByIdsMap = async (
     const result = await response.json();
     const playersMap = new Map<string, Player>();
     if (result.players && Array.isArray(result.players)) {
-      result.players.forEach((playerObj: any) => {
+      result.players.forEach((playerObj: Player) => {
         if (playerObj && playerObj.player_id) {
           playersMap.set(playerObj.player_id, playerObj);
         }
@@ -66,7 +67,7 @@ export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
 };
 
 export const generateTrends = async (
-  data: any,
+  data: Record<string, unknown>[],
   wordLimit: number,
   bulletCount: number,
   leagueState: string = "in_season"
@@ -87,8 +88,8 @@ export const generateTrends = async (
 };
 
 export const generateSummary = async (
-  prompt: any,
-  metadata: any
+  prompt: Record<string, unknown>[],
+  metadata: Record<string, unknown>
 ): Promise<Record<string, string>> => {
   try {
     const response = await fetch(import.meta.env.VITE_LEAGUE_RECAP, {
@@ -113,8 +114,8 @@ export const generateSummary = async (
 };
 
 export const generateReport = async (
-  prompt: any,
-  metadata: any
+  prompt: Record<string, unknown>[],
+  metadata: Record<string, unknown>
 ): Promise<Record<string, string>> => {
   try {
     const response = await fetch(import.meta.env.VITE_WEEKLY_REPORT, {
@@ -139,7 +140,7 @@ export const generateReport = async (
 };
 
 export const generatePreview = async (
-  prompt: any
+  prompt: Record<string, unknown>[]
 ): Promise<Record<string, string>> => {
   try {
     const response = await fetch(import.meta.env.VITE_WEEKLY_PREVIEW, {
@@ -558,11 +559,11 @@ export const getDraftPicks = async (
   const response = await fetch(
     `https://api.sleeper.app/v1/draft/${draftId}/picks`
   );
-  const draftPicks = await response.json();
+  const draftPicks: Draft[] = await response.json();
 
   const picksWithStats = await Promise.all(
-    draftPicks.map(async (pick: any) => {
-      const playerStats: any = await getStats(
+    draftPicks.map(async (pick) => {
+      const playerStats = await getStats(
         pick["player_id"],
         season,
         scoringType
