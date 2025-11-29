@@ -140,7 +140,7 @@ export const generateReport = async (
 };
 
 export const generatePreview = async (
-  prompt: Record<string, unknown>[]
+  prompt: Record<string, unknown>
 ): Promise<Record<string, string>> => {
   try {
     const response = await fetch(import.meta.env.VITE_WEEKLY_PREVIEW, {
