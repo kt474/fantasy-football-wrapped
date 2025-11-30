@@ -13,6 +13,9 @@ import {
   SingleWeekProjection,
   SingleWeekStats,
   Draft,
+  Roster,
+  User,
+  Matchup,
 } from "../types/apiTypes";
 
 export const getPlayerNews = async (
@@ -655,8 +658,8 @@ export const getRosters = async (leagueId: string) => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/rosters`
   );
-  const rosters = await response.json();
-  return rosters.map((roster: any) => {
+  const rosters: Roster[] = await response.json();
+  return rosters.map((roster) => {
     return {
       id: roster["owner_id"],
       pointsFor: roster["settings"]["fpts"],
@@ -679,8 +682,8 @@ export const getUsers = async (leagueId: string) => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/users`
   );
-  const users = await response.json();
-  return users.map((user: any) => {
+  const users: User[] = await response.json();
+  return users.map((user) => {
     return {
       id: user["user_id"],
       name: user["metadata"]["team_name"] || user["display_name"],
@@ -694,8 +697,8 @@ export const getMatchup = async (week: number, leagueId: string) => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`
   );
-  const matchup = await response.json();
-  return matchup.map((game: any) => {
+  const matchup: Matchup[] = await response.json();
+  return matchup.map((game) => {
     const benchPlayers = game["players"]?.filter(
       (value: string) => !game["starters"]?.includes(value)
     );

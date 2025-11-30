@@ -91,3 +91,45 @@ export interface DraftMetadata {
   team_changed_at: string;
   years_exp: string;
 }
+
+export interface Roster {
+  co_owners: null;
+  keepers: null;
+  league_id: string;
+  metadata: RosterMetadata;
+  owner_id: string;
+  player_map: null;
+  players: string[];
+  reserve: string[];
+  roster_id: number;
+  settings: { [key: string]: number };
+  starters: string[];
+  taxi: null;
+}
+
+export interface RosterMetadata {
+  record: string;
+  streak: string;
+}
+
+export interface User {
+  avatar: string;
+  display_name: string;
+  is_bot: boolean;
+  is_owner: boolean;
+  league_id: string;
+  metadata: Record<string, string>;
+  settings: null;
+  user_id: string;
+}
+
+export interface Matchup {
+  points: number;
+  players: string[];
+  roster_id: number;
+  custom_points: null;
+  matchup_id: number;
+  starters: string[];
+  starters_points: number[];
+  players_points: { [key: string]: number };
+}
