@@ -16,7 +16,13 @@ import {
   Roster,
   User,
   Matchup,
+  SeasonStats,
+  SeasonStatsWeekly,
+  LeagueOriginal,
+  Bracket,
+  WeeklyWaiver,
 } from "../types/apiTypes";
+import { LeagueInfoType, RosterType, UserType } from "../types/types";
 
 export const getPlayerNews = async (
   playerNames: string[]
@@ -292,16 +298,16 @@ export const getTradeValue = async (
     const response = await fetch(
       `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}`
     );
-    const result = await response.json();
+    const result: SeasonStats = await response.json();
     return result && result["stats"] ? result["stats"][rank] : 0;
   }
   const response = await fetch(
     `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
   );
-  const result = await response.json();
+  const result: SeasonStatsWeekly = await response.json();
   const weeklyRanks = Object.values(result)
     .slice(weekTraded - 1)
-    .map((week: any) => {
+    .map((week) => {
       return week && week["stats"] ? week["stats"][rank] : 0;
     })
     .filter((num) => num !== 0 && num !== 999);
@@ -522,14 +528,18 @@ export const getProjections = async (
     };
   }
 };
-export const getWinnersBracket = async (leagueId: string) => {
+export const getWinnersBracket = async (
+  leagueId: string
+): Promise<Bracket[]> => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/winners_bracket`
   );
   return await response.json();
 };
 
-export const getLosersBracket = async (leagueId: string) => {
+export const getLosersBracket = async (
+  leagueId: string
+): Promise<Bracket[]> => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/losers_bracket`
   );
@@ -601,7 +611,7 @@ export const getDraftPicks = async (
   return picksWithStats;
 };
 
-export const getLeague = async (leagueId: string) => {
+export const getLeague = async (leagueId: string): Promise<LeagueOriginal> => {
   try {
     const response = await fetch(
       `https://api.sleeper.app/v1/league/${leagueId}`
@@ -650,11 +660,11 @@ export const getLeague = async (leagueId: string) => {
       waiverType: league["settings"]["waiver_type"],
     };
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
-export const getRosters = async (leagueId: string) => {
+export const getRosters = async (leagueId: string): Promise<RosterType[]> => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/rosters`
   );
@@ -678,7 +688,7 @@ export const getRosters = async (leagueId: string) => {
   });
 };
 
-export const getUsers = async (leagueId: string) => {
+export const getUsers = async (leagueId: string): Promise<UserType[]> => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/users`
   );
@@ -728,7 +738,10 @@ export const getAvatar = async (avatarId: string) => {
   }
 };
 
-export const getTransactions = async (leagueId: string, week: number) => {
+export const getTransactions = async (
+  leagueId: string,
+  week: number
+): Promise<WeeklyWaiver[]> => {
   const response = await fetch(
     `https://api.sleeper.app/v1/league/${leagueId}/transactions/${week}`
   );
@@ -743,10 +756,10 @@ export const getCurrentLeagueState = async () => {
 export const getData = async (leagueId: string) => {
   // Initial parallel requests for base league data
   const [leagueInfo, rosters, winnersBracket, losersBracket]: [
-    any,
-    any[],
-    any[],
-    any[]
+    LeagueOriginal,
+    RosterType[],
+    Bracket[],
+    Bracket[]
   ] = await Promise.all([
     getLeague(leagueId),
     getRosters(leagueId),
@@ -754,7 +767,7 @@ export const getData = async (leagueId: string) => {
     getLosersBracket(leagueId),
   ]);
 
-  const newLeagueInfo: any = {
+  const newLeagueInfo: LeagueInfoType = {
     ...leagueInfo,
     rosters,
     winnersBracket,
@@ -763,9 +776,9 @@ export const getData = async (leagueId: string) => {
   };
 
   // Determine the number of weeks to process
-  let numberOfWeeks: any;
-  let currentWeek: number | undefined;
-  let legacyWinner: number | undefined;
+  let numberOfWeeks: number = 0;
+  let currentWeek: number = 0;
+  let legacyWinner: number | null = 0;
 
   if (newLeagueInfo.status === "in_season") {
     const leagueState = await getCurrentLeagueState();
@@ -782,8 +795,8 @@ export const getData = async (leagueId: string) => {
   }
 
   // Parallel requests for weekly data
-  const trades: any = [];
-  const waivers: any = [];
+  const trades: WeeklyWaiver[][] = [];
+  const waivers: WeeklyWaiver[][] = [];
   const [weeklyPoints, users, transactionPromises] = await Promise.all([
     getWeeklyPoints(leagueId, currentWeek ?? newLeagueInfo.lastScoredWeek),
     getUsers(leagueId),
@@ -801,7 +814,7 @@ export const getData = async (leagueId: string) => {
   // Process playoff points in parallel with avatar fetching
   const [processedUsers] = await Promise.all([
     Promise.all(
-      users.map(async (user: any) => ({
+      users.map(async (user) => ({
         ...user,
         avatarImg: user.avatar ? await getAvatar(user.avatar) : null,
       }))

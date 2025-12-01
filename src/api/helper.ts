@@ -12,6 +12,7 @@ import {
 } from "lodash";
 import { getMatchup } from "./api";
 import { RosterType, UserType } from "../types/types";
+import { WeeklyWaiver } from "../types/apiTypes";
 
 const getTierMultiplier = (position: string, rank: number) => {
   switch (position) {
@@ -288,10 +289,12 @@ export const getTotalTransactions = (transactions: any) => {
   }, {});
 };
 
-export const getWaiverMoves = (transactions: any) => {
+export const getWaiverMoves = (
+  transactions: WeeklyWaiver[]
+): { trades: WeeklyWaiver[]; waivers: WeeklyWaiver[] } => {
   const trades: any[] = [];
   const waivers: any[] = [];
-  transactions.forEach((transaction: any) => {
+  transactions.forEach((transaction) => {
     if (transaction.status === "complete" && transaction.type === "trade") {
       trades.push(transaction);
     } else if (["free_agent", "waiver"].includes(transaction.type)) {
