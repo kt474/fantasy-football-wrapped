@@ -22,7 +22,7 @@ import {
   Bracket,
   WeeklyWaiver,
 } from "../types/apiTypes";
-import { LeagueInfoType, RosterType, UserType } from "../types/types";
+import { RosterType, UserType } from "../types/types";
 
 export const getPlayerNews = async (
   playerNames: string[]

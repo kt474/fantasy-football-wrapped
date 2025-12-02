@@ -23,7 +23,7 @@ export type LeagueInfoType = {
   tradeNames?: any[];
   previousLeagues: any[];
   status: string;
-  currentWeek?: number;
+  currentWeek: number;
   scoringType: number;
   rosterPositions: string[];
   playoffTeams: number;
