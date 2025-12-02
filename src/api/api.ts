@@ -767,7 +767,7 @@ export const getData = async (leagueId: string) => {
     getLosersBracket(leagueId),
   ]);
 
-  const newLeagueInfo: LeagueInfoType = {
+  const newLeagueInfo: any = {
     ...leagueInfo,
     rosters,
     winnersBracket,
