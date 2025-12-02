@@ -21,6 +21,7 @@ import {
   LeagueOriginal,
   Bracket,
   WeeklyWaiver,
+  NewLeagueInfo,
 } from "../types/apiTypes";
 import { RosterType, UserType } from "../types/types";
 
@@ -767,7 +768,7 @@ export const getData = async (leagueId: string) => {
     getLosersBracket(leagueId),
   ]);
 
-  const newLeagueInfo: any = {
+  const newLeagueInfo: NewLeagueInfo = {
     ...leagueInfo,
     rosters,
     winnersBracket,
