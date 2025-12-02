@@ -798,7 +798,10 @@ export const getData = async (leagueId: string) => {
   const trades: WeeklyWaiver[][] = [];
   const waivers: WeeklyWaiver[][] = [];
   const [weeklyPoints, users, transactionPromises] = await Promise.all([
-    getWeeklyPoints(leagueId, currentWeek ?? newLeagueInfo.lastScoredWeek),
+    getWeeklyPoints(
+      leagueId,
+      currentWeek !== 0 ? currentWeek : newLeagueInfo.lastScoredWeek
+    ),
     getUsers(leagueId),
     Promise.all(
       Array.from({ length: numberOfWeeks + 1 }, async (_, i) => {
