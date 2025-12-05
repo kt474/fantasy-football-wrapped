@@ -430,10 +430,17 @@ watch(
                     Avg Rank
                   </p>
                   <p
+                    v-if="getAverage(player.stats.ranks) !== 0"
                     class="mt-0.5 text-sm font-semibold rounded-full sm:text-base"
                     :class="[getValueColor(getAverage(player.stats.ranks))]"
                   >
                     {{ getAverage(player.stats.ranks) }}
+                  </p>
+                  <p
+                    v-else
+                    class="mt-0.5 text-sm font-semibold rounded-full sm:text-base"
+                  >
+                    N/A
                   </p>
                 </div>
               </div>
