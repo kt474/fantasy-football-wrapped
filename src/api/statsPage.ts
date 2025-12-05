@@ -124,6 +124,7 @@ export const loadStatsData = async ({
             totalPoints: 0,
             startedGames: 0,
             totalGames: 0,
+            lastWeekSeen: weekNumber,
           });
         }
         const row = contributions.get(key)!;
@@ -134,6 +135,7 @@ export const loadStatsData = async ({
           row.startedPoints += pts;
           row.startedGames += 1;
         }
+        row.lastWeekSeen = Math.max(row.lastWeekSeen || 0, weekNumber);
         if (!playerWeekly.has(playerId)) {
           playerWeekly.set(playerId, []);
         }
@@ -146,9 +148,9 @@ export const loadStatsData = async ({
     });
   });
 
-  const playerAggregateMap = new Map<string, PlayerAggregateRow>();
+  const playerAggregateMap = new Map<string, PlayerAggregateRow & { latestOwnerWeek?: number }>();
   contributions.forEach((row) => {
-    const existing = playerAggregateMap.get(row.playerId);
+    const existing = playerAggregateMap.get(row.playerId) as (PlayerAggregateRow & { latestOwnerWeek?: number }) | undefined;
     if (!existing) {
       playerAggregateMap.set(row.playerId, {
         playerId: row.playerId,
@@ -162,15 +164,18 @@ export const loadStatsData = async ({
         startedPoints: row.startedPoints,
         weeksStarted: row.startedGames,
         weeksPlayed: row.totalGames,
+        latestOwnerWeek: row.lastWeekSeen || 0,
       });
     } else {
       existing.totalPoints += row.totalPoints;
       existing.startedPoints += row.startedPoints;
       existing.weeksStarted += row.startedGames;
       existing.weeksPlayed += row.totalGames;
-      if (!existing.ownerId && row.ownerId) {
+      const candidateWeek = row.lastWeekSeen || 0;
+      if (!existing.latestOwnerWeek || candidateWeek >= existing.latestOwnerWeek) {
         existing.ownerId = row.ownerId;
         existing.ownerName = row.ownerName;
+        existing.latestOwnerWeek = candidateWeek;
       }
       if (!existing.team && row.team) {
         existing.team = row.team;
@@ -195,7 +200,18 @@ export const loadStatsData = async ({
     ),
     contributions: Array.from(contributions.values()),
     playerRows: Array.from(playerAggregateMap.values()).map((row) => ({
-      ...row,
+      // strip internal latestOwnerWeek before returning
+      playerId: row.playerId,
+      name: row.name,
+      position: row.position,
+      team: row.team,
+      draftRound: row.draftRound,
+      ownerId: row.ownerId,
+      ownerName: row.ownerName,
+      totalPoints: row.totalPoints,
+      startedPoints: row.startedPoints,
+      weeksStarted: row.weeksStarted,
+      weeksPlayed: row.weeksPlayed,
       avgPoints: row.weeksPlayed
         ? Number((row.totalPoints / row.weeksPlayed).toFixed(2))
         : row.totalPoints,

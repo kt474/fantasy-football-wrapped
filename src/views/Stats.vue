@@ -12,7 +12,7 @@ import type {
 } from "../types/types";
 
 type TabKey = "season" | "draft" | "players";
-type PositionKey = "QB" | "RB" | "WR" | "TE" | "DEF";
+type PositionKey = "QB" | "RB" | "WR" | "TE" | "DEF" | "K";
 
 const store = useStore();
 const activeTab = ref<TabKey>("season");
@@ -21,6 +21,7 @@ const error = ref("");
 const leagueName = ref("");
 const season = ref("");
 const lastWeek = ref(0);
+const rosterPositions = ref<string[]>([]);
 const weeksLoaded = ref<number[]>([]);
 const rosters = ref<TeamRecordRow[]>([]);
 const contributions = ref<TeamPlayerContribution[]>([]);
@@ -80,6 +81,27 @@ const ownerOptions = computed(() => {
   return [{ value: "ALL", label: "All Teams" }, ...opts];
 });
 
+const normalizeRosterPos = (pos: string): PositionKey | null => {
+  if (!pos) return null;
+  if (pos === "DST" || pos === "DEF") return "DEF";
+  if (pos === "K") return "K";
+  if (pos === "QB" || pos === "RB" || pos === "WR" || pos === "TE") return pos;
+  return null;
+};
+
+const positionsForLeague = computed<PositionKey[]>(() => {
+  const set = new Set<PositionKey>();
+  rosterPositions.value.forEach((pos) => {
+    const norm = normalizeRosterPos(pos);
+    if (norm) set.add(norm);
+  });
+  const order: PositionKey[] = ["QB", "RB", "WR", "TE", "DEF", "K"];
+  if (set.size === 0) {
+    return order.slice(0, 5);
+  }
+  return order.filter((p) => set.has(p));
+});
+
 const loadData = async () => {
   loading.value = true;
   error.value = "";
@@ -93,6 +115,7 @@ const loadData = async () => {
     leagueName.value = data.league.name;
     season.value = data.league.season;
     lastWeek.value = data.league.lastScoredWeek;
+    rosterPositions.value = data.league.rosterPositions || [];
     weeksLoaded.value = data.weeks;
     rosters.value = data.rosters;
     contributions.value = data.contributions;
@@ -121,8 +144,6 @@ const pointsFor = (row: TeamPlayerContribution) =>
 const gamesFor = (row: TeamPlayerContribution) =>
   filters.starterOnly ? row.startedGames : row.totalGames;
 
-const positionList: PositionKey[] = ["QB", "RB", "WR", "TE", "DEF"];
-
 const seasonRows = computed(() => {
   const base = rosters.value.map((r) => ({
     rosterId: r.rosterId,
@@ -134,7 +155,7 @@ const seasonRows = computed(() => {
     >,
   }));
 
-  positionList.forEach((pos) => {
+  positionsForLeague.value.forEach((pos) => {
     const totals = base.map((row) => {
       const playerRows = contributions.value.filter(
         (c) => c.rosterId === row.rosterId && c.position === pos
@@ -168,7 +189,7 @@ const seasonRows = computed(() => {
 
 const draftRows = computed(() => {
   const allowedPositions =
-    filters.position === "ALL" ? positionList : [filters.position];
+    filters.position === "ALL" ? positionsForLeague.value : [filters.position];
   const selectedRounds = new Set(filters.draftRounds);
   const rows = rosters.value.map((r) => {
     const matches = contributions.value.filter((c) => {
@@ -180,10 +201,8 @@ const draftRows = computed(() => {
     });
     const teamPlayers = matches.filter((m) => m.rosterId === r.rosterId);
     const total = teamPlayers.reduce((acc, c) => acc + pointsFor(c), 0);
-    const avg =
-      weeksLoaded.value.length > 0
-        ? total / weeksLoaded.value.length
-        : total;
+    const totalGames = teamPlayers.reduce((acc, c) => acc + gamesFor(c), 0);
+    const avg = totalGames > 0 ? total / totalGames : total;
     return {
       rosterId: r.rosterId,
       ownerName: r.ownerName,
@@ -263,7 +282,7 @@ const playerSortDir = ref<"asc" | "desc">("desc");
 
 const playerFilteredRows = computed(() => {
   const allowedPositions =
-    filters.position === "ALL" ? positionList : [filters.position];
+    filters.position === "ALL" ? positionsForLeague.value : [filters.position];
   const selectedRounds = new Set(filters.draftRounds);
   const search = filters.playerSearch.toLowerCase().trim();
   const rows = playerRows.value
@@ -424,6 +443,9 @@ watch(
           </label>
           <div class="text-xs text-blue-100">
             Loaded weeks: {{ weeksLoaded.join(", ") || "—" }}
+          </div>
+          <div class="text-xs text-blue-100">
+            Max completed week: {{ lastWeek || "—" }}
           </div>
           <button
             @click="refreshPlayerDirectory"
@@ -623,6 +645,7 @@ watch(
             <option value="WR">WR</option>
             <option value="TE">TE</option>
             <option value="DEF">DEF</option>
+            <option value="K">K</option>
           </select>
         </label>
         <div class="flex flex-col text-sm text-gray-700">
@@ -785,11 +808,13 @@ watch(
             class="mt-1 block w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-200"
           >
             <option value="ALL">All</option>
-            <option value="QB">QB</option>
-            <option value="RB">RB</option>
-            <option value="WR">WR</option>
-            <option value="TE">TE</option>
-            <option value="DEF">DEF</option>
+            <option
+              v-for="pos in positionsForLeague"
+              :key="`pos-${pos}`"
+              :value="pos"
+            >
+              {{ pos }}
+            </option>
           </select>
         </label>
         <label class="flex flex-col text-sm text-gray-700">

@@ -209,6 +209,7 @@ export type TeamPlayerContribution = {
   totalPoints: number;
   startedGames: number;
   totalGames: number;
+  lastWeekSeen?: number;
 };
 
 export type PlayerWeeklyStat = {
