@@ -56,7 +56,7 @@ watch(
         <img
           height="150"
           width="150"
-          src="../../assets/KBKH Logo3.svg"
+          src="../../assets/KBKH_Logo.svg"
           class="h-6 kbkh-logo"
         />
         <span
@@ -65,8 +65,54 @@ watch(
         >
       </RouterLink>
 
-      <div class="block w-auto" id="navbar-default">
-        <div class="flex flex-row p-0 mt-0 space-x-2 font-medium rounded-lg">
+      <div class="flex flex-col w-full gap-3 md:w-auto md:ml-auto" id="navbar-default">
+        <div class="flex justify-end w-full">
+          <button
+            aria-label="Button to toggle dark mode"
+            @click="setColorMode()"
+            data-tooltip-target="tooltip-bottom"
+            data-tooltip-placement="bottom"
+            type="button"
+            style="align-items: first baseline;"
+            class="inline-flex items-center gap-2 text-gray-700 bg-gray-50 hover:bg-gray-300 focus:ring focus:outline-none focus:ring-gray-300 font-small rounded-lg text-sm p-2.5 text-center dark:bg-gray-950 dark:text-gray-50 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+          >
+            <span style="font-size: 10px;">Toggle Dark/Light Mode</span>
+            <svg
+              v-if="darkMode"
+              class="w-5 h-5 text-gray-800 dark:text-gray-50"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-11a1 1 0 0 0 1-1V1a1 1 0 0 0-2 0v2a1 1 0 0 0 1 1Zm0 12a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0v-2a1 1 0 0 0-1-1ZM4.343 5.757a1 1 0 0 0 1.414-1.414L4.343 2.929a1 1 0 0 0-1.414 1.414l1.414 1.414Zm11.314 8.486a1 1 0 0 0-1.414 1.414l1.414 1.414a1 1 0 0 0 1.414-1.414l-1.414-1.414ZM4 10a1 1 0 0 0-1-1H1a1 1 0 0 0 0 2h2a1 1 0 0 0 1-1Zm15-1h-2a1 1 0 1 0 0 2h2a1 1 0 0 0 0-2ZM4.343 14.243l-1.414 1.414a1 1 0 1 0 1.414 1.414l1.414-1.414a1 1 0 0 0-1.414-1.414ZM14.95 6.05a1 1 0 0 0 .707-.293l1.414-1.414a1 1 0 1 0-1.414-1.414l-1.414 1.414a1 1 0 0 0 .707 1.707Z"
+              />
+            </svg>
+            <svg
+              v-else
+              class="w-5 h-5 text-gray-800 dark:text-gray-50"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 18 20"
+            >
+              <path
+                d="M17.8 13.75a1 1 0 0 0-.859-.5A7.488 7.488 0 0 1 10.52 2a1 1 0 0 0 0-.969A1.035 1.035 0 0 0 9.687.5h-.113a9.5 9.5 0 1 0 8.222 14.247 1 1 0 0 0 .004-.997Z"
+              />
+            </svg>
+          </button>
+          <div
+            id="tooltip-bottom"
+            role="tooltip"
+            class="noshow absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium bg-gray-900 rounded-lg shadow-sm opacity-0 text-gray-50 tooltip dark:bg-gray-600"
+          >
+            Toggle dark mode
+            <div class="tooltip-arrow" data-popper-arrow></div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap justify-end w-full p-0 mt-0 gap-2 font-medium rounded-lg">
           <RouterLink
             to="/"
             class="px-3 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
@@ -103,7 +149,7 @@ watch(
             data-modal-toggle="default-modal"
             data-tooltip-target="about-tooltip"
             data-tooltip-placement="bottom"
-            class="text-gray-50 bg-gray-50 hover:bg-gray-300 focus:ring focus:outline-none focus:ring-gray-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600 -mr-2 md:mr-2"
+            class="noshow text-gray-50 bg-gray-50 hover:bg-gray-300 focus:ring focus:outline-none focus:ring-gray-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600 -mr-2 md:mr-2"
           >
             <svg
               class="w-5 h-5 text-gray-800 dark:text-gray-50"
@@ -120,7 +166,7 @@ watch(
           <div
             id="about-tooltip"
             role="tooltip"
-            class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium bg-gray-900 rounded-lg shadow-sm opacity-0 text-gray-50 tooltip dark:bg-gray-600"
+            class="noshow absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium bg-gray-900 rounded-lg shadow-sm opacity-0 text-gray-50 tooltip dark:bg-gray-600"
           >
             About
             <div class="tooltip-arrow" data-popper-arrow></div>
@@ -129,9 +175,9 @@ watch(
             id="default-modal"
             tabindex="-1"
             aria-hidden="true"
-            class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+            class="noshow hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
           >
-            <div class="relative w-full max-w-2xl max-h-full p-4 -ml-4 sm:ml-0">
+            <div class="noshow relative w-full max-w-2xl max-h-full p-4 -ml-4 sm:ml-0">
               <div
                 class="relative bg-white rounded-lg shadow dark:bg-darkmodal"
               >
@@ -282,12 +328,13 @@ watch(
             aria-label="Button for github repository"
             href="https://github.com/kt474/fantasy-football-wrapped"
             target="_blank"
+            class="noshow"
           >
             <button
               aria-label="Button for github repository"
               data-tooltip-target="github-tooltip"
               data-tooltip-placement="bottom"
-              class="text-gray-50 bg-gray-50 hover:bg-gray-300 focus:ring focus:outline-none focus:ring-gray-300 font-small rounded-lg text-sm p-2.5 text-center hidden md:inline-flex items-center me-2 dark:bg-gray-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+              class="noshow text-gray-50 bg-gray-50 hover:bg-gray-300 focus:ring focus:outline-none focus:ring-gray-300 font-small rounded-lg text-sm p-2.5 text-center hidden md:inline-flex items-center me-2 dark:bg-gray-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
             >
               <svg
                 class="w-5 h-5 text-gray-800 dark:text-gray-50"
@@ -306,53 +353,12 @@ watch(
             <div
               id="github-tooltip"
               role="tooltip"
-              class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium bg-gray-900 rounded-lg shadow-sm opacity-0 text-gray-50 tooltip dark:bg-gray-600"
-            >
-              Github
-              <div class="tooltip-arrow" data-popper-arrow></div>
-            </div>
-          </a>
-          <button
-            aria-label="Button to toggle dark mode"
-            @click="setColorMode()"
-            data-tooltip-target="tooltip-bottom"
-            data-tooltip-placement="bottom"
-            type="button"
-            class="text-gray-50 bg-gray-50 hover:bg-gray-300 focus:ring focus:outline-none focus:ring-gray-300 font-small rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-950 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+              class="noshow absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium bg-gray-900 rounded-lg shadow-sm opacity-0 text-gray-50 tooltip dark:bg-gray-600"
           >
-            <svg
-              v-if="darkMode"
-              class="w-5 h-5 text-gray-800 dark:text-gray-50"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-11a1 1 0 0 0 1-1V1a1 1 0 0 0-2 0v2a1 1 0 0 0 1 1Zm0 12a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0v-2a1 1 0 0 0-1-1ZM4.343 5.757a1 1 0 0 0 1.414-1.414L4.343 2.929a1 1 0 0 0-1.414 1.414l1.414 1.414Zm11.314 8.486a1 1 0 0 0-1.414 1.414l1.414 1.414a1 1 0 0 0 1.414-1.414l-1.414-1.414ZM4 10a1 1 0 0 0-1-1H1a1 1 0 0 0 0 2h2a1 1 0 0 0 1-1Zm15-1h-2a1 1 0 1 0 0 2h2a1 1 0 0 0 0-2ZM4.343 14.243l-1.414 1.414a1 1 0 1 0 1.414 1.414l1.414-1.414a1 1 0 0 0-1.414-1.414ZM14.95 6.05a1 1 0 0 0 .707-.293l1.414-1.414a1 1 0 1 0-1.414-1.414l-1.414 1.414a1 1 0 0 0 .707 1.707Z"
-              />
-            </svg>
-            <svg
-              v-else
-              class="w-5 h-5 text-gray-800 dark:text-gray-50"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 18 20"
-            >
-              <path
-                d="M17.8 13.75a1 1 0 0 0-.859-.5A7.488 7.488 0 0 1 10.52 2a1 1 0 0 0 0-.969A1.035 1.035 0 0 0 9.687.5h-.113a9.5 9.5 0 1 0 8.222 14.247 1 1 0 0 0 .004-.997Z"
-              />
-            </svg>
-          </button>
-          <div
-            id="tooltip-bottom"
-            role="tooltip"
-            class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium bg-gray-900 rounded-lg shadow-sm opacity-0 text-gray-50 tooltip dark:bg-gray-600"
-          >
-            Toggle dark mode
+            Github
             <div class="tooltip-arrow" data-popper-arrow></div>
           </div>
+        </a>
         </div>
       </div>
     </div>
