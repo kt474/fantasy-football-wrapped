@@ -54,13 +54,13 @@ watch(
         class="flex items-center space-x-3 rtl:space-x-reverse"
       >
         <img
-          height="24"
-          width="24"
-          src="../../assets/football-helmet.png"
-          class="h-6"
+          height="150"
+          width="150"
+          src="../../assets/KBKH Logo3.svg"
+          class="h-6 kbkh-logo"
         />
         <span
-          class="self-center -mb-1.5 custom-font whitespace-nowrap dark:text-gray-50"
+          class="noshow self-center -mb-1.5 custom-font whitespace-nowrap dark:text-gray-50"
           ><span class="text-blue-600 dark:text-blue-500">ff</span>wrapped</span
         >
       </RouterLink>

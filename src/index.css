@@ -6,3 +6,9 @@
 .noshow {
   display: none;
 }
+
+.kbkh-logo {
+  height: 150px;
+  width: auto;
+  padding: 20px 0
+}
