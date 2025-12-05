@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "../store/store";
-import { getCurrentLeagueState, getStats } from "../api/api";
+import { getCurrentLeagueState, getStatsBatch } from "../api/api";
 
 type RosterPlayerRow = {
   playerId: string;
@@ -82,8 +82,10 @@ const loadRosterPlayers = async () => {
   errorMessage.value = "";
   try {
     const playerIds: string[] = selectedRoster.value.players.filter(Boolean);
-    const stats = await Promise.all(
-      playerIds.map((id) => getStats(id, seasonYear.value, scoringType.value))
+    const stats = await getStatsBatch(
+      playerIds,
+      seasonYear.value,
+      scoringType.value
     );
     rosterPlayers.value = stats
       .map((stat: any) => {

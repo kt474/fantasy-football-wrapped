@@ -24,6 +24,7 @@ const leagueName = ref("");
 const season = ref("");
 const lastWeek = ref(0);
 const regularSeasonLength = ref<number | null>(null);
+const lastLoadedAt = ref<string>("");
 const rosterPositions = ref<string[]>([]);
 const weeksLoaded = ref<number[]>([]);
 const rosters = ref<TeamRecordRow[]>([]);
@@ -246,6 +247,7 @@ const loadData = async () => {
     if (!filters.endWeek || filters.endWeek > data.league.lastScoredWeek) {
       filters.endWeek = data.league.lastScoredWeek;
     }
+    lastLoadedAt.value = new Date().toLocaleTimeString();
     ensureRoundsSelected();
   } catch (e) {
     console.error(e);
@@ -643,6 +645,9 @@ watch(
             </span>
             <span class="px-2 py-1 bg-white/10 rounded-md">
               Filters auto-saved per league
+            </span>
+            <span class="px-2 py-1 bg-white/10 rounded-md">
+              Last refreshed: {{ lastLoadedAt || "—" }}
             </span>
           </div>
           <button

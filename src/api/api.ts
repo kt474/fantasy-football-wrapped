@@ -13,6 +13,16 @@ import {
 } from "./sleeperClient";
 import { getMatchupsForWeek } from "./sleeperClient";
 
+type CacheEntry<T> = { expiresAt: number; value: T };
+
+const PLAYER_STATS_TTL_MS = 1000 * 60 * 60 * 6; // 6 hours
+const PLAYER_WEEKLY_TTL_MS = 1000 * 60 * 30; // 30 minutes
+
+const playerStatsCache = new Map<string, CacheEntry<any>>();
+const playerStatsInFlight = new Map<string, Promise<any>>();
+const playerWeeklyCache = new Map<string, CacheEntry<any>>();
+const playerWeeklyInFlight = new Map<string, Promise<any>>();
+
 export const getPlayerNews = async (
   playerNames: string[]
 ): Promise<Record<string, unknown>[]> => {
@@ -305,6 +315,15 @@ export const getStats = async (
   year: string,
   scoringType: number
 ) => {
+  const cacheKey = `season:${player}:${year}:${scoringType}`;
+  const now = Date.now();
+  const cached = playerStatsCache.get(cacheKey);
+  if (cached && cached.expiresAt > now) {
+    return cached.value;
+  }
+  if (playerStatsInFlight.has(cacheKey)) {
+    return playerStatsInFlight.get(cacheKey)!;
+  }
   let rank = "pos_rank_ppr";
   let ppg = "pts_ppr";
   let overall_rank = "rank_ppr";
@@ -317,24 +336,54 @@ export const getStats = async (
     ppg = "pts_half_ppr";
     overall_rank = "rank_half_ppr";
   }
-  const response = await fetch(
+  const promise = fetch(
     `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}`
+  )
+    .then((response) => response.json())
+    .then((result) =>
+      result
+        ? {
+            rank: result["stats"][rank],
+            points: result["stats"][ppg],
+            overallRank: result["stats"][overall_rank],
+            ppg: result["stats"][ppg] / result["stats"]["gp"],
+            firstName: result["player"]["first_name"],
+            lastName: result["player"]["last_name"],
+            position: result["player"]["position"],
+            team: result["team"],
+            id: result["player_id"],
+            gp: result["stats"]["gp"],
+          }
+        : null
+    )
+    .finally(() => {
+      playerStatsInFlight.delete(cacheKey);
+    });
+
+  playerStatsInFlight.set(cacheKey, promise as Promise<any>);
+  promise.then((value) => {
+    playerStatsCache.set(cacheKey, {
+      expiresAt: now + PLAYER_STATS_TTL_MS,
+      value,
+    });
+  });
+  return promise;
+};
+
+export const getStatsBatch = async (
+  players: string[],
+  year: string,
+  scoringType: number
+) => {
+  const unique = Array.from(new Set(players.filter(Boolean)));
+  const results: Record<string, any> = {};
+  await Promise.all(
+    unique.map(async (id) => {
+      const stat = await getStats(id, year, scoringType);
+      results[id] = stat;
+    })
   );
-  const result = await response.json();
-  return result
-    ? {
-        rank: result["stats"][rank],
-        points: result["stats"][ppg],
-        overallRank: result["stats"][overall_rank],
-        ppg: result["stats"][ppg] / result["stats"]["gp"],
-        firstName: result["player"]["first_name"],
-        lastName: result["player"]["last_name"],
-        position: result["player"]["position"],
-        team: result["team"],
-        id: result["player_id"],
-        gp: result["stats"]["gp"],
-      }
-    : null;
+  return players.map((id) => (id ? results[id] ?? null : null));
 };
 
 export const getTradeValue = async (
@@ -467,9 +516,22 @@ export const getPlayerWeeklyFantasyStats = async (
   year: string,
   scoringType: number
 ) => {
-  const response = await fetch(
+  const cacheKey = `weekly:${playerId}:${year}:${scoringType}`;
+  const now = Date.now();
+  const cached = playerWeeklyCache.get(cacheKey);
+  if (cached && cached.expiresAt > now) {
+    return cached.value;
+  }
+  if (playerWeeklyInFlight.has(cacheKey)) {
+    return playerWeeklyInFlight.get(cacheKey)!;
+  }
+  const responsePromise = fetch(
     `https://api.sleeper.com/stats/nfl/player/${playerId}?season_type=regular&season=${year}&grouping=week`
-  );
+  ).finally(() => {
+    playerWeeklyInFlight.delete(cacheKey);
+  });
+  playerWeeklyInFlight.set(cacheKey, responsePromise as Promise<any>);
+  const response = await responsePromise;
   const allWeeks = await response.json();
   let scoringKey = "pts_ppr";
   let rankKey = "pos_rank_ppr";
@@ -499,7 +561,12 @@ export const getPlayerWeeklyFantasyStats = async (
     rank: number;
     snaps: number;
   }[];
-  return rows.sort((a, b) => a.week - b.week);
+  const sorted = rows.sort((a, b) => a.week - b.week);
+  playerWeeklyCache.set(cacheKey, {
+    expiresAt: now + PLAYER_WEEKLY_TTL_MS,
+    value: sorted,
+  });
+  return sorted;
 };
 
 export const getWeeklyProjections = async (
