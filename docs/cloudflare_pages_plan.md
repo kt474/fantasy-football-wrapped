@@ -4,7 +4,7 @@ Goal: deploy the Vite frontend to Cloudflare Pages and replace the Vercel awards
 
 ## 1) Frontend deployment prep
 - Ensure `npm run build` succeeds locally (Vite).
-- Add an SPA fallback for Pages: `public/_redirects` created with `/*   /index.html   200`.
+- Add an SPA fallback for Pages: `public/_redirects` created with `/*   /index.html   200!` (use `200!` to force the rewrite and avoid Cloudflare’s infinite loop warning).
 - Remove or gate `@vercel/analytics` in `src/App.vue` (swap to Cloudflare Web Analytics or disable if `import.meta.env.VITE_VERCEL_ANALYTICS !== "true"`).
 - Confirm all `VITE_*` calls point to reachable HTTPS URLs and have CORS that allows the Pages domain.
 - Note current awards client expects same-origin `/api/awards` (see `src/api/awardsClient.ts`); keep that path in the Pages Function.
