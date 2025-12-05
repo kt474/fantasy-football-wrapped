@@ -17,6 +17,7 @@ import Players from "./views/Players.vue";
 import Rosters from "./views/Rosters.vue";
 import AdminAwards from "./views/AdminAwards.vue";
 import ScoringSettings from "./views/ScoringSettings.vue";
+import Stats from "./views/Stats.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -75,6 +76,15 @@ const routes = [
     meta: {
       title: "Admin: Scoring Settings",
       description: "Debug view of the full scoring_settings object for the active league.",
+    },
+  },
+  {
+    path: "/stats",
+    component: Stats,
+    meta: {
+      title: "League Stats",
+      description:
+        "Sortable player and team rankings by position and draft round using Sleeper data.",
     },
   },
   {

@@ -86,6 +86,12 @@ watch(
             Player Stats
           </RouterLink>
           <RouterLink
+            to="/stats"
+            class="px-3 py-2 text-sm font-semibold text-indigo-700 bg-white border border-indigo-100 rounded-lg shadow-sm hover:bg-indigo-50 dark:bg-gray-800 dark:text-indigo-200 dark:border-gray-700"
+          >
+            League Stats
+          </RouterLink>
+          <RouterLink
             to="/admin/awards"
             class="px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
           >

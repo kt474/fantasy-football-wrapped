@@ -144,3 +144,75 @@ export type PowerRankingEntry = {
   ratings: number[];
   data?: number[];
 };
+
+export type PlayerAggregateRow = {
+  playerId: string;
+  name: string;
+  position: string;
+  team?: string;
+  draftRound: number | null;
+  ownerId: string | null;
+  ownerName: string;
+  totalPoints: number;
+  startedPoints: number;
+  avgPoints?: number;
+  weeksStarted: number;
+  weeksPlayed: number;
+};
+
+export type TeamPositionAggregateRow = {
+  rosterId: number;
+  ownerName: string;
+  position: string;
+  totalPoints: number;
+  avgPoints: number;
+};
+
+export type TeamDraftAggregateRow = {
+  rosterId: number;
+  ownerName: string;
+  draftRound: number | null;
+  totalPoints: number;
+  avgPoints: number;
+};
+
+export type LeagueContext = {
+  leagueId: string;
+  season: string;
+  seasonType: string;
+  lastScoredWeek: number;
+  rosterPositions: string[];
+  scoringSettings: Record<string, number>;
+  name: string;
+  draftId?: string;
+};
+
+export type TeamRecordRow = {
+  rosterId: number;
+  ownerId: string;
+  ownerName: string;
+  wins: number;
+  losses: number;
+  ties: number;
+};
+
+export type TeamPlayerContribution = {
+  rosterId: number;
+  ownerId: string | null;
+  ownerName: string;
+  playerId: string;
+  name: string;
+  position: string;
+  team: string;
+  draftRound: number | null;
+  startedPoints: number;
+  totalPoints: number;
+  startedGames: number;
+  totalGames: number;
+};
+
+export type PlayerWeeklyStat = {
+  week: number;
+  points: number;
+  started: boolean;
+};

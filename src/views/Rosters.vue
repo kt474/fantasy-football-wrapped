@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useStore } from "../store/store";
 import { getCurrentLeagueState, getStats } from "../api/api";
 
@@ -17,6 +17,7 @@ type RosterPlayerRow = {
 
 const store = useStore();
 const router = useRouter();
+const route = useRoute();
 
 const seasonYear = ref<string>("2025");
 const loading = ref(false);
@@ -115,7 +116,9 @@ const goToPlayer = (playerId: string) => {
 onMounted(async () => {
   await fetchSeasonYear();
   if (rosterOptions.value.length > 0) {
-    selectedRosterId.value = rosterOptions.value[0].value;
+    const routeRoster = Number(route.query.rosterId);
+    const match = rosterOptions.value.find((r) => r.value === routeRoster);
+    selectedRosterId.value = match ? match.value : rosterOptions.value[0].value;
     loadRosterPlayers();
   }
 });
@@ -129,7 +132,20 @@ watch(
   async () => {
     await fetchSeasonYear();
     if (rosterOptions.value.length > 0) {
-      selectedRosterId.value = rosterOptions.value[0].value;
+      const routeRoster = Number(route.query.rosterId);
+      const match = rosterOptions.value.find((r) => r.value === routeRoster);
+      selectedRosterId.value = match ? match.value : rosterOptions.value[0].value;
+    }
+  }
+);
+
+watch(
+  () => route.query.rosterId,
+  () => {
+    const routeRoster = Number(route.query.rosterId);
+    const match = rosterOptions.value.find((r) => r.value === routeRoster);
+    if (match) {
+      selectedRosterId.value = match.value;
     }
   }
 );
