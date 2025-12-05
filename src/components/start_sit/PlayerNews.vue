@@ -68,9 +68,10 @@ const getData = async () => {
     if (!currentLeague.rosterRankings) {
       await getRosterRankings();
     }
-    const currentPlayers = currentLeague.rosterRankings[currentRosterId].map(
-      (player: any) => `${player.firstName} ${player.lastName}`
-    );
+    const currentPlayers =
+      currentLeague.rosterRankings?.[currentRosterId].map(
+        (player: any) => `${player.firstName} ${player.lastName}`
+      ) ?? [];
     const playerNews = await getPlayerNews(currentPlayers);
     data.value = playerNews.map((post: any) => post.post);
   } else if (store.leagueInfo.length === 0) {

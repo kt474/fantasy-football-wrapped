@@ -13,8 +13,8 @@ const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
-const data = ref<Record<string, any>>({});
-const allData = ref<Record<string, any>>({});
+const data = ref<Record<string, any[]>>({});
+const allData = ref<Record<string, any[]>>({});
 const loading = ref(false);
 const tab = ref("QB");
 
@@ -114,8 +114,10 @@ onMounted(async () => {
     await getData();
     loading.value = false;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
-    data.value = store.leagueInfo[store.currentLeagueIndex].playerRankings;
-    allData.value = store.leagueInfo[store.currentLeagueIndex].rosterRankings;
+    data.value =
+      store.leagueInfo[store.currentLeagueIndex].playerRankings ?? {};
+    allData.value =
+      store.leagueInfo[store.currentLeagueIndex].rosterRankings ?? {};
   } else if (store.leagueInfo.length === 0) {
     data.value = fakePlayerRankings;
     allData.value = fakeRosterData;
@@ -132,8 +134,10 @@ watch(
       await getData();
       loading.value = false;
     }
-    data.value = store.leagueInfo[store.currentLeagueIndex].playerRankings;
-    allData.value = store.leagueInfo[store.currentLeagueIndex].rosterRankings;
+    data.value =
+      store.leagueInfo[store.currentLeagueIndex].playerRankings ?? {};
+    allData.value =
+      store.leagueInfo[store.currentLeagueIndex].rosterRankings ?? {};
   }
 );
 </script>
@@ -279,7 +283,7 @@ watch(
             <img
               v-else
               alt="Defense image"
-              class="w-16 h-16 object-cover my-auto ml-2"
+              class="object-cover w-16 h-16 my-auto ml-2"
               :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
             />
             <div class="w-full mt-0.5 ml-3">
@@ -295,7 +299,7 @@ watch(
                   }}
                   {{ player.lastName }}
                 </p>
-                <div class="px-3 py-1 bg-gray-50 rounded-lg dark:bg-gray-900">
+                <div class="px-3 py-1 rounded-lg bg-gray-50 dark:bg-gray-900">
                   <p class="text-sm truncate sm:text-base max-w-16 sm:max-w-52">
                     {{ getTeamName(player.id) }}
                   </p>
@@ -303,7 +307,7 @@ watch(
               </div>
               <div class="flex">
                 <div
-                  class="w-full px-3 py-1 m-1 bg-gray-50 rounded-lg dark:bg-gray-900"
+                  class="w-full px-3 py-1 m-1 rounded-lg bg-gray-50 dark:bg-gray-900"
                 >
                   <p class="text-gray-600 dark:text-gray-400">Points:</p>
                   <p class="text-base font-semibold sm:text-lg">
@@ -311,7 +315,7 @@ watch(
                   </p>
                 </div>
                 <div
-                  class="w-full px-3 py-1 m-1 bg-gray-50 rounded-lg dark:bg-gray-900"
+                  class="w-full px-3 py-1 m-1 rounded-lg bg-gray-50 dark:bg-gray-900"
                 >
                   <p class="text-gray-600 dark:text-gray-400">PPG:</p>
                   <p class="text-base font-semibold sm:text-lg">
@@ -319,7 +323,7 @@ watch(
                   </p>
                 </div>
                 <div
-                  class="hidden w-full px-3 py-1 m-1 bg-gray-50 rounded-lg dark:bg-gray-900 sm:inline-block"
+                  class="hidden w-full px-3 py-1 m-1 rounded-lg bg-gray-50 dark:bg-gray-900 sm:inline-block"
                 >
                   <p class="text-gray-600 dark:text-gray-400">Overall Rank:</p>
                   <p class="text-base font-semibold sm:text-lg">
@@ -327,7 +331,7 @@ watch(
                   </p>
                 </div>
                 <div
-                  class="hidden w-full px-3 py-1 m-1 bg-gray-50 rounded-lg dark:bg-gray-900 sm:inline-block"
+                  class="hidden w-full px-3 py-1 m-1 rounded-lg bg-gray-50 dark:bg-gray-900 sm:inline-block"
                 >
                   <p class="text-gray-600 dark:text-gray-400">Games Played:</p>
                   <p class="text-base font-semibold sm:text-lg">
