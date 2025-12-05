@@ -5,6 +5,7 @@ import type {
   PlayerAggregateRow,
   PlayerWeeklyStat,
   LeagueContext,
+  LeagueInfoType,
 } from "../types/types";
 
 type SleeperPlayerMap = Record<
@@ -31,11 +32,11 @@ const fetchLeagueContext = async (
   leagueId: string
 ): Promise<LeagueContext> => {
   if (leagueCache.has(leagueId)) return leagueCache.get(leagueId)!;
-  const league = await getLeague(leagueId);
+  const league = (await getLeague(leagueId)) as unknown as LeagueInfoType;
   const ctx: LeagueContext = {
     leagueId,
     season: league.season,
-    seasonType: league.seasonType?.toLowerCase() || "regular",
+    seasonType: (league.seasonType || "").toLowerCase() || "regular",
     lastScoredWeek: league.lastScoredWeek || league.regularSeasonLength || 14,
     rosterPositions: league.rosterPositions || [],
     scoringSettings: league.scoringSettings || {},
