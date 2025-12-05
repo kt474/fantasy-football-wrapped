@@ -8,16 +8,16 @@ import "./index.css";
 import App from "./App.vue";
 // @ts-ignore
 import posthogPlugin from "../plugins/posthog";
-import ChangelogPage from "./views/Changelog.vue";
-import PrivacyPolicy from "./views/PrivacyPolicy.vue";
-import Contact from "./views/Contact.vue";
-import NotFound from "./views/404.vue";
-import Home from "./views/Home.vue";
-import Players from "./views/Players.vue";
-import Rosters from "./views/Rosters.vue";
-import AdminAwards from "./views/AdminAwards.vue";
-import ScoringSettings from "./views/ScoringSettings.vue";
-import Stats from "./views/Stats.vue";
+const Home = () => import("./views/Home.vue");
+const Players = () => import("./views/Players.vue");
+const Rosters = () => import("./views/Rosters.vue");
+const ChangelogPage = () => import("./views/Changelog.vue");
+const PrivacyPolicy = () => import("./views/PrivacyPolicy.vue");
+const Contact = () => import("./views/Contact.vue");
+const AdminAwards = () => import("./views/AdminAwards.vue");
+const ScoringSettings = () => import("./views/ScoringSettings.vue");
+const Stats = () => import("./views/Stats.vue");
+const NotFound = () => import("./views/404.vue");
 
 const routes = [
   { path: "/", component: Home },

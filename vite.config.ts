@@ -10,6 +10,8 @@ export default defineConfig({
     vueDevTools(),
     VitePWA({
       registerType: "autoUpdate",
+      // Disable SW minification to avoid occasional terser renderChunk crashes
+      minify: false,
       includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png"],
       manifest: {
         name: "ffwrapped",
@@ -37,6 +39,8 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Skip minifying the generated service worker to avoid terser renderChunk crashes
+        mode: "development",
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
         runtimeCaching: [
           {
@@ -57,4 +61,16 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vue: ["vue", "vue-router", "pinia"],
+          charts: ["apexcharts", "vue3-apexcharts"],
+          analytics: ["posthog-js", "@vercel/analytics"],
+        },
+      },
+    },
+  },
 });
