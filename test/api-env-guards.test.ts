@@ -44,6 +44,6 @@ describe("API env guards", () => {
     const { getLeagueCount } = await import("../src/api/api.ts");
     const result = await getLeagueCount();
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(result).toEqual({});
+    expect(result).toEqual({ league_id_count: 0 });
   });
 });

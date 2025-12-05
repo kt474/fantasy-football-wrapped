@@ -1,4 +1,10 @@
 import { getLeague, getRosters, getUsers } from "./api";
+import {
+  getDraftPicksMap,
+  getMatchupsForWeek,
+  getPlayersDirectory,
+  type SleeperPlayerMap,
+} from "./sleeperClient";
 import type {
   TeamPlayerContribution,
   TeamRecordRow,
@@ -8,17 +14,9 @@ import type {
   LeagueInfoType,
 } from "../types/types";
 
-type SleeperPlayerMap = Record<
-  string,
-  { first_name?: string; last_name?: string; full_name?: string; position?: string; team?: string }
->;
-
 const defaultLeagueId =
   import.meta.env.VITE_DEFAULT_LEAGUE_ID || "1257507151190958081";
 
-const playersCache: { players?: SleeperPlayerMap } = {};
-const draftMapCache = new Map<string, Map<string, number | null>>();
-const matchupCache = new Map<string, any[]>();
 const leagueCache = new Map<string, LeagueContext>();
 
 const normalizePosition = (pos?: string) => {
@@ -47,40 +45,6 @@ const fetchLeagueContext = async (
   return ctx;
 };
 
-const fetchPlayersDirectory = async (): Promise<SleeperPlayerMap> => {
-  if (playersCache.players) return playersCache.players;
-  const response = await fetch("https://api.sleeper.com/players/nfl");
-  const result = await response.json();
-  playersCache.players = result as SleeperPlayerMap;
-  return playersCache.players;
-};
-
-const fetchDraftMap = async (draftId?: string) => {
-  if (!draftId) return new Map<string, number | null>();
-  if (draftMapCache.has(draftId)) return draftMapCache.get(draftId)!;
-  const response = await fetch(
-    `https://api.sleeper.app/v1/draft/${draftId}/picks`
-  );
-  const picks = await response.json();
-  const map = new Map<string, number | null>();
-  picks.forEach((pick: any) => {
-    map.set(pick["player_id"], pick["round"] ?? null);
-  });
-  draftMapCache.set(draftId, map);
-  return map;
-};
-
-const fetchMatchupsRaw = async (week: number, leagueId: string) => {
-  const cacheKey = `${leagueId}-${week}`;
-  if (matchupCache.has(cacheKey)) return matchupCache.get(cacheKey)!;
-  const response = await fetch(
-    `https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`
-  );
-  const matchup = await response.json();
-  matchupCache.set(cacheKey, matchup);
-  return matchup;
-};
-
 const ensureName = (player: any) => {
   if (!player) return "Unknown";
   const first = player.first_name || "";
@@ -101,8 +65,8 @@ export const loadStatsData = async ({
   const leagueCtx = await fetchLeagueContext(leagueId);
   const rosters = await getRosters(leagueId);
   const users = await getUsers(leagueId);
-  const players = await fetchPlayersDirectory();
-  const draftMap = await fetchDraftMap(leagueCtx.draftId);
+  const players: SleeperPlayerMap = await getPlayersDirectory();
+  const draftMap = await getDraftPicksMap(leagueCtx.draftId);
 
   const ownerNameById: Record<string, string> = {};
   users.forEach((user: any) => {
@@ -124,7 +88,7 @@ export const loadStatsData = async ({
     weeks.push(w);
   }
   const matchupsByWeek = await Promise.all(
-    weeks.map((week) => fetchMatchupsRaw(week, leagueId))
+    weeks.map((week) => getMatchupsForWeek(leagueId, week))
   );
 
   const contributions = new Map<string, TeamPlayerContribution>();

@@ -6,6 +6,12 @@ import {
 } from "./helper";
 import { round, mean } from "lodash";
 import { seasonType, Player, LeagueCountResponse } from "../types/apiTypes";
+import {
+  getDraftPicksRaw,
+  getPlayersDirectory,
+  type SleeperPlayerMap,
+} from "./sleeperClient";
+import { getMatchupsForWeek } from "./sleeperClient";
 
 export const getPlayerNews = async (
   playerNames: string[]
@@ -90,11 +96,8 @@ let cachedPlayers: any[] | null = null;
 export const searchPlayers = async (query: string) => {
   if (!query || query.length < 2) return [];
   try {
-    if (!cachedPlayers) {
-      const response = await fetch("https://api.sleeper.com/players/nfl");
-      const result = await response.json();
-      cachedPlayers = Object.values(result);
-    }
+    const directory: SleeperPlayerMap = await getPlayersDirectory();
+    cachedPlayers = Object.values(directory);
     const lower = query.toLowerCase();
     const positions = ["QB", "RB", "WR", "TE", "K", "DEF"];
     return cachedPlayers
@@ -716,10 +719,7 @@ export const getDraftPicks = async (
   scoringType: number,
   seasonType: string
 ) => {
-  const response = await fetch(
-    `https://api.sleeper.app/v1/draft/${draftId}/picks`
-  );
-  const draftPicks = await response.json();
+  const draftPicks = await getDraftPicksRaw(draftId);
 
   const picksWithStats = await Promise.all(
     draftPicks.map(async (pick: any) => {
@@ -873,10 +873,7 @@ export const getUsers = async (leagueId: string) => {
 };
 
 export const getMatchup = async (week: number, leagueId: string) => {
-  const response = await fetch(
-    `https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`
-  );
-  const matchup = await response.json();
+  const matchup = await getMatchupsForWeek(leagueId, week);
   return matchup.map((game: any) => {
     const benchPlayers = game["players"]?.filter(
       (value: string) => !game["starters"]?.includes(value)

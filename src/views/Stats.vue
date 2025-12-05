@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { useStore } from "../store/store";
 import { getDefaultLeagueId, loadStatsData } from "../api/statsPage";
+import { clearSleeperCache, clearSleeperPersistentCache } from "../api/sleeperClient";
 import type {
   TeamPlayerContribution,
   TeamRecordRow,
@@ -349,6 +350,14 @@ const roundsSummaryLabel = computed(() => {
   return `${filters.draftRounds.length} selected`;
 });
 
+const refreshPlayerDirectory = async () => {
+  clearSleeperCache("playersDirectory");
+  clearSleeperCache("draft:picks:");
+  clearSleeperPersistentCache("sleeper:players");
+  clearSleeperPersistentCache("sleeper:draft:");
+  await loadData();
+};
+
 onMounted(async () => {
   await loadData();
 });
@@ -416,6 +425,13 @@ watch(
           <div class="text-xs text-blue-100">
             Loaded weeks: {{ weeksLoaded.join(", ") || "—" }}
           </div>
+          <button
+            @click="refreshPlayerDirectory"
+            class="px-3 py-1 text-xs font-semibold text-blue-900 bg-white rounded-md shadow hover:bg-blue-50"
+            :disabled="loading"
+          >
+            Refresh data
+          </button>
         </div>
       </div>
     </div>
