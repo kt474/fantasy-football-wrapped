@@ -17,10 +17,13 @@ type PositionKey = "QB" | "RB" | "WR" | "TE" | "DEF" | "K";
 const store = useStore();
 const activeTab = ref<TabKey>("season");
 const loading = ref(true);
+const loadingMessage = ref("");
 const error = ref("");
+const errorDetail = ref("");
 const leagueName = ref("");
 const season = ref("");
 const lastWeek = ref(0);
+const regularSeasonLength = ref<number | null>(null);
 const rosterPositions = ref<string[]>([]);
 const weeksLoaded = ref<number[]>([]);
 const rosters = ref<TeamRecordRow[]>([]);
@@ -52,6 +55,66 @@ const leagueId = computed(
   () => store.currentLeagueId || getDefaultLeagueId()
 );
 
+const filtersKeyFor = (id: string) => `stats:filters:${id}`;
+const tabKeyFor = (id: string) => `stats:tab:${id}`;
+
+const weekPresets = computed(() => {
+  const maxWeek = lastWeek.value || filters.endWeek || 18;
+  const regSeason = regularSeasonLength.value || null;
+  const seasonRange = { key: "season", label: "Season", start: 1, end: maxWeek };
+  const lastFourStart = Math.max(1, maxWeek - 3);
+  const lastFourRange = {
+    key: "last4",
+    label: "Last 4",
+    start: lastFourStart,
+    end: maxWeek,
+  };
+  const playoffsStartBase = regSeason ? regSeason + 1 : 15;
+  const playoffsStart = Math.max(15, playoffsStartBase);
+  const playoffsEndCap = 17;
+  const playoffsEnd = Math.max(playoffsStart, Math.min(maxWeek, playoffsEndCap));
+  const presets = [seasonRange, lastFourRange];
+  if (lastWeek.value >= playoffsStart) {
+    presets.push({
+      key: "playoffs",
+      label: "Playoffs",
+      start: playoffsStart,
+      end: playoffsEnd,
+    });
+  }
+  return presets;
+});
+
+const activePresetKey = computed(() => {
+  const match = weekPresets.value.find(
+    (preset) =>
+      preset.start === filters.startWeek && preset.end === filters.endWeek
+  );
+  return match?.key || "";
+});
+
+const weekRangeHint = computed(() => {
+  if (filters.startWeek < 1) return "Start week must be at least 1.";
+  if (filters.endWeek && filters.endWeek < filters.startWeek) {
+    return "End week cannot be before start week.";
+  }
+  if (lastWeek.value && filters.endWeek > lastWeek.value) {
+    return `Clamped to last completed week (${lastWeek.value}).`;
+  }
+  return "";
+});
+
+const isInvalidRange = computed(() =>
+  Boolean(filters.endWeek && filters.endWeek < filters.startWeek)
+);
+
+const isApplyDisabled = computed(() => {
+  if (loading.value) return true;
+  if (!filters.startWeek) return true;
+  if (filters.endWeek && filters.endWeek < filters.startWeek) return true;
+  return false;
+});
+
 const availableDraftRounds = computed(() => {
   const set = new Set<number | null>();
   contributions.value.forEach((c) => {
@@ -70,6 +133,62 @@ const ensureRoundsSelected = () => {
     filters.draftRounds = availableDraftRounds.value.map((r) =>
       r === null ? "ud" : r
     );
+  }
+};
+
+const hydrateFiltersFromStorage = (lid: string) => {
+  try {
+    const raw = localStorage.getItem(filtersKeyFor(lid));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const parsedStart = Number(parsed.startWeek);
+      const parsedEnd = Number(parsed.endWeek);
+      filters.startWeek = Number.isFinite(parsedStart)
+        ? parsedStart
+        : filters.startWeek;
+      filters.endWeek = Number.isFinite(parsedEnd)
+        ? parsedEnd
+        : filters.endWeek;
+      filters.starterOnly =
+        parsed.starterOnly !== undefined
+          ? Boolean(parsed.starterOnly)
+          : filters.starterOnly;
+      filters.position =
+        parsed.position && typeof parsed.position === "string"
+          ? parsed.position
+          : filters.position;
+      filters.draftRounds = Array.isArray(parsed.draftRounds)
+        ? [...parsed.draftRounds]
+        : filters.draftRounds;
+      filters.playerSearch =
+        typeof parsed.playerSearch === "string"
+          ? parsed.playerSearch
+          : filters.playerSearch;
+      filters.ownerId =
+        typeof parsed.ownerId === "string" ? parsed.ownerId : filters.ownerId;
+    }
+    const savedTab = localStorage.getItem(tabKeyFor(lid));
+    if (
+      savedTab === "season" ||
+      savedTab === "draft" ||
+      savedTab === "players"
+    ) {
+      activeTab.value = savedTab as TabKey;
+    }
+  } catch (err) {
+    console.warn("Unable to restore stats filters", err);
+  }
+};
+
+const persistFiltersToStorage = () => {
+  try {
+    const payload = {
+      ...filters,
+      draftRounds: [...filters.draftRounds],
+    };
+    localStorage.setItem(filtersKeyFor(leagueId.value), JSON.stringify(payload));
+  } catch (err) {
+    console.warn("Unable to persist stats filters", err);
   }
 };
 
@@ -105,8 +224,10 @@ const positionsForLeague = computed<PositionKey[]>(() => {
 const loadData = async () => {
   loading.value = true;
   error.value = "";
+  errorDetail.value = "";
+  const fallbackEnd = filters.endWeek || lastWeek.value || 14;
+  loadingMessage.value = `Loading weeks ${filters.startWeek}-${fallbackEnd}`;
   try {
-    const fallbackEnd = filters.endWeek || lastWeek.value || 14;
     const data = await loadStatsData({
       leagueId: leagueId.value,
       startWeek: filters.startWeek,
@@ -115,6 +236,7 @@ const loadData = async () => {
     leagueName.value = data.league.name;
     season.value = data.league.season;
     lastWeek.value = data.league.lastScoredWeek;
+    regularSeasonLength.value = data.league.regularSeasonLength || null;
     rosterPositions.value = data.league.rosterPositions || [];
     weeksLoaded.value = data.weeks;
     rosters.value = data.rosters;
@@ -128,8 +250,11 @@ const loadData = async () => {
   } catch (e) {
     console.error(e);
     error.value = "Unable to load stats right now.";
+    errorDetail.value =
+      (e as Error)?.message || "Check your connection and try again.";
   } finally {
     loading.value = false;
+    loadingMessage.value = "";
   }
 };
 
@@ -255,10 +380,21 @@ const applyWeekRange = async () => {
   if (filters.endWeek && filters.endWeek < filters.startWeek) {
     filters.endWeek = filters.startWeek;
   }
+  if (!filters.endWeek && lastWeek.value) {
+    filters.endWeek = lastWeek.value;
+  }
   if (lastWeek.value && filters.endWeek > lastWeek.value) {
     filters.endWeek = lastWeek.value;
   }
   await loadData();
+};
+
+const applyPreset = async (presetKey: string) => {
+  const preset = weekPresets.value.find((p) => p.key === presetKey);
+  if (!preset) return;
+  filters.startWeek = preset.start;
+  filters.endWeek = preset.end;
+  await applyWeekRange();
 };
 
 const toggleSeasonRow = (rosterId: number) => {
@@ -374,16 +510,38 @@ const refreshPlayerDirectory = async () => {
   clearSleeperCache("draft:picks:");
   clearSleeperPersistentCache("sleeper:players");
   clearSleeperPersistentCache("sleeper:draft:");
+  loadingMessage.value = "Refreshing Sleeper data…";
   await loadData();
 };
 
+watch(
+  filters,
+  () => {
+    persistFiltersToStorage();
+  },
+  { deep: true }
+);
+
+watch(
+  () => activeTab.value,
+  (tab) => {
+    try {
+      localStorage.setItem(tabKeyFor(leagueId.value), tab);
+    } catch (err) {
+      console.warn("Unable to persist stats tab", err);
+    }
+  }
+);
+
 onMounted(async () => {
+  hydrateFiltersFromStorage(leagueId.value);
   await loadData();
 });
 
 watch(
   () => leagueId.value,
-  async () => {
+  async (newLeagueId) => {
+    hydrateFiltersFromStorage(newLeagueId);
     await loadData();
   }
 );
@@ -416,44 +574,87 @@ watch(
             <input
               type="number"
               min="1"
-              class="w-16 px-2 py-1 text-gray-900 bg-white border border-blue-100 rounded-md"
+              :max="lastWeek || 18"
+              :disabled="loading"
+              :class="[
+                'w-16 px-2 py-1 text-gray-900 bg-white border rounded-md focus:outline-none',
+                isInvalidRange ? 'border-red-300 ring-1 ring-red-200' : 'border-blue-100',
+              ]"
               v-model.number="filters.startWeek"
             />
             <span class="text-blue-100">to</span>
             <input
               type="number"
               :max="lastWeek || 18"
-              class="w-16 px-2 py-1 text-gray-900 bg-white border border-blue-100 rounded-md"
+              :disabled="loading"
+              :class="[
+                'w-16 px-2 py-1 text-gray-900 bg-white border rounded-md focus:outline-none',
+                isInvalidRange ? 'border-red-300 ring-1 ring-red-200' : 'border-blue-100',
+              ]"
               v-model.number="filters.endWeek"
             />
             <button
               @click="applyWeekRange"
-              class="px-3 py-1 text-sm font-semibold text-blue-900 bg-white rounded-md shadow hover:bg-blue-50"
+              :disabled="isApplyDisabled"
+              :class="[
+                'px-3 py-1 text-sm font-semibold rounded-md shadow',
+                isApplyDisabled
+                  ? 'text-blue-900/60 bg-white/60 cursor-not-allowed'
+                  : 'text-blue-900 bg-white hover:bg-blue-50',
+              ]"
             >
               Apply
+            </button>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-xs text-blue-50">
+            <span class="px-2 py-1 text-[11px] font-semibold bg-white/10 rounded-md">
+              Quick ranges
+            </span>
+            <button
+              v-for="preset in weekPresets"
+              :key="preset.key"
+              @click="applyPreset(preset.key)"
+              :disabled="loading"
+              :class="[
+                'px-3 py-1 rounded-md border text-xs font-semibold backdrop-blur',
+                activePresetKey === preset.key
+                  ? 'bg-white text-blue-900 border-white shadow-sm'
+                  : 'bg-white/10 text-blue-50 border-white/30 hover:bg-white/20',
+              ]"
+            >
+              {{ preset.label }} (W{{ preset.start }}-{{ preset.end }})
             </button>
           </div>
           <label class="flex items-center gap-2 text-sm text-blue-100">
             <input
               type="checkbox"
               v-model="filters.starterOnly"
+              :disabled="loading"
               class="w-4 h-4 text-blue-600 border-blue-200 rounded focus:ring-blue-400"
             />
             Starter points only
           </label>
-          <div class="text-xs text-blue-100">
-            Loaded weeks: {{ weeksLoaded.join(", ") || "—" }}
-          </div>
-          <div class="text-xs text-blue-100">
-            Max completed week: {{ lastWeek || "—" }}
+          <div class="flex flex-wrap items-center gap-2 text-xs text-blue-100">
+            <span class="px-2 py-1 bg-white/10 rounded-md">
+              Loaded weeks: {{ weeksLoaded.join(", ") || "—" }}
+            </span>
+            <span class="px-2 py-1 bg-white/10 rounded-md">
+              Max completed week: {{ lastWeek || "—" }}
+            </span>
+            <span class="px-2 py-1 bg-white/10 rounded-md">
+              Filters auto-saved per league
+            </span>
           </div>
           <button
             @click="refreshPlayerDirectory"
-            class="px-3 py-1 text-xs font-semibold text-blue-900 bg-white rounded-md shadow hover:bg-blue-50"
+            class="px-3 py-1 text-xs font-semibold text-blue-900 bg-white rounded-md shadow hover:bg-blue-50 disabled:opacity-60"
             :disabled="loading"
           >
             Refresh data
           </button>
+        </div>
+        <div v-if="weekRangeHint" class="mt-2 text-xs text-blue-100">
+          {{ weekRangeHint }}
         </div>
       </div>
     </div>
@@ -494,10 +695,78 @@ watch(
       </button>
     </div>
 
-    <div v-if="error" class="p-4 mt-4 text-sm text-red-700 bg-red-100 rounded-lg">
-      {{ error }}
+    <div
+      v-if="error"
+      class="p-4 mt-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg"
+    >
+      <div class="flex items-start gap-3">
+        <div
+          class="flex items-center justify-center w-8 h-8 text-red-700 bg-white rounded-full border border-red-200"
+        >
+          !
+        </div>
+        <div class="flex-1 space-y-2">
+          <p class="font-semibold">{{ error }}</p>
+          <p v-if="errorDetail" class="text-xs text-red-700">
+            {{ errorDetail }}
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              @click="loadData"
+              class="px-3 py-1 text-xs font-semibold text-white bg-red-600 rounded-md shadow hover:bg-red-700"
+            >
+              Retry
+            </button>
+            <button
+              @click="refreshPlayerDirectory"
+              class="px-3 py-1 text-xs font-semibold text-red-700 bg-white border border-red-200 rounded-md hover:bg-red-50 disabled:opacity-60"
+              :disabled="loading"
+            >
+              Hard refresh
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div v-if="loading" class="mt-8 text-center text-gray-600">Loading…</div>
+    <div v-if="loading" class="mt-8 flex justify-center">
+      <div
+        class="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+      >
+        <svg
+          class="w-5 h-5 text-indigo-600 animate-spin"
+          fill="none"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+          ></path>
+        </svg>
+        <div class="text-left">
+          <div class="text-sm font-semibold text-gray-900">
+            Crunching numbers…
+          </div>
+          <div class="text-xs text-gray-600">
+            {{
+              loadingMessage ||
+                `Loading weeks ${filters.startWeek}-${
+                  filters.endWeek || lastWeek || "…"
+                } and rebuilding tables`
+            }}
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Season Ranks -->
     <div v-if="!loading && activeTab === 'season'" class="mt-6">

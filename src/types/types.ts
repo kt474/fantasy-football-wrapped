@@ -181,6 +181,7 @@ export type LeagueContext = {
   season: string;
   seasonType: string;
   lastScoredWeek: number;
+  regularSeasonLength: number;
   rosterPositions: string[];
   scoringSettings: Record<string, number>;
   name: string;

@@ -36,6 +36,8 @@ const fetchLeagueContext = async (
     season: league.season,
     seasonType: (league.seasonType || "").toLowerCase() || "regular",
     lastScoredWeek: league.lastScoredWeek || league.regularSeasonLength || 14,
+    regularSeasonLength:
+      league.regularSeasonLength || league.lastScoredWeek || 14,
     rosterPositions: league.rosterPositions || [],
     scoringSettings: league.scoringSettings || {},
     name: league.name,
