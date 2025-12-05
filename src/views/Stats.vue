@@ -585,21 +585,21 @@ watch(
                 <td colspan="8" class="px-4 py-4">
                   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div
-                      v-for="pos in positionList"
+                      v-for="pos in positionsForLeague"
                       :key="`${row.rosterId}-${pos}`"
                       class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
                     >
                       <div class="flex items-center justify-between">
                         <div class="text-sm font-semibold text-gray-800">
-                          {{ pos }} • Rank {{ row.ranks[pos].rank }}
+                          {{ pos }} • Rank {{ row.ranks[pos as PositionKey].rank }}
                         </div>
                         <div class="text-xs text-gray-500">
-                          {{ row.ranks[pos].total.toFixed(2) }} pts
+                          {{ row.ranks[pos as PositionKey].total.toFixed(2) }} pts
                         </div>
                       </div>
                       <ul class="mt-2 space-y-1 text-sm text-gray-700">
                         <li
-                          v-for="p in row.ranks[pos].topPlayers"
+                          v-for="p in row.ranks[pos as PositionKey].topPlayers"
                           :key="p.playerId"
                           class="flex items-center justify-between"
                         >
@@ -614,7 +614,7 @@ watch(
                             {{ pointsFor(p).toFixed(2) }} ({{ formatRound(p.draftRound) }})
                           </span>
                         </li>
-                        <li v-if="row.ranks[pos].topPlayers.length === 0" class="text-gray-400">
+                        <li v-if="row.ranks[pos as PositionKey].topPlayers.length === 0" class="text-gray-400">
                           No players
                         </li>
                       </ul>
