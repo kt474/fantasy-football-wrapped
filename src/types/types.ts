@@ -1,5 +1,3 @@
-import { Bracket } from "./apiTypes";
-
 export type LeagueInfoType = {
   name: string;
   regularSeasonLength: number;
@@ -13,17 +11,17 @@ export type LeagueInfoType = {
   lastUpdated: number;
   previousLeagueId: string;
   lastScoredWeek: number;
-  winnersBracket: Bracket[];
-  losersBracket: Bracket[];
-  users: UserType[];
-  rosters: RosterType[];
+  winnersBracket: Record<string, any>[];
+  losersBracket: Record<string, any>[];
+  users: any[];
+  rosters: any[];
   weeklyPoints: [];
   transactions: [];
   trades: [];
   waivers: [];
   waiverMoves: WaiverMove[];
   tradeNames?: any[];
-  previousLeagues: LeagueInfoType[];
+  previousLeagues: any[];
   status: string;
   currentWeek: number;
   scoringType: number;

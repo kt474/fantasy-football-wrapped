@@ -2165,43 +2165,63 @@ export const fakeLosersBracket = [
 
 export const fakePlayoffData = [
   {
-    name: "Saquondo ",
+    name: "Saquondo",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [100, 0, 0, 0, 0, 0],
   },
   {
     name: "Breece's Puffs",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [0, 0, 100, 0, 0, 0],
   },
   {
     name: "Baby Back Gibbs",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [0, 0, 0, 100, 0, 0],
   },
   {
     name: "Ja’Marr the Merrier",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [0, 100, 0, 0, 0, 0],
   },
   {
     name: "The Princess McBride",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [0, 0, 0, 0, 100, 0],
   },
   {
     name: "LaPorta Potty",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [0, 0, 0, 0, 0, 100],
   },
   {
     name: "Lamario Kart ",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [0, 0, 0, 0, 0, 0],
   },
   {
     name: "Bijan Mustard",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [0, 0, 0, 0, 0, 0],
   },
   {
     name: "Dak to the Future",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [0, 0, 0, 0, 0, 0],
   },
   {
     name: "Just the Tua Us",
+    username: "",
+    projectedWinsTotal: 0,
     placement: [0, 0, 0, 0, 0, 0],
   },
 ];

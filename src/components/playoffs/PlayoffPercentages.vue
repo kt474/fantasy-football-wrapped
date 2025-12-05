@@ -136,7 +136,7 @@ const getData = async () => {
 
       currentLeague.rosters.forEach((roster: RosterType) => {
         const winScore = roster.wins / currentLeague.lastScoredWeek;
-        const pointScore = roster.pointsFor / maxPoints.value;
+        const pointScore = roster.pointsFor / (maxPoints.value ?? 0);
         const projectedScore: number = roster.projections
           ? getTopProjectionsSum(roster.projections) / maxProjectedScore.value
           : 0;

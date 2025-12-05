@@ -101,11 +101,13 @@ onMounted(async () => {
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
     data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks;
     draftOrder.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata["order"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"];
     roundReversal.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata["roundReversal"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
+        "roundReversal"
+      ];
     draftType.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata["draftType"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"];
   } else if (store.leagueInfo.length == 0) {
     data.value = fakeDraftData;
     draftOrder.value = data.value.slice(0, draftSize.value).map((pick: any) => {
@@ -130,11 +132,13 @@ watch(
     }
     data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks;
     draftOrder.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata["order"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"];
     roundReversal.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata["roundReversal"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
+        "roundReversal"
+      ];
     draftType.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata["draftType"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"];
   }
 );
 
