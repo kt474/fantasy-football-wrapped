@@ -21,9 +21,8 @@ import {
   LeagueOriginal,
   Bracket,
   WeeklyWaiver,
-  NewLeagueInfo,
 } from "../types/apiTypes";
-import { RosterType, UserType } from "../types/types";
+import { LeagueInfoType, RosterType, UserType } from "../types/types";
 
 export const getPlayerNews = async (
   playerNames: string[]
@@ -754,7 +753,7 @@ export const getCurrentLeagueState = async () => {
   return await response.json();
 };
 
-export const getData = async (leagueId: string) => {
+export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
   // Initial parallel requests for base league data
   const [leagueInfo, rosters, winnersBracket, losersBracket]: [
     LeagueOriginal,
@@ -768,7 +767,7 @@ export const getData = async (leagueId: string) => {
     getLosersBracket(leagueId),
   ]);
 
-  const newLeagueInfo: NewLeagueInfo = {
+  const newLeagueInfo: any = {
     ...leagueInfo,
     rosters,
     winnersBracket,
@@ -832,7 +831,6 @@ export const getData = async (leagueId: string) => {
     });
     return acc;
   }, {} as Record<string, number>);
-
   return {
     ...newLeagueInfo,
     weeklyPoints,

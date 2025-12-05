@@ -15,7 +15,7 @@ export type LeagueInfoType = {
   losersBracket: Record<string, any>[];
   users: any[];
   rosters: any[];
-  weeklyPoints: [];
+  weeklyPoints: Record<string, any>[];
   transactions: [];
   trades: [];
   waivers: [];
