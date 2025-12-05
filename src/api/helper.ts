@@ -80,7 +80,7 @@ export const calculateDraftRank = (
   position: string,
   ppg: number
 ) => {
-  const positionWeights: any = {
+  const positionWeights: Record<string, number> = {
     RB: 1.0,
     WR: 0.9,
     TE: 1.1,

@@ -61,7 +61,7 @@ onMounted(async () => {
       : route.query.leagueId;
     // sometimes on refresh the leagueId in the URL becomes undefined
     if (leagueId && !store.leagueIds.includes(leagueId)) {
-      const checkInput: any = await getLeague(leagueId);
+      const checkInput = await getLeague(leagueId);
       if (checkInput["name"]) {
         store.updateCurrentLeagueId(leagueId);
         store.updateLoadingLeague(checkInput["name"]);
