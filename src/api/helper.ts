@@ -83,19 +83,21 @@ export const calculateDraftRank = (
   const positionWeights: Record<string, number> = {
     RB: 1.0,
     WR: 0.9,
-    TE: 1.1,
+    TE: 0.9,
     QB: 0.7,
     K: 0.4,
     DEF: 0.4,
   };
   if (positionRank === 0) return roundToOneDecimal(0); // player did not play
   const firstRoundAdjust = round === 1 ? 2 : 0;
+  const earlyPicksAdjust = pickNumber <= 3 ? 1.5 : 0;
   const posWeightMultiplier =
     position in positionWeights ? positionWeights[position] : 1;
   const baseMultiplier =
     posWeightMultiplier * getTierMultiplier(position, positionRank);
   const rankScore =
-    ((pickNumber + firstRoundAdjust - positionRank) / pickNumber) *
+    ((pickNumber + firstRoundAdjust + earlyPicksAdjust - positionRank) /
+      pickNumber) *
     baseMultiplier;
   const ppgScore = (ppg / 25) * baseMultiplier; // 25 is generally around the max ppg for a season
   const finalScore = roundToOneDecimal(rankScore * 0.7 + ppgScore * 0.3);
