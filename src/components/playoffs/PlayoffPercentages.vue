@@ -85,6 +85,7 @@ const getData = async () => {
           name: user.name,
           id: user.id,
           placement: Array(numSimulations).fill(index + 1),
+          projectedWinsTotal: user.wins,
         };
       });
     } else {
