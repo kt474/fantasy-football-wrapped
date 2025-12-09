@@ -180,11 +180,11 @@ const copyReport = () => {
         class="max-w-5xl my-3 text-gray-900 dark:text-gray-300"
       ></p>
 
-      <p class="mb-4 text-xs text-gray-500 dark:text-gray-300">
+      <p class="text-xs text-gray-500 mb dark:text-gray-300">
         Generated using GPT-4.1. Information provided may not always be
         accurate.
       </p>
-      <p class="text-xs text-gray-500 dark:text-gray-300">
+      <p class="mb-4 text-xs text-gray-500 dark:text-gray-300">
         If you've enjoyed using ffwrapped this season please consider
         <a
           aria-label="buymeacoffee donation page"
