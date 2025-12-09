@@ -96,8 +96,7 @@ const shareLeague = () => {
     "//" +
     window.location.host +
     window.location.pathname;
-  const updatedURL = `${currentUrl}?leagueId=${props.leagueInfo.leagueId}`;
-  navigator.clipboard.writeText(updatedURL);
+  navigator.clipboard.writeText(currentUrl);
   store.showCopiedAlert = true;
   setTimeout(() => {
     store.showCopiedAlert = false;

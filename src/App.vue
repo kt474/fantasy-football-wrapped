@@ -7,9 +7,7 @@ import Email from "./components/util/Email.vue";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./types/types";
 import { inject } from "@vercel/analytics";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
 const store = useStore();
 const vercelAnalyticsEnabled = import.meta.env.VITE_VERCEL_ANALYTICS === "true";
 
@@ -33,11 +31,8 @@ watch(
       localStorage.removeItem("leagueInfo");
     } else {
       localStorage.currentLeagueId = store.currentLeagueId;
-      // update league id in url
-      // sometimes errors to undefined, TODO
-      if (store.currentLeagueId !== "undefined") {
-        router.replace({ query: { leagueId: store.currentLeagueId } });
-      } else {
+      // invalid state guard
+      if (store.currentLeagueId === "undefined") {
         localStorage.removeItem("currentLeagueId");
         localStorage.removeItem("leagueInfo");
         store.showLoadingAlert = true;

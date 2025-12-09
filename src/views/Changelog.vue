@@ -5,16 +5,13 @@ import { onMounted } from "vue";
 const router = useRouter();
 const route = useRoute();
 const goBackToHome = () => {
-  const currentQueryParams = route.query;
-  router.push({ path: "/", query: currentQueryParams });
+  router.push({ path: "/" });
 };
 
 onMounted(() => {
   // this league has somehow been cached in google sitelinks
   if (route.query.leagueId === "1057743221285101568") {
-    const newQuery = { ...route.query };
-    delete newQuery.leagueId;
-    router.replace({ path: route.path, query: newQuery });
+    router.replace({ path: route.path, query: {} });
   }
 });
 

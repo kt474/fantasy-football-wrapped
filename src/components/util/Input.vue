@@ -17,16 +17,9 @@ const seasonYear = ref("2025");
 const showErrorMsg = ref(false);
 const errorMsg = ref("");
 const showHelperMsg = ref(false);
-import { useRouter } from "vue-router";
-
-const router = useRouter();
 const leagueIds = computed(() => {
   return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
 });
-
-const updateURL = (leagueID: string) => {
-  router.replace({ query: { leagueId: leagueID } });
-};
 
 onMounted(() => {
   if (localStorage.inputType) {
@@ -87,7 +80,6 @@ const onSubmit = async () => {
         store.leagueSubmitted = true;
         store.updateShowInput(false);
         store.updateLoadingLeague("");
-        updateURL(leagueIdInput.value);
         await inputLeague(
           leagueIdInput.value,
           newLeagueInfo.name,

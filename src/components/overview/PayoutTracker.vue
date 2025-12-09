@@ -583,7 +583,7 @@ const managerTotals = computed(() => {
 
                 <tr class="bg-gray-100 dark:bg-gray-900/70">
                   <td colspan="4" class="px-4 py-3 text-xs font-semibold tracking-wide text-gray-700 uppercase dark:text-gray-200">
-                    Playoffs (Weeks 15–17) — <span class="playoff-bonuses-note">Playoff teams, active or disqualified, are ineligible for Week 15 - 17 "Weekly High Score" bonuses</span>
+                    Playoffs (Weeks 15–17) — <span class="playoff-bonuses-note" style="text-transform:none;">Playoff teams, active or disqualified, are ineligible for Week 15 - 17 "Weekly High Score" bonuses</span>
                   </td>
                 </tr>
 

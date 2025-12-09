@@ -2,20 +2,15 @@
 import { getLeagueCount } from "../../api/api";
 import { ref, onMounted } from "vue";
 import { useStore } from "../../store/store";
-import { useRoute } from "vue-router";
 
-const route = useRoute();
 const store = useStore();
 const leagueCount = ref(6678); // initial load current unique league count value 11/23/25
 
 onMounted(async () => {
-  const leagueId = route.query.leagueId;
-  if (!leagueId) {
-    const data = await getLeagueCount();
-    const newCount = data?.league_id_count;
-    if (newCount) {
-      leagueCount.value = newCount;
-    }
+  const data = await getLeagueCount();
+  const newCount = data?.league_id_count;
+  if (newCount) {
+    leagueCount.value = newCount;
   }
 });
 </script>
@@ -33,9 +28,7 @@ onMounted(async () => {
             Support & Resources
           </p>
           <p class="mb-1">
-            <router-link
-              :to="{ path: '/changelog', query: $route.query }"
-              class="text-blue-700 dark:text-blue-500 hover:underline"
+            <router-link to="/changelog" class="text-blue-700 dark:text-blue-500 hover:underline"
               >Changelog</router-link
             >
           </p>
@@ -50,9 +43,7 @@ onMounted(async () => {
             >
           </p>
           <p class="mb-1">
-            <router-link
-              :to="{ path: '/contact', query: $route.query }"
-              class="text-blue-700 dark:text-blue-500 hover:underline"
+            <router-link to="/contact" class="text-blue-700 dark:text-blue-500 hover:underline"
               >Email Newsletter</router-link
             >
           </p>
@@ -77,9 +68,7 @@ onMounted(async () => {
             >
           </p>
           <p class="mb-1">
-            <router-link
-              :to="{ path: '/privacy', query: $route.query }"
-              class="text-blue-700 dark:text-blue-500 hover:underline"
+            <router-link to="/privacy" class="text-blue-700 dark:text-blue-500 hover:underline"
               >Privacy Policy</router-link
             >
           </p>

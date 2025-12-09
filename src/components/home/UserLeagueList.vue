@@ -3,16 +3,10 @@ import { ref, computed, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { getData, inputLeague } from "../../api/api";
 import { seasonType } from "../../types/apiTypes";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
 const checkedLeagues = ref([]);
 const duplicateLeagueError = ref(false);
 const store = useStore();
-
-const updateURL = (leagueID: string) => {
-  router.replace({ query: { leagueId: leagueID } });
-};
 
 const showError = computed(() => {
   return checkedLeagues.value.length > 5 ? true : false;
@@ -44,7 +38,6 @@ const addLeagues = async () => {
 
         const newLeagueInfo = await getData(league);
         store.updateLeagueInfo(newLeagueInfo);
-        updateURL(league);
 
         await inputLeague(
           league,
