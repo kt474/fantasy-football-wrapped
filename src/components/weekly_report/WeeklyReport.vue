@@ -73,11 +73,7 @@ const playoffWeeks = computed(() => {
   ) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     const result: number[] = [];
-    for (
-      let i = currentLeague.regularSeasonLength + 1;
-      i <= currentLeague.lastScoredWeek;
-      i++
-    ) {
+    for (let i = currentLeague.regularSeasonLength + 1; i <= 18; i++) {
       result.push(i);
     }
     return result;
