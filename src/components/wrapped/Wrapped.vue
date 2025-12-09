@@ -5,6 +5,7 @@ import { useStore } from "../../store/store";
 import { maxBy, minBy } from "lodash";
 import Draft from "../draft/Draft.vue";
 import Trades from "../roster_management/Trades.vue";
+import Waivers from "../roster_management/Waivers.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -78,43 +79,192 @@ const fewestMoves = computed(() => {
   };
 });
 
-// const totalBids = computed(() => {
-//   const grouped = league.value.waiverMoves.reduce((acc: any, obj: any) => {
-//     const userId = obj.user.id;
-//     const status = obj.status;
+const totalBids = computed(() => {
+  if (league.value.waiverMoves) {
+    const grouped = league.value.waiverMoves.reduce((acc: any, obj: any) => {
+      const userId = obj.user.id;
+      const status = obj.status;
 
-//     if (!acc[userId]) {
-//       acc[userId] = {
-//         user: obj.user,
-//         sumByStatus: {},
-//         totalSpent: 0,
-//       };
-//     }
-//     acc[userId].sumByStatus[status] =
-//       (acc[userId].sumByStatus[status] || 0) + obj.bid;
-//     acc[userId].totalSpent += obj.bid;
+      if (!acc[userId]) {
+        acc[userId] = {
+          user: obj.user,
+          sumByStatus: {},
+          totalSpent: 0,
+        };
+      }
+      acc[userId].sumByStatus[status] =
+        (acc[userId].sumByStatus[status] || 0) + obj.bid;
+      acc[userId].totalSpent += obj.bid;
 
-//     return acc;
-//   }, {});
-//   return {
-//     highest: maxBy(Object.values(grouped), "totalSpent"),
-//     lowest: minBy(Object.values(grouped), "totalSpent"),
-//   };
-// });
+      return acc;
+    }, {});
+    return {
+      highest: maxBy(Object.values(grouped), "totalSpent"),
+      lowest: minBy(Object.values(grouped), "totalSpent"),
+    };
+  }
+  return null;
+});
+
+const impactfulTrades = computed(() => {
+  let minValue = Infinity;
+  let minTrade = null;
+  if (league.value.tradeNames) {
+    for (const trade of league.value.tradeNames) {
+      // Combine value arrays from both teams
+      const values = [
+        ...(trade.team1.value || []),
+        ...(trade.team2.value || []),
+      ];
+
+      for (const val of values) {
+        if (val < minValue) {
+          minValue = val;
+          minTrade = trade;
+        }
+      }
+    }
+  }
+  return minTrade;
+});
+
+const scheduleData = computed(() => {
+  return props.tableData.map((user) => {
+    return {
+      teamName: store.showUsernames ? user.username : user.name,
+      matchups: user.matchups,
+      points: user.points,
+      actualWins: user.wins,
+      expectedWins: user.randomScheduleWins,
+    };
+  });
+});
+
+const scheduleAnalysis = computed(() => {
+  const teams = scheduleData.value;
+
+  let result = teams.map((team) => {
+    let bestRecord = team.actualWins;
+    let worstRecord = team.actualWins;
+    let bestScheduleTeam = team.teamName;
+    let worstScheduleTeam = team.teamName;
+
+    // Try each other team's schedule
+    teams.forEach((otherTeam) => {
+      if (otherTeam.teamName === team.teamName) return;
+
+      let winsWithThisSchedule = 0;
+
+      // Play this team's points against the other team's opponents
+      for (
+        let week = 0;
+        week <
+        (store.leagueInfo.length > 0
+          ? store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+          : 14);
+        week++
+      ) {
+        const opponentId = otherTeam.matchups[week];
+        const opponent = teams.find(
+          (t) => t.matchups[week] === opponentId && t !== otherTeam
+        );
+
+        if (!opponent) continue;
+
+        // Would this team have won with their points against this opponent?
+        if (team.points[week] > opponent.points[week]) {
+          winsWithThisSchedule++;
+        }
+      }
+
+      // Track best and worst possible records
+      if (winsWithThisSchedule > bestRecord) {
+        bestRecord = winsWithThisSchedule;
+        bestScheduleTeam = otherTeam.teamName;
+      }
+
+      if (winsWithThisSchedule < worstRecord) {
+        worstRecord = winsWithThisSchedule;
+        worstScheduleTeam = otherTeam.teamName;
+      }
+    });
+
+    return {
+      teamName: team.teamName,
+      actualWins: team.actualWins,
+      expectedWins: team.expectedWins,
+      bestPossibleRecord: bestRecord,
+      worstPossibleRecord: worstRecord,
+      bestScheduleTeam,
+      worstScheduleTeam,
+      recordRange: bestRecord - worstRecord,
+    };
+  });
+
+  return result.sort(
+    (a, b) => b.actualWins - b.expectedWins - (a.actualWins - a.expectedWins)
+  );
+});
+
+const bestManagers = computed(() => {
+  return props.tableData
+    .slice()
+    .sort((a, b) => b.managerEfficiency - a.managerEfficiency);
+});
+
+const uniquePlayers = computed(() => {
+  const result = props.tableData.map((user) => {
+    // Flatten all the starter arrays into one array of IDs
+    const allStarterIds = user.starters.flat();
+
+    // Get the set of unique IDs
+    const uniqueStarterIds = new Set(allStarterIds);
+
+    return {
+      id: user.id,
+      name: store.showUsernames ? user.username : user.name,
+      avatar: user.avatarImg,
+      uniqueStarterCount: uniqueStarterIds.size,
+      // uniqueStarterIds: Array.from(uniqueStarterIds) // (optional, if you want the IDs)
+    };
+  });
+  return result.sort((a, b) => b.uniqueStarterCount - a.uniqueStarterCount);
+});
+
+const originalPlayers = computed(() => {
+  return props.tableData.map((user) => {
+    // Get all draft picks made by this user (could also match by rosterId if needed)
+    const draftedPicks = league.value.draftPicks?.filter(
+      (pick) => pick.rosterId === user.rosterId
+    );
+    // Count how many of those players are still on their team
+    const playersStillOnTeam = league.value.draftPicks?.filter((pick) =>
+      user.players.includes(pick.playerId)
+    );
+
+    return {
+      userId: user.id,
+      userName: user.name,
+      totalDrafted: draftedPicks?.length,
+      stillOnTeam: playersStillOnTeam?.length,
+      playerIds: playersStillOnTeam?.map((p) => p.playerId), // Optional: to see which
+    };
+  });
+});
 
 // Best/worst draft picks DONE
-// Best/worst trades
+// Best/worst trades DONE
 // Best/worst waiver moves DONE
 // Most/fewest moves DONE
 // Biggest blowouts
-// Unluckiest/luckiest
-// Most points left on bench (potential points)
-// Players drafted still on team
-// Total players used
+// Unluckiest/luckiest DONE
+// Most points left on bench (potential points) DONE
+// Players drafted still on team DONE
+// Total players used DONE
 
 // If multiple years, show all time record
 
-// Points gained from waive999`? (difficult)
+// Points gained from waivers`? (difficult)
 // Compare 1st half vs 2nd half, win/lose streaks
 
 // Overall League recap
@@ -172,6 +322,7 @@ const fewestMoves = computed(() => {
     </p>
     <h2 class="text-xl font-semibold">Trades</h2>
     <p>{{ league.tradeNames?.length }} trades were made this season</p>
+    {{ impactfulTrades }}
     <h2 class="text-xl font-semibold">Waiver wire</h2>
     <p>
       {{ league.waivers.length }} players were picked up on waivers or as free
@@ -196,9 +347,47 @@ const fewestMoves = computed(() => {
     <h2 class="text-xl font-semibold">Least active</h2>
     <p>{{ fewestMoves }}</p>
     <h2 class="text-xl font-semibold">Highest Bidders</h2>
-    <!-- {{ totalBids }} -->
+    <p>{{ totalBids?.highest }}</p>
+    <h2 class="text-xl font-semibold">Lowest Bidders</h2>
+    <p>{{ totalBids?.lowest }}</p>
+    <h2 class="text-xl font-semibold">Luckiest Managers</h2>
+    <p>{{ scheduleAnalysis.slice(0, 3) }}</p>
+    <h2 class="text-xl font-semibold">Unluckiest Managers</h2>
+    <p>{{ scheduleAnalysis.slice(-3) }}</p>
+    <h2 class="text-xl font-semibold">Most Efficient Managers</h2>
+    <div v-for="manager in bestManagers.slice(0, 3)">
+      <p>{{ manager.name }}</p>
+      <p>{{ manager.managerEfficiency }}</p>
+      <p>
+        {{ manager.potentialPoints - manager.pointsFor }} Points left on the
+        bench
+      </p>
+    </div>
+    <h2 class="text-xl font-semibold">Least Efficient Manager</h2>
+    <div v-for="manager in bestManagers.slice(0, 3)">
+      <p>{{ manager.name }}</p>
+      <p>{{ manager.managerEfficiency }}</p>
+      <p>
+        {{ manager.potentialPoints - manager.pointsFor }} Points left on the
+        bench
+      </p>
+    </div>
+    <h2 class="text-xl font-semibold">Total Players Used</h2>
+    <div>
+      <div v-for="manager in uniquePlayers">
+        <p>
+          {{ manager.name }}
+        </p>
+        <p>{{ manager.uniqueStarterCount }}</p>
+      </div>
+    </div>
+    <h2 class="text-xl font-semibold">Draft Players still on team</h2>
+    <div>{{ originalPlayers }}</div>
+    <h2 class="text-xl font-semibold">Playoffs</h2>
+    <h2 class="text-xl font-semibold">League Champion</h2>
     <!-- workaround to get data without copying over methods -->
     <Draft v-show="false" />
     <Trades v-show="false" />
+    <Waivers v-show="false" />
   </div>
 </template>

@@ -32,7 +32,7 @@ const getMatchups = () => {
       );
 
       if (teamB && teamB.matchups[matchupIndex] !== null) {
-        const scoreA = teamA.pointsArr[matchupIndex]; // Changed from 'points' to 'pointsArr' based on your code
+        const scoreA = teamA.pointsArr[matchupIndex];
         const scoreB = teamB.pointsArr[matchupIndex];
 
         if (
@@ -117,29 +117,29 @@ const getWeek = (seasonsData: any[], index: number) => {
 
 <template>
   <div
-    class="flex justify-start mt-4 text-gray-900 dark:text-gray-50 md:flex-nowrap flex-wrap"
+    class="flex flex-wrap justify-start mt-4 text-gray-900 dark:text-gray-50 md:flex-nowrap"
   >
     <div
-      class="bg-white dark:bg-gray-800 rounded-lg shadow px-6 py-4 mr-0 md:mr-4 w-full"
+      class="w-full px-6 py-4 mr-0 bg-white rounded-lg shadow dark:bg-gray-800 md:mr-4"
     >
-      <h5 class="font-bold text-2xl mb-4 sm:text-3xl">Closest Matchups</h5>
+      <h5 class="mb-4 text-2xl font-bold sm:text-3xl">Closest Matchups</h5>
       <div
         v-for="matchup in closestMatchups"
-        class="border border-gray-200 dark:border-gray-700 dark:shadow-gray-600 rounded-lg shadow p-4 mb-4"
+        class="p-4 mb-4 border border-gray-200 rounded-lg shadow dark:border-gray-700 dark:shadow-gray-600"
       >
         <div class="">
           <p class="mb-2 font-medium">
             {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
           </p>
 
-          <div class="flex mt-1 justify-between mr-1">
-            <div class="text-center mb-2 mr-4">
-              <p class="font-semibold text-gray-900 dark:text-gray-50 text-2xl">
+          <div class="flex justify-between mt-1 mr-1">
+            <div class="mb-2 mr-4 text-center">
+              <p class="text-2xl font-semibold text-gray-900 dark:text-gray-50">
                 {{ matchup.difference.toFixed(2) }}
               </p>
               <p class="text-gray-700 dark:text-gray-200">
-                <span class="sm:inline hidden">Point</span
-                ><span class="sm:hidden inline">Pt.</span> Diff
+                <span class="hidden sm:inline">Point</span
+                ><span class="inline sm:hidden">Pt.</span> Diff
               </p>
             </div>
             <div class="w-4/5">
@@ -185,26 +185,26 @@ const getWeek = (seasonsData: any[], index: number) => {
       </div>
     </div>
     <div
-      class="bg-white dark:bg-gray-800 rounded-lg shadow px-6 py-4 mt-4 md:mt-0 w-full"
+      class="w-full px-6 py-4 mt-4 bg-white rounded-lg shadow dark:bg-gray-800 md:mt-0"
     >
-      <h5 class="font-bold text-2xl mb-4 sm:text-3xl">Biggest Blowouts</h5>
+      <h5 class="mb-4 text-2xl font-bold sm:text-3xl">Biggest Blowouts</h5>
       <div
         v-for="matchup in farthestMatchups"
-        class="border border-gray-200 dark:border-gray-700 dark:shadow-gray-600 rounded-lg shadow p-4 mb-4"
+        class="p-4 mb-4 border border-gray-200 rounded-lg shadow dark:border-gray-700 dark:shadow-gray-600"
       >
         <div class="">
           <p class="mb-2 font-medium">
             {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
           </p>
 
-          <div class="flex mt-1 justify-between mr-1">
-            <div class="text-center mb-2 mr-4">
-              <p class="font-semibold text-gray-900 dark:text-gray-50 text-2xl">
+          <div class="flex justify-between mt-1 mr-1">
+            <div class="mb-2 mr-4 text-center">
+              <p class="text-2xl font-semibold text-gray-900 dark:text-gray-50">
                 {{ matchup.difference.toFixed(2) }}
               </p>
               <p class="text-gray-700 dark:text-gray-200">
-                <span class="sm:inline hidden">Point</span
-                ><span class="sm:hidden inline">Pt.</span> Diff
+                <span class="hidden sm:inline">Point</span
+                ><span class="inline sm:hidden">Pt.</span> Diff
               </p>
             </div>
             <div class="w-4/5">
