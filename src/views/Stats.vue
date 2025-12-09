@@ -36,7 +36,7 @@ const filters = reactive({
   startWeek: 1,
   endWeek: 0,
   starterOnly: true,
-  position: "ALL" as "ALL" | PositionKey,
+  positions: [] as PositionKey[],
   draftRounds: [] as (number | "ud")[],
   playerSearch: "",
   ownerId: "ALL" as string | "ALL",
@@ -49,7 +49,10 @@ const draftSortDir = ref<"asc" | "desc">("desc");
 const openSeasonRows = ref<number[]>([]);
 const openDraftRows = ref<number[]>([]);
 const openPlayerRows = ref<string[]>([]);
+const positionsHydrated = ref(false);
+const showDraftPositions = ref(false);
 const showDraftRounds = ref(false);
+const showPlayerPositions = ref(false);
 const showPlayerRounds = ref(false);
 
 const leagueId = computed(
@@ -139,9 +142,14 @@ const ensureRoundsSelected = () => {
 
 const hydrateFiltersFromStorage = (lid: string) => {
   try {
+    positionsHydrated.value = false;
     const raw = localStorage.getItem(filtersKeyFor(lid));
     if (raw) {
       const parsed = JSON.parse(raw);
+      const parsedPositions =
+        parsed && typeof parsed === "object" && ("positions" in parsed || "position" in parsed)
+          ? parsed.positions ?? parsed.position
+          : undefined;
       const parsedStart = Number(parsed.startWeek);
       const parsedEnd = Number(parsed.endWeek);
       filters.startWeek = Number.isFinite(parsedStart)
@@ -154,10 +162,17 @@ const hydrateFiltersFromStorage = (lid: string) => {
         parsed.starterOnly !== undefined
           ? Boolean(parsed.starterOnly)
           : filters.starterOnly;
-      filters.position =
-        parsed.position && typeof parsed.position === "string"
-          ? parsed.position
-          : filters.position;
+      if (parsedPositions !== undefined) {
+        const positionList = Array.isArray(parsedPositions)
+          ? parsedPositions.filter((p: unknown) => isPositionKey(p))
+          : typeof parsedPositions === "string" && parsedPositions === "ALL"
+            ? []
+            : typeof parsedPositions === "string" && isPositionKey(parsedPositions)
+              ? [parsedPositions]
+              : [];
+        filters.positions = positionList;
+        positionsHydrated.value = true;
+      }
       filters.draftRounds = Array.isArray(parsed.draftRounds)
         ? [...parsed.draftRounds]
         : filters.draftRounds;
@@ -186,6 +201,7 @@ const persistFiltersToStorage = () => {
     const payload = {
       ...filters,
       draftRounds: [...filters.draftRounds],
+      positions: [...filters.positions],
     };
     localStorage.setItem(filtersKeyFor(leagueId.value), JSON.stringify(payload));
   } catch (err) {
@@ -200,6 +216,14 @@ const ownerOptions = computed(() => {
   }));
   return [{ value: "ALL", label: "All Teams" }, ...opts];
 });
+
+const isPositionKey = (value: unknown): value is PositionKey =>
+  value === "QB" ||
+  value === "RB" ||
+  value === "WR" ||
+  value === "TE" ||
+  value === "DEF" ||
+  value === "K";
 
 const normalizeRosterPos = (pos: string): PositionKey | null => {
   if (!pos) return null;
@@ -220,6 +244,10 @@ const positionsForLeague = computed<PositionKey[]>(() => {
     return order.slice(0, 5);
   }
   return order.filter((p) => set.has(p));
+});
+
+const selectedPositions = computed<PositionKey[]>(() => {
+  return filters.positions;
 });
 
 const loadData = async () => {
@@ -244,6 +272,9 @@ const loadData = async () => {
     contributions.value = data.contributions;
     playerRows.value = data.playerRows;
     playerWeekly.value = data.playerWeekly;
+    if (!positionsHydrated.value && filters.positions.length === 0) {
+      filters.positions = [...positionsForLeague.value];
+    }
     if (!filters.endWeek || filters.endWeek > data.league.lastScoredWeek) {
       filters.endWeek = data.league.lastScoredWeek;
     }
@@ -315,8 +346,7 @@ const seasonRows = computed(() => {
 });
 
 const draftRows = computed(() => {
-  const allowedPositions =
-    filters.position === "ALL" ? positionsForLeague.value : [filters.position];
+  const allowedPositions = selectedPositions.value;
   const selectedRounds = new Set(filters.draftRounds);
   const rows = rosters.value.map((r) => {
     const matches = contributions.value.filter((c) => {
@@ -377,6 +407,19 @@ const isRoundSelected = (round: number | null) => {
   return filters.draftRounds.includes(key);
 };
 
+const togglePosition = (pos: PositionKey) => {
+  const idx = filters.positions.indexOf(pos);
+  if (idx >= 0) {
+    filters.positions.splice(idx, 1);
+  } else {
+    filters.positions.push(pos);
+  }
+};
+
+const isPositionSelected = (pos: PositionKey) => {
+  return filters.positions.includes(pos);
+};
+
 const applyWeekRange = async () => {
   if (filters.startWeek < 1) filters.startWeek = 1;
   if (filters.endWeek && filters.endWeek < filters.startWeek) {
@@ -419,8 +462,7 @@ const playerSortKey = ref<"total" | "avg" | "starts" | "name">("total");
 const playerSortDir = ref<"asc" | "desc">("desc");
 
 const playerFilteredRows = computed(() => {
-  const allowedPositions =
-    filters.position === "ALL" ? positionsForLeague.value : [filters.position];
+  const allowedPositions = selectedPositions.value;
   const selectedRounds = new Set(filters.draftRounds);
   const search = filters.playerSearch.toLowerCase().trim();
   const rows = playerRows.value
@@ -505,6 +547,12 @@ const roundsSummaryLabel = computed(() => {
     return "All rounds";
   }
   return `${filters.draftRounds.length} selected`;
+});
+
+const positionsSummaryLabel = computed(() => {
+  if (!filters.positions.length) return "None";
+  if (filters.positions.length === positionsForLeague.value.length) return "All positions";
+  return `${filters.positions.length} selected`;
 });
 
 const refreshPlayerDirectory = async () => {
@@ -907,21 +955,54 @@ watch(
       <div
         class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
       >
-        <label class="text-sm text-gray-700">
-          Position filter
-          <select
-            v-model="filters.position"
-            class="block w-32 px-3 py-2 mt-1 text-sm bg-white border border-gray-200 rounded-md"
+        <div class="flex flex-col text-sm text-gray-700">
+          <button
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md"
+            @click="showDraftPositions = !showDraftPositions"
           >
-            <option value="ALL">All</option>
-            <option value="QB">QB</option>
-            <option value="RB">RB</option>
-            <option value="WR">WR</option>
-            <option value="TE">TE</option>
-            <option value="DEF">DEF</option>
-            <option value="K">K</option>
-          </select>
-        </label>
+            Positions
+            <span class="text-xs text-indigo-500">({{ positionsSummaryLabel }})</span>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7" />
+            </svg>
+          </button>
+          <div
+            v-show="showDraftPositions"
+            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md"
+          >
+            <label
+              v-for="pos in positionsForLeague"
+              :key="`pos-${pos}`"
+              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md"
+            >
+              <input
+                type="checkbox"
+                :value="pos"
+                :checked="isPositionSelected(pos)"
+                @change="togglePosition(pos)"
+              />
+              {{ pos }}
+            </label>
+            <button
+              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
+              @click="filters.positions = [...positionsForLeague]"
+            >
+              Select all
+            </button>
+            <button
+              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md"
+              @click="filters.positions = []"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
         <div class="flex flex-col text-sm text-gray-700">
           <button
             class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md"
@@ -1075,22 +1156,55 @@ watch(
     <!-- Player Ranks -->
     <div v-if="!loading && activeTab === 'players'" class="mt-6 space-y-4">
       <div class="grid gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <label class="flex flex-col text-sm text-gray-700">
-          <span class="font-semibold text-gray-800">Position</span>
-          <select
-            v-model="filters.position"
-            class="mt-1 block w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-200"
+        <div class="flex flex-col text-sm text-gray-700">
+          <span class="font-semibold text-gray-800">Positions</span>
+          <button
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md mt-1"
+            @click="showPlayerPositions = !showPlayerPositions"
           >
-            <option value="ALL">All</option>
-            <option
-              v-for="pos in positionsForLeague"
-              :key="`pos-${pos}`"
-              :value="pos"
+            Positions
+            <span class="text-xs text-indigo-500">({{ positionsSummaryLabel }})</span>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
             >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7" />
+            </svg>
+          </button>
+          <div
+            v-show="showPlayerPositions"
+            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md"
+          >
+            <label
+              v-for="pos in positionsForLeague"
+              :key="`ppos-${pos}`"
+              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md"
+            >
+              <input
+                type="checkbox"
+                :value="pos"
+                :checked="isPositionSelected(pos)"
+                @change="togglePosition(pos)"
+              />
               {{ pos }}
-            </option>
-          </select>
-        </label>
+            </label>
+            <button
+              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
+              @click="filters.positions = [...positionsForLeague]"
+            >
+              Select all
+            </button>
+            <button
+              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md"
+              @click="filters.positions = []"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
         <label class="flex flex-col text-sm text-gray-700">
           <span class="font-semibold text-gray-800">Team / Manager</span>
           <select
