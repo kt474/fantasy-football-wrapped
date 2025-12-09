@@ -12,3 +12,22 @@
   width: auto;
   padding: 20px 0
 }
+
+button[aria-label="Add additional league"] {
+  display: none;
+}
+
+div[data-popper-placement="bottom"] {
+  z-index: 100;
+  border-color: #666;
+  border: outset 1px;
+}
+
+div[data-popper-placement="bottom"]>ul :not(:first-child) {
+  display: none;
+}
+
+div[data-popper-placement="bottom"] button {
+  text-align: center;
+  padding: 0;
+}

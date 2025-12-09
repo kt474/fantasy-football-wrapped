@@ -2,7 +2,12 @@
 import { useStore } from "../../store/store";
 const store = useStore();
 
+const weeklyReportEnabled = Boolean(import.meta.env.VITE_WEEKLY_REPORT);
+const startSitEnabled = Boolean(import.meta.env.VITE_PLAYER_NEWS);
+
 const changeTab = (tab: string) => {
+  if (tab === "weeklyReport" && !weeklyReportEnabled) return;
+  if (tab === "startSit" && !startSitEnabled) return;
   store.currentTab = tab;
   localStorage.currentTab = tab;
 };
@@ -94,7 +99,7 @@ const changeTab = (tab: string) => {
         Playoffs
       </button>
     </li>
-    <li class="cursor-pointer me-2">
+    <li v-if="weeklyReportEnabled" class="cursor-pointer me-2">
       <button
         @click="changeTab('weeklyReport')"
         class="inline-block p-2 rounded-t-lg sm:p-4"
@@ -108,7 +113,7 @@ const changeTab = (tab: string) => {
         Report
       </button>
     </li>
-    <li class="cursor-pointer me-2">
+    <li v-if="startSitEnabled" class="cursor-pointer me-2">
       <button
         @click="changeTab('startSit')"
         class="inline-block p-2 rounded-t-lg sm:p-4"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { maxBy, minBy } from "lodash";
 import { fakeRosters, fakeUsers, createTableData } from "../../api/helper";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType, UserType, RosterType } from "../../types/types";
 import PowerRankingData from "../power_rankings/PowerRankingData.vue";
@@ -39,16 +39,40 @@ const props = defineProps<{
   points: Array<object>;
 }>();
 const store = useStore();
+const weeklyReportEnabled = Boolean(import.meta.env.VITE_WEEKLY_REPORT);
+const startSitEnabled = Boolean(import.meta.env.VITE_PLAYER_NEWS);
 
 interface savedData {
   [key: string]: TableDataType[];
 }
 
+const tabAvailable = (tab: string) => {
+  if (tab === "weeklyReport") return weeklyReportEnabled;
+  if (tab === "startSit") return startSitEnabled;
+  return true;
+};
+
 onMounted(() => {
-  if (localStorage.currentTab) {
-    store.currentTab = localStorage.currentTab;
+  const savedTab = localStorage.currentTab;
+  if (savedTab && tabAvailable(savedTab)) {
+    store.currentTab = savedTab;
+  } else {
+    store.currentTab = tabAvailable(store.currentTab)
+      ? store.currentTab
+      : "standings";
+    localStorage.currentTab = store.currentTab;
   }
 });
+
+watch(
+  () => store.currentTab,
+  (tab) => {
+    if (!tabAvailable(tab)) {
+      store.currentTab = "standings";
+      localStorage.currentTab = "standings";
+    }
+  }
+);
 
 const originalData = computed(() => {
   if (localStorage.originalData && store.currentLeagueId) {
@@ -650,7 +674,7 @@ const getHeadToHeadRecord = (team: any) => {
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
       <Playoffs :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'weeklyReport'">
+    <div v-if="store.currentTab === 'weeklyReport' && weeklyReportEnabled">
       <WeeklyReport
         v-if="store.currentLeagueId"
         :tableData="tableData"
@@ -661,7 +685,7 @@ const getHeadToHeadRecord = (team: any) => {
     <div v-if="store.currentTab === 'draft'">
       <Draft class="mt-4" />
     </div>
-    <div v-if="store.currentTab === 'startSit'">
+    <div v-if="store.currentTab === 'startSit' && startSitEnabled">
       <PlayerNews :tableData="tableData" class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'leagueHistory'">
