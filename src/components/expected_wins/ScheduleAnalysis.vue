@@ -124,7 +124,6 @@ const scheduleAnalysis = computed(() => {
     // Try each other team's schedule
     teams.forEach((otherTeam) => {
       if (otherTeam.teamName === team.teamName) return;
-
       let winsWithThisSchedule = 0;
 
       // Play this team's points against the other team's opponents
@@ -146,6 +145,10 @@ const scheduleAnalysis = computed(() => {
         // Would this team have won with their points against this opponent?
         if (team.points[week] > opponent.points[week]) {
           winsWithThisSchedule++;
+        } else if (team.points[week] === opponent.points[week]) {
+          if (team.points[week] > otherTeam.points[week]) {
+            winsWithThisSchedule++;
+          }
         }
       }
 
