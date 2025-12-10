@@ -780,7 +780,10 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
   let currentWeek: number = 0;
   let legacyWinner: number | null = 0;
 
-  if (newLeagueInfo.status === "in_season") {
+  if (
+    newLeagueInfo.status === "in_season" ||
+    newLeagueInfo.status === "post_season"
+  ) {
     const leagueState = await getCurrentLeagueState();
     currentWeek = leagueState.week;
     numberOfWeeks = currentWeek;
