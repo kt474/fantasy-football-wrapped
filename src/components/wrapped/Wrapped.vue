@@ -260,6 +260,30 @@ const originalPlayers = computed(() => {
   });
 });
 
+const pointsFromWaivers = computed(() => {
+  let result: any[] = [];
+  props.tableData.forEach((user) => {
+    let sum = 0;
+    const draftedPlayers = league.value.draftPicks
+      ?.filter((pick) => pick.rosterId === user.rosterId)
+      .map((player) => player.playerId);
+
+    user.starters.forEach((week, weekIndex) => {
+      week.forEach((starter, starterIndex) => {
+        if (!draftedPlayers?.includes(starter)) {
+          sum += user.starterPoints[weekIndex][starterIndex];
+        }
+      });
+    });
+    result.push({
+      name: user.name,
+      avatar: user.avatarImg,
+      pointsFromWaivers: Math.round(sum * 100) / 100,
+    });
+  });
+  return result;
+});
+
 const draftRankings = computed(() => {
   return league.value.draftGrades?.map((user) => ({
     grade: user.grade,
@@ -295,12 +319,19 @@ const allTimeRecord = computed(() => {
   return result;
 });
 
+const winStreak = computed(() => {
+  return props.tableData.map((user) => ({
+    name: user.name,
+    avatar: user.avatarImg,
+    streak: getCurrentStreak(user.recordByWeek),
+  }));
+});
+
 const getMatchups = () => {
   const matchupDifferences: any[] = [];
 
   props.tableData.forEach((teamA) => {
-    console.log(teamA);
-    teamA.matchups.forEach((matchupId: number, matchupIndex: number) => {
+    teamA.matchups.forEach((matchupId: any, matchupIndex: number) => {
       if (matchupId === null) {
         return;
       }
@@ -357,12 +388,17 @@ const getMatchups = () => {
       processedMatchups.add(id);
     }
   });
-  console.log(uniqueMatchups);
   uniqueMatchups.sort((a, b) => a.difference - b.difference);
   closestMatchups.value = uniqueMatchups.slice(0, 5);
 
   uniqueMatchups.sort((a, b) => b.difference - a.difference);
   farthestMatchups.value = uniqueMatchups.slice(0, 5);
+};
+
+const getCurrentStreak = (str: string): string => {
+  const match = str.match(/([WL])\1*$/);
+  if (!match) return "";
+  return match[1] + match[0].length;
 };
 
 onMounted(() => {
@@ -373,7 +409,7 @@ onMounted(() => {
 // Best/worst trades DONE
 // Best/worst waiver moves DONE
 // Most/fewest moves DONE
-// Biggest blowouts/closest matchups
+// Biggest blowouts/closest matchups DONE
 // Unluckiest/luckiest DONE
 // Most points left on bench (potential points) DONE
 // Players drafted still on team DONE
@@ -382,8 +418,8 @@ onMounted(() => {
 // Predraft rankings DONE
 // If multiple years, show all time record DONE
 
-// Points gained from waivers`? (difficult)
-// Compare 1st half vs 2nd half, win/lose streaks
+// Points gained from waivers`? (difficult) DONE
+// Win/lose streaks DONE
 
 // Overall League recap
 // League Champ
@@ -516,7 +552,23 @@ onMounted(() => {
       <p>{{ allTimeRecord }}</p>
     </div>
     <h2 class="text-xl font-semibold">Closest Matchups</h2>
-    <p>{{ closestMatchups }}</p>
+    <div v-for="matchup in closestMatchups">
+      <div class="my-2">
+        <p>{{ matchup.teamA.name }} {{ matchup.scoreA }}</p>
+        <p>{{ matchup.teamB.name }} {{ matchup.scoreB }}</p>
+      </div>
+    </div>
+    <h2 class="text-xl font-semibold">Biggest Blowouts</h2>
+    <div v-for="matchup in farthestMatchups">
+      <div class="my-2">
+        <p>{{ matchup.teamA.name }} {{ matchup.scoreA }}</p>
+        <p>{{ matchup.teamB.name }} {{ matchup.scoreB }}</p>
+      </div>
+    </div>
+    <h2 class="text-xl font-semibold">Points from non drafted players</h2>
+    {{ pointsFromWaivers }}
+    <h2 class="text-xl font-semibold">Longest Streaks</h2>
+    <p>{{ winStreak }}</p>
     <!-- workaround to get data without copying over methods -->
     <Draft v-show="false" />
     <Trades v-show="false" />

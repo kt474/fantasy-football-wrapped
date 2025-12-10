@@ -105,7 +105,7 @@ export type TableDataType = {
   expectedWinsSTD: number;
   recordByWeek: string;
   players: string[];
-  starters: string[];
+  starters: string[][];
   starterPoints: number[][];
   benchPlayers: string[];
   benchPoints: number[];

@@ -13,6 +13,19 @@ const changeTab = (tab: string) => {
   >
     <li class="cursor-pointer me-2">
       <button
+        @click="changeTab('wrapped')"
+        class="inline-block p-2 rounded-t-lg sm:p-4"
+        :class="[
+          store.currentTab === 'wrapped'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
+      >
+        Wrapped 🎉
+      </button>
+    </li>
+    <li class="cursor-pointer me-2">
+      <button
         @click="changeTab('standings')"
         aria-current="page"
         class="inline-block p-2 rounded-t-lg sm:p-4"
@@ -131,19 +144,6 @@ const changeTab = (tab: string) => {
         ]"
       >
         <span class="hidden sm:inline">League</span> History
-      </button>
-    </li>
-    <li class="cursor-pointer me-2">
-      <button
-        @click="changeTab('wrapped')"
-        class="inline-block p-2 rounded-t-lg sm:p-4"
-        :class="[
-          store.currentTab === 'wrapped'
-            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
-            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
-        ]"
-      >
-        Wrapped
       </button>
     </li>
   </ul>
