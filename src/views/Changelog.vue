@@ -21,6 +21,17 @@ onMounted(() => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "12/10/25",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Fixed a bug in the schedule analysis where the best/worst possible records were not calculated correctly.",
+        ],
+      },
+    ],
+  },
+  {
     date: "11/20/25",
     content: [
       {
