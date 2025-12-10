@@ -1,16 +1,24 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { TableDataType } from "../../types/types.ts";
+import { computed, ref, onMounted } from "vue";
+import {
+  TableDataType,
+  LeagueInfoType,
+  RosterType,
+} from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { maxBy, minBy } from "lodash";
 import Draft from "../draft/Draft.vue";
 import Trades from "../roster_management/Trades.vue";
 import Waivers from "../roster_management/Waivers.vue";
+import LeagueHistory from "../league_history/LeagueHistory.vue";
 
 const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
+
+const closestMatchups: any = ref([]);
+const farthestMatchups: any = ref([]);
 
 const league = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex];
@@ -252,17 +260,127 @@ const originalPlayers = computed(() => {
   });
 });
 
+const draftRankings = computed(() => {
+  return league.value.draftGrades?.map((user) => ({
+    grade: user.grade,
+    user: props.tableData.find(
+      (manager) => manager.rosterId === user.picks[0].draftPick.rosterId
+    ),
+  }));
+});
+
+const allTimeRecord = computed(() => {
+  let result = props.tableData.map((user) => ({
+    name: user.name,
+    rosterId: user.rosterId,
+    wins: user.wins,
+    losses: user.losses,
+    ties: user.ties,
+  }));
+
+  if (league.value.previousLeagues.length > 0) {
+    league.value.previousLeagues.forEach((league: LeagueInfoType) => {
+      league.rosters.forEach((roster: RosterType) => {
+        let currentUser = result.find(
+          (user) => user.rosterId === roster.rosterId
+        );
+        if (currentUser) {
+          currentUser.wins += roster.wins;
+          currentUser.losses += roster.losses;
+          currentUser.ties += roster.ties;
+        }
+      });
+    });
+  }
+  return result;
+});
+
+const getMatchups = () => {
+  const matchupDifferences: any[] = [];
+
+  props.tableData.forEach((teamA) => {
+    console.log(teamA);
+    teamA.matchups.forEach((matchupId: number, matchupIndex: number) => {
+      if (matchupId === null) {
+        return;
+      }
+
+      const teamB = props.tableData.find(
+        (team) => team !== teamA && team.matchups[matchupIndex] === matchupId
+      );
+
+      if (teamB && teamB.matchups[matchupIndex] !== null) {
+        const scoreA = teamA.points[matchupIndex];
+        const scoreB = teamB.points[matchupIndex];
+
+        if (
+          typeof scoreA === "number" &&
+          typeof scoreB === "number" &&
+          !isNaN(scoreA) &&
+          !isNaN(scoreB) &&
+          scoreA !== 0 &&
+          scoreB !== 0
+        ) {
+          const difference = Math.abs(scoreA - scoreB);
+          matchupDifferences.push({
+            teamA: teamA,
+            teamB: teamB,
+            scoreA: scoreA,
+            scoreB: scoreB,
+            difference: difference,
+            matchupId: matchupId,
+            matchupIndex: matchupIndex,
+          });
+        }
+      }
+    });
+  });
+
+  const uniqueMatchups: any[] = [];
+  const processedMatchups = new Set();
+
+  matchupDifferences.forEach((matchup) => {
+    const teamAId =
+      matchup.teamA.id ||
+      matchup.teamA.name ||
+      `teamA-idx-${matchup.matchupIndex}`;
+    const teamBId =
+      matchup.teamB.id ||
+      matchup.teamB.name ||
+      `teamB-idx-${matchup.matchupIndex}`;
+
+    const sortedTeamIds = [teamAId, teamBId].sort();
+    const id = `${sortedTeamIds[0]}-${sortedTeamIds[1]}-${matchup.matchupId}`;
+
+    if (!processedMatchups.has(id)) {
+      uniqueMatchups.push(matchup);
+      processedMatchups.add(id);
+    }
+  });
+  console.log(uniqueMatchups);
+  uniqueMatchups.sort((a, b) => a.difference - b.difference);
+  closestMatchups.value = uniqueMatchups.slice(0, 5);
+
+  uniqueMatchups.sort((a, b) => b.difference - a.difference);
+  farthestMatchups.value = uniqueMatchups.slice(0, 5);
+};
+
+onMounted(() => {
+  getMatchups();
+});
+
 // Best/worst draft picks DONE
 // Best/worst trades DONE
 // Best/worst waiver moves DONE
 // Most/fewest moves DONE
-// Biggest blowouts
+// Biggest blowouts/closest matchups
 // Unluckiest/luckiest DONE
 // Most points left on bench (potential points) DONE
 // Players drafted still on team DONE
 // Total players used DONE
 
-// If multiple years, show all time record
+// Predraft rankings DONE
+// If multiple years, show all time record DONE
 
 // Points gained from waivers`? (difficult)
 // Compare 1st half vs 2nd half, win/lose streaks
@@ -385,9 +503,24 @@ const originalPlayers = computed(() => {
     <div>{{ originalPlayers }}</div>
     <h2 class="text-xl font-semibold">Playoffs</h2>
     <h2 class="text-xl font-semibold">League Champion</h2>
+    <h2 class="text-xl font-semibold">Does ADP mean anything?</h2>
+    <div>
+      <div v-for="grade in draftRankings">
+        <p>{{ grade.grade }}</p>
+        <p>{{ grade.user?.name }}</p>
+        <p>{{ grade.user?.regularSeasonRank }}</p>
+      </div>
+    </div>
+    <h2 class="text-xl font-semibold">All Time Records</h2>
+    <div>
+      <p>{{ allTimeRecord }}</p>
+    </div>
+    <h2 class="text-xl font-semibold">Closest Matchups</h2>
+    <p>{{ closestMatchups }}</p>
     <!-- workaround to get data without copying over methods -->
     <Draft v-show="false" />
     <Trades v-show="false" />
     <Waivers v-show="false" />
+    <LeagueHistory v-show="false" :table-data="tableData" />
   </div>
 </template>

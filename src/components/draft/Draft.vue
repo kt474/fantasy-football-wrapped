@@ -480,7 +480,10 @@ const getValueColor = (value: number) => {
       </div>
     </div>
     <DraftGrades
-      v-if="data.length > 0 && activeTab === 'Grades'"
+      v-if="
+        data.length > 0 &&
+        (activeTab === 'Grades' || store.currentTab === 'wrapped')
+      "
       :draft-data="data"
       :scoring-type="scoringType"
     />
