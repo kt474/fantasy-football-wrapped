@@ -95,8 +95,8 @@ const formatTeamName = (team: TableDataType) => {
     <div class="weekly-head">
       <div>
         <div class="weekly-pill">Weekly High Scores</div>
-        <div class="weekly-title">Fireworks of the Week</div>
-        <p class="weekly-subtitle">Highest starter score from every week.</p>
+        <!-- <div class="weekly-title">Fireworks of the Week</div>
+        <p class="weekly-subtitle">Highest starter score from every week.</p> -->
       </div>
       <span class="weekly-badge">
         Weeks {{ scoredWeeks || 0 }} / {{ totalWeeks || 0 }}
@@ -301,7 +301,7 @@ const formatTeamName = (team: TableDataType) => {
 
 .weekly-row--top {
   border-color: var(--accent-1);
-  box-shadow: 0 14px 30px -26px var(--accent-1);
+  /* box-shadow: 0 14px 30px -26px var(--accent-1); */
 }
 
 .weekly-row:hover {

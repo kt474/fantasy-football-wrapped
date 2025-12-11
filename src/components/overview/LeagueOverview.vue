@@ -175,6 +175,38 @@ const perYardNote = (item: { note?: string; value: number }) => {
 
 const showRosterSettings = ref(false);
 const showScoringDetails = ref(false);
+
+const safeWeekValue = (week?: number | null) =>
+  typeof week === "number" && week > 0 ? week : null;
+
+const derivedWeekFromTable = computed(() => {
+  if (!props.tableData?.length) return null;
+  const weekCounts = props.tableData.map((team) => team.points?.length || 0);
+  const maxWeeks = Math.max(...weekCounts);
+  return maxWeeks > 0 ? maxWeeks : null;
+});
+
+const currentWeekNumber = computed(() => {
+  const fromCurrent = safeWeekValue(league.value?.currentWeek);
+  if (fromCurrent) return fromCurrent;
+  const fromLastScored = safeWeekValue(league.value?.lastScoredWeek);
+  if (fromLastScored) return fromLastScored;
+  return derivedWeekFromTable.value;
+});
+
+const playoffRoundLabel = computed(() => {
+  const week = currentWeekNumber.value;
+  const regularWeeks = league.value?.regularSeasonLength;
+  if (!week || !regularWeeks || week <= regularWeeks) return "";
+  const roundIndex = week - regularWeeks;
+  const roundNames: Record<number, string> = {
+    1: "Quarterfinals",
+    2: "Semifinals",
+    3: "Championship",
+    4: "Championship",
+  };
+  return roundNames[roundIndex] || "Playoffs";
+});
 </script>
 
 <template>
@@ -256,11 +288,11 @@ const showScoringDetails = ref(false);
               Slot counts and lineup requirements
             </p>
           </div>
-          <span
+          <!-- <span
             class="px-3 py-1 text-xs font-semibold text-gray-800 bg-gray-200 rounded-full dark:bg-gray-700 dark:text-gray-200"
           >
             {{ league.rosterPositions?.length || 0 }} slots
-          </span>
+          </span> -->
           <span class="ml-3 text-xs font-semibold text-gray-700 dark:text-gray-200">
             {{ showRosterSettings ? "Hide" : "Show" }}
           </span>
@@ -302,11 +334,11 @@ const showScoringDetails = ref(false);
               Grouped by category; uses league scoring_settings.
             </p>
           </div>
-          <span
+          <!-- <span
             class="px-3 py-1 text-xs font-semibold text-gray-800 bg-gray-200 rounded-full dark:bg-gray-700 dark:text-gray-200"
           >
             {{ scoringEntries.length }} settings
-          </span>
+          </span> -->
           <span class="ml-3 text-xs font-semibold text-gray-700 dark:text-gray-200">
             {{ showScoringDetails ? "Hide" : "Show" }}
           </span>
@@ -398,7 +430,13 @@ const showScoringDetails = ref(false);
               Current week
             </p>
             <p class="mt-1 text-sm text-gray-900 dark:text-gray-50">
-              {{ league.currentWeek ?? "—" }}
+              {{ currentWeekNumber ? `Week ${currentWeekNumber}` : "—" }}
+            </p>
+            <p
+              v-if="playoffRoundLabel"
+              class="text-xs text-gray-500 dark:text-gray-300"
+            >
+              {{ playoffRoundLabel }}
             </p>
           </div>
         </div>

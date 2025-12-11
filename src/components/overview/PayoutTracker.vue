@@ -101,6 +101,11 @@ const formatDefinition = (value?: string) => {
   return escaped.replace(/\*(.*?)\*/g, "<em>$1</em>");
 };
 
+const formatPointsTotal = (value?: number | null) => {
+  if (value === null || value === undefined) return "";
+  return `${value.toFixed(2)} pts`;
+};
+
 const managerNames = computed(() => {
   if (props.league?.users?.length) {
     const names = props.league.users
@@ -122,6 +127,12 @@ const scoredWeeks = computed(() => {
   const lastScored = leagueInfo.value?.lastScoredWeek || 0;
   if (lastScored > 0) return Math.min(lastScored, weeksPlayed.value);
   return weeksPlayed.value;
+});
+
+const regularSeasonComplete = computed(() => {
+  const totalRegularWeeks = props.league?.regularSeasonLength || 0;
+  if (!totalRegularWeeks) return false;
+  return scoredWeeks.value >= totalRegularWeeks;
 });
 
 const findUserByRosterId = (rosterId?: number) => {
@@ -240,10 +251,12 @@ const coreSeasonalAwards = computed(() => {
   const mostPointsTeam = props.tableData?.length
     ? [...props.tableData].sort((a, b) => (b.pointsFor || 0) - (a.pointsFor || 0))[0]
     : undefined;
+  const mostPointsTotal = mostPointsTeam?.pointsFor;
   const mostPointsPendingLabel = mostPointsTeam
     ? `Pending (current leader: ${formatTeamName(mostPointsTeam)})`
     : "Pending";
-  const mostPointsName = seasonComplete && mostPointsTeam
+  const mostPointsFinalized = regularSeasonComplete.value && Boolean(mostPointsTeam);
+  const mostPointsName = mostPointsFinalized && mostPointsTeam
     ? formatTeamName(mostPointsTeam)
     : mostPointsPendingLabel;
 
@@ -256,7 +269,11 @@ const coreSeasonalAwards = computed(() => {
       informalLabel: "",
       winner: mostPointsName,
       amount: 360,
-      pending: !seasonComplete,
+      pending: !mostPointsFinalized,
+      pointsTotal:
+        mostPointsFinalized && typeof mostPointsTotal === "number"
+          ? Number(mostPointsTotal.toFixed(2))
+          : null,
       definition: "",
     },
   ];
@@ -273,6 +290,7 @@ const customSeasonalAwards = computed(() =>
       winner,
       amount: award.amount,
       pending: winner === "Pending",
+      pointsTotal: null,
     };
   })
 );
@@ -583,7 +601,7 @@ const managerTotals = computed(() => {
 
                 <tr class="bg-gray-100 dark:bg-gray-900/70">
                   <td colspan="4" class="px-4 py-3 text-xs font-semibold tracking-wide text-gray-700 uppercase dark:text-gray-200">
-                    Playoffs (Weeks 15–17) <span class="playoff-bonuses-note" style="text-transform:none; display: block;">Playoff teams, active or disqualified, are ineligible for Week 15 - 17 "Weekly High Score" bonuses</span>
+                    Playoffs (Weeks 15–17) <span class="playoff-bonuses-note text-xs text-gray-500 dark:text-gray-300" style="text-transform:none; display: block;">Playoff teams, active or disqualified, are ineligible for Week 15 - 17 "Weekly High Score" bonuses</span>
                   </td>
                 </tr>
 
@@ -672,7 +690,7 @@ const managerTotals = computed(() => {
                 </div>
                 <div
                   v-if="award.definition"
-                  class="absolute z-20 hidden max-w-xs p-3 mt-2 text-xs leading-relaxed text-gray-800 bg-white border border-gray-200 rounded-lg shadow-lg group-hover:block dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  class="absolute z-20 hidden min-w-[18rem] max-w-xl p-4 mt-2 text-sm leading-relaxed text-gray-800 bg-white border border-gray-200 rounded-lg shadow-lg group-hover:block whitespace-normal break-words dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 >
                   <p class="font-semibold text-gray-900 dark:text-gray-50">
                     {{ award.title }}
@@ -685,16 +703,37 @@ const managerTotals = computed(() => {
                     v-html="formatDefinition(award.definition)"
                   />
                 </div>
-                <p
-                  class="text-xs"
-                  :class="[
-                    award.pending
-                      ? 'text-amber-600 dark:text-amber-300'
-                      : 'text-gray-600 dark:text-gray-200',
-                  ]"
-                >
-                  {{ award.winner }}
-                </p>
+                <div class="flex flex-wrap items-center gap-2 mt-1">
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold shadow-sm"
+                    :class="[
+                      award.pending
+                        ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:ring-amber-800/70'
+                        : 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:ring-emerald-700/80',
+                    ]"
+                  >
+                    <svg
+                      v-if="!award.pending"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      class="w-4 h-4"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.25 7.333a1 1 0 0 1-1.435.018l-3.5-3.416a1 1 0 1 1 1.399-1.43l2.787 2.721 6.539-6.61a1 1 0 0 1 1.454-.02Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    {{ award.winner }}
+                  </span>
+                  <span
+                    v-if="!award.pending && award.pointsTotal"
+                    class="text-[11px] font-semibold text-gray-600 dark:text-gray-200"
+                  >
+                    {{ formatPointsTotal(award.pointsTotal) }}
+                  </span>
+                </div>
               </div>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-50">
                 {{ formatCurrency(award.amount) }}
@@ -740,7 +779,7 @@ const managerTotals = computed(() => {
                   </div>
                   <div
                     v-if="award.definition"
-                    class="absolute z-20 hidden max-w-xs p-3 mt-2 text-xs leading-relaxed text-gray-800 bg-white border border-gray-200 rounded-lg shadow-lg group-hover:block dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    class="absolute z-20 hidden min-w-[18rem] max-w-xl p-4 mt-2 text-sm leading-relaxed text-gray-800 bg-white border border-gray-200 rounded-lg shadow-lg group-hover:block whitespace-normal break-words dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                   >
                     <p class="font-semibold text-gray-900 dark:text-gray-50">
                       {{ award.title }}
@@ -753,16 +792,37 @@ const managerTotals = computed(() => {
                       v-html="formatDefinition(award.definition)"
                     />
                   </div>
-                  <p
-                    class="text-xs"
-                    :class="[
-                      award.pending
-                        ? 'text-amber-600 dark:text-amber-300'
-                        : 'text-gray-600 dark:text-gray-200',
-                    ]"
-                  >
-                    {{ award.winner }}
-                  </p>
+                  <div class="flex flex-wrap items-center gap-2 mt-1">
+                    <span
+                      class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold shadow-sm"
+                      :class="[
+                        award.pending
+                          ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:ring-amber-800/70'
+                          : 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:ring-emerald-700/80',
+                      ]"
+                    >
+                      <svg
+                        v-if="!award.pending"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        class="w-4 h-4"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.25 7.333a1 1 0 0 1-1.435.018l-3.5-3.416a1 1 0 1 1 1.399-1.43l2.787 2.721 6.539-6.61a1 1 0 0 1 1.454-.02Z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      {{ award.winner }}
+                    </span>
+                    <span
+                      v-if="!award.pending && award.pointsTotal"
+                      class="text-[11px] font-semibold text-gray-600 dark:text-gray-200"
+                    >
+                      {{ formatPointsTotal(award.pointsTotal) }}
+                    </span>
+                  </div>
                 </div>
                 <span class="text-sm font-semibold text-gray-900 dark:text-gray-50">
                   {{ formatCurrency(award.amount) }}

@@ -59,7 +59,7 @@ onMounted(() => {
   } else {
     store.currentTab = tabAvailable(store.currentTab)
       ? store.currentTab
-      : "standings";
+      : "leagueOverview";
     localStorage.currentTab = store.currentTab;
   }
 });
@@ -68,8 +68,8 @@ watch(
   () => store.currentTab,
   (tab) => {
     if (!tabAvailable(tab)) {
-      store.currentTab = "standings";
-      localStorage.currentTab = "standings";
+      store.currentTab = "leagueOverview";
+      localStorage.currentTab = "leagueOverview";
     }
   }
 );

@@ -19,7 +19,7 @@ const showInput = () => {
 </script>
 <template>
   <div class="container flex mr-4">
-    <div class="flex max-w-screen-xl overflow-auto no-scrollbar">
+    <div class="noshow flex max-w-screen-xl overflow-auto no-scrollbar">
       <LeagueCard
         v-for="(leagueInfo, index) in leagues"
         :key="index"

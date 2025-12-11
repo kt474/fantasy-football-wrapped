@@ -68,7 +68,7 @@ const removeLeague = () => {
       localStorage.removeItem("currentTab");
       removeHistoryLeagues();
       store.showUsernames = false;
-      store.currentTab = "standings";
+      store.currentTab = "leagueOverview";
       // reset url if there are no leagues
       router.replace({
         path: "/",

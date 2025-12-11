@@ -91,9 +91,9 @@ const onSubmit = async () => {
       leagueIdInput.value = "";
     }
   }
-  // return to standings tab when league is added
-  store.currentTab = "standings";
-  localStorage.currentTab = "standings";
+  // return to overview tab when league is added
+  store.currentTab = "leagueOverview";
+  localStorage.currentTab = "leagueOverview";
 };
 </script>
 

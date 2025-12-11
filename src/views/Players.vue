@@ -5,6 +5,7 @@ import {
   getStats,
   getCurrentLeagueState,
   searchPlayers,
+  getRosters,
 } from "../api/api";
 import { useStore } from "../store/store";
 import { useRoute } from "vue-router";
@@ -14,6 +15,7 @@ type PlayerResult = {
   name: string;
   position: string;
   team?: string;
+  points?: number;
 };
 
 const store = useStore();
@@ -22,6 +24,11 @@ const route = useRoute();
 const query = ref("");
 const selectedPlayer = ref<PlayerResult | null>(null);
 const suggestions = ref<PlayerResult[]>([]);
+const defaultSuggestions = ref<PlayerResult[]>([]);
+const suggestionLoading = ref(false);
+const defaultSuggestionsLoading = ref(false);
+const inputFocused = ref(false);
+const rosterFilter = ref<string>("");
 const loading = ref(false);
 const weeklyLoading = ref(false);
 const errorMessage = ref("");
@@ -39,6 +46,8 @@ const seasonLine = ref<{
   gp?: number;
   name?: string;
 }>({});
+const allowedPositions = ["QB", "RB", "WR", "TE", "K", "DEF"];
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const scoringType = computed(() => {
   if (store.currentLeagueId && store.leagueInfo[store.currentLeagueIndex]) {
@@ -48,10 +57,65 @@ const scoringType = computed(() => {
 });
 
 const headerSubtitle = computed(() => {
-  if (!selectedPlayer.value) return "Search any NFL player for fantasy production.";
+  if (!selectedPlayer.value) return "";
   const pos = selectedPlayer.value.position || "";
   return `${pos} • ${seasonYear.value} regular season`;
 });
+
+const rosterOptions = computed(() => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (!currentLeague?.rosters?.length) return [];
+  return currentLeague.rosters.map((roster: any) => {
+    const user = (currentLeague.users || []).find(
+      (u: any) => u?.id === roster.id
+    );
+    return {
+      value: String(roster.rosterId),
+      label: user?.name || user?.username || `Roster ${roster.rosterId}`,
+      players: roster.players || [],
+    };
+  });
+});
+
+const isLoadingSuggestions = computed(
+  () => suggestionLoading.value || defaultSuggestionsLoading.value
+);
+
+const visibleSuggestions = computed(() => {
+  if (
+    selectedPlayer.value &&
+    !inputFocused.value &&
+    !rosterFilter.value &&
+    !query.value.trim()
+  ) {
+    return [];
+  }
+  const trimmed = query.value.trim();
+  if (trimmed.length >= 2) {
+    return suggestions.value;
+  }
+  if (!trimmed) {
+    return defaultSuggestions.value;
+  }
+  return [];
+});
+
+const usingDefaultSuggestions = computed(
+  () => !query.value.trim() && defaultSuggestions.value.length > 0
+);
+
+const suggestionTitle = computed(() => {
+  if (query.value.trim().length >= 2) return "Suggestions";
+  if (rosterFilter.value) {
+    const option = rosterOptions.value.find(
+      (opt) => opt.value === rosterFilter.value
+    );
+    return option ? `Roster: ${option.label}` : "Roster suggestions";
+  }
+  return "Top scorers";
+});
+
+const isRosterSuggestions = computed(() => Boolean(rosterFilter.value));
 
 const fetchSeasonYear = async () => {
   if (store.currentLeagueId && store.leagueInfo[store.currentLeagueIndex]) {
@@ -113,6 +177,10 @@ const setPlayerFromStats = async (player: PlayerResult) => {
 
 const loadPlayer = async (player: PlayerResult) => {
   await setPlayerFromStats(player);
+  if (player.name) {
+    query.value = player.name;
+  }
+  rosterFilter.value = "";
 };
 
 const loadPlayerById = async (playerId: string) => {
@@ -125,20 +193,145 @@ const loadPlayerById = async (playerId: string) => {
   });
 };
 
-const search = async () => {
+const updateSuggestions = async (
+  term: string,
+  { showErrors }: { showErrors?: boolean } = {}
+) => {
+  const trimmed = term.trim();
   errorMessage.value = "";
-  suggestions.value = [];
-  if (!query.value || query.value.length < 2) {
-    errorMessage.value = "Enter at least 2 characters.";
+  if (!trimmed) {
+    suggestions.value = [];
     return;
   }
-  loading.value = true;
-  const results = await searchPlayers(query.value);
-  loading.value = false;
-  if (results.length === 0) {
-    errorMessage.value = "No players found. Try a different name.";
-  } else {
+  if (trimmed.length < 2) {
+    suggestions.value = [];
+    if (showErrors) {
+      errorMessage.value = "Enter at least 2 characters.";
+    }
+    return;
+  }
+  suggestionLoading.value = true;
+  try {
+    const results = await searchPlayers(trimmed);
     suggestions.value = results;
+    if (showErrors && results.length === 0) {
+      errorMessage.value = "No players found. Try a different name.";
+    }
+  } catch (err) {
+    console.error("Error searching players:", err);
+    if (showErrors) {
+      errorMessage.value = "Unable to search players right now.";
+    }
+  } finally {
+    suggestionLoading.value = false;
+  }
+};
+
+const search = async () => {
+  await updateSuggestions(query.value, { showErrors: true });
+};
+
+const handleBlur = () => {
+  // Delay to allow clicks on suggestion list before hiding
+  setTimeout(() => {
+    inputFocused.value = false;
+  }, 120);
+};
+
+const getOwnerName = (rosterId: string | number) => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (!currentLeague) return "";
+  const roster = (currentLeague.rosters || []).find(
+    (r: any) => String(r?.rosterId) === String(rosterId)
+  );
+  if (!roster) return "";
+  const user = (currentLeague.users || []).find((u: any) => u?.id === roster.id);
+  return user?.name || user?.username || "";
+};
+
+const buildTopSuggestionsFromIds = async (playerIds: string[]) => {
+  if (playerIds.length === 0) return [];
+  const unique = Array.from(new Set(playerIds)).slice(0, 200);
+  const stats = await Promise.all(
+    unique.map((id) => getStats(id, seasonYear.value, scoringType.value))
+  );
+  const topPlayers = stats
+    .map((stat, idx) => {
+      if (!stat) return null;
+      const position = stat.position || "";
+      if (!allowedPositions.includes(position)) return null;
+      const name = `${stat.firstName || ""} ${stat.lastName || ""}`.trim();
+      return {
+        id: stat.id || unique[idx],
+        name: name || "Unknown Player",
+        position,
+        team: stat.team || "FA",
+        points: stat.points ?? 0,
+      };
+    })
+    .filter(Boolean) as PlayerResult[];
+  const sorted = topPlayers
+    .sort((a, b) => (b.points ?? 0) - (a.points ?? 0))
+    .slice(0, 10);
+  return sorted;
+};
+
+const collectPlayerPool = async () => {
+  const ids = new Set<string>();
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (currentLeague?.rosters?.length) {
+    currentLeague.rosters.forEach((roster: any) => {
+      (roster.players || []).forEach((playerId: string) => ids.add(playerId));
+    });
+  }
+  if (ids.size === 0 && import.meta.env.VITE_DEFAULT_LEAGUE_ID) {
+    try {
+      const fallbackRosters = await getRosters(
+        import.meta.env.VITE_DEFAULT_LEAGUE_ID
+      );
+      fallbackRosters.forEach((roster: any) => {
+        (roster.players || []).forEach((playerId: string) => ids.add(playerId));
+      });
+    } catch (error) {
+      console.warn("Unable to fetch fallback rosters for suggestions", error);
+    }
+  }
+  return Array.from(ids);
+};
+
+const loadDefaultSuggestions = async () => {
+  defaultSuggestionsLoading.value = true;
+  try {
+    const playerIds = await collectPlayerPool();
+    if (playerIds.length === 0) {
+      defaultSuggestions.value = [];
+      return;
+    }
+    defaultSuggestions.value = await buildTopSuggestionsFromIds(playerIds);
+    if (!query.value.trim()) {
+      suggestions.value = [];
+    }
+  } catch (error) {
+    console.error("Unable to load default player suggestions", error);
+  } finally {
+    defaultSuggestionsLoading.value = false;
+  }
+};
+
+const loadRosterSuggestions = async (rosterId: string) => {
+  if (!rosterId) return;
+  defaultSuggestionsLoading.value = true;
+  try {
+    const players =
+      rosterOptions.value.find((opt) => opt.value === rosterId)?.players || [];
+    defaultSuggestions.value = await buildTopSuggestionsFromIds(players);
+    if (!query.value.trim()) {
+      suggestions.value = [];
+    }
+  } catch (error) {
+    console.error("Unable to load roster suggestions", error);
+  } finally {
+    defaultSuggestionsLoading.value = false;
   }
 };
 
@@ -149,6 +342,8 @@ onMounted(async () => {
     : route.query.playerId;
   if (playerId) {
     await loadPlayerById(playerId);
+  } else {
+    await loadDefaultSuggestions();
   }
 });
 
@@ -161,6 +356,44 @@ watch(
     }
   }
 );
+
+watch(
+  () => store.currentLeagueId,
+  async () => {
+    await fetchSeasonYear();
+    await loadDefaultSuggestions();
+  }
+);
+
+watch(
+  () => query.value,
+  (newQuery) => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      updateSuggestions(newQuery);
+    }, 200);
+  }
+);
+
+const resetView = async () => {
+  selectedPlayer.value = null;
+  seasonLine.value = {};
+  weeklyRows.value = [];
+  query.value = "";
+  rosterFilter.value = "";
+  errorMessage.value = "";
+  await loadDefaultSuggestions();
+};
+
+const handleRosterSelect = async () => {
+  if (rosterFilter.value) {
+    await loadRosterSuggestions(rosterFilter.value);
+  } else {
+    await loadDefaultSuggestions();
+  }
+};
 </script>
 
 <template>
@@ -174,7 +407,7 @@ watch(
           Player Explorer
         </p>
         <h1 class="mt-2 text-2xl font-semibold sm:text-3xl">
-          Fantasy stats at your fingertips
+          Search for any player to view their fantasy production.
         </h1>
         <p class="mt-2 text-sm text-blue-100">
           {{ headerSubtitle }}
@@ -184,6 +417,8 @@ watch(
             <input
               v-model="query"
               @keydown.enter.prevent="search"
+              @focus="inputFocused = true"
+              @blur="handleBlur"
               type="text"
               placeholder="Search by player name (e.g., 'Ja'Marr Chase')"
               class="w-full px-4 py-3 text-gray-900 bg-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:outline-none"
@@ -196,16 +431,76 @@ watch(
             Search
           </button>
         </div>
+        <div
+          class="flex flex-col gap-3 mt-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div class="flex flex-wrap gap-2">
+            <button
+              @click="resetView"
+              class="px-4 py-2 text-xs font-semibold text-blue-900 bg-white rounded-lg shadow-sm hover:bg-blue-50 focus:ring-2 focus:ring-blue-300"
+            >
+              Reset to top scorers
+            </button>
+          </div>
+          <div
+            v-if="rosterOptions.length"
+            class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
+          >
+            <span class="text-xs font-semibold uppercase text-blue-100">
+              Browse by roster
+            </span>
+            <div class="flex items-center gap-2">
+              <select
+                v-model="rosterFilter"
+                class="px-3 py-2 text-sm text-gray-900 bg-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:outline-none"
+              >
+                <option value="">All rosters (top scorers)</option>
+                <option v-for="opt in rosterOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </option>
+              </select>
+              <button
+                @click="handleRosterSelect"
+                class="px-3 py-2 text-xs font-semibold text-blue-900 bg-white rounded-lg shadow-sm hover:bg-blue-50 focus:ring-2 focus:ring-blue-300"
+              >
+                View
+              </button>
+            </div>
+          </div>
+        </div>
         <p v-if="errorMessage" class="mt-2 text-sm text-red-100">
           {{ errorMessage }}
         </p>
         <div
-          v-if="suggestions.length"
+          v-if="isLoadingSuggestions && (!selectedPlayer || inputFocused)"
+          class="flex items-center gap-2 mt-3 text-sm text-blue-100"
+        >
+          <span class="h-2 w-2 rounded-full bg-blue-200 animate-pulse"></span>
+          Fetching suggestions...
+        </div>
+        <div
+          v-if="visibleSuggestions.length"
           class="relative z-10 mt-4 overflow-hidden bg-white border border-blue-100 rounded-lg shadow-lg"
         >
+          <div
+            class="flex items-center justify-between px-4 py-2 text-xs font-semibold tracking-wide uppercase text-gray-500 bg-gray-50"
+          >
+            <span>
+              {{ suggestionTitle }}
+            </span>
+            <span
+              v-if="usingDefaultSuggestions && !isRosterSuggestions"
+              class="text-gray-400"
+            >
+              Based on your league rosters
+            </span>
+            <span v-else-if="isRosterSuggestions" class="text-gray-400">
+              Roster-specific suggestions
+            </span>
+          </div>
           <ul class="divide-y divide-gray-100">
             <li
-              v-for="player in suggestions"
+              v-for="player in visibleSuggestions"
               :key="player.id"
               @click="loadPlayer(player)"
               class="px-4 py-3 cursor-pointer hover:bg-blue-50"
@@ -220,6 +515,13 @@ watch(
                   </p>
                 </div>
                 <span
+                  v-if="player.points !== undefined"
+                  class="px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full"
+                >
+                  {{ Number(player.points).toFixed(1) }} pts
+                </span>
+                <span
+                  v-else
                   class="px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full"
                 >
                   Select

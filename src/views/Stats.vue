@@ -735,7 +735,7 @@ watch(
 </script>
 
 <template>
-  <div class="container w-11/12 max-w-screen-xl mx-auto pb-12">
+  <div class="container w-11/12 max-w-screen-xl mx-auto pb-12 text-gray-900 dark:text-gray-100">
     <div
       class="relative mt-6 overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-700 to-sky-600 text-gray-50 shadow-lg"
     >
@@ -765,8 +765,8 @@ watch(
               :max="lastWeek || 18"
               :disabled="loading"
               :class="[
-                'w-16 px-2 py-1 text-gray-900 bg-white border rounded-md focus:outline-none',
-                isInvalidRange ? 'border-red-300 ring-1 ring-red-200' : 'border-blue-100',
+                'w-16 px-2 py-1 text-gray-900 bg-white border rounded-md focus:outline-none dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700',
+                isInvalidRange ? 'border-red-300 ring-1 ring-red-200 dark:border-red-500 dark:ring-red-600/40' : 'border-blue-100 dark:border-gray-700',
               ]"
               v-model.number="filters.startWeek"
             />
@@ -776,8 +776,8 @@ watch(
               :max="lastWeek || 18"
               :disabled="loading"
               :class="[
-                'w-16 px-2 py-1 text-gray-900 bg-white border rounded-md focus:outline-none',
-                isInvalidRange ? 'border-red-300 ring-1 ring-red-200' : 'border-blue-100',
+                'w-16 px-2 py-1 text-gray-900 bg-white border rounded-md focus:outline-none dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700',
+                isInvalidRange ? 'border-red-300 ring-1 ring-red-200 dark:border-red-500 dark:ring-red-600/40' : 'border-blue-100 dark:border-gray-700',
               ]"
               v-model.number="filters.endWeek"
             />
@@ -787,8 +787,8 @@ watch(
               :class="[
                 'px-3 py-1 text-sm font-semibold rounded-md shadow',
                 isApplyDisabled
-                  ? 'text-blue-900/60 bg-white/60 cursor-not-allowed'
-                  : 'text-blue-900 bg-white hover:bg-blue-50',
+                  ? 'text-blue-900/60 bg-white/60 cursor-not-allowed dark:bg-gray-800 dark:text-gray-400'
+                  : 'text-blue-900 bg-white hover:bg-blue-50 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800',
               ]"
             >
               Apply
@@ -806,8 +806,8 @@ watch(
               :class="[
                 'px-3 py-1 rounded-md border text-xs font-semibold backdrop-blur',
                 activePresetKey === preset.key
-                  ? 'bg-white text-blue-900 border-white shadow-sm'
-                  : 'bg-white/10 text-blue-50 border-white/30 hover:bg-white/20',
+                  ? 'bg-white text-blue-900 border-white shadow-sm dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700'
+                  : 'bg-white/10 text-blue-50 border-white/30 hover:bg-white/20 dark:border-gray-700/70 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:bg-gray-800/70',
               ]"
             >
               {{ preset.label }} (W{{ preset.start }}-{{ preset.end }})
@@ -818,7 +818,7 @@ watch(
               type="checkbox"
               v-model="filters.starterOnly"
               :disabled="loading"
-              class="w-4 h-4 text-blue-600 border-blue-200 rounded focus:ring-blue-400"
+              class="w-4 h-4 text-blue-600 border-blue-200 rounded focus:ring-blue-400 dark:border-gray-500 dark:bg-gray-900"
             />
             Starter points only
           </label>
@@ -838,7 +838,7 @@ watch(
           </div>
           <button
             @click="refreshPlayerDirectory"
-            class="px-3 py-1 text-xs font-semibold text-blue-900 bg-white rounded-md shadow hover:bg-blue-50 disabled:opacity-60"
+            class="px-3 py-1 text-xs font-semibold text-blue-900 bg-white rounded-md shadow hover:bg-blue-50 disabled:opacity-60 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
             :disabled="loading"
           >
             Refresh data
@@ -855,8 +855,8 @@ watch(
         class="px-4 py-2 text-sm font-semibold rounded-lg shadow-sm"
         :class="[
           activeTab === 'season'
-            ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 border border-gray-200',
+            ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-gray-50'
+            : 'bg-white text-gray-700 border border-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700',
         ]"
         @click="activeTab = 'season'"
       >
@@ -866,8 +866,8 @@ watch(
         class="px-4 py-2 text-sm font-semibold rounded-lg shadow-sm"
         :class="[
           activeTab === 'draft'
-            ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 border border-gray-200',
+            ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-gray-50'
+            : 'bg-white text-gray-700 border border-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700',
         ]"
         @click="activeTab = 'draft'"
       >
@@ -877,8 +877,8 @@ watch(
         class="px-4 py-2 text-sm font-semibold rounded-lg shadow-sm"
         :class="[
           activeTab === 'undrafted'
-            ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 border border-gray-200',
+            ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-gray-50'
+            : 'bg-white text-gray-700 border border-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700',
         ]"
         @click="activeTab = 'undrafted'"
       >
@@ -888,8 +888,8 @@ watch(
         class="px-4 py-2 text-sm font-semibold rounded-lg shadow-sm"
         :class="[
           activeTab === 'players'
-            ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 border border-gray-200',
+            ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-gray-50'
+            : 'bg-white text-gray-700 border border-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700',
         ]"
         @click="activeTab = 'players'"
       >
@@ -899,29 +899,29 @@ watch(
 
     <div
       v-if="error"
-      class="p-4 mt-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg"
+      class="p-4 mt-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg dark:bg-red-950 dark:text-red-100 dark:border-red-900"
     >
       <div class="flex items-start gap-3">
         <div
-          class="flex items-center justify-center w-8 h-8 text-red-700 bg-white rounded-full border border-red-200"
+          class="flex items-center justify-center w-8 h-8 text-red-700 bg-white rounded-full border border-red-200 dark:bg-gray-900 dark:text-red-200 dark:border-red-800"
         >
           !
         </div>
         <div class="flex-1 space-y-2">
           <p class="font-semibold">{{ error }}</p>
-          <p v-if="errorDetail" class="text-xs text-red-700">
+          <p v-if="errorDetail" class="text-xs text-red-700 dark:text-red-100">
             {{ errorDetail }}
           </p>
           <div class="flex flex-wrap gap-2">
             <button
               @click="loadData"
-              class="px-3 py-1 text-xs font-semibold text-white bg-red-600 rounded-md shadow hover:bg-red-700"
+              class="px-3 py-1 text-xs font-semibold text-white bg-red-600 rounded-md shadow hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600"
             >
               Retry
             </button>
             <button
               @click="refreshPlayerDirectory"
-              class="px-3 py-1 text-xs font-semibold text-red-700 bg-white border border-red-200 rounded-md hover:bg-red-50 disabled:opacity-60"
+              class="px-3 py-1 text-xs font-semibold text-red-700 bg-white border border-red-200 rounded-md hover:bg-red-50 disabled:opacity-60 dark:bg-gray-900 dark:text-red-200 dark:border-red-800 dark:hover:bg-red-950"
               :disabled="loading"
             >
               Hard refresh
@@ -932,7 +932,7 @@ watch(
     </div>
     <div v-if="loading" class="mt-8 flex justify-center">
       <div
-        class="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+        class="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-900 dark:border-gray-800"
       >
         <svg
           class="w-5 h-5 text-indigo-600 animate-spin"
@@ -955,10 +955,10 @@ watch(
           ></path>
         </svg>
         <div class="text-left">
-          <div class="text-sm font-semibold text-gray-900">
+          <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
             Crunching numbers…
           </div>
-          <div class="text-xs text-gray-600">
+          <div class="text-xs text-gray-600 dark:text-gray-300">
             {{
               loadingMessage ||
                 `Loading weeks ${filters.startWeek}-${
@@ -973,16 +973,16 @@ watch(
     <!-- Team Position Ranks -->
     <div v-if="!loading && activeTab === 'season'" class="mt-6">
       <div
-        class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+        class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-900 dark:border-gray-800"
       >
-        <p class="text-sm text-gray-700">
+        <p class="text-sm text-gray-700 dark:text-gray-200">
           Click any positional header to sort ({{ seasonSortDir === "asc" ? "asc" : "desc" }}).
         </p>
       </div>
 
-      <div class="mt-4 overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm">
-        <table class="w-full text-sm text-left text-gray-700">
-          <thead class="text-xs uppercase bg-gray-50 text-gray-500">
+      <div class="mt-4 overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
+        <table class="w-full text-sm text-left text-gray-700 dark:text-gray-100">
+          <thead class="text-xs uppercase bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-300">
             <tr>
               <th class="px-4 py-3">Team</th>
               <th class="px-4 py-3">Record</th>
@@ -1022,12 +1022,12 @@ watch(
           <tbody>
             <template v-for="row in seasonRows" :key="row.rosterId">
               <tr
-                class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
+                class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer dark:border-gray-800 dark:hover:bg-gray-800/80"
                 @click="toggleSeasonRow(row.rosterId)"
               >
-                <td class="px-4 py-3 font-medium text-gray-900">
+                <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                   <RouterLink
-                    class="text-indigo-600 hover:underline"
+                    class="text-indigo-600 hover:underline dark:text-indigo-300"
                     :to="{ path: '/rosters', query: { rosterId: row.rosterId } }"
                     @click.stop
                   >
@@ -1042,7 +1042,7 @@ watch(
                 <td class="px-4 py-3 text-right">{{ row.ranks.DEF.rank }}</td>
                 <td class="px-4 py-3 text-right">
                   <button
-                    class="text-indigo-600 hover:underline"
+                    class="text-indigo-600 hover:underline dark:text-indigo-300"
                     @click.stop="toggleSeasonRow(row.rosterId)"
                   >
                     {{ openSeasonRows.includes(row.rosterId) ? "Hide" : "View" }}
@@ -1051,41 +1051,41 @@ watch(
               </tr>
               <tr
                 v-if="openSeasonRows.includes(row.rosterId)"
-                class="border-t border-gray-100 bg-gray-50"
+                class="border-t border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/70"
               >
                 <td colspan="8" class="px-4 py-4">
                   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div
                       v-for="pos in positionsForLeague"
                       :key="`${row.rosterId}-${pos}`"
-                      class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                      class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-900 dark:border-gray-800"
                     >
                       <div class="flex items-center justify-between">
-                        <div class="text-sm font-semibold text-gray-800">
+                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">
                           {{ pos }} • Rank {{ row.ranks[pos as PositionKey].rank }}
                         </div>
-                        <div class="text-xs text-gray-500">
+                        <div class="text-xs text-gray-500 dark:text-gray-300">
                           {{ row.ranks[pos as PositionKey].total.toFixed(2) }} pts
                         </div>
                       </div>
-                      <ul class="mt-2 space-y-1 text-sm text-gray-700">
+                      <ul class="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-200">
                         <li
                           v-for="p in row.ranks[pos as PositionKey].topPlayers"
                           :key="p.playerId"
                           class="flex items-center justify-between"
                         >
                           <RouterLink
-                            class="truncate text-indigo-600 hover:underline"
+                            class="truncate text-indigo-600 hover:underline dark:text-indigo-300"
                             :to="{ path: '/players', query: { playerId: p.playerId } }"
                             @click.stop
                           >
                             {{ p.name }}
                           </RouterLink>
-                          <span class="text-gray-500">
+                          <span class="text-gray-500 dark:text-gray-300">
                             {{ pointsFor(p).toFixed(2) }} ({{ formatRound(p.draftRound) }})
                           </span>
                         </li>
-                        <li v-if="row.ranks[pos as PositionKey].topPlayers.length === 0" class="text-gray-400">
+                        <li v-if="row.ranks[pos as PositionKey].topPlayers.length === 0" class="text-gray-400 dark:text-gray-400">
                           No players
                         </li>
                       </ul>
@@ -1102,24 +1102,24 @@ watch(
     <!-- Draft Ranks -->
     <div v-if="!loading && activeTab === 'draft'" class="mt-6 space-y-4">
       <div
-        class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+        class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-900 dark:border-gray-800"
       >
-        <div class="flex flex-col text-xs text-gray-600">
-          <span class="font-semibold text-gray-800">
+        <div class="flex flex-col text-xs text-gray-600 dark:text-gray-300">
+          <span class="font-semibold text-gray-800 dark:text-gray-100">
             Points from drafted players only (filters apply to all teams)
           </span>
           <div class="flex flex-wrap gap-2 mt-1">
-            <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+            <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800">
               {{ positionsChipLabel }}
             </span>
-            <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+            <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800">
               {{ roundsChipLabel }}
             </span>
           </div>
         </div>
-        <div class="flex flex-col text-sm text-gray-700">
+        <div class="flex flex-col text-sm text-gray-700 dark:text-gray-200">
           <button
-            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md"
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
             @click="showDraftPositions = !showDraftPositions"
           >
             Positions
@@ -1136,12 +1136,12 @@ watch(
           </button>
           <div
             v-show="showDraftPositions"
-            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md"
+            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md dark:bg-gray-800 dark:border-gray-700"
           >
             <label
               v-for="pos in positionsForLeague"
               :key="`pos-${pos}`"
-              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md"
+              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:border-gray-700"
             >
               <input
                 type="checkbox"
@@ -1152,22 +1152,22 @@ watch(
               {{ pos }}
             </label>
             <button
-              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
               @click="selectAllPositions()"
             >
               Select all
             </button>
             <button
-              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
               @click="filters.positions = []"
             >
               Clear
             </button>
           </div>
         </div>
-        <div class="flex flex-col text-sm text-gray-700">
+        <div class="flex flex-col text-sm text-gray-700 dark:text-gray-200">
           <button
-            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md"
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
             @click="showDraftRounds = !showDraftRounds"
           >
             Rounds
@@ -1184,12 +1184,12 @@ watch(
           </button>
           <div
             v-show="showDraftRounds"
-            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md"
+            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md dark:bg-gray-800 dark:border-gray-700"
           >
             <label
               v-for="round in availableDraftRounds"
               :key="`round-${round ?? 'ud'}`"
-              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md"
+              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:border-gray-700"
             >
               <input
                 type="checkbox"
@@ -1199,27 +1199,27 @@ watch(
               {{ formatRound(round) }}
             </label>
             <button
-              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
               @click="selectAllRounds()"
             >
               Select all
             </button>
             <button
-              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
               @click="filters.draftRounds = []"
             >
               Clear
             </button>
           </div>
         </div>
-        <p class="text-sm text-gray-700">
+        <p class="text-sm text-gray-700 dark:text-gray-200">
           Click table headers to sort ({{ draftSortDir === "asc" ? "asc" : "desc" }}).
         </p>
       </div>
 
-      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm">
-        <table class="w-full text-sm text-left text-gray-700">
-          <thead class="text-xs uppercase bg-gray-50 text-gray-500">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
+        <table class="w-full text-sm text-left text-gray-700 dark:text-gray-100">
+          <thead class="text-xs uppercase bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-300">
             <tr>
               <th
                 class="px-4 py-3 cursor-pointer"
@@ -1245,12 +1245,12 @@ watch(
           <tbody>
             <template v-for="row in draftRows" :key="row.rosterId">
               <tr
-                class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
+                class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer dark:border-gray-800 dark:hover:bg-gray-800/80"
                 @click="toggleDraftRow(row.rosterId)"
               >
-                <td class="px-4 py-3 font-medium text-gray-900">
+                <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                   <RouterLink
-                    class="text-indigo-600 hover:underline"
+                    class="text-indigo-600 hover:underline dark:text-indigo-300"
                     :to="{ path: '/rosters', query: { rosterId: row.rosterId } }"
                     @click.stop
                   >
@@ -1270,21 +1270,21 @@ watch(
               </tr>
               <tr
                 v-if="openDraftRows.includes(row.rosterId)"
-                class="border-t border-gray-100 bg-gray-50"
+                class="border-t border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/70"
               >
                 <td colspan="4" class="px-4 py-4">
-                  <div class="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs text-gray-600">
-                    <span class="font-semibold text-gray-800">
+                  <div class="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs text-gray-600 dark:text-gray-300">
+                    <span class="font-semibold text-gray-800 dark:text-gray-100">
                       Drafted players for {{ row.ownerName }} (filters applied)
                     </span>
                     <div class="flex flex-wrap gap-2">
-                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800">
                         {{ positionsChipLabel }}
                       </span>
-                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800">
                         {{ roundsChipLabel }}
                       </span>
-                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700">
                         {{ filters.starterOnly ? "Starter points" : "All points" }}
                       </span>
                     </div>
@@ -1293,7 +1293,7 @@ watch(
                     <div
                       v-for="p in row.players.slice(0, 12)"
                       :key="p.playerId"
-                      class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                      class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-900 dark:border-gray-800"
                     >
                       <div class="flex-shrink-0 w-16 h-full">
                         <div class="flex h-full flex-col items-center justify-center rounded-md bg-indigo-700 text-white text-xs font-semibold py-2 px-2 leading-tight">
@@ -1306,27 +1306,27 @@ watch(
                         </div>
                       </div>
                       <div class="flex-1">
-                        <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                        <div class="text-sm font-semibold text-gray-900 flex items-center gap-2 dark:text-gray-100">
                           <RouterLink
-                            class="text-indigo-600 hover:underline"
+                            class="text-indigo-600 hover:underline dark:text-indigo-300"
                             :to="{ path: '/players', query: { playerId: p.playerId } }"
                             @click.stop
                           >
                             {{ p.name }}
                           </RouterLink>
-                          <span class="text-gray-600">•</span>
-                          <span class="text-gray-800 font-semibold">{{ p.position }}</span>
+                          <span class="text-gray-600 dark:text-gray-300">•</span>
+                          <span class="text-gray-800 font-semibold dark:text-gray-100">{{ p.position }}</span>
                         </div>
-                        <div class="text-xs text-gray-500">
+                        <div class="text-xs text-gray-500 dark:text-gray-300">
                           {{ p.team || "FA" }}
                         </div>
                       </div>
-                      <div class="text-right text-sm text-gray-800">
-                        <div class="font-semibold text-gray-900">{{ pointsFor(p).toFixed(2) }} pts</div>
-                        <div class="text-xs text-gray-500">{{ p.ppg.toFixed(2) }} ppg</div>
+                      <div class="text-right text-sm text-gray-800 dark:text-gray-200">
+                        <div class="font-semibold text-gray-900 dark:text-gray-100">{{ pointsFor(p).toFixed(2) }} pts</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-300">{{ p.ppg.toFixed(2) }} ppg</div>
                       </div>
                     </div>
-                    <div v-if="row.players.length === 0" class="text-sm text-gray-500">
+                    <div v-if="row.players.length === 0" class="text-sm text-gray-500 dark:text-gray-300">
                       No players in this filter.
                     </div>
                   </div>
@@ -1340,24 +1340,24 @@ watch(
     <!-- Undrafted Ranks -->
     <div v-if="!loading && activeTab === 'undrafted'" class="mt-6 space-y-4">
       <div
-        class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+        class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-900 dark:border-gray-800"
       >
-        <div class="flex flex-col text-xs text-gray-600">
-          <span class="font-semibold text-gray-800">
+        <div class="flex flex-col text-xs text-gray-600 dark:text-gray-300">
+          <span class="font-semibold text-gray-800 dark:text-gray-100">
             Points from waiver/FA pickups or traded-in players (filters apply to all teams)
           </span>
           <div class="flex flex-wrap gap-2 mt-1">
-            <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+            <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800">
               {{ positionsChipLabel }}
             </span>
-            <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+            <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700">
               {{ filters.starterOnly ? "Starter points" : "All points" }}
             </span>
           </div>
         </div>
-        <div class="flex flex-col text-sm text-gray-700">
+        <div class="flex flex-col text-sm text-gray-700 dark:text-gray-200">
           <button
-            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md"
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
             @click="showUndraftedPositions = !showUndraftedPositions"
           >
             Positions
@@ -1374,12 +1374,12 @@ watch(
           </button>
           <div
             v-show="showUndraftedPositions"
-            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md"
+            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md dark:bg-gray-800 dark:border-gray-700"
           >
             <label
               v-for="pos in positionsForLeague"
               :key="`upos-${pos}`"
-              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md"
+              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:border-gray-700"
             >
               <input
                 type="checkbox"
@@ -1390,27 +1390,27 @@ watch(
               {{ pos }}
             </label>
             <button
-              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
               @click="selectAllPositions()"
             >
               Select all
             </button>
             <button
-              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
               @click="filters.positions = []"
             >
               Clear
             </button>
           </div>
         </div>
-        <p class="text-sm text-gray-700">
+        <p class="text-sm text-gray-700 dark:text-gray-200">
           Click table headers to sort ({{ undraftedSortDir === "asc" ? "asc" : "desc" }}).
         </p>
       </div>
 
-      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm">
-        <table class="w-full text-sm text-left text-gray-700">
-          <thead class="text-xs uppercase bg-gray-50 text-gray-500">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
+        <table class="w-full text-sm text-left text-gray-700 dark:text-gray-100">
+          <thead class="text-xs uppercase bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-300">
             <tr>
               <th
                 class="px-4 py-3 cursor-pointer"
@@ -1436,12 +1436,12 @@ watch(
           <tbody>
             <template v-for="row in undraftedRows" :key="row.rosterId">
               <tr
-                class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
+                class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer dark:border-gray-800 dark:hover:bg-gray-800/80"
                 @click="toggleUndraftedRow(row.rosterId)"
               >
-                <td class="px-4 py-3 font-medium text-gray-900">
+                <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                   <RouterLink
-                    class="text-indigo-600 hover:underline"
+                    class="text-indigo-600 hover:underline dark:text-indigo-300"
                     :to="{ path: '/rosters', query: { rosterId: row.rosterId } }"
                     @click.stop
                   >
@@ -1461,21 +1461,21 @@ watch(
               </tr>
               <tr
                 v-if="openUndraftedRows.includes(row.rosterId)"
-                class="border-t border-gray-100 bg-gray-50"
+                class="border-t border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/70"
               >
                 <td colspan="4" class="px-4 py-4">
-                  <div class="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs text-gray-600">
-                    <span class="font-semibold text-gray-800">
+                  <div class="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs text-gray-600 dark:text-gray-300">
+                    <span class="font-semibold text-gray-800 dark:text-gray-100">
                       Waiver/FA + trade pickups for {{ row.ownerName }} (filters applied)
                     </span>
                     <div class="flex flex-wrap gap-2">
-                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-100">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-100 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800">
                         Trades: {{ row.tradePoints.toFixed(2) }} pts
                       </span>
-                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-800">
                         Waiver/FA: {{ row.waiverPoints.toFixed(2) }} pts
                       </span>
-                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700">
                         {{ filters.starterOnly ? "Starter points" : "All points" }}
                       </span>
                     </div>
@@ -1484,7 +1484,7 @@ watch(
                     <div
                       v-for="p in row.players.slice(0, 12)"
                       :key="p.playerId"
-                      class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                      class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-900 dark:border-gray-800"
                     >
                       <div class="flex-shrink-0 w-16 h-full">
                         <div class="flex h-full items-center justify-center rounded-md bg-indigo-700 text-white text-sm font-semibold py-3 px-2 uppercase tracking-wide">
@@ -1492,36 +1492,36 @@ watch(
                         </div>
                       </div>
                       <div class="flex-1">
-                        <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                        <div class="text-sm font-semibold text-gray-900 flex items-center gap-2 dark:text-gray-100">
                           <RouterLink
-                            class="text-indigo-600 hover:underline"
+                            class="text-indigo-600 hover:underline dark:text-indigo-300"
                             :to="{ path: '/players', query: { playerId: p.playerId } }"
                             @click.stop
                           >
                             {{ p.name }}
                           </RouterLink>
-                          <span class="text-gray-600">•</span>
-                          <span class="text-gray-800 font-semibold">{{ p.team || "FA" }}</span>
+                          <span class="text-gray-600 dark:text-gray-300">•</span>
+                          <span class="text-gray-800 font-semibold dark:text-gray-100">{{ p.team || "FA" }}</span>
                         </div>
-                        <div class="text-xs text-gray-500 flex items-center gap-2">
+                        <div class="text-xs text-gray-500 flex items-center gap-2 dark:text-gray-300">
                           <span class="inline-flex items-center px-2 py-1 rounded-full"
                             :class="p.acquiredVia === 'trade'
-                              ? 'bg-amber-50 text-amber-800 border border-amber-100'
-                              : 'bg-emerald-50 text-emerald-700 border border-emerald-100'"
+                              ? 'bg-amber-50 text-amber-800 border border-amber-100 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800'
+                              : 'bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-800'"
                           >
                             {{ acquisitionLabel(p) }}
                           </span>
-                          <span v-if="p.acquisitionWeek" class="text-[11px] text-gray-500">
+                          <span v-if="p.acquisitionWeek" class="text-[11px] text-gray-500 dark:text-gray-300">
                             Added W{{ p.acquisitionWeek }}
                           </span>
                         </div>
                       </div>
-                      <div class="text-right text-sm text-gray-800">
-                        <div class="font-semibold text-gray-900">{{ pointsFor(p).toFixed(2) }} pts</div>
-                        <div class="text-xs text-gray-500">{{ p.ppg.toFixed(2) }} ppg</div>
+                      <div class="text-right text-sm text-gray-800 dark:text-gray-200">
+                        <div class="font-semibold text-gray-900 dark:text-gray-100">{{ pointsFor(p).toFixed(2) }} pts</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-300">{{ p.ppg.toFixed(2) }} ppg</div>
                       </div>
                     </div>
-                    <div v-if="row.players.length === 0" class="text-sm text-gray-500">
+                    <div v-if="row.players.length === 0" class="text-sm text-gray-500 dark:text-gray-300">
                       No waiver/FA or trade pickups in this filter.
                     </div>
                   </div>
@@ -1534,11 +1534,11 @@ watch(
     </div>
     <!-- Player Ranks -->
     <div v-if="!loading && activeTab === 'players'" class="mt-6 space-y-4">
-      <div class="grid gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <div class="flex flex-col text-sm text-gray-700">
-          <span class="font-semibold text-gray-800">Positions</span>
+      <div class="grid gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 dark:bg-gray-900 dark:border-gray-800">
+        <div class="flex flex-col text-sm text-gray-700 dark:text-gray-200">
+          <span class="font-semibold text-gray-800 dark:text-gray-100">Positions</span>
           <button
-            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md mt-1"
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md mt-1 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
             @click="showPlayerPositions = !showPlayerPositions"
           >
             Positions
@@ -1555,12 +1555,12 @@ watch(
           </button>
           <div
             v-show="showPlayerPositions"
-            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md"
+            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md dark:bg-gray-800 dark:border-gray-700"
           >
             <label
               v-for="pos in positionsForLeague"
               :key="`ppos-${pos}`"
-              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md"
+              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:border-gray-700"
             >
               <input
                 type="checkbox"
@@ -1571,24 +1571,24 @@ watch(
               {{ pos }}
             </label>
             <button
-              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
               @click="selectAllPositions()"
             >
               Select all
             </button>
             <button
-              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
               @click="filters.positions = []"
             >
               Clear
             </button>
           </div>
         </div>
-        <label class="flex flex-col text-sm text-gray-700">
-          <span class="font-semibold text-gray-800">Team / Manager</span>
+        <label class="flex flex-col text-sm text-gray-700 dark:text-gray-200">
+          <span class="font-semibold text-gray-800 dark:text-gray-100">Team / Manager</span>
           <select
             v-model="filters.ownerId"
-            class="mt-1 block w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-200"
+            class="mt-1 block w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-200 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
           >
             <option
               v-for="opt in ownerOptions"
@@ -1599,19 +1599,19 @@ watch(
             </option>
           </select>
         </label>
-        <label class="flex flex-col text-sm text-gray-700">
-          <span class="font-semibold text-gray-800">Search</span>
+        <label class="flex flex-col text-sm text-gray-700 dark:text-gray-200">
+          <span class="font-semibold text-gray-800 dark:text-gray-100">Search</span>
           <input
             v-model="filters.playerSearch"
             type="text"
             placeholder="Player name"
-            class="mt-1 block w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-200"
+            class="mt-1 block w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-200 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
           />
         </label>
-        <div class="flex flex-col text-sm text-gray-700">
-          <span class="font-semibold text-gray-800">Rounds</span>
+        <div class="flex flex-col text-sm text-gray-700 dark:text-gray-200">
+          <span class="font-semibold text-gray-800 dark:text-gray-100">Rounds</span>
           <button
-            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md mt-1"
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md mt-1 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
             @click="showPlayerRounds = !showPlayerRounds"
           >
             Rounds
@@ -1628,12 +1628,12 @@ watch(
           </button>
           <div
             v-show="showPlayerRounds"
-            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md"
+            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md dark:bg-gray-800 dark:border-gray-700"
           >
             <label
               v-for="round in availableDraftRounds"
               :key="`pround-${round ?? 'ud'}`"
-              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md"
+              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:border-gray-700"
             >
               <input
                 type="checkbox"
@@ -1643,27 +1643,27 @@ watch(
               {{ formatRound(round) }}
             </label>
             <button
-              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
               @click="selectAllRounds()"
             >
               Select all
             </button>
             <button
-              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md"
+              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
               @click="filters.draftRounds = []"
             >
               Clear
             </button>
           </div>
         </div>
-        <p class="text-sm text-gray-700 md:col-span-2 lg:col-span-1">
+        <p class="text-sm text-gray-700 md:col-span-2 lg:col-span-1 dark:text-gray-200">
           Click headers to sort ({{ playerSortDir === "asc" ? "asc" : "desc" }}).
         </p>
       </div>
 
-      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow">
-        <table class="w-full text-sm text-left text-gray-800">
-          <thead class="text-xs uppercase bg-gray-50 text-gray-500">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow dark:bg-gray-900 dark:border-gray-800">
+        <table class="w-full text-sm text-left text-gray-800 dark:text-gray-100">
+          <thead class="text-xs uppercase bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-300">
             <tr>
               <th
                 class="px-4 py-3 cursor-pointer"
@@ -1699,12 +1699,12 @@ watch(
           <tbody>
             <template v-for="row in playerFilteredRows" :key="row.playerId">
               <tr
-                class="border-t border-gray-100 odd:bg-white even:bg-gray-50 hover:bg-indigo-50/60 cursor-pointer transition"
+                class="border-t border-gray-100 odd:bg-white even:bg-gray-50 hover:bg-indigo-50/60 cursor-pointer transition dark:border-gray-800 dark:odd:bg-gray-900 dark:even:bg-gray-800 dark:hover:bg-indigo-900/40"
                 @click="togglePlayerRow(row.playerId)"
               >
-                <td class="px-4 py-3 font-semibold text-gray-900">
+                <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">
                   <RouterLink
-                    class="text-indigo-600 hover:underline"
+                    class="text-indigo-600 hover:underline dark:text-indigo-300"
                     :to="{ path: '/players', query: { playerId: row.playerId } }"
                     @click.stop
                   >
@@ -1712,52 +1712,52 @@ watch(
                   </RouterLink>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800">
                     {{ row.position }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-gray-600">{{ row.team || "—" }}</td>
+                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">{{ row.team || "—" }}</td>
                 <td class="px-4 py-3">
-                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700">
                     {{ formatRound(row.draftRound) }}
                   </span>
                 </td>
                 <td class="px-4 py-3">
                   <RouterLink
-                    class="text-indigo-600 hover:underline"
+                    class="text-indigo-600 hover:underline dark:text-indigo-300"
                     :to="{ path: '/rosters', query: { rosterId: row.ownerId ? rosters.find((r) => r.ownerId === row.ownerId)?.rosterId : undefined } }"
                     @click.stop
                   >
                     {{ row.ownerName }}
                   </RouterLink>
                 </td>
-                <td class="px-4 py-3 text-right font-semibold text-gray-900">
+                <td class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-gray-100">
                   {{ row.displayTotal.toFixed(2) }}
                 </td>
-                <td class="px-4 py-3 text-right text-gray-700">
+                <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-200">
                   {{ row.displayAvg.toFixed(2) }}
                 </td>
                 <td class="px-4 py-3 text-right">{{ row.weeksStarted }}</td>
                 <td class="px-4 py-3 text-right">
-                  <span class="text-indigo-600 hover:underline" @click.stop="togglePlayerRow(row.playerId)">
+                  <span class="text-indigo-600 hover:underline dark:text-indigo-300" @click.stop="togglePlayerRow(row.playerId)">
                     {{ openPlayerRows.includes(row.playerId) ? "Hide" : "View" }}
                   </span>
                 </td>
               </tr>
               <tr
                 v-if="openPlayerRows.includes(row.playerId)"
-                class="border-t border-gray-100 bg-gray-50"
+                class="border-t border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/70"
               >
                 <td colspan="9" class="px-4 py-4">
-                  <div class="flex flex-wrap gap-2 text-xs text-gray-700">
-                    <span class="font-semibold text-gray-800">Weekly:</span>
+                  <div class="flex flex-wrap gap-2 text-xs text-gray-700 dark:text-gray-200">
+                    <span class="font-semibold text-gray-800 dark:text-gray-100">Weekly:</span>
                     <span v-if="!(playerWeekly.get(row.playerId)?.length)">
                       No weekly data.
                     </span>
                     <span
                       v-for="w in (playerWeekly.get(row.playerId) || []).sort((a,b) => a.week - b.week)"
                       :key="`${row.playerId}-w${w.week}`"
-                      class="px-2 py-1 bg-white border border-gray-200 rounded-md"
+                      class="px-2 py-1 bg-white border border-gray-200 rounded-md dark:bg-gray-900 dark:border-gray-700"
                     >
                       W{{ w.week }}: {{ w.points.toFixed(2) }}
                       <span class="text-gray-500">
