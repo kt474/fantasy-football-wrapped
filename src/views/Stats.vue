@@ -692,7 +692,7 @@ watch(
               Max completed week: {{ lastWeek || "—" }}
             </span>
             <span class="px-2 py-1 bg-white/10 rounded-md">
-              Filters auto-saved per league
+              Filters auto-saved
             </span>
             <span class="px-2 py-1 bg-white/10 rounded-md">
               Last refreshed: {{ lastLoadedAt || "—" }}

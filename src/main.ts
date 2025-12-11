@@ -13,7 +13,6 @@ const Players = () => import("./views/Players.vue");
 const Rosters = () => import("./views/Rosters.vue");
 const ChangelogPage = () => import("./views/Changelog.vue");
 const PrivacyPolicy = () => import("./views/PrivacyPolicy.vue");
-const Contact = () => import("./views/Contact.vue");
 const AdminAwards = () => import("./views/AdminAwards.vue");
 const ScoringSettings = () => import("./views/ScoringSettings.vue");
 const Stats = () => import("./views/Stats.vue");
@@ -52,14 +51,6 @@ const routes = [
     meta: {
       title: "Privacy Policy",
       description: "We don’t collect or store your personal information.",
-    },
-  },
-  {
-    path: "/contact",
-    component: Contact,
-    meta: {
-      title: "Newsletter",
-      description: "Subscribe to our newsletter for updates and announcements.",
     },
   },
   {

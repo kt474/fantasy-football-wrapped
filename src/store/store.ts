@@ -12,7 +12,6 @@ export const useStore = defineStore("main", {
     showLeagueExistsAlert: false,
     showCopyReport: false,
     showLoadingAlert: false,
-    showEmailAlert: false,
     showInvalidLeagueAlert: false,
     showInput: false,
     leagueInfo: [] as LeagueInfoType[],
@@ -49,9 +48,6 @@ export const useStore = defineStore("main", {
     },
   },
   actions: {
-    updateShowEmailAlert(payload: boolean) {
-      this.showEmailAlert = payload;
-    },
     updateShowUsernames(payload: boolean) {
       this.showUsernames = payload;
     },

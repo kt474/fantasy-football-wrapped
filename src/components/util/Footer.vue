@@ -43,11 +43,6 @@ onMounted(async () => {
             >
           </p>
           <p class="mb-1">
-            <router-link to="/contact" class="text-blue-700 dark:text-blue-500 hover:underline"
-              >Email Newsletter</router-link
-            >
-          </p>
-          <p class="mb-1">
             <a
               aria-label="discord community invite"
               class="text-blue-700 dark:text-blue-500 hover:underline"
