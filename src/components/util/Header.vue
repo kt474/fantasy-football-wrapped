@@ -59,10 +59,6 @@ watch(
           src="../../assets/KBKH_Logo.svg"
           class="h-6 kbkh-logo"
         />
-        <span
-          class="noshow self-center -mb-1.5 custom-font whitespace-nowrap dark:text-gray-50"
-          ><span class="text-blue-600 dark:text-blue-500">ff</span>wrapped</span
-        >
       </RouterLink>
 
       <div class="flex flex-col w-full gap-3 md:w-auto md:ml-auto" id="navbar-default">

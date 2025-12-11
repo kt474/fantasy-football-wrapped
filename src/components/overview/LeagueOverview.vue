@@ -196,8 +196,17 @@ const currentWeekNumber = computed(() => {
 
 const playoffRoundLabel = computed(() => {
   const week = currentWeekNumber.value;
-  const regularWeeks = league.value?.regularSeasonLength;
-  if (!week || !regularWeeks || week <= regularWeeks) return "";
+  const regularWeeks =
+    league.value?.regularSeasonLength && league.value.regularSeasonLength > 0
+      ? league.value.regularSeasonLength
+      : 14;
+  if (!week) return "";
+  if (week <= regularWeeks) {
+    if (league.value?.status === "post_season" || league.value?.status === "complete") {
+      return "Playoffs";
+    }
+    return "";
+  }
   const roundIndex = week - regularWeeks;
   const roundNames: Record<number, string> = {
     1: "Quarterfinals",
