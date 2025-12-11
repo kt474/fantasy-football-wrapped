@@ -173,12 +173,20 @@ export const getDraftPicksRaw = async (draftId?: string) => {
   return promise;
 };
 
+export type DraftPickMeta = {
+  round: number | null;
+  rosterId: number | null;
+};
+
 export const getDraftPicksMap = async (draftId?: string) => {
-  if (!draftId) return new Map<string, number | null>();
+  if (!draftId) return new Map<string, DraftPickMeta>();
   const picks = await getDraftPicksRaw(draftId);
-  const map = new Map<string, number | null>();
+  const map = new Map<string, DraftPickMeta>();
   picks.forEach((pick: any) => {
-    map.set(pick["player_id"], pick["round"] ?? null);
+    map.set(pick["player_id"], {
+      round: pick["round"] ?? null,
+      rosterId: pick["roster_id"] ?? null,
+    });
   });
   return map;
 };

@@ -53,7 +53,7 @@ describe("loadStatsData aggregation", () => {
     mockGetPlayersDirectory.mockResolvedValue({
       p1: { first_name: "Alex", last_name: "Ace", position: "QB", team: "DAL" },
     });
-    mockGetDraftPicksMap.mockResolvedValue(new Map([["p1", 1]]));
+    mockGetDraftPicksMap.mockResolvedValue(new Map([["p1", { round: 1, rosterId: 1 }]]));
 
     mockGetMatchupsForWeek
       .mockResolvedValueOnce([

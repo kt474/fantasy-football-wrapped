@@ -29,6 +29,7 @@ const rosterPositions = ref<string[]>([]);
 const weeksLoaded = ref<number[]>([]);
 const rosters = ref<TeamRecordRow[]>([]);
 const contributions = ref<TeamPlayerContribution[]>([]);
+const draftContributions = ref<TeamPlayerContribution[]>([]);
 const playerRows = ref<PlayerAggregateRow[]>([]);
 const playerWeekly = ref<Map<string, PlayerWeeklyStat[]>>(new Map());
 
@@ -37,7 +38,7 @@ const filters = reactive({
   endWeek: 0,
   starterOnly: true,
   positions: [] as PositionKey[],
-  draftRounds: [] as (number | "ud")[],
+  draftRounds: [] as number[],
   playerSearch: "",
   ownerId: "ALL" as string | "ALL",
 });
@@ -120,23 +121,19 @@ const isApplyDisabled = computed(() => {
 });
 
 const availableDraftRounds = computed(() => {
-  const set = new Set<number | null>();
-  contributions.value.forEach((c) => {
-    set.add(c.draftRound);
+  const set = new Set<number>();
+  draftContributions.value.forEach((c) => {
+    if (c.draftRound !== null && c.draftRound !== undefined) {
+      set.add(c.draftRound);
+    }
   });
-  const sorted = Array.from(set).sort((a, b) => {
-    if (a === null) return 1;
-    if (b === null) return -1;
-    return a - b;
-  });
+  const sorted = Array.from(set).sort((a, b) => a - b);
   return sorted;
 });
 
 const ensureRoundsSelected = () => {
   if (filters.draftRounds.length === 0) {
-    filters.draftRounds = availableDraftRounds.value.map((r) =>
-      r === null ? "ud" : r
-    );
+    filters.draftRounds = availableDraftRounds.value.map((r) => r);
   }
 };
 
@@ -174,7 +171,9 @@ const hydrateFiltersFromStorage = (lid: string) => {
         positionsHydrated.value = true;
       }
       filters.draftRounds = Array.isArray(parsed.draftRounds)
-        ? [...parsed.draftRounds]
+        ? parsed.draftRounds
+            .filter((r: unknown) => Number.isFinite(r))
+            .map((r: any) => Number(r))
         : filters.draftRounds;
       filters.playerSearch =
         typeof parsed.playerSearch === "string"
@@ -270,6 +269,7 @@ const loadData = async () => {
     weeksLoaded.value = data.weeks;
     rosters.value = data.rosters;
     contributions.value = data.contributions;
+    draftContributions.value = data.draftContributions || [];
     playerRows.value = data.playerRows;
     playerWeekly.value = data.playerWeekly;
     if (!positionsHydrated.value && filters.positions.length === 0) {
@@ -349,17 +349,25 @@ const draftRows = computed(() => {
   const allowedPositions = selectedPositions.value;
   const selectedRounds = new Set(filters.draftRounds);
   const rows = rosters.value.map((r) => {
-    const matches = contributions.value.filter((c) => {
-      const roundKey = c.draftRound === null ? "ud" : c.draftRound;
+    const matches = draftContributions.value.filter((c) => {
       return (
         allowedPositions.includes(c.position as PositionKey) &&
-        selectedRounds.has(roundKey as any)
+        c.draftRound !== null &&
+        selectedRounds.has(c.draftRound) &&
+        c.ownerId === r.ownerId
       );
     });
     const teamPlayers = matches.filter((m) => m.rosterId === r.rosterId);
     const total = teamPlayers.reduce((acc, c) => acc + pointsFor(c), 0);
     const totalGames = teamPlayers.reduce((acc, c) => acc + gamesFor(c), 0);
     const avg = totalGames > 0 ? total / totalGames : total;
+    const uniqueRounds = Array.from(
+      new Set(teamPlayers.map((p) => p.draftRound))
+    ).sort((a, b) => {
+      if (a === null || a === undefined) return 1;
+      if (b === null || b === undefined) return -1;
+      return a - b;
+    });
     return {
       rosterId: r.rosterId,
       ownerName: r.ownerName,
@@ -371,11 +379,7 @@ const draftRows = computed(() => {
           ppg: gamesFor(c) ? pointsFor(c) / gamesFor(c) : pointsFor(c),
         }))
         .sort((a, b) => pointsFor(b) - pointsFor(a)),
-      roundsSummary: Array.from(
-        new Set(
-          teamPlayers.map((p) => (p.draftRound === null ? "UD" : `R${p.draftRound}`))
-        )
-      ).join(", "),
+      roundsSummary: uniqueRounds.map((r) => formatRound(r)).join(", "),
     };
   });
 
@@ -392,7 +396,7 @@ const draftRows = computed(() => {
   return sorted;
 });
 
-const toggleRound = (round: number | "ud") => {
+const toggleRound = (round: number) => {
   const idx = filters.draftRounds.indexOf(round);
   if (idx >= 0) {
     filters.draftRounds.splice(idx, 1);
@@ -403,8 +407,8 @@ const toggleRound = (round: number | "ud") => {
 };
 
 const isRoundSelected = (round: number | null) => {
-  const key = round === null ? "ud" : round;
-  return filters.draftRounds.includes(key);
+  if (round === null) return false;
+  return filters.draftRounds.includes(round);
 };
 
 const togglePosition = (pos: PositionKey) => {
@@ -418,6 +422,14 @@ const togglePosition = (pos: PositionKey) => {
 
 const isPositionSelected = (pos: PositionKey) => {
   return filters.positions.includes(pos);
+};
+
+const selectAllPositions = () => {
+  filters.positions = [...positionsForLeague.value];
+};
+
+const selectAllRounds = () => {
+  filters.draftRounds = [...availableDraftRounds.value];
 };
 
 const applyWeekRange = async () => {
@@ -467,7 +479,11 @@ const playerFilteredRows = computed(() => {
   const search = filters.playerSearch.toLowerCase().trim();
   const rows = playerRows.value
     .filter((p) => allowedPositions.includes(p.position as PositionKey))
-    .filter((p) => selectedRounds.size === 0 || selectedRounds.has((p.draftRound === null ? "ud" : p.draftRound) as any))
+    .filter(
+      (p) =>
+        selectedRounds.size === 0 ||
+        (p.draftRound !== null && selectedRounds.has(p.draftRound))
+    )
     .filter((p) =>
       filters.ownerId === "ALL"
         ? true
@@ -555,6 +571,48 @@ const positionsSummaryLabel = computed(() => {
   return `${filters.positions.length} selected`;
 });
 
+const positionsChipLabel = computed(() => {
+  if (!filters.positions.length) return "Positions: None";
+  if (filters.positions.length === positionsForLeague.value.length) return "Positions: All";
+  return `Positions: ${filters.positions.join(", ")}`;
+});
+
+const roundsChipLabel = computed(() => {
+  if (!filters.draftRounds.length || filters.draftRounds.length === availableDraftRounds.value.length) {
+    return "Rounds: All drafted";
+  }
+  const sorted = [...filters.draftRounds].sort((a, b) => a - b);
+  const allRounds = [...availableDraftRounds.value].sort((a, b) => a - b);
+
+  const compressRanges = (nums: number[]) => {
+    const ranges: string[] = [];
+    let start = nums[0];
+    let prev = nums[0];
+    for (let i = 1; i <= nums.length; i++) {
+      const curr = nums[i];
+      if (curr === prev + 1) {
+        prev = curr;
+        continue;
+      }
+      if (start === prev) {
+        ranges.push(`R${start}`);
+      } else {
+        ranges.push(`R${start}-${`R${prev}`.slice(1)}`);
+      }
+      start = curr;
+      prev = curr;
+    }
+    return ranges.join(", ");
+  };
+
+  const missing = allRounds.filter((r) => !sorted.includes(r));
+  if (missing.length && missing.length <= 2) {
+    return `Rounds: Excluding ${missing.map((r) => `R${r}`).join(" & ")}`;
+  }
+
+  return `Rounds: ${compressRanges(sorted)}`;
+});
+
 const refreshPlayerDirectory = async () => {
   clearSleeperCache("playersDirectory");
   clearSleeperCache("draft:picks:");
@@ -606,11 +664,12 @@ watch(
         class="absolute inset-0 opacity-20 bg-[radial-gradient(circle,_rgba(255,255,255,0.25)_1px,_transparent_1px)] bg-[size:26px_26px]"
       ></div>
       <div class="relative px-6 py-8 sm:px-10 sm:py-10">
-        <p class="text-xs uppercase tracking-[0.3em] text-blue-100">
-          Team Stats Lab
-        </p>
+        <!-- <p class="text-xs uppercase tracking-[0.3em] text-blue-100">
+          {{ leagueName || "Sleeper League" }} • {{ season || "2025" }} regular
+          season
+        </p> -->
         <h1 class="mt-2 text-2xl font-semibold sm:text-3xl">
-          Team Sortable Stats
+          League Sortable Stats
         </h1>
         <p class="mt-2 text-sm text-blue-100">
           {{ leagueName || "Sleeper League" }} • {{ season || "2025" }} regular
@@ -894,7 +953,7 @@ watch(
                 <td class="px-4 py-3 text-right">
                   <button
                     class="text-indigo-600 hover:underline"
-                    @click="toggleSeasonRow(row.rosterId)"
+                    @click.stop="toggleSeasonRow(row.rosterId)"
                   >
                     {{ openSeasonRows.includes(row.rosterId) ? "Hide" : "View" }}
                   </button>
@@ -955,6 +1014,19 @@ watch(
       <div
         class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
       >
+        <div class="flex flex-col text-xs text-gray-600">
+          <span class="font-semibold text-gray-800">
+            Points from drafted players only (filters apply to all teams)
+          </span>
+          <div class="flex flex-wrap gap-2 mt-1">
+            <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+              {{ positionsChipLabel }}
+            </span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+              {{ roundsChipLabel }}
+            </span>
+          </div>
+        </div>
         <div class="flex flex-col text-sm text-gray-700">
           <button
             class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md"
@@ -991,7 +1063,7 @@ watch(
             </label>
             <button
               class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
-              @click="filters.positions = [...positionsForLeague]"
+              @click="selectAllPositions()"
             >
               Select all
             </button>
@@ -1031,15 +1103,14 @@ watch(
             >
               <input
                 type="checkbox"
-                :value="round === null ? 'ud' : round"
                 :checked="isRoundSelected(round)"
-                @change="toggleRound(round === null ? 'ud' : round)"
+                @change="toggleRound(round as number)"
               />
               {{ formatRound(round) }}
             </label>
             <button
               class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
-              @click="ensureRoundsSelected()"
+              @click="selectAllRounds()"
             >
               Select all
             </button>
@@ -1066,7 +1137,6 @@ watch(
               >
                 Team
               </th>
-              <th class="px-4 py-3">Rounds</th>
               <th
                 class="px-4 py-3 text-right cursor-pointer"
                 @click="handleDraftHeaderSort('total')"
@@ -1097,13 +1167,12 @@ watch(
                     {{ row.ownerName }}
                   </RouterLink>
                 </td>
-                <td class="px-4 py-3">{{ row.roundsSummary || "—" }}</td>
                 <td class="px-4 py-3 text-right">{{ row.total.toFixed(2) }}</td>
                 <td class="px-4 py-3 text-right">{{ row.avg.toFixed(2) }}</td>
                 <td class="px-4 py-3 text-right">
                   <button
                     class="text-indigo-600 hover:underline"
-                    @click="toggleDraftRow(row.rosterId)"
+                    @click.stop="toggleDraftRow(row.rosterId)"
                   >
                     {{ openDraftRows.includes(row.rosterId) ? "Hide" : "View" }}
                   </button>
@@ -1113,15 +1182,41 @@ watch(
                 v-if="openDraftRows.includes(row.rosterId)"
                 class="border-t border-gray-100 bg-gray-50"
               >
-                <td colspan="5" class="px-4 py-4">
+                <td colspan="4" class="px-4 py-4">
+                  <div class="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs text-gray-600">
+                    <span class="font-semibold text-gray-800">
+                      Drafted players for {{ row.ownerName }} (filters applied)
+                    </span>
+                    <div class="flex flex-wrap gap-2">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        {{ positionsChipLabel }}
+                      </span>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        {{ roundsChipLabel }}
+                      </span>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                        {{ filters.starterOnly ? "Starter points" : "All points" }}
+                      </span>
+                    </div>
+                  </div>
                   <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     <div
                       v-for="p in row.players.slice(0, 12)"
                       :key="p.playerId"
-                      class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                      class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
                     >
-                      <div>
-                        <div class="text-sm font-semibold text-gray-900">
+                      <div class="flex-shrink-0 w-16 h-full">
+                        <div class="flex h-full flex-col items-center justify-center rounded-md bg-indigo-700 text-white text-xs font-semibold py-2 px-2 leading-tight">
+                          <div class="text-sm">
+                            {{ formatRound(p.draftRound) }}
+                          </div>
+                          <div class="uppercase text-[10px] tracking-wide">
+                            {{ p.team || "FA" }}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex-1">
+                        <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
                           <RouterLink
                             class="text-indigo-600 hover:underline"
                             :to="{ path: '/players', query: { playerId: p.playerId } }"
@@ -1129,17 +1224,16 @@ watch(
                           >
                             {{ p.name }}
                           </RouterLink>
-                          • {{ p.position }}
+                          <span class="text-gray-600">•</span>
+                          <span class="text-gray-800 font-semibold">{{ p.position }}</span>
                         </div>
                         <div class="text-xs text-gray-500">
-                          {{ formatRound(p.draftRound) }} • {{ p.team || "FA" }}
+                          {{ p.team || "FA" }}
                         </div>
                       </div>
                       <div class="text-right text-sm text-gray-800">
-                        <div>{{ pointsFor(p).toFixed(2) }} pts</div>
-                        <div class="text-xs text-gray-500">
-                          {{ p.ppg.toFixed(2) }} ppg
-                        </div>
+                        <div class="font-semibold text-gray-900">{{ pointsFor(p).toFixed(2) }} pts</div>
+                        <div class="text-xs text-gray-500">{{ p.ppg.toFixed(2) }} ppg</div>
                       </div>
                     </div>
                     <div v-if="row.players.length === 0" class="text-sm text-gray-500">
@@ -1193,7 +1287,7 @@ watch(
             </label>
             <button
               class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
-              @click="filters.positions = [...positionsForLeague]"
+              @click="selectAllPositions()"
             >
               Select all
             </button>
@@ -1258,15 +1352,14 @@ watch(
             >
               <input
                 type="checkbox"
-                :value="round === null ? 'ud' : round"
                 :checked="isRoundSelected(round)"
-                @change="toggleRound(round === null ? 'ud' : round)"
+                @change="toggleRound(round as number)"
               />
               {{ formatRound(round) }}
             </label>
             <button
               class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
-              @click="ensureRoundsSelected()"
+              @click="selectAllRounds()"
             >
               Select all
             </button>
@@ -1361,7 +1454,7 @@ watch(
                 </td>
                 <td class="px-4 py-3 text-right">{{ row.weeksStarted }}</td>
                 <td class="px-4 py-3 text-right">
-                  <span class="text-indigo-600 hover:underline">
+                  <span class="text-indigo-600 hover:underline" @click.stop="togglePlayerRow(row.playerId)">
                     {{ openPlayerRows.includes(row.playerId) ? "Hide" : "View" }}
                   </span>
                 </td>

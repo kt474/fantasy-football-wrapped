@@ -4,6 +4,7 @@ import {
   getMatchupsForWeek,
   getPlayersDirectory,
   type SleeperPlayerMap,
+  type DraftPickMeta,
 } from "./sleeperClient";
 import type {
   TeamPlayerContribution,
@@ -94,6 +95,7 @@ export const loadStatsData = async ({
   );
 
   const contributions = new Map<string, TeamPlayerContribution>();
+  const draftContributions = new Map<string, TeamPlayerContribution>();
   const playerWeekly = new Map<string, PlayerWeeklyStat[]>();
 
   weeks.forEach((weekNumber, idx) => {
@@ -109,6 +111,16 @@ export const loadStatsData = async ({
       playerIds.forEach((playerId: string) => {
         const pts = Number(playersPoints[playerId]) || 0;
         const meta = players[playerId] || {};
+        const draftMeta: DraftPickMeta | undefined = draftMap.get(playerId);
+        const draftRound = draftMeta?.round ?? null;
+        const draftingRosterId = draftMeta?.rosterId ?? null;
+        const draftingOwnerId = draftingRosterId
+          ? rosterOwnerByRosterId[draftingRosterId]
+          : undefined;
+        const draftingOwnerName =
+          draftingOwnerId && ownerNameById[draftingOwnerId]
+            ? ownerNameById[draftingOwnerId]
+            : "Unknown";
         const key = `${game.roster_id}-${playerId}`;
         if (!contributions.has(key)) {
           contributions.set(key, {
@@ -121,7 +133,7 @@ export const loadStatsData = async ({
             name: ensureName(meta),
             position: normalizePosition(meta.position),
             team: meta.team || "",
-            draftRound: draftMap.get(playerId) ?? null,
+            draftRound,
             startedPoints: 0,
             totalPoints: 0,
             startedGames: 0,
@@ -138,6 +150,36 @@ export const loadStatsData = async ({
           row.startedGames += 1;
         }
         row.lastWeekSeen = Math.max(row.lastWeekSeen || 0, weekNumber);
+
+        // Attribute points to drafting manager for draft-specific totals. Skip undrafted.
+        if (draftMeta && draftingRosterId !== null) {
+          const draftKey = `${draftingRosterId}-${playerId}`;
+          if (!draftContributions.has(draftKey)) {
+            draftContributions.set(draftKey, {
+              rosterId: draftingRosterId,
+              ownerId: draftingOwnerId || null,
+              ownerName: draftingOwnerName,
+              playerId,
+              name: ensureName(meta),
+              position: normalizePosition(meta.position),
+              team: meta.team || "",
+              draftRound,
+              startedPoints: 0,
+              totalPoints: 0,
+              startedGames: 0,
+              totalGames: 0,
+              lastWeekSeen: weekNumber,
+            });
+          }
+          const draftRow = draftContributions.get(draftKey)!;
+          draftRow.totalPoints += pts;
+          draftRow.totalGames += 1;
+          if (started) {
+            draftRow.startedPoints += pts;
+            draftRow.startedGames += 1;
+          }
+          draftRow.lastWeekSeen = Math.max(draftRow.lastWeekSeen || 0, weekNumber);
+        }
         if (!playerWeekly.has(playerId)) {
           playerWeekly.set(playerId, []);
         }
@@ -147,6 +189,31 @@ export const loadStatsData = async ({
           started,
         });
       });
+    });
+  });
+
+  // Ensure every drafted player appears for their drafter even if they recorded 0 points in the window.
+  draftMap.forEach((draftMeta, playerId) => {
+    if (!draftMeta || draftMeta.rosterId === null || draftMeta.rosterId === undefined) return;
+    const draftKey = `${draftMeta.rosterId}-${playerId}`;
+    if (draftContributions.has(draftKey)) return;
+    const meta = players[playerId] || {};
+    const ownerId = rosterOwnerByRosterId[draftMeta.rosterId] || null;
+    const ownerName = ownerId ? ownerNameById[ownerId] || "Unknown" : "Unknown";
+    draftContributions.set(draftKey, {
+      rosterId: draftMeta.rosterId,
+      ownerId,
+      ownerName,
+      playerId,
+      name: ensureName(meta),
+      position: normalizePosition(meta.position),
+      team: meta.team || "",
+      draftRound: draftMeta.round ?? null,
+      startedPoints: 0,
+      totalPoints: 0,
+      startedGames: 0,
+      totalGames: 0,
+      lastWeekSeen: undefined,
     });
   });
 
@@ -201,6 +268,7 @@ export const loadStatsData = async ({
       })
     ),
     contributions: Array.from(contributions.values()),
+    draftContributions: Array.from(draftContributions.values()),
     playerRows: Array.from(playerAggregateMap.values()).map((row) => ({
       // strip internal latestOwnerWeek before returning
       playerId: row.playerId,
