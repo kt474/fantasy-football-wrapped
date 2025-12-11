@@ -44,6 +44,12 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
         runtimeCaching: [
           {
+            // Always go to network for admin UI and API calls; avoid SW cache or fallback
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/"),
+            handler: "NetworkOnly",
+          },
+          {
             urlPattern: /^https:\/\/api\.sleeper\.app\/v1/,
             handler: "CacheFirst",
             options: {
@@ -58,6 +64,7 @@ export default defineConfig({
             },
           },
         ],
+        navigateFallbackDenylist: [/^\/admin\//, /^\/api\//],
       },
     }),
   ],
