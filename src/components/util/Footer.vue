@@ -81,7 +81,7 @@ onMounted(async () => {
           class="w-full mt-2 mb-2.5 border-b border-gray-200 dark:border-gray-600"
         ></div>
         <p class="text-gray-700 dark:text-gray-300">
-          Join thousands of managers using ffwrapped
+          Join thousands of managers using this app
         </p>
       </div>
     </div>

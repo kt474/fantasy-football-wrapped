@@ -14,8 +14,8 @@ export default defineConfig({
       minify: false,
       includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png"],
       manifest: {
-        name: "ffwrapped",
-        short_name: "ffwrapped",
+        name: "Fantasy Football Wrapped",
+        short_name: "Fantasy Wrapped",
         description: "Fantasy football league insights",
         theme_color: "#f8fafc",
         display: "standalone",

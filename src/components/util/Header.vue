@@ -212,7 +212,7 @@ watch(
                   <p
                     class="text-base leading-relaxed text-gray-700 dark:text-gray-100"
                   >
-                    Welcome to ffwrapped, a platform designed to provide
+                    Welcome to Fantasy Football Wrapped, a platform designed to provide
                     insightful data and charts for your
                     <a
                       aria-label="Link to sleeper website"
@@ -244,7 +244,7 @@ watch(
                     >
                     send an
                     <a
-                      href="mailto:kevin@ffwrapped.com?subject=ffwrapped request"
+                      href="mailto:support@example.com?subject=feature%20request"
                       class="font-medium text-blue-600 dark:text-blue-400 hover:underline"
                       >email,</a
                     >
@@ -272,18 +272,6 @@ watch(
                         style="height: 55px !important; width: 217px !important"
                         class="mx-auto mt-6"
                     /></a>
-                    <a
-                      href="https://venmo.com/u/ffwrapped"
-                      target="_blank"
-                      class=""
-                    >
-                      <img
-                        src="/Venmo_Logo_Blue.png"
-                        alt="Venmo"
-                        style="height: 45px !important; width: 210px !important"
-                        class="mt-7"
-                      />
-                    </a>
                   </div>
                 </div>
                 <div

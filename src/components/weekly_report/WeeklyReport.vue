@@ -635,7 +635,7 @@ const getMatchupWinner = (matchupIndex: number | null, currentWeek: number) => {
 
 const copyReport = () => {
   navigator.clipboard.writeText(
-    rawWeeklyReport.value + "\n\nCreated with https://ffwrapped.com"
+    rawWeeklyReport.value + "\n\nCreated with Fantasy Football Wrapped"
   );
   store.showCopyReport = true;
   setTimeout(() => {

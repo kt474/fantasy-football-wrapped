@@ -136,7 +136,7 @@ const getSummary = async () => {
 };
 const copyReport = () => {
   navigator.clipboard.writeText(
-    rawSummary.value + +"\n\nCreated with https://ffwrapped.com"
+    rawSummary.value + "\n\nCreated with Fantasy Football Wrapped"
   );
   store.showCopyReport = true;
   setTimeout(() => {
@@ -185,7 +185,7 @@ const copyReport = () => {
         accurate.
       </p>
       <p class="text-xs text-gray-500 dark:text-gray-300">
-        If you've enjoyed using ffwrapped this season please consider
+        If you've enjoyed using this app this season please consider
         <a
           aria-label="buymeacoffee donation page"
           class="text-blue-700 dark:text-blue-500 hover:underline"

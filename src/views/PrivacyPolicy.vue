@@ -27,9 +27,9 @@ onMounted(() => {
         class="max-w-4xl text-base leading-relaxed text-gray-700 dark:text-gray-300"
       >
         <p class="mb-3 text-xl font-semibold">Introduction</p>
-        ffwrapped ("we," "our," or "us") is committed to protecting your
-        privacy. This Privacy Policy explains how we collect, use, and share
-        information when you use our website, ffwrapped.com.
+        Fantasy Football Wrapped ("we," "our," or "us") is committed to
+        protecting your privacy. This Privacy Policy explains how we collect,
+        use, and share information when you use our website.
         <p class="my-3 text-xl font-semibold">Information Collection and Use</p>
         We do not collect any personal data from our users. You can browse and
         use our website without providing any personal information.
@@ -54,7 +54,7 @@ onMounted(() => {
         If you have any questions or concerns about this Privacy Policy, please
         contact us at this
         <a
-          href="mailto:kevin@ffwrapped.com?subject=privacy policy"
+          href="mailto:support@example.com?subject=privacy policy"
           class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
           >email</a
         >.

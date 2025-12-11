@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { fetchAwards, saveAwards } from "../api/awardsClient";
 import { SeasonalAward, SeasonalAwardId } from "../types/types";
 
-const STORAGE_KEY = "ffwrappedSeasonalAwards";
+const STORAGE_KEY = "seasonalAwardsCache";
 
 const defaultAwards: SeasonalAward[] = [
   {
