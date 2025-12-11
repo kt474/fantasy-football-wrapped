@@ -238,17 +238,6 @@ const handleBlur = () => {
   }, 120);
 };
 
-const getOwnerName = (rosterId: string | number) => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  if (!currentLeague) return "";
-  const roster = (currentLeague.rosters || []).find(
-    (r: any) => String(r?.rosterId) === String(rosterId)
-  );
-  if (!roster) return "";
-  const user = (currentLeague.users || []).find((u: any) => u?.id === roster.id);
-  return user?.name || user?.username || "";
-};
-
 const buildTopSuggestionsFromIds = async (playerIds: string[]) => {
   if (playerIds.length === 0) return [];
   const unique = Array.from(new Set(playerIds)).slice(0, 200);

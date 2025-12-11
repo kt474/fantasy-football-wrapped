@@ -238,7 +238,6 @@ const resolveCustomWinner = (award: any) => {
 };
 
 const coreSeasonalAwards = computed(() => {
-  const seasonComplete = props.league?.status === "complete";
   const championshipMatch = props.league?.winnersBracket?.find(
     (matchup: any) => matchup.p === 1
   );
