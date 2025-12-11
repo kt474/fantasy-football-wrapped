@@ -374,6 +374,12 @@ const resetView = async () => {
 
 const handleRosterSelect = async () => {
   if (rosterFilter.value) {
+    // Clear current player context so roster suggestions show immediately
+    selectedPlayer.value = null;
+    seasonLine.value = {};
+    weeklyRows.value = [];
+    query.value = "";
+    errorMessage.value = "";
     await loadRosterSuggestions(rosterFilter.value);
   } else {
     await loadDefaultSuggestions();
