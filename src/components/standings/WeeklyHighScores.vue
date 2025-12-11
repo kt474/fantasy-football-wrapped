@@ -76,6 +76,14 @@ const highestPoints = computed(() => {
   return Math.max(...weeklyLeaders.value.map((leader) => leader.points));
 });
 
+const topWeeklyHigh = computed(() => {
+  if (!weeklyLeaders.value.length) return null;
+  return weeklyLeaders.value.reduce(
+    (best, current) => (current.points > best.points ? current : best),
+    weeklyLeaders.value[0]
+  );
+});
+
 const leaderForWeek = (week: number) => leadersByWeek.value[week];
 
 const formatTeamName = (team: TableDataType) => {
@@ -170,7 +178,20 @@ const formatTeamName = (team: TableDataType) => {
                 leaderForWeek(week) ? '' : 'weekly-cell__points--pending',
               ]"
             >
-              {{ leaderForWeek(week)?.points ?? "Pending" }}
+              <div class="weekly-points">
+                <span
+                  v-if="
+                    topWeeklyHigh &&
+                    leaderForWeek(week)?.points === topWeeklyHigh.points
+                  "
+                  class="weekly-points__badge"
+                >
+                  🔥 Season high
+                </span>
+                <span class="weekly-points__value">
+                  {{ leaderForWeek(week)?.points ?? "Pending" }}
+                </span>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -387,6 +408,27 @@ const formatTeamName = (team: TableDataType) => {
 .weekly-cell__points--pending {
   color: var(--text-secondary);
   font-weight: 700;
+}
+
+.weekly-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.weekly-points__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #b91c1c;
+  background: rgba(248, 113, 113, 0.16);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  white-space: nowrap;
 }
 
 .weekly-empty {

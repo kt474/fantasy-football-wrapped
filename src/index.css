@@ -31,3 +31,7 @@ div[data-popper-placement="bottom"] button {
   text-align: center;
   padding: 0;
 }
+
+.weekly-team__meta {
+  display: none;
+}
