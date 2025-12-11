@@ -1,4 +1,4 @@
-import { getLeague, getRosters, getUsers } from "./api";
+import { getLeague, getRosters, getTransactions, getUsers } from "./api";
 import {
   getDraftPicksMap,
   getMatchupsForWeek,
@@ -13,6 +13,7 @@ import type {
   PlayerWeeklyStat,
   LeagueContext,
   LeagueInfoType,
+  AcquisitionType,
 } from "../types/types";
 
 const defaultLeagueId =
@@ -90,9 +91,68 @@ export const loadStatsData = async ({
   for (let w = clampedStart; w <= clampedEnd; w += 1) {
     weeks.push(w);
   }
-  const matchupsByWeek = await Promise.all(
+
+  const acquisitionByRosterPlayer = new Map<
+    string,
+    { type: AcquisitionType; week: number }
+  >();
+  const registerAcquisition = (
+    playerId: string,
+    rosterId: number | null | undefined,
+    type: AcquisitionType,
+    week: number
+  ) => {
+    if (rosterId === null || rosterId === undefined) return;
+    const numericRosterId = Number(rosterId);
+    if (!Number.isFinite(numericRosterId)) return;
+    const key = `${numericRosterId}-${playerId}`;
+    const existing = acquisitionByRosterPlayer.get(key);
+    if (existing && existing.week <= week) return;
+    acquisitionByRosterPlayer.set(key, { type, week });
+  };
+
+  draftMap.forEach((draftMeta, playerId) => {
+    if (draftMeta && draftMeta.rosterId !== null && draftMeta.rosterId !== undefined) {
+      registerAcquisition(playerId, draftMeta.rosterId, "draft", 0);
+    }
+  });
+
+  const transactionWeeks = Array.from({ length: clampedEnd }, (_, i) => i + 1);
+  const transactionsByWeekPromise = Promise.all(
+    transactionWeeks.map(async (week) => {
+      try {
+        return await getTransactions(leagueId, week);
+      } catch (err) {
+        console.warn(`Unable to load transactions for week ${week}`, err);
+        return [];
+      }
+    })
+  );
+
+  const matchupsByWeekPromise = Promise.all(
     weeks.map((week) => getMatchupsForWeek(leagueId, week))
   );
+
+  const [matchupsByWeek, transactionsByWeek] = await Promise.all([
+    matchupsByWeekPromise,
+    transactionsByWeekPromise,
+  ]);
+
+  transactionsByWeek.forEach((transactions: any[], idx) => {
+    const week = transactionWeeks[idx];
+    (transactions || []).forEach((txn: any) => {
+      if (txn.status !== "complete" || !txn.adds) return;
+      const type: AcquisitionType =
+        txn.type === "trade"
+          ? "trade"
+          : txn.type === "waiver"
+            ? "waiver"
+            : "free_agent";
+      Object.entries(txn.adds).forEach(([playerId, rosterId]) => {
+        registerAcquisition(playerId, Number(rosterId), type, week);
+      });
+    });
+  });
 
   const contributions = new Map<string, TeamPlayerContribution>();
   const draftContributions = new Map<string, TeamPlayerContribution>();
@@ -122,6 +182,7 @@ export const loadStatsData = async ({
             ? ownerNameById[draftingOwnerId]
             : "Unknown";
         const key = `${game.roster_id}-${playerId}`;
+        const acquisitionMeta = acquisitionByRosterPlayer.get(key);
         if (!contributions.has(key)) {
           contributions.set(key, {
             rosterId: game.roster_id,
@@ -134,6 +195,8 @@ export const loadStatsData = async ({
             position: normalizePosition(meta.position),
             team: meta.team || "",
             draftRound,
+            acquiredVia: acquisitionMeta?.type ?? null,
+            acquisitionWeek: acquisitionMeta?.week ?? null,
             startedPoints: 0,
             totalPoints: 0,
             startedGames: 0,
@@ -142,6 +205,10 @@ export const loadStatsData = async ({
           });
         }
         const row = contributions.get(key)!;
+        if (!row.acquiredVia && acquisitionMeta?.type) {
+          row.acquiredVia = acquisitionMeta.type;
+          row.acquisitionWeek = acquisitionMeta.week ?? null;
+        }
         row.totalPoints += pts;
         row.totalGames += 1;
         const started = starterSet.has(playerId);
@@ -161,14 +228,16 @@ export const loadStatsData = async ({
               ownerName: draftingOwnerName,
               playerId,
               name: ensureName(meta),
-              position: normalizePosition(meta.position),
-              team: meta.team || "",
-              draftRound,
-              startedPoints: 0,
-              totalPoints: 0,
-              startedGames: 0,
-              totalGames: 0,
-              lastWeekSeen: weekNumber,
+            position: normalizePosition(meta.position),
+            team: meta.team || "",
+            draftRound,
+            acquiredVia: "draft",
+            acquisitionWeek: 0,
+            startedPoints: 0,
+            totalPoints: 0,
+            startedGames: 0,
+            totalGames: 0,
+            lastWeekSeen: weekNumber,
             });
           }
           const draftRow = draftContributions.get(draftKey)!;
@@ -209,6 +278,8 @@ export const loadStatsData = async ({
       position: normalizePosition(meta.position),
       team: meta.team || "",
       draftRound: draftMeta.round ?? null,
+      acquiredVia: "draft",
+      acquisitionWeek: 0,
       startedPoints: 0,
       totalPoints: 0,
       startedGames: 0,
@@ -255,6 +326,10 @@ export const loadStatsData = async ({
     }
   });
 
+  const undraftedContributions = Array.from(contributions.values()).filter(
+    (row) => row.acquiredVia && row.acquiredVia !== "draft"
+  );
+
   return {
     league: leagueCtx,
     rosters: rosters.map(
@@ -269,6 +344,7 @@ export const loadStatsData = async ({
     ),
     contributions: Array.from(contributions.values()),
     draftContributions: Array.from(draftContributions.values()),
+    undraftedContributions,
     playerRows: Array.from(playerAggregateMap.values()).map((row) => ({
       // strip internal latestOwnerWeek before returning
       playerId: row.playerId,

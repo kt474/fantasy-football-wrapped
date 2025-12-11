@@ -11,7 +11,7 @@ import type {
   PlayerWeeklyStat,
 } from "../types/types";
 
-type TabKey = "season" | "draft" | "players";
+type TabKey = "season" | "draft" | "undrafted" | "players";
 type PositionKey = "QB" | "RB" | "WR" | "TE" | "DEF" | "K";
 
 const store = useStore();
@@ -30,6 +30,7 @@ const weeksLoaded = ref<number[]>([]);
 const rosters = ref<TeamRecordRow[]>([]);
 const contributions = ref<TeamPlayerContribution[]>([]);
 const draftContributions = ref<TeamPlayerContribution[]>([]);
+const undraftedContributions = ref<TeamPlayerContribution[]>([]);
 const playerRows = ref<PlayerAggregateRow[]>([]);
 const playerWeekly = ref<Map<string, PlayerWeeklyStat[]>>(new Map());
 
@@ -47,11 +48,15 @@ const seasonSortKey = ref<PositionKey>("QB");
 const seasonSortDir = ref<"asc" | "desc">("asc");
 const draftSortKey = ref<"total" | "avg" | "team">("total");
 const draftSortDir = ref<"asc" | "desc">("desc");
+const undraftedSortKey = ref<"total" | "avg" | "team">("total");
+const undraftedSortDir = ref<"asc" | "desc">("desc");
 const openSeasonRows = ref<number[]>([]);
 const openDraftRows = ref<number[]>([]);
+const openUndraftedRows = ref<number[]>([]);
 const openPlayerRows = ref<string[]>([]);
 const positionsHydrated = ref(false);
 const showDraftPositions = ref(false);
+const showUndraftedPositions = ref(false);
 const showDraftRounds = ref(false);
 const showPlayerPositions = ref(false);
 const showPlayerRounds = ref(false);
@@ -186,6 +191,7 @@ const hydrateFiltersFromStorage = (lid: string) => {
     if (
       savedTab === "season" ||
       savedTab === "draft" ||
+      savedTab === "undrafted" ||
       savedTab === "players"
     ) {
       activeTab.value = savedTab as TabKey;
@@ -270,6 +276,7 @@ const loadData = async () => {
     rosters.value = data.rosters;
     contributions.value = data.contributions;
     draftContributions.value = data.draftContributions || [];
+    undraftedContributions.value = data.undraftedContributions || [];
     playerRows.value = data.playerRows;
     playerWeekly.value = data.playerWeekly;
     if (!positionsHydrated.value && filters.positions.length === 0) {
@@ -396,6 +403,53 @@ const draftRows = computed(() => {
   return sorted;
 });
 
+const undraftedRows = computed(() => {
+  const allowedPositions = selectedPositions.value;
+  const rows = rosters.value.map((r) => {
+    const matches = undraftedContributions.value.filter((c) => {
+      return (
+        allowedPositions.includes(c.position as PositionKey) &&
+        c.ownerId === r.ownerId
+      );
+    });
+    const total = matches.reduce((acc, c) => acc + pointsFor(c), 0);
+    const totalGames = matches.reduce((acc, c) => acc + gamesFor(c), 0);
+    const avg = totalGames > 0 ? total / totalGames : total;
+    const tradePoints = matches
+      .filter((m) => m.acquiredVia === "trade")
+      .reduce((acc, c) => acc + pointsFor(c), 0);
+    const waiverPoints = matches
+      .filter((m) => m.acquiredVia !== "trade")
+      .reduce((acc, c) => acc + pointsFor(c), 0);
+    return {
+      rosterId: r.rosterId,
+      ownerName: r.ownerName,
+      total,
+      avg,
+      tradePoints,
+      waiverPoints,
+      players: matches
+        .map((c) => ({
+          ...c,
+          ppg: gamesFor(c) ? pointsFor(c) / gamesFor(c) : pointsFor(c),
+        }))
+        .sort((a, b) => pointsFor(b) - pointsFor(a)),
+    };
+  });
+
+  const sorted = [...rows].sort((a, b) => {
+    if (undraftedSortKey.value === "team") {
+      const cmp = a.ownerName.localeCompare(b.ownerName);
+      return undraftedSortDir.value === "asc" ? cmp : -cmp;
+    }
+    if (undraftedSortKey.value === "avg") {
+      return undraftedSortDir.value === "asc" ? a.avg - b.avg : b.avg - a.avg;
+    }
+    return undraftedSortDir.value === "asc" ? a.total - b.total : b.total - a.total;
+  });
+  return sorted;
+});
+
 const toggleRound = (round: number) => {
   const idx = filters.draftRounds.indexOf(round);
   if (idx >= 0) {
@@ -467,6 +521,14 @@ const toggleDraftRow = (rosterId: number) => {
     openDraftRows.value = openDraftRows.value.filter((r) => r !== rosterId);
   } else {
     openDraftRows.value = [...openDraftRows.value, rosterId];
+  }
+};
+
+const toggleUndraftedRow = (rosterId: number) => {
+  if (openUndraftedRows.value.includes(rosterId)) {
+    openUndraftedRows.value = openUndraftedRows.value.filter((r) => r !== rosterId);
+  } else {
+    openUndraftedRows.value = [...openUndraftedRows.value, rosterId];
   }
 };
 
@@ -558,6 +620,15 @@ const handleDraftHeaderSort = (key: "team" | "total" | "avg") => {
   }
 };
 
+const handleUndraftedHeaderSort = (key: "team" | "total" | "avg") => {
+  if (undraftedSortKey.value === key) {
+    undraftedSortDir.value = undraftedSortDir.value === "asc" ? "desc" : "asc";
+  } else {
+    undraftedSortKey.value = key;
+    undraftedSortDir.value = key === "team" ? "asc" : "desc";
+  }
+};
+
 const roundsSummaryLabel = computed(() => {
   if (!filters.draftRounds.length || filters.draftRounds.length === availableDraftRounds.value.length) {
     return "All rounds";
@@ -612,6 +683,14 @@ const roundsChipLabel = computed(() => {
 
   return `Rounds: ${compressRanges(sorted)}`;
 });
+
+const acquisitionLabel = (row: TeamPlayerContribution) => {
+  if (row.acquiredVia === "trade") return "Trade";
+  if (row.acquiredVia === "waiver" || row.acquiredVia === "free_agent") {
+    return "Waiver / FA";
+  }
+  return "Undrafted";
+};
 
 const refreshPlayerDirectory = async () => {
   clearSleeperCache("playersDirectory");
@@ -781,7 +860,7 @@ watch(
         ]"
         @click="activeTab = 'season'"
       >
-        Season Ranks
+        Team Pos. Ranks
       </button>
       <button
         class="px-4 py-2 text-sm font-semibold rounded-lg shadow-sm"
@@ -793,6 +872,17 @@ watch(
         @click="activeTab = 'draft'"
       >
         Draft Ranks
+      </button>
+      <button
+        class="px-4 py-2 text-sm font-semibold rounded-lg shadow-sm"
+        :class="[
+          activeTab === 'undrafted'
+            ? 'bg-blue-600 text-white'
+            : 'bg-white text-gray-700 border border-gray-200',
+        ]"
+        @click="activeTab = 'undrafted'"
+      >
+        Undrafted Ranks
       </button>
       <button
         class="px-4 py-2 text-sm font-semibold rounded-lg shadow-sm"
@@ -880,7 +970,7 @@ watch(
       </div>
     </div>
 
-    <!-- Season Ranks -->
+    <!-- Team Position Ranks -->
     <div v-if="!loading && activeTab === 'season'" class="mt-6">
       <div
         class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
@@ -1238,6 +1328,201 @@ watch(
                     </div>
                     <div v-if="row.players.length === 0" class="text-sm text-gray-500">
                       No players in this filter.
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Undrafted Ranks -->
+    <div v-if="!loading && activeTab === 'undrafted'" class="mt-6 space-y-4">
+      <div
+        class="flex flex-wrap items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+      >
+        <div class="flex flex-col text-xs text-gray-600">
+          <span class="font-semibold text-gray-800">
+            Points from waiver/FA pickups or traded-in players (filters apply to all teams)
+          </span>
+          <div class="flex flex-wrap gap-2 mt-1">
+            <span class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+              {{ positionsChipLabel }}
+            </span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+              {{ filters.starterOnly ? "Starter points" : "All points" }}
+            </span>
+          </div>
+        </div>
+        <div class="flex flex-col text-sm text-gray-700">
+          <button
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md"
+            @click="showUndraftedPositions = !showUndraftedPositions"
+          >
+            Positions
+            <span class="text-xs text-indigo-500">({{ positionsSummaryLabel }})</span>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7" />
+            </svg>
+          </button>
+          <div
+            v-show="showUndraftedPositions"
+            class="flex flex-wrap items-center gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md"
+          >
+            <label
+              v-for="pos in positionsForLeague"
+              :key="`upos-${pos}`"
+              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md"
+            >
+              <input
+                type="checkbox"
+                :value="pos"
+                :checked="isPositionSelected(pos)"
+                @change="togglePosition(pos)"
+              />
+              {{ pos }}
+            </label>
+            <button
+              class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md"
+              @click="selectAllPositions()"
+            >
+              Select all
+            </button>
+            <button
+              class="px-2 py-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md"
+              @click="filters.positions = []"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+        <p class="text-sm text-gray-700">
+          Click table headers to sort ({{ undraftedSortDir === "asc" ? "asc" : "desc" }}).
+        </p>
+      </div>
+
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm">
+        <table class="w-full text-sm text-left text-gray-700">
+          <thead class="text-xs uppercase bg-gray-50 text-gray-500">
+            <tr>
+              <th
+                class="px-4 py-3 cursor-pointer"
+                @click="handleUndraftedHeaderSort('team')"
+              >
+                Team
+              </th>
+              <th
+                class="px-4 py-3 text-right cursor-pointer"
+                @click="handleUndraftedHeaderSort('total')"
+              >
+                Total
+              </th>
+              <th
+                class="px-4 py-3 text-right cursor-pointer"
+                @click="handleUndraftedHeaderSort('avg')"
+              >
+                Avg/Week
+              </th>
+              <th class="px-4 py-3 text-right">Expand</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="row in undraftedRows" :key="row.rosterId">
+              <tr
+                class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
+                @click="toggleUndraftedRow(row.rosterId)"
+              >
+                <td class="px-4 py-3 font-medium text-gray-900">
+                  <RouterLink
+                    class="text-indigo-600 hover:underline"
+                    :to="{ path: '/rosters', query: { rosterId: row.rosterId } }"
+                    @click.stop
+                  >
+                    {{ row.ownerName }}
+                  </RouterLink>
+                </td>
+                <td class="px-4 py-3 text-right">{{ row.total.toFixed(2) }}</td>
+                <td class="px-4 py-3 text-right">{{ row.avg.toFixed(2) }}</td>
+                <td class="px-4 py-3 text-right">
+                  <button
+                    class="text-indigo-600 hover:underline"
+                    @click.stop="toggleUndraftedRow(row.rosterId)"
+                  >
+                    {{ openUndraftedRows.includes(row.rosterId) ? "Hide" : "View" }}
+                  </button>
+                </td>
+              </tr>
+              <tr
+                v-if="openUndraftedRows.includes(row.rosterId)"
+                class="border-t border-gray-100 bg-gray-50"
+              >
+                <td colspan="4" class="px-4 py-4">
+                  <div class="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs text-gray-600">
+                    <span class="font-semibold text-gray-800">
+                      Waiver/FA + trade pickups for {{ row.ownerName }} (filters applied)
+                    </span>
+                    <div class="flex flex-wrap gap-2">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-100">
+                        Trades: {{ row.tradePoints.toFixed(2) }} pts
+                      </span>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                        Waiver/FA: {{ row.waiverPoints.toFixed(2) }} pts
+                      </span>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                        {{ filters.starterOnly ? "Starter points" : "All points" }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    <div
+                      v-for="p in row.players.slice(0, 12)"
+                      :key="p.playerId"
+                      class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                    >
+                      <div class="flex-shrink-0 w-16 h-full">
+                        <div class="flex h-full items-center justify-center rounded-md bg-indigo-700 text-white text-sm font-semibold py-3 px-2 uppercase tracking-wide">
+                          {{ p.position }}
+                        </div>
+                      </div>
+                      <div class="flex-1">
+                        <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                          <RouterLink
+                            class="text-indigo-600 hover:underline"
+                            :to="{ path: '/players', query: { playerId: p.playerId } }"
+                            @click.stop
+                          >
+                            {{ p.name }}
+                          </RouterLink>
+                          <span class="text-gray-600">•</span>
+                          <span class="text-gray-800 font-semibold">{{ p.team || "FA" }}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 flex items-center gap-2">
+                          <span class="inline-flex items-center px-2 py-1 rounded-full"
+                            :class="p.acquiredVia === 'trade'
+                              ? 'bg-amber-50 text-amber-800 border border-amber-100'
+                              : 'bg-emerald-50 text-emerald-700 border border-emerald-100'"
+                          >
+                            {{ acquisitionLabel(p) }}
+                          </span>
+                          <span v-if="p.acquisitionWeek" class="text-[11px] text-gray-500">
+                            Added W{{ p.acquisitionWeek }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="text-right text-sm text-gray-800">
+                        <div class="font-semibold text-gray-900">{{ pointsFor(p).toFixed(2) }} pts</div>
+                        <div class="text-xs text-gray-500">{{ p.ppg.toFixed(2) }} ppg</div>
+                      </div>
+                    </div>
+                    <div v-if="row.players.length === 0" class="text-sm text-gray-500">
+                      No waiver/FA or trade pickups in this filter.
                     </div>
                   </div>
                 </td>

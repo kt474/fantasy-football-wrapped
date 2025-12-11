@@ -197,6 +197,8 @@ export type TeamRecordRow = {
   ties: number;
 };
 
+export type AcquisitionType = "draft" | "waiver" | "free_agent" | "trade";
+
 export type TeamPlayerContribution = {
   rosterId: number;
   ownerId: string | null;
@@ -206,6 +208,8 @@ export type TeamPlayerContribution = {
   position: string;
   team: string;
   draftRound: number | null;
+  acquiredVia?: AcquisitionType | null;
+  acquisitionWeek?: number | null;
   startedPoints: number;
   totalPoints: number;
   startedGames: number;
