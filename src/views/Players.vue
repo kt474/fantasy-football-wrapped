@@ -82,22 +82,18 @@ const isLoadingSuggestions = computed(
 );
 
 const visibleSuggestions = computed(() => {
-  if (
-    selectedPlayer.value &&
-    !inputFocused.value &&
-    !rosterFilter.value &&
-    !query.value.trim()
-  ) {
-    return [];
-  }
+  if (selectedPlayer.value && !rosterFilter.value) return [];
   const trimmed = query.value.trim();
+  let list: PlayerResult[] = [];
   if (trimmed.length >= 2) {
-    return suggestions.value;
+    list = suggestions.value;
+  } else if (!trimmed) {
+    list = defaultSuggestions.value;
   }
-  if (!trimmed) {
-    return defaultSuggestions.value;
+  if (selectedPlayer.value && rosterFilter.value) {
+    list = list.filter((p) => p.id !== selectedPlayer.value?.id);
   }
-  return [];
+  return list;
 });
 
 const usingDefaultSuggestions = computed(
@@ -116,6 +112,10 @@ const suggestionTitle = computed(() => {
 });
 
 const isRosterSuggestions = computed(() => Boolean(rosterFilter.value));
+
+const showClearButton = computed(
+  () => Boolean(selectedPlayer.value || query.value.trim() || rosterFilter.value)
+);
 
 const fetchSeasonYear = async () => {
   if (store.currentLeagueId && store.leagueInfo[store.currentLeagueIndex]) {
@@ -383,6 +383,13 @@ const handleRosterSelect = async () => {
     await loadDefaultSuggestions();
   }
 };
+
+watch(
+  () => rosterFilter.value,
+  async () => {
+    await handleRosterSelect();
+  }
+);
 </script>
 
 <template>
@@ -425,10 +432,11 @@ const handleRosterSelect = async () => {
         >
           <div class="flex flex-wrap gap-2">
             <button
+              v-if="showClearButton"
               @click="resetView"
               class="px-4 py-2 text-xs font-semibold text-blue-900 bg-white rounded-lg shadow-sm hover:bg-blue-50 focus:ring-2 focus:ring-blue-300"
             >
-              Reset to top scorers
+              Reset
             </button>
           </div>
           <div
@@ -436,7 +444,7 @@ const handleRosterSelect = async () => {
             class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
           >
             <span class="text-xs font-semibold uppercase text-blue-100">
-              Browse by roster
+              View player suggestions by roster
             </span>
             <div class="flex items-center gap-2">
               <select
@@ -448,17 +456,14 @@ const handleRosterSelect = async () => {
                   {{ opt.label }}
                 </option>
               </select>
-              <button
-                @click="handleRosterSelect"
-                class="px-3 py-2 text-xs font-semibold text-blue-900 bg-white rounded-lg shadow-sm hover:bg-blue-50 focus:ring-2 focus:ring-blue-300"
-              >
-                View
-              </button>
             </div>
           </div>
         </div>
         <p v-if="errorMessage" class="mt-2 text-sm text-red-100">
           {{ errorMessage }}
+        </p>
+        <p v-if="visibleSuggestions.length" class="mt-3 text-sm font-semibold text-blue-100">
+          Suggested players
         </p>
         <div
           v-if="isLoadingSuggestions && (!selectedPlayer || inputFocused)"
@@ -477,13 +482,7 @@ const handleRosterSelect = async () => {
             <span>
               {{ suggestionTitle }}
             </span>
-            <span
-              v-if="usingDefaultSuggestions && !isRosterSuggestions"
-              class="text-gray-400"
-            >
-              Based on your league rosters
-            </span>
-            <span v-else-if="isRosterSuggestions" class="text-gray-400">
+            <span v-if="isRosterSuggestions" class="text-gray-400">
               Roster-specific suggestions
             </span>
           </div>
