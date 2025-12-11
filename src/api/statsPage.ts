@@ -33,13 +33,17 @@ const fetchLeagueContext = async (
 ): Promise<LeagueContext> => {
   if (leagueCache.has(leagueId)) return leagueCache.get(leagueId)!;
   const league = (await getLeague(leagueId)) as unknown as LeagueInfoType;
+  const reportedLast = league.lastScoredWeek || 0;
+  const inferredFromCurrent =
+    league.currentWeek && league.currentWeek > 1 ? league.currentWeek - 1 : 0;
+  const lastCompletedWeek = Math.max(reportedLast, inferredFromCurrent);
+  const fallbackLast = lastCompletedWeek || league.regularSeasonLength || 14;
   const ctx: LeagueContext = {
     leagueId,
     season: league.season,
     seasonType: (league.seasonType || "").toLowerCase() || "regular",
-    lastScoredWeek: league.lastScoredWeek || league.regularSeasonLength || 14,
-    regularSeasonLength:
-      league.regularSeasonLength || league.lastScoredWeek || 14,
+    lastScoredWeek: fallbackLast,
+    regularSeasonLength: league.regularSeasonLength || fallbackLast,
     rosterPositions: league.rosterPositions || [],
     scoringSettings: league.scoringSettings || {},
     name: league.name,
