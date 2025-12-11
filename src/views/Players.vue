@@ -96,10 +96,6 @@ const visibleSuggestions = computed(() => {
   return list;
 });
 
-const usingDefaultSuggestions = computed(
-  () => !query.value.trim() && defaultSuggestions.value.length > 0
-);
-
 const suggestionTitle = computed(() => {
   if (query.value.trim().length >= 2) return "Suggestions";
   if (rosterFilter.value) {
