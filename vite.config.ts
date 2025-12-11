@@ -14,9 +14,9 @@ export default defineConfig({
       minify: false,
       includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png"],
       manifest: {
-        name: "Fantasy Football Wrapped",
-        short_name: "Fantasy Wrapped",
-        description: "Fantasy football league insights",
+        name: "Kicker? Barekly Know Her",
+        short_name: "KBKH",
+        description: "",
         theme_color: "#f8fafc",
         display: "standalone",
         icons: [
