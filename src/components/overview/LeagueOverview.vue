@@ -194,6 +194,10 @@ const currentWeekNumber = computed(() => {
   return derivedWeekFromTable.value;
 });
 
+const currentWeekText = computed(() =>
+  currentWeekNumber.value ? `Week ${currentWeekNumber.value}` : "—"
+);
+
 const playoffRoundLabel = computed(() => {
   const week = currentWeekNumber.value;
   const regularWeeks =
@@ -438,15 +442,15 @@ const playoffRoundLabel = computed(() => {
             <p class="text-xs font-semibold text-gray-500 uppercase">
               Current week
             </p>
-            <p class="mt-1 text-sm text-gray-900 dark:text-gray-50">
-              {{ currentWeekNumber ? `Week ${currentWeekNumber}` : "—" }}
-            </p>
-            <p
-              v-if="playoffRoundLabel"
-              class="text-xs text-gray-500 dark:text-gray-300"
-            >
-              {{ playoffRoundLabel }}
-            </p>
+            <div class="mt-1 flex items-center gap-2 text-sm text-gray-900 dark:text-gray-50">
+              <span>{{ currentWeekText }}</span>
+              <span
+                v-if="playoffRoundLabel"
+                class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold bg-indigo-100 text-indigo-800 rounded-full dark:bg-indigo-900 dark:text-indigo-100"
+              >
+                {{ playoffRoundLabel }}
+              </span>
+            </div>
           </div>
         </div>
       </div>

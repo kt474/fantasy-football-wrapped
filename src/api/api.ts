@@ -986,7 +986,7 @@ export const getData = async (leagueId: string) => {
   let currentWeek: number | undefined;
   let legacyWinner: number | undefined;
 
-  if (newLeagueInfo.status === "in_season") {
+  if (newLeagueInfo.status === "in_season" || newLeagueInfo.status === "post_season") {
     const leagueState = await getCurrentLeagueState();
     currentWeek = leagueState.week;
     numberOfWeeks = currentWeek;
