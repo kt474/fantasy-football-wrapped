@@ -19,7 +19,7 @@ const defaultWeeklyBonuses: WeeklyBonus[] = [
   {
     week: 15,
     label: "Highest score, non-playoff matchups",
-    note: "Playoff teams, active or disqualified, are ineligible for Week 15.",
+    note: "Starter only",
     amount: 15,
     winnerOwnerId: null,
     winnerNameOverride: null,
@@ -28,7 +28,7 @@ const defaultWeeklyBonuses: WeeklyBonus[] = [
   {
     week: 16,
     label: "Highest-scoring player, non-QB",
-    note: "Starter only; enter the top non-QB player score.",
+    note: "Starter only",
     amount: 15,
     winnerOwnerId: null,
     winnerNameOverride: null,
@@ -37,7 +37,7 @@ const defaultWeeklyBonuses: WeeklyBonus[] = [
   {
     week: 17,
     label: "Highest-scoring player, all positions",
-    note: "Starter only; enter the top player score across all positions.",
+    note: "Starter only",
     amount: 15,
     winnerOwnerId: null,
     winnerNameOverride: null,
