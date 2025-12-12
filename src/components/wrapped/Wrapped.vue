@@ -89,23 +89,26 @@ const fewestMoves = computed(() => {
 
 const totalBids = computed(() => {
   if (league.value.waiverMoves) {
-    const grouped = league.value.waiverMoves.reduce((acc: any, obj: any) => {
-      const userId = obj.user.id;
-      const status = obj.status;
+    const grouped: any[] = league.value.waiverMoves.reduce(
+      (acc: any, obj: any) => {
+        const userId = obj.user.id;
+        const status = obj.status;
 
-      if (!acc[userId]) {
-        acc[userId] = {
-          user: obj.user,
-          sumByStatus: {},
-          totalSpent: 0,
-        };
-      }
-      acc[userId].sumByStatus[status] =
-        (acc[userId].sumByStatus[status] || 0) + obj.bid;
-      acc[userId].totalSpent += obj.bid;
+        if (!acc[userId]) {
+          acc[userId] = {
+            user: obj.user,
+            sumByStatus: {},
+            totalSpent: 0,
+          };
+        }
+        acc[userId].sumByStatus[status] =
+          (acc[userId].sumByStatus[status] || 0) + obj.bid;
+        acc[userId].totalSpent += obj.bid;
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {}
+    );
     return {
       highest: maxBy(Object.values(grouped), "totalSpent"),
       lowest: minBy(Object.values(grouped), "totalSpent"),
@@ -682,7 +685,7 @@ onMounted(() => {
         />
         <p>{{ totalBids?.highest.user.name }}</p>
         <p>${{ totalBids?.highest.sumByStatus.complete }} spent</p>
-        <p v-if="totalBids.highest.sumByStatus.failed">
+        <p v-if="totalBids?.highest.sumByStatus.failed">
           ${{ totalBids?.highest.sumByStatus.failed }} in failed bids
         </p>
       </div>
@@ -695,7 +698,9 @@ onMounted(() => {
         />
         <p>{{ totalBids?.lowest.user.name }}</p>
         <p>${{ totalBids?.lowest.sumByStatus.complete }} spent</p>
-        <p>${{ totalBids?.lowest.sumByStatus.failed }} in failed bids</p>
+        <p v-if="totalBids?.lowest.sumByStatus.failed">
+          ${{ totalBids?.lowest.sumByStatus.failed }} in failed bids
+        </p>
       </div>
     </div>
     <div>
@@ -811,8 +816,8 @@ onMounted(() => {
           />
           <p>{{ grade.user?.name }}</p>
         </div>
-        <p>{{ grade.grade }}</p>
-        <p>{{ grade.user?.regularSeasonRank }}</p>
+        <p>Preseason Grade: {{ grade.grade }}</p>
+        <p>Regular Season Rank: {{ grade.user?.regularSeasonRank }}</p>
       </div>
     </div>
     <div>
@@ -883,7 +888,9 @@ onMounted(() => {
       </div>
     </div>
     <h2 class="text-xl font-semibold">Playoffs</h2>
+    <p>TBD</p>
     <h2 class="text-xl font-semibold">League Champion</h2>
+    <p>TBD</p>
     <!-- workaround to get data without copying over methods -->
     <Draft v-show="false" />
     <Trades v-show="false" />
