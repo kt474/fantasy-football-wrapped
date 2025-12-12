@@ -102,6 +102,7 @@ const getData = async () => {
         team1: {
           user: getRosterName(trade.roster_ids[1]),
           players: team1Players,
+          playerIds: trade.adds[trade.roster_ids[1]] ?? [],
           draftPicks: trade.draft_picks.filter(
             (pick) => pick.owner_id === trade.roster_ids[1]
           ),
@@ -125,6 +126,7 @@ const getData = async () => {
         team2: {
           user: getRosterName(trade.roster_ids[0]),
           players: team2Players,
+          playerIds: trade.adds[trade.roster_ids[0]] ?? [],
           draftPicks: trade.draft_picks.filter(
             (pick) => pick.owner_id === trade.roster_ids[0]
           ),

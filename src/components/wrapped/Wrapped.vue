@@ -139,6 +139,7 @@ const scheduleData = computed(() => {
   return props.tableData.map((user) => {
     return {
       teamName: store.showUsernames ? user.username : user.name,
+      avatarImg: user.avatarImg,
       matchups: user.matchups,
       points: user.points,
       actualWins: user.wins,
@@ -195,7 +196,6 @@ const scheduleAnalysis = computed(() => {
         worstScheduleTeam = otherTeam.teamName;
       }
     });
-
     return {
       teamName: team.teamName,
       actualWins: team.actualWins,
@@ -205,6 +205,7 @@ const scheduleAnalysis = computed(() => {
       bestScheduleTeam,
       worstScheduleTeam,
       recordRange: bestRecord - worstRecord,
+      avatarImg: team.avatarImg,
     };
   });
 
@@ -280,6 +281,7 @@ const pointsFromWaivers = computed(() => {
       pointsFromWaivers: Math.round(sum * 100) / 100,
     });
   });
+  result.sort((a, b) => b.pointsFromWaivers - a.pointsFromWaivers);
   return result;
 });
 
@@ -300,6 +302,7 @@ const allTimeRecord = computed(() => {
     wins: user.wins,
     losses: user.losses,
     ties: user.ties,
+    avatarImg: user.avatarImg,
   }));
 
   if (league.value.previousLeagues.length > 0) {
@@ -433,7 +436,7 @@ onMounted(() => {
 // League Champ
 </script>
 <template>
-  <div class="pt-4 text-center geist-text">
+  <div class="pt-4 text-center text-gray-900 geist-text dark:text-gray-200">
     <!-- Intro -->
     <div>
       <h1 class="my-2 text-3xl font-semibold">Test League</h1>
@@ -479,15 +482,22 @@ onMounted(() => {
           class="flex my-2 justify-evenly"
           v-for="(pick, index) in bestPicks"
         >
-          <img
-            alt="Player image"
-            class="w-14 sm:h-auto"
-            :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
-          />
+          <div>
+            <img
+              class="w-10 h-10 mb-2 mr-2 rounded-full"
+              :src="getUserObject(pick.userId)?.avatarImg"
+            />
+            <p>{{ getUserObject(pick.userId)?.name }}</p>
+          </div>
           <p>
             {{ index + 1 }}. {{ pick.position }} {{ pick.firstName }}
             {{ pick.lastName }}
           </p>
+          <img
+            alt="Player image"
+            class="w-10 h-10"
+            :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
+          />
           <p>
             Drafted round {{ pick.round }}, pick {{ pick.draftSlot }} ({{
               pick.pickNumber
@@ -496,15 +506,22 @@ onMounted(() => {
           <p>Positional rank {{ pick.rank }}</p>
         </div>
       </div>
-      <h2 class="text-xl font-semibold">Worst picks</h2>
+      <h2 class="text-3xl font-semibold">Worst picks</h2>
       <div>
         <div
           class="flex my-2 justify-evenly"
           v-for="(pick, index) in worstPicks"
         >
+          <div>
+            <img
+              class="w-10 h-10 mb-2 mr-2 rounded-full"
+              :src="getUserObject(pick.userId)?.avatarImg"
+            />
+            <p>{{ getUserObject(pick.userId)?.name }}</p>
+          </div>
           <img
             alt="Player image"
-            class="w-14 sm:h-auto"
+            class="w-10 h-10"
             :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
           />
           <p>
@@ -531,10 +548,18 @@ onMounted(() => {
           {{ getUserObject(draftSteal?.[0].userId)?.name }}
         </p>
       </div>
-      <p>
-        {{ draftSteal?.[0].position }} {{ draftSteal?.[0].firstName }}
-        {{ draftSteal?.[0].lastName }}
-      </p>
+      <div class="flex justify-center">
+        <img
+          alt="Player image"
+          class="w-10"
+          :src="`https://sleepercdn.com/content/nfl/players/thumb/${draftSteal?.[0].playerId}.jpg`"
+        />
+
+        <p>
+          {{ draftSteal?.[0].position }} {{ draftSteal?.[0].firstName }}
+          {{ draftSteal?.[0].lastName }}
+        </p>
+      </div>
       <p>
         Drafted round {{ draftSteal?.[0].round }}, pick
         {{ draftSteal?.[0].draftSlot }} ({{ draftSteal?.[0].pickNumber }})
@@ -545,26 +570,46 @@ onMounted(() => {
     <div>
       <h2 class="mt-20 text-3xl font-semibold">Trades</h2>
       <p class="my-2">
-        {{ league.tradeNames?.length }} trades were made this season
+        {{ league.tradeNames?.length }} trades were made this season.
       </p>
-      <p class="my-2">Here's the most impactful</p>
+      <p class="my-2">Here's the most impactful.</p>
       <div>
         <div class="flex justify-center">
           <img
             class="w-10 h-10 mb-2 mr-2 rounded-full"
-            :src="impactfulTrades.team1.user.avatarImg"
+            :src="impactfulTrades?.team1.user.avatarImg"
           />
-          <p>{{ impactfulTrades.team1.user.name }}</p>
+          <p>{{ impactfulTrades?.team1.user.name }}</p>
         </div>
-        <div v-for="player in impactfulTrades.team1.players">{{ player }}</div>
+        <div
+          v-for="(player, index) in impactfulTrades?.team1.players"
+          class="flex justify-center"
+        >
+          <img
+            alt="Player image"
+            class="w-10"
+            :src="`https://sleepercdn.com/content/nfl/players/thumb/${impactfulTrades?.team1.playerIds[index]}.jpg`"
+          />
+          <p>{{ player }}</p>
+        </div>
         <div class="flex justify-center mt-4">
           <img
             class="w-10 h-10 mb-2 mr-2 rounded-full"
-            :src="impactfulTrades.team2.user.avatarImg"
+            :src="impactfulTrades?.team2.user.avatarImg"
           />
-          <p>{{ impactfulTrades.team2.user.name }}</p>
+          <p>{{ impactfulTrades?.team2.user.name }}</p>
         </div>
-        <div v-for="player in impactfulTrades.team2.players">{{ player }}</div>
+        <div
+          v-for="(player, index) in impactfulTrades?.team2.players"
+          class="flex justify-center"
+        >
+          <img
+            alt="Player image"
+            class="w-10"
+            :src="`https://sleepercdn.com/content/nfl/players/thumb/${impactfulTrades?.team2.playerIds[index]}.jpg`"
+          />
+          <p>{{ player }}</p>
+        </div>
       </div>
     </div>
     <!-- Waivers -->
@@ -577,20 +622,41 @@ onMounted(() => {
       <div v-if="league.waiverType === 2">
         <h2 class="text-xl font-semibold">Highest Bids</h2>
         <p class="my-2">Here are the players your league wanted the most.</p>
-        <ol>
-          <li v-for="move in highestBids">
-            {{ move.user.name }} {{ move.adds }} ${{ move.bid }}
-          </li>
-        </ol>
+        <div>
+          <div v-for="move in highestBids" class="flex justify-evenly">
+            <img
+              class="w-10 mb-2 mr-2 rounded-full"
+              :src="move.user.avatarImg"
+            />
+            <p>{{ move.user.name }}</p>
+
+            <img
+              alt="Player image"
+              class="w-10"
+              :src="`https://sleepercdn.com/content/nfl/players/thumb/${move.player_id}.jpg`"
+            />
+            <p>{{ move.position }} {{ move.adds }}</p>
+            <p>${{ move.bid }}</p>
+          </div>
+        </div>
       </div>
-      <h2 class="text-xl font-semibold">Best Pickups</h2>
+      <h2 class="mt-4 text-xl font-semibold">Best Pickups</h2>
       <p class="my-2">The moves with the biggest impact.</p>
-      <ol>
-        <li v-for="move in bestPickups">
-          {{ move.user.name }} {{ move.adds }} {{ move.value }}
-        </li>
-      </ol>
-      <h2 class="text-xl font-semibold">Most active</h2>
+      <div>
+        <div v-for="move in bestPickups" class="flex justify-evenly">
+          <img class="w-10 mb-2 mr-2 rounded-full" :src="move.user.avatarImg" />
+          <p>{{ move.user.name }}</p>
+
+          <img
+            alt="Player image"
+            class="w-10"
+            :src="`https://sleepercdn.com/content/nfl/players/thumb/${move.player_id}.jpg`"
+          />
+          <p>{{ move.position }} {{ move.adds }}</p>
+          <p>Avg Rank: {{ move.value }}</p>
+        </div>
+      </div>
+      <h2 class="mt-4 text-xl font-semibold">Most active</h2>
       <div class="flex my-2 justify-evenly">
         <img
           class="w-10 h-10 mb-2 mr-2 rounded-full"
@@ -616,7 +682,9 @@ onMounted(() => {
         />
         <p>{{ totalBids?.highest.user.name }}</p>
         <p>${{ totalBids?.highest.sumByStatus.complete }} spent</p>
-        <p>${{ totalBids?.highest.sumByStatus.failed }} in failed bids</p>
+        <p v-if="totalBids.highest.sumByStatus.failed">
+          ${{ totalBids?.highest.sumByStatus.failed }} in failed bids
+        </p>
       </div>
       <h2 class="text-xl font-semibold">Lowest Bidders</h2>
       <p>This league member was way too frugal.</p>
@@ -634,7 +702,10 @@ onMounted(() => {
       <h2 class="text-xl font-semibold">Luckiest Managers</h2>
       <p>These managers need to go buy a lottery ticket.</p>
       <div class="mb-2" v-for="user in scheduleAnalysis.slice(0, 3)">
-        <p>{{ user.teamName }}</p>
+        <div class="flex justify-center">
+          <img class="w-10 h-10 mb-2 mr-2 rounded-full" :src="user.avatarImg" />
+          <p>{{ user.teamName }}</p>
+        </div>
         <p>Actual wins {{ user.actualWins }}</p>
         <p>Expected Wins {{ user.expectedWins }}</p>
         <p>
@@ -648,6 +719,10 @@ onMounted(() => {
     <div>
       <h2 class="text-xl font-semibold">Unluckiest Managers</h2>
       <div class="mb-2" v-for="user in scheduleAnalysis.slice(-3)">
+        <div class="flex justify-center">
+          <img class="w-10 h-10 mb-2 mr-2 rounded-full" :src="user.avatarImg" />
+          <p>{{ user.teamName }}</p>
+        </div>
         <p>{{ user.teamName }}</p>
         <p>Actual wins {{ user.actualWins }}</p>
         <p>Expected Wins {{ user.expectedWins }}</p>
@@ -662,7 +737,13 @@ onMounted(() => {
     <div>
       <h2 class="text-xl font-semibold">Most Efficient Managers</h2>
       <div v-for="manager in bestManagers.slice(0, 3)">
-        <p>{{ manager.name }}</p>
+        <div class="flex justify-center">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="manager.avatarImg"
+          />
+          <p>{{ manager.name }}</p>
+        </div>
         <p>{{ manager.managerEfficiency }}</p>
         <p>
           {{ manager.potentialPoints - manager.pointsFor }} Points left on the
@@ -672,8 +753,14 @@ onMounted(() => {
     </div>
     <div>
       <h2 class="text-xl font-semibold">Least Efficient Manager</h2>
-      <div v-for="manager in bestManagers.slice(0, 3)">
-        <p>{{ manager.name }}</p>
+      <div v-for="manager in bestManagers.slice(-3)">
+        <div class="flex justify-center">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="manager.avatarImg"
+          />
+          <p>{{ manager.name }}</p>
+        </div>
         <p>{{ manager.managerEfficiency }}</p>
         <p>
           {{ manager.potentialPoints - manager.pointsFor }} Points left on the
@@ -685,9 +772,15 @@ onMounted(() => {
       <h2 class="text-xl font-semibold">Total Players Used</h2>
       <div>
         <div v-for="manager in uniquePlayers">
-          <p>
-            {{ manager.name }}
-          </p>
+          <div class="flex justify-center">
+            <img
+              class="w-10 h-10 mb-2 mr-2 rounded-full"
+              :src="manager.avatar"
+            />
+            <p>
+              {{ manager.name }}
+            </p>
+          </div>
           <p>{{ manager.uniqueStarterCount }}</p>
         </div>
       </div>
@@ -711,15 +804,24 @@ onMounted(() => {
     <h2 class="text-xl font-semibold">Does ADP mean anything?</h2>
     <div>
       <div v-for="grade in draftRankings">
+        <div class="flex justify-center">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="grade.user?.avatarImg"
+          />
+          <p>{{ grade.user?.name }}</p>
+        </div>
         <p>{{ grade.grade }}</p>
-        <p>{{ grade.user?.name }}</p>
         <p>{{ grade.user?.regularSeasonRank }}</p>
       </div>
     </div>
     <div>
       <h2 class="text-xl font-semibold">All Time Records</h2>
       <div v-for="user in allTimeRecord">
-        <p>{{ user.name }}</p>
+        <div class="flex justify-center">
+          <img class="w-10 h-10 mb-2 mr-2 rounded-full" :src="user.avatarImg" />
+          <p>{{ user.name }}</p>
+        </div>
         <p>
           {{ user.wins }} - {{ user.losses }}
           <span v-if="user.ties !== 0">{{ user.ties }}</span>
@@ -729,15 +831,39 @@ onMounted(() => {
     <h2 class="text-xl font-semibold">Closest Matchups</h2>
     <div v-for="matchup in closestMatchups">
       <div class="my-2">
-        <p>{{ matchup.teamA.name }} {{ matchup.scoreA }}</p>
-        <p>{{ matchup.teamB.name }} {{ matchup.scoreB }}</p>
+        <div class="flex justify-center">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="matchup.teamA.avatarImg"
+          />
+          <p>{{ matchup.teamA.name }} {{ matchup.scoreA }}</p>
+        </div>
+        <div class="flex justify-center">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="matchup.teamB.avatarImg"
+          />
+          <p>{{ matchup.teamB.name }} {{ matchup.scoreB }}</p>
+        </div>
       </div>
     </div>
     <h2 class="text-xl font-semibold">Biggest Blowouts</h2>
     <div v-for="matchup in farthestMatchups">
       <div class="my-2">
-        <p>{{ matchup.teamA.name }} {{ matchup.scoreA }}</p>
-        <p>{{ matchup.teamB.name }} {{ matchup.scoreB }}</p>
+        <div class="flex justify-center">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="matchup.teamA.avatarImg"
+          />
+          <p>{{ matchup.teamA.name }} {{ matchup.scoreA }}</p>
+        </div>
+        <div class="flex justify-center">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="matchup.teamB.avatarImg"
+          />
+          <p>{{ matchup.teamB.name }} {{ matchup.scoreB }}</p>
+        </div>
       </div>
     </div>
     <div>
