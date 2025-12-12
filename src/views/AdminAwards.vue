@@ -258,6 +258,23 @@ const formatDefinition = (value: string) => {
   return escaped.replace(/\*(.*?)\*/g, "<em>$1</em>");
 };
 
+const restoreLeagueContext = () => {
+  if (typeof localStorage === "undefined") return;
+  if (store.leagueInfo.length === 0 && localStorage.leagueInfo) {
+    try {
+      const savedLeagues = JSON.parse(localStorage.leagueInfo);
+      if (Array.isArray(savedLeagues)) {
+        savedLeagues.forEach((leagueData: any) => store.updateLeagueInfo(leagueData));
+      }
+    } catch (error) {
+      console.error("Failed to parse saved leagues", error);
+    }
+  }
+  if (!store.currentLeagueId && localStorage.currentLeagueId && localStorage.currentLeagueId !== "undefined") {
+    store.updateCurrentLeagueId(localStorage.currentLeagueId);
+  }
+};
+
 const hydrate = async () => {
   if (!awardsStore.initialized) {
     await awardsStore.hydrateFromApi();
@@ -270,6 +287,7 @@ const hydrate = async () => {
 };
 
 onMounted(() => {
+  restoreLeagueContext();
   hydrate();
 });
 </script>
