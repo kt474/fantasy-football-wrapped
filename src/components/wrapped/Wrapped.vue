@@ -111,7 +111,6 @@ const totalBids = computed(() => {
       lowest: minBy(Object.values(grouped), "totalSpent"),
     };
   }
-  return null;
 });
 
 const impactfulTrades = computed(() => {
@@ -297,6 +296,7 @@ const allTimeRecord = computed(() => {
   let result = props.tableData.map((user) => ({
     name: user.name,
     rosterId: user.rosterId,
+    userId: user.id,
     wins: user.wins,
     losses: user.losses,
     ties: user.ties,
@@ -305,9 +305,7 @@ const allTimeRecord = computed(() => {
   if (league.value.previousLeagues.length > 0) {
     league.value.previousLeagues.forEach((league: LeagueInfoType) => {
       league.rosters.forEach((roster: RosterType) => {
-        let currentUser = result.find(
-          (user) => user.rosterId === roster.rosterId
-        );
+        let currentUser = result.find((user) => user.userId === roster.id);
         if (currentUser) {
           currentUser.wins += roster.wins;
           currentUser.losses += roster.losses;
@@ -320,11 +318,17 @@ const allTimeRecord = computed(() => {
 });
 
 const winStreak = computed(() => {
-  return props.tableData.map((user) => ({
+  let result = props.tableData.map((user) => ({
     name: user.name,
     avatar: user.avatarImg,
     streak: getCurrentStreak(user.recordByWeek),
   }));
+
+  return result.sort((a, b) => {
+    const getNumber = (obj: any) => parseInt(obj.streak.slice(1), 10);
+
+    return getNumber(b) - getNumber(a);
+  });
 });
 
 const getMatchups = () => {
@@ -401,6 +405,10 @@ const getCurrentStreak = (str: string): string => {
   return match[1] + match[0].length;
 };
 
+const getUserObject = (userId: string) => {
+  return props.tableData.find((user) => user.id === userId);
+};
+
 onMounted(() => {
   getMatchups();
 });
@@ -425,120 +433,281 @@ onMounted(() => {
 // League Champ
 </script>
 <template>
-  <div class="pt-4 text-center">
-    <h1 class="text-xl font-semibold">{{ league.name }} Wrapped</h1>
-    <p>{{ league.season }} {{ league.seasonType }} {{ league.scoringType }}</p>
-
-    <h1 class="mt-2 text-xl font-semibold">Let's take a look at the draft</h1>
-    <p>
-      {{ league.draftMetadata?.order[0].name }} started off the draft with
-      {{ league.draftPicks?.[0].firstName }}
-      {{ league.draftPicks?.[0].lastName }}
-    </p>
-    <h2 class="text-xl font-semibold">Best picks</h2>
+  <div class="pt-4 text-center geist-text">
+    <!-- Intro -->
     <div>
-      <ol class="my-2" v-for="(pick, index) in bestPicks">
-        <li>
-          {{ index + 1 }}. {{ pick.position }} {{ pick.firstName }}
-          {{ pick.lastName }}
-        </li>
-        <li>
-          Drafted round {{ pick.round }}, pick {{ pick.draftSlot }} ({{
-            pick.pickNumber
-          }})
-        </li>
-        <li>Positional rank {{ pick.rank }}</li>
-      </ol>
-    </div>
-    <h2 class="text-xl font-semibold">Worst picks</h2>
-    <div>
-      <ol class="my-2" v-for="(pick, index) in worstPicks">
-        <li>
-          {{ index + 1 }}. {{ pick.position }} {{ pick.firstName }}
-          {{ pick.lastName }}
-        </li>
-        <li>
-          Drafted round {{ pick.round }}, pick {{ pick.draftSlot }} ({{
-            pick.pickNumber
-          }})
-        </li>
-        <li>Positional rank {{ pick.rank }}</li>
-      </ol>
-    </div>
-    <h2 class="text-xl font-semibold">Steal of the draft</h2>
-    <p>
-      {{ draftSteal?.[0].position }} {{ draftSteal?.[0].firstName }}
-      {{ draftSteal?.[0].lastName }}
-    </p>
-    <p>
-      Drafted round {{ draftSteal?.[0].round }}, pick
-      {{ draftSteal?.[0].draftSlot }} ({{ draftSteal?.[0].pickNumber }})
-    </p>
-    <h2 class="text-xl font-semibold">Trades</h2>
-    <p>{{ league.tradeNames?.length }} trades were made this season</p>
-    {{ impactfulTrades }}
-    <h2 class="text-xl font-semibold">Waiver wire</h2>
-    <p>
-      {{ league.waivers.length }} players were picked up on waivers or as free
-      agents
-    </p>
-    <div v-if="league.waiverType === 2">
-      <h2 class="text-xl font-semibold">Highest Bids</h2>
-      <ol>
-        <li v-for="move in highestBids">
-          {{ move.user.name }} {{ move.adds }} ${{ move.bid }}
-        </li>
-      </ol>
-    </div>
-    <h2 class="text-xl font-semibold">Best Pickups</h2>
-    <ol>
-      <li v-for="move in bestPickups">
-        {{ move.user.name }} {{ move.adds }} {{ move.value }}
-      </li>
-    </ol>
-    <h2 class="text-xl font-semibold">Most active</h2>
-    <p>{{ mostMoves }}</p>
-    <h2 class="text-xl font-semibold">Least active</h2>
-    <p>{{ fewestMoves }}</p>
-    <h2 class="text-xl font-semibold">Highest Bidders</h2>
-    <p>{{ totalBids?.highest }}</p>
-    <h2 class="text-xl font-semibold">Lowest Bidders</h2>
-    <p>{{ totalBids?.lowest }}</p>
-    <h2 class="text-xl font-semibold">Luckiest Managers</h2>
-    <p>{{ scheduleAnalysis.slice(0, 3) }}</p>
-    <h2 class="text-xl font-semibold">Unluckiest Managers</h2>
-    <p>{{ scheduleAnalysis.slice(-3) }}</p>
-    <h2 class="text-xl font-semibold">Most Efficient Managers</h2>
-    <div v-for="manager in bestManagers.slice(0, 3)">
-      <p>{{ manager.name }}</p>
-      <p>{{ manager.managerEfficiency }}</p>
+      <h1 class="my-2 text-3xl font-semibold">Test League</h1>
+      <h2 class="my-2 text-5xl font-semibold">{{ league.season }} Wrapped</h2>
+      <!-- <p>{{ league.seasonType }} {{ league.scoringType }}</p> -->
       <p>
-        {{ manager.potentialPoints - manager.pointsFor }} Points left on the
-        bench
+        It's been a season to remember. Let's review your fantasy football
+        journey through 2025.
       </p>
     </div>
-    <h2 class="text-xl font-semibold">Least Efficient Manager</h2>
-    <div v-for="manager in bestManagers.slice(0, 3)">
-      <p>{{ manager.name }}</p>
-      <p>{{ manager.managerEfficiency }}</p>
-      <p>
-        {{ manager.potentialPoints - manager.pointsFor }} Points left on the
-        bench
-      </p>
-    </div>
-    <h2 class="text-xl font-semibold">Total Players Used</h2>
+    <!-- Draft Intro -->
     <div>
-      <div v-for="manager in uniquePlayers">
-        <p>
-          {{ manager.name }}
-        </p>
-        <p>{{ manager.uniqueStarterCount }}</p>
+      <h1 class="my-2 text-5xl font-semibold">Let's start with the draft</h1>
+      <div class>
+        <div class="flex justify-center mb-4">
+          <img
+            class="w-10 h-10 mr-2 rounded-full"
+            :src="league.draftMetadata?.order[0].avatarImg"
+          />
+          <p class="text-xl font-semibold">
+            {{ league.draftMetadata?.order[0].name }}
+          </p>
+        </div>
+        <p>Started off {{ league.season }} with</p>
+        <div class="flex justify-center">
+          <img
+            alt="Player image"
+            class="w-14 sm:h-auto object-cover mr-2.5"
+            :src="`https://sleepercdn.com/content/nfl/players/thumb/${league.draftPicks?.[0].playerId}.jpg`"
+          />
+          <p>
+            {{ league.draftPicks?.[0].firstName }}
+            {{ league.draftPicks?.[0].lastName }}
+          </p>
+        </div>
       </div>
     </div>
-    <h2 class="text-xl font-semibold">Draft Players still on team</h2>
-    <div>{{ originalPlayers }}</div>
-    <h2 class="text-xl font-semibold">Playoffs</h2>
-    <h2 class="text-xl font-semibold">League Champion</h2>
+    <!-- Draft -->
+    <div>
+      <h2 class="my-4 text-3xl font-semibold">Best picks</h2>
+      <div>
+        <div
+          class="flex my-2 justify-evenly"
+          v-for="(pick, index) in bestPicks"
+        >
+          <img
+            alt="Player image"
+            class="w-14 sm:h-auto"
+            :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
+          />
+          <p>
+            {{ index + 1 }}. {{ pick.position }} {{ pick.firstName }}
+            {{ pick.lastName }}
+          </p>
+          <p>
+            Drafted round {{ pick.round }}, pick {{ pick.draftSlot }} ({{
+              pick.pickNumber
+            }})
+          </p>
+          <p>Positional rank {{ pick.rank }}</p>
+        </div>
+      </div>
+      <h2 class="text-xl font-semibold">Worst picks</h2>
+      <div>
+        <div
+          class="flex my-2 justify-evenly"
+          v-for="(pick, index) in worstPicks"
+        >
+          <img
+            alt="Player image"
+            class="w-14 sm:h-auto"
+            :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
+          />
+          <p>
+            {{ index + 1 }}. {{ pick.position }} {{ pick.firstName }}
+            {{ pick.lastName }}
+          </p>
+          <p>
+            Drafted round {{ pick.round }}, pick {{ pick.draftSlot }} ({{
+              pick.pickNumber
+            }})
+          </p>
+          <p>Positional rank {{ pick.rank }}</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h2 class="mt-20 mb-4 text-3xl font-semibold">Steal of the draft</h2>
+      <div class="flex justify-center">
+        <img
+          class="w-10 h-10 mb-2 mr-2 rounded-full"
+          :src="getUserObject(draftSteal?.[0].userId)?.avatarImg"
+        />
+        <p class="text-xl font-semibold">
+          {{ getUserObject(draftSteal?.[0].userId)?.name }}
+        </p>
+      </div>
+      <p>
+        {{ draftSteal?.[0].position }} {{ draftSteal?.[0].firstName }}
+        {{ draftSteal?.[0].lastName }}
+      </p>
+      <p>
+        Drafted round {{ draftSteal?.[0].round }}, pick
+        {{ draftSteal?.[0].draftSlot }} ({{ draftSteal?.[0].pickNumber }})
+      </p>
+      <p>Positional Rank: {{ draftSteal?.[0].rank }}</p>
+    </div>
+    <!-- Trades -->
+    <div>
+      <h2 class="mt-20 text-3xl font-semibold">Trades</h2>
+      <p class="my-2">
+        {{ league.tradeNames?.length }} trades were made this season
+      </p>
+      <p class="my-2">Here's the most impactful</p>
+      <div>
+        <div class="flex justify-center">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="impactfulTrades.team1.user.avatarImg"
+          />
+          <p>{{ impactfulTrades.team1.user.name }}</p>
+        </div>
+        <div v-for="player in impactfulTrades.team1.players">{{ player }}</div>
+        <div class="flex justify-center mt-4">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="impactfulTrades.team2.user.avatarImg"
+          />
+          <p>{{ impactfulTrades.team2.user.name }}</p>
+        </div>
+        <div v-for="player in impactfulTrades.team2.players">{{ player }}</div>
+      </div>
+    </div>
+    <!-- Waivers -->
+    <div>
+      <h2 class="mt-20 text-3xl font-semibold">Waiver wire</h2>
+      <p class="my-2">
+        {{ league.waivers.length }} players were picked up on waivers or as free
+        agents.
+      </p>
+      <div v-if="league.waiverType === 2">
+        <h2 class="text-xl font-semibold">Highest Bids</h2>
+        <p class="my-2">Here are the players your league wanted the most.</p>
+        <ol>
+          <li v-for="move in highestBids">
+            {{ move.user.name }} {{ move.adds }} ${{ move.bid }}
+          </li>
+        </ol>
+      </div>
+      <h2 class="text-xl font-semibold">Best Pickups</h2>
+      <p class="my-2">The moves with the biggest impact.</p>
+      <ol>
+        <li v-for="move in bestPickups">
+          {{ move.user.name }} {{ move.adds }} {{ move.value }}
+        </li>
+      </ol>
+      <h2 class="text-xl font-semibold">Most active</h2>
+      <div class="flex my-2 justify-evenly">
+        <img
+          class="w-10 h-10 mb-2 mr-2 rounded-full"
+          :src="mostMoves.user.avatarImg"
+        />
+        <p>{{ mostMoves.user.name }}</p>
+        <p>{{ mostMoves.moves }} moves</p>
+      </div>
+      <h2 class="text-xl font-semibold">Least active</h2>
+      <div class="flex my-2 justify-evenly">
+        <img
+          class="w-10 h-10 mb-2 mr-2 rounded-full"
+          :src="fewestMoves.user.avatarImg"
+        />
+        <p>{{ fewestMoves.user.name }}</p>
+        <p>{{ fewestMoves.moves }} moves</p>
+      </div>
+      <h2 class="text-xl font-semibold">Highest Bidders</h2>
+      <div class="flex my-2 justify-evenly">
+        <img
+          class="w-10 h-10 mb-2 mr-2 rounded-full"
+          :src="totalBids?.highest?.user.avatarImg"
+        />
+        <p>{{ totalBids?.highest.user.name }}</p>
+        <p>${{ totalBids?.highest.sumByStatus.complete }} spent</p>
+        <p>${{ totalBids?.highest.sumByStatus.failed }} in failed bids</p>
+      </div>
+      <h2 class="text-xl font-semibold">Lowest Bidders</h2>
+      <p>This league member was way too frugal.</p>
+      <div class="flex my-2 justify-evenly">
+        <img
+          class="w-10 h-10 mb-2 mr-2 rounded-full"
+          :src="totalBids?.lowest?.user.avatarImg"
+        />
+        <p>{{ totalBids?.lowest.user.name }}</p>
+        <p>${{ totalBids?.lowest.sumByStatus.complete }} spent</p>
+        <p>${{ totalBids?.lowest.sumByStatus.failed }} in failed bids</p>
+      </div>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold">Luckiest Managers</h2>
+      <p>These managers need to go buy a lottery ticket.</p>
+      <div class="mb-2" v-for="user in scheduleAnalysis.slice(0, 3)">
+        <p>{{ user.teamName }}</p>
+        <p>Actual wins {{ user.actualWins }}</p>
+        <p>Expected Wins {{ user.expectedWins }}</p>
+        <p>
+          Best record with a different schedule {{ user.bestPossibleRecord }}
+        </p>
+        <p>
+          Worst record with a different schedule {{ user.worstPossibleRecord }}
+        </p>
+      </div>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold">Unluckiest Managers</h2>
+      <div class="mb-2" v-for="user in scheduleAnalysis.slice(-3)">
+        <p>{{ user.teamName }}</p>
+        <p>Actual wins {{ user.actualWins }}</p>
+        <p>Expected Wins {{ user.expectedWins }}</p>
+        <p>
+          Best record with a different schedule {{ user.bestPossibleRecord }}
+        </p>
+        <p>
+          Worst record with a different schedule {{ user.worstPossibleRecord }}
+        </p>
+      </div>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold">Most Efficient Managers</h2>
+      <div v-for="manager in bestManagers.slice(0, 3)">
+        <p>{{ manager.name }}</p>
+        <p>{{ manager.managerEfficiency }}</p>
+        <p>
+          {{ manager.potentialPoints - manager.pointsFor }} Points left on the
+          bench
+        </p>
+      </div>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold">Least Efficient Manager</h2>
+      <div v-for="manager in bestManagers.slice(0, 3)">
+        <p>{{ manager.name }}</p>
+        <p>{{ manager.managerEfficiency }}</p>
+        <p>
+          {{ manager.potentialPoints - manager.pointsFor }} Points left on the
+          bench
+        </p>
+      </div>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold">Total Players Used</h2>
+      <div>
+        <div v-for="manager in uniquePlayers">
+          <p>
+            {{ manager.name }}
+          </p>
+          <p>{{ manager.uniqueStarterCount }}</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold">Drafted players still on team</h2>
+      <div v-for="user in originalPlayers">
+        <div class="flex justify-center">
+          <img
+            class="w-10 h-10 mb-2 mr-2 rounded-full"
+            :src="getUserObject(user.userId)?.avatarImg"
+          />
+          <p>{{ user.userName }}</p>
+        </div>
+        <p>
+          Drafted players still on team {{ user.stillOnTeam }} /
+          {{ user.totalDrafted }}
+        </p>
+      </div>
+    </div>
     <h2 class="text-xl font-semibold">Does ADP mean anything?</h2>
     <div>
       <div v-for="grade in draftRankings">
@@ -547,9 +716,15 @@ onMounted(() => {
         <p>{{ grade.user?.regularSeasonRank }}</p>
       </div>
     </div>
-    <h2 class="text-xl font-semibold">All Time Records</h2>
     <div>
-      <p>{{ allTimeRecord }}</p>
+      <h2 class="text-xl font-semibold">All Time Records</h2>
+      <div v-for="user in allTimeRecord">
+        <p>{{ user.name }}</p>
+        <p>
+          {{ user.wins }} - {{ user.losses }}
+          <span v-if="user.ties !== 0">{{ user.ties }}</span>
+        </p>
+      </div>
     </div>
     <h2 class="text-xl font-semibold">Closest Matchups</h2>
     <div v-for="matchup in closestMatchups">
@@ -565,10 +740,24 @@ onMounted(() => {
         <p>{{ matchup.teamB.name }} {{ matchup.scoreB }}</p>
       </div>
     </div>
-    <h2 class="text-xl font-semibold">Points from non drafted players</h2>
-    {{ pointsFromWaivers }}
-    <h2 class="text-xl font-semibold">Longest Streaks</h2>
-    <p>{{ winStreak }}</p>
+    <div>
+      <h2 class="text-xl font-semibold">Points from non drafted players</h2>
+      <div v-for="user in pointsFromWaivers" class="flex justify-evenly">
+        <img class="w-10 h-10 mb-2 mr-2 rounded-full" :src="user.avatar" />
+        <p>{{ user.name }}</p>
+        <p>{{ user.pointsFromWaivers }}</p>
+      </div>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold">Longest Streaks</h2>
+      <div v-for="user in winStreak.slice(0, 2)" class="flex justify-evenly">
+        <img class="w-10 h-10 mb-2 mr-2 rounded-full" :src="user.avatar" />
+        <p>{{ user.name }}</p>
+        <p>{{ user.streak }}</p>
+      </div>
+    </div>
+    <h2 class="text-xl font-semibold">Playoffs</h2>
+    <h2 class="text-xl font-semibold">League Champion</h2>
     <!-- workaround to get data without copying over methods -->
     <Draft v-show="false" />
     <Trades v-show="false" />
@@ -576,3 +765,8 @@ onMounted(() => {
     <LeagueHistory v-show="false" :table-data="tableData" />
   </div>
 </template>
+<style scoped>
+.geist-text {
+  font-family: "Geist", sans-serif;
+}
+</style>
