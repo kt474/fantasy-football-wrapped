@@ -2,6 +2,11 @@ name = "kicker-barely-know-her"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-11-18"
 
+[vars]
+VITE_AWARDS_API_URL = "/api"
+CF_ACCESS_TEAM_DOMAIN = "jmsdigitaltechnologies.cloudflareaccess.com" # replace if your team domain differs
+CF_ACCESS_AUD = "6896a7c55931fcd76ddf0cf2c574931c281c85611cba79bf7e6c98767b722067" # set to the audience tag for the kbkh.app Access app
+
 [[d1_databases]]
 binding = "DB"
 database_name = "kbkh-awards"

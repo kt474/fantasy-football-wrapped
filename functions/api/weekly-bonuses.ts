@@ -1,3 +1,5 @@
+import { requireAccessForWrite } from "../lib/access";
+
 export interface WeeklyBonus {
   week: number;
   label: string;
@@ -102,6 +104,14 @@ const saveToKV = async (env: Env, weeklyBonuses: WeeklyBonus[]) => {
 export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  const access = await requireAccessForWrite(request, env);
+  if (!access.ok) {
+    return new Response(JSON.stringify({ message: access.message }), {
+      status: access.status,
+      headers: corsHeaders,
+    });
   }
 
   try {

@@ -38,6 +38,7 @@ None of the environment variables are required to get the project running locall
 - Ensure `.env.local` includes `VITE_AWARDS_API_URL=http://localhost:3000`
 - Start the app with the API available: `vercel dev`
   - If you instead run `npm run dev`, the awards API won’t be available; point `VITE_AWARDS_API_URL` at a deployed URL in that case.
+- Optional: set `VITE_AWARDS_API_FALLBACK_URL` to a public, CORS-enabled deployment (e.g. your `*.pages.dev` URL) if your custom domain enforces Cloudflare Access for `/api/*`. The frontend will try the primary base, then same-origin, then this fallback.
 
 ### Technologies
 It would also be helpful to familiarize yourself with the technologies used in this project:

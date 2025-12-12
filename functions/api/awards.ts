@@ -1,3 +1,5 @@
+import { requireAccessForWrite } from "../lib/access";
+
 export interface SeasonalAward {
   id: string;
   title: string;
@@ -122,6 +124,14 @@ const saveToKV = async (env: Env, awards: SeasonalAward[]) => {
 export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  const access = await requireAccessForWrite(request, env);
+  if (!access.ok) {
+    return new Response(JSON.stringify({ message: access.message }), {
+      status: access.status,
+      headers: corsHeaders,
+    });
   }
 
   try {
