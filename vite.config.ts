@@ -3,6 +3,17 @@ import vueDevTools from "vite-plugin-vue-devtools";
 import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
 
+const adminApiProxyTarget = process.env.ADMIN_API_PROXY_TARGET;
+const accessClientId = process.env.CF_ACCESS_CLIENT_ID;
+const accessClientSecret = process.env.CF_ACCESS_CLIENT_SECRET;
+const accessHeaders =
+  accessClientId && accessClientSecret
+    ? {
+        "CF-Access-Client-Id": accessClientId,
+        "CF-Access-Client-Secret": accessClientSecret,
+      }
+    : undefined;
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -68,6 +79,22 @@ export default defineConfig({
       },
     }),
   ],
+  server: adminApiProxyTarget
+    ? {
+        proxy: {
+          "/api/awards": {
+            target: adminApiProxyTarget,
+            changeOrigin: true,
+            headers: accessHeaders,
+          },
+          "/api/weekly-bonuses": {
+            target: adminApiProxyTarget,
+            changeOrigin: true,
+            headers: accessHeaders,
+          },
+        },
+      }
+    : undefined,
   build: {
     chunkSizeWarningLimit: 700,
     rollupOptions: {

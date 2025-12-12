@@ -38,7 +38,7 @@ None of the environment variables are required to get the project running locall
 - Ensure `.env.local` includes `VITE_AWARDS_API_URL=http://localhost:3000`
 - Start the app with the API available: `vercel dev`
   - If you instead run `npm run dev`, the awards API won’t be available; point `VITE_AWARDS_API_URL` at a deployed URL in that case.
-- Optional: set `VITE_AWARDS_API_FALLBACK_URL` to a public, CORS-enabled deployment (e.g. your `*.pages.dev` URL) if your custom domain enforces Cloudflare Access for `/api/*`. The frontend will try the primary base, then same-origin, then this fallback.
+- Admin endpoints require Cloudflare Access for both reads and writes. If you need local dev without an interactive Access login, set `ADMIN_API_PROXY_TARGET` to your deployed URL and add `CF_ACCESS_CLIENT_ID` / `CF_ACCESS_CLIENT_SECRET` (service token) so the Vite dev proxy forwards requests with the token server-side.
 
 ### Technologies
 It would also be helpful to familiarize yourself with the technologies used in this project:

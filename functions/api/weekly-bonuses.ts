@@ -1,4 +1,4 @@
-import { requireAccessForWrite } from "../lib/access";
+import { requireAccess } from "../lib/access";
 
 export interface WeeklyBonus {
   week: number;
@@ -106,9 +106,9 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
-  const access = await requireAccessForWrite(request, env);
+  const access = await requireAccess(request, env);
   if (!access.ok) {
-    return new Response(JSON.stringify({ message: access.message }), {
+    return new Response(JSON.stringify({ message: access.message, loginUrl: access.loginUrl }), {
       status: access.status,
       headers: corsHeaders,
     });

@@ -48,26 +48,36 @@ const getAccessKeys = async (teamDomain: string) => {
   return map;
 };
 
+const buildAccessLoginUrl = (teamDomain: string, returnUrl: string) => {
+  const searchParams = new URLSearchParams({
+    redirect_url: returnUrl,
+  });
+  return `https://${teamDomain}/cdn-cgi/access/login?${searchParams.toString()}`;
+};
+
 export type AdminCheckResult =
   | { ok: true }
-  | { ok: false; status: number; message: string };
+  | { ok: false; status: number; message: string; loginUrl?: string };
 
 /**
- * Validates a Cloudflare Access JWT on PUT requests. GET/OPTIONS are allowed.
+ * Validates a Cloudflare Access JWT for all non-OPTIONS requests.
  * Requires env.CF_ACCESS_TEAM_DOMAIN and env.CF_ACCESS_AUD to be set.
  */
-export const requireAccessForWrite = async (
+export const requireAccess = async (
   request: Request,
   env: { CF_ACCESS_TEAM_DOMAIN?: string; CF_ACCESS_AUD?: string }
 ): Promise<AdminCheckResult> => {
-  if (request.method !== "PUT") return { ok: true };
+  if (request.method === "OPTIONS") return { ok: true };
 
   const teamDomain = env.CF_ACCESS_TEAM_DOMAIN;
   const audience = env.CF_ACCESS_AUD;
   if (!teamDomain || !audience) {
-    // If not configured, allow but warn so we don't break writes unexpectedly.
-    console.warn("Access validation skipped: CF_ACCESS_TEAM_DOMAIN or CF_ACCESS_AUD not set.");
-    return { ok: true };
+    console.warn("Access validation failed: CF_ACCESS_TEAM_DOMAIN or CF_ACCESS_AUD not set.");
+    return {
+      ok: false,
+      status: 500,
+      message: "Admin access not configured",
+    };
   }
 
   const token =
@@ -81,7 +91,12 @@ export const requireAccessForWrite = async (
     })();
 
   if (!token) {
-    return { ok: false, status: 401, message: "Missing Access token" };
+    return {
+      ok: false,
+      status: 401,
+      message: "Missing Access token",
+      loginUrl: buildAccessLoginUrl(teamDomain, request.url),
+    };
   }
 
   try {
