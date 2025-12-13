@@ -39,7 +39,7 @@ export const fetchAwards = async (): Promise<SeasonalAward[] | null> => {
 
 export const saveAwards = async (awards: SeasonalAward[]): Promise<boolean> => {
   try {
-    const response = await fetchWithFallback("/api/awards", {
+    const response = await fetchWithFallback("/api/admin/awards", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ awards }),

@@ -42,7 +42,7 @@ export const fetchWeeklyBonuses = async (): Promise<WeeklyBonus[] | null> => {
 
 export const saveWeeklyBonuses = async (weeklyBonuses: WeeklyBonus[]): Promise<boolean> => {
   try {
-    const response = await fetchWithFallback("/api/weekly-bonuses", {
+    const response = await fetchWithFallback("/api/admin/weekly-bonuses", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ weeklyBonuses }),
