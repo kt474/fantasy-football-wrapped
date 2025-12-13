@@ -2,9 +2,9 @@ import { requireAccess } from "./lib/access";
 
 const protectedPaths = [
   /^\/admin(\/|$)/,
-  /^\/api\/awards/,
-  /^\/api\/weekly-bonuses/,
+  /^\/api\/admin(\/|$)/,
 ];
+
 
 export const onRequest: PagesFunction = async (context) => {
   const { request, env, next } = context;

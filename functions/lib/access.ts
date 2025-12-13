@@ -122,7 +122,11 @@ export const requireAccess = async (
       : payload.aud === audience;
     if (!audOk) throw new Error("Audience mismatch");
 
-    const issOk = payload.iss === `https://${teamDomain}/`;
+    const expectedIss = `https://${teamDomain}`;
+    const issOk =
+      payload.iss === expectedIss ||
+      payload.iss === `${expectedIss}/`;
+
     if (!issOk) throw new Error("Issuer mismatch");
 
     return { ok: true };
