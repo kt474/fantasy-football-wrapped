@@ -1,2 +1,2 @@
-# SPA fallback rewrite for Cloudflare Pages (200! avoids loop warning)
-/*   /index.html   200!
+# SPA fallback rewrite for Cloudflare Pages
+/*   /index.html   200
