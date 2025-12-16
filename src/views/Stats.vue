@@ -42,6 +42,7 @@ const filters = reactive({
   draftRounds: [] as number[],
   playerSearch: "",
   ownerId: "ALL" as string | "ALL",
+  undraftedOnly: false,
 });
 
 const seasonSortKey = ref<PositionKey>("QB");
@@ -186,6 +187,10 @@ const hydrateFiltersFromStorage = (lid: string) => {
           : filters.playerSearch;
       filters.ownerId =
         typeof parsed.ownerId === "string" ? parsed.ownerId : filters.ownerId;
+      filters.undraftedOnly =
+        parsed.undraftedOnly !== undefined
+          ? Boolean(parsed.undraftedOnly)
+          : filters.undraftedOnly;
     }
     const savedTab = localStorage.getItem(tabKeyFor(lid));
     if (
@@ -451,6 +456,7 @@ const undraftedRows = computed(() => {
 });
 
 const toggleRound = (round: number) => {
+  filters.undraftedOnly = false;
   const idx = filters.draftRounds.indexOf(round);
   if (idx >= 0) {
     filters.draftRounds.splice(idx, 1);
@@ -483,6 +489,7 @@ const selectAllPositions = () => {
 };
 
 const selectAllRounds = () => {
+  filters.undraftedOnly = false;
   filters.draftRounds = [...availableDraftRounds.value];
 };
 
@@ -541,11 +548,12 @@ const playerFilteredRows = computed(() => {
   const search = filters.playerSearch.toLowerCase().trim();
   const rows = playerRows.value
     .filter((p) => allowedPositions.includes(p.position as PositionKey))
-    .filter(
-      (p) =>
-        selectedRounds.size === 0 ||
-        (p.draftRound !== null && selectedRounds.has(p.draftRound))
-    )
+    .filter((p) => {
+      if (filters.undraftedOnly) return p.draftRound === null;
+      if (selectedRounds.size === 0) return true;
+      if (p.draftRound === null) return false;
+      return selectedRounds.has(p.draftRound);
+    })
     .filter((p) =>
       filters.ownerId === "ALL"
         ? true
@@ -630,6 +638,9 @@ const handleUndraftedHeaderSort = (key: "team" | "total" | "avg") => {
 };
 
 const roundsSummaryLabel = computed(() => {
+  if (filters.undraftedOnly) {
+    return "Undrafted only";
+  }
   if (!filters.draftRounds.length || filters.draftRounds.length === availableDraftRounds.value.length) {
     return "All rounds";
   }
@@ -649,6 +660,9 @@ const positionsChipLabel = computed(() => {
 });
 
 const roundsChipLabel = computed(() => {
+  if (filters.undraftedOnly) {
+    return "Rounds: Undrafted only";
+  }
   if (!filters.draftRounds.length || filters.draftRounds.length === availableDraftRounds.value.length) {
     return "Rounds: All drafted";
   }
@@ -1641,6 +1655,15 @@ watch(
                 @change="toggleRound(round as number)"
               />
               {{ formatRound(round) }}
+            </label>
+            <label
+              class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md text-xs font-semibold dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+            >
+              <input
+                type="checkbox"
+                v-model="filters.undraftedOnly"
+              />
+              Undrafted only
             </label>
             <button
               class="px-2 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-md dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800"
