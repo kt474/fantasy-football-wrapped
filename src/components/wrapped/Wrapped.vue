@@ -8,6 +8,10 @@ import {
 import { useStore } from "../../store/store";
 import { maxBy, minBy } from "lodash";
 import WrappedSlide from "./WrappedSlide.vue";
+import Draft from "../draft/Draft.vue";
+import Trades from "../roster_management/Trades.vue";
+import Waivers from "../roster_management/Waivers.vue";
+import LeagueHistory from "../league_history/LeagueHistory.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -19,6 +23,10 @@ const farthestMatchups: any = ref([]);
 
 const league = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex];
+});
+
+const leagueSize = computed(() => {
+  return league.value.totalRosters;
 });
 
 const bestPicks = computed(() => {
@@ -242,29 +250,32 @@ const uniquePlayers = computed(() => {
       // uniqueStarterIds: Array.from(uniqueStarterIds) // (optional, if you want the IDs)
     };
   });
-  return result.sort((a, b) => b.uniqueStarterCount - a.uniqueStarterCount);
+  return result
+    .sort((a, b) => b.uniqueStarterCount - a.uniqueStarterCount)
+    .slice(0, 14);
 });
 
 const originalPlayers = computed(() => {
   const result = props.tableData.map((user) => {
-    // Get all draft picks made by this user (could also match by rosterId if needed)
-    const draftedPicks = league.value.draftPicks?.filter(
-      (pick) => pick.rosterId === user.rosterId
-    );
-    // Count how many of those players are still on their team
-    const playersStillOnTeam = league.value.draftPicks?.filter((pick) =>
-      user.players.includes(pick.playerId)
-    );
+    const draftedPicks = league.value.draftPicks
+      ?.filter((pick) => pick.rosterId === user.rosterId)
+      .map((pick) => pick.playerId);
+    let playerCount = 0;
+    user.players.forEach((player) => {
+      console.log(player);
+      if (draftedPicks?.includes(player)) {
+        playerCount += 1;
+      }
+    });
 
     return {
       userId: user.id,
       userName: user.name,
       totalDrafted: draftedPicks?.length,
-      stillOnTeam: playersStillOnTeam?.length ?? 0,
-      playerIds: playersStillOnTeam?.map((p) => p.playerId), // Optional: to see which
+      stillOnTeam: playerCount,
     };
   });
-  return result.sort((a, b) => b.stillOnTeam - a.stillOnTeam);
+  return result.sort((a, b) => b.stillOnTeam - a.stillOnTeam).slice(0, 14);
 });
 
 const pointsFromWaivers = computed(() => {
@@ -303,7 +314,8 @@ const draftRankings = computed(() => {
     .sort(
       (a, b) =>
         (a.user?.regularSeasonRank ?? 0) - (b.user?.regularSeasonRank ?? 0)
-    );
+    )
+    .slice(0, 14);
 });
 
 const allTimeRecord = computed(() => {
@@ -611,7 +623,7 @@ onMounted(() => {
         <div class="flex items-center gap-4 p-4 bg-black/20 rounded-xl">
           <img
             alt="Player image"
-            class="w-16 h-16 rounded"
+            class="w-16 rounded"
             :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
           />
           <div class="text-left">
@@ -634,7 +646,10 @@ onMounted(() => {
         The number of drafted players that earned their spot and never left.
       </p>
 
-      <div class="grid w-full grid-cols-2 gap-4 overflow-auto">
+      <div
+        class="grid w-full grid-flow-col grid-cols-2 gap-4"
+        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
+      >
         <div
           v-for="user in originalPlayers"
           :key="user.userId"
@@ -662,7 +677,10 @@ onMounted(() => {
       <p class="mb-6 text-lg text-blue-200">
         The total number of different starting players.
       </p>
-      <div class="grid w-full grid-cols-2 gap-4 overflow-auto">
+      <div
+        class="grid w-full grid-flow-col grid-cols-2 gap-4 overflow-auto"
+        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
+      >
         <div
           v-for="user in uniquePlayers"
           class="flex items-center justify-between p-3 rounded-lg bg-sky-900/40"
@@ -922,7 +940,10 @@ onMounted(() => {
       <p class="mb-8 text-lg text-purple-200">
         Sleeper said A+. Reality said otherwise.
       </p>
-      <div class="grid gap-4 w-full max-h-[70vh] grid-cols-2">
+      <div
+        class="grid gap-4 w-full max-h-[70vh] grid-cols-2 grid-flow-col"
+        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
+      >
         <div
           v-for="grade in draftRankings"
           :key="grade.user?.id"
@@ -1167,11 +1188,11 @@ onMounted(() => {
             class="bg-orange-900/40 p-6 rounded-2xl border border-orange-500/30 flex flex-col items-center min-w-[200px]"
           >
             <img
-              class="mb-4 border-4 border-orange-500 rounded-full w-14 h-14"
+              class="w-12 h-12 mb-4 border-4 border-orange-500 rounded-full"
               :src="user.avatar"
             />
             <div class="mb-2 text-xl font-bold">{{ user.name }}</div>
-            <div class="text-4xl font-black text-orange-500">
+            <div class="text-3xl font-black text-orange-500">
               {{ user.streak }}
             </div>
           </div>
@@ -1193,7 +1214,10 @@ onMounted(() => {
       <p class="mb-6 text-lg text-slate-200">
         All time regular season records.
       </p>
-      <div class="grid w-full grid-cols-2 gap-4">
+      <div
+        class="grid w-full grid-flow-col grid-cols-2 gap-4"
+        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
+      >
         <div
           v-for="user in allTimeRecord.slice(0, 12)"
           :key="user.userId"
@@ -1219,7 +1243,10 @@ onMounted(() => {
         How many points did you leave sitting on your bench?
       </p>
 
-      <div class="grid w-full grid-cols-2 gap-4 overflow-auto">
+      <div
+        class="grid w-full grid-flow-col grid-cols-2 gap-4 overflow-auto"
+        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
+      >
         <div
           v-for="user in bestManagers"
           class="flex items-center justify-between p-3 rounded-lg bg-amber-900/40"
@@ -1247,7 +1274,10 @@ onMounted(() => {
         Points scored from players you didn't draft.
       </p>
 
-      <div class="grid w-full grid-cols-2 gap-4 overflow-auto">
+      <div
+        class="grid w-full grid-flow-col grid-cols-2 gap-4 overflow-auto"
+        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
+      >
         <div
           v-for="user in pointsFromWaivers"
           class="flex items-center justify-between p-3 rounded-lg bg-violet-900/40"
@@ -1274,6 +1304,11 @@ onMounted(() => {
         <p class="text-zinc-300">Thank you for using ffwrapped ❤️</p>
       </div>
     </WrappedSlide>
+    <!-- workaround to get data without copying over methods -->
+    <Draft v-show="false" />
+    <Trades v-show="false" />
+    <Waivers v-show="false" />
+    <LeagueHistory v-show="false" :table-data="tableData" />
   </div>
 </template>
 
