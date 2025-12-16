@@ -11,9 +11,10 @@ import Tabs from "../components/util/Tabs.vue";
 import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../types/types";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
+const router = useRouter();
 const store = useStore();
 
 const showLoading = ref(false);
@@ -60,7 +61,11 @@ onMounted(async () => {
       ? route.query.leagueId[0]
       : route.query.leagueId;
     // sometimes on refresh the leagueId in the URL becomes undefined
-    if (leagueId && !store.leagueIds.includes(leagueId)) {
+    if (
+      leagueId &&
+      !store.leagueIds.includes(leagueId) &&
+      leagueId !== "1057743221285101568"
+    ) {
       const checkInput = await getLeague(leagueId);
       if (checkInput["name"]) {
         store.updateCurrentLeagueId(leagueId);
@@ -88,6 +93,11 @@ onMounted(async () => {
       setTimeout(() => {
         store.showLoadingAlert = false;
       }, 8000);
+      // this league has somehow been cached in google sitelinks
+    } else if (leagueId === "1057743221285101568") {
+      const newQuery = { ...route.query };
+      delete newQuery.leagueId;
+      router.replace({ path: route.path, query: newQuery });
     }
   } catch {
     store.showLoadingAlert = true;

@@ -20,6 +20,12 @@ const promptData = computed(() => {
   });
 });
 
+const lastWeek = computed(() => {
+  const league = store.leagueInfo[store.currentLeagueIndex];
+  if (!league) return 14;
+  return Math.min(league.lastScoredWeek, league.regularSeasonLength);
+});
+
 const luckAnalysis = computed(() => {
   const teams = promptData.value;
 
@@ -37,10 +43,7 @@ const luckAnalysis = computed(() => {
   teams.forEach((team, teamIndex) => {
     for (
       let week = 0;
-      week <
-      (store.leagueInfo.length > 0
-        ? store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
-        : 14);
+      week < (store.leagueInfo.length > 0 ? lastWeek.value : 14);
       week++
     ) {
       const opponentId = team.matchups[week];
@@ -129,10 +132,7 @@ const scheduleAnalysis = computed(() => {
       // Play this team's points against the other team's opponents
       for (
         let week = 0;
-        week <
-        (store.leagueInfo.length > 0
-          ? store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
-          : 14);
+        week < (store.leagueInfo.length > 0 ? lastWeek.value : 14);
         week++
       ) {
         const opponentId = otherTeam.matchups[week];
@@ -414,11 +414,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
           <div class="flex-1">
             <p class="text-gray-600 dark:text-gray-300">Actual</p>
             <p class="text-xl font-semibold">
-              {{ team.actualWins }}-{{
-                (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                  ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                  : 14) - team.actualWins
-              }}
+              {{ team.actualWins }}-{{ lastWeek - team.actualWins }}
             </p>
           </div>
           <div class="flex-1">
@@ -431,9 +427,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
             <p class="text-gray-600 dark:text-gray-300">Best</p>
             <p class="text-xl font-semibold text-green-500">
               {{ team.bestPossibleRecord }}-{{
-                (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                  ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                  : 14) - team.bestPossibleRecord
+                lastWeek - team.bestPossibleRecord
               }}
             </p>
             <p class="mt-1 text-xs">({{ team.bestScheduleTeam }})</p>
@@ -442,9 +436,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
             <p class="text-gray-600 dark:text-gray-300">Worst</p>
             <p class="text-xl font-semibold text-red-500">
               {{ team.worstPossibleRecord }}-{{
-                (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                  ? store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-                  : 14) - team.worstPossibleRecord
+                lastWeek - team.worstPossibleRecord
               }}
             </p>
             <p class="mt-1 text-xs">({{ team.worstScheduleTeam }})</p>
