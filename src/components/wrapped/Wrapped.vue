@@ -262,7 +262,6 @@ const originalPlayers = computed(() => {
       .map((pick) => pick.playerId);
     let playerCount = 0;
     user.players.forEach((player) => {
-      console.log(player);
       if (draftedPicks?.includes(player)) {
         playerCount += 1;
       }
@@ -270,7 +269,7 @@ const originalPlayers = computed(() => {
 
     return {
       userId: user.id,
-      userName: user.name,
+      userName: store.showUsernames ? user.username : user.name,
       totalDrafted: draftedPicks?.length,
       stillOnTeam: playerCount,
     };
@@ -294,7 +293,7 @@ const pointsFromWaivers = computed(() => {
       });
     });
     result.push({
-      name: user.name,
+      name: store.showUsernames ? user.username : user.name,
       avatar: user.avatarImg,
       pointsFromWaivers: Math.round(sum * 100) / 100,
     });
@@ -320,7 +319,7 @@ const draftRankings = computed(() => {
 
 const allTimeRecord = computed(() => {
   let result = props.tableData.map((user) => ({
-    name: user.name,
+    name: store.showUsernames ? user.username : user.name,
     rosterId: user.rosterId,
     userId: user.id,
     wins: user.wins,
@@ -346,7 +345,7 @@ const allTimeRecord = computed(() => {
 
 const winStreak = computed(() => {
   let result = props.tableData.map((user) => ({
-    name: user.name,
+    name: store.showUsernames ? user.username : user.name,
     avatar: user.avatarImg,
     streak: getCurrentStreak(user.recordByWeek),
   }));
@@ -481,7 +480,9 @@ onMounted(() => {
             :src="league.draftMetadata?.order[0].avatarImg"
           />
           <span class="text-xl font-semibold">{{
-            league.draftMetadata?.order[0].name
+            store.showUsernames
+              ? league.draftMetadata?.order[0].username
+              : league.draftMetadata?.order[0].name
           }}</span>
         </div>
         <div class="text-lg">Started off the draft with</div>
@@ -513,7 +514,6 @@ onMounted(() => {
       <div class="w-full space-y-4">
         <div
           v-for="(pick, index) in bestPicks?.slice(0, 5)"
-          :key="pick.pickNumber"
           class="flex items-center gap-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm"
         >
           <div class="text-3xl font-bold text-indigo-400 opacity-50">
@@ -560,7 +560,6 @@ onMounted(() => {
       <div class="w-full space-y-4">
         <div
           v-for="(pick, index) in worstPicks?.slice(0, 5)"
-          :key="pick.pickNumber"
           class="flex items-center gap-4 p-4 border bg-white/5 rounded-xl border-red-900/50"
         >
           <div class="text-3xl font-bold text-red-500 opacity-50">
@@ -617,7 +616,11 @@ onMounted(() => {
           :src="getUserObject(pick.userId)?.avatarImg"
         />
         <div class="mb-4 text-xl font-bold">
-          {{ getUserObject(pick.userId)?.name }}
+          {{
+            store.showUsernames
+              ? getUserObject(pick.userId)?.username
+              : getUserObject(pick.userId)?.name
+          }}
         </div>
 
         <div class="flex items-center gap-4 p-4 bg-black/20 rounded-xl">
@@ -652,7 +655,6 @@ onMounted(() => {
       >
         <div
           v-for="user in originalPlayers"
-          :key="user.userId"
           class="flex items-center justify-between p-3 rounded-lg bg-blue-900/40"
         >
           <div class="flex items-center gap-3">
@@ -717,12 +719,15 @@ onMounted(() => {
               class="w-10 h-10 border-2 rounded-full border-emerald-500"
               :src="impactfulTrades.team1.user.avatarImg"
             />
-            <span class="font-bold">{{ impactfulTrades.team1.user.name }}</span>
+            <span class="font-bold">{{
+              store.showUsernames
+                ? impactfulTrades.team1.user.username
+                : impactfulTrades.team1.user.name
+            }}</span>
           </div>
           <div class="flex flex-wrap gap-2">
             <div
               v-for="(player, idx) in impactfulTrades.team1.players"
-              :key="idx"
               class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               <img
@@ -746,12 +751,15 @@ onMounted(() => {
               class="w-10 h-10 border-2 rounded-full border-emerald-500"
               :src="impactfulTrades.team2.user.avatarImg"
             />
-            <span class="font-bold">{{ impactfulTrades.team2.user.name }}</span>
+            <span class="font-bold">{{
+              store.showUsernames
+                ? impactfulTrades.team2.user.username
+                : impactfulTrades.team2.user.name
+            }}</span>
           </div>
           <div class="flex flex-wrap gap-2">
             <div
               v-for="(player, idx) in impactfulTrades.team2.players"
-              :key="idx"
               class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               <img
@@ -782,7 +790,13 @@ onMounted(() => {
             class="w-16 h-16 mb-3 border-4 rounded-full border-cyan-500/50"
             :src="mostMoves.user.avatarImg"
           />
-          <div class="font-bold text-center">{{ mostMoves.user.name }}</div>
+          <div class="font-bold text-center">
+            {{
+              store.showUsernames
+                ? mostMoves.user.username
+                : mostMoves.user.name
+            }}
+          </div>
           <div class="text-3xl font-black text-cyan-400">
             {{ mostMoves.moves }}
           </div>
@@ -797,7 +811,13 @@ onMounted(() => {
             class="w-16 h-16 mb-3 border-4 rounded-full border-cyan-500/50"
             :src="fewestMoves.user.avatarImg"
           />
-          <div class="font-bold text-center">{{ fewestMoves.user.name }}</div>
+          <div class="font-bold text-center">
+            {{
+              store.showUsernames
+                ? fewestMoves.user.username
+                : fewestMoves.user.name
+            }}
+          </div>
           <div class="text-3xl font-black text-cyan-400">
             {{ fewestMoves.moves }}
           </div>
@@ -821,7 +841,11 @@ onMounted(() => {
             />
             <div class="text-left">
               <div class="text-lg font-bold">
-                {{ totalBids.highest.user.name }}
+                {{
+                  store.showUsernames
+                    ? totalBids.highest.user.username
+                    : totalBids.highest.user.name
+                }}
               </div>
               <div class="font-mono text-cyan-400">
                 ${{ totalBids.highest.sumByStatus.complete }} spent
@@ -845,7 +869,11 @@ onMounted(() => {
             />
             <div class="text-left">
               <p class="text-lg font-bold">
-                {{ totalBids.lowest.user.name }}
+                {{
+                  store.showUsernames
+                    ? totalBids.lowest.user.username
+                    : totalBids.lowest.user.name
+                }}
               </p>
               <p class="font-mono text-cyan-400">
                 ${{ totalBids.lowest.sumByStatus.complete }} spent
@@ -898,7 +926,6 @@ onMounted(() => {
       <div class="w-full space-y-4">
         <div
           v-for="(move, index) in bestPickups"
-          :key="index"
           class="flex items-center gap-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm"
         >
           <div class="text-3xl font-bold text-teal-500 opacity-50">
@@ -946,12 +973,13 @@ onMounted(() => {
       >
         <div
           v-for="grade in draftRankings"
-          :key="grade.user?.id"
           class="flex items-center justify-between p-3 rounded-lg bg-purple-900/40"
         >
           <div class="flex items-center gap-3">
             <img class="w-8 h-8 rounded-full" :src="grade.user?.avatarImg" />
-            <span class="text-sm font-bold">{{ grade.user?.name }}</span>
+            <span class="text-sm font-bold">{{
+              store.showUsernames ? grade.user?.username : grade.user?.name
+            }}</span>
           </div>
           <div class="flex items-center gap-4 text-right">
             <div class="flex flex-col items-center">
@@ -1101,7 +1129,11 @@ onMounted(() => {
                   <span class="text-xl font-bold">{{ matchup.scoreA }}</span>
                 </div>
                 <p class="w-32 mt-1 text-left truncate">
-                  {{ matchup.teamA.name }}
+                  {{
+                    store.showUsernames
+                      ? matchup.teamA.username
+                      : matchup.teamA.name
+                  }}
                 </p>
               </div>
               <div>
@@ -1119,7 +1151,11 @@ onMounted(() => {
                   />
                 </div>
                 <p class="float-right w-32 mt-1 text-right truncate">
-                  {{ matchup.teamB.name }}
+                  {{
+                    store.showUsernames
+                      ? matchup.teamB.username
+                      : matchup.teamB.name
+                  }}
                 </p>
               </div>
             </div>
@@ -1179,11 +1215,7 @@ onMounted(() => {
         Hottest run. Coldest stretch. Momentum is everything.
       </p>
       <div class="flex flex-col gap-4">
-        <div
-          v-for="user in winStreak.slice(0, 3)"
-          :key="user.name"
-          class="relative"
-        >
+        <div v-for="user in winStreak.slice(0, 3)" class="relative">
           <div
             class="bg-orange-900/40 p-6 rounded-2xl border border-orange-500/30 flex flex-col items-center min-w-[200px]"
           >
@@ -1220,7 +1252,6 @@ onMounted(() => {
       >
         <div
           v-for="user in allTimeRecord.slice(0, 12)"
-          :key="user.userId"
           class="flex items-center justify-between p-3 rounded-lg bg-slate-800"
         >
           <div class="flex items-center gap-3">
@@ -1253,7 +1284,9 @@ onMounted(() => {
         >
           <div class="flex items-center gap-3">
             <img class="w-10 h-10 rounded-full" :src="user.avatarImg" />
-            <span class="text-sm font-semibold">{{ user.name }}</span>
+            <span class="text-sm font-semibold">{{
+              store.showUsernames ? user.username : user.name
+            }}</span>
           </div>
           <div class="text-right">
             <p class="text-xl font-bold text-amber-300">
