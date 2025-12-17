@@ -134,25 +134,23 @@ const totalBids = computed(() => {
 });
 
 const impactfulTrades = computed(() => {
-  let minValue = Infinity;
-  let minTrade = null;
-  if (league.value.tradeNames) {
-    for (const trade of league.value.tradeNames) {
-      // Combine value arrays from both teams
-      const values = [
-        ...(trade.team1.value || []),
-        ...(trade.team2.value || []),
-      ];
+  if (!league.value.tradeNames) return [];
 
-      for (const val of values) {
-        if (val < minValue) {
-          minValue = val;
-          minTrade = trade;
-        }
-      }
-    }
-  }
-  return minTrade;
+  return league.value.tradeNames.slice().sort((a, b) => {
+    const aValues = [...(a.team1.value || []), ...(a.team2.value || [])];
+    const bValues = [...(b.team1.value || []), ...(b.team2.value || [])];
+
+    const minA = aValues.reduce(
+      (min, val) => (val != null && val < min ? val : min),
+      Infinity
+    );
+    const minB = bValues.reduce(
+      (min, val) => (val != null && val < min ? val : min),
+      Infinity
+    );
+
+    return minA - minB;
+  });
 });
 
 const scheduleData = computed(() => {
@@ -798,26 +796,29 @@ watch(
     <!-- Trade Slide -->
     <WrappedSlide bg-color="bg-emerald-950" v-if="impactfulTrades">
       <h2 class="mb-2 text-5xl font-bold text-emerald-400">
-        Blockbuster Trade
+        Blockbuster Trades
       </h2>
       <p class="mt-4 mb-8 text-lg text-emerald-200/80">
-        The one that shook the league.
+        The ones that shook the league.
       </p>
 
-      <div class="flex flex-col w-full gap-6">
+      <div
+        v-for="trade in impactfulTrades.slice(0, 2)"
+        class="flex justify-between w-full mb-4"
+      >
         <!-- Team 1 Side -->
         <div
-          class="p-4 border bg-emerald-900/40 rounded-2xl border-emerald-800/50"
+          class="p-4 border w-72 bg-emerald-900/40 rounded-2xl border-emerald-800/50"
         >
           <div class="flex items-center gap-3 mb-4">
             <img
-              v-if="impactfulTrades.team1.user.avatarImg"
+              v-if="trade.team1.user.avatarImg"
               class="w-10 h-10 border-2 rounded-full border-emerald-500"
-              :src="impactfulTrades.team1.user.avatarImg"
+              :src="trade.team1.user.avatarImg"
             />
             <svg
               v-else
-              class="w-10 h-10 text-gray-200"
+              class="w-10 h-10 text-gray-200 border-2 rounded-full border-emerald-500"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -829,39 +830,39 @@ watch(
             </svg>
             <span class="font-bold">{{
               store.showUsernames
-                ? impactfulTrades.team1.user.username
-                : impactfulTrades.team1.user.name
+                ? trade.team1.user.username
+                : trade.team1.user.name
             }}</span>
           </div>
           <div class="flex flex-wrap gap-2">
             <div
-              v-for="(player, idx) in impactfulTrades.team1.players"
+              v-for="(player, idx) in trade.team1.players"
               class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               <img
-                v-if="/\d/.test(impactfulTrades.team1.playerIds[idx])"
+                v-if="/\d/.test(trade.team1.playerIds[idx])"
                 class="w-8 rounded"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${impactfulTrades.team1.playerIds[idx]}.jpg`"
+                :src="`https://sleepercdn.com/content/nfl/players/thumb/${trade.team1.playerIds[idx]}.jpg`"
               />
               <img
                 v-else
                 class="w-8 rounded"
-                :src="`https://sleepercdn.com/images/team_logos/nfl/${impactfulTrades.team1.playerIds[
+                :src="`https://sleepercdn.com/images/team_logos/nfl/${trade.team1.playerIds[
                   idx
                 ].toLowerCase()}.png`"
               />
               {{ player }}
             </div>
             <p
-              v-for="pick in impactfulTrades.team1.draftPicks"
-              class="mt-2.5 text-sm font-medium"
+              v-for="pick in trade.team1.draftPicks"
+              class="p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               {{ pick ? pick.season : "" }}
               {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
             </p>
             <p
-              v-for="budget in impactfulTrades.team1.waiverBudget"
-              class="mt-2.5 text-sm font-medium"
+              v-for="budget in trade.team1.waiverBudget"
+              class="p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               {{ budget ? `$${budget.amount} FAAB` : "" }}
             </p>
@@ -870,7 +871,7 @@ watch(
 
         <!-- Exchange Icon -->
         <svg
-          class="w-6 h-6 mx-auto rotate-90 text-emerald-500"
+          class="w-6 h-6 mx-auto mt-12 text-emerald-500"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -889,17 +890,17 @@ watch(
 
         <!-- Team 2 Side -->
         <div
-          class="p-4 border bg-emerald-900/40 rounded-2xl border-emerald-800/50"
+          class="p-4 border w-72 bg-emerald-900/40 rounded-2xl border-emerald-800/50"
         >
           <div class="flex items-center gap-3 mb-4">
             <img
-              v-if="impactfulTrades.team2.user.avatarImg"
+              v-if="trade.team2.user.avatarImg"
               class="w-10 h-10 border-2 rounded-full border-emerald-500"
-              :src="impactfulTrades.team2.user.avatarImg"
+              :src="trade.team2.user.avatarImg"
             />
             <svg
               v-else
-              class="w-10 h-10 text-gray-200"
+              class="w-10 h-10 text-gray-200 border-2 rounded-full border-emerald-500"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -912,39 +913,39 @@ watch(
 
             <span class="font-bold">{{
               store.showUsernames
-                ? impactfulTrades.team2.user.username
-                : impactfulTrades.team2.user.name
+                ? trade.team2.user.username
+                : trade.team2.user.name
             }}</span>
           </div>
           <div class="flex flex-wrap gap-2">
             <div
-              v-for="(player, idx) in impactfulTrades.team2.players"
+              v-for="(player, idx) in trade.team2.players"
               class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               <img
-                v-if="/\d/.test(impactfulTrades.team1.playerIds[idx])"
+                v-if="/\d/.test(trade.team1.playerIds[idx])"
                 class="w-8 rounded"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${impactfulTrades.team2.playerIds[idx]}.jpg`"
+                :src="`https://sleepercdn.com/content/nfl/players/thumb/${trade.team2.playerIds[idx]}.jpg`"
               />
               <img
                 v-else
                 class="w-8 rounded"
-                :src="`https://sleepercdn.com/images/team_logos/nfl/${impactfulTrades.team2.playerIds[
+                :src="`https://sleepercdn.com/images/team_logos/nfl/${trade.team2.playerIds[
                   idx
                 ].toLowerCase()}.png`"
               />
               {{ player }}
             </div>
             <p
-              v-for="pick in impactfulTrades.team2.draftPicks"
-              class="mt-2.5 text-sm font-medium"
+              v-for="pick in trade.team2.draftPicks"
+              class="p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               {{ pick ? pick.season : "" }}
               {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
             </p>
             <p
-              v-for="budget in impactfulTrades.team2.waiverBudget"
-              class="mt-2.5 text-sm font-medium"
+              v-for="budget in trade.team2.waiverBudget"
+              class="p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               {{ budget ? `$${budget.amount} FAAB` : "" }}
             </p>
