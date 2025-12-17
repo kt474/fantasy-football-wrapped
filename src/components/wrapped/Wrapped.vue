@@ -458,6 +458,21 @@ watch(
   >
     <!-- Intro Slide -->
     <WrappedSlide bg-color="bg-gradient-to-r from-green-950 to-gray-900">
+      <div class="absolute inset-0 pointer-events-none">
+        <!-- Floating orbs -->
+        <div
+          class="absolute rounded-full w-80 h-80 bg-green-500/20 blur-3xl top-10 left-10"
+          style="animation: float-slow 10s ease-in-out infinite"
+        ></div>
+        <div
+          class="absolute rounded-full w-96 h-96 bg-lime-500/18 blur-3xl bottom-10 right-10"
+          style="animation: float-slower 12s ease-in-out infinite"
+        ></div>
+        <div
+          class="absolute w-56 h-56 rounded-full bg-green-400/15 blur-2xl top-1/3 left-1/2"
+          style="animation: float 8s ease-in-out infinite"
+        ></div>
+      </div>
       <div class="">
         <h1 class="font-bold md:text-8xl">{{ league.season }}</h1>
         <h1
@@ -1746,6 +1761,24 @@ watch(
         <h1 class="mb-4 text-6xl font-black text-white">
           See you next season!
         </h1>
+
+        <div class="text-zinc-300">
+          <!-- Hardcoding data from 12/17/25 -->
+          <p>ffwrapped stats</p>
+          <p>2025 Leagues: 4961</p>
+          <p>Most common league names</p>
+          <div>
+            <p>The League: 34</p>
+            <p>Dynasty: 21</p>
+            <p>Dynasty League: 11</p>
+            <p>
+              Out of 5000 leagues analyzed this season, we need to talk about
+              the hundreds of you who named your league "The League", "Dynasty",
+              or "Dynasty League". No judgment but I'm hoping for a more
+              creative league name next year!
+            </p>
+          </div>
+        </div>
         <p class="text-zinc-300">Thank you for using ffwrapped ❤️</p>
       </div>
     </WrappedSlide>
@@ -1765,5 +1798,45 @@ div::-webkit-scrollbar {
 div {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-30px) translateX(20px);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-35px) translateX(-25px);
+  }
+}
+
+@keyframes float-slower {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(30px) translateX(35px);
+  }
+}
+
+@keyframes gradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 </style>
