@@ -468,6 +468,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
     class="flex flex-wrap mb-4 overflow-auto gap-x-4 gap-y-2"
   >
     <div
+      v-if="matchups.length > 0"
       v-for="matchup in matchups"
       class="sm:px-2 px-1 py-2.5 mt-2 text-gray-700 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 w-full xl:w-[calc(50%-.5rem)] overflow-auto"
     >
@@ -808,6 +809,12 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
         :options="chartOptions"
         :series="getSeriesData(matchup[0], matchup[1])"
       ></apexchart>
+    </div>
+    <div v-else>
+      <p class="text-gray-900 sm:w-1/2 mb-96 dark:text-gray-200">
+        The Sleeper API returns playoff matchup data on Wednesdays (4 AM EST).
+        Please try again at a later time if no matchups are loaded.
+      </p>
     </div>
   </div>
   <div v-else>

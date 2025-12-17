@@ -291,7 +291,7 @@ const getValueColor = (value: number) => {
         positional rank compared to where they were drafted. The sum of these
         scores is listed by each manager's name.
       </p>
-      <form class="max-w-sm mb-4">
+      <form v-if="snakeDraftFormat" class="max-w-sm mb-4">
         <label
           for="sort order"
           class="block text-sm mb-0.5 text-gray-600 dark:text-gray-300"
