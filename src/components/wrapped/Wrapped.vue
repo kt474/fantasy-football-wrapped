@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import {
   TableDataType,
   LeagueInfoType,
@@ -20,6 +20,13 @@ const props = defineProps<{
 
 const closestMatchups: any = ref([]);
 const farthestMatchups: any = ref([]);
+
+const getOrdinalSuffix = (number: number) => {
+  const suffixes = ["th", "st", "nd", "rd"];
+  const v = number % 100;
+
+  return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+};
 
 const league = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex];
@@ -84,10 +91,12 @@ const mostMoves = computed(() => {
 });
 
 const fewestMoves = computed(() => {
-  const maxKey: any = Object.keys(league.value.transactions).reduce(
-    (a: any, b: any) =>
+  const activeRosterIds = league.value.rosters.map((roster) => roster.id);
+  const maxKey: any = Object.keys(league.value.transactions)
+    .filter((id) => activeRosterIds.includes(id))
+    .reduce((a: any, b: any) =>
       league.value.transactions[b] > league.value.transactions[a] ? a : b
-  );
+    );
   const user = league.value.users.find((user) => user.id === maxKey);
   return {
     user: user,
@@ -438,6 +447,11 @@ const getUserObject = (userId: string) => {
 onMounted(() => {
   getMatchups();
 });
+
+watch(
+  () => store.currentLeagueId,
+  () => getMatchups()
+);
 </script>
 
 <template>
@@ -456,8 +470,8 @@ onMounted(() => {
         <p class="text-xl text-gray-400 md:text-xl">
           The stats are in. The league champion has been crowned. Lets see how
           everyone in
-          <!-- <span class="font-bold text-gray-200">{{ league.name }}</span> -->
-          <span class="font-bold text-gray-200">Test League</span>
+          <span class="font-bold text-gray-200">{{ league.name }}</span>
+          <!-- <span class="font-bold text-gray-200">Test League</span> -->
           really did.
         </p>
       </div>
@@ -476,9 +490,22 @@ onMounted(() => {
       <div class="flex flex-col items-center gap-6">
         <div class="flex items-center gap-4">
           <img
+            v-if="league.draftMetadata?.order[0].avatarImg"
             class="w-16 h-16 border-4 border-purple-500 rounded-full shadow-lg"
             :src="league.draftMetadata?.order[0].avatarImg"
           />
+          <svg
+            v-else
+            class="w-16 h-16 text-gray-200 border-4 border-purple-500 rounded-full shadow-lg"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+            />
+          </svg>
           <span class="text-xl font-semibold">{{
             store.showUsernames
               ? league.draftMetadata?.order[0].username
@@ -536,9 +563,22 @@ onMounted(() => {
           </div>
           <div class="flex flex-col items-end truncate w-36">
             <img
+              v-if="getUserObject(pick.userId)?.avatarImg"
               class="w-8 h-8 border border-indigo-300 rounded-full"
               :src="getUserObject(pick.userId)?.avatarImg"
             />
+            <svg
+              v-else
+              class="w-8 h-8 text-gray-200 border border-indigo-300 rounded-full"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <p>
               {{
                 store.showUsernames
@@ -582,9 +622,22 @@ onMounted(() => {
           </div>
           <div class="flex flex-col items-end truncate w-36">
             <img
-              class="w-8 h-8 rounded-full opacity-70"
+              v-if="getUserObject(pick.userId)?.avatarImg"
+              class="w-8 h-8 rounded-full"
               :src="getUserObject(pick.userId)?.avatarImg"
             />
+            <svg
+              v-else
+              class="w-8 h-8 text-gray-200 rounded-full"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <p>
               {{
                 store.showUsernames
@@ -612,9 +665,22 @@ onMounted(() => {
         class="flex flex-col items-center w-full p-6 mb-4 border bg-teal-900/30 rounded-2xl border-teal-500/30"
       >
         <img
+          v-if="getUserObject(pick.userId)?.avatarImg"
           class="w-16 h-16 mb-4 border-2 border-teal-400 rounded-full"
           :src="getUserObject(pick.userId)?.avatarImg"
         />
+        <svg
+          v-else
+          class="w-16 h-16 text-gray-200 border-2 border-teal-400 rounded-full"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+          />
+        </svg>
         <div class="mb-4 text-xl font-bold">
           {{
             store.showUsernames
@@ -659,9 +725,22 @@ onMounted(() => {
         >
           <div class="flex items-center gap-3">
             <img
+              v-if="getUserObject(user.userId)?.avatarImg"
               class="w-10 h-10 rounded-full"
               :src="getUserObject(user.userId)?.avatarImg"
             />
+            <svg
+              v-else
+              class="w-10 h-10 text-gray-200"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <span class="text-sm font-semibold">{{ user.userName }}</span>
           </div>
           <div class="text-right">
@@ -688,7 +767,23 @@ onMounted(() => {
           class="flex items-center justify-between p-3 rounded-lg bg-sky-900/40"
         >
           <div class="flex items-center gap-3">
-            <img class="w-10 h-10 rounded-full" :src="user.avatar" />
+            <img
+              v-if="user.avatar"
+              class="w-10 h-10 rounded-full"
+              :src="user.avatar"
+            />
+            <svg
+              v-else
+              class="w-10 h-10 text-gray-200"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <span class="text-sm font-semibold">{{ user.name }}</span>
           </div>
           <div class="text-right">
@@ -716,9 +811,22 @@ onMounted(() => {
         >
           <div class="flex items-center gap-3 mb-4">
             <img
+              v-if="impactfulTrades.team1.user.avatarImg"
               class="w-10 h-10 border-2 rounded-full border-emerald-500"
               :src="impactfulTrades.team1.user.avatarImg"
             />
+            <svg
+              v-else
+              class="w-10 h-10 text-gray-200"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <span class="font-bold">{{
               store.showUsernames
                 ? impactfulTrades.team1.user.username
@@ -731,16 +839,53 @@ onMounted(() => {
               class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               <img
+                v-if="/\d/.test(impactfulTrades.team1.playerIds[idx])"
                 class="w-8 rounded"
                 :src="`https://sleepercdn.com/content/nfl/players/thumb/${impactfulTrades.team1.playerIds[idx]}.jpg`"
               />
+              <img
+                v-else
+                class="w-8 rounded"
+                :src="`https://sleepercdn.com/images/team_logos/nfl/${impactfulTrades.team1.playerIds[
+                  idx
+                ].toLowerCase()}.png`"
+              />
               {{ player }}
             </div>
+            <p
+              v-for="pick in impactfulTrades.team1.draftPicks"
+              class="mt-2.5 text-sm font-medium"
+            >
+              {{ pick ? pick.season : "" }}
+              {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+            </p>
+            <p
+              v-for="budget in impactfulTrades.team1.waiverBudget"
+              class="mt-2.5 text-sm font-medium"
+            >
+              {{ budget ? `$${budget.amount} FAAB` : "" }}
+            </p>
           </div>
         </div>
 
         <!-- Exchange Icon -->
-        <div class="text-2xl rotate-90 text-emerald-500">⇄</div>
+        <svg
+          class="w-6 h-6 mx-auto rotate-90 text-emerald-500"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 16h13M4 16l4-4m-4 4 4 4M20 8H7m13 0-4 4m4-4-4-4"
+          />
+        </svg>
 
         <!-- Team 2 Side -->
         <div
@@ -748,9 +893,23 @@ onMounted(() => {
         >
           <div class="flex items-center gap-3 mb-4">
             <img
+              v-if="impactfulTrades.team2.user.avatarImg"
               class="w-10 h-10 border-2 rounded-full border-emerald-500"
               :src="impactfulTrades.team2.user.avatarImg"
             />
+            <svg
+              v-else
+              class="w-10 h-10 text-gray-200"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
+
             <span class="font-bold">{{
               store.showUsernames
                 ? impactfulTrades.team2.user.username
@@ -763,11 +922,32 @@ onMounted(() => {
               class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               <img
+                v-if="/\d/.test(impactfulTrades.team1.playerIds[idx])"
                 class="w-8 rounded"
                 :src="`https://sleepercdn.com/content/nfl/players/thumb/${impactfulTrades.team2.playerIds[idx]}.jpg`"
               />
+              <img
+                v-else
+                class="w-8 rounded"
+                :src="`https://sleepercdn.com/images/team_logos/nfl/${impactfulTrades.team2.playerIds[
+                  idx
+                ].toLowerCase()}.png`"
+              />
               {{ player }}
             </div>
+            <p
+              v-for="pick in impactfulTrades.team2.draftPicks"
+              class="mt-2.5 text-sm font-medium"
+            >
+              {{ pick ? pick.season : "" }}
+              {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+            </p>
+            <p
+              v-for="budget in impactfulTrades.team2.waiverBudget"
+              class="mt-2.5 text-sm font-medium"
+            >
+              {{ budget ? `$${budget.amount} FAAB` : "" }}
+            </p>
           </div>
         </div>
       </div>
@@ -787,9 +967,22 @@ onMounted(() => {
             Most Active
           </div>
           <img
+            v-if="mostMoves.user.avatarImg"
             class="w-16 h-16 mb-3 border-4 rounded-full border-cyan-500/50"
             :src="mostMoves.user.avatarImg"
           />
+          <svg
+            v-else
+            class="w-16 h-16 text-gray-200 border-4 rounded-full border-cyan-500/50"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+            />
+          </svg>
           <div class="font-bold text-center">
             {{
               store.showUsernames
@@ -803,14 +996,30 @@ onMounted(() => {
           <div class="text-xs text-cyan-500/80">Moves</div>
         </div>
 
-        <div class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl">
+        <div
+          v-if="fewestMoves?.user"
+          class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl"
+        >
           <div class="mb-2 text-xs tracking-widest uppercase text-cyan-300">
             Least Active
           </div>
           <img
+            v-if="fewestMoves.user.avatarImg"
             class="w-16 h-16 mb-3 border-4 rounded-full border-cyan-500/50"
             :src="fewestMoves.user.avatarImg"
           />
+          <svg
+            v-else
+            class="w-16 h-16 mb-3 text-gray-200 border-4 rounded-full border-cyan-500/50"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+            />
+          </svg>
           <div class="font-bold text-center">
             {{
               store.showUsernames
@@ -836,9 +1045,22 @@ onMounted(() => {
             class="flex items-center justify-center gap-4 p-4 bg-cyan-900/20 rounded-xl"
           >
             <img
+              v-if="totalBids.highest.user.avatarImg"
               class="w-12 h-12 rounded-full"
               :src="totalBids.highest.user.avatarImg"
             />
+            <svg
+              v-else
+              class="w-12 h-12 text-gray-200 rounded-full"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <div class="text-left">
               <div class="text-lg font-bold">
                 {{
@@ -864,9 +1086,22 @@ onMounted(() => {
             class="flex items-center justify-center gap-4 p-4 bg-cyan-900/20 rounded-xl"
           >
             <img
+              v-if="totalBids.lowest.user.avatarImg"
               class="w-12 h-12 rounded-full"
               :src="totalBids.lowest.user.avatarImg"
             />
+            <svg
+              v-else
+              class="w-12 h-12 text-gray-200 rounded-full"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <div class="text-left">
               <p class="text-lg font-bold">
                 {{
@@ -946,7 +1181,23 @@ onMounted(() => {
             </div>
           </div>
           <div class="flex flex-col items-end">
-            <img class="w-8 h-8 rounded-full" :src="move.user.avatarImg" />
+            <img
+              v-if="move.user.avatarImg"
+              class="w-8 h-8 rounded-full"
+              :src="move.user.avatarImg"
+            />
+            <svg
+              v-else
+              class="w-8 h-8 text-gray-200 rounded-full"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <p>
               {{ store.showUsernames ? move.user.username : move.user.name }}
             </p>
@@ -976,7 +1227,23 @@ onMounted(() => {
           class="flex items-center justify-between p-3 rounded-lg bg-purple-900/40"
         >
           <div class="flex items-center gap-3">
-            <img class="w-8 h-8 rounded-full" :src="grade.user?.avatarImg" />
+            <img
+              v-if="grade.user?.avatarImg"
+              class="w-8 h-8 rounded-full"
+              :src="grade.user?.avatarImg"
+            />
+            <svg
+              v-else
+              class="w-8 h-8 text-gray-200"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <span class="text-sm font-bold">{{
               store.showUsernames ? grade.user?.username : grade.user?.name
             }}</span>
@@ -1068,9 +1335,22 @@ onMounted(() => {
             <div class="flex justify-between p-4 bg-fuchsia-900/30 rounded-2xl">
               <div class="flex gap-4">
                 <img
+                  v-if="schedule.avatarImg"
                   class="border-2 rounded-full w-14 h-14 border-fuchsia-500"
                   :src="schedule.avatarImg"
                 />
+                <svg
+                  v-else
+                  class="text-gray-200 border-2 rounded-full w-14 h-14 border-fuchsia-500"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                  />
+                </svg>
                 <div class="text-left">
                   <p class="text-lg font-bold text-left truncate w-36">
                     {{ schedule.teamName }}
@@ -1123,9 +1403,22 @@ onMounted(() => {
               <div class="truncate w-44">
                 <div class="flex gap-3">
                   <img
+                    v-if="matchup.teamA.avatarImg"
                     class="w-8 h-8 rounded-full"
                     :src="matchup.teamA.avatarImg"
                   />
+                  <svg
+                    v-else
+                    class="w-8 h-8 text-gray-200"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                    />
+                  </svg>
                   <span class="text-xl font-bold">{{ matchup.scoreA }}</span>
                 </div>
                 <p class="w-32 mt-1 text-left truncate">
@@ -1146,9 +1439,22 @@ onMounted(() => {
                 <div class="flex justify-end gap-2">
                   <span class="text-xl font-bold">{{ matchup.scoreB }}</span>
                   <img
+                    v-if="matchup.teamB.avatarImg"
                     class="w-8 h-8 rounded-full"
                     :src="matchup.teamB.avatarImg"
                   />
+                  <svg
+                    v-else
+                    class="w-8 h-8 text-gray-200"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                    />
+                  </svg>
                 </div>
                 <p class="float-right w-32 mt-1 text-right truncate">
                   {{
@@ -1175,13 +1481,30 @@ onMounted(() => {
               <div class="truncate w-44">
                 <div class="flex gap-3">
                   <img
+                    v-if="matchup.teamA.avatarImg"
                     class="w-8 h-8 rounded-full"
                     :src="matchup.teamA.avatarImg"
                   />
+                  <svg
+                    v-else
+                    class="w-8 h-8 text-gray-200"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                    />
+                  </svg>
                   <span class="text-xl font-bold">{{ matchup.scoreA }}</span>
                 </div>
-                <p class="mt-1 text-left truncate w-36">
-                  {{ matchup.teamA.name }}
+                <p class="w-32 mt-1 text-left truncate">
+                  {{
+                    store.showUsernames
+                      ? matchup.teamA.username
+                      : matchup.teamA.name
+                  }}
                 </p>
               </div>
               <div>
@@ -1194,12 +1517,29 @@ onMounted(() => {
                 <div class="flex justify-end gap-2">
                   <span class="text-xl font-bold">{{ matchup.scoreB }}</span>
                   <img
+                    v-if="matchup.teamB.avatarImg"
                     class="w-8 h-8 rounded-full"
                     :src="matchup.teamB.avatarImg"
                   />
+                  <svg
+                    v-else
+                    class="w-10 h-10 text-gray-200"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                    />
+                  </svg>
                 </div>
-                <p class="float-right mt-1 text-right truncate w-36">
-                  {{ matchup.teamB.name }}
+                <p class="float-right w-32 mt-1 text-right truncate">
+                  {{
+                    store.showUsernames
+                      ? matchup.teamB.username
+                      : matchup.teamB.name
+                  }}
                 </p>
               </div>
             </div>
@@ -1220,9 +1560,22 @@ onMounted(() => {
             class="bg-orange-900/40 p-6 rounded-2xl border border-orange-500/30 flex flex-col items-center min-w-[200px]"
           >
             <img
+              v-if="user.avatar"
               class="w-12 h-12 mb-4 border-4 border-orange-500 rounded-full"
               :src="user.avatar"
             />
+            <svg
+              v-else
+              class="w-12 h-12 text-gray-200 border-4 border-orange-500 rounded-full"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <div class="mb-2 text-xl font-bold">{{ user.name }}</div>
             <div class="text-3xl font-black text-orange-500">
               {{ user.streak }}
@@ -1251,11 +1604,27 @@ onMounted(() => {
         :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
       >
         <div
-          v-for="user in allTimeRecord.slice(0, 12)"
+          v-for="user in allTimeRecord.slice(0, 14)"
           class="flex items-center justify-between p-3 rounded-lg bg-slate-800"
         >
           <div class="flex items-center gap-3">
-            <img class="w-8 h-8 rounded-full" :src="user.avatarImg" />
+            <img
+              v-if="user.avatarImg"
+              class="w-8 h-8 rounded-full"
+              :src="user.avatarImg"
+            />
+            <svg
+              v-else
+              class="w-8 h-8 text-gray-200"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <span class="font-medium">{{ user.name }}</span>
           </div>
           <div class="font-mono font-bold text-slate-300">
@@ -1283,7 +1652,23 @@ onMounted(() => {
           class="flex items-center justify-between p-3 rounded-lg bg-amber-900/40"
         >
           <div class="flex items-center gap-3">
-            <img class="w-10 h-10 rounded-full" :src="user.avatarImg" />
+            <img
+              v-if="user.avatarImg"
+              class="w-10 h-10 rounded-full"
+              :src="user.avatarImg"
+            />
+            <svg
+              v-else
+              class="w-10 h-10 text-gray-200"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <span class="text-sm font-semibold">{{
               store.showUsernames ? user.username : user.name
             }}</span>
@@ -1316,7 +1701,23 @@ onMounted(() => {
           class="flex items-center justify-between p-3 rounded-lg bg-violet-900/40"
         >
           <div class="flex items-center gap-3">
-            <img class="w-10 h-10 rounded-full" :src="user.avatar" />
+            <img
+              v-if="user.avatar"
+              class="w-10 h-10 rounded-full"
+              :src="user.avatar"
+            />
+            <svg
+              v-else
+              class="w-10 h-10 text-gray-200"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
             <span class="text-sm font-semibold">{{ user.name }}</span>
           </div>
           <div class="text-right">
