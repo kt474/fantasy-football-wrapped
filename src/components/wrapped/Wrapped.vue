@@ -45,7 +45,7 @@ const bestPicks = computed(() => {
 
 const worstPicks = computed(() => {
   return league.value.draftPicks
-    ?.filter((obj) => obj.position !== "TE")
+    ?.filter((obj) => obj.position !== "TE" && obj.position !== "K")
     .sort((a, b) => a.pickRank - b.pickRank)
     .slice(0, 5);
 });
@@ -55,7 +55,7 @@ const draftSteal = computed(() => {
     ?.filter((obj) => obj.pickNumber > 36)
     .filter((obj) => obj.position !== "TE")
     .sort((a, b) => b.pickRank - a.pickRank)
-    .slice(0, 2);
+    .slice(0, 3);
 });
 
 const highestBids = computed(() => {
@@ -654,17 +654,17 @@ watch(
       alignment="center"
       v-if="draftSteal && draftSteal.length > 0"
     >
-      <h2 class="mb-8 text-5xl font-bold text-teal-400">Late Round Legends</h2>
+      <h2 class="mb-6 text-5xl font-bold text-teal-400">Late Round Legends</h2>
       <p class="mb-6 -mt-2 text-lg font-medium text-teal-200">
         Found gold while everyone else was digging for silver.
       </p>
       <div
         v-for="pick in draftSteal"
-        class="flex flex-col items-center w-full p-6 mb-4 border bg-teal-900/30 rounded-2xl border-teal-500/30"
+        class="flex flex-col items-center w-full px-2 py-3 mb-4 border bg-teal-900/30 rounded-2xl border-teal-500/30"
       >
         <img
           v-if="getUserObject(pick.userId)?.avatarImg"
-          class="w-16 h-16 mb-4 border-2 border-teal-400 rounded-full"
+          class="w-12 h-12 mb-2 border-2 border-teal-400 rounded-full"
           :src="getUserObject(pick.userId)?.avatarImg"
         />
         <svg
@@ -679,7 +679,7 @@ watch(
             d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
           />
         </svg>
-        <div class="mb-4 text-xl font-bold">
+        <div class="mb-3 text-xl font-bold">
           {{
             store.showUsernames
               ? getUserObject(pick.userId)?.username
@@ -687,14 +687,14 @@ watch(
           }}
         </div>
 
-        <div class="flex items-center gap-4 p-4 bg-black/20 rounded-xl">
+        <div class="flex items-center gap-4 p-2.5 bg-black/20 rounded-xl">
           <img
             alt="Player image"
             class="w-16 rounded"
             :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
           />
           <div class="text-left">
-            <p class="text-2xl font-bold text-teal-100">
+            <p class="text-xl font-bold text-teal-100">
               {{ pick.firstName }} {{ pick.lastName }}
             </p>
             <p class="text-teal-300">
@@ -798,11 +798,15 @@ watch(
       <h2 class="mb-2 text-5xl font-bold text-emerald-400">
         Blockbuster Trades
       </h2>
-      <p class="mt-4 mb-8 text-lg text-emerald-200/80">
+      <p
+        v-if="impactfulTrades.length > 0"
+        class="mt-4 mb-8 text-lg text-emerald-200/80"
+      >
         The ones that shook the league.
       </p>
 
       <div
+        v-if="impactfulTrades.length > 0"
         v-for="trade in impactfulTrades.slice(0, 2)"
         class="flex justify-between w-full mb-4"
       >
@@ -834,7 +838,7 @@ watch(
                 : trade.team1.user.name
             }}</span>
           </div>
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap gap-2 font-medium">
             <div
               v-for="(player, idx) in trade.team1.players"
               class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
@@ -917,13 +921,13 @@ watch(
                 : trade.team2.user.name
             }}</span>
           </div>
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap gap-2 font-medium">
             <div
               v-for="(player, idx) in trade.team2.players"
               class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
             >
               <img
-                v-if="/\d/.test(trade.team1.playerIds[idx])"
+                v-if="/\d/.test(trade.team2.playerIds[idx])"
                 class="w-8 rounded"
                 :src="`https://sleepercdn.com/content/nfl/players/thumb/${trade.team2.playerIds[idx]}.jpg`"
               />
@@ -951,6 +955,12 @@ watch(
             </p>
           </div>
         </div>
+      </div>
+      <div v-else>
+        <p class="mt-4 mb-8 text-lg text-emerald-200/80">
+          Zero trades all season? That's... something. Maybe next year find some
+          league mates who like to shake things up a bit.
+        </p>
       </div>
     </WrappedSlide>
 
@@ -1034,11 +1044,8 @@ watch(
           <div class="text-xs text-cyan-500/80">Moves</div>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div
-          v-if="league.waiverType === 2 && totalBids?.highest"
-          class="w-full mt-4"
-        >
+      <div v-if="league.waiverType === 2" class="grid grid-cols-2 gap-4">
+        <div v-if="totalBids?.highest" class="w-full mt-4">
           <div class="mb-2 text-xl font-semibold text-center text-cyan-200">
             Big Spender
           </div>
@@ -1118,10 +1125,13 @@ watch(
           </div>
         </div>
       </div>
-      <p class="mt-2 mb-2.5 text-xl font-semibold text-center text-cyan-200">
+      <p
+        v-if="league.waiverType === 2"
+        class="mt-2 mb-2.5 text-xl font-semibold text-center text-cyan-200"
+      >
         Highest Bids
       </p>
-      <div class="grid grid-cols-2 gap-4">
+      <div v-if="league.waiverType === 2" class="grid grid-cols-2 gap-4">
         <div
           v-for="bid in highestBids"
           class="flex justify-between bg-cyan-900/30 rounded-2xl"
@@ -1245,7 +1255,7 @@ watch(
                 d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
               />
             </svg>
-            <span class="text-sm font-bold">{{
+            <span class="w-40 text-sm font-bold text-left">{{
               store.showUsernames ? grade.user?.username : grade.user?.name
             }}</span>
           </div>
