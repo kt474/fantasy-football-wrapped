@@ -12,6 +12,7 @@ import Draft from "../draft/Draft.vue";
 import Trades from "../roster_management/Trades.vue";
 import Waivers from "../roster_management/Waivers.vue";
 import LeagueHistory from "../league_history/LeagueHistory.vue";
+import OverallStats from "./OverallStats.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -1627,7 +1628,7 @@ watch(
 
     <!-- Loyalty / Retention Slide -->
     <WrappedSlide bg-color="bg-blue-950" alignment="center">
-      <h2 class="mb-6 text-3xl font-bold text-blue-400 sm:text-5xl">
+      <h2 class="mb-6 text-3xl font-bold text-blue-400 sm:mb-8 sm:text-5xl">
         Day Ones
       </h2>
       <p class="mb-6 -mt-4 text-base text-blue-200 sm:text-lg">
@@ -1829,30 +1830,20 @@ watch(
     </WrappedSlide>
 
     <!-- Outro Slide -->
-    <WrappedSlide bg-color="bg-black" alignment="center">
+    <WrappedSlide bg-color="bg-gray-950" alignment="center">
       <div class="space-y-6">
-        <h1 class="mb-4 text-6xl font-black text-white">
+        <h1 class="mb-4 text-3xl font-black text-white sm:text-5xl">
           See you next season!
         </h1>
 
-        <div class="text-zinc-300">
+        <div class="text-gray-200">
           <!-- Hardcoding data from 12/17/25 -->
-          <p>ffwrapped stats</p>
-          <p>2025 Leagues: 4986</p>
-          <p>Most common league names</p>
-          <div>
-            <p>The League: 34</p>
-            <p>Dynasty: 21</p>
-            <p>Dynasty League: 11</p>
-            <p>
-              Out of 5000 leagues analyzed this season, we need to talk about
-              the hundreds of you who named your league "The League", "Dynasty",
-              or "Dynasty League". No judgment but I'm hoping for a more
-              creative league name next year!
-            </p>
-          </div>
+          <p class="mb-8 text-base sm:text-lg">
+            Here's a look back at the 5000+ leagues that used ffwrapped in 2025.
+          </p>
+          <OverallStats />
         </div>
-        <p class="text-zinc-300">Thank you for using ffwrapped ❤️</p>
+        <!-- <p class="text-zinc-300">Thank you for using ffwrapped ❤️</p> -->
       </div>
     </WrappedSlide>
     <!-- workaround to get data without copying over methods -->
