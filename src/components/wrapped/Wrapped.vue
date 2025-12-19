@@ -564,6 +564,25 @@ const getUserObject = (userId: string) => {
   return props.tableData.find((user) => user.id === userId);
 };
 
+const onScroll = () => {
+  if (!slideshow.value) return;
+  const container: any = slideshow.value;
+  const slideHeight = container.clientHeight;
+  currentSlide.value = Math.round(container.scrollTop / slideHeight);
+};
+
+const scrollToSlide = (index: number) => {
+  if (!slideshow.value) return;
+  const container: any = slideshow.value;
+  container.scrollTo({
+    top: index * container.clientHeight,
+    behavior: "smooth",
+  });
+};
+
+const slideshow = ref(null);
+const currentSlide = ref(0);
+
 onMounted(() => {
   getMatchups();
 });
@@ -575,376 +594,81 @@ watch(
 </script>
 
 <template>
-  <div
-    class="w-full h-screen mt-4 overflow-y-scroll font-sans text-white rounded-lg snap-y snap-mandatory bg-zinc-900 scroll-smooth"
-  >
-    <!-- Intro Slide -->
-    <WrappedSlide bg-color="bg-gradient-to-r from-green-950 to-gray-900">
-      <div class="absolute inset-0 pointer-events-none">
-        <div
-          class="absolute rounded-full w-80 h-80 bg-green-500/20 blur-3xl top-10 left-10"
-          style="animation: float-slow 10s ease-in-out infinite"
-        ></div>
-        <div
-          class="absolute rounded-full w-96 h-96 bg-lime-500/18 blur-3xl bottom-10 right-10"
-          style="animation: float-slower 12s ease-in-out infinite"
-        ></div>
-        <div
-          class="absolute w-56 h-56 rounded-full bg-green-400/15 blur-2xl top-1/3 left-1/2"
-          style="animation: float 8s ease-in-out infinite"
-        ></div>
-      </div>
-      <div class="">
-        <h1 class="text-5xl font-bold md:text-8xl">{{ league.season }}</h1>
-        <h1
-          class="mb-8 text-6xl font-bold text-transparent md:text-9xl bg-gradient-to-r from-green-400 to-lime-600 bg-clip-text"
-        >
-          Wrapped
-        </h1>
-        <p class="text-lg text-gray-400 md:text-xl">
-          The stats are in. The league champion has been crowned. Lets see how
-          everyone in
-          <span class="font-bold text-gray-200">{{ league.name }}</span>
-          <!-- <span class="font-bold text-gray-200">Test League</span> -->
-          really did.
-        </p>
-      </div>
-      <p
-        class="absolute left-0 w-full text-center text-gray-400 animate-bounce bottom-4"
-      >
-        SCROLL TO REVEAL
-      </p>
-    </WrappedSlide>
-
-    <!-- First Pick Slide -->
-    <WrappedSlide bg-color="bg-zinc-900" alignment="center">
-      <h2 class="mb-8 text-4xl font-bold text-purple-400 sm:text-5xl">
-        Where it all began...
-      </h2>
-      <div class="flex flex-col items-center gap-6">
-        <div class="flex items-center gap-4">
-          <img
-            v-if="league.draftMetadata?.order[0].avatarImg"
-            class="w-16 h-16 border-4 border-purple-500 rounded-full shadow-lg"
-            :src="league.draftMetadata?.order[0].avatarImg"
-          />
-          <svg
-            v-else
-            class="w-16 h-16 text-gray-200 border-4 border-purple-500 rounded-full shadow-lg"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-            />
-          </svg>
-          <span class="text-xl font-semibold">{{
-            store.showUsernames
-              ? league.draftMetadata?.order[0].username
-              : league.draftMetadata?.order[0].name
-          }}</span>
-        </div>
-        <div class="text-base sm:text-lg">Started off the draft with</div>
-        <div
-          class="flex flex-col items-center w-full p-6 shadow-xl bg-zinc-800 rounded-2xl"
-        >
-          <img
-            alt="Player image"
-            class="object-cover w-32 h-32 mb-4 shadow-md rounded-xl"
-            :src="`https://sleepercdn.com/content/nfl/players/thumb/${league.draftPicks?.[0].playerId}.jpg`"
-          />
-          <p class="text-2xl font-bold">
-            {{ league.draftPicks?.[0].firstName }}
-            {{ league.draftPicks?.[0].lastName }}
-          </p>
-          <p class="mt-2 text-sm text-zinc-400">Pick 1.01</p>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Best Picks Slide -->
-    <WrappedSlide bg-color="bg-indigo-950" alignment="center">
-      <h2 class="mb-6 text-3xl font-bold text-indigo-300 sm:mb-8 sm:text-5xl">
-        Drafted to Perfection
-      </h2>
-      <p class="mb-6 -mt-2 text-base font-medium text-indigo-200 sm:text-lg">
-        Draft picks that made you look like a fantasy genius.
-      </p>
-      <div class="w-full space-y-2 sm:space-y-4">
-        <div
-          v-for="(pick, index) in bestPicks?.slice(0, 5)"
-          class="flex items-center gap-1 p-4 sm:gap-4 bg-white/10 rounded-xl backdrop-blur-sm"
-        >
-          <p class="text-2xl font-bold text-indigo-400 opacity-50 sm:text-3xl">
-            #{{ index + 1 }}
-          </p>
-          <img
-            alt="Player image"
-            class="w-12 rounded-lg sm:w-20"
-            :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
-          />
-
-          <div class="flex-1 min-w-0">
-            <p class="font-bold">{{ pick.firstName }} {{ pick.lastName }}</p>
-            <p class="text-xs text-indigo-200 sm:text-sm">
-              Round {{ pick.round }} • Pick {{ pick.draftSlot }} ({{
-                pick.pickNumber
-              }})
-            </p>
-          </div>
-          <div class="flex flex-col items-end max-w-20 sm:max-w-36">
-            <img
-              v-if="getUserObject(pick.userId)?.avatarImg"
-              class="w-6 border border-indigo-300 rounded-full sm:w-8"
-              :src="getUserObject(pick.userId)?.avatarImg"
-            />
-            <svg
-              v-else
-              class="w-6 text-gray-200 border border-indigo-300 rounded-full sm:w-8"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <p class="w-16 text-xs sm:w-36 text-end sm:text-base text-pretty">
-              {{
-                store.showUsernames
-                  ? getUserObject(pick.userId)?.username
-                  : getUserObject(pick.userId)?.name
-              }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Worst Picks Slide -->
-    <WrappedSlide bg-color="bg-red-950" alignment="center">
-      <h2 class="mb-6 text-3xl font-bold text-red-400 sm:mb-8 sm:text-5xl">
-        Buyer's Remorse
-      </h2>
-      <p class="mb-6 -mt-2 text-base font-medium text-red-200 sm:text-lg">
-        Draft picks that didn't quite pan out...
-      </p>
-      <div class="w-full space-y-2 sm:space-y-4">
-        <div
-          v-for="(pick, index) in worstPicks?.slice(0, 5)"
-          class="flex items-center gap-1 p-4 border sm:gap-4 bg-white/5 rounded-xl border-red-900/50"
-        >
-          <div class="text-2xl font-bold text-red-500 opacity-50 sm:text-3xl">
-            #{{ index + 1 }}
-          </div>
-          <img
-            alt="Player image"
-            class="w-12 rounded-lg sm:w-20"
-            :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
-          />
-          <div class="flex-1 min-w-0">
-            <p class="font-bold text-red-400">
-              {{ pick.firstName }} {{ pick.lastName }}
-            </p>
-            <p class="text-xs text-red-200 sm:text-sm">
-              Round {{ pick.round }} • Pick {{ pick.draftSlot }} ({{
-                pick.pickNumber
-              }})
-            </p>
-          </div>
-          <div class="flex flex-col items-end max-w-20 sm:max-w-36">
-            <img
-              v-if="getUserObject(pick.userId)?.avatarImg"
-              class="w-6 rounded-full sm:w-8"
-              :src="getUserObject(pick.userId)?.avatarImg"
-            />
-            <svg
-              v-else
-              class="w-6 text-gray-200 rounded-full sm:w-8"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <p class="w-16 text-xs sm:w-36 text-end sm:text-base text-pretty">
-              {{
-                store.showUsernames
-                  ? getUserObject(pick.userId)?.username
-                  : getUserObject(pick.userId)?.name
-              }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Draft Steal Slide -->
-    <WrappedSlide
-      bg-color="bg-teal-950"
-      alignment="center"
-      v-if="draftSteal && draftSteal.length > 0"
+  <div>
+    <div
+      class="flex justify-center gap-1.5 z-50 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 mt-4"
     >
-      <h2 class="mb-4 text-3xl font-bold text-teal-400 sm:mb-6 sm:text-5xl">
-        Late Round Legends
-      </h2>
-      <p class="mb-6 -mt-2 text-base font-medium text-teal-200 sm:text-lg">
-        Found gold while everyone else was digging for silver.
-      </p>
-      <div
-        v-for="pick in draftSteal"
-        class="flex flex-col items-center w-full px-2 py-3 mb-4 border bg-teal-900/30 rounded-2xl border-teal-500/30"
-      >
-        <img
-          v-if="getUserObject(pick.userId)?.avatarImg"
-          class="w-10 mb-2 border-2 border-teal-400 rounded-full sm:w-12"
-          :src="getUserObject(pick.userId)?.avatarImg"
-        />
-        <svg
-          v-else
-          class="w-10 text-gray-200 border-2 border-teal-400 rounded-full sm:w-12"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-          />
-        </svg>
-        <div class="mb-3 text-lg font-bold sm:text-xl">
-          {{
-            store.showUsernames
-              ? getUserObject(pick.userId)?.username
-              : getUserObject(pick.userId)?.name
-          }}
-        </div>
-
-        <div class="flex items-center gap-4 p-2.5 bg-black/20 rounded-xl">
-          <img
-            alt="Player image"
-            class="w-12 rounded sm:w-16"
-            :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
-          />
-          <div class="text-left">
-            <p class="text-lg font-bold text-teal-100 sm:text-xl">
-              {{ pick.firstName }} {{ pick.lastName }}
-            </p>
-            <p class="text-sm text-teal-300 sm:text-base">
-              Round {{ pick.round }} • Pick
-              {{ pick.pickNumber }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Waiver Wire Slide -->
-    <WrappedSlide bg-color="bg-cyan-950">
-      <h2
-        class="mb-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-cyan-400 bg-clip-text"
-      >
-        Waiver Wire Warriors
-      </h2>
-      <p class="mb-6 text-base sm:text-lg text-cyan-200">
-        Some lived on the waiver wire. Some pretended it didn't exist.
-      </p>
-      <div class="grid w-full grid-cols-2 gap-4">
-        <div class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl">
-          <div class="mb-2 text-xs tracking-widest uppercase text-cyan-300">
-            Most Active
-          </div>
-          <img
-            v-if="mostMoves.user.avatarImg"
-            class="w-10 mb-3 border-4 rounded-full sm:w-16 border-cyan-500/50"
-            :src="mostMoves.user.avatarImg"
-          />
-          <svg
-            v-else
-            class="w-10 text-gray-200 border-4 rounded-full sm:w-16 border-cyan-500/50"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-            />
-          </svg>
-          <div class="text-sm font-bold text-center sm:text-base">
-            {{
-              store.showUsernames
-                ? mostMoves.user.username
-                : mostMoves.user.name
-            }}
-          </div>
-          <div class="text-2xl font-black sm:text-3xl text-cyan-400">
-            {{ mostMoves.moves }}
-          </div>
-          <div class="text-xs text-cyan-500/80">Moves</div>
-        </div>
-
-        <div
-          v-if="fewestMoves?.user"
-          class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl"
-        >
-          <div class="mb-2 text-xs tracking-widest uppercase text-cyan-300">
-            Least Active
-          </div>
-          <img
-            v-if="fewestMoves.user.avatarImg"
-            class="w-10 mb-3 border-4 rounded-full sm:w-16 border-cyan-500/50"
-            :src="fewestMoves.user.avatarImg"
-          />
-          <svg
-            v-else
-            class="w-10 mb-3 text-gray-200 border-4 rounded-full sm:w-16 border-cyan-500/50"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-            />
-          </svg>
-          <div class="text-sm font-bold text-center sm:text-base">
-            {{
-              store.showUsernames
-                ? fewestMoves.user.username
-                : fewestMoves.user.name
-            }}
-          </div>
-          <div class="text-2xl font-black sm:text-3xl text-cyan-400">
-            {{ fewestMoves.moves }}
-          </div>
-          <div class="text-xs text-cyan-500/80">Moves</div>
-        </div>
-      </div>
-      <div v-if="league.waiverType === 2" class="grid grid-cols-2 gap-4">
-        <div v-if="totalBids?.highest" class="w-full mt-2">
+      <button
+        v-for="(_, index) in 19"
+        :key="index"
+        @click="scrollToSlide(index)"
+        :class="[
+          'transition-all duration-300 rounded-full',
+          currentSlide === index
+            ? 'bg-green-400 w-8 h-2'
+            : 'bg-neutral-400 hover:bg-neutral-300 w-2 h-2',
+        ]"
+        :aria-label="`Go to slide ${index + 1}`"
+      />
+    </div>
+    <div
+      ref="slideshow"
+      @scroll="onScroll"
+      class="w-full h-screen overflow-y-scroll font-sans text-white rounded-b-lg z-1 snap-y snap-mandatory bg-zinc-900 scroll-smooth"
+    >
+      <!-- Intro Slide -->
+      <WrappedSlide bg-color="bg-gradient-to-r from-green-950 to-gray-900">
+        <div class="absolute inset-0 pointer-events-none">
           <div
-            class="mb-2 text-lg font-semibold text-center sm:text-xl text-cyan-200"
-          >
-            Big Spender
-          </div>
+            class="absolute rounded-full w-80 h-80 bg-green-500/20 blur-3xl top-10 left-10"
+            style="animation: float-slow 10s ease-in-out infinite"
+          ></div>
           <div
-            class="flex items-center justify-center gap-4 p-4 bg-cyan-900/20 rounded-xl"
+            class="absolute rounded-full w-96 h-96 bg-lime-500/18 blur-3xl bottom-10 right-10"
+            style="animation: float-slower 12s ease-in-out infinite"
+          ></div>
+          <div
+            class="absolute w-56 h-56 rounded-full bg-green-400/15 blur-2xl top-1/3 left-1/2"
+            style="animation: float 8s ease-in-out infinite"
+          ></div>
+        </div>
+        <div class="">
+          <h1 class="text-5xl font-bold md:text-8xl">{{ league.season }}</h1>
+          <h1
+            class="mb-8 text-6xl font-bold text-transparent md:text-9xl bg-gradient-to-r from-green-400 to-lime-600 bg-clip-text"
           >
+            Wrapped
+          </h1>
+          <p class="text-lg text-gray-400 md:text-xl">
+            The stats are in. The league champion has been crowned. Lets see how
+            everyone in
+            <span class="font-bold text-gray-200">{{ league.name }}</span>
+            <!-- <span class="font-bold text-gray-200">Test League</span> -->
+            really did.
+          </p>
+        </div>
+        <p
+          class="absolute left-0 w-full text-center text-gray-400 animate-bounce bottom-4"
+        >
+          SCROLL TO REVEAL
+        </p>
+      </WrappedSlide>
+
+      <!-- First Pick Slide -->
+      <WrappedSlide bg-color="bg-zinc-900" alignment="center">
+        <h2 class="mb-8 text-4xl font-bold text-purple-400 sm:text-5xl">
+          Where it all began...
+        </h2>
+        <div class="flex flex-col items-center gap-6">
+          <div class="flex items-center gap-4">
             <img
-              v-if="totalBids.highest.user.avatarImg"
-              class="w-8 rounded-full sm:w-12"
-              :src="totalBids.highest.user.avatarImg"
+              v-if="league.draftMetadata?.order[0].avatarImg"
+              class="w-16 h-16 border-4 border-purple-500 rounded-full shadow-lg"
+              :src="league.draftMetadata?.order[0].avatarImg"
             />
             <svg
               v-else
-              class="w-8 text-gray-200 rounded-full sm:w-12"
+              class="w-16 h-16 text-gray-200 border-4 border-purple-500 rounded-full shadow-lg"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -954,1167 +678,1510 @@ watch(
                 d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
               />
             </svg>
-            <div class="text-left">
-              <div
-                class="text-sm font-bold truncate max-w-24 sm:max-w-52 sm:text-lg"
-              >
-                {{
-                  store.showUsernames
-                    ? totalBids.highest.user.username
-                    : totalBids.highest.user.name
-                }}
-              </div>
-              <div class="font-mono text-sm text-cyan-400 sm:text-base">
-                ${{ totalBids.highest.sumByStatus.complete }} spent
-              </div>
-            </div>
+            <span class="text-xl font-semibold">{{
+              store.showUsernames
+                ? league.draftMetadata?.order[0].username
+                : league.draftMetadata?.order[0].name
+            }}</span>
           </div>
-        </div>
-        <div
-          v-if="league.waiverType === 2 && totalBids?.lowest"
-          class="w-full mt-2"
-        >
+          <div class="text-base sm:text-lg">Started off the draft with</div>
           <div
-            class="mb-2 text-lg font-semibold text-center sm:text-xl text-cyan-200"
-          >
-            Penny Pincher
-          </div>
-          <div
-            class="flex items-center justify-center gap-4 p-4 bg-cyan-900/20 rounded-xl"
+            class="flex flex-col items-center w-full p-6 shadow-xl bg-zinc-800 rounded-2xl"
           >
             <img
-              v-if="totalBids.lowest.user.avatarImg"
-              class="w-8 rounded-full sm:w-12"
-              :src="totalBids.lowest.user.avatarImg"
+              alt="Player image"
+              class="object-cover w-32 h-32 mb-4 shadow-md rounded-xl"
+              :src="`https://sleepercdn.com/content/nfl/players/thumb/${league.draftPicks?.[0].playerId}.jpg`"
             />
-            <svg
-              v-else
-              class="w-8 text-gray-200 rounded-full sm:w-12"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <div class="text-left">
-              <p
-                class="text-sm font-bold truncate sm:text-lg max-w-24 sm:max-w-52"
-              >
-                {{
-                  store.showUsernames
-                    ? totalBids.lowest.user.username
-                    : totalBids.lowest.user.name
-                }}
-              </p>
-              <p class="font-mono text-sm text-cyan-400 sm:text-base">
-                ${{ totalBids.lowest.sumByStatus.complete }} spent
-              </p>
-            </div>
+            <p class="text-2xl font-bold">
+              {{ league.draftPicks?.[0].firstName }}
+              {{ league.draftPicks?.[0].lastName }}
+            </p>
+            <p class="mt-2 text-sm text-zinc-400">Pick 1.01</p>
           </div>
         </div>
-      </div>
-      <p
-        v-if="league.waiverType === 2"
-        class="mt-2 mb-2.5 text-lg sm:text-xl font-semibold text-center text-cyan-200"
-      >
-        Highest Bids
-      </p>
-      <div v-if="league.waiverType === 2" class="grid grid-cols-2 gap-4">
-        <div v-for="bid in highestBids" class="bg-cyan-900/30 rounded-2xl">
-          <div class="flex justify-between">
-            <div class="p-1.5 sm:p-3">
+      </WrappedSlide>
+
+      <!-- Best Picks Slide -->
+      <WrappedSlide bg-color="bg-indigo-950" alignment="center">
+        <h2 class="mb-6 text-3xl font-bold text-indigo-300 sm:mb-8 sm:text-5xl">
+          Drafted to Perfection
+        </h2>
+        <p class="mb-6 -mt-2 text-base font-medium text-indigo-200 sm:text-lg">
+          Draft picks that made you look like a fantasy genius.
+        </p>
+        <div class="w-full space-y-2 sm:space-y-4">
+          <div
+            v-for="(pick, index) in bestPicks?.slice(0, 5)"
+            class="flex items-center gap-1 p-4 sm:gap-4 bg-white/10 rounded-xl backdrop-blur-sm"
+          >
+            <p
+              class="text-2xl font-bold text-indigo-400 opacity-50 sm:text-3xl"
+            >
+              #{{ index + 1 }}
+            </p>
+            <img
+              alt="Player image"
+              class="w-12 rounded-lg sm:w-20"
+              :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
+            />
+
+            <div class="flex-1 min-w-0">
+              <p class="font-bold">{{ pick.firstName }} {{ pick.lastName }}</p>
+              <p class="text-xs text-indigo-200 sm:text-sm">
+                Round {{ pick.round }} • Pick {{ pick.draftSlot }} ({{
+                  pick.pickNumber
+                }})
+              </p>
+            </div>
+            <div class="flex flex-col items-end max-w-20 sm:max-w-36">
               <img
-                alt="Player image"
-                class="w-10 rounded-lg sm:w-14"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${bid.player_id}.jpg`"
+                v-if="getUserObject(pick.userId)?.avatarImg"
+                class="w-6 border border-indigo-300 rounded-full sm:w-8"
+                :src="getUserObject(pick.userId)?.avatarImg"
               />
-              <p
-                class="w-16 mt-1 text-xs font-semibold text-left sm:w-24 sm:text-base"
+              <svg
+                v-else
+                class="w-6 text-gray-200 border border-indigo-300 rounded-full sm:w-8"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
               >
-                {{ bid.adds }}
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <p class="w-16 text-xs sm:w-36 text-end sm:text-base text-pretty">
+                {{
+                  store.showUsernames
+                    ? getUserObject(pick.userId)?.username
+                    : getUserObject(pick.userId)?.name
+                }}
               </p>
             </div>
-            <div class="hidden mt-10 sm:inline">
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Worst Picks Slide -->
+      <WrappedSlide bg-color="bg-red-950" alignment="center">
+        <h2 class="mb-6 text-3xl font-bold text-red-400 sm:mb-8 sm:text-5xl">
+          Buyer's Remorse
+        </h2>
+        <p class="mb-6 -mt-2 text-base font-medium text-red-200 sm:text-lg">
+          Draft picks that didn't quite pan out...
+        </p>
+        <div class="w-full space-y-2 sm:space-y-4">
+          <div
+            v-for="(pick, index) in worstPicks?.slice(0, 5)"
+            class="flex items-center gap-1 p-4 border sm:gap-4 bg-white/5 rounded-xl border-red-900/50"
+          >
+            <div class="text-2xl font-bold text-red-500 opacity-50 sm:text-3xl">
+              #{{ index + 1 }}
+            </div>
+            <img
+              alt="Player image"
+              class="w-12 rounded-lg sm:w-20"
+              :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
+            />
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-red-400">
+                {{ pick.firstName }} {{ pick.lastName }}
+              </p>
+              <p class="text-xs text-red-200 sm:text-sm">
+                Round {{ pick.round }} • Pick {{ pick.draftSlot }} ({{
+                  pick.pickNumber
+                }})
+              </p>
+            </div>
+            <div class="flex flex-col items-end max-w-20 sm:max-w-36">
+              <img
+                v-if="getUserObject(pick.userId)?.avatarImg"
+                class="w-6 rounded-full sm:w-8"
+                :src="getUserObject(pick.userId)?.avatarImg"
+              />
+              <svg
+                v-else
+                class="w-6 text-gray-200 rounded-full sm:w-8"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <p class="w-16 text-xs sm:w-36 text-end sm:text-base text-pretty">
+                {{
+                  store.showUsernames
+                    ? getUserObject(pick.userId)?.username
+                    : getUserObject(pick.userId)?.name
+                }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Draft Steal Slide -->
+      <WrappedSlide
+        bg-color="bg-teal-950"
+        alignment="center"
+        v-if="draftSteal && draftSteal.length > 0"
+      >
+        <h2 class="mb-4 text-3xl font-bold text-teal-400 sm:mb-6 sm:text-5xl">
+          Late Round Legends
+        </h2>
+        <p class="mb-6 -mt-2 text-base font-medium text-teal-200 sm:text-lg">
+          Found gold while everyone else was digging for silver.
+        </p>
+        <div
+          v-for="pick in draftSteal"
+          class="flex flex-col items-center w-full px-2 py-3 mb-4 border bg-teal-900/30 rounded-2xl border-teal-500/30"
+        >
+          <img
+            v-if="getUserObject(pick.userId)?.avatarImg"
+            class="w-10 mb-2 border-2 border-teal-400 rounded-full sm:w-12"
+            :src="getUserObject(pick.userId)?.avatarImg"
+          />
+          <svg
+            v-else
+            class="w-10 text-gray-200 border-2 border-teal-400 rounded-full sm:w-12"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+            />
+          </svg>
+          <div class="mb-3 text-lg font-bold sm:text-xl">
+            {{
+              store.showUsernames
+                ? getUserObject(pick.userId)?.username
+                : getUserObject(pick.userId)?.name
+            }}
+          </div>
+
+          <div class="flex items-center gap-4 p-2.5 bg-black/20 rounded-xl">
+            <img
+              alt="Player image"
+              class="w-12 rounded sm:w-16"
+              :src="`https://sleepercdn.com/content/nfl/players/thumb/${pick.playerId}.jpg`"
+            />
+            <div class="text-left">
+              <p class="text-lg font-bold text-teal-100 sm:text-xl">
+                {{ pick.firstName }} {{ pick.lastName }}
+              </p>
+              <p class="text-sm text-teal-300 sm:text-base">
+                Round {{ pick.round }} • Pick
+                {{ pick.pickNumber }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Waiver Wire Slide -->
+      <WrappedSlide bg-color="bg-cyan-950">
+        <h2
+          class="mb-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-cyan-400 bg-clip-text"
+        >
+          Waiver Wire Warriors
+        </h2>
+        <p class="mb-6 text-base sm:text-lg text-cyan-200">
+          Some lived on the waiver wire. Some pretended it didn't exist.
+        </p>
+        <div class="grid w-full grid-cols-2 gap-4">
+          <div
+            class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl"
+          >
+            <div class="mb-2 text-xs tracking-widest uppercase text-cyan-300">
+              Most Active
+            </div>
+            <img
+              v-if="mostMoves.user.avatarImg"
+              class="w-10 mb-3 border-4 rounded-full sm:w-16 border-cyan-500/50"
+              :src="mostMoves.user.avatarImg"
+            />
+            <svg
+              v-else
+              class="w-10 text-gray-200 border-4 rounded-full sm:w-16 border-cyan-500/50"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
+            <div class="text-sm font-bold text-center sm:text-base">
+              {{
+                store.showUsernames
+                  ? mostMoves.user.username
+                  : mostMoves.user.name
+              }}
+            </div>
+            <div class="text-2xl font-black sm:text-3xl text-cyan-400">
+              {{ mostMoves.moves }}
+            </div>
+            <div class="text-xs text-cyan-500/80">Moves</div>
+          </div>
+
+          <div
+            v-if="fewestMoves?.user"
+            class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl"
+          >
+            <div class="mb-2 text-xs tracking-widest uppercase text-cyan-300">
+              Least Active
+            </div>
+            <img
+              v-if="fewestMoves.user.avatarImg"
+              class="w-10 mb-3 border-4 rounded-full sm:w-16 border-cyan-500/50"
+              :src="fewestMoves.user.avatarImg"
+            />
+            <svg
+              v-else
+              class="w-10 mb-3 text-gray-200 border-4 rounded-full sm:w-16 border-cyan-500/50"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              />
+            </svg>
+            <div class="text-sm font-bold text-center sm:text-base">
+              {{
+                store.showUsernames
+                  ? fewestMoves.user.username
+                  : fewestMoves.user.name
+              }}
+            </div>
+            <div class="text-2xl font-black sm:text-3xl text-cyan-400">
+              {{ fewestMoves.moves }}
+            </div>
+            <div class="text-xs text-cyan-500/80">Moves</div>
+          </div>
+        </div>
+        <div v-if="league.waiverType === 2" class="grid grid-cols-2 gap-4">
+          <div v-if="totalBids?.highest" class="w-full mt-2">
+            <div
+              class="mb-2 text-lg font-semibold text-center sm:text-xl text-cyan-200"
+            >
+              Big Spender
+            </div>
+            <div
+              class="flex items-center justify-center gap-4 p-4 bg-cyan-900/20 rounded-xl"
+            >
+              <img
+                v-if="totalBids.highest.user.avatarImg"
+                class="w-8 rounded-full sm:w-12"
+                :src="totalBids.highest.user.avatarImg"
+              />
+              <svg
+                v-else
+                class="w-8 text-gray-200 rounded-full sm:w-12"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <div class="text-left">
+                <div
+                  class="text-sm font-bold truncate max-w-24 sm:max-w-52 sm:text-lg"
+                >
+                  {{
+                    store.showUsernames
+                      ? totalBids.highest.user.username
+                      : totalBids.highest.user.name
+                  }}
+                </div>
+                <div class="font-mono text-sm text-cyan-400 sm:text-base">
+                  ${{ totalBids.highest.sumByStatus.complete }} spent
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="league.waiverType === 2 && totalBids?.lowest"
+            class="w-full mt-2"
+          >
+            <div
+              class="mb-2 text-lg font-semibold text-center sm:text-xl text-cyan-200"
+            >
+              Penny Pincher
+            </div>
+            <div
+              class="flex items-center justify-center gap-4 p-4 bg-cyan-900/20 rounded-xl"
+            >
+              <img
+                v-if="totalBids.lowest.user.avatarImg"
+                class="w-8 rounded-full sm:w-12"
+                :src="totalBids.lowest.user.avatarImg"
+              />
+              <svg
+                v-else
+                class="w-8 text-gray-200 rounded-full sm:w-12"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <div class="text-left">
+                <p
+                  class="text-sm font-bold truncate sm:text-lg max-w-24 sm:max-w-52"
+                >
+                  {{
+                    store.showUsernames
+                      ? totalBids.lowest.user.username
+                      : totalBids.lowest.user.name
+                  }}
+                </p>
+                <p class="font-mono text-sm text-cyan-400 sm:text-base">
+                  ${{ totalBids.lowest.sumByStatus.complete }} spent
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p
+          v-if="league.waiverType === 2"
+          class="mt-2 mb-2.5 text-lg sm:text-xl font-semibold text-center text-cyan-200"
+        >
+          Highest Bids
+        </p>
+        <div v-if="league.waiverType === 2" class="grid grid-cols-2 gap-4">
+          <div v-for="bid in highestBids" class="bg-cyan-900/30 rounded-2xl">
+            <div class="flex justify-between">
+              <div class="p-1.5 sm:p-3">
+                <img
+                  alt="Player image"
+                  class="w-10 rounded-lg sm:w-14"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${bid.player_id}.jpg`"
+                />
+                <p
+                  class="w-16 mt-1 text-xs font-semibold text-left sm:w-24 sm:text-base"
+                >
+                  {{ bid.adds }}
+                </p>
+              </div>
+              <div class="hidden mt-10 sm:inline">
+                <p class="text-xs font-semibold sm:text-base">
+                  {{ store.showUsernames ? bid.user.username : bid.user.name }}
+                </p>
+                <p class="text-xs text-cyan-500/80">Week {{ bid.week }}</p>
+              </div>
+              <p class="p-3 mt-2 text-2xl font-bold sm:mt-7 text-cyan-400">
+                ${{ bid.bid }}
+              </p>
+            </div>
+            <div class="block pb-2 sm:hidden">
               <p class="text-xs font-semibold sm:text-base">
                 {{ store.showUsernames ? bid.user.username : bid.user.name }}
               </p>
               <p class="text-xs text-cyan-500/80">Week {{ bid.week }}</p>
             </div>
-            <p class="p-3 mt-2 text-2xl font-bold sm:mt-7 text-cyan-400">
-              ${{ bid.bid }}
-            </p>
-          </div>
-          <div class="block pb-2 sm:hidden">
-            <p class="text-xs font-semibold sm:text-base">
-              {{ store.showUsernames ? bid.user.username : bid.user.name }}
-            </p>
-            <p class="text-xs text-cyan-500/80">Week {{ bid.week }}</p>
           </div>
         </div>
-      </div>
-    </WrappedSlide>
+      </WrappedSlide>
 
-    <!-- Best Pickups Slide -->
-    <WrappedSlide
-      bg-color="bg-teal-950"
-      alignment="center"
-      v-if="bestPickups.length > 0"
-    >
-      <h2 class="mb-4 text-3xl font-bold text-teal-400 sm:mb-6 sm:text-5xl">
-        The Pickup Artists
-      </h2>
-      <p class="mb-6 text-base text-teal-200 sm:text-lg">
-        Found league winners in the bargain bin.
-      </p>
-      <div class="w-full space-y-4">
-        <div
-          v-for="(move, index) in bestPickups"
-          class="flex items-center gap-2 p-3 sm:p-4 sm:gap-4 bg-white/10 rounded-xl backdrop-blur-sm"
-        >
-          <div class="text-2xl font-bold text-teal-500 opacity-50 sm:text-3xl">
-            #{{ index + 1 }}
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <img
-                class="w-12 rounded sm:w-20"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${move.player_id}.jpg`"
-              />
-              <div>
-                <div class="text-sm font-bold sm:text-base">
-                  {{ move.position }} {{ move.adds }}
-                </div>
-                <div class="text-xs text-teal-200">
-                  Week {{ move.week }} • Avg Rank: {{ move.value }}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="flex flex-col items-end">
-            <img
-              v-if="move.user.avatarImg"
-              class="w-8 h-8 rounded-full"
-              :src="move.user.avatarImg"
-            />
-            <svg
-              v-else
-              class="w-8 h-8 text-gray-200 rounded-full"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <p class="w-20 text-sm text-right text-pretty sm:text-base sm:w-28">
-              {{ store.showUsernames ? move.user.username : move.user.name }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Trade Slide -->
-    <WrappedSlide bg-color="bg-emerald-950" v-if="impactfulTrades">
-      <h2 class="mb-2 text-3xl font-bold sm:text-5xl text-emerald-400">
-        Blockbuster Trades
-      </h2>
-      <p
-        v-if="impactfulTrades.length > 0"
-        class="mt-4 mb-8 text-base sm:text-lg text-emerald-200/80"
+      <!-- Best Pickups Slide -->
+      <WrappedSlide
+        bg-color="bg-teal-950"
+        alignment="center"
+        v-if="bestPickups.length > 0"
       >
-        Out of the {{ league.tradeNames?.length }} trades made this season,
-        these were the most impactful.
-      </p>
-
-      <div
-        v-if="impactfulTrades.length > 0"
-        v-for="trade in impactfulTrades.slice(0, 2)"
-        class="flex justify-between w-full mb-4"
-      >
-        <!-- Team 1 Side -->
-        <div
-          class="p-4 border w-72 bg-emerald-900/40 rounded-2xl border-emerald-800/50"
-        >
-          <div class="flex items-center gap-1 mb-4 sm:gap-3">
-            <img
-              v-if="trade.team1.user.avatarImg"
-              class="w-10 h-10 border-2 rounded-full border-emerald-500"
-              :src="trade.team1.user.avatarImg"
-            />
-            <svg
-              v-else
-              class="w-10 h-10 text-gray-200 border-2 rounded-full border-emerald-500"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <span class="text-sm font-bold sm:text-base">{{
-              store.showUsernames
-                ? trade.team1.user.username
-                : trade.team1.user.name
-            }}</span>
-          </div>
-          <div class="flex flex-wrap gap-2 font-medium">
-            <div
-              v-for="(player, idx) in trade.team1.players"
-              class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
-            >
-              <img
-                v-if="/\d/.test(trade.team1.playerIds[idx])"
-                class="w-8 rounded"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${trade.team1.playerIds[idx]}.jpg`"
-              />
-              <img
-                v-else
-                class="w-8 rounded"
-                :src="`https://sleepercdn.com/images/team_logos/nfl/${trade.team1.playerIds[
-                  idx
-                ].toLowerCase()}.png`"
-              />
-              {{ player }}
-            </div>
-            <p
-              v-for="pick in trade.team1.draftPicks"
-              class="p-2 text-sm rounded-lg bg-emerald-950/50"
-            >
-              {{ pick ? pick.season : "" }}
-              {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
-            </p>
-            <p
-              v-for="budget in trade.team1.waiverBudget"
-              class="p-2 text-sm rounded-lg bg-emerald-950/50"
-            >
-              {{ budget ? `$${budget.amount} FAAB` : "" }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Exchange Icon -->
-        <div class="w-6 mx-2">
-          <svg
-            class="w-6 h-6 mt-12 text-emerald-500"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16h13M4 16l4-4m-4 4 4 4M20 8H7m13 0-4 4m4-4-4-4"
-            />
-          </svg>
-        </div>
-
-        <!-- Team 2 Side -->
-        <div
-          class="p-4 border w-72 bg-emerald-900/40 rounded-2xl border-emerald-800/50"
-        >
-          <div class="flex items-center gap-1 mb-4 sm:gap-3">
-            <img
-              v-if="trade.team2.user.avatarImg"
-              class="w-10 h-10 border-2 rounded-full border-emerald-500"
-              :src="trade.team2.user.avatarImg"
-            />
-            <svg
-              v-else
-              class="w-10 h-10 text-gray-200 border-2 rounded-full border-emerald-500"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-
-            <span class="text-sm font-bold sm:text-base">{{
-              store.showUsernames
-                ? trade.team2.user.username
-                : trade.team2.user.name
-            }}</span>
-          </div>
-          <div class="flex flex-wrap gap-2 font-medium">
-            <div
-              v-for="(player, idx) in trade.team2.players"
-              class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
-            >
-              <img
-                v-if="/\d/.test(trade.team2.playerIds[idx])"
-                class="w-8 rounded"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${trade.team2.playerIds[idx]}.jpg`"
-              />
-              <img
-                v-else
-                class="w-8 rounded"
-                :src="`https://sleepercdn.com/images/team_logos/nfl/${trade.team2.playerIds[
-                  idx
-                ].toLowerCase()}.png`"
-              />
-              {{ player }}
-            </div>
-            <p
-              v-for="pick in trade.team2.draftPicks"
-              class="p-2 text-sm rounded-lg bg-emerald-950/50"
-            >
-              {{ pick ? pick.season : "" }}
-              {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
-            </p>
-            <p
-              v-for="budget in trade.team2.waiverBudget"
-              class="p-2 text-sm rounded-lg bg-emerald-950/50"
-            >
-              {{ budget ? `$${budget.amount} FAAB` : "" }}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div v-else>
-        <p class="mt-4 mb-8 text-lg text-emerald-200/80">
-          Zero trades all season? That's... something. Maybe next year find some
-          league mates who like to shake things up a bit.
+        <h2 class="mb-4 text-3xl font-bold text-teal-400 sm:mb-6 sm:text-5xl">
+          The Pickup Artists
+        </h2>
+        <p class="mb-6 text-base text-teal-200 sm:text-lg">
+          Found league winners in the bargain bin.
         </p>
-      </div>
-    </WrappedSlide>
-
-    <!-- Points from Waivers Slide -->
-    <WrappedSlide bg-color="bg-violet-950" alignment="center">
-      <h2 class="mb-4 text-3xl font-bold sm:text-5xl text-violet-500">
-        Waiver Wire Impact
-      </h2>
-
-      <p class="mb-6 text-base sm:text-lg text-violet-200">
-        Points scored from players you didn't draft.
-      </p>
-
-      <div
-        class="grid w-full grid-cols-1 gap-2 overflow-auto sm:gap-4 sm:grid-flow-col sm:grid-cols-2"
-        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
-      >
-        <div
-          v-for="user in pointsFromWaivers"
-          class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-violet-900/40"
-        >
-          <div class="flex items-center gap-3">
-            <img
-              v-if="user.avatar"
-              class="rounded-full w-7 sm:w-10"
-              :src="user.avatar"
-            />
-            <svg
-              v-else
-              class="text-gray-200 rounded-full w-7 sm:w-10"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <span class="text-sm font-semibold text-left">{{ user.name }}</span>
-          </div>
-          <div class="text-right">
-            <p class="text-lg font-bold sm:text-xl text-violet-300">
-              {{ user.pointsFromWaivers }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Efficiency Slide -->
-    <WrappedSlide bg-color="bg-amber-950" alignment="center">
-      <h2 class="mb-4 text-3xl font-bold sm:text-5xl text-amber-500">
-        The What-Ifs
-      </h2>
-
-      <p class="mb-6 text-base sm:text-lg text-amber-200">
-        How many points did you leave sitting on your bench?
-      </p>
-
-      <div
-        class="grid w-full grid-cols-1 gap-2 overflow-auto sm:grid-flow-col sm:grid-cols-2 sm:gap-4"
-        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
-      >
-        <div
-          v-for="user in bestManagers"
-          class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-amber-900/40"
-        >
-          <div class="flex items-center gap-3">
-            <img
-              v-if="user.avatarImg"
-              class="rounded-full sm:w-10 w-7"
-              :src="user.avatarImg"
-            />
-            <svg
-              v-else
-              class="text-gray-200 rounded-full sm:w-10 w-7"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <span class="text-sm font-semibold">{{
-              store.showUsernames ? user.username : user.name
-            }}</span>
-          </div>
-          <div class="text-right">
-            <p class="text-xl font-bold text-amber-300">
-              {{ user.potentialPoints - user.pointsFor }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Matchups Slide -->
-    <WrappedSlide bg-color="bg-rose-950" alignment="center">
-      <h2 class="mb-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-rose-400">
-        Too Close vs. Not Even Close
-      </h2>
-      <p class="mb-4 text-base sm:mb-6 sm:text-lg text-rose-200">
-        Some matchups came down to the wire. Some were over by noon.
-      </p>
-      <div class="grid w-full grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
-        <!-- Closest -->
-        <div v-if="closestMatchups.length > 0">
-          <div class="mb-2 text-sm font-bold text-left uppercase text-rose-200">
-            Nail Biters
-          </div>
+        <div class="w-full space-y-4">
           <div
-            v-for="matchup in closestMatchups.slice(0, 3)"
-            class="px-2 py-1.5 mb-2 border sm:px-4 sm:py-4 sm:mb-4 bg-rose-900/30 rounded-xl border-rose-500/20"
-          >
-            <div class="flex justify-between">
-              <div class="truncate w-44">
-                <div class="flex gap-3">
-                  <img
-                    v-if="matchup.teamA.avatarImg"
-                    class="w-8 h-8 rounded-full"
-                    :src="matchup.teamA.avatarImg"
-                  />
-                  <svg
-                    v-else
-                    class="w-8 h-8 text-gray-200"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                    />
-                  </svg>
-                  <span class="text-lg font-bold sm:text-xl">{{
-                    matchup.scoreA
-                  }}</span>
-                </div>
-                <p
-                  class="w-24 mt-1 text-sm text-left truncate sm:w-32 sm:text-base"
-                >
-                  {{
-                    store.showUsernames
-                      ? matchup.teamA.username
-                      : matchup.teamA.name
-                  }}
-                </p>
-              </div>
-              <div class="mt-1 min-w-12 sm:mt-0">
-                <span class="font-bold text-rose-500">VS</span>
-                <p class="mt-2 text-xs text-center text-rose-300">
-                  Week {{ matchup.matchupIndex + 1 }}
-                </p>
-              </div>
-              <div class="truncate w-44">
-                <div class="flex justify-end gap-2">
-                  <span class="text-lg font-bold sm:text-xl">{{
-                    matchup.scoreB
-                  }}</span>
-                  <img
-                    v-if="matchup.teamB.avatarImg"
-                    class="w-8 h-8 rounded-full"
-                    :src="matchup.teamB.avatarImg"
-                  />
-                  <svg
-                    v-else
-                    class="w-8 h-8 text-gray-200"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                    />
-                  </svg>
-                </div>
-                <p
-                  class="float-right w-24 mt-1 text-sm text-right truncate sm:w-32 sm:text-base"
-                >
-                  {{
-                    store.showUsernames
-                      ? matchup.teamB.username
-                      : matchup.teamB.name
-                  }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Blowout -->
-        <div v-if="farthestMatchups.length > 0">
-          <div class="mb-2 text-sm font-bold text-left uppercase text-rose-200">
-            Biggest Blowouts
-          </div>
-          <div
-            v-for="matchup in farthestMatchups.slice(0, 3)"
-            class="px-2 py-1.5 mb-2 border sm:px-4 sm:py-4 sm:mb-4 bg-rose-900/30 rounded-xl border-rose-500/20"
-          >
-            <div class="flex justify-between">
-              <div class="truncate w-44">
-                <div class="flex gap-3">
-                  <img
-                    v-if="matchup.teamA.avatarImg"
-                    class="w-8 h-8 rounded-full"
-                    :src="matchup.teamA.avatarImg"
-                  />
-                  <svg
-                    v-else
-                    class="w-8 h-8 text-gray-200"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                    />
-                  </svg>
-                  <span class="text-lg font-bold sm:text-xl">{{
-                    matchup.scoreA
-                  }}</span>
-                </div>
-                <p
-                  class="w-24 mt-1 text-sm text-left truncate sm:w-32 sm:text-base"
-                >
-                  {{
-                    store.showUsernames
-                      ? matchup.teamA.username
-                      : matchup.teamA.name
-                  }}
-                </p>
-              </div>
-              <div class="mt-1 min-w-12 sm:mt-0">
-                <span class="font-bold text-rose-500">VS</span>
-                <p class="mt-2 text-xs text-center text-rose-300">
-                  Week {{ matchup.matchupIndex + 1 }}
-                </p>
-              </div>
-              <div class="truncate w-44">
-                <div class="flex justify-end gap-2">
-                  <span class="text-lg font-bold sm:text-xl">{{
-                    matchup.scoreB
-                  }}</span>
-                  <img
-                    v-if="matchup.teamB.avatarImg"
-                    class="w-8 h-8 rounded-full"
-                    :src="matchup.teamB.avatarImg"
-                  />
-                  <svg
-                    v-else
-                    class="w-10 h-10 text-gray-200"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                    />
-                  </svg>
-                </div>
-                <p
-                  class="float-right w-24 mt-1 text-sm text-right truncate sm:w-32 sm:text-base"
-                >
-                  {{
-                    store.showUsernames
-                      ? matchup.teamB.username
-                      : matchup.teamB.name
-                  }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Win Streak Slide -->
-    <WrappedSlide bg-color="bg-orange-950" alignment="center">
-      <h2 class="mb-6 text-3xl font-bold text-orange-400 sm:text-5xl">
-        Hot and Cold
-      </h2>
-      <p class="mb-6 text-base text-orange-200 sm:text-lg">
-        Hottest run. Coldest stretch. Momentum is everything.
-      </p>
-      <div class="flex flex-col gap-4">
-        <div v-for="user in winStreak.slice(0, 3)" class="relative">
-          <div
-            class="bg-orange-900/40 sm:p-6 p-4 rounded-2xl border border-orange-500/30 flex flex-col items-center min-w-[200px]"
-          >
-            <img
-              v-if="user.avatar"
-              class="w-10 mb-4 border-4 border-orange-500 rounded-full sm:w-12"
-              :src="user.avatar"
-            />
-            <svg
-              v-else
-              class="w-10 text-gray-200 border-4 border-orange-500 rounded-full sm:w-12"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <div class="mb-2 text-xl font-bold">{{ user.name }}</div>
-            <div class="text-3xl font-black text-orange-500">
-              {{ user.streak }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Schedule Luck Slide -->
-    <WrappedSlide bg-color="bg-fuchsia-950">
-      <h2 class="mb-6 -mt-4 text-3xl font-bold sm:text-5xl text-fuchsia-400">
-        Schedule Roulette
-      </h2>
-      <p class="mb-6 text-base sm:text-lg text-fuchsia-200">
-        One got easy matchups. One got the gauntlet. Life isn't fair.
-      </p>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <!-- Luckiest -->
-        <div>
-          <div class="flex items-center gap-4 px-2 mb-1">
-            <h3
-              class="text-sm font-bold tracking-widest uppercase text-fuchsia-200"
-            >
-              Luckiest Schedules
-            </h3>
-          </div>
-          <div
-            v-for="schedule in scheduleAnalysis.slice(0, 3)"
-            class="mb-2 sm:mb-4"
+            v-for="(move, index) in bestPickups"
+            class="flex items-center gap-2 p-3 sm:p-4 sm:gap-4 bg-white/10 rounded-xl backdrop-blur-sm"
           >
             <div
-              class="flex justify-between px-3 py-2 sm:px-4 sm:py-4 bg-fuchsia-900/30 rounded-2xl"
+              class="text-2xl font-bold text-teal-500 opacity-50 sm:text-3xl"
             >
-              <div class="flex gap-4">
+              #{{ index + 1 }}
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
                 <img
-                  v-if="schedule.avatarImg"
-                  class="w-10 h-10 border-2 rounded-full sm:w-14 sm:h-14 border-fuchsia-500"
-                  :src="schedule.avatarImg"
+                  class="w-12 rounded sm:w-20"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${move.player_id}.jpg`"
                 />
-                <svg
-                  v-else
-                  class="w-10 h-10 text-gray-200 border-2 rounded-full sm:w-14 sm:h-14 border-fuchsia-500"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                  />
-                </svg>
-                <div class="text-left">
-                  <p
-                    class="text-base font-bold text-left truncate sm:text-lg w-36"
-                  >
-                    {{ schedule.teamName }}
-                  </p>
-                  <p class="text-xs text-fuchsia-300/80">
-                    Expected Wins:
-                    <span class="text-fuchsia-200">{{
-                      schedule.expectedWins.toFixed(1)
-                    }}</span>
-                  </p>
-                  <p class="text-xs text-fuchsia-300/80">
-                    Actual:
-                    <span class="text-fuchsia-200">{{
-                      schedule.actualWins
-                    }}</span>
-                  </p>
+                <div>
+                  <div class="text-sm font-bold sm:text-base">
+                    {{ move.position }} {{ move.adds }}
+                  </div>
+                  <div class="text-xs text-teal-200">
+                    Week {{ move.week }} • Avg Rank: {{ move.value }}
+                  </div>
                 </div>
               </div>
-              <div>
-                <p class="mt-1 text-xl font-semibold sm:mt-2 sm:text-2xl">
-                  +{{
-                    (schedule.actualWins - schedule.expectedWins).toFixed(2)
-                  }}
-                </p>
-                <p class="text-xs">Wins</p>
-              </div>
+            </div>
+            <div class="flex flex-col items-end">
+              <img
+                v-if="move.user.avatarImg"
+                class="w-8 h-8 rounded-full"
+                :src="move.user.avatarImg"
+              />
+              <svg
+                v-else
+                class="w-8 h-8 text-gray-200 rounded-full"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <p
+                class="w-20 text-sm text-right text-pretty sm:text-base sm:w-28"
+              >
+                {{ store.showUsernames ? move.user.username : move.user.name }}
+              </p>
             </div>
           </div>
         </div>
+      </WrappedSlide>
 
-        <!-- Unluckiest -->
-        <div>
-          <div class="flex items-center gap-4 px-2 mb-1">
-            <h3
-              class="text-sm font-bold tracking-widest uppercase text-fuchsia-200"
-            >
-              Hardest Roads
-            </h3>
-          </div>
+      <!-- Trade Slide -->
+      <WrappedSlide bg-color="bg-emerald-950" v-if="impactfulTrades">
+        <h2 class="mb-2 text-3xl font-bold sm:text-5xl text-emerald-400">
+          Blockbuster Trades
+        </h2>
+        <p
+          v-if="impactfulTrades.length > 0"
+          class="mt-4 mb-8 text-base sm:text-lg text-emerald-200/80"
+        >
+          Out of the {{ league.tradeNames?.length }} trades made this season,
+          these were the most impactful.
+        </p>
+
+        <div
+          v-if="impactfulTrades.length > 0"
+          v-for="trade in impactfulTrades.slice(0, 2)"
+          class="flex justify-between w-full mb-4"
+        >
+          <!-- Team 1 Side -->
           <div
-            v-for="schedule in scheduleAnalysis.slice(-3).reverse()"
-            class="mb-2 sm:mb-4"
+            class="p-4 border w-72 bg-emerald-900/40 rounded-2xl border-emerald-800/50"
           >
+            <div class="flex items-center gap-1 mb-4 sm:gap-3">
+              <img
+                v-if="trade.team1.user.avatarImg"
+                class="w-10 h-10 border-2 rounded-full border-emerald-500"
+                :src="trade.team1.user.avatarImg"
+              />
+              <svg
+                v-else
+                class="w-10 h-10 text-gray-200 border-2 rounded-full border-emerald-500"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <span class="text-sm font-bold sm:text-base">{{
+                store.showUsernames
+                  ? trade.team1.user.username
+                  : trade.team1.user.name
+              }}</span>
+            </div>
+            <div class="flex flex-wrap gap-2 font-medium">
+              <div
+                v-for="(player, idx) in trade.team1.players"
+                class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
+              >
+                <img
+                  v-if="/\d/.test(trade.team1.playerIds[idx])"
+                  class="w-8 rounded"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${trade.team1.playerIds[idx]}.jpg`"
+                />
+                <img
+                  v-else
+                  class="w-8 rounded"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${trade.team1.playerIds[
+                    idx
+                  ].toLowerCase()}.png`"
+                />
+                {{ player }}
+              </div>
+              <p
+                v-for="pick in trade.team1.draftPicks"
+                class="p-2 text-sm rounded-lg bg-emerald-950/50"
+              >
+                {{ pick ? pick.season : "" }}
+                {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+              </p>
+              <p
+                v-for="budget in trade.team1.waiverBudget"
+                class="p-2 text-sm rounded-lg bg-emerald-950/50"
+              >
+                {{ budget ? `$${budget.amount} FAAB` : "" }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Exchange Icon -->
+          <div class="w-6 mx-2">
+            <svg
+              class="w-6 h-6 mt-12 text-emerald-500"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 16h13M4 16l4-4m-4 4 4 4M20 8H7m13 0-4 4m4-4-4-4"
+              />
+            </svg>
+          </div>
+
+          <!-- Team 2 Side -->
+          <div
+            class="p-4 border w-72 bg-emerald-900/40 rounded-2xl border-emerald-800/50"
+          >
+            <div class="flex items-center gap-1 mb-4 sm:gap-3">
+              <img
+                v-if="trade.team2.user.avatarImg"
+                class="w-10 h-10 border-2 rounded-full border-emerald-500"
+                :src="trade.team2.user.avatarImg"
+              />
+              <svg
+                v-else
+                class="w-10 h-10 text-gray-200 border-2 rounded-full border-emerald-500"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+
+              <span class="text-sm font-bold sm:text-base">{{
+                store.showUsernames
+                  ? trade.team2.user.username
+                  : trade.team2.user.name
+              }}</span>
+            </div>
+            <div class="flex flex-wrap gap-2 font-medium">
+              <div
+                v-for="(player, idx) in trade.team2.players"
+                class="flex items-center gap-2 p-2 text-sm rounded-lg bg-emerald-950/50"
+              >
+                <img
+                  v-if="/\d/.test(trade.team2.playerIds[idx])"
+                  class="w-8 rounded"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${trade.team2.playerIds[idx]}.jpg`"
+                />
+                <img
+                  v-else
+                  class="w-8 rounded"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${trade.team2.playerIds[
+                    idx
+                  ].toLowerCase()}.png`"
+                />
+                {{ player }}
+              </div>
+              <p
+                v-for="pick in trade.team2.draftPicks"
+                class="p-2 text-sm rounded-lg bg-emerald-950/50"
+              >
+                {{ pick ? pick.season : "" }}
+                {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+              </p>
+              <p
+                v-for="budget in trade.team2.waiverBudget"
+                class="p-2 text-sm rounded-lg bg-emerald-950/50"
+              >
+                {{ budget ? `$${budget.amount} FAAB` : "" }}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          <p class="mt-4 mb-8 text-lg text-emerald-200/80">
+            Zero trades all season? That's... something. Maybe next year find
+            some league mates who like to shake things up a bit.
+          </p>
+        </div>
+      </WrappedSlide>
+
+      <!-- Points from Waivers Slide -->
+      <WrappedSlide bg-color="bg-violet-950" alignment="center">
+        <h2 class="mb-4 text-3xl font-bold sm:text-5xl text-violet-500">
+          Waiver Wire Impact
+        </h2>
+
+        <p class="mb-6 text-base sm:text-lg text-violet-200">
+          Points scored from players you didn't draft.
+        </p>
+
+        <div
+          class="grid w-full grid-cols-1 gap-2 overflow-auto sm:gap-4 sm:grid-flow-col sm:grid-cols-2"
+          :style="`grid-template-rows: repeat(${
+            leagueSize / 2
+          }, minmax(0, 1fr))`"
+        >
+          <div
+            v-for="user in pointsFromWaivers"
+            class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-violet-900/40"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                v-if="user.avatar"
+                class="rounded-full w-7 sm:w-10"
+                :src="user.avatar"
+              />
+              <svg
+                v-else
+                class="text-gray-200 rounded-full w-7 sm:w-10"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <span class="text-sm font-semibold text-left">{{
+                user.name
+              }}</span>
+            </div>
+            <div class="text-right">
+              <p class="text-lg font-bold sm:text-xl text-violet-300">
+                {{ user.pointsFromWaivers }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Efficiency Slide -->
+      <WrappedSlide bg-color="bg-amber-950" alignment="center">
+        <h2 class="mb-4 text-3xl font-bold sm:text-5xl text-amber-500">
+          The What-Ifs
+        </h2>
+
+        <p class="mb-6 text-base sm:text-lg text-amber-200">
+          How many points did you leave sitting on your bench?
+        </p>
+
+        <div
+          class="grid w-full grid-cols-1 gap-2 overflow-auto sm:grid-flow-col sm:grid-cols-2 sm:gap-4"
+          :style="`grid-template-rows: repeat(${
+            leagueSize / 2
+          }, minmax(0, 1fr))`"
+        >
+          <div
+            v-for="user in bestManagers"
+            class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-amber-900/40"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                v-if="user.avatarImg"
+                class="rounded-full sm:w-10 w-7"
+                :src="user.avatarImg"
+              />
+              <svg
+                v-else
+                class="text-gray-200 rounded-full sm:w-10 w-7"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <span class="text-sm font-semibold">{{
+                store.showUsernames ? user.username : user.name
+              }}</span>
+            </div>
+            <div class="text-right">
+              <p class="text-xl font-bold text-amber-300">
+                {{ user.potentialPoints - user.pointsFor }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Matchups Slide -->
+      <WrappedSlide bg-color="bg-rose-950" alignment="center">
+        <h2 class="mb-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-rose-400">
+          Too Close vs. Not Even Close
+        </h2>
+        <p class="mb-4 text-base sm:mb-6 sm:text-lg text-rose-200">
+          Some matchups came down to the wire. Some were over by noon.
+        </p>
+        <div class="grid w-full grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
+          <!-- Closest -->
+          <div v-if="closestMatchups.length > 0">
             <div
-              class="flex justify-between px-3 py-2 sm:px-4 sm:py-4 bg-fuchsia-900/30 rounded-2xl"
+              class="mb-2 text-sm font-bold text-left uppercase text-rose-200"
             >
-              <div class="flex gap-4">
-                <img
-                  v-if="schedule.avatarImg"
-                  class="w-10 h-10 border-2 rounded-full sm:w-14 sm:h-14 border-fuchsia-500"
-                  :src="schedule.avatarImg"
-                />
-                <svg
-                  v-else
-                  class="w-10 h-10 text-gray-200 border-2 rounded-full sm:w-14 sm:h-14 border-fuchsia-500"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                  />
-                </svg>
-                <div class="text-left">
+              Nail Biters
+            </div>
+            <div
+              v-for="matchup in closestMatchups.slice(0, 3)"
+              class="px-2 py-1.5 mb-2 border sm:px-4 sm:py-4 sm:mb-4 bg-rose-900/30 rounded-xl border-rose-500/20"
+            >
+              <div class="flex justify-between">
+                <div class="truncate w-44">
+                  <div class="flex gap-3">
+                    <img
+                      v-if="matchup.teamA.avatarImg"
+                      class="w-8 h-8 rounded-full"
+                      :src="matchup.teamA.avatarImg"
+                    />
+                    <svg
+                      v-else
+                      class="w-8 h-8 text-gray-200"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                      />
+                    </svg>
+                    <span class="text-lg font-bold sm:text-xl">{{
+                      matchup.scoreA
+                    }}</span>
+                  </div>
                   <p
-                    class="text-base font-bold text-left truncate sm:text-lg w-36"
+                    class="w-24 mt-1 text-sm text-left truncate sm:w-32 sm:text-base"
                   >
-                    {{ schedule.teamName }}
+                    {{
+                      store.showUsernames
+                        ? matchup.teamA.username
+                        : matchup.teamA.name
+                    }}
                   </p>
-                  <p class="text-xs text-fuchsia-300/80">
-                    Expected Wins:
-                    <span class="text-fuchsia-200">{{
-                      schedule.expectedWins.toFixed(1)
-                    }}</span>
+                </div>
+                <div class="mt-1 min-w-12 sm:mt-0">
+                  <span class="font-bold text-rose-500">VS</span>
+                  <p class="mt-2 text-xs text-center text-rose-300">
+                    Week {{ matchup.matchupIndex + 1 }}
                   </p>
-                  <p class="text-xs text-fuchsia-300/80">
-                    Actual:
-                    <span class="text-fuchsia-200">{{
-                      schedule.actualWins
+                </div>
+                <div class="truncate w-44">
+                  <div class="flex justify-end gap-2">
+                    <span class="text-lg font-bold sm:text-xl">{{
+                      matchup.scoreB
                     }}</span>
+                    <img
+                      v-if="matchup.teamB.avatarImg"
+                      class="w-8 h-8 rounded-full"
+                      :src="matchup.teamB.avatarImg"
+                    />
+                    <svg
+                      v-else
+                      class="w-8 h-8 text-gray-200"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                      />
+                    </svg>
+                  </div>
+                  <p
+                    class="float-right w-24 mt-1 text-sm text-right truncate sm:w-32 sm:text-base"
+                  >
+                    {{
+                      store.showUsernames
+                        ? matchup.teamB.username
+                        : matchup.teamB.name
+                    }}
                   </p>
                 </div>
               </div>
-              <div>
-                <p class="mt-1 text-xl font-semibold sm:mt-2 sm:text-2xl">
-                  {{ (schedule.actualWins - schedule.expectedWins).toFixed(2) }}
-                </p>
-                <p class="text-xs">Wins</p>
+            </div>
+          </div>
+
+          <!-- Blowout -->
+          <div v-if="farthestMatchups.length > 0">
+            <div
+              class="mb-2 text-sm font-bold text-left uppercase text-rose-200"
+            >
+              Biggest Blowouts
+            </div>
+            <div
+              v-for="matchup in farthestMatchups.slice(0, 3)"
+              class="px-2 py-1.5 mb-2 border sm:px-4 sm:py-4 sm:mb-4 bg-rose-900/30 rounded-xl border-rose-500/20"
+            >
+              <div class="flex justify-between">
+                <div class="truncate w-44">
+                  <div class="flex gap-3">
+                    <img
+                      v-if="matchup.teamA.avatarImg"
+                      class="w-8 h-8 rounded-full"
+                      :src="matchup.teamA.avatarImg"
+                    />
+                    <svg
+                      v-else
+                      class="w-8 h-8 text-gray-200"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                      />
+                    </svg>
+                    <span class="text-lg font-bold sm:text-xl">{{
+                      matchup.scoreA
+                    }}</span>
+                  </div>
+                  <p
+                    class="w-24 mt-1 text-sm text-left truncate sm:w-32 sm:text-base"
+                  >
+                    {{
+                      store.showUsernames
+                        ? matchup.teamA.username
+                        : matchup.teamA.name
+                    }}
+                  </p>
+                </div>
+                <div class="mt-1 min-w-12 sm:mt-0">
+                  <span class="font-bold text-rose-500">VS</span>
+                  <p class="mt-2 text-xs text-center text-rose-300">
+                    Week {{ matchup.matchupIndex + 1 }}
+                  </p>
+                </div>
+                <div class="truncate w-44">
+                  <div class="flex justify-end gap-2">
+                    <span class="text-lg font-bold sm:text-xl">{{
+                      matchup.scoreB
+                    }}</span>
+                    <img
+                      v-if="matchup.teamB.avatarImg"
+                      class="w-8 h-8 rounded-full"
+                      :src="matchup.teamB.avatarImg"
+                    />
+                    <svg
+                      v-else
+                      class="w-10 h-10 text-gray-200"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                      />
+                    </svg>
+                  </div>
+                  <p
+                    class="float-right w-24 mt-1 text-sm text-right truncate sm:w-32 sm:text-base"
+                  >
+                    {{
+                      store.showUsernames
+                        ? matchup.teamB.username
+                        : matchup.teamB.name
+                    }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </WrappedSlide>
+      </WrappedSlide>
 
-    <!-- Loyalty / Retention Slide -->
-    <WrappedSlide bg-color="bg-blue-950" alignment="center">
-      <h2 class="mb-6 text-3xl font-bold text-blue-400 sm:mb-8 sm:text-5xl">
-        Day Ones
-      </h2>
-      <p class="mb-6 -mt-4 text-base text-blue-200 sm:text-lg">
-        The number of drafted players that earned their spot and never left.
-      </p>
-
-      <div
-        class="grid w-full grid-cols-1 gap-2 sm:gap-4 sm:grid-flow-col sm:grid-cols-2"
-        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
-      >
-        <div
-          v-for="user in originalPlayers"
-          class="flex items-center justify-between sm:p-3 py-1.5 px-2 rounded-lg bg-blue-900/40"
-        >
-          <div class="flex items-center gap-3">
-            <img
-              v-if="getUserObject(user.userId)?.avatarImg"
-              class="rounded-full sm:w-10 w-7"
-              :src="getUserObject(user.userId)?.avatarImg"
-            />
-            <svg
-              v-else
-              class="text-gray-200 sm:w-10 w-7"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
+      <!-- Win Streak Slide -->
+      <WrappedSlide bg-color="bg-orange-950" alignment="center">
+        <h2 class="mb-6 text-3xl font-bold text-orange-400 sm:text-5xl">
+          Hot and Cold
+        </h2>
+        <p class="mb-6 text-base text-orange-200 sm:text-lg">
+          Hottest run. Coldest stretch. Momentum is everything.
+        </p>
+        <div class="flex flex-col gap-4">
+          <div v-for="user in winStreak.slice(0, 3)" class="relative">
+            <div
+              class="bg-orange-900/40 sm:p-6 p-4 rounded-2xl border border-orange-500/30 flex flex-col items-center min-w-[200px]"
             >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+              <img
+                v-if="user.avatar"
+                class="w-10 mb-4 border-4 border-orange-500 rounded-full sm:w-12"
+                :src="user.avatar"
               />
-            </svg>
-            <span class="text-sm font-semibold">{{ user.userName }}</span>
-          </div>
-          <div class="text-right">
-            <span class="text-xl font-bold text-blue-300"
-              >{{ user.stillOnTeam }}/{{ user.totalDrafted }}</span
-            >
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Total Players Used Slide -->
-    <WrappedSlide bg-color="bg-sky-950" alignment="center">
-      <h2 class="mb-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-sky-400">
-        The Full Cast
-      </h2>
-      <p class="mb-6 text-base text-blue-200 sm:text-lg">
-        The total number of different starting players.
-      </p>
-      <div
-        class="grid w-full grid-cols-1 gap-2 overflow-auto sm:grid-flow-col sm:grid-cols-2 sm:gap-4"
-        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
-      >
-        <div
-          v-for="user in uniquePlayers"
-          class="flex items-center justify-between sm:p-3 px-2 py-1.5 rounded-lg bg-sky-900/40"
-        >
-          <div class="flex items-center gap-3">
-            <img
-              v-if="user.avatar"
-              class="rounded-full sm:w-10 w-7"
-              :src="user.avatar"
-            />
-            <svg
-              v-else
-              class="text-gray-200 rounded-full sm:w-10 w-7"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <span class="text-sm font-semibold">{{ user.name }}</span>
-          </div>
-          <div class="text-right">
-            <span class="text-xl font-bold text-sky-300">{{
-              user.uniqueStarterCount
-            }}</span>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Predictions Slide -->
-    <WrappedSlide
-      bg-color="bg-purple-950"
-      alignment="center"
-      v-if="draftRankings && draftRankings.length > 0"
-    >
-      <h2 class="mb-4 text-3xl font-bold text-purple-400 sm:mb-8 sm:text-5xl">
-        Expectations vs. Reality
-      </h2>
-      <p class="mb-4 text-base text-purple-200 sm:mb-8 sm:text-lg">
-        Sleeper said A+. Reality said otherwise.
-      </p>
-      <div
-        class="grid sm:gap-4 gap-1.5 grid-cols-1 w-full max-h-[70vh] sm:grid-cols-2 sm:grid-flow-col"
-        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
-      >
-        <div
-          v-for="grade in draftRankings"
-          class="flex items-center justify-between px-2 py-1.5 rounded-lg sm:p-3 bg-purple-900/40"
-        >
-          <div class="flex items-center gap-3">
-            <img
-              v-if="grade.user?.avatarImg"
-              class="rounded-full w-7 sm:w-8"
-              :src="grade.user?.avatarImg"
-            />
-            <svg
-              v-else
-              class="text-gray-200 rounded-full sm:w-8 w-7"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <span class="w-40 text-sm font-bold text-left truncate">{{
-              store.showUsernames ? grade.user?.username : grade.user?.name
-            }}</span>
-          </div>
-          <div class="flex items-center gap-4 text-right">
-            <div class="flex flex-col items-center">
-              <span class="text-xs text-purple-300">Rank</span>
-              <span class="text-sm font-bold text-white sm:text-lg">{{
-                grade.user?.regularSeasonRank
-              }}</span>
-            </div>
-            <div class="flex flex-col items-center">
-              <span class="text-xs text-purple-300">Grade</span>
-              <span class="text-sm font-bold sm:text-lg">{{
-                grade.grade
-              }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Legacy Slide -->
-    <WrappedSlide
-      bg-color="bg-slate-900"
-      alignment="center"
-      v-if="
-        allTimeRecord &&
-        allTimeRecord.length > 0 &&
-        league.previousLeagues.length > 0
-      "
-    >
-      <h2 class="mb-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-slate-200">
-        The History Books
-      </h2>
-      <p class="mb-6 text-base sm:text-lg text-slate-200">
-        All time regular season records.
-      </p>
-      <div
-        class="grid w-full grid-cols-1 gap-2 sm:gap-4 sm:grid-flow-col sm:grid-cols-2"
-        :style="`grid-template-rows: repeat(${leagueSize / 2}, minmax(0, 1fr))`"
-      >
-        <div
-          v-for="user in allTimeRecord.slice(0, 14)"
-          class="flex items-center justify-between rounded-lg sm:p-3 px-2 py-1.5 bg-slate-800"
-        >
-          <div class="flex items-center gap-3">
-            <img
-              v-if="user.avatarImg"
-              class="rounded-full sm:w-8 w-7"
-              :src="user.avatarImg"
-            />
-            <svg
-              v-else
-              class="text-gray-200 rounded-full sm:w-8 w-7"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-              />
-            </svg>
-            <span class="font-medium">{{ user.name }}</span>
-          </div>
-          <div class="font-mono font-bold text-slate-300">
-            {{ user.wins }}-{{ user.losses
-            }}<span v-if="user.ties > 0">-{{ user.ties }}</span>
-          </div>
-        </div>
-      </div>
-    </WrappedSlide>
-
-    <!-- Individual Team Slide -->
-
-    <WrappedSlide bg-color="bg-gray-950" alignment="center">
-      <div class="absolute inset-0 pointer-events-none">
-        <div
-          class="absolute rounded-full w-80 h-80 bg-green-500/20 blur-3xl top-10 left-10"
-          style="animation: float-slow 10s ease-in-out infinite"
-        ></div>
-        <div
-          class="absolute rounded-full w-96 h-96 bg-lime-500/18 blur-3xl bottom-10 right-10"
-          style="animation: float-slower 12s ease-in-out infinite"
-        ></div>
-        <div
-          class="absolute w-56 h-56 rounded-full bg-green-400/15 blur-2xl top-1/3 left-1/2"
-          style="animation: float 8s ease-in-out infinite"
-        ></div>
-      </div>
-      <div>
-        <h1 class="mb-4 text-3xl font-bold text-white sm:text-5xl">
-          Team Summary
-        </h1>
-
-        <div v-for="team in props.tableData">
-          <div v-if="team.rosterId === currentManager.rosterId">
-            <div>
-              <div class="flex my-4 sm:my-6">
-                <img
-                  v-if="team.avatarImg"
-                  class="w-10 h-10 mt-0.5 mr-4 border-2 rounded-full sm:mt-0 border-greem-400 sm:w-12 sm:h-12"
-                  :src="team.avatarImg"
+              <svg
+                v-else
+                class="w-10 text-gray-200 border-4 border-orange-500 rounded-full sm:w-12"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                 />
-                <svg
-                  v-else
-                  class="w-10 mr-4 text-gray-200 border-2 border-green-400 rounded-full sm:w-12"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                  />
-                </svg>
-                <select
-                  aria-label="Manager name"
-                  id="Manager name"
-                  class="block p-2 text-base font-bold text-gray-200 bg-green-900 border border-gray-300 rounded-lg sm:text-lg focus:ring-green-500 focus:border-green-500"
-                  v-model="currentManager"
-                >
-                  <option
-                    v-for="manager in managers"
-                    :key="manager.rosterId"
-                    :value="manager"
-                  >
-                    {{ manager.name }}
-                  </option>
-                </select>
+              </svg>
+              <div class="mb-2 text-xl font-bold">{{ user.name }}</div>
+              <div class="text-3xl font-black text-orange-500">
+                {{ user.streak }}
               </div>
-              <div class="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
-                <div
-                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
-                >
-                  <p class="mt-0.5 font-semibold">Regular Season Rank</p>
-                  <p class="text-lg font-bold sm:text-xl">
-                    {{ team.regularSeasonRank }}
-                  </p>
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Schedule Luck Slide -->
+      <WrappedSlide bg-color="bg-fuchsia-950">
+        <h2 class="mb-6 -mt-4 text-3xl font-bold sm:text-5xl text-fuchsia-400">
+          Schedule Roulette
+        </h2>
+        <p class="mb-6 text-base sm:text-lg text-fuchsia-200">
+          One got easy matchups. One got the gauntlet. Life isn't fair.
+        </p>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <!-- Luckiest -->
+          <div>
+            <div class="flex items-center gap-4 px-2 mb-1">
+              <h3
+                class="text-sm font-bold tracking-widest uppercase text-fuchsia-200"
+              >
+                Luckiest Schedules
+              </h3>
+            </div>
+            <div
+              v-for="schedule in scheduleAnalysis.slice(0, 3)"
+              class="mb-2 sm:mb-4"
+            >
+              <div
+                class="flex justify-between px-3 py-2 sm:px-4 sm:py-4 bg-fuchsia-900/30 rounded-2xl"
+              >
+                <div class="flex gap-4">
+                  <img
+                    v-if="schedule.avatarImg"
+                    class="w-10 h-10 border-2 rounded-full sm:w-14 sm:h-14 border-fuchsia-500"
+                    :src="schedule.avatarImg"
+                  />
+                  <svg
+                    v-else
+                    class="w-10 h-10 text-gray-200 border-2 rounded-full sm:w-14 sm:h-14 border-fuchsia-500"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                    />
+                  </svg>
+                  <div class="text-left">
+                    <p
+                      class="text-base font-bold text-left truncate sm:text-lg w-36"
+                    >
+                      {{ schedule.teamName }}
+                    </p>
+                    <p class="text-xs text-fuchsia-300/80">
+                      Expected Wins:
+                      <span class="text-fuchsia-200">{{
+                        schedule.expectedWins.toFixed(1)
+                      }}</span>
+                    </p>
+                    <p class="text-xs text-fuchsia-300/80">
+                      Actual:
+                      <span class="text-fuchsia-200">{{
+                        schedule.actualWins
+                      }}</span>
+                    </p>
+                  </div>
                 </div>
-                <div
-                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
-                >
-                  <p class="mt-0.5 font-semibold">Record</p>
-                  <p class="text-lg font-bold sm:text-xl">
-                    {{ team.wins }} - {{ team.losses }}
-                    <span v-if="team.ties">-{{ team.ties }}</span>
+                <div>
+                  <p class="mt-1 text-xl font-semibold sm:mt-2 sm:text-2xl">
+                    +{{
+                      (schedule.actualWins - schedule.expectedWins).toFixed(2)
+                    }}
                   </p>
+                  <p class="text-xs">Wins</p>
                 </div>
-                <div
-                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
-                >
-                  <p class="mt-0.5 font-semibold">Record with Median</p>
-                  <p class="text-lg font-bold sm:text-xl">
-                    {{ team.winsWithMedian }} -
-                    {{ team.lossesWithMedian }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Unluckiest -->
+          <div>
+            <div class="flex items-center gap-4 px-2 mb-1">
+              <h3
+                class="text-sm font-bold tracking-widest uppercase text-fuchsia-200"
+              >
+                Hardest Roads
+              </h3>
+            </div>
+            <div
+              v-for="schedule in scheduleAnalysis.slice(-3).reverse()"
+              class="mb-2 sm:mb-4"
+            >
+              <div
+                class="flex justify-between px-3 py-2 sm:px-4 sm:py-4 bg-fuchsia-900/30 rounded-2xl"
+              >
+                <div class="flex gap-4">
+                  <img
+                    v-if="schedule.avatarImg"
+                    class="w-10 h-10 border-2 rounded-full sm:w-14 sm:h-14 border-fuchsia-500"
+                    :src="schedule.avatarImg"
+                  />
+                  <svg
+                    v-else
+                    class="w-10 h-10 text-gray-200 border-2 rounded-full sm:w-14 sm:h-14 border-fuchsia-500"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                    />
+                  </svg>
+                  <div class="text-left">
+                    <p
+                      class="text-base font-bold text-left truncate sm:text-lg w-36"
+                    >
+                      {{ schedule.teamName }}
+                    </p>
+                    <p class="text-xs text-fuchsia-300/80">
+                      Expected Wins:
+                      <span class="text-fuchsia-200">{{
+                        schedule.expectedWins.toFixed(1)
+                      }}</span>
+                    </p>
+                    <p class="text-xs text-fuchsia-300/80">
+                      Actual:
+                      <span class="text-fuchsia-200">{{
+                        schedule.actualWins
+                      }}</span>
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p class="mt-1 text-xl font-semibold sm:mt-2 sm:text-2xl">
+                    {{
+                      (schedule.actualWins - schedule.expectedWins).toFixed(2)
+                    }}
                   </p>
+                  <p class="text-xs">Wins</p>
                 </div>
-                <div
-                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
-                >
-                  <p class="mt-0.5 font-semibold">Start/Sit Efficiency</p>
-                  <p class="text-lg font-bold sm:text-xl">
-                    {{ (team.managerEfficiency * 100).toFixed(1) }}%
-                  </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Loyalty / Retention Slide -->
+      <WrappedSlide bg-color="bg-blue-950" alignment="center">
+        <h2 class="mb-6 text-3xl font-bold text-blue-400 sm:mb-8 sm:text-5xl">
+          Day Ones
+        </h2>
+        <p class="mb-6 -mt-4 text-base text-blue-200 sm:text-lg">
+          The number of drafted players that earned their spot and never left.
+        </p>
+
+        <div
+          class="grid w-full grid-cols-1 gap-2 sm:gap-4 sm:grid-flow-col sm:grid-cols-2"
+          :style="`grid-template-rows: repeat(${
+            leagueSize / 2
+          }, minmax(0, 1fr))`"
+        >
+          <div
+            v-for="user in originalPlayers"
+            class="flex items-center justify-between sm:p-3 py-1.5 px-2 rounded-lg bg-blue-900/40"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                v-if="getUserObject(user.userId)?.avatarImg"
+                class="rounded-full sm:w-10 w-7"
+                :src="getUserObject(user.userId)?.avatarImg"
+              />
+              <svg
+                v-else
+                class="text-gray-200 sm:w-10 w-7"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <span class="text-sm font-semibold">{{ user.userName }}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-xl font-bold text-blue-300"
+                >{{ user.stillOnTeam }}/{{ user.totalDrafted }}</span
+              >
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Total Players Used Slide -->
+      <WrappedSlide bg-color="bg-sky-950" alignment="center">
+        <h2 class="mb-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-sky-400">
+          The Full Cast
+        </h2>
+        <p class="mb-6 text-base text-blue-200 sm:text-lg">
+          The total number of different starting players.
+        </p>
+        <div
+          class="grid w-full grid-cols-1 gap-2 overflow-auto sm:grid-flow-col sm:grid-cols-2 sm:gap-4"
+          :style="`grid-template-rows: repeat(${
+            leagueSize / 2
+          }, minmax(0, 1fr))`"
+        >
+          <div
+            v-for="user in uniquePlayers"
+            class="flex items-center justify-between sm:p-3 px-2 py-1.5 rounded-lg bg-sky-900/40"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                v-if="user.avatar"
+                class="rounded-full sm:w-10 w-7"
+                :src="user.avatar"
+              />
+              <svg
+                v-else
+                class="text-gray-200 rounded-full sm:w-10 w-7"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <span class="text-sm font-semibold">{{ user.name }}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-xl font-bold text-sky-300">{{
+                user.uniqueStarterCount
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Predictions Slide -->
+      <WrappedSlide
+        bg-color="bg-purple-950"
+        alignment="center"
+        v-if="draftRankings && draftRankings.length > 0"
+      >
+        <h2 class="mb-4 text-3xl font-bold text-purple-400 sm:mb-8 sm:text-5xl">
+          Expectations vs. Reality
+        </h2>
+        <p class="mb-4 text-base text-purple-200 sm:mb-8 sm:text-lg">
+          Sleeper said A+. Reality said otherwise.
+        </p>
+        <div
+          class="grid sm:gap-4 gap-1.5 grid-cols-1 w-full max-h-[70vh] sm:grid-cols-2 sm:grid-flow-col"
+          :style="`grid-template-rows: repeat(${
+            leagueSize / 2
+          }, minmax(0, 1fr))`"
+        >
+          <div
+            v-for="grade in draftRankings"
+            class="flex items-center justify-between px-2 py-1.5 rounded-lg sm:p-3 bg-purple-900/40"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                v-if="grade.user?.avatarImg"
+                class="rounded-full w-7 sm:w-8"
+                :src="grade.user?.avatarImg"
+              />
+              <svg
+                v-else
+                class="text-gray-200 rounded-full sm:w-8 w-7"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <span class="w-40 text-sm font-bold text-left truncate">{{
+                store.showUsernames ? grade.user?.username : grade.user?.name
+              }}</span>
+            </div>
+            <div class="flex items-center gap-4 text-right">
+              <div class="flex flex-col items-center">
+                <span class="text-xs text-purple-300">Rank</span>
+                <span class="text-sm font-bold text-white sm:text-lg">{{
+                  grade.user?.regularSeasonRank
+                }}</span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="text-xs text-purple-300">Grade</span>
+                <span class="text-sm font-bold sm:text-lg">{{
+                  grade.grade
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Legacy Slide -->
+      <WrappedSlide
+        bg-color="bg-slate-900"
+        alignment="center"
+        v-if="
+          allTimeRecord &&
+          allTimeRecord.length > 0 &&
+          league.previousLeagues.length > 0
+        "
+      >
+        <h2 class="mb-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-slate-200">
+          The History Books
+        </h2>
+        <p class="mb-6 text-base sm:text-lg text-slate-200">
+          All time regular season records.
+        </p>
+        <div
+          class="grid w-full grid-cols-1 gap-2 sm:gap-4 sm:grid-flow-col sm:grid-cols-2"
+          :style="`grid-template-rows: repeat(${
+            leagueSize / 2
+          }, minmax(0, 1fr))`"
+        >
+          <div
+            v-for="user in allTimeRecord.slice(0, 14)"
+            class="flex items-center justify-between rounded-lg sm:p-3 px-2 py-1.5 bg-slate-800"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                v-if="user.avatarImg"
+                class="rounded-full sm:w-8 w-7"
+                :src="user.avatarImg"
+              />
+              <svg
+                v-else
+                class="text-gray-200 rounded-full sm:w-8 w-7"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                />
+              </svg>
+              <span class="font-medium">{{ user.name }}</span>
+            </div>
+            <div class="font-mono font-bold text-slate-300">
+              {{ user.wins }}-{{ user.losses
+              }}<span v-if="user.ties > 0">-{{ user.ties }}</span>
+            </div>
+          </div>
+        </div>
+      </WrappedSlide>
+
+      <!-- Individual Team Slide -->
+
+      <WrappedSlide bg-color="bg-gray-950" alignment="center">
+        <div class="absolute inset-0 pointer-events-none">
+          <div
+            class="absolute rounded-full w-80 h-80 bg-green-500/20 blur-3xl top-10 left-10"
+            style="animation: float-slow 10s ease-in-out infinite"
+          ></div>
+          <div
+            class="absolute rounded-full w-96 h-96 bg-lime-500/18 blur-3xl bottom-10 right-10"
+            style="animation: float-slower 12s ease-in-out infinite"
+          ></div>
+          <div
+            class="absolute w-56 h-56 rounded-full bg-green-400/15 blur-2xl top-1/3 left-1/2"
+            style="animation: float 8s ease-in-out infinite"
+          ></div>
+        </div>
+        <div>
+          <h1 class="mb-4 text-3xl font-bold text-white sm:text-5xl">
+            Team Summary
+          </h1>
+
+          <div v-for="team in props.tableData">
+            <div v-if="team.rosterId === currentManager.rosterId">
+              <div>
+                <div class="flex my-4 sm:my-6">
+                  <img
+                    v-if="team.avatarImg"
+                    class="w-10 h-10 mt-0.5 mr-4 border-2 rounded-full sm:mt-0 border-greem-400 sm:w-12 sm:h-12"
+                    :src="team.avatarImg"
+                  />
+                  <svg
+                    v-else
+                    class="w-10 mr-4 text-gray-200 border-2 border-green-400 rounded-full sm:w-12"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                    />
+                  </svg>
+                  <select
+                    aria-label="Manager name"
+                    id="Manager name"
+                    class="block p-2 text-base font-bold text-gray-200 bg-green-900 border border-gray-300 rounded-lg sm:text-lg focus:ring-green-500 focus:border-green-500"
+                    v-model="currentManager"
+                  >
+                    <option
+                      v-for="manager in managers"
+                      :key="manager.rosterId"
+                      :value="manager"
+                    >
+                      {{ manager.name }}
+                    </option>
+                  </select>
                 </div>
-                <!-- <div class="p-3 bg-green-800 rounded-lg">
+                <div class="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
+                  <div
+                    class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                  >
+                    <p class="mt-0.5 font-semibold">Regular Season Rank</p>
+                    <p class="text-lg font-bold sm:text-xl">
+                      {{ team.regularSeasonRank }}
+                    </p>
+                  </div>
+                  <div
+                    class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                  >
+                    <p class="mt-0.5 font-semibold">Record</p>
+                    <p class="text-lg font-bold sm:text-xl">
+                      {{ team.wins }} - {{ team.losses }}
+                      <span v-if="team.ties">-{{ team.ties }}</span>
+                    </p>
+                  </div>
+                  <div
+                    class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                  >
+                    <p class="mt-0.5 font-semibold">Record with Median</p>
+                    <p class="text-lg font-bold sm:text-xl">
+                      {{ team.winsWithMedian }} -
+                      {{ team.lossesWithMedian }}
+                    </p>
+                  </div>
+                  <div
+                    class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                  >
+                    <p class="mt-0.5 font-semibold">Start/Sit Efficiency</p>
+                    <p class="text-lg font-bold sm:text-xl">
+                      {{ (team.managerEfficiency * 100).toFixed(1) }}%
+                    </p>
+                  </div>
+                  <!-- <div class="p-3 bg-green-800 rounded-lg">
                   <p>
                     Record Against All: {{ team.winsAgainstAll }} -
                     {{ team.lossesAgainstAll }}
                   </p>
                 </div> -->
-                <div
-                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
-                >
-                  <p class="mt-0.5 font-semibold">Points For</p>
-                  <p class="text-lg font-bold sm:text-xl">
-                    {{ team.pointsFor }}
-                  </p>
+                  <div
+                    class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                  >
+                    <p class="mt-0.5 font-semibold">Points For</p>
+                    <p class="text-lg font-bold sm:text-xl">
+                      {{ team.pointsFor }}
+                    </p>
+                  </div>
+                  <div
+                    class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                  >
+                    <p class="mt-0.5 font-semibold">Points Against</p>
+                    <p class="text-lg font-bold sm:text-xl">
+                      {{ team.pointsAgainst }}
+                    </p>
+                  </div>
                 </div>
-                <div
-                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
-                >
-                  <p class="mt-0.5 font-semibold">Points Against</p>
-                  <p class="text-lg font-bold sm:text-xl">
-                    {{ team.pointsAgainst }}
-                  </p>
-                </div>
+                <apexchart
+                  class="mt-4"
+                  type="line"
+                  height="350"
+                  :options="chartOptions"
+                  :series="seriesData"
+                ></apexchart>
               </div>
-              <apexchart
-                class="mt-4"
-                type="line"
-                height="350"
-                :options="chartOptions"
-                :series="seriesData"
-              ></apexchart>
             </div>
           </div>
         </div>
-      </div>
-    </WrappedSlide>
+      </WrappedSlide>
 
-    <!-- Outro Slide -->
-    <WrappedSlide bg-color="bg-gray-950" alignment="center">
-      <div class="space-y-6">
-        <h1 class="mb-4 text-3xl font-bold text-white sm:text-5xl">
-          Thank you for using ffwrapped!
-        </h1>
+      <!-- Outro Slide -->
+      <WrappedSlide bg-color="bg-gray-950" alignment="center">
+        <div class="space-y-6">
+          <h1 class="mb-4 text-3xl font-bold text-white sm:text-5xl">
+            Thank you for using ffwrapped!
+          </h1>
 
-        <div class="text-gray-200">
-          <!-- Hardcoding data from 12/17/25 -->
-          <p class="mb-8 text-base sm:text-lg">
-            Here's some data on the 5000+ leagues that used ffwrapped in 2025.
-          </p>
-          <OverallStats />
-          <p class="my-4 text-base sm:text-lg">See you next season!</p>
-          <button
-            v-if="isShareSupported"
-            @click="share"
-            aria-label="Button share"
-            type="submit"
-            class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center"
-          >
-            Share
-          </button>
+          <div class="text-gray-200">
+            <!-- Hardcoding data from 12/17/25 -->
+            <p class="mb-6 text-base sm:mb-8 sm:text-lg">
+              Here's some data on the 5000+ leagues that used ffwrapped in 2025.
+            </p>
+            <OverallStats />
+            <p class="my-4 text-base sm:text-lg">See you next season!</p>
+            <button
+              v-if="isShareSupported"
+              @click="share"
+              aria-label="Button share"
+              type="submit"
+              class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center"
+            >
+              Share
+            </button>
+          </div>
         </div>
-      </div>
-    </WrappedSlide>
-    <!-- workaround to get data without copying over methods -->
-    <Draft v-show="false" />
-    <Trades v-show="false" />
-    <Waivers v-show="false" />
-    <LeagueHistory v-show="false" :table-data="tableData" />
+      </WrappedSlide>
+      <!-- workaround to get data without copying over methods -->
+      <Draft v-show="false" />
+      <Trades v-show="false" />
+      <Waivers v-show="false" />
+      <LeagueHistory v-show="false" :table-data="tableData" />
+    </div>
   </div>
 </template>
 
