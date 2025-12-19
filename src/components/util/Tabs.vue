@@ -21,7 +21,7 @@ const changeTab = (tab: string) => {
             : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
         ]"
       >
-        Wrapped 🎉
+        Wrapped
       </button>
     </li>
     <li class="cursor-pointer me-2">

@@ -40,12 +40,115 @@ const share = async () => {
   }
 };
 
+const chartOptions = ref({
+  chart: {
+    foreColor: "#ffffff",
+    height: 350,
+    type: "line",
+    zoom: {
+      enabled: false,
+    },
+    toolbar: {
+      show: false,
+    },
+    animations: {
+      enabled: false,
+    },
+  },
+  colors: ["#f97316"],
+  tooltip: {
+    theme: "dark",
+  },
+  dataLabels: {
+    enabled: true,
+  },
+  stroke: {
+    curve: "smooth",
+  },
+  markers: {
+    size: 1,
+  },
+  title: {
+    text: "Weekly Points",
+    style: {
+      fontSize: "16px",
+      fontFamily:
+        "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+      fontWeight: 600,
+    },
+  },
+
+  responsive: [
+    {
+      breakpoint: 480,
+      options: {
+        chart: {
+          width: 290,
+          height: 230,
+        },
+        legend: {
+          position: "bottom",
+        },
+      },
+    },
+  ],
+
+  xaxis: {
+    title: {
+      text: "Week",
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
+    },
+  },
+  yaxis: {
+    title: {
+      text: "Points",
+      style: {
+        fontSize: "16px",
+        fontFamily:
+          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+        fontWeight: 600,
+      },
+    },
+  },
+});
+
+const seriesData = computed(() => {
+  const user = props.tableData.find(
+    (user) => user.rosterId === currentManager.value.rosterId
+  );
+  return [
+    {
+      name: currentManager.value.name,
+      data: user?.points.slice(0, league.value.regularSeasonLength),
+    },
+  ];
+});
+
 const getOrdinalSuffix = (number: number) => {
   const suffixes = ["th", "st", "nd", "rd"];
   const v = number % 100;
 
   return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
 };
+
+const managers = computed(() => {
+  if (store.leagueInfo.length > 0) {
+    return props.tableData.map((user) => {
+      return {
+        name: store.showUsernames ? user.username : user.name,
+        rosterId: user.rosterId,
+      };
+    });
+  }
+  return [];
+});
+
+const currentManager = ref(managers.value[0]);
 
 const league = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex];
@@ -705,7 +808,7 @@ watch(
         />
         <svg
           v-else
-          class="w-16 h-16 text-gray-200 border-2 border-teal-400 rounded-full"
+          class="w-10 text-gray-200 border-2 border-teal-400 rounded-full sm:w-12"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
@@ -1019,13 +1122,14 @@ watch(
     <!-- Trade Slide -->
     <WrappedSlide bg-color="bg-emerald-950" v-if="impactfulTrades">
       <h2 class="mb-2 text-3xl font-bold sm:text-5xl text-emerald-400">
-        Franchise-Altering Moves
+        Blockbuster Trades
       </h2>
       <p
         v-if="impactfulTrades.length > 0"
         class="mt-4 mb-8 text-base sm:text-lg text-emerald-200/80"
       >
-        These trades rewrote the season.
+        Out of the {{ league.tradeNames?.length }} trades made this season,
+        these were the most impactful.
       </p>
 
       <div
@@ -1851,10 +1955,139 @@ watch(
       </div>
     </WrappedSlide>
 
+    <!-- Individual Team Slide -->
+
+    <WrappedSlide bg-color="bg-gray-950" alignment="center">
+      <div class="absolute inset-0 pointer-events-none">
+        <div
+          class="absolute rounded-full w-80 h-80 bg-green-500/20 blur-3xl top-10 left-10"
+          style="animation: float-slow 10s ease-in-out infinite"
+        ></div>
+        <div
+          class="absolute rounded-full w-96 h-96 bg-lime-500/18 blur-3xl bottom-10 right-10"
+          style="animation: float-slower 12s ease-in-out infinite"
+        ></div>
+        <div
+          class="absolute w-56 h-56 rounded-full bg-green-400/15 blur-2xl top-1/3 left-1/2"
+          style="animation: float 8s ease-in-out infinite"
+        ></div>
+      </div>
+      <div>
+        <h1 class="mb-4 text-3xl font-bold text-white sm:text-5xl">
+          Team Summary
+        </h1>
+
+        <div v-for="team in props.tableData">
+          <div v-if="team.rosterId === currentManager.rosterId">
+            <div>
+              <div class="flex my-4 sm:my-6">
+                <img
+                  v-if="team.avatarImg"
+                  class="w-10 h-10 mt-0.5 mr-4 border-2 rounded-full sm:mt-0 border-greem-400 sm:w-12 sm:h-12"
+                  :src="team.avatarImg"
+                />
+                <svg
+                  v-else
+                  class="w-10 mr-4 text-gray-200 border-2 border-green-400 rounded-full sm:w-12"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                  />
+                </svg>
+                <select
+                  aria-label="Manager name"
+                  id="Manager name"
+                  class="block p-2 text-base font-bold text-gray-200 bg-green-900 border border-gray-300 rounded-lg sm:text-lg focus:ring-green-500 focus:border-green-500"
+                  v-model="currentManager"
+                >
+                  <option
+                    v-for="manager in managers"
+                    :key="manager.rosterId"
+                    :value="manager"
+                  >
+                    {{ manager.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
+                <div
+                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                >
+                  <p class="mt-0.5 font-semibold">Regular Season Rank</p>
+                  <p class="text-lg font-bold sm:text-xl">
+                    {{ team.regularSeasonRank }}
+                  </p>
+                </div>
+                <div
+                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                >
+                  <p class="mt-0.5 font-semibold">Record</p>
+                  <p class="text-lg font-bold sm:text-xl">
+                    {{ team.wins }} - {{ team.losses }}
+                    <span v-if="team.ties">-{{ team.ties }}</span>
+                  </p>
+                </div>
+                <div
+                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                >
+                  <p class="mt-0.5 font-semibold">Record with Median</p>
+                  <p class="text-lg font-bold sm:text-xl">
+                    {{ team.winsWithMedian }} -
+                    {{ team.lossesWithMedian }}
+                  </p>
+                </div>
+                <div
+                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                >
+                  <p class="mt-0.5 font-semibold">Start/Sit Efficiency</p>
+                  <p class="text-lg font-bold sm:text-xl">
+                    {{ (team.managerEfficiency * 100).toFixed(1) }}%
+                  </p>
+                </div>
+                <!-- <div class="p-3 bg-green-800 rounded-lg">
+                  <p>
+                    Record Against All: {{ team.winsAgainstAll }} -
+                    {{ team.lossesAgainstAll }}
+                  </p>
+                </div> -->
+                <div
+                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                >
+                  <p class="mt-0.5 font-semibold">Points For</p>
+                  <p class="text-lg font-bold sm:text-xl">
+                    {{ team.pointsFor }}
+                  </p>
+                </div>
+                <div
+                  class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
+                >
+                  <p class="mt-0.5 font-semibold">Points Against</p>
+                  <p class="text-lg font-bold sm:text-xl">
+                    {{ team.pointsAgainst }}
+                  </p>
+                </div>
+              </div>
+              <apexchart
+                class="mt-4"
+                type="line"
+                height="350"
+                :options="chartOptions"
+                :series="seriesData"
+              ></apexchart>
+            </div>
+          </div>
+        </div>
+      </div>
+    </WrappedSlide>
+
     <!-- Outro Slide -->
     <WrappedSlide bg-color="bg-gray-950" alignment="center">
       <div class="space-y-6">
-        <h1 class="mb-4 text-3xl font-black text-white sm:text-5xl">
+        <h1 class="mb-4 text-3xl font-bold text-white sm:text-5xl">
           Thank you for using ffwrapped!
         </h1>
 
