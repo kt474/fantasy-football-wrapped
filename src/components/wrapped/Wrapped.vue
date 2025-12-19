@@ -22,6 +22,24 @@ const props = defineProps<{
 const closestMatchups: any = ref([]);
 const farthestMatchups: any = ref([]);
 
+const isShareSupported = ref(false);
+
+if (typeof window !== "undefined") {
+  isShareSupported.value = !!navigator.share;
+}
+
+const share = async () => {
+  try {
+    await navigator.share({
+      title: document.title,
+      text: "ffwrapped 2025",
+      url: window.location.href,
+    });
+  } catch (error) {
+    console.error("Sharing failed:", error);
+  }
+};
+
 const getOrdinalSuffix = (number: number) => {
   const suffixes = ["th", "st", "nd", "rd"];
   const v = number % 100;
@@ -834,7 +852,9 @@ watch(
               />
             </svg>
             <div class="text-left">
-              <div class="text-sm font-bold truncate sm:text-lg">
+              <div
+                class="text-sm font-bold truncate max-w-24 sm:max-w-52 sm:text-lg"
+              >
                 {{
                   store.showUsernames
                     ? totalBids.highest.user.username
@@ -877,7 +897,9 @@ watch(
               />
             </svg>
             <div class="text-left">
-              <p class="text-sm font-bold truncate sm:text-lg">
+              <p
+                class="text-sm font-bold truncate sm:text-lg max-w-24 sm:max-w-52"
+              >
                 {{
                   store.showUsernames
                     ? totalBids.lowest.user.username
@@ -997,13 +1019,13 @@ watch(
     <!-- Trade Slide -->
     <WrappedSlide bg-color="bg-emerald-950" v-if="impactfulTrades">
       <h2 class="mb-2 text-3xl font-bold sm:text-5xl text-emerald-400">
-        Blockbuster Trades
+        Franchise-Altering Moves
       </h2>
       <p
         v-if="impactfulTrades.length > 0"
         class="mt-4 mb-8 text-base sm:text-lg text-emerald-200/80"
       >
-        The ones that shook the league.
+        These trades rewrote the season.
       </p>
 
       <div
@@ -1015,7 +1037,7 @@ watch(
         <div
           class="p-4 border w-72 bg-emerald-900/40 rounded-2xl border-emerald-800/50"
         >
-          <div class="flex items-center gap-3 mb-4">
+          <div class="flex items-center gap-1 mb-4 sm:gap-3">
             <img
               v-if="trade.team1.user.avatarImg"
               class="w-10 h-10 border-2 rounded-full border-emerald-500"
@@ -1099,7 +1121,7 @@ watch(
         <div
           class="p-4 border w-72 bg-emerald-900/40 rounded-2xl border-emerald-800/50"
         >
-          <div class="flex items-center gap-3 mb-4">
+          <div class="flex items-center gap-1 mb-4 sm:gap-3">
             <img
               v-if="trade.team2.user.avatarImg"
               class="w-10 h-10 border-2 rounded-full border-emerald-500"
@@ -1217,7 +1239,7 @@ watch(
     <!-- Efficiency Slide -->
     <WrappedSlide bg-color="bg-amber-950" alignment="center">
       <h2 class="mb-4 text-3xl font-bold sm:text-5xl text-amber-500">
-        Left on the Bench
+        The What-Ifs
       </h2>
 
       <p class="mb-6 text-base sm:text-lg text-amber-200">
@@ -1833,17 +1855,26 @@ watch(
     <WrappedSlide bg-color="bg-gray-950" alignment="center">
       <div class="space-y-6">
         <h1 class="mb-4 text-3xl font-black text-white sm:text-5xl">
-          See you next season!
+          Thank you for using ffwrapped!
         </h1>
 
         <div class="text-gray-200">
           <!-- Hardcoding data from 12/17/25 -->
           <p class="mb-8 text-base sm:text-lg">
-            Here's a look back at the 5000+ leagues that used ffwrapped in 2025.
+            Here's some data on the 5000+ leagues that used ffwrapped in 2025.
           </p>
           <OverallStats />
+          <p class="my-4 text-base sm:text-lg">See you next season!</p>
+          <button
+            v-if="isShareSupported"
+            @click="share"
+            aria-label="Button share"
+            type="submit"
+            class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center"
+          >
+            Share
+          </button>
         </div>
-        <!-- <p class="text-zinc-300">Thank you for using ffwrapped ❤️</p> -->
       </div>
     </WrappedSlide>
     <!-- workaround to get data without copying over methods -->
