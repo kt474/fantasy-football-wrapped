@@ -21,6 +21,7 @@ const props = defineProps<{
 
 const closestMatchups: any = ref([]);
 const farthestMatchups: any = ref([]);
+const loading: any = ref(true);
 
 const isShareSupported = ref(false);
 
@@ -585,11 +586,19 @@ const currentSlide = ref(0);
 
 onMounted(() => {
   getMatchups();
+  if (league.value.draftGrades) {
+    loading.value = false;
+  }
 });
 
 watch(
   () => store.currentLeagueId,
   () => getMatchups()
+);
+
+watch(
+  () => league.value.draftGrades,
+  () => (loading.value = false)
 );
 </script>
 
@@ -612,6 +621,7 @@ watch(
       />
     </div>
     <div
+      v-if="!loading"
       ref="slideshow"
       @scroll="onScroll"
       class="w-full h-screen overflow-y-scroll font-sans text-white rounded-b-lg z-1 snap-y snap-mandatory bg-zinc-900 scroll-smooth"
@@ -2177,11 +2187,14 @@ watch(
         </div>
       </WrappedSlide>
       <!-- workaround to get data without copying over methods -->
-      <Draft v-show="false" />
-      <Trades v-show="false" />
-      <Waivers v-show="false" />
-      <LeagueHistory v-show="false" :table-data="tableData" />
     </div>
+    <div v-else>
+      <p class="mt-4 text-lg font-semibold">Loading...</p>
+    </div>
+    <Draft v-show="false" />
+    <Trades v-show="false" />
+    <Waivers v-show="false" />
+    <LeagueHistory v-show="false" :table-data="tableData" />
   </div>
 </template>
 
