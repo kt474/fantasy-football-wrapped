@@ -11,7 +11,10 @@ const changeTab = (tab: string) => {
   <ul
     class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-200"
   >
-    <li class="cursor-pointer me-2">
+    <li
+      v-if="store.leagueInfo[store.currentLeagueIndex]?.season === '2025'"
+      class="cursor-pointer me-2"
+    >
       <button
         @click="changeTab('wrapped')"
         class="inline-block p-2 rounded-t-lg sm:p-4"

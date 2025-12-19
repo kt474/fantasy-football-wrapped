@@ -194,7 +194,10 @@ const bestPickups = computed(() => {
     league.value.waiverMoves
       ?.filter(
         (obj) =>
-          obj.value !== null && obj.position !== "DEF" && obj.position !== "K"
+          obj.value !== null &&
+          obj.position !== "DEF" &&
+          obj.position !== "K" &&
+          obj.player_id !== "12530" // filter out travis hunter
       )
       .sort((a, b) => (a.value ?? 0) - (b.value ?? 0))
       .slice(0, 5) ?? []
@@ -605,7 +608,7 @@ watch(
 <template>
   <div>
     <div
-      class="flex justify-center gap-1.5 z-50 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 mt-4"
+      class="flex justify-center gap-1.5 z-50 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 mt-4 -mb-6 relative opacity-40"
     >
       <button
         v-for="(_, index) in 19"
@@ -614,7 +617,7 @@ watch(
         :class="[
           'transition-all duration-300 rounded-full',
           currentSlide === index
-            ? 'bg-green-400 w-8 h-2'
+            ? 'bg-green-500 w-8 h-2'
             : 'bg-neutral-400 hover:bg-neutral-300 w-2 h-2',
         ]"
         :aria-label="`Go to slide ${index + 1}`"
@@ -624,7 +627,7 @@ watch(
       v-if="!loading"
       ref="slideshow"
       @scroll="onScroll"
-      class="w-full h-screen overflow-y-scroll font-sans text-white rounded-b-lg z-1 snap-y snap-mandatory bg-zinc-900 scroll-smooth"
+      class="w-full h-screen overflow-y-scroll font-sans text-white rounded-lg z-1 snap-y snap-mandatory bg-zinc-900 scroll-smooth"
     >
       <!-- Intro Slide -->
       <WrappedSlide bg-color="bg-gradient-to-r from-green-950 to-gray-900">
@@ -898,7 +901,7 @@ watch(
       <!-- Waiver Wire Slide -->
       <WrappedSlide bg-color="bg-cyan-950">
         <h2
-          class="mb-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-cyan-400 bg-clip-text"
+          class="mb-4 text-3xl font-bold sm:text-5xl text-cyan-400 bg-clip-text"
         >
           Waiver Wire Warriors
         </h2>
@@ -1090,17 +1093,21 @@ watch(
                 </p>
               </div>
               <div class="hidden mt-10 sm:inline">
-                <p class="text-xs font-semibold sm:text-base">
+                <p class="w-32 text-xs font-semibold truncate sm:text-base">
                   {{ store.showUsernames ? bid.user.username : bid.user.name }}
                 </p>
                 <p class="text-xs text-cyan-500/80">Week {{ bid.week }}</p>
               </div>
-              <p class="p-3 mt-2 text-2xl font-bold sm:mt-7 text-cyan-400">
+              <p
+                class="p-3 mt-2 text-xl font-bold sm:text-2xl sm:mt-7 text-cyan-400"
+              >
                 ${{ bid.bid }}
               </p>
             </div>
             <div class="block pb-2 sm:hidden">
-              <p class="text-xs font-semibold sm:text-base">
+              <p
+                class="mx-auto text-xs font-semibold truncate sm:text-base w-28"
+              >
                 {{ store.showUsernames ? bid.user.username : bid.user.name }}
               </p>
               <p class="text-xs text-cyan-500/80">Week {{ bid.week }}</p>
@@ -1184,8 +1191,11 @@ watch(
           v-if="impactfulTrades.length > 0"
           class="mt-4 mb-8 text-base sm:text-lg text-emerald-200/80"
         >
-          Out of the {{ league.tradeNames?.length }} trades made this season,
-          these were the most impactful.
+          Out of the {{ league.tradeNames?.length }} trade<span
+            v-if="impactfulTrades.length !== 1"
+            >s</span
+          >
+          made this season, these were the most impactful.
         </p>
 
         <div
@@ -2077,7 +2087,7 @@ watch(
                   <select
                     aria-label="Manager name"
                     id="Manager name"
-                    class="block p-2 text-base font-bold text-gray-200 bg-green-900 border border-gray-300 rounded-lg sm:text-lg focus:ring-green-500 focus:border-green-500"
+                    class="block p-2 text-base font-bold text-gray-200 bg-green-900 border border-gray-300 rounded-lg max-w-60 sm:text-lg focus:ring-green-500 focus:border-green-500"
                     v-model="currentManager"
                   >
                     <option
