@@ -12,7 +12,10 @@ const changeTab = (tab: string) => {
     class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-200"
   >
     <li
-      v-if="store.leagueInfo[store.currentLeagueIndex]?.season === '2025'"
+      v-if="
+        store.leagueInfo[store.currentLeagueIndex]?.season === '2025' &&
+        store.leagueInfo[store.currentLeagueIndex]?.seasonType !== 'Guillotine'
+      "
       class="cursor-pointer me-2"
     >
       <button

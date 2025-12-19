@@ -847,7 +847,9 @@ watch(
         <h2 class="mb-4 text-3xl font-bold text-teal-400 sm:mb-6 sm:text-5xl">
           Late Round Legends
         </h2>
-        <p class="mb-6 -mt-2 text-base font-medium text-teal-200 sm:text-lg">
+        <p
+          class="mb-4 -mt-2 text-base font-medium text-teal-200 sm:mb-6 sm:text-lg"
+        >
           Found gold while everyone else was digging for silver.
         </p>
         <div
@@ -905,7 +907,7 @@ watch(
         >
           Waiver Wire Warriors
         </h2>
-        <p class="mb-6 text-base sm:text-lg text-cyan-200">
+        <p class="mb-4 text-base sm:mb-6 sm:text-lg text-cyan-200">
           Some lived on the waiver wire. Some pretended it didn't exist.
         </p>
         <div class="grid w-full grid-cols-2 gap-4">
@@ -999,7 +1001,7 @@ watch(
               />
               <svg
                 v-else
-                class="w-8 text-gray-200 rounded-full sm:w-12"
+                class="w-8 h-8 text-gray-200 rounded-full sm:w-12"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -1065,7 +1067,7 @@ watch(
                   }}
                 </p>
                 <p class="font-mono text-sm text-cyan-400 sm:text-base">
-                  ${{ totalBids.lowest.sumByStatus.complete }} spent
+                  ${{ totalBids.lowest.sumByStatus.complete ?? 0 }} spent
                 </p>
               </div>
             </div>
@@ -1173,7 +1175,7 @@ watch(
                 />
               </svg>
               <p
-                class="w-20 text-sm text-right text-pretty sm:text-base sm:w-28"
+                class="w-20 text-sm text-right text-pretty sm:text-base sm:w-36"
               >
                 {{ store.showUsernames ? move.user.username : move.user.name }}
               </p>
@@ -1621,7 +1623,7 @@ watch(
                     />
                     <svg
                       v-else
-                      class="w-10 h-10 text-gray-200"
+                      class="w-8 h-8 text-gray-200"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -1650,7 +1652,7 @@ watch(
 
       <!-- Win Streak Slide -->
       <WrappedSlide bg-color="bg-orange-950" alignment="center">
-        <h2 class="mb-6 text-3xl font-bold text-orange-400 sm:text-5xl">
+        <h2 class="mb-4 text-3xl font-bold text-orange-400 sm:mb-6 sm:text-5xl">
           Hot and Cold
         </h2>
         <p class="mb-6 text-base text-orange-200 sm:text-lg">
@@ -1689,7 +1691,9 @@ watch(
 
       <!-- Schedule Luck Slide -->
       <WrappedSlide bg-color="bg-fuchsia-950">
-        <h2 class="mb-6 -mt-4 text-3xl font-bold sm:text-5xl text-fuchsia-400">
+        <h2
+          class="mb-4 -mt-4 text-3xl font-bold sm:mb-6 sm:text-5xl text-fuchsia-400"
+        >
           Schedule Roulette
         </h2>
         <p class="mb-6 text-base sm:text-lg text-fuchsia-200">
@@ -1938,7 +1942,7 @@ watch(
           Sleeper said A+. Reality said otherwise.
         </p>
         <div
-          class="grid sm:gap-4 gap-1.5 grid-cols-1 w-full max-h-[70vh] sm:grid-cols-2 sm:grid-flow-col"
+          class="grid sm:gap-4 gap-0.5 grid-cols-1 w-full max-h-[70vh] sm:grid-cols-2 sm:grid-flow-col"
           :style="`grid-template-rows: repeat(${
             leagueSize / 2
           }, minmax(0, 1fr))`"
@@ -2199,7 +2203,7 @@ watch(
       <!-- workaround to get data without copying over methods -->
     </div>
     <div v-else>
-      <p class="mt-4 text-lg font-semibold">Loading...</p>
+      <p class="mt-8 text-lg font-semibold">Loading...</p>
     </div>
     <Draft v-show="false" />
     <Trades v-show="false" />
