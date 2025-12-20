@@ -608,7 +608,7 @@ watch(
 <template>
   <div>
     <div
-      class="flex justify-center gap-1.5 z-50 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 mt-4 -mb-6 relative opacity-40"
+      class="flex justify-center gap-1.5 z-50 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 mt-4 -mb-6 relative opacity-20"
     >
       <button
         v-for="(_, index) in 19"
@@ -617,7 +617,7 @@ watch(
         :class="[
           'transition-all duration-300 rounded-full',
           currentSlide === index
-            ? 'bg-green-500 w-8 h-2'
+            ? 'bg-neutral-600 w-8 h-2'
             : 'bg-neutral-400 hover:bg-neutral-300 w-2 h-2',
         ]"
         :aria-label="`Go to slide ${index + 1}`"
@@ -717,7 +717,7 @@ watch(
 
       <!-- Best Picks Slide -->
       <WrappedSlide bg-color="bg-indigo-950" alignment="center">
-        <h2 class="mb-6 text-3xl font-bold text-indigo-300 sm:mb-8 sm:text-5xl">
+        <h2 class="mb-6 text-3xl font-bold text-indigo-300 sm:text-5xl">
           Drafted to Perfection
         </h2>
         <p class="mb-6 -mt-2 text-base font-medium text-indigo-200 sm:text-lg">
@@ -779,7 +779,7 @@ watch(
 
       <!-- Worst Picks Slide -->
       <WrappedSlide bg-color="bg-red-950" alignment="center">
-        <h2 class="mb-6 text-3xl font-bold text-red-400 sm:mb-8 sm:text-5xl">
+        <h2 class="mb-6 text-3xl font-bold text-red-400 sm:text-5xl">
           Buyer's Remorse
         </h2>
         <p class="mb-6 -mt-2 text-base font-medium text-red-200 sm:text-lg">
@@ -1935,7 +1935,7 @@ watch(
         alignment="center"
         v-if="draftRankings && draftRankings.length > 0"
       >
-        <h2 class="mb-4 text-3xl font-bold text-purple-400 sm:mb-8 sm:text-5xl">
+        <h2 class="mb-4 text-3xl font-bold text-purple-400 sm:mb-6 sm:text-5xl">
           Expectations vs. Reality
         </h2>
         <p class="mb-4 text-base text-purple-200 sm:mb-8 sm:text-lg">
