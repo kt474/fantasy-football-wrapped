@@ -3,7 +3,7 @@ import { onMounted, watch } from "vue";
 import Header from "./components/util/Header.vue";
 import Footer from "./components/util/Footer.vue";
 import Alert from "./components/util/Alert.vue";
-import Email from "./components/util/Email.vue";
+// import Email from "./components/util/Email.vue";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./types/types";
 import { inject } from "@vercel/analytics";
@@ -93,7 +93,7 @@ const setHtmlBackground = () => {
       <RouterView />
       <Footer />
     </div>
-    <Email />
+    <!-- <Email /> -->
     <Alert
       v-if="store.showEmailAlert"
       alert-msg="Thanks for subscribing!"
