@@ -191,15 +191,15 @@ watch(
                     but if you would like to support this project, any donations
                     would be greatly appreciated.
                   </p>
-                  <div class="flex justify-evenly sm:flex-nowrap flex-wrap">
+                  <div class="flex flex-wrap justify-evenly sm:flex-nowrap">
                     <a href="https://www.buymeacoffee.com/kt474" target="_blank"
                       ><img
                         src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
                         alt="Buy Me A Coffee"
                         style="height: 55px !important; width: 217px !important"
-                        class="mx-auto mt-6"
+                        class="mx-auto mt-4"
                     /></a>
-                    <a
+                    <!-- <a
                       href="https://venmo.com/u/ffwrapped"
                       target="_blank"
                       class=""
@@ -210,7 +210,7 @@ watch(
                         style="height: 45px !important; width: 210px !important"
                         class="mt-7"
                       />
-                    </a>
+                    </a> -->
                   </div>
                 </div>
                 <div
