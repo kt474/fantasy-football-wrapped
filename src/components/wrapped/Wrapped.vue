@@ -197,7 +197,8 @@ const bestPickups = computed(() => {
           obj.value !== null &&
           obj.position !== "DEF" &&
           obj.position !== "K" &&
-          obj.player_id !== "12530" // filter out travis hunter
+          obj.player_id !== "12530" && // filter out travis hunter
+          obj.status === "complete"
       )
       .sort((a, b) => (a.value ?? 0) - (b.value ?? 0))
       .slice(0, 5) ?? []
@@ -480,14 +481,11 @@ const winStreak = computed(() => {
   let result = props.tableData.map((user) => ({
     name: store.showUsernames ? user.username : user.name,
     avatar: user.avatarImg,
-    streak: getCurrentStreak(user.recordByWeek),
+    streak: getAllStreaks(user.recordByWeek),
   }));
 
-  return result.sort((a, b) => {
-    const getNumber = (obj: any) => parseInt(obj.streak.slice(1), 10);
-
-    return getNumber(b) - getNumber(a);
-  });
+  result.sort((a, b) => b.streak.length - a.streak.length);
+  return result;
 });
 
 const getMatchups = () => {
@@ -558,10 +556,25 @@ const getMatchups = () => {
   farthestMatchups.value = uniqueMatchups.slice(0, 5);
 };
 
-const getCurrentStreak = (str: string): string => {
-  const match = str.match(/([WL])\1*$/);
-  if (!match) return "";
-  return match[1] + match[0].length;
+const getAllStreaks = (str: string) => {
+  const streaks: any[] = [];
+  if (!str) return streaks;
+  let i = 0;
+  while (i < str.length) {
+    const ch = str[i];
+    let j = i + 1;
+    while (j < str.length && str[j] === ch) {
+      j++;
+    }
+    streaks.push({
+      type: ch,
+      length: j - i,
+      start: i,
+      end: j - 1,
+    });
+    i = j;
+  }
+  return streaks.reduce((a, b) => (b.length > a.length ? b : a), streaks[0]);
 };
 
 const getUserObject = (userId: string) => {
@@ -617,7 +630,7 @@ watch(
         :class="[
           'transition-all duration-300 rounded-full',
           currentSlide === index
-            ? 'bg-neutral-600 w-8 h-2'
+            ? 'bg-neutral-900 dark:bg-neutral-100 w-8 h-2'
             : 'bg-neutral-400 hover:bg-neutral-300 w-2 h-2',
         ]"
         :aria-label="`Go to slide ${index + 1}`"
@@ -656,9 +669,13 @@ watch(
             The stats are in. The league champion has been crowned. Lets see how
             everyone in
             <span class="font-bold text-gray-200">{{ league.name }}</span>
-            <!-- <span class="font-bold text-gray-200">Test League</span> -->
             really did.
           </p>
+          <!-- <p class="text-lg text-gray-400 md:text-xl">
+            Come back after Week 17 to see the wrapped for
+            <span class="font-bold text-gray-200">{{ league.name }}</span
+            >!
+          </p> -->
         </div>
         <p
           class="absolute left-0 w-full text-center text-gray-400 animate-bounce bottom-4"
@@ -1547,7 +1564,7 @@ watch(
                     </svg>
                   </div>
                   <p
-                    class="float-right w-24 mt-1 text-sm text-right truncate sm:w-32 sm:text-base"
+                    class="float-right w-24 mt-1 text-sm text-right truncate sm:w-28 sm:text-base"
                   >
                     {{
                       store.showUsernames
@@ -1635,7 +1652,7 @@ watch(
                     </svg>
                   </div>
                   <p
-                    class="float-right w-24 mt-1 text-sm text-right truncate sm:w-32 sm:text-base"
+                    class="float-right w-24 mt-1 text-sm text-right truncate sm:w-28 sm:text-base"
                   >
                     {{
                       store.showUsernames
@@ -1682,7 +1699,14 @@ watch(
               </svg>
               <div class="mb-2 text-xl font-bold">{{ user.name }}</div>
               <div class="text-3xl font-black text-orange-500">
-                {{ user.streak }}
+                <p>
+                  {{ user.streak.type }}{{ user.streak.length
+                  }}<span class="text-lg font-medium">
+                    (Weeks {{ user.streak.start + 1 }}-{{
+                      user.streak.end + 1
+                    }})</span
+                  >
+                </p>
               </div>
             </div>
           </div>
@@ -2203,7 +2227,9 @@ watch(
       <!-- workaround to get data without copying over methods -->
     </div>
     <div v-else>
-      <p class="mt-8 text-lg font-semibold">Loading...</p>
+      <p class="mt-8 text-lg font-semibold mb-96 dark:text-gray-300">
+        Loading...
+      </p>
     </div>
     <Draft v-show="false" />
     <Trades v-show="false" />
