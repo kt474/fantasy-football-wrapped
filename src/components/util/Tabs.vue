@@ -30,6 +30,19 @@ const changeTab = (tab: string) => {
         Wrapped
       </button>
     </li>
+    <li v-else-if="store.leagueInfo.length === 0" class="cursor-pointer me-2">
+      <button
+        @click="changeTab('fakeWrapped')"
+        class="inline-block p-2 rounded-t-lg sm:p-4"
+        :class="[
+          store.currentTab === 'fakeWrapped'
+            ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
+            : ' hover:bg-gray-100 dark:hover:bg-gray-800 ',
+        ]"
+      >
+        Wrapped
+      </button>
+    </li>
     <li class="cursor-pointer me-2">
       <button
         @click="changeTab('standings')"

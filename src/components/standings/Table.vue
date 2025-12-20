@@ -29,6 +29,7 @@ import ScheduleStrength from "../expected_wins/ScheduleStrength.vue";
 import PlayerNews from "../start_sit/PlayerNews.vue";
 import ScheduleAnalysis from "../expected_wins/ScheduleAnalysis.vue";
 import Wrapped from "../wrapped/Wrapped.vue";
+import FakeWrapped from "../wrapped/FakeWrapped.vue";
 
 const tableOrder = ref("wins");
 const hover = ref("");
@@ -578,6 +579,9 @@ const getTeamName = (tableDataItem: any) => {
     </div>
     <div v-if="store.currentTab === 'wrapped'">
       <Wrapped :tableData="tableData" />
+    </div>
+    <div v-if="store.currentTab === 'fakeWrapped'">
+      <FakeWrapped />
     </div>
   </div>
 </template>
