@@ -578,7 +578,7 @@ const getTeamName = (tableDataItem: any) => {
       <LeagueHistory :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'wrapped'">
-      <Wrapped :tableData="tableData" />
+      <Wrapped :tableData="originalData" />
     </div>
     <div v-if="store.currentTab === 'fakeWrapped'">
       <FakeWrapped />

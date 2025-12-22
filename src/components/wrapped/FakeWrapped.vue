@@ -29,7 +29,9 @@ import WrappedSlide from "./WrappedSlide.vue";
           Wrapped
         </h1>
 
-        <p class="mx-auto text-lg text-gray-400 md:text-xl w-96 text-balance">
+        <p
+          class="mx-auto text-lg text-gray-400 md:text-xl sm:w-96 text-balance"
+        >
           Come back after Week 17 and enter your league ID to see your league's
           <span class="font-bold text-gray-200">Wrapped</span>!
         </p>

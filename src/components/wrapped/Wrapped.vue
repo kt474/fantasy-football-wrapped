@@ -436,21 +436,6 @@ const pointsFromWaivers = computed(() => {
   return result;
 });
 
-const draftRankings = computed(() => {
-  return league.value.draftGrades
-    ?.map((user) => ({
-      grade: user.grade,
-      user: props.tableData.find(
-        (manager) => manager.rosterId === user.picks[0].draftPick.rosterId
-      ),
-    }))
-    .sort(
-      (a, b) =>
-        (a.user?.regularSeasonRank ?? 0) - (b.user?.regularSeasonRank ?? 0)
-    )
-    .slice(0, 14);
-});
-
 const allTimeRecord = computed(() => {
   let result = props.tableData.map((user) => ({
     name: store.showUsernames ? user.username : user.name,
@@ -487,6 +472,102 @@ const winStreak = computed(() => {
   result.sort((a, b) => b.streak.length - a.streak.length);
   return result;
 });
+
+const totalSlides = computed(() => {
+  if (league.value.previousLeagues.length > 0) {
+    return 18;
+  }
+  return 17;
+});
+
+const teamName = computed(() => {
+  const currentTeam: any = props.tableData.find(
+    (user) => user.rosterId === currentManager.value.rosterId
+  );
+  return getTeamName(currentTeam);
+});
+
+const getTeamName = (user: TableDataType) => {
+  if (user.regularSeasonRank === 1 && getPointsRank(user.pointsFor) <= 2) {
+    return "The Unquestioned Tyrant";
+  } else if (user.regularSeasonRank === league.value.totalRosters) {
+    return "The Walking Bye Week";
+  } else if (user.wins - user.randomScheduleWins > 2.2) {
+    return "The Schedule Merchant";
+  } else if (user.randomScheduleWins - user.wins > 2.2) {
+    return "Weekly Victim of Career Performances";
+  } else if (
+    user.regularSeasonRank >= 8 &&
+    league.value.transactions[user.id] <= 15
+  ) {
+    return "Set It and Forget It (And Regret It)";
+  } else if (
+    user.regularSeasonRank >= 8 &&
+    league.value.transactions[user.id] >= 35
+  ) {
+    return "The Panic Button Presser";
+  } else if (
+    user.regularSeasonRank <= 4 &&
+    league.value.transactions[user.id] <= 12
+  ) {
+    return "Won on Draft Day";
+  } else if (
+    user.regularSeasonRank > league.value.playoffTeams &&
+    user.managerEfficiency < 0.875
+  ) {
+    return "Should've Just Used the Projections";
+  } else if (getPointsAgainstRank(user.pointsAgainst) === 1) {
+    return "The League Punching Bag";
+  } else if (
+    user.regularSeasonRank <= 4 &&
+    getPointsRank(user.pointsFor) >= 8
+  ) {
+    return "The Fraud";
+  } else if (user.regularSeasonRank === league.value.playoffTeams) {
+    return "Just Happy to Be Here";
+  } else if (user.regularSeasonRank === league.value.playoffTeams + 1) {
+    return "The Heartbreaker";
+  } else if (
+    user.regularSeasonRank <= league.value.playoffTeams &&
+    getPointsRank(user.pointsFor) > league.value.playoffTeams
+  ) {
+    return "The Playoff Imposter";
+  } else if (
+    user.regularSeasonRank > league.value.playoffTeams &&
+    getPointsRank(user.pointsFor) <= league.value.playoffTeams
+  ) {
+    return "All Those Points for Nothing";
+  } else if (user.managerEfficiency >= 0.915) {
+    return "The Lineup Savant";
+  } else if (user.managerEfficiency <= 0.85) {
+    return "Bench Points Champion";
+  } else if (user.regularSeasonRank <= 3) {
+    return "The Consistent Contender";
+  } else if (user.regularSeasonRank <= league.value.playoffTeams) {
+    return "Textbook Mediocrity";
+  } else if (user.regularSeasonRank > league.value.playoffTeams) {
+    return "Mid Tier Disappointment";
+  }
+  return "Perfectly Average";
+};
+
+const totalPointsArray = computed(() => {
+  return props.tableData.map((user) => user.pointsFor).sort((a, b) => b - a);
+});
+
+const totalPointsAgainst = computed(() => {
+  return props.tableData
+    .map((user) => user.pointsAgainst)
+    .sort((a, b) => b - a);
+});
+
+const getPointsRank = (points: number) => {
+  return totalPointsArray.value.indexOf(points) + 1;
+};
+
+const getPointsAgainstRank = (points: number) => {
+  return totalPointsAgainst.value.indexOf(points) + 1;
+};
 
 const getMatchups = () => {
   const matchupDifferences: any[] = [];
@@ -624,7 +705,7 @@ watch(
       class="flex justify-center gap-1.5 z-50 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 mt-4 -mb-6 relative opacity-20"
     >
       <button
-        v-for="(_, index) in 19"
+        v-for="(_, index) in totalSlides"
         :key="index"
         @click="scrollToSlide(index)"
         :class="[
@@ -1953,68 +2034,6 @@ watch(
         </div>
       </WrappedSlide>
 
-      <!-- Predictions Slide -->
-      <WrappedSlide
-        bg-color="bg-purple-950"
-        alignment="center"
-        v-if="draftRankings && draftRankings.length > 0"
-      >
-        <h2 class="mb-4 text-3xl font-bold text-purple-400 sm:mb-6 sm:text-5xl">
-          Expectations vs. Reality
-        </h2>
-        <p class="mb-4 text-base text-purple-200 sm:mb-8 sm:text-lg">
-          Sleeper said A+. Reality said otherwise.
-        </p>
-        <div
-          class="grid sm:gap-4 gap-0.5 grid-cols-1 w-full max-h-[70vh] sm:grid-cols-2 sm:grid-flow-col"
-          :style="`grid-template-rows: repeat(${
-            leagueSize / 2
-          }, minmax(0, 1fr))`"
-        >
-          <div
-            v-for="grade in draftRankings"
-            class="flex items-center justify-between px-2 py-1.5 rounded-lg sm:p-3 bg-purple-900/40"
-          >
-            <div class="flex items-center gap-3">
-              <img
-                v-if="grade.user?.avatarImg"
-                class="rounded-full w-7 sm:w-8"
-                :src="grade.user?.avatarImg"
-              />
-              <svg
-                v-else
-                class="text-gray-200 rounded-full sm:w-8 w-7"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                />
-              </svg>
-              <span class="w-40 text-sm font-bold text-left truncate">{{
-                store.showUsernames ? grade.user?.username : grade.user?.name
-              }}</span>
-            </div>
-            <div class="flex items-center gap-4 text-right">
-              <div class="flex flex-col items-center">
-                <span class="text-xs text-purple-300">Rank</span>
-                <span class="text-sm font-bold text-white sm:text-lg">{{
-                  grade.user?.regularSeasonRank
-                }}</span>
-              </div>
-              <div class="flex flex-col items-center">
-                <span class="text-xs text-purple-300">Grade</span>
-                <span class="text-sm font-bold sm:text-lg">{{
-                  grade.grade
-                }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </WrappedSlide>
-
       <!-- Legacy Slide -->
       <WrappedSlide
         bg-color="bg-slate-900"
@@ -2126,6 +2145,7 @@ watch(
                       {{ manager.name }}
                     </option>
                   </select>
+                  <p class="ml-4 text-xl font-semibold">{{ teamName }}</p>
                 </div>
                 <div class="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
                   <div
@@ -2162,12 +2182,7 @@ watch(
                       {{ (team.managerEfficiency * 100).toFixed(1) }}%
                     </p>
                   </div>
-                  <!-- <div class="p-3 bg-green-800 rounded-lg">
-                  <p>
-                    Record Against All: {{ team.winsAgainstAll }} -
-                    {{ team.lossesAgainstAll }}
-                  </p>
-                </div> -->
+
                   <div
                     class="flex justify-between px-3 py-2 bg-green-900 rounded-lg sm:p-3"
                   >

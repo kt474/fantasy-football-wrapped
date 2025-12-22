@@ -16,7 +16,7 @@ export type LeagueInfoType = {
   users: any[];
   rosters: any[];
   weeklyPoints: [];
-  transactions: [];
+  transactions: Record<string, any>;
   trades: [];
   waivers: [];
   waiverMoves: WaiverMove[];
