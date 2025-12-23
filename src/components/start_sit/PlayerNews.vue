@@ -262,7 +262,7 @@ watch(
         >Manager</label
       >
       <select
-        aria-label="current week"
+        aria-label="Manager name"
         id="Manager name"
         class="block p-2 text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
         v-model="currentManager"

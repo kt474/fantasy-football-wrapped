@@ -38,7 +38,7 @@ export const getPlayerNews = async (
 };
 
 export const getPlayersByIdsMap = async (
-  playerIds: string[]
+  playerIds: string[] | string[][]
 ): Promise<Map<string, Player>> => {
   if (playerIds.length === 0) {
     return new Map();

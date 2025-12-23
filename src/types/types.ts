@@ -16,7 +16,7 @@ export type LeagueInfoType = {
   users: any[];
   rosters: any[];
   weeklyPoints: [];
-  transactions: [];
+  transactions: Record<string, any>;
   trades: [];
   waivers: [];
   waiverMoves: WaiverMove[];
@@ -49,6 +49,7 @@ export type RosterType = {
   managerEfficiency: number;
   wins: number;
   losses: number;
+  ties: number;
   rosterId: number;
   recordByWeek: string;
   players?: string[];
@@ -84,7 +85,7 @@ export type TableDataType = {
   username: string;
   wins: number;
   losses: number;
-  ties?: number;
+  ties: number;
   pointsFor: number;
   pointsAgainst: number;
   winsAgainstAll: number;
@@ -104,7 +105,7 @@ export type TableDataType = {
   expectedWinsSTD: number;
   recordByWeek: string;
   players: string[];
-  starters: string[];
+  starters: string[][];
   starterPoints: number[][];
   benchPlayers: string[];
   benchPoints: number[];
