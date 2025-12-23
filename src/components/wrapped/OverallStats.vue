@@ -2,13 +2,13 @@
 import { computed } from "vue";
 
 // Hard coding data, not worth it to create another endpoint
-//4964 2025 leagues
+//4132 2025 leagues
 const leagueTypeSeries = computed(() => {
-  return [1922, 2413, 629];
+  return [2031, 2439, 638];
 });
 
 const leagueSizeSeries = computed(() => {
-  return [2594, 1630, 290, 285, 165];
+  return [2663, 1689, 296, 294, 190];
 });
 
 const leagueSizeChartOptions = computed(() => {

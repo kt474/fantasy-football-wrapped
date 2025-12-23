@@ -489,64 +489,82 @@ const teamName = computed(() => {
 
 const getTeamName = (user: TableDataType) => {
   if (user.regularSeasonRank === 1 && getPointsRank(user.pointsFor) <= 2) {
-    return "The Unquestioned Tyrant";
+    return ["The Unquestioned Tyrant", "Best record with high points scored"];
   } else if (user.regularSeasonRank === league.value.totalRosters) {
-    return "The Walking Bye Week";
+    return ["The Walking Bye Week", "Last place in the regular season"];
   } else if (user.wins - user.randomScheduleWins > 2.2) {
-    return "The Schedule Merchant";
+    return ["The Schedule Merchant", "Extremely lucky matchups"];
   } else if (user.randomScheduleWins - user.wins > 2.2) {
-    return "Weekly Victim of Career Performances";
+    return [
+      "Weekly Victim of Career Performances",
+      "Extremely unlucky matchups",
+    ];
   } else if (
     user.regularSeasonRank >= 8 &&
-    league.value.transactions[user.id] <= 15
+    league.value.transactions[user.id] <= 16
   ) {
-    return "Set It and Forget It (And Regret It)";
+    return [
+      "Set It and Forget It",
+      "Poor performing team with few waiver moves",
+    ];
   } else if (
     user.regularSeasonRank >= 8 &&
-    league.value.transactions[user.id] >= 35
+    league.value.transactions[user.id] >= 40
   ) {
-    return "The Panic Button Presser";
+    return [
+      "The Panic Button Presser",
+      "Poor performing team with many wavier moves",
+    ];
   } else if (
     user.regularSeasonRank <= 4 &&
-    league.value.transactions[user.id] <= 12
+    league.value.transactions[user.id] <= 15
   ) {
-    return "Won on Draft Day";
+    return ["Won on Draft Day", "Finished top 4 with few waiver moves"];
   } else if (
     user.regularSeasonRank > league.value.playoffTeams &&
     user.managerEfficiency < 0.875
   ) {
-    return "Should've Just Used the Projections";
+    return [
+      "Should've Just Used the Projections",
+      "Missed the playoffs with low start/sit efficiency",
+    ];
   } else if (getPointsAgainstRank(user.pointsAgainst) === 1) {
-    return "The League Punching Bag";
+    return ["The League Punching Bag", "Most points against"];
   } else if (
     user.regularSeasonRank <= 4 &&
     getPointsRank(user.pointsFor) >= 8
   ) {
-    return "The Fraud";
-  } else if (user.regularSeasonRank === league.value.playoffTeams) {
-    return "Just Happy to Be Here";
-  } else if (user.regularSeasonRank === league.value.playoffTeams + 1) {
-    return "The Heartbreaker";
+    return ["The Fraud", "Finished top 4 with bottom 4 points scored"];
   } else if (
     user.regularSeasonRank <= league.value.playoffTeams &&
     getPointsRank(user.pointsFor) > league.value.playoffTeams
   ) {
-    return "The Playoff Imposter";
+    return [
+      "The Playoff Imposter",
+      "Made the playoffs with below average points",
+    ];
   } else if (
     user.regularSeasonRank > league.value.playoffTeams &&
     getPointsRank(user.pointsFor) <= league.value.playoffTeams
   ) {
-    return "All Those Points for Nothing";
+    return [
+      "All Those Points for Nothing",
+      "Missed the playoffs with above average points",
+    ];
   } else if (user.managerEfficiency >= 0.915) {
-    return "The Lineup Savant";
+    return ["The Lineup Savant", "High start/sit efficiency"];
   } else if (user.managerEfficiency <= 0.85) {
-    return "Bench Points Champion";
+    return ["Bench Points Champion", "Low start/sit efficiency"];
+  } else if (user.regularSeasonRank === league.value.playoffTeams) {
+    return ["Just Happy to Be Here", "Made the playoffs as the last seed"];
+  } else if (user.regularSeasonRank === league.value.playoffTeams + 1) {
+    return ["The Heartbreaker", "Just missed the playoffs"];
   } else if (user.regularSeasonRank <= 3) {
-    return "The Consistent Contender";
+    return ["The Consistent Contender", "Top 3 regular season team"];
   } else if (user.regularSeasonRank <= league.value.playoffTeams) {
-    return "Textbook Mediocrity";
+    return ["Textbook Mediocrity", "Average playoff team"];
   } else if (user.regularSeasonRank > league.value.playoffTeams) {
-    return "Mid Tier Disappointment";
+    return ["Mid Tier Disappointment", "Average consolation bracket team"];
   }
   return "Perfectly Average";
 };
@@ -1783,8 +1801,15 @@ watch(
                 <p>
                   {{ user.streak.type }}{{ user.streak.length
                   }}<span class="text-lg font-medium">
-                    (Weeks {{ user.streak.start + 1 }}-{{
-                      user.streak.end + 1
+                    (Weeks
+                    {{
+                      league.medianScoring
+                        ? Math.floor((user.streak.start + 1) / 2)
+                        : user.streak.start + 1
+                    }}-{{
+                      league.medianScoring
+                        ? Math.round((user.streak.end + 1) / 2)
+                        : user.streak.end + 1
                     }})</span
                   >
                 </p>
@@ -2109,43 +2134,49 @@ watch(
           <h1 class="mb-4 text-3xl font-bold text-white sm:text-5xl">
             Team Summary
           </h1>
-
           <div v-for="team in props.tableData">
             <div v-if="team.rosterId === currentManager.rosterId">
               <div>
-                <div class="flex my-4 sm:my-6">
-                  <img
-                    v-if="team.avatarImg"
-                    class="w-10 h-10 mt-0.5 mr-4 border-2 rounded-full sm:mt-0 border-greem-400 sm:w-12 sm:h-12"
-                    :src="team.avatarImg"
-                  />
-                  <svg
-                    v-else
-                    class="w-10 mr-4 text-gray-200 border-2 border-green-400 rounded-full sm:w-12"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                <div
+                  class="flex flex-wrap justify-between my-4 sm:my-6 sm:flex-nowrap"
+                >
+                  <div class="flex mx-auto sm:mx-0">
+                    <img
+                      v-if="team.avatarImg"
+                      class="w-10 h-10 mt-0.5 mr-4 border-2 rounded-full sm:mt-0 border-greem-400 sm:w-12 sm:h-12"
+                      :src="team.avatarImg"
                     />
-                  </svg>
-                  <select
-                    aria-label="Manager name"
-                    id="Manager name"
-                    class="block p-2 text-base font-bold text-gray-200 bg-green-900 border border-gray-300 rounded-lg max-w-60 sm:text-lg focus:ring-green-500 focus:border-green-500"
-                    v-model="currentManager"
-                  >
-                    <option
-                      v-for="manager in managers"
-                      :key="manager.rosterId"
-                      :value="manager"
+                    <svg
+                      v-else
+                      class="w-10 mr-4 text-gray-200 border-2 border-green-400 rounded-full sm:w-12"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
                     >
-                      {{ manager.name }}
-                    </option>
-                  </select>
-                  <p class="ml-4 text-xl font-semibold">{{ teamName }}</p>
+                      <path
+                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                      />
+                    </svg>
+                    <select
+                      aria-label="Manager name"
+                      id="Manager name"
+                      class="block p-2 text-base font-bold text-gray-200 bg-green-900 border border-gray-300 rounded-lg w-60 sm:text-lg focus:ring-green-500 focus:border-green-500"
+                      v-model="currentManager"
+                    >
+                      <option
+                        v-for="manager in managers"
+                        :key="manager.rosterId"
+                        :value="manager"
+                      >
+                        {{ manager.name }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="mx-auto mt-3 sm:mt-0 sm:pl-6">
+                    <p class="text-2xl font-semibold">{{ teamName[0] }}</p>
+                    <p class="text-sm">{{ teamName[1] }}</p>
+                  </div>
                 </div>
                 <div class="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
                   <div
@@ -2223,7 +2254,7 @@ watch(
           <div class="text-gray-200">
             <!-- Hardcoding data from 12/17/25 -->
             <p class="mb-6 text-base sm:mb-8 sm:text-lg">
-              Here's some data on the 5000+ leagues that used ffwrapped in 2025.
+              Here's some data on the 5100+ leagues that used ffwrapped in 2025.
             </p>
             <OverallStats />
             <p class="my-4 text-base sm:text-lg">See you next season!</p>
