@@ -635,6 +635,7 @@ export const getLeague = async (leagueId: string): Promise<LeagueOriginal> => {
         playoffType: 0,
         draftId: "",
         waiverType: 0,
+        sport: "",
       };
     }
     const league = await response.json();
@@ -658,6 +659,7 @@ export const getLeague = async (leagueId: string): Promise<LeagueOriginal> => {
       playoffType: league["settings"]["playoff_type"],
       draftId: league["draft_id"],
       waiverType: league["settings"]["waiver_type"],
+      sport: league["sport"],
     };
   } catch (error) {
     throw error;

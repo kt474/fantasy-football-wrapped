@@ -214,6 +214,7 @@ export interface LeagueOriginal {
   playoffType: number;
   draftId: string;
   waiverType: number;
+  sport: string;
 }
 
 export interface Bracket {

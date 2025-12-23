@@ -39,6 +39,7 @@ export type LeagueInfoType = {
   playerRankings?: Record<string, any[]>;
   rosterRankings?: Record<string, any[]>;
   waiverType: number;
+  sport: string;
 };
 
 export type RosterType = {

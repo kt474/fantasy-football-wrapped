@@ -26,13 +26,13 @@ const preseasonRank = computed(() => {
   if (currentLeague?.rosters) {
     const results = currentLeague.rosters.map((roster: RosterType) => {
       const projections = roster.projections ?? [];
-      const hasAllPositions = ["QB", "WR", "TE", "RB"].every((pos) =>
-        projections.some((p) => p.position === pos && p.projection > 0)
-      );
+      // const hasAllPositions = ["QB", "WR", "TE", "RB"].every((pos) =>
+      //   projections.some((p) => p.position === pos && p.projection > 0)
+      // );
 
-      if (!hasAllPositions) {
-        return null; // Not ready yet
-      }
+      // if (!hasAllPositions) {
+      //   return null; // Not ready yet
+      // }
       const sumTop2: Top2Sums = positions.reduce<Top2Sums>(
         (acc, pos) => {
           const filtered = projections.filter((item) => item.position === pos);

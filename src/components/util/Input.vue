@@ -78,6 +78,9 @@ const onSubmit = async () => {
       } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
         errorMsg.value = "League already added";
         showErrorMsg.value = true;
+      } else if (checkInput["sport"] !== "nfl") {
+        errorMsg.value = "Only NFL leagues are supported";
+        showErrorMsg.value = true;
       } else {
         showErrorMsg.value = false;
         store.updateLoadingLeague(checkInput["name"]);
