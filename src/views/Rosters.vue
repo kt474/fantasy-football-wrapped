@@ -2,7 +2,8 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "../store/store";
-import { getCurrentLeagueState, getStatsBatch } from "../api/api";
+import { getCurrentLeagueState, getLeague, getRosters, getStatsBatch, getUsers } from "../api/api";
+import { getDefaultLeagueId } from "../api/statsPage";
 
 type RosterPlayerRow = {
   playerId: string;
@@ -24,22 +25,41 @@ const loading = ref(false);
 const errorMessage = ref("");
 const selectedRosterId = ref<number | null>(null);
 const rosterPlayers = ref<RosterPlayerRow[]>([]);
+const fallbackLeague = ref<{
+  rosters: any[];
+  users: any[];
+  scoringType: number;
+  season?: string;
+} | null>(null);
 
 const currentLeague = computed(() =>
   store.currentLeagueId ? store.leagueInfo[store.currentLeagueIndex] : null
 );
 
+const effectiveLeagueId = computed(() => {
+  return (
+    (route.query.leagueId as string) ||
+    store.currentLeagueId ||
+    localStorage.currentLeagueId ||
+    getDefaultLeagueId()
+  );
+});
+
 const scoringType = computed(() => {
-  if (currentLeague.value) {
+  if (currentLeague.value?.scoringType !== undefined) {
     return currentLeague.value.scoringType ?? 1;
+  }
+  if (fallbackLeague.value?.scoringType !== undefined) {
+    return fallbackLeague.value.scoringType ?? 1;
   }
   return 1;
 });
 
 const rosterOptions = computed(() => {
-  if (!currentLeague.value) return [];
-  return currentLeague.value.rosters.map((roster: any) => {
-    const manager = currentLeague.value?.users.find(
+  const league = currentLeague.value ?? fallbackLeague.value;
+  if (!league) return [];
+  return league.rosters.map((roster: any) => {
+    const manager = league?.users.find(
       (u: any) => u.id === roster.id
     );
     const name =
@@ -56,15 +76,20 @@ const rosterOptions = computed(() => {
 });
 
 const selectedRoster = computed(() => {
-  if (!currentLeague.value || selectedRosterId.value === null) return null;
-  return currentLeague.value.rosters.find(
+  const league = currentLeague.value ?? fallbackLeague.value;
+  if (!league || selectedRosterId.value === null) return null;
+  return league.rosters.find(
     (r: any) => r.rosterId === selectedRosterId.value
   );
 });
 
 const fetchSeasonYear = async () => {
-  if (currentLeague.value) {
+  if (currentLeague.value?.season) {
     seasonYear.value = currentLeague.value.season;
+    return;
+  }
+  if (fallbackLeague.value?.season) {
+    seasonYear.value = fallbackLeague.value.season;
     return;
   }
   const state = await getCurrentLeagueState();
@@ -115,13 +140,42 @@ const goToPlayer = (playerId: string) => {
   router.push({ path: "/players", query: { playerId } });
 };
 
+const loadFallbackLeague = async () => {
+  if (currentLeague.value || fallbackLeague.value) return;
+  const leagueId = effectiveLeagueId.value;
+  if (!leagueId) return;
+  try {
+    const [league, rosters, users] = await Promise.all([
+      getLeague(leagueId),
+      getRosters(leagueId),
+      getUsers(leagueId),
+    ]);
+    fallbackLeague.value = {
+      rosters,
+      users,
+      scoringType: (league as any)?.scoringType ?? 1,
+      season: (league as any)?.season,
+    };
+    if ((league as any)?.season) {
+      seasonYear.value = (league as any).season;
+    }
+  } catch (err) {
+    console.warn("Unable to load fallback league data", err);
+  }
+};
+
+const syncSelectedRosterFromRoute = () => {
+  if (!rosterOptions.value.length) return;
+  const routeRoster = Number(route.query.rosterId);
+  const match = rosterOptions.value.find((r) => r.value === routeRoster);
+  selectedRosterId.value = match ? match.value : rosterOptions.value[0].value;
+};
+
 onMounted(async () => {
+  await loadFallbackLeague();
   await fetchSeasonYear();
   if (rosterOptions.value.length > 0) {
-    const routeRoster = Number(route.query.rosterId);
-    const match = rosterOptions.value.find((r) => r.value === routeRoster);
-    selectedRosterId.value = match ? match.value : rosterOptions.value[0].value;
-    loadRosterPlayers();
+    syncSelectedRosterFromRoute();
   }
 });
 
@@ -132,11 +186,10 @@ watch(selectedRosterId, () => {
 watch(
   () => store.currentLeagueId,
   async () => {
+    await loadFallbackLeague();
     await fetchSeasonYear();
     if (rosterOptions.value.length > 0) {
-      const routeRoster = Number(route.query.rosterId);
-      const match = rosterOptions.value.find((r) => r.value === routeRoster);
-      selectedRosterId.value = match ? match.value : rosterOptions.value[0].value;
+      syncSelectedRosterFromRoute();
     }
   }
 );
@@ -144,10 +197,34 @@ watch(
 watch(
   () => route.query.rosterId,
   () => {
-    const routeRoster = Number(route.query.rosterId);
-    const match = rosterOptions.value.find((r) => r.value === routeRoster);
-    if (match) {
-      selectedRosterId.value = match.value;
+    syncSelectedRosterFromRoute();
+  }
+);
+
+watch(
+  () => rosterOptions.value.length,
+  (len) => {
+    if (len && selectedRosterId.value === null) {
+      syncSelectedRosterFromRoute();
+    }
+  }
+);
+
+watch(
+  () => route.query.leagueId,
+  async () => {
+    const previousRosterId = selectedRosterId.value;
+    fallbackLeague.value = null;
+    await loadFallbackLeague();
+    await fetchSeasonYear();
+    if (rosterOptions.value.length > 0) {
+      syncSelectedRosterFromRoute();
+      if (
+        selectedRosterId.value === previousRosterId &&
+        selectedRosterId.value !== null
+      ) {
+        loadRosterPlayers();
+      }
     }
   }
 );

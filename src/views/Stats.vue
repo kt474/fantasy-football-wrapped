@@ -1042,7 +1042,7 @@ watch(
                 <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                   <RouterLink
                     class="text-indigo-600 hover:underline dark:text-indigo-300"
-                    :to="{ path: '/rosters', query: { rosterId: row.rosterId } }"
+                    :to="{ path: '/rosters', query: { rosterId: row.rosterId, leagueId } }"
                     @click.stop
                   >
                     {{ row.ownerName }}
@@ -1265,7 +1265,7 @@ watch(
                 <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                   <RouterLink
                     class="text-indigo-600 hover:underline dark:text-indigo-300"
-                    :to="{ path: '/rosters', query: { rosterId: row.rosterId } }"
+                    :to="{ path: '/rosters', query: { rosterId: row.rosterId, leagueId } }"
                     @click.stop
                   >
                     {{ row.ownerName }}
@@ -1456,7 +1456,7 @@ watch(
                 <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                   <RouterLink
                     class="text-indigo-600 hover:underline dark:text-indigo-300"
-                    :to="{ path: '/rosters', query: { rosterId: row.rosterId } }"
+                    :to="{ path: '/rosters', query: { rosterId: row.rosterId, leagueId } }"
                     @click.stop
                   >
                     {{ row.ownerName }}
@@ -1748,7 +1748,13 @@ watch(
                 <td class="px-4 py-3">
                   <RouterLink
                     class="text-indigo-600 hover:underline dark:text-indigo-300"
-                    :to="{ path: '/rosters', query: { rosterId: row.ownerId ? rosters.find((r) => r.ownerId === row.ownerId)?.rosterId : undefined } }"
+                    :to="{
+                      path: '/rosters',
+                      query: {
+                        rosterId: row.ownerId ? rosters.find((r) => r.ownerId === row.ownerId)?.rosterId : undefined,
+                        leagueId,
+                      },
+                    }"
                     @click.stop
                   >
                     {{ row.ownerName }}
