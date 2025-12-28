@@ -115,12 +115,14 @@ const getValueColor = (value: number) => {
                   class="object-cover w-12 mr-2 -mt-1 -ml-2 rounded-full"
                   :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
                   alt="player_img"
+                  loading="lazy"
                 />
                 <img
                   v-else
                   class="w-8 mx-2 rounded-full h-7"
                   :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
                   alt="Team avatar"
+                  loading="lazy"
                 />
                 <p class="w-auto truncate sm:w-28">
                   {{
@@ -171,12 +173,14 @@ const getValueColor = (value: number) => {
                     class="object-cover w-12 mr-2 -mt-1 -ml-2 rounded-full"
                     :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
                     alt="player_img"
+                    loading="lazy"
                   />
                   <img
                     v-else
                     class="w-8 mx-2 rounded-full h-7"
                     :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
                     alt="Team avatar"
+                    loading="lazy"
                   />
                   <p class="w-auto truncate sm:w-28">
                     {{

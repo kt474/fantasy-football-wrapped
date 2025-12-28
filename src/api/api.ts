@@ -4,7 +4,8 @@ import {
   calculateDraftRank,
   getWaiverMoves,
 } from "./helper";
-import { round, mean } from "lodash";
+import round from "lodash-es/round";
+import mean from "lodash-es/mean";
 import { seasonType, Player, LeagueCountResponse } from "../types/apiTypes";
 import {
   getDraftPicksRaw,

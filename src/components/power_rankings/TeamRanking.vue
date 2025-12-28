@@ -275,12 +275,14 @@ watch(
               alt="Player image"
               class="object-cover w-16 h-16 mx-2 sm:h-auto"
               :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
+              loading="lazy"
             />
             <img
               v-else
               alt="Defense image"
               class="w-16 h-16 object-cover my-auto ml-2"
               :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
+              loading="lazy"
             />
             <div class="w-full mt-0.5 ml-3">
               <div class="flex justify-between px-2 mt-1 mb-4">
