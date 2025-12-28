@@ -13,18 +13,6 @@ const changeTab = (tab: string) => {
 };
 </script>
 <template>
-<style scoped>
-/* Hide scrollbar for Chrome, Safari and Opera */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-</style>
   <ul
     class="flex overflow-x-auto text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-200 sticky top-0 z-30 bg-gray-50/95 backdrop-blur dark:bg-gray-950/95 scroll-smooth scrollbar-hide"
   >
@@ -165,3 +153,16 @@ const changeTab = (tab: string) => {
     </li>
   </ul>
 </template>
+
+<style scoped>
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+</style>
