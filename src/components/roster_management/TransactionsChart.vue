@@ -119,7 +119,8 @@ const getNameFromId = (rosterId: string) => {
       const userObj = currentLeague.users.find(
         (user) => user.id == rosterObj.id
       );
-      return store.showUsernames ? userObj.username : userObj.name;
+      if (!userObj) return "Ghost Roster";
+      return store.showUsernames ? userObj?.username : userObj?.name;
     }
   } else return rosterId;
 };

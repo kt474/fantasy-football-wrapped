@@ -72,8 +72,8 @@ const currentManagerMoves = computed(() => {
     .flat()
     .filter(
       (move) =>
-        move.user.username === currentManager.value ||
-        move.user.name === currentManager.value
+        move.user?.username === currentManager.value ||
+        move.user?.name === currentManager.value
     );
 });
 
@@ -464,7 +464,7 @@ watch(
               <div class="flex text-sm text-gray-600 dark:text-gray-400">
                 <p class="truncate max-w-36">
                   {{
-                    store.showUsernames ? move.user.username : move.user.name
+                    store.showUsernames ? move.user?.username : move.user?.name
                   }}
                 </p>
                 <p class="ml-1">&#183; Week {{ move.week }}</p>
