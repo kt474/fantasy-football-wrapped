@@ -6,6 +6,15 @@ const systemDarkMode = window.matchMedia(
   "(prefers-color-scheme: dark)"
 ).matches;
 const clicked = ref(systemDarkMode);
+const mobileMenuOpen = ref(false);
+
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+const closeMobileMenu = () => {
+  mobileMenuOpen.value = false;
+};
 
 onMounted(() => {
   if (systemDarkMode && !localStorage.darkMode) {
@@ -61,6 +70,37 @@ watch(
         />
       </RouterLink>
 
+      <!-- Mobile hamburger button -->
+      <div class="flex items-center gap-2 md:hidden">
+        <button
+          @click="toggleMobileMenu"
+          aria-label="Toggle mobile menu"
+          type="button"
+          class="inline-flex items-center p-2 text-sm text-gray-700 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+        >
+          <svg
+            class="w-6 h-6"
+            aria-hidden="true"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              v-if="!mobileMenuOpen"
+              fill-rule="evenodd"
+              d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+              clip-rule="evenodd"
+            ></path>
+            <path
+              v-else
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+        </button>
+      </div>
+
       <div class="flex flex-col w-full gap-3 md:w-auto md:ml-auto" id="navbar-default">
         <div class="flex justify-end w-full">
           <button
@@ -108,33 +148,43 @@ watch(
           </div>
         </div>
 
-        <div class="flex flex-wrap justify-end w-full p-0 mt-0 gap-2 font-medium rounded-lg">
+        <div
+          :class="[
+            'flex flex-col md:flex-row md:flex-wrap justify-end w-full p-0 mt-0 gap-2 font-medium rounded-lg transition-all duration-300',
+            mobileMenuOpen ? 'flex' : 'hidden md:flex'
+          ]"
+        >
           <RouterLink
             to="/"
+            @click="closeMobileMenu"
             class="px-3 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
           >
             Home
           </RouterLink>
           <RouterLink
             to="/rosters"
+            @click="closeMobileMenu"
             class="px-3 py-2 text-sm font-semibold text-emerald-700 bg-white border border-emerald-100 rounded-lg shadow-sm hover:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-200 dark:border-gray-700"
           >
             Rosters
           </RouterLink>
           <RouterLink
             to="/players"
+            @click="closeMobileMenu"
             class="px-3 py-2 text-sm font-semibold text-blue-700 bg-white border border-blue-100 rounded-lg shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-blue-300 dark:border-gray-700"
           >
             Player Stats
           </RouterLink>
           <RouterLink
             to="/stats"
+            @click="closeMobileMenu"
             class="px-3 py-2 text-sm font-semibold text-indigo-700 bg-white border border-indigo-100 rounded-lg shadow-sm hover:bg-indigo-50 dark:bg-gray-800 dark:text-indigo-200 dark:border-gray-700"
           >
             League Stats
           </RouterLink>
           <RouterLink
             to="/admin/awards"
+            @click="closeMobileMenu"
             class="noshow px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
           >
             Admin

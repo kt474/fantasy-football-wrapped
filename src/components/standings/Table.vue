@@ -53,9 +53,16 @@ const tabAvailable = (tab: string) => {
 };
 
 onMounted(() => {
-  const savedTab = localStorage.currentTab;
+  let savedTab = localStorage.currentTab;
+
+  // Migrate old tab names to new names
+  if (savedTab === 'managerEfficiency') {
+    savedTab = 'transactions';
+  }
+
   if (savedTab && tabAvailable(savedTab)) {
     store.currentTab = savedTab;
+    localStorage.currentTab = savedTab;
   } else {
     store.currentTab = tabAvailable(store.currentTab)
       ? store.currentTab
@@ -618,11 +625,6 @@ const getHeadToHeadRecord = (team: any) => {
         </div>
       </div>
     </div>
-    <WeeklyHighScores
-      v-if="store.currentTab === 'standings'"
-      :tableData="tableData"
-      class="mt-4"
-    />
     <StandingsChart
       v-if="store.currentTab === 'standings'"
       :tableData="tableData"
@@ -661,7 +663,7 @@ const getHeadToHeadRecord = (team: any) => {
       </div>
       <ScheduleAnalysis :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'managerEfficiency'">
+    <div v-if="store.currentTab === 'transactions'">
       <div class="flex flex-wrap md:flex-nowrap">
         <ManagementCard :tableData="tableData" class="mt-4" />
         <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
@@ -696,6 +698,7 @@ const getHeadToHeadRecord = (team: any) => {
         :league="store.currentLeagueId ? store.leagueInfo[store.currentLeagueIndex] : undefined"
         :tableData="tableData"
       />
+      <WeeklyHighScores :tableData="tableData" class="mt-4" />
     </div>
   </div>
 </template>

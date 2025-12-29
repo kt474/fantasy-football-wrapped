@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { findIndex } from "lodash";
+import findIndex from "lodash-es/findIndex";
 import { LeagueInfoType, RosterType } from "../types/types";
 
 export const useStore = defineStore("main", {
