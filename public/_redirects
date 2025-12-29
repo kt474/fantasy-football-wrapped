@@ -1,2 +1,4 @@
 # SPA fallback rewrite for Cloudflare Pages
+# Let Cloudflare handle its internal endpoints (Access auth, etc.)
+/cdn-cgi/*  /cdn-cgi/:splat  200!
 /*   /index.html   200
