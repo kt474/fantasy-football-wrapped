@@ -6,6 +6,7 @@ export interface WeeklyBonus {
   winnerOwnerId: string | null;
   winnerNameOverride?: string | null;
   score: number | null;
+  playerName?: string | null;
 }
 
 export type Env = {
@@ -23,6 +24,7 @@ export const defaultWeeklyBonuses: WeeklyBonus[] = [
     winnerOwnerId: null,
     winnerNameOverride: null,
     score: null,
+    playerName: null,
   },
   {
     week: 16,
@@ -32,6 +34,7 @@ export const defaultWeeklyBonuses: WeeklyBonus[] = [
     winnerOwnerId: null,
     winnerNameOverride: null,
     score: null,
+    playerName: null,
   },
   {
     week: 17,
@@ -41,6 +44,7 @@ export const defaultWeeklyBonuses: WeeklyBonus[] = [
     winnerOwnerId: null,
     winnerNameOverride: null,
     score: null,
+    playerName: null,
   },
 ];
 

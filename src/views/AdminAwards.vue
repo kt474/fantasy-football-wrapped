@@ -181,6 +181,7 @@ const normalizeBonus = (bonus: WeeklyBonus) => {
     winnerNameOverride: bonus.winnerNameOverride?.trim() || null,
     score: Number.isNaN(parsedScore) ? null : parsedScore,
     amount: bonus.amount ?? 15,
+    playerName: bonus.playerName?.trim() || null,
   };
 };
 
@@ -652,7 +653,7 @@ onMounted(() => {
               </div>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-4 md:grid-cols-3">
               <div class="space-y-2">
                 <label class="text-xs font-semibold text-gray-600 uppercase dark:text-gray-300">
                   Score (optional)
@@ -666,6 +667,21 @@ onMounted(() => {
                 />
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                   For Week 15 use team score; Weeks 16–17 use player score.
+                </p>
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-gray-600 uppercase dark:text-gray-300">
+                  Player (optional)
+                </label>
+                <input
+                  v-model="playoffForm[bonus.week].playerName"
+                  type="text"
+                  maxlength="80"
+                  class="w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:text-gray-50 dark:border-gray-700"
+                  placeholder="e.g., Josh Allen"
+                />
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  For player-based bonuses only.
                 </p>
               </div>
               <div class="flex flex-col justify-end gap-2 md:items-end">

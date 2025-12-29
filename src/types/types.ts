@@ -136,6 +136,7 @@ export type WeeklyBonus = {
   winnerOwnerId?: string | null;
   winnerNameOverride?: string | null;
   score?: number | null;
+  playerName?: string | null;
 };
 
 export type PowerRankingEntry = {

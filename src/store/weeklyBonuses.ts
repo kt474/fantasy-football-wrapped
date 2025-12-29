@@ -13,6 +13,7 @@ const defaultWeeklyBonuses: WeeklyBonus[] = [
     winnerOwnerId: null,
     winnerNameOverride: null,
     score: null,
+    playerName: null,
   },
   {
     week: 16,
@@ -22,6 +23,7 @@ const defaultWeeklyBonuses: WeeklyBonus[] = [
     winnerOwnerId: null,
     winnerNameOverride: null,
     score: null,
+    playerName: null,
   },
   {
     week: 17,
@@ -31,6 +33,7 @@ const defaultWeeklyBonuses: WeeklyBonus[] = [
     winnerOwnerId: null,
     winnerNameOverride: null,
     score: null,
+    playerName: null,
   },
 ];
 

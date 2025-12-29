@@ -203,6 +203,7 @@ const playoffWeeklyBonuses = computed(() => {
           : Number(bonus.score),
       label: bonus.label,
       note: bonus.note,
+      playerName: bonus.playerName || null,
     };
   });
   return resolved.sort((a, b) => a.week - b.week);
@@ -632,7 +633,12 @@ const managerTotals = computed(() => {
                     </div>
                   </td>
                   <td class="px-4 py-2 text-sm text-right text-gray-800 dark:text-gray-50">
-                    {{ bonus.score !== null ? bonus.score.toFixed(2) : "-" }}
+                    <div class="flex flex-col">
+                      <span>{{ bonus.score !== null ? bonus.score.toFixed(2) : "-" }}</span>
+                      <span v-if="bonus.playerName" class="text-[11px] text-gray-500 dark:text-gray-400">
+                        {{ bonus.playerName }}
+                      </span>
+                    </div>
                   </td>
                   <td class="px-4 py-2 text-sm text-right text-gray-800 dark:text-gray-50">
                     {{ formatCurrency(bonus.amount) }}
