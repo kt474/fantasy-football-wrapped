@@ -75,7 +75,7 @@ export default defineConfig({
             },
           },
         ],
-        navigateFallbackDenylist: [/^\/admin\//, /^\/api\//],
+        navigateFallbackDenylist: [/^\/admin\//, /^\/api\//, /^\/cdn-cgi\//],
       },
     }),
   ],
