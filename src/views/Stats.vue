@@ -994,8 +994,9 @@ watch(
         </p>
       </div>
 
-      <div class="mt-4 overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
-        <table class="w-full text-sm text-left text-gray-700 dark:text-gray-100">
+      <div class="mt-4 bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
+        <div class="table-scroll-container">
+          <table class="w-full text-sm text-left text-gray-700 dark:text-gray-100">
           <thead class="text-xs uppercase bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-300">
             <tr>
               <th class="px-4 py-3">Team</th>
@@ -1110,6 +1111,7 @@ watch(
             </template>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
 
@@ -1231,8 +1233,9 @@ watch(
         </p>
       </div>
 
-      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
-        <table class="w-full text-sm text-left text-gray-700 dark:text-gray-100">
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
+        <div class="table-scroll-container">
+          <table class="w-full text-sm text-left text-gray-700 dark:text-gray-100">
           <thead class="text-xs uppercase bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-300">
             <tr>
               <th
@@ -1349,6 +1352,7 @@ watch(
             </template>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
     <!-- Undrafted Ranks -->
@@ -1422,8 +1426,9 @@ watch(
         </p>
       </div>
 
-      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
-        <table class="w-full text-sm text-left text-gray-700 dark:text-gray-100">
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
+        <div class="table-scroll-container">
+          <table class="w-full text-sm text-left text-gray-700 dark:text-gray-100">
           <thead class="text-xs uppercase bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-300">
             <tr>
               <th
@@ -1544,6 +1549,7 @@ watch(
             </template>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
     <!-- Player Ranks -->
@@ -1684,8 +1690,9 @@ watch(
         </p>
       </div>
 
-      <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow dark:bg-gray-900 dark:border-gray-800">
-        <table class="w-full text-sm text-left text-gray-800 dark:text-gray-100">
+      <div class="bg-white border border-gray-200 rounded-xl shadow dark:bg-gray-900 dark:border-gray-800">
+        <div class="table-scroll-container">
+          <table class="w-full text-sm text-left text-gray-800 dark:text-gray-100">
           <thead class="text-xs uppercase bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-300">
             <tr>
               <th
@@ -1799,7 +1806,37 @@ watch(
             </template>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.table-scroll-container {
+  overflow-x: auto;
+  position: relative;
+  /* Fade shadow on edges to indicate scrollable content */
+  background:
+    linear-gradient(to right, white 30%, transparent),
+    linear-gradient(to right, transparent, white 70%) 100% 0,
+    linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent),
+    linear-gradient(to left, rgba(0, 0, 0, 0.1), transparent) 100% 0;
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+/* Dark mode support */
+:deep(.dark) .table-scroll-container,
+.dark .table-scroll-container {
+  background:
+    linear-gradient(to right, rgb(17 24 39) 30%, transparent),
+    linear-gradient(to right, transparent, rgb(17 24 39) 70%) 100% 0,
+    linear-gradient(to right, rgba(255, 255, 255, 0.08), transparent),
+    linear-gradient(to left, rgba(255, 255, 255, 0.08), transparent) 100% 0;
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+</style>

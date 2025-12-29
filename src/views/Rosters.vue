@@ -301,7 +301,7 @@ watch(
       <div v-else-if="rosterPlayers.length === 0" class="p-6 text-sm text-gray-500">
         No players found on this roster.
       </div>
-      <div v-else class="overflow-x-auto">
+      <div v-else class="table-scroll-container">
         <table
           class="w-full text-sm text-left text-gray-600 rtl:text-right dark:text-gray-200"
         >
@@ -355,3 +355,32 @@ watch(
     </div>
   </div>
 </template>
+
+<style scoped>
+.table-scroll-container {
+  overflow-x: auto;
+  position: relative;
+  /* Fade shadow on edges to indicate scrollable content */
+  background:
+    linear-gradient(to right, white 30%, transparent),
+    linear-gradient(to right, transparent, white 70%) 100% 0,
+    linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent),
+    linear-gradient(to left, rgba(0, 0, 0, 0.1), transparent) 100% 0;
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+/* Dark mode support */
+:deep(.dark) .table-scroll-container,
+.dark .table-scroll-container {
+  background:
+    linear-gradient(to right, rgb(17 24 39) 30%, transparent),
+    linear-gradient(to right, transparent, rgb(17 24 39) 70%) 100% 0,
+    linear-gradient(to right, rgba(255, 255, 255, 0.08), transparent),
+    linear-gradient(to left, rgba(255, 255, 255, 0.08), transparent) 100% 0;
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+</style>
