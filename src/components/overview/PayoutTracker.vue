@@ -153,6 +153,21 @@ const resolveNameByRosterId = (rosterId?: number) => {
   return rosterId ? `Roster #${rosterId}` : "Pending";
 };
 
+const pickChampionshipMatch = (matchups: any[]) => {
+  if (!Array.isArray(matchups) || matchups.length === 0) return undefined;
+  const byPlacement = matchups.find((matchup) => matchup.p === 1);
+  if (byPlacement) return byPlacement;
+  const withResults = matchups.filter(
+    (matchup) => matchup && matchup.w && matchup.l
+  );
+  if (!withResults.length) return undefined;
+  return withResults.reduce((best, current) => {
+    const bestRound = Number(best.r) || 0;
+    const currentRound = Number(current.r) || 0;
+    return currentRound > bestRound ? current : best;
+  });
+};
+
 const regularWeeklyBonusWinners = computed(() => {
   // cap at 14 regular-season weeks; playoff bonuses handled separately
   const regularSeasonWeeks = 14;
@@ -239,12 +254,23 @@ const resolveCustomWinner = (award: any) => {
 };
 
 const coreSeasonalAwards = computed(() => {
-  const championshipMatch = props.league?.winnersBracket?.find(
-    (matchup: any) => matchup.p === 1
+  const championshipMatch = pickChampionshipMatch(
+    props.league?.winnersBracket || []
   );
-  const championName = championshipMatch
+  const leagueWinnerRosterId = props.league?.leagueWinner
+    ? Number(props.league.leagueWinner)
+    : undefined;
+  const fallbackWinnerRosterId = Number.isFinite(leagueWinnerRosterId)
+    ? leagueWinnerRosterId
+    : props.league?.legacyWinner;
+  const championFromBracket = championshipMatch
     ? resolveNameByRosterId(championshipMatch.w)
     : "Pending";
+  const championFromLeague = fallbackWinnerRosterId
+    ? resolveNameByRosterId(fallbackWinnerRosterId)
+    : "Pending";
+  const championName =
+    championFromBracket !== "Pending" ? championFromBracket : championFromLeague;
   const runnerUpName = championshipMatch
     ? resolveNameByRosterId(championshipMatch.l)
     : "Pending";

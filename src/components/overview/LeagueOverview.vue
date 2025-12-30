@@ -188,10 +188,11 @@ const derivedWeekFromTable = computed(() => {
 
 const currentWeekNumber = computed(() => {
   const fromCurrent = safeWeekValue(league.value?.currentWeek);
-  if (fromCurrent) return fromCurrent;
   const fromLastScored = safeWeekValue(league.value?.lastScoredWeek);
-  if (fromLastScored) return fromLastScored;
-  return derivedWeekFromTable.value;
+  if (league.value?.status && league.value.status !== "in_season") {
+    return fromLastScored || fromCurrent || derivedWeekFromTable.value;
+  }
+  return fromCurrent || fromLastScored || derivedWeekFromTable.value;
 });
 
 const currentWeekText = computed(() =>
