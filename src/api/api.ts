@@ -986,14 +986,22 @@ export const getData = async (leagueId: string) => {
   let numberOfWeeks: any;
   let currentWeek: number | undefined;
   let legacyWinner: number | undefined;
+  const reportedLastScored = Number(newLeagueInfo.lastScoredWeek) || 0;
+  let scoredWeeks = reportedLastScored;
 
   if (newLeagueInfo.status === "in_season" || newLeagueInfo.status === "post_season") {
     const leagueState = await getCurrentLeagueState();
     currentWeek = leagueState.week;
     numberOfWeeks = currentWeek;
     newLeagueInfo.currentWeek = currentWeek;
+    if (!scoredWeeks && currentWeek && currentWeek > 1) {
+      scoredWeeks = currentWeek - 1;
+    }
   } else {
     numberOfWeeks = newLeagueInfo.regularSeasonLength;
+    if (!scoredWeeks) {
+      scoredWeeks = numberOfWeeks;
+    }
     winnersBracket.forEach((matchup) => {
       if (matchup.p === 1) {
         legacyWinner = matchup.w;
@@ -1004,8 +1012,9 @@ export const getData = async (leagueId: string) => {
   // Parallel requests for weekly data
   const trades: any = [];
   const waivers: any = [];
+  const weeksForPoints = scoredWeeks || numberOfWeeks || 0;
   const [weeklyPoints, users, transactionPromises] = await Promise.all([
-    getWeeklyPoints(leagueId, currentWeek ?? newLeagueInfo.lastScoredWeek),
+    getWeeklyPoints(leagueId, weeksForPoints),
     getUsers(leagueId),
     Promise.all(
       Array.from({ length: numberOfWeeks + 1 }, async (_, i) => {
