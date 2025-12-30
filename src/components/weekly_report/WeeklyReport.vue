@@ -128,7 +128,7 @@ const fetchPlayerNames = async () => {
 const getReport = async () => {
   if (store.leagueIds.length > 0) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-    let leagueMetadata;
+    let leagueMetadata: any;
     if (isPlayoffs.value) {
       const roundNames: { [key: number]: string } = {
         1: "Quarterfinal round",
@@ -140,6 +140,9 @@ const getReport = async () => {
         playoffRound:
           roundNames[currentWeek.value - currentLeague.regularSeasonLength],
       };
+      if (currentWeek.value - currentLeague.regularSeasonLength > 2) {
+        leagueMetadata["ChampionshipMatchup"] = 1;
+      }
     } else {
       leagueMetadata = {
         numberOfPlayoffTeams: currentLeague.playoffTeams,
