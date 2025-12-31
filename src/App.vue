@@ -30,9 +30,15 @@ watch(
       localStorage.removeItem("leagueInfo");
     } else {
       localStorage.currentLeagueId = store.currentLeagueId;
-      // update league id in url
-      // sometimes errors to undefined, TODO
+      if (
+        store.currentTab === "wrapped" &&
+        store.leagueInfo[store.currentLeagueIndex]?.season !== "2025"
+      ) {
+        store.currentTab = "standings";
+      }
       if (store.currentLeagueId !== "undefined") {
+        // update league id in url
+        // sometimes errors to undefined, TODO
         router.replace({ query: { leagueId: store.currentLeagueId } });
       } else {
         localStorage.removeItem("currentLeagueId");

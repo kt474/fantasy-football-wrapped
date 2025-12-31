@@ -2325,7 +2325,11 @@ watch(
               <h3
                 class="text-2xl font-black text-center text-white truncate sm:text-3xl text-shadow-lg max-w-64 sm:max-w-96"
               >
-                {{ leagueWinner.name }}
+                {{
+                  store.showUsernames
+                    ? leagueWinner.username
+                    : leagueWinner.name
+                }}
               </h3>
             </div>
           </div>
