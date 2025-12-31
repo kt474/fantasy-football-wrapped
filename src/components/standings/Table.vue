@@ -252,16 +252,21 @@ const getGamesPlayed = (tableDataItem: any) => {
     (tableDataItem.wins || 0) +
     (tableDataItem.losses || 0) +
     (tableDataItem.ties || 0);
-  const leagueLastScored =
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek || 0;
+  const leagueInfo = store.leagueInfo[store.currentLeagueIndex];
+  const leagueLastScored = leagueInfo?.lastScoredWeek || 0;
+  const regularSeasonWeeks = leagueInfo?.regularSeasonLength || 0;
+  const capRegularSeason = (value: number) => {
+    if (!regularSeasonWeeks) return value;
+    return Math.min(value, regularSeasonWeeks);
+  };
 
   if (leagueLastScored > 0) {
-    return leagueLastScored;
+    return capRegularSeason(leagueLastScored);
   }
   if (pointsPlayed > 0) {
-    return pointsPlayed;
+    return capRegularSeason(pointsPlayed);
   }
-  return recordGames;
+  return capRegularSeason(recordGames);
 };
 
 const getPointsPerGame = (tableDataItem: any) => {
@@ -276,10 +281,12 @@ const getHeadToHeadRecord = (team: any) => {
   let ties = 0;
   if (!team.matchups || !team.points) return "0-0";
   const opponents = originalData.value;
-  const lastScored =
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek || 0;
+  const leagueInfo = store.leagueInfo[store.currentLeagueIndex];
+  const lastScored = leagueInfo?.lastScoredWeek || 0;
+  const regularSeasonWeeks = leagueInfo?.regularSeasonLength || 0;
   team.matchups.forEach((matchupId: number, idx: number) => {
     // Only count completed weeks
+    if (regularSeasonWeeks && idx + 1 > regularSeasonWeeks) return;
     if (lastScored && idx + 1 > lastScored) return;
     if (!matchupId || team.points[idx] === undefined || team.points[idx] === null)
       return;
