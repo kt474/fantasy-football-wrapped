@@ -129,7 +129,7 @@ const fetchPlayerNames = async () => {
           ? currentLeague.currentWeek
           : currentLeague.lastScoredWeek;
         const starterIds = [
-          ...user.starters[week - 1],
+          ...(user.starters[week - 1] ?? []),
           ...difference(user.players, user.starters[week - 1]),
         ];
         // For each starter, fetch player and projection

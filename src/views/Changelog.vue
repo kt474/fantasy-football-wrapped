@@ -21,6 +21,17 @@ onMounted(() => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "12/30/25",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added a new 'wrapped' tab for the spotify wrapped style end of season recap.",
+        ],
+      },
+    ],
+  },
+  {
     date: "12/10/25",
     content: [
       {
