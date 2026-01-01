@@ -90,6 +90,7 @@ export interface DraftMetadata {
   team_abbr: string;
   team_changed_at: string;
   years_exp: string;
+  amount?: number;
 }
 
 export interface Roster {

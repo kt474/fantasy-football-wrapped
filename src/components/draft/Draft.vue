@@ -148,7 +148,8 @@ const getData = async () => {
     currentLeague.draftId,
     currentLeague.season,
     currentLeague.scoringType,
-    currentLeague.seasonType
+    currentLeague.seasonType,
+    currentLeague.draftMetadata?.draftType
   );
   if (draftType.value === "snake") {
     const roundGroups = draftPicks.reduce((acc: any, pick: any) => {

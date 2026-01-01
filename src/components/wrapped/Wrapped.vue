@@ -168,20 +168,36 @@ const bestPicks = computed(() => {
 });
 
 const worstPicks = computed(() => {
-  return league.value.draftPicks
-    ?.filter((obj) => obj.position !== "TE" && obj.position !== "K")
-    .sort((a, b) => a.pickRank - b.pickRank)
-    .slice(0, 5);
+  if (league.value.draftMetadata?.draftType !== "auction") {
+    return league.value.draftPicks
+      ?.filter((obj) => obj.position !== "TE" && obj.position !== "K")
+      .sort((a, b) => a.pickRank - b.pickRank)
+      .slice(0, 5);
+  } else {
+    return league.value.draftPicks
+      ?.filter((obj) => obj.position !== "TE" && obj.position !== "K")
+      .filter((obj) => obj.amount > 12)
+      .sort((a, b) => a.pickRank - b.pickRank)
+      .slice(0, 5);
+  }
 });
 
 const draftSteal = computed(() => {
   if (league.value.draftPicks && league.value.draftPicks.length <= 48)
     return [];
-  return league.value.draftPicks
-    ?.filter((obj) => obj.pickNumber > 36)
-    .filter((obj) => obj.position !== "TE")
-    .sort((a, b) => b.pickRank - a.pickRank)
-    .slice(0, 3);
+  if (league.value.draftMetadata?.draftType !== "auction") {
+    return league.value.draftPicks
+      ?.filter((obj) => obj.pickNumber > 36)
+      .filter((obj) => obj.position !== "TE")
+      .sort((a, b) => b.pickRank - a.pickRank)
+      .slice(0, 3);
+  } else {
+    return league.value.draftPicks
+      ?.filter((obj) => obj.amount < 20)
+      .filter((obj) => obj.position !== "TE")
+      .sort((a, b) => b.pickRank - a.pickRank)
+      .slice(0, 3);
+  }
 });
 
 const highestBids = computed(() => {
@@ -879,10 +895,16 @@ watch(
 
             <div class="flex-1 min-w-0">
               <p class="font-bold">{{ pick.firstName }} {{ pick.lastName }}</p>
-              <p class="text-xs text-indigo-200 sm:text-sm">
+              <p
+                v-if="league.draftMetadata?.draftType !== 'auction'"
+                class="text-xs text-indigo-200 sm:text-sm"
+              >
                 Round {{ pick.round }} • Pick {{ pick.draftSlot }} ({{
                   pick.pickNumber
                 }})
+              </p>
+              <p v-else class="text-xs text-indigo-200 sm:text-sm">
+                Winning bid ${{ pick.amount }}
               </p>
             </div>
             <div class="flex flex-col items-end max-w-20 sm:max-w-36">
@@ -942,10 +964,16 @@ watch(
               <p class="font-bold text-red-400">
                 {{ pick.firstName }} {{ pick.lastName }}
               </p>
-              <p class="text-xs text-red-200 sm:text-sm">
+              <p
+                v-if="league.draftMetadata?.draftType !== 'auction'"
+                class="text-xs text-red-200 sm:text-sm"
+              >
                 Round {{ pick.round }} • Pick {{ pick.draftSlot }} ({{
                   pick.pickNumber
                 }})
+              </p>
+              <p v-else class="text-xs text-red-200 sm:text-sm">
+                Winning bid ${{ pick.amount }}
               </p>
             </div>
             <div class="flex flex-col items-end max-w-20 sm:max-w-36">
@@ -1032,9 +1060,15 @@ watch(
               <p class="text-lg font-bold text-teal-100 sm:text-xl">
                 {{ pick.firstName }} {{ pick.lastName }}
               </p>
-              <p class="text-sm text-teal-300 sm:text-base">
+              <p
+                v-if="league.draftMetadata?.draftType !== 'auction'"
+                class="text-sm text-teal-300 sm:text-base"
+              >
                 Round {{ pick.round }} • Pick
                 {{ pick.pickNumber }}
+              </p>
+              <p v-else class="text-sm text-teal-300 sm:text-base">
+                Winning bid ${{ pick.amount }}
               </p>
             </div>
           </div>

@@ -567,7 +567,8 @@ export const getDraftPicks = async (
   draftId: string,
   season: string,
   scoringType: number,
-  seasonType: string
+  seasonType: string,
+  draftType?: string
 ) => {
   const response = await fetch(
     `https://api.sleeper.app/v1/draft/${draftId}/picks`
@@ -585,6 +586,7 @@ export const getDraftPicks = async (
         keeper: pick["is_keeper"],
         firstName: pick["metadata"]["first_name"],
         lastName: pick["metadata"]["last_name"],
+        amount: pick["metadata"]["amount"] ?? 0,
         playerId: pick["player_id"],
         position: pick["metadata"]["position"],
         pickNumber: pick["pick_no"],
@@ -596,11 +598,13 @@ export const getDraftPicks = async (
         rank: playerStats ? playerStats["rank"] : 0,
         pickRank: playerStats
           ? calculateDraftRank(
-              pick["pick_no"],
+              draftType !== "auction"
+                ? pick["pick_no"]
+                : pick["metadata"]["amount"] ?? 0,
               seasonType === "Dynasty" && draftPicks.length < 100
                 ? playerStats["rank"] / 6
                 : playerStats["rank"],
-              pick["round"],
+              draftType !== "auction" ? pick["round"] : 1,
               pick["metadata"]["position"],
               playerStats["ppg"]
             )
