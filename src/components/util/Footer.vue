@@ -6,7 +6,7 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const store = useStore();
-const leagueCount = ref(9079); // initial load current unique league count value 12/29/25
+const leagueCount = ref(11615); // initial load current unique league count value 1/7/26
 
 onMounted(async () => {
   const leagueId = route.query.leagueId;
@@ -106,7 +106,7 @@ onMounted(async () => {
     ></div>
     <div class="container w-11/12 max-w-screen-xl pb-8 mx-auto">
       <p class="container mx-auto mt-1 text-gray-700 dark:text-gray-300">
-        &copy; 2024-2025. Kevin Tian
+        &copy; 2024-2026. Kevin Tian
       </p>
     </div>
   </div>

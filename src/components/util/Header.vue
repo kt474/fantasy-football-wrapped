@@ -199,18 +199,6 @@ watch(
                         style="height: 55px !important; width: 217px !important"
                         class="mx-auto mt-4"
                     /></a>
-                    <!-- <a
-                      href="https://venmo.com/u/ffwrapped"
-                      target="_blank"
-                      class=""
-                    >
-                      <img
-                        src="/Venmo_Logo_Blue.png"
-                        alt="Venmo"
-                        style="height: 45px !important; width: 210px !important"
-                        class="mt-7"
-                      />
-                    </a> -->
                   </div>
                 </div>
                 <div
