@@ -47,11 +47,11 @@ test("Retrieving league data", async () => {
   let weeklyPoints = data.weeklyPoints;
   expect(weeklyPoints.length).toBe(12);
   expect(weeklyPoints[0].rosterId).toBe(1);
-  expect(weeklyPoints[0].points.length).toBe(14);
-  expect(data.playoffPoints[0].points.length).toBe(3);
+  expect(weeklyPoints[0].points.length).toBe(17);
   expect(data.users.length).toBe(12);
   expect(data.users[1]).toEqual({
     id: "666116213100867584",
+    username: "kevkevkt",
     name: "kevkevkt",
     avatar: "a77d198f5c82bd93d3da5bd10493f7cd",
     avatarImg:
