@@ -40,7 +40,7 @@ const addLeagues = async () => {
         const addedLeague = store.leaguesList.find(
           (value) => value.league_id == league
         );
-        store.updateLoadingLeague(addedLeague.name);
+        store.updateLoadingLeague(addedLeague?.name);
 
         const newLeagueInfo = await getData(league);
         store.updateLeagueInfo(newLeagueInfo);

@@ -20,7 +20,7 @@ export const useStore = defineStore("main", {
     leagueSubmitted: false,
     currentTab: "standings",
     showLeaguesList: false,
-    leaguesList: [] as LeagueInfoType[],
+    leaguesList: [] as Record<string, any>[],
     username: "",
     loadingLeague: "",
     loadingUserLeagues: false,
