@@ -57,6 +57,16 @@ export type RosterType = {
   projections?: { projection: number; position: string }[];
 };
 
+export type PointsType = {
+  rosterId: number;
+  points: number[];
+  matchups?: number | undefined[];
+  starters: string[][];
+  starterPoints: number[][];
+  benchPlayers: string[][];
+  benchPoints: number[][];
+};
+
 export interface WaiverMove {
   id: number | string;
   user: {

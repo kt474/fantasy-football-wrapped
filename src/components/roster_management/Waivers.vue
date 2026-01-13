@@ -191,7 +191,8 @@ onMounted(async () => {
   } else if (store.leagueInfo.length == 0) {
     rawData.value = fakeWaiverMoves;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
-    rawData.value = store.leagueInfo[store.currentLeagueIndex].waiverMoves;
+    rawData.value =
+      store.leagueInfo[store.currentLeagueIndex].waiverMoves ?? [];
   }
 });
 
@@ -202,7 +203,8 @@ watch(
       rawData.value = [];
       await getData();
     }
-    rawData.value = store.leagueInfo[store.currentLeagueIndex].waiverMoves;
+    rawData.value =
+      store.leagueInfo[store.currentLeagueIndex].waiverMoves ?? [];
     currentManager.value = managers.value[0];
   }
 );

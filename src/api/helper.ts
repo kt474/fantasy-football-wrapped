@@ -11,7 +11,7 @@ import {
   sum,
 } from "lodash";
 import { getMatchup } from "./api";
-import { RosterType, UserType } from "../types/types";
+import { RosterType, UserType, PointsType } from "../types/types";
 import { WeeklyWaiver } from "../types/apiTypes";
 
 const getTierMultiplier = (position: string, rank: number) => {
@@ -107,7 +107,7 @@ export const calculateDraftRank = (
 export const createTableData = (
   users: UserType[],
   rosters: RosterType[],
-  points: Record<string, any>[],
+  points: PointsType[],
   medianScoring: boolean
 ) => {
   if (users && points) {
@@ -279,8 +279,8 @@ export const winsOnWeek = (recordString: string, week: number) => {
   return count;
 };
 
-export const getTotalTransactions = (transactions: any) => {
-  return transactions.reduce((countMap: any, obj: any) => {
+export const getTotalTransactions = (transactions: WeeklyWaiver[]) => {
+  return transactions.reduce((countMap: Record<string, number>, obj) => {
     const id = obj.creator;
     const shouldCount = obj.status === "complete" && obj.adds !== null;
 
