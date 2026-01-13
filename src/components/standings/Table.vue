@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { maxBy, minBy } from "lodash";
 import { fakeRosters, fakeUsers, createTableData } from "../../api/helper";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, ComputedRef } from "vue";
 import { useStore } from "../../store/store";
-import { TableDataType, UserType, RosterType } from "../../types/types";
+import {
+  TableDataType,
+  UserType,
+  RosterType,
+  PointsType,
+} from "../../types/types";
 import PowerRankingData from "../power_rankings/PowerRankingData.vue";
 import ExpectedWinsCard from "../expected_wins/ExpectedWinsCard.vue";
 import ExpectedWinsChart from "../expected_wins/ExpectedWinsChart.vue";
@@ -36,7 +41,7 @@ const hover = ref("");
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
-  points: Array<object>;
+  points: PointsType[];
 }>();
 const store = useStore();
 
@@ -65,7 +70,7 @@ const originalData = computed(() => {
       medianScoring.value
     );
     if (store.currentLeagueId) {
-      let savedData: any = {};
+      let savedData: Record<string, TableDataType[]> = {};
       if (localStorage.originalData) {
         savedData = JSON.parse(localStorage.originalData);
       }
@@ -87,42 +92,43 @@ const sortedPropsTableData = computed<TableDataType[]>(() => {
 });
 
 // sorted version of originalData
-const tableData: any = computed(() => {
+const tableData: ComputedRef<TableDataType[]> = computed(() => {
   const data = [...originalData.value];
   if (tableOrder.value === "wins") {
-    return data.sort((a: any, b: any) => {
+    return data.sort((a, b) => {
       if (a.wins !== b.wins) {
         return b.wins - a.wins;
       }
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "points") {
-    return data.sort((a: any, b: any) => {
+    return data.sort((a, b) => {
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "pointsAgainst") {
-    return data.sort((a: any, b: any) => {
+    return data.sort((a, b) => {
       return b.pointsAgainst - a.pointsAgainst;
     });
   } else if (tableOrder.value === "rating") {
-    return data.sort((a: any, b: any) => {
+    return data.sort((a, b) => {
       return b.rating - a.rating;
     });
   } else if (tableOrder.value === "recordAgainstAll") {
-    return data.sort((a: any, b: any) => {
+    return data.sort((a, b) => {
       if (a.winsAgainstAll !== b.winsAgainstAll) {
         return b.winsAgainstAll - a.winsAgainstAll;
       }
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "medianRecord") {
-    return originalData.value.sort((a: any, b: any) => {
+    return originalData.value.sort((a, b) => {
       if (a.winsWithMedian !== b.winsWithMedian) {
         return b.winsWithMedian - a.winsWithMedian;
       }
       return b.pointsFor - a.pointsFor;
     });
   }
+  return data;
 });
 
 const mostWins = computed(() => {
@@ -186,7 +192,7 @@ const medianScoring = computed(() => {
   return false;
 });
 
-const getTeamName = (tableDataItem: any) => {
+const getTeamName = (tableDataItem: TableDataType) => {
   if (store.showUsernames) {
     return tableDataItem.username ? tableDataItem.username : `Ghost Roster`;
   }
