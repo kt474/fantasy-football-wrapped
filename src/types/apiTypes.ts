@@ -1,3 +1,5 @@
+import { RosterType } from "./types";
+
 export const seasonType: { [key: number]: string } = {
   0: "Redraft",
   1: "Keeper",
@@ -234,6 +236,14 @@ export interface BracketTeam {
   w?: number;
   l?: number;
 }
+
+export type NewLeagueInfoType = LeagueOriginal & {
+  rosters: RosterType[];
+  winnersBracket: Bracket[];
+  losersBracket: Bracket[];
+  previousLeagues: LeagueOriginal[];
+  currentWeek: number;
+};
 
 export interface WeeklyWaiver {
   status: WaiverStatus;

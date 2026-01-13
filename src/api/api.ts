@@ -21,6 +21,7 @@ import {
   LeagueOriginal,
   Bracket,
   WeeklyWaiver,
+  NewLeagueInfoType,
 } from "../types/apiTypes";
 import { LeagueInfoType, RosterType, UserType } from "../types/types";
 
@@ -773,12 +774,13 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     getLosersBracket(leagueId),
   ]);
 
-  const newLeagueInfo: any = {
+  const newLeagueInfo: NewLeagueInfoType = {
     ...leagueInfo,
     rosters,
     winnersBracket,
     losersBracket,
     previousLeagues: [],
+    currentWeek: 0,
   };
 
   // Determine the number of weeks to process

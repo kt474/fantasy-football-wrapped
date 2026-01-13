@@ -15,11 +15,11 @@ export type LeagueInfoType = {
   losersBracket: Record<string, any>[];
   users: any[];
   rosters: any[];
-  weeklyPoints: [];
+  weeklyPoints: any[];
   transactions: Record<string, any>;
-  trades: [];
-  waivers: [];
-  waiverMoves: WaiverMove[];
+  trades: any[];
+  waivers: any[];
+  waiverMoves?: WaiverMove[];
   tradeNames?: any[];
   previousLeagues: any[];
   status: string;
