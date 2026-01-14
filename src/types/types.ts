@@ -60,7 +60,7 @@ export type RosterType = {
 export type PointsType = {
   rosterId: number;
   points: number[];
-  matchups?: number | undefined[];
+  matchups?: number[];
   starters: string[][];
   starterPoints: number[][];
   benchPlayers: string[][];
