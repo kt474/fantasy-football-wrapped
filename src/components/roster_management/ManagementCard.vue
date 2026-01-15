@@ -13,15 +13,15 @@ const props = defineProps<{
 const tableData = computed(() => {
   const tableDataCopy = cloneDeep(props.tableData);
   if (tableOrder.value === "points") {
-    return tableDataCopy.sort((a: any, b: any) => {
+    return tableDataCopy.sort((a, b) => {
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "potentialPoints") {
-    return tableDataCopy.sort((a: any, b: any) => {
+    return tableDataCopy.sort((a, b) => {
       return b.potentialPoints - a.potentialPoints;
     });
   } else if (tableOrder.value === "efficiency") {
-    return tableDataCopy.sort((a: any, b: any) => {
+    return tableDataCopy.sort((a, b) => {
       return b.managerEfficiency - a.managerEfficiency;
     });
   }
@@ -100,7 +100,7 @@ const listPadding = computed(() => {
             </div>
             <div
               :class="hover === 'points' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm w-52 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 w-52 tooltip dark:bg-gray-600"
             >
               Total regular season points
             </div>
@@ -133,7 +133,7 @@ const listPadding = computed(() => {
             </div>
             <div
               :class="hover === 'potentialPoints' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
             >
               Maximum points possible if the best lineup was set each week
             </div>
@@ -166,7 +166,7 @@ const listPadding = computed(() => {
             </div>
             <div
               :class="hover === 'efficiency' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block w-40 px-3 py-2 mt-2 -ml-12 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
             >
               Points / Potential Points
             </div>

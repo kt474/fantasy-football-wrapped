@@ -13,15 +13,15 @@ const props = defineProps<{
 const tableData = computed(() => {
   const tableDataCopy = cloneDeep(props.tableData);
   if (tableOrder.value === "randomScheduleWins") {
-    return tableDataCopy.sort((a: any, b: any) => {
+    return tableDataCopy.sort((a, b) => {
       return b.randomScheduleWins - a.randomScheduleWins;
     });
   } else if (tableOrder.value === "winsDifference") {
-    return tableDataCopy.sort((a: any, b: any) => {
+    return tableDataCopy.sort((a, b) => {
       return b.wins - b.randomScheduleWins - (a.wins - a.randomScheduleWins);
     });
   } else if (tableOrder.value === "probability") {
-    return tableDataCopy.sort((a: any, b: any) => {
+    return tableDataCopy.sort((a, b) => {
       return (
         getProbability(b.wins, b.randomScheduleWins, b.expectedWinsSTD) -
         getProbability(a.wins, a.randomScheduleWins, a.expectedWinsSTD)
@@ -61,7 +61,7 @@ const listPadding = computed(() => {
   return "py-2.5";
 });
 
-const getTeamName = (tableDataItem: any) => {
+const getTeamName = (tableDataItem: TableDataType) => {
   if (store.showUsernames) {
     return tableDataItem.username ? tableDataItem.username : `Ghost Roster`;
   }
@@ -114,7 +114,7 @@ const getTeamName = (tableDataItem: any) => {
             </div>
             <div
               :class="hover === 'randomScheduleWins' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm w-60 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 w-60 tooltip dark:bg-gray-600"
             >
               Average number of wins after simulating 10,000 randomized weekly
               matchups
@@ -148,7 +148,7 @@ const getTeamName = (tableDataItem: any) => {
             </div>
             <div
               :class="hover === 'winsDifference' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-12 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-12 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 w-44 tooltip dark:bg-gray-600"
             >
               Difference between expected wins and actual wins
             </div>
@@ -181,7 +181,7 @@ const getTeamName = (tableDataItem: any) => {
             </div>
             <div
               :class="hover === 'probability' ? 'visible' : 'invisible'"
-              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium text-gray-50 normal-case bg-gray-900 rounded-lg shadow-sm w-44 tooltip dark:bg-gray-600"
+              class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 w-44 tooltip dark:bg-gray-600"
             >
               If wins above expected is positive, this is the probability of
               having equal to or greater than the number of actual wins. If

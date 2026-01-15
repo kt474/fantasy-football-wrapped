@@ -9,8 +9,8 @@ const props = defineProps<{
 }>();
 
 const seriesData = computed(() => {
-  const result: any[] = [];
-  props.tableData.forEach((user: any) => {
+  const result: Record<string, any>[] = [];
+  props.tableData.forEach((user) => {
     result.push({
       x: store.showUsernames
         ? user.username

@@ -7,7 +7,7 @@ import { RosterType } from "../../types/types";
 const store = useStore();
 
 const transactionData = computed(() => {
-  const currentLeague: any = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague) {
     let trades: any[] = [];
     currentLeague.trades.forEach((trade: any) => {

@@ -463,15 +463,15 @@ watch(
                         store.leagueInfo[store.currentLeagueIndex]?.currentWeek
                           ? store.leagueInfo[store.currentLeagueIndex]
                               .currentWeek -
-                            index -
+                            Number(index) -
                             1
                           : store.leagueInfo[store.currentLeagueIndex]
                               ?.lastScoredWeek
                           ? store.leagueInfo[store.currentLeagueIndex]
                               ?.lastScoredWeek -
-                            index -
+                            Number(index) -
                             1
-                          : 17 - index
+                          : 17 - Number(index)
                       }}
                     </p>
                     <p class="my-1">{{ score }}</p>

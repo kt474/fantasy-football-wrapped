@@ -94,10 +94,10 @@ const getData = async () => {
         !store.leagueInfo[store.currentLeagueIndex]?.rosters[0]?.projections
       ) {
         await Promise.all(
-          currentLeague.rosters.map(async (roster: any) => {
+          currentLeague.rosters.map(async (roster) => {
             const singleRoster: any[] = [];
             if (!roster.players) return [];
-            const projectionPromises = roster.players.map((player: any) => {
+            const projectionPromises = roster.players.map((player: string) => {
               return getProjections(
                 player,
                 store.leagueInfo[store.currentLeagueIndex].season,
@@ -122,14 +122,14 @@ const getData = async () => {
       }
 
       const nameMapping: any = new Map(
-        store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
+        store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
           user.id,
           user.name,
         ])
       );
 
       const userNameMapping: any = new Map(
-        store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
+        store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
           user.id,
           user.username,
         ])

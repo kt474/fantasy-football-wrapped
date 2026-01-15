@@ -19,7 +19,7 @@ const seriesData = computed(() => {
     tableDataCopy.value.reduce((sum, team) => sum + team.pointsFor, 0) /
     tableDataCopy.value.length /
     tableDataCopy.value[0]?.recordByWeek?.length;
-  const result = tableDataCopy.value.map((user: any) => {
+  const result = tableDataCopy.value.map((user: TableDataType) => {
     return parseFloat(
       (user.pointsAgainst / user.recordByWeek?.length - averagePoints).toFixed(
         2

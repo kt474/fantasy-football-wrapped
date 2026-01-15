@@ -17,7 +17,7 @@ const tableDataCopy = computed(() => {
 });
 
 const seriesData = computed(() => {
-  const result = tableDataCopy.value.map((user: any) => {
+  const result = tableDataCopy.value.map((user) => {
     return parseFloat((user.wins - user.randomScheduleWins).toFixed(2));
   });
   return [{ name: "Win Difference", data: result }];
@@ -36,14 +36,14 @@ const categories = computed(() => {
 });
 
 const maxWinDifference = computed(() => {
-  const winDifference = props.tableData.map((user: any) => {
+  const winDifference = props.tableData.map((user) => {
     return Math.ceil(user.wins - user.randomScheduleWins);
   });
   return max(winDifference);
 });
 
 const minWinDifference = computed(() => {
-  const winDifference = props.tableData.map((user: any) => {
+  const winDifference = props.tableData.map((user) => {
     return Math.floor(user.wins - user.randomScheduleWins);
   });
   return min(winDifference);

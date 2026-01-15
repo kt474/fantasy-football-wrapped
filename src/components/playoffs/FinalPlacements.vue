@@ -2,7 +2,7 @@
 import { useStore } from "../../store/store";
 const store = useStore();
 const props = defineProps<{
-  rosters: any[];
+  rosters: Record<string, string | number>[];
 }>();
 </script>
 <template>
