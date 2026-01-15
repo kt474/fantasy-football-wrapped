@@ -300,8 +300,8 @@ export const getTotalTransactions = (transactions: WeeklyWaiver[]) => {
 export const getWaiverMoves = (
   transactions: WeeklyWaiver[]
 ): { trades: WeeklyWaiver[]; waivers: WeeklyWaiver[] } => {
-  const trades: any[] = [];
-  const waivers: any[] = [];
+  const trades: WeeklyWaiver[] = [];
+  const waivers: WeeklyWaiver[] = [];
   transactions.forEach((transaction) => {
     if (transaction.status === "complete" && transaction.type === "trade") {
       trades.push(transaction);
