@@ -111,28 +111,34 @@ export const createTableData = (
   medianScoring: boolean
 ) => {
   if (users && points) {
-    const combined = users.map((a: UserType) => {
-      const matched = rosters.find((b: RosterType) => b.id === a.id);
-      if (matched) {
-        return {
-          ...a,
-          ...matched,
-        };
+    const combined: ((UserType & RosterType) | null)[] = users.map(
+      (a: UserType) => {
+        const matched = rosters.find((b: RosterType) => b.id === a.id);
+
+        if (matched) {
+          return {
+            ...a,
+            ...matched,
+          };
+        }
+
+        return null;
       }
-      return null;
-    });
-    const ghostRosters: any = rosters.filter((roster) => roster.id === null);
+    );
+    const ghostRosters = rosters.filter(
+      (roster): roster is RosterType & { id: null } => roster.id === null
+    );
     if (ghostRosters.length > 0) {
       combined.push(...ghostRosters);
     }
-    const filtered = combined.filter((a: any) => a !== null);
+    const filtered: RosterType[] = combined.filter((a) => a !== null);
     const combinedPoints = filtered.map((a: any) => ({
       ...a,
       ...points.find((b: any) => b.rosterId === a.rosterId),
     }));
 
-    const pointsArr: any[] = [];
-    combinedPoints.forEach((value: any) => {
+    const pointsArr: number[][] = [];
+    combinedPoints.forEach((value) => {
       let weekLength = value.recordByWeek ? value.recordByWeek.length : 0;
       if (medianScoring) weekLength = weekLength / 2;
       const pointsList = value.points ? value.points : [];
@@ -140,15 +146,15 @@ export const createTableData = (
       value["winsAgainstAll"] = 0;
       value["lossesAgainstAll"] = 0;
     });
-    const zipped: any = zip(...pointsArr);
+    const zipped = zip(...pointsArr).map((row) =>
+      row.filter((v): v is number => v !== undefined)
+    );
     const medians: number[] = [];
     for (let i: number = 0; i < zipped.length; i++) {
       medians.push(Number(getMedian(zipped[i])?.toFixed(2)));
       for (let j: number = 0; j < zipped[i].length; j++) {
-        const numberOfWins = zipped[i].filter(
-          (a: any) => a < zipped[i][j]
-        ).length;
-        const currentTeam = combinedPoints.find((obj: any) => {
+        const numberOfWins = zipped[i].filter((a) => a < zipped[i][j]).length;
+        const currentTeam = combinedPoints.find((obj) => {
           return obj.points[i] === zipped[i][j];
         });
         if (currentTeam.pointsFor !== 0) {
@@ -159,7 +165,7 @@ export const createTableData = (
       }
     }
     if (combinedPoints) {
-      combinedPoints.forEach((value: any) => {
+      combinedPoints.forEach((value) => {
         let randomScheduleWins = 0;
         const numOfSimulations = 10000;
         const numberWeeks = medianScoring
@@ -219,7 +225,7 @@ export const createTableData = (
         }
       });
 
-      combinedPoints.sort((a: any, b: any) => {
+      combinedPoints.sort((a, b) => {
         if (a.wins !== b.wins) {
           return b.wins - a.wins;
         }
