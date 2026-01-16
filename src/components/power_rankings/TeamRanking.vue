@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { groupBy } from "lodash";
-import { TableDataType, LeagueInfoType } from "../../types/types";
+import { TableDataType, LeagueInfoType, WeeklyEntry } from "../../types/types";
 import { getStats } from "../../api/api";
 import { useStore } from "../../store/store";
 import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
@@ -14,7 +14,7 @@ const props = defineProps<{
 }>();
 
 const data = ref<Record<string, any[]>>({});
-const allData = ref<Record<string, any[]>>({});
+const allData = ref<Record<string, WeeklyEntry[]>>({});
 const loading = ref(false);
 const tab = ref("QB");
 
@@ -51,8 +51,8 @@ const getData = async () => {
 
   const filtered = allPlayersWithRoster.filter((item) => item !== null);
 
-  function groupByRosterId(arr: any[]) {
-    return arr.reduce((acc, item) => {
+  function groupByRosterId(arr: WeeklyEntry[]) {
+    return arr.reduce<Record<number, WeeklyEntry[]>>((acc, item) => {
       if (!acc[item.rosterId]) acc[item.rosterId] = [];
       acc[item.rosterId].push(item);
       return acc;

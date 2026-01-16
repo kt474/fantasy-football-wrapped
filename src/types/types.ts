@@ -36,8 +36,8 @@ export type LeagueInfoType = {
   draftPicks?: any[];
   draftMetadata?: Record<string, any>;
   draftGrades?: any[];
-  playerRankings?: Record<string, any[]>;
-  rosterRankings?: Record<string, any[]>;
+  playerRankings?: PlayerRankingsType;
+  rosterRankings?: Record<string, PlayerType[]>;
   waiverType: number;
   sport: string;
 };
@@ -128,3 +128,32 @@ export type PowerRankingEntry = {
   ratings: number[];
   data?: number[];
 };
+
+export interface PlayerRankingsType {
+  WR: PlayerType[];
+  RB: PlayerType[];
+  K: PlayerType[];
+  TE: PlayerType[];
+  QB: PlayerType[];
+  DEF: PlayerType[];
+}
+
+export interface PlayerType {
+  rank: number;
+  overallRank: number;
+  firstName: string;
+  lastName: string;
+  position: string;
+  team: string;
+  id: string;
+  rosterId: number;
+  points?: number;
+  ppg?: number;
+  gp?: number;
+}
+
+export interface RosterOnly {
+  rosterId: number;
+}
+
+export type WeeklyEntry = PlayerType | RosterOnly;
