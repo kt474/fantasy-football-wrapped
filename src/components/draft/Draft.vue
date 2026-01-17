@@ -11,8 +11,8 @@ const store = useStore();
 const data: any = ref([]);
 const loading = ref(false);
 const draftOrder: any = ref([]);
-const draftType = ref("snake");
-const roundReversal = ref(0);
+const draftType = ref<string>("snake");
+const roundReversal = ref<number>(0);
 const sortOrder = ref("Draft Order");
 const scoringType = ref(""); // idp
 
@@ -105,9 +105,10 @@ onMounted(async () => {
     roundReversal.value =
       store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
         "roundReversal"
-      ];
+      ] ?? 0;
     draftType.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"] ??
+      "snake";
   } else if (store.leagueInfo.length == 0) {
     data.value = fakeDraftData;
     draftOrder.value = data.value.slice(0, draftSize.value).map((pick: any) => {
@@ -136,9 +137,10 @@ watch(
     roundReversal.value =
       store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
         "roundReversal"
-      ];
+      ] ?? 0;
     draftType.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"] ??
+      "snake";
   }
 );
 

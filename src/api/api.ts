@@ -22,6 +22,7 @@ import {
   Bracket,
   WeeklyWaiver,
   NewLeagueInfoType,
+  DraftPick,
 } from "../types/apiTypes";
 import { LeagueInfoType, RosterType, UserType } from "../types/types";
 
@@ -570,7 +571,7 @@ export const getDraftPicks = async (
   scoringType: number,
   seasonType: string,
   draftType?: string
-) => {
+): Promise<DraftPick[]> => {
   const response = await fetch(
     `https://api.sleeper.app/v1/draft/${draftId}/picks`
   );
@@ -601,7 +602,7 @@ export const getDraftPicks = async (
           ? calculateDraftRank(
               draftType !== "auction"
                 ? pick["pick_no"]
-                : pick["metadata"]["amount"] ?? 0,
+                : (pick["metadata"]["amount"] ?? 0),
               seasonType === "Dynasty" && draftPicks.length < 100
                 ? playerStats["rank"] / 6
                 : playerStats["rank"],
@@ -609,7 +610,7 @@ export const getDraftPicks = async (
               pick["metadata"]["position"],
               playerStats["ppg"]
             )
-          : 0,
+          : "0.0",
       };
     })
   );
@@ -766,7 +767,7 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     LeagueOriginal,
     RosterType[],
     Bracket[],
-    Bracket[]
+    Bracket[],
   ] = await Promise.all([
     getLeague(leagueId),
     getRosters(leagueId),
@@ -836,12 +837,15 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
   ]);
 
   // Combine all transactions
-  const transactions = transactionPromises.reduce((acc, obj) => {
-    Object.entries(obj).forEach(([id, value]) => {
-      acc[id] = (acc[id] || 0) + (value as number);
-    });
-    return acc;
-  }, {} as Record<string, number>);
+  const transactions = transactionPromises.reduce(
+    (acc, obj) => {
+      Object.entries(obj).forEach(([id, value]) => {
+        acc[id] = (acc[id] || 0) + (value as number);
+      });
+      return acc;
+    },
+    {} as Record<string, number>
+  );
   return {
     ...newLeagueInfo,
     weeklyPoints,

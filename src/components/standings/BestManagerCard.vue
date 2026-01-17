@@ -11,7 +11,7 @@ const props = defineProps<{
 
 const bestManager = computed<RosterType | null>(() => {
   const rosterEfficiency = props.rosters.reduce(
-    (highestValue: any, roster: RosterType) => {
+    (highestValue, roster: RosterType) => {
       return roster.managerEfficiency > highestValue.managerEfficiency
         ? roster
         : highestValue;

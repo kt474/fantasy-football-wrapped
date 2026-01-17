@@ -1,3 +1,5 @@
+import { DraftPick, DraftGrades } from "./apiTypes";
+
 export type LeagueInfoType = {
   name: string;
   regularSeasonLength: number;
@@ -33,9 +35,9 @@ export type LeagueInfoType = {
   currentTrends?: string[];
   playoffType: number;
   draftId: string;
-  draftPicks?: any[];
-  draftMetadata?: Record<string, any>;
-  draftGrades?: any[];
+  draftPicks?: DraftPick[];
+  draftMetadata?: LeagueDraftMetadata;
+  draftGrades?: DraftGrades[];
   playerRankings?: PlayerRankingsType;
   rosterRankings?: Record<string, PlayerType[]>;
   waiverType: number;
@@ -157,3 +159,18 @@ export interface RosterOnly {
 }
 
 export type WeeklyEntry = PlayerType | RosterOnly;
+
+export interface LeagueDraftMetadata {
+  order: Order[];
+  roundReversal: number;
+  draftType: string;
+}
+
+export interface Order {
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  avatarImg: string;
+  placement: number;
+}

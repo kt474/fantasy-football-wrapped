@@ -69,7 +69,7 @@ export interface Draft {
   draft_id: string;
   draft_slot: number;
   is_keeper: null;
-  metadata: DraftMetadata;
+  metadata: ApiDraftMetadata;
   pick_no: number;
   picked_by: string;
   player_id: string;
@@ -78,7 +78,7 @@ export interface Draft {
   round: number;
 }
 
-export interface DraftMetadata {
+export interface ApiDraftMetadata {
   first_name: string;
   injury_status: string;
   last_name: string;
@@ -284,4 +284,35 @@ export interface WaiverBudget {
   amount: number;
   receiver: number;
   sender: number;
+}
+
+export interface DraftPick {
+  keeper: any;
+  firstName: string;
+  lastName: string;
+  amount: number;
+  playerId: string;
+  position: string;
+  pickNumber: number;
+  draftSlot: number;
+  team: string;
+  round: number;
+  rosterId: number;
+  userId: string;
+  rank: number;
+  pickRank: string;
+}
+
+export interface DraftGrades {
+  totalScore: number;
+  picks: PickObj[];
+  zScore: number;
+  grade: string;
+}
+
+export interface PickObj {
+  draftPick: DraftPick;
+  adp: number;
+  projectedPoints: number;
+  draftValue: number;
 }
