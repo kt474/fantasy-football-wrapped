@@ -372,7 +372,7 @@ const tableData = computed(() => {
               scope="row"
               class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-gray-50"
             >
-              {{ store.showUsernames ? item.username : item.name }}
+              {{ item.name }}
             </th>
             <td v-for="i in playoffTeams" class="px-2 py-3">
               {{

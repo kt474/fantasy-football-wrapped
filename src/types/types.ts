@@ -29,7 +29,7 @@ export type LeagueInfoType = {
   scoringType: number;
   rosterPositions: string[];
   playoffTeams: number;
-  playoffProjections?: Record<string, any>[];
+  playoffProjections?: PlayoffProjection[];
   weeklyReport?: string;
   yearEndReport?: string;
   currentTrends?: string[];
@@ -173,4 +173,11 @@ export interface Order {
   avatar: string;
   avatarImg: string;
   placement: number;
+}
+
+export interface PlayoffProjection {
+  name: string;
+  id: string;
+  placement: number[];
+  projectedWinsTotal: number;
 }
