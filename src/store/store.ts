@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { findIndex } from "lodash";
-import { LeagueInfoType, RosterType } from "../types/types";
+import { LeagueInfoType, PlayoffProjection, RosterType } from "../types/types";
 
 export const useStore = defineStore("main", {
   state: () => ({
@@ -100,7 +100,7 @@ export const useStore = defineStore("main", {
       };
       this.leagueInfo = updatedLeagueInfo;
     },
-    addPlayoffOdds(leagueId: string, payload: Record<string, any>[]) {
+    addPlayoffOdds(leagueId: string, payload: PlayoffProjection[]) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
         item.playoffProjections = payload;

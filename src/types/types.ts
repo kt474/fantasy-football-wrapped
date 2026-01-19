@@ -176,6 +176,11 @@ export interface Order {
 }
 
 export interface PlayoffProjection {
+  username?: string;
+  score?: number;
+  currentWins?: number;
+  originalWins?: number;
+  playoffPercentage?: number;
   name: string;
   id: string;
   placement: number[];

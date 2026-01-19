@@ -2,12 +2,17 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { maxBy, sum } from "lodash";
 import { useStore } from "../../store/store";
-import { RosterType, LeagueInfoType, TableDataType } from "../../types/types";
+import {
+  RosterType,
+  LeagueInfoType,
+  TableDataType,
+  PlayoffProjection,
+} from "../../types/types";
 import { getProjections } from "../../api/api";
 import { fakePlayoffData } from "../../api/helper";
 const store = useStore();
 const loading = ref(false);
-const playoffOdds: any = ref([]);
+const playoffOdds = ref<PlayoffProjection[]>([]);
 const showData = ref(false);
 
 const props = defineProps<{
@@ -25,7 +30,7 @@ onMounted(async () => {
     loading.value = false;
   } else if (store.leagueInfo.length > 0) {
     playoffOdds.value =
-      store.leagueInfo[store.currentLeagueIndex].playoffProjections;
+      store.leagueInfo[store.currentLeagueIndex].playoffProjections ?? [];
   }
 });
 
@@ -39,7 +44,7 @@ watch(
       loading.value = false;
     }
     playoffOdds.value =
-      store.leagueInfo[store.currentLeagueIndex].playoffProjections;
+      store.leagueInfo[store.currentLeagueIndex].playoffProjections ?? [];
   }
 );
 
@@ -95,7 +100,7 @@ const getData = async () => {
       ) {
         await Promise.all(
           currentLeague.rosters.map(async (roster) => {
-            const singleRoster: any[] = [];
+            const singleRoster: { projection: number; position: string }[] = [];
             if (!roster.players) return [];
             const projectionPromises = roster.players.map((player: string) => {
               return getProjections(
@@ -192,9 +197,7 @@ const getData = async () => {
         });
       }
     }
-    playoffOdds.value.sort(
-      (a: any, b: any) => sum(a.placement) - sum(b.placement)
-    );
+    playoffOdds.value.sort((a, b) => sum(a.placement) - sum(b.placement));
   }
   store.addPlayoffOdds(store.currentLeagueId, playoffOdds.value);
   localStorage.setItem(
@@ -372,7 +375,7 @@ const tableData = computed(() => {
               scope="row"
               class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-gray-50"
             >
-              {{ item.name }}
+              {{ store.showUsernames ? item.username : item.name }}
             </th>
             <td v-for="i in playoffTeams" class="px-2 py-3">
               {{
