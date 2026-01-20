@@ -69,7 +69,7 @@ export interface Draft {
   draft_id: string;
   draft_slot: number;
   is_keeper: null;
-  metadata: ApiDraftMetadata;
+  metadata: DraftMetadataPlayer;
   pick_no: number;
   picked_by: string;
   player_id: string;
@@ -78,7 +78,7 @@ export interface Draft {
   round: number;
 }
 
-export interface ApiDraftMetadata {
+export interface DraftMetadataPlayer {
   first_name: string;
   injury_status: string;
   last_name: string;

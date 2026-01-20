@@ -107,7 +107,7 @@ const getPointsScored = (rosterId: number, week: number) => {
     );
     return pointsArray.playoffPoints[week - 1];
   }
-  const pointsArray: any = store.leagueInfo[
+  const pointsArray = store.leagueInfo[
     store.currentLeagueIndex
   ].weeklyPoints.find((roster: RosterType) => roster.rosterId === rosterId);
   if (!pointsArray) return;
@@ -117,8 +117,8 @@ const getPointsScored = (rosterId: number, week: number) => {
 };
 
 const getRecord = (rosterId: number) => {
-  const user: any = props.tableData.find((val) => val.rosterId === rosterId);
-  if (user.recordByWeek) {
+  const user = props.tableData.find((val) => val.rosterId === rosterId);
+  if (user?.recordByWeek) {
     const numWins = user.recordByWeek.split("W").length - 1;
     const numLosses = user.recordByWeek.split("L").length - 1;
     return `${numWins} - ${numLosses}`;
