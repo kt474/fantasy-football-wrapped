@@ -15,9 +15,9 @@ export type LeagueInfoType = {
   lastScoredWeek: number;
   winnersBracket: Record<string, any>[];
   losersBracket: Record<string, any>[];
-  users: any[];
-  rosters: any[];
-  weeklyPoints: any[];
+  users: UserType[];
+  rosters: RosterType[];
+  weeklyPoints: PointsType[];
   transactions: Record<string, any>;
   trades: any[];
   waivers: any[];
@@ -91,6 +91,7 @@ export type UserType = {
   avatarImg?: string;
   name: string;
   username?: string;
+  placement?: number;
 };
 
 export type TableDataType = {

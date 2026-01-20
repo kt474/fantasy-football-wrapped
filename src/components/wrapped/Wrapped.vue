@@ -1093,7 +1093,7 @@ watch(
               Most Active
             </p>
             <img
-              v-if="mostMoves.user.avatarImg"
+              v-if="mostMoves.user?.avatarImg"
               class="w-10 mb-3 border-4 rounded-full sm:w-16 border-cyan-500/50"
               :src="mostMoves.user.avatarImg"
             />
@@ -1114,8 +1114,8 @@ watch(
             >
               {{
                 store.showUsernames
-                  ? mostMoves.user.username
-                  : mostMoves.user.name
+                  ? mostMoves.user?.username
+                  : mostMoves.user?.name
               }}
             </p>
             <p class="text-2xl font-black sm:text-3xl text-cyan-400">
