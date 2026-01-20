@@ -16,8 +16,8 @@ const categories = computed(() => {
         ? user.username
         : ""
       : user.name
-      ? user.name
-      : ""
+        ? user.name
+        : ""
   );
 });
 
@@ -40,8 +40,8 @@ const getData = async () => {
     currentLeague.status === "complete"
       ? 0
       : currentLeague.lastScoredWeek
-      ? currentLeague.lastScoredWeek
-      : 0;
+        ? currentLeague.lastScoredWeek
+        : 0;
 
   await Promise.all(
     currentLeague.rosters.map(async (roster: any) => {
@@ -78,21 +78,21 @@ const formattedData = computed(() => {
   ) {
     return fakeProjectionData;
   }
-  const topPositions = ["RB", "WR"];
+  const topPositions: string[] = ["RB", "WR"];
   const otherPositions = intersection(
     ["QB", "TE", "K", "DEF"],
     store.leagueInfo[store.currentLeagueIndex].rosterPositions
   );
 
-  const nameMapping: any = new Map(
-    store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
+  const nameMapping = new Map(
+    store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
       user.id,
       user.name,
     ])
   );
 
-  const userNameMapping: any = new Map(
-    store.leagueInfo[store.currentLeagueIndex].users.map((user: any) => [
+  const userNameMapping = new Map(
+    store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
       user.id,
       user.username,
     ])
@@ -112,7 +112,7 @@ const formattedData = computed(() => {
       const filteredData = roster.data ? roster.data : [];
 
       const groupedAndSortedTopPositions = topPositions.reduce(
-        (acc: any, position: any) => {
+        (acc: any, position) => {
           const sortedByProjection = filteredData
             .filter((item: any) => item.position === position)
             .sort((a: any, b: any) => b.projection - a.projection);
