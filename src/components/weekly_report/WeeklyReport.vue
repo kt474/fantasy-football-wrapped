@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { TableDataType, LeagueInfoType } from "../../types/types.ts";
+import { Player } from "../../types/apiTypes.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { generateReport, getPlayersByIdsMap } from "../../api/api.ts";
@@ -17,10 +18,10 @@ const props = defineProps<{
   regularSeasonLength: number;
 }>();
 
-const weeklyReport: any = ref("");
-const rawWeeklyReport: any = ref("");
-const playerNames: any = ref([]);
-const benchPlayerNames: any = ref([]);
+const weeklyReport = ref<string>("");
+const rawWeeklyReport = ref<string>("");
+const playerNames = ref<Player[][]>([]);
+const benchPlayerNames = ref<Player[][]>([]);
 const loading = ref(false);
 const fetchingPlayers = ref(false);
 
@@ -58,10 +59,10 @@ const weeks = computed(() => {
     return activeTab.value === "Report"
       ? result
       : result.length === 17 ||
-        result.length === 18 ||
-        store.leagueInfo.length === 0
-      ? result
-      : (result.unshift(result[result.length - 1] + result.length), result);
+          result.length === 18 ||
+          store.leagueInfo.length === 0
+        ? result
+        : (result.unshift(result[result.length - 1] + result.length), result);
   }
   return [1];
 });
@@ -97,7 +98,7 @@ const fetchPlayerNames = async () => {
     if (allPlayerIds.length > 0) {
       playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
     }
-    const result: any = props.tableData.map((user: any) => {
+    const result: any = props.tableData.map((user) => {
       const starterIds = user.starters[currentWeek.value - 1];
       const starterNames = starterIds
         ?.map((id: string) => playerLookupMap.get(id))
@@ -128,7 +129,7 @@ const fetchPlayerNames = async () => {
 const getReport = async () => {
   if (store.leagueIds.length > 0) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-    let leagueMetadata: any;
+    let leagueMetadata: Record<string, string | number>;
     if (isPlayoffs.value) {
       const roundNames: { [key: number]: string } = {
         1: "Quarterfinal round",
@@ -182,9 +183,8 @@ onMounted(async () => {
     store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
   ) {
     await fetchPlayerNames();
-    const savedText: any = store.leagueInfo[store.currentLeagueIndex]
-      .weeklyReport
-      ? store.leagueInfo[store.currentLeagueIndex].weeklyReport
+    const savedText = store.leagueInfo[store.currentLeagueIndex].weeklyReport
+      ? (store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "")
       : "";
     weeklyReport.value = savedText;
     rawWeeklyReport.value = savedText
@@ -396,7 +396,7 @@ const seriesData = computed(() => {
   return [
     {
       name: "Points",
-      data: sortedTableData.value.map((user: any) =>
+      data: sortedTableData.value.map((user) =>
         user.matchups[currentWeek.value - 1]
           ? user.points[currentWeek.value - 1]
           : 0
@@ -450,8 +450,8 @@ const chartOptions = ref({
           ? user.username
           : ""
         : user.name
-        ? user.name
-        : ""
+          ? user.name
+          : ""
     ),
     tickAmount: sortedTableData.value.length - 1,
     hideOverlappingLabels: false,
@@ -529,8 +529,8 @@ const updateChartColor = () => {
             ? user.username
             : ""
           : user.name
-          ? user.name
-          : ""
+            ? user.name
+            : ""
       ),
       tickAmount: sortedTableData.value.length - 1,
       hideOverlappingLabels: false,
@@ -598,7 +598,7 @@ watch(
       await fetchPlayerNames();
     }
     weeklyReport.value =
-      store.leagueInfo[store.currentLeagueIndex]?.weeklyReport;
+      store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "";
   }
 );
 
@@ -910,8 +910,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
                             ? user.username
                             : "Ghost Roster"
                           : user.name
-                          ? user.name
-                          : "Ghost Roster"
+                            ? user.name
+                            : "Ghost Roster"
                       }}
                     </p>
                     <p class="ml-2 text-xs">
