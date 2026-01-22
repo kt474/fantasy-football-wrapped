@@ -1,6 +1,13 @@
 import { defineStore } from "pinia";
 import { findIndex } from "lodash";
-import { LeagueInfoType, PlayoffProjection, RosterType } from "../types/types";
+import {
+  LeagueInfoType,
+  PlayoffProjection,
+  RosterType,
+  LeagueDraftMetadata,
+  WaiverMove,
+} from "../types/types";
+import { DraftGrades, DraftPick } from "../types/apiTypes";
 
 export const useStore = defineStore("main", {
   state: () => ({
@@ -124,25 +131,25 @@ export const useStore = defineStore("main", {
         item.tradeNames = payload;
       }
     },
-    addWaiverMoves(leagueId: string, payload: any) {
+    addWaiverMoves(leagueId: string, payload: WaiverMove[]) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
         item.waiverMoves = payload;
       }
     },
-    addDraftPicks(leagueId: string, payload: any[]) {
+    addDraftPicks(leagueId: string, payload: DraftPick[]) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
         item.draftPicks = payload;
       }
     },
-    addDraftMetadata(leagueId: string, payload: any) {
+    addDraftMetadata(leagueId: string, payload: LeagueDraftMetadata) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
         item.draftMetadata = payload;
       }
     },
-    addDraftGrades(leagueId: string, payload: any[]) {
+    addDraftGrades(leagueId: string, payload: DraftGrades[]) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
         item.draftGrades = payload;
