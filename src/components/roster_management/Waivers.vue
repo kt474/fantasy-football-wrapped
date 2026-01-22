@@ -84,7 +84,7 @@ const totalSpent = computed(() => {
 });
 
 const waiverData: ComputedRef<WaiverData> = computed(() => {
-  const sortedData = rawData.value.reduce((acc: any, move: any) => {
+  const sortedData = rawData.value.reduce((acc: any, move) => {
     const id = move.id;
     if (!acc[id]) {
       acc[id] = [];
@@ -106,7 +106,7 @@ const waiverData: ComputedRef<WaiverData> = computed(() => {
 const orderedData = computed(() => {
   if (
     rawData.value.filter(
-      (player: any) =>
+      (player) =>
         !["K", "DEF"].includes(player.position) &&
         player.value != null &&
         player.status === "complete"
@@ -114,7 +114,7 @@ const orderedData = computed(() => {
   ) {
     return rawData.value
       .filter(
-        (player: any) =>
+        (player) =>
           !["K", "DEF"].includes(player.position) &&
           player.value != null &&
           player.status === "complete"
@@ -123,7 +123,7 @@ const orderedData = computed(() => {
       .slice(0, 10);
   }
   return rawData.value
-    .filter((player: any) => player.value != null)
+    .filter((player) => player.value != null)
     .sort((a: any, b: any) => a.value - b.value)
     .slice(0, 10);
 });

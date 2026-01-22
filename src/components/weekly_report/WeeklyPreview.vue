@@ -70,7 +70,7 @@ const fetchPlayerNames = async () => {
 
     // Map over tableData and resolve all player projections
     const result = await Promise.all(
-      props.tableData.map(async (user: any) => {
+      props.tableData.map(async (user) => {
         const starterIds = user.starters[previewWeek.value];
         // For each starter, fetch player and projection
         if (starterIds) {
@@ -507,8 +507,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           ? matchup[0].username
                           : "Ghost Roster"
                         : matchup[0].name
-                        ? matchup[0].name
-                        : "Ghost Roster"
+                          ? matchup[0].name
+                          : "Ghost Roster"
                     }}
                   </p>
                   <p class="ml-2 text-xs">
@@ -628,8 +628,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           ? matchup[1].username
                           : "Ghost Roster"
                         : matchup[1].name
-                        ? matchup[1].name
-                        : "Ghost Roster"
+                          ? matchup[1].name
+                          : "Ghost Roster"
                     }}
                   </p>
                   <p class="mr-2 text-xs float-end">
@@ -765,8 +765,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   ? matchup[0].username
                   : "Ghost Roster"
                 : matchup[0].name
-                ? matchup[0].name
-                : "Ghost Roster"
+                  ? matchup[0].name
+                  : "Ghost Roster"
             }}
           </p>
           {{ generateString(cases[matchup[0].id]) }}
@@ -781,8 +781,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                   ? matchup[1].username
                   : "Ghost Roster"
                 : matchup[1].name
-                ? matchup[1].name
-                : "Ghost Roster"
+                  ? matchup[1].name
+                  : "Ghost Roster"
             }}
           </p>
           {{ generateString(cases[matchup[1].id]) }}

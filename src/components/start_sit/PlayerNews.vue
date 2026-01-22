@@ -124,7 +124,7 @@ const fetchPlayerNames = async () => {
 
     // Map over tableData and resolve all player projections
     const result = await Promise.all(
-      props.tableData.map(async (user: any) => {
+      props.tableData.map(async (user) => {
         const week = currentLeague.currentWeek
           ? currentLeague.currentWeek
           : currentLeague.lastScoredWeek;
@@ -323,8 +323,8 @@ watch(
                         player.projection?.away === true
                           ? "@ "
                           : player.projection?.away === false
-                          ? "vs "
-                          : "BYE"
+                            ? "vs "
+                            : "BYE"
                       }}{{ player.projection?.opponent }}</span
                     >
                   </p>
@@ -466,12 +466,12 @@ watch(
                             Number(index) -
                             1
                           : store.leagueInfo[store.currentLeagueIndex]
-                              ?.lastScoredWeek
-                          ? store.leagueInfo[store.currentLeagueIndex]
-                              ?.lastScoredWeek -
-                            Number(index) -
-                            1
-                          : 17 - Number(index)
+                                ?.lastScoredWeek
+                            ? store.leagueInfo[store.currentLeagueIndex]
+                                ?.lastScoredWeek -
+                              Number(index) -
+                              1
+                            : 17 - Number(index)
                       }}
                     </p>
                     <p class="my-1">{{ score }}</p>

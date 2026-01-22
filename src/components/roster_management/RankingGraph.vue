@@ -8,22 +8,20 @@ const props = defineProps<{
 const store = useStore();
 
 const pointsArray = computed(() => {
-  return props.tableData.map((team: any) => team.pointsFor);
+  return props.tableData.map((team) => team.pointsFor);
 });
 
 const potentialPointsArray = computed(() => {
-  return props.tableData.map((team: any) => team.potentialPoints);
+  return props.tableData.map((team) => team.potentialPoints);
 });
 
 const series = computed(() => {
   const result: any[] = [];
-  const points = props.tableData.map((team: any) => team.pointsFor);
+  const points = props.tableData.map((team) => team.pointsFor);
   points.sort((a, b) => b - a);
-  const potentialPoints = props.tableData.map(
-    (team: any) => team.potentialPoints
-  );
+  const potentialPoints = props.tableData.map((team) => team.potentialPoints);
   potentialPoints.sort((a, b) => b - a);
-  props.tableData.forEach((team: any) => {
+  props.tableData.forEach((team) => {
     result.push({
       name: store.showUsernames ? team.username : team.name,
       data: [
