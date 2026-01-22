@@ -10,6 +10,8 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@capacitor/core": "^8.0.1",
+    "@capacitor/ios": "^8.0.1",
     "@supabase/supabase-js": "^2.39.7",
     "@vercel/analytics": "^1.1.1",
     "apexcharts": "^3.49.1",
@@ -22,6 +24,7 @@
     "vue3-apexcharts": "^1.4.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.0.1",
     "@types/lodash": "^4.14.202",
     "@vitejs/plugin-vue": "^4.5.2",
     "autoprefixer": "^10.4.16",
