@@ -1,14 +1,25 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useStore } from "../../store/store";
+import { UserType } from "../../types/types";
 
 const store = useStore();
 const props = defineProps<{
   tableData: any[];
 }>();
 
+interface MatchupDataType {
+  username: string;
+  record: Record;
+}
+
+interface Record {
+  losses: number;
+  wins: number;
+}
+
 const matchupData = computed(() => {
-  const result: any = [];
+  const result: MatchupDataType[][] = [];
   props.tableData.forEach((user) => {
     const currentUser: any = [];
     user.matchups.forEach((matchupId: number, index: number) => {
@@ -59,8 +70,8 @@ const matchupData = computed(() => {
   return result;
 });
 
-const extractRecord = (user: any, opponent: any) => {
-  const opp = user.find((opp: any) => opp.username == opponent.username);
+const extractRecord = (user: MatchupDataType[], opponent: UserType) => {
+  const opp = user.find((opp) => opp.username == opponent.username);
   // This is backwards but the chart is read horizontally
   return opp ? `${opp.record.losses} - ${opp.record.wins}` : "0 - 0";
 };
@@ -105,8 +116,8 @@ const extractRecord = (user: any, opponent: any) => {
                       ? item.username
                       : "Ghost Roster"
                     : item.name
-                    ? item.name
-                    : "Ghost Roster"
+                      ? item.name
+                      : "Ghost Roster"
                 }}
               </div>
             </th>
@@ -128,8 +139,8 @@ const extractRecord = (user: any, opponent: any) => {
                     ? item.username
                     : "Ghost Roster"
                   : item.name
-                  ? item.name
-                  : "Ghost Roster"
+                    ? item.name
+                    : "Ghost Roster"
               }}
             </th>
             <td

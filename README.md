@@ -55,3 +55,10 @@ It would also be helpful to familiarize yourself with the technologies used in t
 ## Contact
 
 Please report any issues or request new features in the [issues](https://github.com/kt474/fantasy-football-wrapped/issues) tab
+
+## TODO
+
+- IOS App
+- ESPN Support
+- Yahoo Support
+- Site Redesign
