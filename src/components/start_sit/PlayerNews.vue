@@ -15,7 +15,7 @@ import { max, min } from "lodash";
 
 const data: any = ref([]);
 const playerNames: any = ref([]);
-const loading: any = ref(false);
+const loading = ref<boolean>(false);
 const expanded = ref<Record<number, boolean>>({});
 const store = useStore();
 const props = defineProps<{
@@ -253,7 +253,7 @@ watch(
     class="py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6"
   >
     <p class="text-3xl font-bold leading-none text-gray-900 dark:text-gray-50">
-      Start/Sit (Beta)
+      Start/Sit
     </p>
     <div class="my-4">
       <label

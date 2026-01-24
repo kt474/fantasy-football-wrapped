@@ -22,7 +22,7 @@ const props = defineProps<{
 
 const closestMatchups: any = ref([]);
 const farthestMatchups: any = ref([]);
-const loading: any = ref(true);
+const loading = ref<boolean>(true);
 
 const isShareSupported = ref(false);
 
@@ -509,9 +509,10 @@ const totalSlides = computed(() => {
 });
 
 const teamName = computed(() => {
-  const currentTeam: any = props.tableData.find(
-    (user) => user.rosterId === currentManager.value.rosterId
-  );
+  const currentTeam =
+    props.tableData.find(
+      (user) => user.rosterId === currentManager.value.rosterId
+    ) ?? props.tableData[0];
   return getTeamName(currentTeam);
 });
 
@@ -627,7 +628,7 @@ const getMatchups = () => {
   const matchupDifferences: any[] = [];
 
   props.tableData.forEach((teamA) => {
-    teamA.matchups.forEach((matchupId: any, matchupIndex: number) => {
+    teamA.matchups.forEach((matchupId, matchupIndex: number) => {
       if (matchupId === null) {
         return;
       }

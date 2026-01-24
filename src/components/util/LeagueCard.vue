@@ -26,7 +26,7 @@ const refreshLeague = async () => {
   selectLeague();
   store.$patch((state) => {
     state.leagueInfo = state.leagueInfo.filter(
-      (item: any) => item.leagueId !== props.leagueInfo.leagueId
+      (item) => item.leagueId !== props.leagueInfo.leagueId
     );
   });
   if (localStorage.originalData) {
@@ -59,7 +59,7 @@ const removeLeague = () => {
     }
     store.$patch((state) => {
       state.leagueInfo = state.leagueInfo.filter(
-        (item: any) => item.leagueId !== props.leagueInfo.leagueId
+        (item) => item.leagueId !== props.leagueInfo.leagueId
       );
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
