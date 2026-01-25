@@ -2,8 +2,9 @@
 import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { generatePreview } from "../../api/api";
+import { TableDataType } from "../../types/types";
 
-const preview: any = ref("");
+const preview = ref<string>("");
 const loading = ref<boolean>(false);
 
 const getPreview = async () => {
@@ -13,17 +14,31 @@ const getPreview = async () => {
   loading.value = false;
 };
 
+interface PlayerType {
+  name: string;
+  player_id: string;
+  position: string;
+  projection: number;
+  team: string;
+}
+
+interface PlayerNameType {
+  id: number;
+  players: PlayerType[];
+  total: number;
+}
+
 const store = useStore();
 const props = defineProps<{
-  matchup1: any;
-  matchup2: any;
-  playerNames: any[];
+  matchup1: TableDataType;
+  matchup2: TableDataType;
+  playerNames: PlayerNameType[];
 }>();
 
 const getStarters = (id: number) => {
-  const playerObj: any = props.playerNames.find((user: any) => user.id === id);
+  const playerObj = props.playerNames.find((user) => user.id === id);
   if (playerObj) {
-    return playerObj.players.map((player: any) => {
+    return playerObj.players.map((player) => {
       return {
         name: player.name,
         position: player.position,
