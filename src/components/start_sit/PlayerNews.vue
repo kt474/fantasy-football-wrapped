@@ -12,6 +12,7 @@ import { TableDataType } from "../../types/types";
 import { difference } from "lodash";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/helper";
 import { max, min } from "lodash";
+import { Player } from "../../types/apiTypes";
 
 const data: any = ref([]);
 const playerNames: any = ref([]);
@@ -117,7 +118,7 @@ const fetchPlayerNames = async () => {
   if (store.leagueIds.length > 0) {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     const allPlayerIds = props.tableData.map((user) => user.players).flat();
-    let playerLookupMap = new Map<string, any>();
+    let playerLookupMap = new Map<string, Player>();
     if (allPlayerIds.length > 0) {
       playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
     }

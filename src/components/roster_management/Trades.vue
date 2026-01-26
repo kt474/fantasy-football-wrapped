@@ -9,6 +9,7 @@ import {
   roundToOneDecimal,
 } from "../../api/helper";
 import { useStore } from "../../store/store";
+import { Player } from "../../types/apiTypes.ts";
 
 const store = useStore();
 const tradeData: any = ref([]);
@@ -72,7 +73,7 @@ const getData = async () => {
   const uniquePlayerIdArray = Array.from(allUniquePlayerIds);
 
   // 2. Fetch all player names at once
-  let playerLookupMap = new Map<string, any>();
+  let playerLookupMap = new Map<string, Player>();
   if (uniquePlayerIdArray.length > 0) {
     playerLookupMap = await getPlayersByIdsMap(uniquePlayerIdArray);
   }
@@ -83,18 +84,18 @@ const getData = async () => {
       const team1Players = trade.adds[trade.roster_ids[1]]
         ? trade.adds[trade.roster_ids[1]].map((id: string) => {
             let playerObj = playerLookupMap.get(id);
-            return playerObj.name
+            return playerObj?.name
               ? playerObj.name
-              : `${playerObj.team} Defense`;
+              : `${playerObj?.team} Defense`;
           })
         : [];
 
       const team2Players = trade.adds[trade.roster_ids[0]]
         ? trade.adds[trade.roster_ids[0]].map((id: string) => {
             let playerObj = playerLookupMap.get(id);
-            return playerObj.name
-              ? playerObj.name
-              : `${playerObj.team} Defense`;
+            return playerObj?.name
+              ? playerObj?.name
+              : `${playerObj?.team} Defense`;
           })
         : [];
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { TableDataType, LeagueInfoType } from "../../types/types.ts";
+import { Player } from "../../types/apiTypes.ts";
 import { generateSummary, getPlayersByIdsMap } from "../../api/api.ts";
 import { ref, onMounted, watch, computed } from "vue";
 import { useStore } from "../../store/store";
@@ -10,8 +11,8 @@ const props = defineProps<{
   finalPlacements: any[];
 }>();
 
-const summary: any = ref("");
-const rawSummary: any = ref("");
+const summary = ref("");
+const rawSummary = ref("");
 const playoffPromptData = ref([]);
 
 const showSummary = computed(() => {
@@ -35,8 +36,8 @@ onMounted(async () => {
     await fetchPlayerNames();
     await getSummary();
   } else if (store.leagueInfo.length > 0) {
-    const savedText: any =
-      store.leagueInfo[store.currentLeagueIndex].yearEndReport;
+    const savedText =
+      store.leagueInfo[store.currentLeagueIndex].yearEndReport ?? "";
     summary.value = savedText;
     rawSummary.value = savedText
       .replace(/<b>(.*?)<\/b>/g, "**$1**")
@@ -52,7 +53,8 @@ watch(
       await fetchPlayerNames();
       await getSummary();
     }
-    summary.value = store.leagueInfo[store.currentLeagueIndex].yearEndReport;
+    summary.value =
+      store.leagueInfo[store.currentLeagueIndex].yearEndReport ?? "";
   }
 );
 
@@ -64,12 +66,12 @@ const fetchPlayerNames = async () => {
         .map((user: any) => user.starters.at(-1))
         .flat();
 
-      let playerLookupMap = new Map<string, any>();
+      let playerLookupMap = new Map<string, Player>();
       if (allPlayerIds.length > 0) {
         playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
       }
 
-      const result: any = currentLeague.weeklyPoints.map((user: any) => {
+      const result: any = currentLeague.weeklyPoints.map((user) => {
         const starterIds = user.starters.at(-1);
         const starterNames = starterIds?.map((id: string) =>
           playerLookupMap.get(id)?.name

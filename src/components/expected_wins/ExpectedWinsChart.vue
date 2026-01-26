@@ -8,8 +8,14 @@ const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
+interface ResultType {
+  x: string;
+  y: number;
+  goals: Record<string, string | number>[];
+}
+
 const seriesData = computed(() => {
-  const result: Record<string, any>[] = [];
+  const result: ResultType[] = [];
   props.tableData.forEach((user) => {
     result.push({
       x: store.showUsernames
@@ -17,8 +23,8 @@ const seriesData = computed(() => {
           ? user.username
           : ""
         : user.name
-        ? user.name
-        : "",
+          ? user.name
+          : "",
       y: user.wins,
       goals: [
         {

@@ -94,15 +94,15 @@ const fetchPlayerNames = async () => {
     const allPlayerIds = props.tableData
       .map((user) => [user.starters[currentWeek.value - 1]])
       .flat();
-    let playerLookupMap = new Map<string, any>();
+    let playerLookupMap = new Map<string, Player>();
     if (allPlayerIds.length > 0) {
       playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
     }
-    const result: any = props.tableData.map((user) => {
+    const result = props.tableData.map((user) => {
       const starterIds = user.starters[currentWeek.value - 1];
       const starterNames = starterIds
         ?.map((id: string) => playerLookupMap.get(id))
-        .filter((player: any) => player !== undefined);
+        .filter((player) => player !== undefined);
       return starterNames;
     });
     playerNames.value = result;
@@ -110,7 +110,7 @@ const fetchPlayerNames = async () => {
     const benchPlayerIds = props.tableData
       .map((user) => [user.benchPlayers[currentWeek.value - 1]])
       .flat();
-    let benchPlayerLookupMap = new Map<string, any>();
+    let benchPlayerLookupMap = new Map();
     if (benchPlayerIds.length > 0) {
       benchPlayerLookupMap = await getPlayersByIdsMap(benchPlayerIds);
     }
@@ -333,7 +333,7 @@ const reportPrompt = computed(() => {
             getMatchupWinner(user.matchups[week], week) === user.points[week],
           playerPoints: user.starterPoints[week].slice(0, 7),
           playerNames: playerNames.value[index]
-            .map((player: any) =>
+            .map((player) =>
               player.name ? player.name : `${player.team} Defense`
             )
             .slice(0, 7),
@@ -357,7 +357,7 @@ const reportPrompt = computed(() => {
           playerNames:
             playerNames.value.length > 0
               ? playerNames.value[index]
-                  .map((player: any) =>
+                  .map((player) =>
                     player?.name ? player.name : `${player.team} Defense`
                   )
                   .slice(0, 7)
