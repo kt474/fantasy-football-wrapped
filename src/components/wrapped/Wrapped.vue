@@ -432,7 +432,12 @@ const originalPlayers = computed(() => {
 });
 
 const pointsFromWaivers = computed(() => {
-  let result: any[] = [];
+  interface resultType {
+    name: string;
+    avatar: string;
+    pointsFromWaivers: number;
+  }
+  let result: resultType[] = [];
   props.tableData.forEach((user) => {
     let sum = 0;
     const draftedPlayers = league.value.draftPicks

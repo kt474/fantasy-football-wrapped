@@ -5,6 +5,7 @@ import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { getPlayersByIdsMap, getSingleWeekProjection } from "../../api/api.ts";
 import { fakeWeeklyPreview, getWinProbability } from "../../api/helper.ts";
+import { Player } from "../../types/apiTypes.ts";
 
 const store = useStore();
 const props = defineProps<{
@@ -63,7 +64,7 @@ const fetchPlayerNames = async () => {
     const allPlayerIds = props.tableData
       .map((user) => [user.starters[previewWeek.value]])
       .flat();
-    let playerLookupMap = new Map<string, any>();
+    let playerLookupMap = new Map<string, Player>();
     if (allPlayerIds.length > 0) {
       playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
     }
