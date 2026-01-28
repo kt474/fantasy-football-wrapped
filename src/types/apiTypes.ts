@@ -287,10 +287,10 @@ export interface WaiverBudget {
 }
 
 export interface DraftPick {
-  keeper: any;
+  keeper?: any;
   firstName: string;
   lastName: string;
-  amount: number;
+  amount?: number;
   playerId: string;
   position: string;
   pickNumber: number;

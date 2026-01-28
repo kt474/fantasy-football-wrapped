@@ -6,9 +6,10 @@ import { LeagueInfoType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { fakeUsers } from "../../api/helper.ts";
 import DraftGrades from "./DraftGrades.vue";
+import { DraftPick } from "../../types/apiTypes.ts";
 
 const store = useStore();
-const data: any = ref([]);
+const data = ref<DraftPick[]>([]);
 const loading = ref(false);
 const draftOrder: any = ref([]);
 const draftType = ref<string>("snake");
@@ -27,9 +28,13 @@ const sortedData = computed(() => {
   if (sortOrder.value === "Draft Order") {
     return data.value;
   } else if (sortOrder.value === "Highest Score") {
-    return [...data.value].sort((a: any, b: any) => b.pickRank - a.pickRank);
+    return [...data.value].sort(
+      (a, b) => Number(b.pickRank) - Number(a.pickRank)
+    );
   }
-  return [...data.value].sort((a: any, b: any) => a.pickRank - b.pickRank);
+  return [...data.value].sort(
+    (a, b) => Number(a.pickRank) - Number(b.pickRank)
+  );
 });
 
 const getDraftOrder = async () => {
@@ -99,7 +104,7 @@ onMounted(async () => {
     await getData();
     loading.value = false;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
-    data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks;
+    data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks ?? [];
     draftOrder.value =
       store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"];
     roundReversal.value =
@@ -131,7 +136,7 @@ watch(
       await getData();
       loading.value = false;
     }
-    data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks;
+    data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks ?? [];
     draftOrder.value =
       store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"];
     roundReversal.value =
@@ -154,7 +159,7 @@ const getData = async () => {
     currentLeague.draftMetadata?.draftType
   );
   if (draftType.value === "snake") {
-    const roundGroups = draftPicks.reduce((acc: any, pick: any) => {
+    const roundGroups = draftPicks.reduce((acc: any, pick) => {
       if (!acc[pick.round]) {
         acc[pick.round] = [];
       }

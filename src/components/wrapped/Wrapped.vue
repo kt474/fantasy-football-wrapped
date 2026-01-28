@@ -176,7 +176,7 @@ const worstPicks = computed(() => {
   } else {
     return league.value.draftPicks
       ?.filter((obj) => obj.position !== "TE" && obj.position !== "K")
-      .filter((obj) => obj.amount > 12)
+      .filter((obj) => obj.amount ?? 0 > 12)
       .sort((a, b) => Number(a.pickRank) - Number(b.pickRank))
       .slice(0, 5);
   }
@@ -193,7 +193,7 @@ const draftSteal = computed(() => {
       .slice(0, 3);
   } else {
     return league.value.draftPicks
-      ?.filter((obj) => obj.amount < 20)
+      ?.filter((obj) => obj.amount ?? 0 < 20)
       .filter((obj) => obj.position !== "TE")
       .sort((a, b) => Number(b.pickRank) - Number(a.pickRank))
       .slice(0, 3);
