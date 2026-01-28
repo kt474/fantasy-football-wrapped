@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import { capitalize } from "lodash";
 import { useStore } from "../../store/store";
-import { onMounted } from "vue";
-import { initFlowbite } from "flowbite";
+
 import { getData, inputLeague } from "../../api/api";
 import { LeagueInfoType } from "../../types/types";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-onMounted(() => {
-  initFlowbite();
-});
 
 const props = defineProps<{
   leagueInfo: LeagueInfoType;

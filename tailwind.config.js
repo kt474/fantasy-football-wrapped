@@ -1,11 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: "class",
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-    "./node_modules/flowbite/**/*.js",
-  ],
+  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -13,5 +9,5 @@ export default {
       },
     },
   },
-  plugins: [require("flowbite/plugin"), require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate")],
 };
