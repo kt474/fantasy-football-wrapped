@@ -1,4 +1,20 @@
 <script setup lang="ts">
+import AppSidebar from "@/components/layout/AppSidebar.vue";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+
 import { onMounted, ref } from "vue";
 import CardContainer from "../components/util/CardContainer.vue";
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
@@ -112,58 +128,70 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto">
-    <SkeletonLoading v-if="isInitialLoading" />
-    <Test />
-    <!-- <div v-else>
-      <div v-if="store.currentLeagueId" class="container mx-auto">
-        <Input v-if="store.showInput" class="custom-input-width" />
-        <div v-if="store.showLeaguesList" class="container mx-auto">
-          <UserLeagueList />
-        </div>
-        <div
-          v-if="
-            store.leagueUsers[store.currentLeagueIndex] &&
-            !store.loadingUserLeagues
-          "
-        >
-          <CardContainer />
-          <Tabs class="mt-4" />
-          <Table
-            :users="store.leagueUsers[store.currentLeagueIndex]"
-            :rosters="store.leagueRosters[store.currentLeagueIndex]"
-            :points="store.weeklyPoints[store.currentLeagueIndex]"
-          />
-        </div>
-        <SkeletonLoading v-else />
-      </div>
-      <div v-else-if="store.showLeaguesList" class="container mx-auto">
-        <UserLeagueList />
-      </div>
+  <SidebarProvider>
+    <AppSidebar />
+    <SidebarInset>
+      <header class="flex items-center h-16 gap-2 px-4 border-b shrink-0">
+        <SidebarTrigger class="-ml-1" />
+        <Separator
+          orientation="vertical"
+          class="mr-2 data-[orientation=vertical]:h-4"
+        />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem class="hidden md:block">
+              <BreadcrumbLink href="#">
+                Building Your Application
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator class="hidden md:block" />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </header>
+      <div>
+        <SkeletonLoading v-if="isInitialLoading" />
+        <div v-else>
+          <div v-if="store.currentLeagueId" class="container mx-auto">
+            <Input v-if="store.showInput" class="custom-input-width" />
+            <div v-if="store.showLeaguesList" class="container mx-auto">
+              <UserLeagueList />
+            </div>
+            <div
+              v-if="
+                store.leagueUsers[store.currentLeagueIndex] &&
+                !store.loadingUserLeagues
+              "
+            >
+              <CardContainer />
+              <Tabs class="mt-4" />
+              <Table
+                :users="store.leagueUsers[store.currentLeagueIndex]"
+                :rosters="store.leagueRosters[store.currentLeagueIndex]"
+                :points="store.weeklyPoints[store.currentLeagueIndex]"
+              />
+            </div>
+            <SkeletonLoading v-else />
+          </div>
+          <div v-else-if="store.showLeaguesList" class="container mx-auto">
+            <UserLeagueList />
+          </div>
 
-      <SkeletonLoading v-else-if="showLoading" />
-      <div v-else class="container mx-auto custom-background">
-        <Intro />
-        <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
-        <Tabs class="mt-4" />
-        <Table :users="fakeUsers" :rosters="fakeRosters" :points="fakePoints" />
-      </div> 
-    </div>-->
-  </div>
+          <SkeletonLoading v-else-if="showLoading" />
+          <div v-else class="container mx-auto custom-background">
+            <Intro />
+            <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
+            <Tabs class="mt-4" />
+            <Table
+              :users="fakeUsers"
+              :rosters="fakeRosters"
+              :points="fakePoints"
+            />
+          </div>
+        </div>
+      </div>
+    </SidebarInset>
+  </SidebarProvider>
 </template>
-<style scoped>
-.custom-input-width {
-  width: 18.9rem;
-  @media (min-width: 640px) {
-    width: 29.1rem;
-  }
-}
-.custom-background {
-  background: linear-gradient(
-    90deg,
-    rgba(36, 19, 0, 0) 0%,
-    rgba(90, 140, 255, 0.1) 54%,
-    rgba(0, 187, 255, 0) 100%
-  );
-}
-</style>

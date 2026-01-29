@@ -61,6 +61,6 @@ const app = createApp(App);
 app.use(pinia);
 app.use(VueApexCharts);
 app.use(router);
-app.use(posthogPlugin);
+// app.use(posthogPlugin);
 registerSW({ immediate: true });
 app.mount("#app");

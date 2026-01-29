@@ -12,16 +12,23 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
     "@vercel/analytics": "^1.1.1",
+    "@vueuse/core": "^14.1.0",
     "apexcharts": "^3.49.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "lodash": "^4.17.21",
+    "lucide-vue-next": "^0.563.0",
     "pinia": "^2.1.7",
     "posthog-js": "^1.239.1",
+    "reka-ui": "^2.7.0",
+    "tailwind-merge": "^3.4.0",
     "vue": "^3.3.11",
     "vue-router": "^4.5.0",
     "vue3-apexcharts": "^1.4.4"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.202",
+    "@types/node": "^25.0.10",
     "@vitejs/plugin-vue": "^4.5.2",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",

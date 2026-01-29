@@ -94,10 +94,10 @@ const setHtmlBackground = () => {
 <template>
   <div :class="{ dark: store.darkMode }" class="h-screen">
     <div class="h-full bg-gray-50 dark:bg-gray-950">
-      <Header />
-      <div class="w-full border-b border-gray-200 dark:border-gray-600"></div>
+      <!-- <Header /> -->
+      <!-- <div class="w-full border-b border-gray-200 dark:border-gray-600"></div> -->
       <RouterView />
-      <Footer />
+      <!-- <Footer /> -->
     </div>
     <!-- <Email /> -->
     <Alert
