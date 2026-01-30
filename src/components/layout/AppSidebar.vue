@@ -12,8 +12,15 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useStore } from "../../store/store";
+const store = useStore();
 
 const props = defineProps<SidebarProps>();
+
+const changeTab = (tab: string) => {
+  store.currentTab = tab;
+  localStorage.currentTab = tab;
+};
 
 const data = {
   navMain: [
@@ -28,49 +35,48 @@ const data = {
       ],
     },
     {
-      title: "Insights",
+      title: "League Insights",
       url: "#",
       items: [
         {
           title: "Standings",
-          url: "#",
+          url: "standings",
         },
         {
           title: "Power Rankings",
-          url: "#",
-          isActive: true,
+          url: "powerRankings",
         },
         {
           title: "Expected Wins",
-          url: "#",
-        },
-        {
-          title: "Caching",
-          url: "#",
+          url: "expectedWins",
         },
         {
           title: "Roster Management",
-          url: "#",
+          url: "managerEfficiency",
         },
         {
           title: "Playoffs",
-          url: "#",
+          url: "playoffs",
         },
         {
           title: "Weekly Report",
-          url: "#",
+          url: "weeklyReport",
         },
         {
           title: "Start/Sit",
-          url: "#",
+          url: "startSit",
         },
         {
           title: "Draft",
-          url: "#",
+          url: "draft",
         },
         {
           title: "League History",
-          url: "#",
+          url: "leagueHistory",
+        },
+        {
+          title: "Wrapped",
+          url: "wrapped",
         },
       ],
     },
@@ -108,8 +114,13 @@ const data = {
               v-for="childItem in item.items"
               :key="childItem.title"
             >
-              <SidebarMenuButton as-child :is-active="childItem.isActive">
-                <a :href="childItem.url">{{ childItem.title }}</a>
+              <SidebarMenuButton
+                as-child
+                :is-active="store.currentTab === childItem.url"
+              >
+                <p class="cursor-pointer" @click="changeTab(childItem.url)">
+                  {{ childItem.title }}
+                </p>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

@@ -129,11 +129,20 @@ const removeHistoryLeagues = () => {
     <BreadcrumbList>
       <BreadcrumbItem class="hidden md:block">
         <!-- <CardContainer /> -->
-        <BreadcrumbLink href="#"> Building Your Application </BreadcrumbLink>
+        <BreadcrumbPage>
+          {{ props.leagueInfo.name }}
+        </BreadcrumbPage>
       </BreadcrumbItem>
       <BreadcrumbSeparator class="hidden md:block" />
       <BreadcrumbItem>
-        <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+        {{
+          props.leagueInfo.season +
+          ": " +
+          capitalize(props.leagueInfo.seasonType) +
+          " " +
+          props.leagueInfo.totalRosters +
+          "-team"
+        }}
       </BreadcrumbItem>
     </BreadcrumbList>
   </Breadcrumb>

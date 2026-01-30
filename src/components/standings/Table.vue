@@ -200,7 +200,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
 };
 </script>
 <template>
-  <div>
+  <div class="mx-4">
     <div
       v-if="store.currentTab === 'standings'"
       class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"
