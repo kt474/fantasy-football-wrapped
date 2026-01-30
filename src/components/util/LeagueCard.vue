@@ -2,6 +2,15 @@
 import { capitalize } from "lodash";
 import { useStore } from "../../store/store";
 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+
 import { getData, inputLeague } from "../../api/api";
 import { LeagueInfoType } from "../../types/types";
 import { useRouter } from "vue-router";
@@ -116,7 +125,22 @@ const removeHistoryLeagues = () => {
 };
 </script>
 <template>
-  <div
+  <Breadcrumb>
+    <BreadcrumbList>
+      <BreadcrumbItem class="hidden md:block">
+        <!-- <CardContainer /> -->
+        <BreadcrumbLink href="#"> Building Your Application </BreadcrumbLink>
+      </BreadcrumbItem>
+      <BreadcrumbSeparator class="hidden md:block" />
+      <BreadcrumbItem>
+        <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+      </BreadcrumbItem>
+    </BreadcrumbList>
+  </Breadcrumb>
+  <!-- <div>
+    <h4 class="text-lg font-semibold">{{ props.leagueInfo.name }}</h4>
+  </div> -->
+  <!-- <div
     @click.self="selectLeague()"
     :class="{
       'border-b-4 border-b-blue-700 dark:border-b-blue-600':
@@ -210,7 +234,7 @@ const removeHistoryLeagues = () => {
         "-team"
       }}
     </p>
-  </div>
+  </div> -->
 </template>
 <style scoped>
 .card-width {

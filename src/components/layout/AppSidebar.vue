@@ -32,16 +32,16 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Routing",
+          title: "Standings",
           url: "#",
         },
         {
-          title: "Data Fetching",
+          title: "Power Rankings",
           url: "#",
           isActive: true,
         },
         {
-          title: "Rendering",
+          title: "Expected Wins",
           url: "#",
         },
         {
@@ -49,35 +49,27 @@ const data = {
           url: "#",
         },
         {
-          title: "Styling",
+          title: "Roster Management",
           url: "#",
         },
         {
-          title: "Optimizing",
+          title: "Playoffs",
           url: "#",
         },
         {
-          title: "Configuring",
+          title: "Weekly Report",
           url: "#",
         },
         {
-          title: "Testing",
+          title: "Start/Sit",
           url: "#",
         },
         {
-          title: "Authentication",
+          title: "Draft",
           url: "#",
         },
         {
-          title: "Deploying",
-          url: "#",
-        },
-        {
-          title: "Upgrading",
-          url: "#",
-        },
-        {
-          title: "Examples",
+          title: "League History",
           url: "#",
         },
       ],

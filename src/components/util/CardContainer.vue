@@ -27,7 +27,7 @@ const showInput = () => {
         :dropdownIndex="index"
       />
     </div>
-    <button
+    <!-- <button
       v-if="!store.showInput && !store.showLeaguesList"
       aria-label="Add additional league"
       @click="showInput()"
@@ -76,7 +76,7 @@ const showInput = () => {
         />
       </svg>
       <span class="sr-only">Close input</span>
-    </button>
+    </button> -->
   </div>
 </template>
 <style>
