@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Check, ChevronsUpDown, GalleryVerticalEnd } from "lucide-vue-next";
+import { capitalize } from "lodash";
 
 import { ref } from "vue";
 import {
@@ -14,13 +15,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { LeagueInfoType } from "@/types/types";
 
 const props = defineProps<{
-  versions: string[];
-  defaultVersion: string;
+  leagues: LeagueInfoType[];
 }>();
 
-const selectedVersion = ref(props.defaultVersion);
+const selectedVersion = ref(props.leagues[0]?.leagueId);
 </script>
 
 <template>
@@ -32,14 +33,16 @@ const selectedVersion = ref(props.defaultVersion);
             size="lg"
             class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <div
-              class="flex items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground aspect-square size-8"
-            >
-              <GalleryVerticalEnd class="size-4" />
-            </div>
             <div class="flex flex-col gap-0.5 leading-none">
-              <span class="font-medium">Documentation</span>
-              <span class="">v{{ selectedVersion }}</span>
+              <span class="font-medium">{{ props.leagues[0]?.name }}</span>
+              <span class="text-sm text-gray-800">{{
+                props.leagues[0]?.season +
+                ": " +
+                capitalize(props.leagues[0]?.seasonType) +
+                " " +
+                props.leagues[0]?.totalRosters +
+                "-team"
+              }}</span>
             </div>
             <ChevronsUpDown class="ml-auto" />
           </SidebarMenuButton>
@@ -49,12 +52,12 @@ const selectedVersion = ref(props.defaultVersion);
           align="start"
         >
           <DropdownMenuItem
-            v-for="version in versions"
-            :key="version"
-            @select="selectedVersion = version"
+            v-for="league in leagues"
+            :key="league.leagueId"
+            @select="selectedVersion = league.leagueId"
           >
-            v{{ version }}
-            <Check v-if="version === selectedVersion" class="ml-auto" />
+            {{ league.name }}
+            <Check v-if="league.leagueId === selectedVersion" class="ml-auto" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

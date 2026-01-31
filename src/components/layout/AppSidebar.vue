@@ -108,10 +108,6 @@ const data = {
       </SidebarMenu>
     </SidebarHeader>
     <SidebarContent>
-      <!-- <LeagueSwitcher
-        :versions="data.versions"
-        :default-version="data.versions[0]"
-      /> -->
       <SidebarGroup v-for="item in data.navMain" :key="item.title">
         <SidebarGroupLabel>{{ item.title }}</SidebarGroupLabel>
         <SidebarGroupContent>
