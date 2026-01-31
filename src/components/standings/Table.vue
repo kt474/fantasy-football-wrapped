@@ -202,7 +202,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
 <template>
   <div class="mx-4">
     <div
-      v-if="store.currentTab === 'standings'"
+      v-if="store.currentTab === 'Standings'"
       class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"
     >
       <div
@@ -516,11 +516,11 @@ const getTeamName = (tableDataItem: TableDataType) => {
       </div>
     </div>
     <StandingsChart
-      v-if="store.currentTab === 'standings'"
+      v-if="store.currentTab === 'Standings'"
       :tableData="tableData"
       class="mt-4"
     />
-    <div v-if="store.currentTab === 'powerRankings'">
+    <div v-if="store.currentTab === 'Power Rankings'">
       <PowerRankingData
         v-if="store.currentLeagueId"
         :tableData="tableData"
@@ -542,7 +542,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
         class="mt-4"
       />
     </div>
-    <div v-if="store.currentTab === 'expectedWins'">
+    <div v-if="store.currentTab === 'Expected Wins'">
       <div class="flex flex-wrap md:flex-nowrap">
         <ExpectedWinsCard :tableData="tableData" class="mt-4" />
         <ExpectedWinsChart :tableData="tableData" class="mt-4 md:ml-4" />
@@ -553,7 +553,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       </div>
       <ScheduleAnalysis :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'managerEfficiency'">
+    <div v-if="store.currentTab === 'Roster Management'">
       <div class="flex flex-wrap md:flex-nowrap">
         <ManagementCard :tableData="tableData" class="mt-4" />
         <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
@@ -562,11 +562,11 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <Trades class="mt-4" />
       <Waivers class="mt-4" />
     </div>
-    <div v-if="store.currentTab === 'playoffs'">
+    <div v-if="store.currentTab === 'Playoffs'">
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
       <Playoffs :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'weeklyReport'">
+    <div v-if="store.currentTab === 'Weekly Report'">
       <WeeklyReport
         v-if="store.currentLeagueId"
         :tableData="tableData"
@@ -574,16 +574,16 @@ const getTeamName = (tableDataItem: TableDataType) => {
       />
       <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
     </div>
-    <div v-if="store.currentTab === 'draft'">
+    <div v-if="store.currentTab === 'Draft'">
       <Draft class="mt-4" />
     </div>
-    <div v-if="store.currentTab === 'startSit'">
+    <div v-if="store.currentTab === 'Start/Sit'">
       <PlayerNews :tableData="tableData" class="mt-4" />
     </div>
-    <div v-if="store.currentTab === 'leagueHistory'">
+    <div v-if="store.currentTab === 'League History'">
       <LeagueHistory :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'wrapped'">
+    <div v-if="store.currentTab === 'Wrapped'">
       <Wrapped :tableData="originalData" />
     </div>
     <div v-if="store.currentTab === 'fakeWrapped'">

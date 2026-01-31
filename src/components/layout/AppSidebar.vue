@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SidebarProps } from "@/components/ui/sidebar";
+import LeagueSwitcher from "./LeagueSwitcher.vue";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +24,7 @@ const changeTab = (tab: string) => {
 };
 
 const data = {
+  versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [
     {
       title: "Home",
@@ -89,7 +91,7 @@ const data = {
     <SidebarHeader
       ><SidebarMenu>
         <SidebarMenuItem>
-          <div class="flex items-center">
+          <div class="flex items-center ml-2 mt-1.5">
             <img
               height="24"
               width="24"
@@ -106,6 +108,10 @@ const data = {
       </SidebarMenu>
     </SidebarHeader>
     <SidebarContent>
+      <!-- <LeagueSwitcher
+        :versions="data.versions"
+        :default-version="data.versions[0]"
+      /> -->
       <SidebarGroup v-for="item in data.navMain" :key="item.title">
         <SidebarGroupLabel>{{ item.title }}</SidebarGroupLabel>
         <SidebarGroupContent>
@@ -116,9 +122,9 @@ const data = {
             >
               <SidebarMenuButton
                 as-child
-                :is-active="store.currentTab === childItem.url"
+                :is-active="store.currentTab === childItem.title"
               >
-                <p class="cursor-pointer" @click="changeTab(childItem.url)">
+                <p class="cursor-pointer" @click="changeTab(childItem.title)">
                   {{ childItem.title }}
                 </p>
               </SidebarMenuButton>

@@ -130,7 +130,8 @@ onMounted(async () => {
           orientation="vertical"
           class="mr-2 data-[orientation=vertical]:h-4"
         />
-        <CardContainer />
+        <!-- <CardContainer /> -->
+        <p class="mx-auto">{{ store.currentTab }}</p>
       </header>
       <div>
         <SkeletonLoading v-if="isInitialLoading" />
