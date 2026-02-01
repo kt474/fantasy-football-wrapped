@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import LeagueCard from "./LeagueCard.vue";
 import LeagueSwitcher from "../layout/LeagueSwitcher.vue";
+import { Button } from "@/components/ui/button";
+import { X, RefreshCcw, Share } from "lucide-vue-next";
 import { useStore } from "../../store/store";
 import { computed } from "vue";
+
+import { Separator } from "@/components/ui/separator";
 
 const store = useStore();
 
