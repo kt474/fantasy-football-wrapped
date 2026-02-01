@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, ChevronsUpDown, GalleryVerticalEnd } from "lucide-vue-next";
+import { Check, ChevronsUpDown, Plus } from "lucide-vue-next";
 import { capitalize } from "lodash";
 
 import { ref } from "vue";
@@ -58,6 +58,15 @@ const selectedVersion = ref(props.leagues[0]?.leagueId);
           >
             {{ league.name }}
             <Check v-if="league.leagueId === selectedVersion" class="ml-auto" />
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem class="gap-2 p-2">
+            <div
+              class="flex items-center justify-center bg-transparent border rounded-md size-6"
+            >
+              <Plus class="size-4" />
+            </div>
+            <div class="font-medium text-muted-foreground">Add team</div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -17,15 +17,12 @@ const showInput = () => {
     store.updateShowInput(!store.showInput);
   }
 };
-
-const data = {
-  versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
-};
 </script>
 <template>
   <div class="container flex mr-4">
     <div class="flex max-w-screen-xl overflow-auto no-scrollbar">
       <LeagueSwitcher :leagues="leagues" />
+
       <!-- <LeagueCard
         v-for="(leagueInfo, index) in leagues"
         :key="index"
