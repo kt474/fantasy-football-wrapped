@@ -29,6 +29,8 @@ import { LeagueInfoType } from "@/types/types";
 import { useStore } from "../../store/store";
 import { useRouter } from "vue-router";
 
+import { getData, inputLeague } from "../../api/api";
+
 const router = useRouter();
 const store = useStore();
 
@@ -38,6 +40,9 @@ const props = defineProps<{
 
 const selectedVersion = ref(props.leagues[0]?.leagueId);
 
+const selectLeague = () => {
+  store.updateCurrentLeagueId(props.leagues[0].leagueId);
+};
 const removeHistoryLeagues = () => {
   // Regular expression to match keys starting with a digit
   const numberStartRegex = /^[0-9]/;
@@ -90,6 +95,48 @@ const removeLeague = () => {
       store.updateRemovedAlert(false);
     }, 3000);
   }
+};
+
+const refreshLeague = async () => {
+  selectLeague();
+  store.$patch((state) => {
+    state.leagueInfo = state.leagueInfo.filter(
+      (item) => item.leagueId !== props.leagues[0].leagueId
+    );
+  });
+  if (localStorage.originalData) {
+    const currentData = JSON.parse(localStorage.originalData);
+    delete currentData[props.leagues[0].leagueId];
+    localStorage.originalData = JSON.stringify(currentData);
+  }
+  store.updateLoadingLeague(props.leagues[0].name);
+  store.updateLeagueInfo(await getData(props.leagues[0].leagueId));
+  store.showRefreshAlert = true;
+  store.updateLoadingLeague("");
+  setTimeout(() => {
+    store.showRefreshAlert = false;
+  }, 3000);
+  await inputLeague(
+    props.leagues[0].leagueId,
+    props.leagues[0].name,
+    props.leagues[0].totalRosters,
+    props.leagues[0].seasonType,
+    props.leagues[0].season
+  );
+};
+
+const shareLeague = () => {
+  const currentUrl =
+    window.location.protocol +
+    "//" +
+    window.location.host +
+    window.location.pathname;
+  const updatedURL = `${currentUrl}?leagueId=${props.leagues[0].leagueId}`;
+  navigator.clipboard.writeText(updatedURL);
+  store.showCopiedAlert = true;
+  setTimeout(() => {
+    store.showCopiedAlert = false;
+  }, 3000);
 };
 </script>
 
@@ -154,11 +201,11 @@ const removeLeague = () => {
         <X />
         <span class="sr-only">Remove League</span>
       </Button>
-      <Button variant="ghost" size="icon-sm">
+      <Button @click="refreshLeague" variant="ghost" size="icon-sm">
         <RefreshCcw />
         <span class="sr-only">Refresh League</span>
       </Button>
-      <Button variant="ghost" size="icon-sm">
+      <Button @click="shareLeague" variant="ghost" size="icon-sm">
         <Share />
         <span class="sr-only">Share League</span>
       </Button>
