@@ -21,7 +21,6 @@ import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
-import Test from "./Test.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -166,12 +165,12 @@ onMounted(async () => {
           <div v-else class="container mx-auto custom-background">
             <Intro />
             <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
-            <Tabs class="mt-4" />
-            <Table
+            <!-- <Tabs class="mt-4" /> -->
+            <!-- <Table
               :users="fakeUsers"
               :rosters="fakeRosters"
               :points="fakePoints"
-            />
+            /> -->
           </div>
         </div>
       </div>

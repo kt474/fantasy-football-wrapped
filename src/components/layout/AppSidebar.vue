@@ -32,7 +32,7 @@ const data = {
       items: [
         {
           title: "Add League",
-          url: "#",
+          url: "",
         },
       ],
     },
