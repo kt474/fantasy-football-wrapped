@@ -178,8 +178,14 @@ const shareLeague = () => {
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <Dialog />
-            <DropdownMenuItem class="gap-2 p-2"> </DropdownMenuItem>
+            <div class="flex">
+              <div
+                class="flex items-center justify-center bg-transparent border rounded-md size-6"
+              >
+                <Plus class="size-4" />
+              </div>
+              <Dialog />
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

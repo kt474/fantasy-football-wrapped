@@ -130,7 +130,6 @@ onMounted(async () => {
           class="mr-2 data-[orientation=vertical]:h-4"
         />
         <CardContainer />
-
         <p class="mx-auto">{{ store.currentTab }}</p>
       </header>
       <div>

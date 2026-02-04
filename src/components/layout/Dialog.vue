@@ -4,36 +4,34 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
+import Input from "../util/Input.vue";
 // import { Label } from "@/components/ui/label";
 </script>
 
 <template>
   <Dialog>
     <DialogTrigger as-child>
-      <Button variant="outline"> Share </Button>
+      <div class="ml-2 font-medium text-muted-foreground">Add League</div>
     </DialogTrigger>
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Share link</DialogTitle>
-        <DialogDescription>
-          Anyone who has this link will be able to view this.
-        </DialogDescription>
+        <DialogTitle>Add League</DialogTitle>
       </DialogHeader>
       <div class="flex items-center gap-2">
         <div class="grid flex-1 gap-2">
           <!-- <Label for="link" class="sr-only"> Link </Label> -->
-          <Input
+          <!-- <Input
             id="link"
             default-value="https://ui.shadcn.com/docs/installation"
             read-only
-          />
+          /> -->
+          <Input />
         </div>
       </div>
       <DialogFooter class="sm:justify-start">

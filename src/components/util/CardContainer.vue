@@ -24,7 +24,7 @@ const showInput = () => {
 <template>
   <div class="container flex mr-4">
     <div class="flex max-w-screen-xl overflow-auto no-scrollbar">
-      <LeagueSwitcher :leagues="leagues" />
+      <LeagueSwitcher v-if="leagues.length > 0" :leagues="leagues" />
 
       <!-- <LeagueCard
         v-for="(leagueInfo, index) in leagues"
