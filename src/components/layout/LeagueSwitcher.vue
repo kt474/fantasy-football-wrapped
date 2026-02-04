@@ -30,6 +30,7 @@ import { useStore } from "../../store/store";
 import { useRouter } from "vue-router";
 
 import { getData, inputLeague } from "../../api/api";
+import Dialog from "./Dialog.vue";
 
 const router = useRouter();
 const store = useStore();
@@ -164,10 +165,7 @@ const shareLeague = () => {
               <ChevronsUpDown class="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            class="w-(--reka-dropdown-menu-trigger-width)"
-            align="start"
-          >
+          <DropdownMenuContent class="w-72" align="start">
             <DropdownMenuItem
               v-for="league in leagues"
               :key="league.leagueId"
@@ -180,14 +178,8 @@ const shareLeague = () => {
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-2 p-2">
-              <div
-                class="flex items-center justify-center bg-transparent border rounded-md size-6"
-              >
-                <Plus class="size-4" />
-              </div>
-              <div class="font-medium text-muted-foreground">Add team</div>
-            </DropdownMenuItem>
+            <Dialog />
+            <DropdownMenuItem class="gap-2 p-2"> </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
