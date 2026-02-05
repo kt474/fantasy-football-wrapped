@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LeagueSwitcher from "../layout/LeagueSwitcher.vue";
+import Dialog from "../layout/Dialog.vue";
 import { Button } from "@/components/ui/button";
 import { X, RefreshCcw, Share } from "lucide-vue-next";
 import { useStore } from "../../store/store";
@@ -25,6 +26,9 @@ const showInput = () => {
   <div class="container flex mr-4">
     <div class="flex max-w-screen-xl overflow-auto no-scrollbar">
       <LeagueSwitcher v-if="leagues.length > 0" :leagues="leagues" />
+      <div v-else>
+        <Dialog />
+      </div>
 
       <!-- <LeagueCard
         v-for="(leagueInfo, index) in leagues"

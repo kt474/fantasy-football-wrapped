@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
 const store = useStore();
 
@@ -26,16 +27,16 @@ const changeTab = (tab: string) => {
 const data = {
   versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [
-    {
-      title: "Home",
-      url: "#",
-      items: [
-        {
-          title: "Add League",
-          url: "",
-        },
-      ],
-    },
+    // {
+    //   title: "Home",
+    //   url: "#",
+    //   items: [
+    //     {
+    //       title: "Add League",
+    //       url: "",
+    //     },
+    //   ],
+    // },
     {
       title: "League Insights",
       url: "#",
@@ -107,9 +108,13 @@ const data = {
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeader>
+    <Separator
+      orientation="horizontal"
+      class="mr-2 mt-2 data-[orientation=vertical]:h-4"
+    />
     <SidebarContent>
       <SidebarGroup v-for="item in data.navMain" :key="item.title">
-        <SidebarGroupLabel>{{ item.title }}</SidebarGroupLabel>
+        <!-- <SidebarGroupLabel>{{ item.title }}</SidebarGroupLabel> -->
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem

@@ -17,7 +17,9 @@ import Input from "../util/Input.vue";
 <template>
   <Dialog>
     <DialogTrigger as-child>
-      <div class="ml-2 font-medium text-muted-foreground">Add League</div>
+      <Button type="button" variant="outline" class="ml-2 font-medium">
+        Add League
+      </Button>
     </DialogTrigger>
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
@@ -34,11 +36,11 @@ import Input from "../util/Input.vue";
           <Input />
         </div>
       </div>
-      <DialogFooter class="sm:justify-start">
+      <!-- <DialogFooter class="sm:justify-start">
         <DialogClose as-child>
           <Button type="button" variant="secondary"> Close </Button>
         </DialogClose>
-      </DialogFooter>
+      </DialogFooter> -->
     </DialogContent>
   </Dialog>
 </template>

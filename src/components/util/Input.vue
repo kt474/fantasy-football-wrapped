@@ -2,6 +2,8 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { LeagueInfoType } from "../../types/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   getData,
   getLeague,
@@ -134,7 +136,7 @@ const onSubmit = async () => {
         <option>2021</option>
       </select>
       <div class="w-full">
-        <input
+        <Input
           v-model="leagueIdInput"
           type="text"
           id="default-input"
@@ -142,7 +144,6 @@ const onSubmit = async () => {
           :placeholder="
             inputType === 'League ID' ? 'Enter League ID' : 'Enter Username'
           "
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-base sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 min-w-16 sm:min-w-36"
         />
         <p
           v-if="showErrorMsg"
@@ -160,14 +161,9 @@ const onSubmit = async () => {
         </p>
       </div>
       <div class="sm:ml-4">
-        <button
-          aria-label="Button to submit league ID"
-          @click="onSubmit()"
-          type="submit"
-          class="text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-base sm:text-sm w-full sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 hidden sm:block"
-        >
+        <Button aria-label="Button to submit league ID" @click="onSubmit()">
           Submit
-        </button>
+        </Button>
       </div>
     </div>
     <div class="">
