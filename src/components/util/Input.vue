@@ -4,6 +4,15 @@ import { useStore } from "../../store/store";
 import { LeagueInfoType } from "../../types/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import {
   getData,
   getLeague,
@@ -115,14 +124,13 @@ const onSubmit = async () => {
     <div
       class="flex justify-start max-w-md mx-auto sm:max-w-lg lg:max-w-xl xl:max-w-full"
     >
-      <select
+      <!-- <select
         aria-label="Input type"
         v-model="inputType"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-base sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height custom-drop-width"
       >
         <option selected>League ID</option>
         <option>Username</option>
-      </select>
       <select
         aria-label="Season year"
         v-if="inputType === 'Username'"
@@ -134,7 +142,25 @@ const onSubmit = async () => {
         <option>2023</option>
         <option>2022</option>
         <option>2021</option>
-      </select>
+      </select> -->
+      <Select v-model="inputType">
+        <SelectTrigger>
+          <SelectValue placeholder="League ID" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="apple"> League ID </SelectItem>
+          <SelectItem value="banana"> Username </SelectItem>
+        </SelectContent>
+      </Select>
+      <Select v-if="inputType === 'Username'" v-model="seasonYear">
+        <SelectTrigger>
+          <SelectValue placeholder="League ID" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="apple"> League ID </SelectItem>
+          <SelectItem value="banana"> Username </SelectItem>
+        </SelectContent>
+      </Select>
       <div class="w-full">
         <Input
           v-model="leagueIdInput"
