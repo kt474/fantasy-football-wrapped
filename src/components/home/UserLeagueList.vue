@@ -69,7 +69,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="w-full" :class="{ 'h-screen': !store.currentLeagueId }">
+  <div class="w-full px-6" :class="{ 'h-screen': !store.currentLeagueId }">
     <h3
       class="my-4 text-2xl font-medium text-gray-900 dark:text-gray-50"
       :class="{ hidden: store.currentLeagueId }"

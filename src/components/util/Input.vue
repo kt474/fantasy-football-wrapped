@@ -143,13 +143,13 @@ const onSubmit = async () => {
         <option>2022</option>
         <option>2021</option>
       </select> -->
-      <Select v-model="inputType">
+      <Select class="mr-4" v-model="inputType">
         <SelectTrigger>
           <SelectValue placeholder="League ID" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="apple"> League ID </SelectItem>
-          <SelectItem value="banana"> Username </SelectItem>
+          <SelectItem value="League ID"> League ID </SelectItem>
+          <SelectItem value="Username"> Username </SelectItem>
         </SelectContent>
       </Select>
       <Select v-if="inputType === 'Username'" v-model="seasonYear">
@@ -157,12 +157,16 @@ const onSubmit = async () => {
           <SelectValue placeholder="League ID" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="apple"> League ID </SelectItem>
-          <SelectItem value="banana"> Username </SelectItem>
+          <SelectItem value="2025"> 2025 </SelectItem>
+          <SelectItem value="2024"> 2024 </SelectItem>
+          <SelectItem value="2023"> 2023 </SelectItem>
+          <SelectItem value="2022"> 2022 </SelectItem>
+          <SelectItem value="2021"> 2021 </SelectItem>
         </SelectContent>
       </Select>
       <div class="w-full">
         <Input
+          class="ml-2"
           v-model="leagueIdInput"
           type="text"
           id="default-input"
@@ -192,7 +196,7 @@ const onSubmit = async () => {
         </Button>
       </div>
     </div>
-    <div class="">
+    <!-- <div class="">
       <button
         aria-label="Button to submit league ID"
         @click="onSubmit()"
@@ -201,7 +205,7 @@ const onSubmit = async () => {
       >
         Submit
       </button>
-    </div>
+    </div> -->
   </div>
 </template>
 <style scoped>

@@ -15,13 +15,11 @@ import Input from "../util/Input.vue";
 </script>
 
 <template>
-  <Dialog>
+  <Dialog class="">
     <DialogTrigger as-child>
-      <Button type="button" variant="outline" class="ml-2 font-medium">
-        Add League
-      </Button>
+      <Button type="button" class="ml-2 font-medium"> Add League </Button>
     </DialogTrigger>
-    <DialogContent class="sm:max-w-md">
+    <DialogContent class="sm:max-w-lg">
       <DialogHeader>
         <DialogTitle>Add League</DialogTitle>
       </DialogHeader>

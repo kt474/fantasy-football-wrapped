@@ -42,6 +42,10 @@ const data = {
       url: "#",
       items: [
         {
+          title: "Home",
+          url: "home",
+        },
+        {
           title: "Standings",
           url: "standings",
         },
