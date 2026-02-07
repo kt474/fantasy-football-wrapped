@@ -130,8 +130,8 @@ const addNewLeague = async (season: string) => {
       ) {
         store.updateLeagueInfo(newLeagueInfo);
         store.updateCurrentLeagueId(newLeagueInfo.leagueId);
-        store.currentTab = "standings";
-        localStorage.currentTab = "standings";
+        store.currentTab = "Standings";
+        localStorage.currentTab = "Standings";
         store.updateShowAddedAlert(true);
         setTimeout(() => {
           store.updateShowAddedAlert(false);
@@ -590,8 +590,8 @@ const worstManager = computed(() => {
                         ? user.username
                         : "Ghost Roster"
                       : user.name
-                      ? user.name
-                      : "Ghost Roster"
+                        ? user.name
+                        : "Ghost Roster"
                   }}
                 </p>
               </div>

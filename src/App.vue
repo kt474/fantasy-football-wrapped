@@ -31,10 +31,10 @@ watch(
     } else {
       localStorage.currentLeagueId = store.currentLeagueId;
       if (
-        store.currentTab === "wrapped" &&
+        store.currentTab === "Wrapped" &&
         store.leagueInfo[store.currentLeagueIndex]?.season !== "2025"
       ) {
-        store.currentTab = "standings";
+        store.currentTab = "Standings";
       }
       if (store.currentLeagueId !== "undefined") {
         // update league id in url

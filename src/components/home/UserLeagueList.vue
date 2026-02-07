@@ -4,6 +4,7 @@ import { useStore } from "../../store/store";
 import { getData, inputLeague } from "../../api/api";
 import { seasonType } from "../../types/apiTypes";
 import { useRouter } from "vue-router";
+import { Button } from "../ui/button";
 
 const router = useRouter();
 const checkedLeagues = ref([]);
@@ -143,23 +144,20 @@ onMounted(() => {
     <p v-if="leagueCountError" class="-mt-1 text-red-600 dark:text-red-500">
       A maximum of 5 leagues can be active. Please remove a league first.
     </p>
-    <button
+    <Button
       v-if="store.leaguesList.length > 0"
       @click="addLeagues"
-      aria-label="Button to add leagues"
-      type="submit"
       :disabled="checkedLeagues.length == 0 || showError || leagueCountError"
       :class="{ 'cursor-not-allowed': checkedLeagues.length == 0 }"
-      class="text-gray-50 mt-4 sm:mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >
       Continue
       <span
-        class="inline-flex items-center justify-center w-4 h-4 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full ms-2"
+        class="inline-flex items-center justify-center w-4 h-4 text-xs font-semibold rounded-full ms-2"
       >
         {{ checkedLeagues.length }}
       </span>
-    </button>
-    <button
+    </Button>
+    <Button
       v-else
       @click="
         store.leaguesList = [];
@@ -167,10 +165,9 @@ onMounted(() => {
       "
       aria-label="Button to go back if there are no leagues"
       type="submit"
-      class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >
       Back
-    </button>
+    </Button>
   </div>
 </template>
 <style scoped>
