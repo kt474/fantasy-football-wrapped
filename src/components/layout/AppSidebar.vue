@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
-const store = useStore();
+import { useRoute } from "vue-router";
 
+const store = useStore();
+const route = useRoute();
 const props = defineProps<SidebarProps>();
 
 const changeTab = (tab: string) => {
@@ -23,7 +25,14 @@ const changeTab = (tab: string) => {
 };
 
 const data = {
-  footer: ["About", "Github", "Theme"],
+  footer: [
+    "About",
+    "Github",
+    "Changelog",
+    "Donate",
+    "Discord",
+    "Privacy Policy",
+  ],
   navMain: [
     {
       title: "League Insights",
@@ -136,10 +145,70 @@ const data = {
         />
         <SidebarGroupContent>
           <SidebarMenu>
-            <SidebarMenuItem v-for="item in data.footer" :key="item">
+            <SidebarMenuItem>
               <SidebarMenuButton as-child>
                 <a class="cursor-pointer">
-                  {{ item }}
+                  <router-link :to="{ path: '/about', query: $route.query }"
+                    >About</router-link
+                  >
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton as-child>
+                <a
+                  href="https://github.com/kt474/fantasy-football-wrapped"
+                  target="_blank"
+                  >Github</a
+                >
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton as-child>
+                <a class="cursor-pointer">
+                  <router-link :to="{ path: '/changelog', query: $route.query }"
+                    >Changelog</router-link
+                  >
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton as-child>
+                <a
+                  aria-label="buymeacoffee donation page"
+                  href="https://buymeacoffee.com/kt474"
+                  title="buymeacofee donation page"
+                  target="_blank"
+                  >Donate</a
+                >
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton as-child>
+                <a
+                  aria-label="discord community invite"
+                  href="https://discord.gg/sSVwNhyv7U"
+                  title="discord community invite"
+                  target="_blank"
+                  >Discord Community</a
+                >
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton as-child>
+                <a class="cursor-pointer">
+                  <router-link :to="{ path: '/privacy', query: $route.query }"
+                    >Privacy Policy</router-link
+                  >
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton as-child>
+                <a class="cursor-pointer">
+                  <router-link :to="{ path: '/changelog', query: $route.query }"
+                    >Changelog</router-link
+                  >
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
