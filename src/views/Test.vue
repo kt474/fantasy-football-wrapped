@@ -7,16 +7,15 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-
-import { onMounted, ref } from "vue";
+import { Sun, MoonStar } from "lucide-vue-next";
+import { Button } from "@/components/ui/button";
+import { onMounted, ref, computed, watch } from "vue";
 import CardContainer from "../components/util/CardContainer.vue";
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "../api/helper";
 import Input from "../components/util/Input.vue";
-import Intro from "../components/home/Intro.vue";
 import Table from "../components/standings/Table.vue";
-import Tabs from "../components/util/Tabs.vue";
 import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../types/types";
@@ -29,8 +28,14 @@ const store = useStore();
 const showLoading = ref(false);
 const isInitialLoading = ref(true);
 
+const systemDarkMode = window.matchMedia(
+  "(prefers-color-scheme: dark)"
+).matches;
+const clicked = ref(systemDarkMode);
+
 onMounted(async () => {
   try {
+    checkSystemTheme();
     if (localStorage.leagueInfo) {
       const savedLeagues = JSON.parse(localStorage.leagueInfo);
       await Promise.all(
@@ -117,12 +122,35 @@ onMounted(async () => {
     isInitialLoading.value = false;
   }
 });
+
+const checkSystemTheme = () => {
+  if (systemDarkMode && !localStorage.darkMode) {
+    clicked.value = true;
+    store.updateDarkMode(true);
+  } else if (localStorage.darkMode) {
+    clicked.value = JSON.parse(localStorage.darkMode);
+    store.updateDarkMode(clicked.value);
+  }
+};
+
+const darkMode = computed(() => {
+  return store.darkMode;
+});
+
+watch(clicked, () => {
+  localStorage.darkMode = clicked.value;
+  store.updateDarkMode(clicked.value);
+});
+
+const setColorMode = () => {
+  clicked.value = !clicked.value;
+};
 </script>
 
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset>
+    <SidebarInset class="flex flex-col h-screen">
       <header class="flex items-center h-16 gap-2 px-4 border-b shrink-0">
         <SidebarTrigger class="-ml-1" />
         <Separator
@@ -130,9 +158,28 @@ onMounted(async () => {
           class="mr-2 data-[orientation=vertical]:h-4"
         />
         <CardContainer />
-        <p class="mx-auto">{{ store.currentTab }}</p>
+        <Button
+          v-if="darkMode"
+          @click="setColorMode()"
+          class="ml-auto"
+          variant="ghost"
+          size="icon-sm"
+        >
+          <Sun />
+          <span class="sr-only">Remove League</span>
+        </Button>
+        <Button
+          v-else
+          @click="setColorMode()"
+          class="ml-auto"
+          variant="ghost"
+          size="icon-sm"
+        >
+          <MoonStar />
+          <span class="sr-only">Remove League</span>
+        </Button>
       </header>
-      <div>
+      <div class="flex-1 overflow-y-auto">
         <SkeletonLoading v-if="isInitialLoading" />
         <div v-else>
           <div v-if="store.currentLeagueId" class="container mx-auto">
@@ -146,8 +193,6 @@ onMounted(async () => {
                 !store.loadingUserLeagues
               "
             >
-              <!-- <CardContainer /> -->
-              <!-- <Tabs class="mt-4" /> -->
               <Table
                 :users="store.leagueUsers[store.currentLeagueIndex]"
                 :rosters="store.leagueRosters[store.currentLeagueIndex]"

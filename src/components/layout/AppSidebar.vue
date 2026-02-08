@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import type { SidebarProps } from "@/components/ui/sidebar";
-import LeagueSwitcher from "./LeagueSwitcher.vue";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -25,18 +23,8 @@ const changeTab = (tab: string) => {
 };
 
 const data = {
-  versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
+  footer: ["About", "Github", "Theme"],
   navMain: [
-    // {
-    //   title: "Home",
-    //   url: "#",
-    //   items: [
-    //     {
-    //       title: "Add League",
-    //       url: "",
-    //     },
-    //   ],
-    // },
     {
       title: "League Insights",
       url: "#",
@@ -112,6 +100,7 @@ const data = {
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeader>
+
     <Separator
       orientation="horizontal"
       class="mr-2 mt-2 data-[orientation=vertical]:h-4"
@@ -132,6 +121,26 @@ const data = {
                 <p class="cursor-pointer" @click="changeTab(childItem.title)">
                   {{ childItem.title }}
                 </p>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    </SidebarContent>
+
+    <SidebarContent>
+      <SidebarGroup class="mt-auto">
+        <Separator
+          orientation="horizontal"
+          class="mr-2 mb-2 data-[orientation=vertical]:h-4"
+        />
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem v-for="item in data.footer" :key="item">
+              <SidebarMenuButton as-child>
+                <a class="cursor-pointer">
+                  {{ item }}
+                </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

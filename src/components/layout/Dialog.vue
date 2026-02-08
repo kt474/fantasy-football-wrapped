@@ -59,6 +59,14 @@ watch(
   () => (localStorage.inputType = inputType.value)
 );
 
+watch(
+  () => open.value,
+  () => {
+    errorMsg.value = "";
+    showErrorMsg.value = false;
+  }
+);
+
 const onSubmit = async () => {
   if (inputType.value === "Username") {
     if (leagueIdInput.value === "") {
@@ -133,7 +141,9 @@ const onSubmit = async () => {
 <template>
   <Dialog v-model:open="open">
     <DialogTrigger as-child>
-      <Button type="button" class="ml-2 font-medium"> Add League </Button>
+      <Button type="button" size="sm" class="ml-2 text-sm font-medium">
+        Add League
+      </Button>
     </DialogTrigger>
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
