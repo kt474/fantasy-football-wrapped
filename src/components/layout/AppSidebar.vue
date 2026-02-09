@@ -23,6 +23,12 @@ import {
   TicketPercent,
   Trophy,
   Users,
+  Info,
+  ScrollText,
+  FolderGit,
+  HandCoins,
+  MessageSquareMore,
+  ShieldUser,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
@@ -186,73 +192,88 @@ const data = {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <a class="cursor-pointer">
+              <router-link
+                :to="{ path: '/about', query: $route.query }"
+                class="cursor-pointer"
+              >
                 <SidebarMenuButton as-child>
-                  <router-link :to="{ path: '/about', query: $route.query }"
-                    >About</router-link
-                  >
+                  <div>
+                    <Info />
+                    About
+                  </div>
                 </SidebarMenuButton>
-              </a>
+              </router-link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <a class="cursor-pointer">
+              <router-link
+                :to="{ path: '/changelog', query: $route.query }"
+                class="cursor-pointer"
+              >
                 <SidebarMenuButton as-child>
-                  <router-link :to="{ path: '/changelog', query: $route.query }"
-                    >Changelog</router-link
-                  >
+                  <div>
+                    <ScrollText />
+                    Changelog
+                  </div>
                 </SidebarMenuButton>
-              </a>
+              </router-link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton as-child>
-                <a
-                  href="https://github.com/kt474/fantasy-football-wrapped"
-                  target="_blank"
-                  >Github</a
-                >
-              </SidebarMenuButton>
+              <a
+                href="https://github.com/kt474/fantasy-football-wrapped"
+                target="_blank"
+              >
+                <SidebarMenuButton as-child>
+                  <div>
+                    <FolderGit />
+                    Github
+                  </div>
+                </SidebarMenuButton>
+              </a>
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton as-child>
-                <a
-                  aria-label="buymeacoffee donation page"
-                  href="https://buymeacoffee.com/kt474"
-                  title="buymeacofee donation page"
-                  target="_blank"
-                  >Donate</a
-                >
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton as-child>
-                <a
-                  aria-label="discord community invite"
-                  href="https://discord.gg/sSVwNhyv7U"
-                  title="discord community invite"
-                  target="_blank"
-                  >Discord</a
-                >
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <a class="cursor-pointer">
+              <a
+                aria-label="buymeacoffee donation page"
+                href="https://buymeacoffee.com/kt474"
+                title="buymeacofee donation page"
+                target="_blank"
+              >
                 <SidebarMenuButton as-child>
-                  <router-link :to="{ path: '/privacy', query: $route.query }"
-                    >Privacy Policy</router-link
-                  >
-                </SidebarMenuButton></a
+                  <div>
+                    <HandCoins />
+                    Donate
+                  </div>
+                </SidebarMenuButton>
+              </a>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <a
+                aria-label="discord community invite"
+                href="https://discord.gg/sSVwNhyv7U"
+                title="discord community invite"
+                target="_blank"
+              >
+                <SidebarMenuButton as-child>
+                  <div>
+                    <MessageSquareMore />
+                    Discord
+                  </div>
+                </SidebarMenuButton>
+              </a>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <router-link
+                :to="{ path: '/privacy', query: $route.query }"
+                class="cursor-pointer"
+              >
+                <SidebarMenuButton as-child>
+                  <div>
+                    <ShieldUser />
+                    Privacy Policy
+                  </div>
+                </SidebarMenuButton></router-link
               >
             </SidebarMenuItem>
-            <!-- <SidebarMenuItem>
-              <SidebarMenuButton as-child>
-                <a class="cursor-pointer">
-                  <router-link :to="{ path: '/changelog', query: $route.query }"
-                    >Changelog</router-link
-                  >
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem> -->
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
