@@ -190,7 +190,7 @@ const data = {
                   href="https://discord.gg/sSVwNhyv7U"
                   title="discord community invite"
                   target="_blank"
-                  >Discord Community</a
+                  >Discord</a
                 >
               </SidebarMenuButton>
             </SidebarMenuItem>

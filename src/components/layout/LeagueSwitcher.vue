@@ -165,27 +165,43 @@ const shareLeague = () => {
               <ChevronsUpDown class="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent class="w-72" align="start">
+          <DropdownMenuContent class="w-60" align="start">
             <DropdownMenuItem
               v-for="league in leagues"
               :key="league.leagueId"
               @select="selectedVersion = league.leagueId"
             >
-              {{ league.name }}
+              <div>
+                <p>{{ league.name }}</p>
+                <p class="text-xs text-gray-800">
+                  {{
+                    league.season +
+                    ": " +
+                    capitalize(league.seasonType) +
+                    " " +
+                    props.leagues[0]?.totalRosters +
+                    "-team"
+                  }}
+                </p>
+              </div>
               <Check
                 v-if="league.leagueId === selectedVersion"
                 class="ml-auto"
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <div class="flex">
-              <div
-                class="flex items-center justify-center bg-transparent border rounded-md size-6"
-              >
-                <Plus class="size-4" />
-              </div>
-              <Dialog />
-            </div>
+            <Dialog>
+              <template #trigger>
+                <div class="flex p-1 cursor-default hover:bg-neutral-100">
+                  <div
+                    class="flex items-center justify-center bg-transparent border rounded-md size-6"
+                  >
+                    <Plus class="size-4" />
+                  </div>
+                  <p class="ml-2 mt-0.5 text-sm text-gray-700">Add League</p>
+                </div>
+              </template>
+            </Dialog>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

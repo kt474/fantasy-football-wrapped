@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import LeagueSwitcher from "../layout/LeagueSwitcher.vue";
 import Dialog from "../layout/Dialog.vue";
+import { Button } from "../ui/button";
 
 import { useStore } from "../../store/store";
 import { computed } from "vue";
@@ -16,7 +17,13 @@ const leagues = computed(() => {
     <div class="flex overflow-auto no-scrollbar">
       <LeagueSwitcher v-if="leagues.length > 0" :leagues="leagues" />
       <div v-else>
-        <Dialog />
+        <Dialog>
+          <template #trigger>
+            <Button type="button" size="sm" class="ml-2 text-sm font-medium">
+              Add League
+            </Button>
+          </template>
+        </Dialog>
       </div>
     </div>
   </div>

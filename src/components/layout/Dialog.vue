@@ -141,9 +141,7 @@ const onSubmit = async () => {
 <template>
   <Dialog v-model:open="open">
     <DialogTrigger as-child>
-      <Button type="button" size="sm" class="ml-2 text-sm font-medium">
-        Add League
-      </Button>
+      <slot name="trigger" />
     </DialogTrigger>
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
