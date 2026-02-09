@@ -183,7 +183,7 @@ const worstPicks = computed(() => {
 });
 
 const draftSteal = computed(() => {
-  if (league.value.draftPicks && league.value.draftPicks.length <= 48)
+  if (league.value?.draftPicks && league.value?.draftPicks.length <= 48)
     return [];
   if (league.value.draftMetadata?.draftType !== "auction") {
     return league.value.draftPicks
@@ -504,7 +504,7 @@ const winStreak = computed(() => {
 
 const totalSlides = computed(() => {
   let total = 17;
-  if (league.value.previousLeagues.length > 0) {
+  if (league.value?.previousLeagues.length > 0) {
     total += 1;
   }
   if (draftSteal.value && draftSteal.value.length > 0) {
@@ -761,7 +761,7 @@ watch(
 );
 
 watch(
-  () => league.value.draftGrades,
+  () => league.value?.draftGrades,
   () => (loading.value = false)
 );
 </script>

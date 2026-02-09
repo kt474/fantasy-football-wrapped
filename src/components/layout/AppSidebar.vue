@@ -58,57 +58,46 @@ const data = {
       items: [
         {
           title: "Home",
-          url: "home",
           icon: Home,
         },
         {
           title: "Standings",
-          url: "standings",
           icon: ChartColumn,
         },
         {
           title: "Power Rankings",
-          url: "powerRankings",
           icon: ChartNoAxesCombined,
         },
         {
           title: "Expected Wins",
-          url: "expectedWins",
           icon: TicketPercent,
         },
         {
           title: "Roster Management",
-          url: "managerEfficiency",
           icon: Move3D,
         },
         {
           title: "Playoffs",
-          url: "playoffs",
           icon: Trophy,
         },
         {
           title: "Weekly Report",
-          url: "weeklyReport",
           icon: NotebookPen,
         },
         {
           title: "Start/Sit",
-          url: "startSit",
           icon: Newspaper,
         },
         {
           title: "Draft",
-          url: "draft",
           icon: Users,
         },
         {
           title: "League History",
-          url: "leagueHistory",
           icon: FolderClock,
         },
         {
           title: "Wrapped",
-          url: "wrapped",
           icon: Gift,
         },
       ],
