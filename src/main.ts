@@ -10,12 +10,21 @@ import App from "./App.vue";
 import posthogPlugin from "../plugins/posthog";
 import ChangelogPage from "./views/Changelog.vue";
 import PrivacyPolicy from "./views/PrivacyPolicy.vue";
+import About from "./views/About.vue";
 import Contact from "./views/Contact.vue";
 import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
 
 const routes = [
   { path: "/", component: Home },
+  {
+    path: "/about",
+    component: About,
+    meta: {
+      title: "About",
+      description: "Site description",
+    },
+  },
   {
     path: "/changelog",
     component: ChangelogPage,

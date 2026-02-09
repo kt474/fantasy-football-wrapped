@@ -1,16 +1,42 @@
 <script setup lang="ts">
-import { onMounted, watch } from "vue";
-import Header from "./components/util/Header.vue";
-import Footer from "./components/util/Footer.vue";
+import { onMounted, watch, ref, computed } from "vue";
+import AppSidebar from "@/components/layout/AppSidebar.vue";
+import CardContainer from "./components/util/CardContainer.vue";
 import Alert from "./components/util/Alert.vue";
-// import Email from "./components/util/Email.vue";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./types/types";
 import { inject } from "@vercel/analytics";
 import { useRouter } from "vue-router";
 
+import { Separator } from "@/components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Sun, MoonStar } from "lucide-vue-next";
+import { Button } from "@/components/ui/button";
+
 const router = useRouter();
 const store = useStore();
+
+const systemDarkMode = window.matchMedia(
+  "(prefers-color-scheme: dark)"
+).matches;
+const clicked = ref(systemDarkMode);
+
+const darkMode = computed(() => {
+  return store.darkMode;
+});
+
+watch(clicked, () => {
+  localStorage.darkMode = clicked.value;
+  store.updateDarkMode(clicked.value);
+});
+
+const setColorMode = () => {
+  clicked.value = !clicked.value;
+};
 
 onMounted(async () => {
   inject();
@@ -92,14 +118,46 @@ const setHtmlBackground = () => {
 </script>
 
 <template>
-  <div :class="{ dark: store.darkMode }" class="h-screen">
-    <div class="h-full bg-gray-50 dark:bg-gray-950">
-      <!-- <Header /> -->
-      <!-- <div class="w-full border-b border-gray-200 dark:border-gray-600"></div> -->
-      <RouterView />
-      <!-- <Footer /> -->
+  <div :class="{ dark: store.darkMode }">
+    <div>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset class="flex flex-col h-screen">
+          <header class="flex items-center h-16 gap-2 px-4 border-b shrink-0">
+            <SidebarTrigger class="-ml-1" />
+            <Separator
+              orientation="vertical"
+              class="mr-2 data-[orientation=vertical]:h-4"
+            />
+            <CardContainer />
+            <Button
+              v-if="darkMode"
+              @click="setColorMode()"
+              class="ml-auto"
+              variant="ghost"
+              size="icon-sm"
+            >
+              <Sun />
+              <span class="sr-only">Remove League</span>
+            </Button>
+            <Button
+              v-else
+              @click="setColorMode()"
+              class="ml-auto"
+              variant="ghost"
+              size="icon-sm"
+            >
+              <MoonStar />
+              <span class="sr-only">Remove League</span>
+            </Button>
+          </header>
+          <main class="flex-1 overflow-y-auto">
+            <RouterView />
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
     </div>
-    <!-- <Email /> -->
+
     <Alert
       v-if="store.showEmailAlert"
       alert-msg="Thanks for subscribing!"

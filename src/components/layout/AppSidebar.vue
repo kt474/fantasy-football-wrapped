@@ -13,13 +13,22 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const store = useStore();
 const route = useRoute();
+const router = useRouter();
 const props = defineProps<SidebarProps>();
 
+const goBackToHome = () => {
+  const currentQueryParams = route.query;
+  router.push({ path: "/", query: currentQueryParams });
+};
+
 const changeTab = (tab: string) => {
+  if (route.path !== "/") {
+    goBackToHome();
+  }
   store.currentTab = tab;
   localStorage.currentTab = tab;
 };
@@ -106,7 +115,6 @@ const data = {
     />
     <SidebarContent>
       <SidebarGroup v-for="item in data.navMain">
-        <!-- <SidebarGroupLabel>{{ item.title }}</SidebarGroupLabel> -->
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem
@@ -135,9 +143,7 @@ const data = {
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
-    </SidebarContent>
 
-    <SidebarContent>
       <SidebarGroup class="mt-auto">
         <Separator
           orientation="horizontal"
@@ -146,13 +152,22 @@ const data = {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton as-child>
-                <a class="cursor-pointer">
+              <a class="cursor-pointer">
+                <SidebarMenuButton as-child>
                   <router-link :to="{ path: '/about', query: $route.query }"
                     >About</router-link
                   >
-                </a>
-              </SidebarMenuButton>
+                </SidebarMenuButton>
+              </a>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <a class="cursor-pointer">
+                <SidebarMenuButton as-child>
+                  <router-link :to="{ path: '/changelog', query: $route.query }"
+                    >Changelog</router-link
+                  >
+                </SidebarMenuButton>
+              </a>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton as-child>
@@ -163,15 +178,7 @@ const data = {
                 >
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton as-child>
-                <a class="cursor-pointer">
-                  <router-link :to="{ path: '/changelog', query: $route.query }"
-                    >Changelog</router-link
-                  >
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+
             <SidebarMenuItem>
               <SidebarMenuButton as-child>
                 <a
@@ -195,15 +202,15 @@ const data = {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton as-child>
-                <a class="cursor-pointer">
+              <a class="cursor-pointer">
+                <SidebarMenuButton as-child>
                   <router-link :to="{ path: '/privacy', query: $route.query }"
                     >Privacy Policy</router-link
                   >
-                </a>
-              </SidebarMenuButton>
+                </SidebarMenuButton></a
+              >
             </SidebarMenuItem>
-            <SidebarMenuItem>
+            <!-- <SidebarMenuItem>
               <SidebarMenuButton as-child>
                 <a class="cursor-pointer">
                   <router-link :to="{ path: '/changelog', query: $route.query }"
@@ -211,7 +218,7 @@ const data = {
                   >
                 </a>
               </SidebarMenuButton>
-            </SidebarMenuItem>
+            </SidebarMenuItem> -->
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>

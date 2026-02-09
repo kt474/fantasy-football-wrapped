@@ -1,16 +1,6 @@
 <script setup lang="ts">
-import AppSidebar from "@/components/layout/AppSidebar.vue";
-
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Sun, MoonStar } from "lucide-vue-next";
-import { Button } from "@/components/ui/button";
 import { onMounted, ref, computed, watch } from "vue";
-import CardContainer from "../components/util/CardContainer.vue";
+
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "../api/helper";
@@ -132,92 +122,42 @@ const checkSystemTheme = () => {
     store.updateDarkMode(clicked.value);
   }
 };
-
-const darkMode = computed(() => {
-  return store.darkMode;
-});
-
-watch(clicked, () => {
-  localStorage.darkMode = clicked.value;
-  store.updateDarkMode(clicked.value);
-});
-
-const setColorMode = () => {
-  clicked.value = !clicked.value;
-};
 </script>
 
 <template>
-  <SidebarProvider>
-    <AppSidebar />
-    <SidebarInset class="flex flex-col h-screen">
-      <header class="flex items-center h-16 gap-2 px-4 border-b shrink-0">
-        <SidebarTrigger class="-ml-1" />
-        <Separator
-          orientation="vertical"
-          class="mr-2 data-[orientation=vertical]:h-4"
-        />
-        <CardContainer />
-        <Button
-          v-if="darkMode"
-          @click="setColorMode()"
-          class="ml-auto"
-          variant="ghost"
-          size="icon-sm"
-        >
-          <Sun />
-          <span class="sr-only">Remove League</span>
-        </Button>
-        <Button
-          v-else
-          @click="setColorMode()"
-          class="ml-auto"
-          variant="ghost"
-          size="icon-sm"
-        >
-          <MoonStar />
-          <span class="sr-only">Remove League</span>
-        </Button>
-      </header>
-      <div class="flex-1 overflow-y-auto">
-        <SkeletonLoading v-if="isInitialLoading" />
-        <div v-else>
-          <div v-if="store.currentLeagueId" class="container mx-auto">
-            <Input v-if="store.showInput" class="custom-input-width" />
-            <div v-if="store.showLeaguesList" class="container mx-auto">
-              <UserLeagueList />
-            </div>
-            <div
-              v-if="
-                store.leagueUsers[store.currentLeagueIndex] &&
-                !store.loadingUserLeagues
-              "
-            >
-              <Table
-                :users="store.leagueUsers[store.currentLeagueIndex]"
-                :rosters="store.leagueRosters[store.currentLeagueIndex]"
-                :points="store.weeklyPoints[store.currentLeagueIndex]"
-              />
-            </div>
-            <SkeletonLoading v-else />
-          </div>
-          <div v-else-if="store.showLeaguesList" class="container mx-auto">
-            <UserLeagueList />
-          </div>
-
-          <SkeletonLoading v-else-if="showLoading" />
-          <div v-else class="container mx-auto">
-            <!-- <Intro />
-            <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" /> -->
-            <!-- <Tabs class="mt-4" /> -->
-            <Table
-              :users="fakeUsers"
-              :rosters="fakeRosters"
-              :points="fakePoints"
-            />
-          </div>
+  <div>
+    <SkeletonLoading v-if="isInitialLoading" />
+    <div v-else>
+      <div v-if="store.currentLeagueId" class="container mx-auto">
+        <Input v-if="store.showInput" class="custom-input-width" />
+        <div v-if="store.showLeaguesList" class="container mx-auto">
+          <UserLeagueList />
         </div>
+        <div
+          v-if="
+            store.leagueUsers[store.currentLeagueIndex] &&
+            !store.loadingUserLeagues
+          "
+        >
+          <Table
+            :users="store.leagueUsers[store.currentLeagueIndex]"
+            :rosters="store.leagueRosters[store.currentLeagueIndex]"
+            :points="store.weeklyPoints[store.currentLeagueIndex]"
+          />
+        </div>
+        <SkeletonLoading v-else />
       </div>
-    </SidebarInset>
-  </SidebarProvider>
+      <div v-else-if="store.showLeaguesList" class="container mx-auto">
+        <UserLeagueList />
+      </div>
+
+      <SkeletonLoading v-else-if="showLoading" />
+      <div v-else class="container mx-auto">
+        <!-- <Intro />
+            <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" /> -->
+        <!-- <Tabs class="mt-4" /> -->
+        <Table :users="fakeUsers" :rosters="fakeRosters" :points="fakePoints" />
+      </div>
+    </div>
+  </div>
 </template>
