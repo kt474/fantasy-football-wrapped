@@ -11,6 +11,19 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import {
+  ChartColumn,
+  ChartNoAxesCombined,
+  FolderClock,
+  Gift,
+  Home,
+  Move3D,
+  Newspaper,
+  NotebookPen,
+  TicketPercent,
+  Trophy,
+  Users,
+} from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
 import { useRoute, useRouter } from "vue-router";
@@ -40,46 +53,57 @@ const data = {
         {
           title: "Home",
           url: "home",
+          icon: Home,
         },
         {
           title: "Standings",
           url: "standings",
+          icon: ChartColumn,
         },
         {
           title: "Power Rankings",
           url: "powerRankings",
+          icon: ChartNoAxesCombined,
         },
         {
           title: "Expected Wins",
           url: "expectedWins",
+          icon: TicketPercent,
         },
         {
           title: "Roster Management",
           url: "managerEfficiency",
+          icon: Move3D,
         },
         {
           title: "Playoffs",
           url: "playoffs",
+          icon: Trophy,
         },
         {
           title: "Weekly Report",
           url: "weeklyReport",
+          icon: NotebookPen,
         },
         {
           title: "Start/Sit",
           url: "startSit",
+          icon: Newspaper,
         },
         {
           title: "Draft",
           url: "draft",
+          icon: Users,
         },
         {
           title: "League History",
           url: "leagueHistory",
+          icon: FolderClock,
         },
         {
           title: "Wrapped",
           url: "wrapped",
+          icon: Gift,
         },
       ],
     },
@@ -125,19 +149,29 @@ const data = {
                 v-if="childItem.title !== 'Home'"
                 as-child
                 :is-active="store.currentTab === childItem.title"
+                @click="changeTab(childItem.title)"
+                class="cursor-pointer"
               >
-                <p class="cursor-pointer" @click="changeTab(childItem.title)">
-                  {{ childItem.title }}
-                </p>
+                <div>
+                  <component :is="childItem.icon" v-if="childItem.icon" />
+                  <p>
+                    {{ childItem.title }}
+                  </p>
+                </div>
               </SidebarMenuButton>
               <SidebarMenuButton
                 v-else-if="!store.currentLeagueId"
                 as-child
                 :is-active="store.currentTab === childItem.title"
+                @click="changeTab(childItem.title)"
+                class="cursor-pointer"
               >
-                <p class="cursor-pointer" @click="changeTab(childItem.title)">
-                  {{ childItem.title }}
-                </p>
+                <div>
+                  <component :is="childItem.icon" v-if="childItem.icon" />
+                  <p>
+                    {{ childItem.title }}
+                  </p>
+                </div>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
