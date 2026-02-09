@@ -96,7 +96,7 @@ const removeLeague = () => {
       localStorage.removeItem("currentTab");
       removeHistoryLeagues();
       store.showUsernames = false;
-      store.currentTab = "Standings";
+      store.currentTab = "Home";
       // reset url if there are no leagues
       router.replace({
         path: "/",
@@ -181,18 +181,20 @@ const shareLeague = () => {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent class="w-60" align="start">
-            <DropdownMenuItem
-              v-for="league in leagues"
-              :key="league.leagueId"
-              @select="currentLeagueId = league.leagueId"
-            >
+            <DropdownMenuItem v-for="league in leagues" :key="league.leagueId">
               <div @click="selectLeague(league.leagueId)">
                 <p class="truncate max-w-40">{{ league.name }}</p>
                 <p class="text-xs text-gray-800">
-                  {{ leagueMetadata }}
+                  {{
+                    league.season +
+                    ": " +
+                    capitalize(league.seasonType) +
+                    " " +
+                    league.totalRosters +
+                    "-team"
+                  }}
                 </p>
               </div>
-
               <Check
                 v-if="league.leagueId === currentLeagueId"
                 class="ml-auto"

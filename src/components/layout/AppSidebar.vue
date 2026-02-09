@@ -25,18 +25,8 @@ const changeTab = (tab: string) => {
 };
 
 const data = {
-  footer: [
-    "About",
-    "Github",
-    "Changelog",
-    "Donate",
-    "Discord",
-    "Privacy Policy",
-  ],
   navMain: [
     {
-      title: "League Insights",
-      url: "#",
       items: [
         {
           title: "Home",
@@ -115,7 +105,7 @@ const data = {
       class="mr-2 mt-2 data-[orientation=vertical]:h-4"
     />
     <SidebarContent>
-      <SidebarGroup v-for="item in data.navMain" :key="item.title">
+      <SidebarGroup v-for="item in data.navMain">
         <!-- <SidebarGroupLabel>{{ item.title }}</SidebarGroupLabel> -->
         <SidebarGroupContent>
           <SidebarMenu>
@@ -124,6 +114,16 @@ const data = {
               :key="childItem.title"
             >
               <SidebarMenuButton
+                v-if="childItem.title !== 'Home'"
+                as-child
+                :is-active="store.currentTab === childItem.title"
+              >
+                <p class="cursor-pointer" @click="changeTab(childItem.title)">
+                  {{ childItem.title }}
+                </p>
+              </SidebarMenuButton>
+              <SidebarMenuButton
+                v-else-if="!store.currentLeagueId"
                 as-child
                 :is-active="store.currentTab === childItem.title"
               >

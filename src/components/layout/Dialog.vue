@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -146,10 +147,13 @@ const onSubmit = async () => {
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
         <DialogTitle>Add League</DialogTitle>
+        <DialogDescription>
+          Enter your Sleeper league ID or username.
+        </DialogDescription>
       </DialogHeader>
       <div class="flex items-center gap-2">
         <div class="grid flex-1 gap-2">
-          <div class="container mt-4">
+          <div class="container mt-2">
             <div
               class="flex justify-start max-w-md gap-2 mx-auto sm:max-w-lg lg:max-w-xl xl:max-w-full"
             >
