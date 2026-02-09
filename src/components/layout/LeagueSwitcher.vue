@@ -11,7 +11,7 @@ import { capitalize } from "lodash";
 
 import { Button } from "@/components/ui/button";
 import Separator from "../ui/separator/Separator.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,10 +39,30 @@ const props = defineProps<{
   leagues: LeagueInfoType[];
 }>();
 
-const selectedVersion = ref(props.leagues[0]?.leagueId);
+const currentLeague = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex];
+});
 
-const selectLeague = () => {
-  store.updateCurrentLeagueId(props.leagues[0].leagueId);
+const currentLeagueId = computed(() => {
+  return store.currentLeagueId;
+});
+
+const leagueMetadata = computed(() => {
+  if (currentLeague.value) {
+    return (
+      currentLeague?.value.season +
+      ": " +
+      capitalize(currentLeague?.value.seasonType) +
+      " " +
+      currentLeague?.value.totalRosters +
+      "-team"
+    );
+  }
+  return "";
+});
+
+const selectLeague = (leagueId: string) => {
+  store.updateCurrentLeagueId(leagueId);
 };
 const removeHistoryLeagues = () => {
   // Regular expression to match keys starting with a digit
@@ -60,14 +80,14 @@ const removeHistoryLeagues = () => {
 };
 const removeLeague = () => {
   if (localStorage.leagueInfo) {
-    if (props.leagues[0].previousLeagues) {
-      props.leagues[0].previousLeagues.forEach((league: LeagueInfoType) => {
+    if (currentLeague.value.previousLeagues) {
+      currentLeague.value.previousLeagues.forEach((league: LeagueInfoType) => {
         localStorage.removeItem(league.leagueId);
       });
     }
     store.$patch((state) => {
       state.leagueInfo = state.leagueInfo.filter(
-        (item) => item.leagueId !== props.leagues[0].leagueId
+        (item) => item.leagueId !== currentLeagueId.value
       );
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
@@ -85,7 +105,7 @@ const removeLeague = () => {
     }
     if (localStorage.originalData) {
       const currentData = JSON.parse(localStorage.originalData);
-      delete currentData[props.leagues[0].leagueId];
+      delete currentData[currentLeagueId.value];
       if (Object.keys(currentData).length == 0) {
         localStorage.removeItem("originalData");
       } else {
@@ -99,30 +119,30 @@ const removeLeague = () => {
 };
 
 const refreshLeague = async () => {
-  selectLeague();
+  selectLeague(currentLeagueId.value);
   store.$patch((state) => {
     state.leagueInfo = state.leagueInfo.filter(
-      (item) => item.leagueId !== props.leagues[0].leagueId
+      (item) => item.leagueId !== currentLeagueId.value
     );
   });
   if (localStorage.originalData) {
     const currentData = JSON.parse(localStorage.originalData);
-    delete currentData[props.leagues[0].leagueId];
+    delete currentData[currentLeagueId.value];
     localStorage.originalData = JSON.stringify(currentData);
   }
-  store.updateLoadingLeague(props.leagues[0].name);
-  store.updateLeagueInfo(await getData(props.leagues[0].leagueId));
+  store.updateLoadingLeague(currentLeague.value?.name);
+  store.updateLeagueInfo(await getData(currentLeagueId.value));
   store.showRefreshAlert = true;
   store.updateLoadingLeague("");
   setTimeout(() => {
     store.showRefreshAlert = false;
   }, 3000);
   await inputLeague(
-    props.leagues[0].leagueId,
-    props.leagues[0].name,
-    props.leagues[0].totalRosters,
-    props.leagues[0].seasonType,
-    props.leagues[0].season
+    currentLeague.value.leagueId,
+    currentLeague.value.name,
+    currentLeague.value.totalRosters,
+    currentLeague.value.seasonType,
+    currentLeague.value.season
   );
 };
 
@@ -132,7 +152,7 @@ const shareLeague = () => {
     "//" +
     window.location.host +
     window.location.pathname;
-  const updatedURL = `${currentUrl}?leagueId=${props.leagues[0].leagueId}`;
+  const updatedURL = `${currentUrl}?leagueId=${currentLeague.value.leagueId}`;
   navigator.clipboard.writeText(updatedURL);
   store.showCopiedAlert = true;
   setTimeout(() => {
@@ -151,16 +171,11 @@ const shareLeague = () => {
               size="lg"
               class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div class="flex flex-col gap-0.5 leading-none">
-                <span class="font-medium">{{ props.leagues[0]?.name }}</span>
-                <span class="text-sm text-gray-800">{{
-                  props.leagues[0]?.season +
-                  ": " +
-                  capitalize(props.leagues[0]?.seasonType) +
-                  " " +
-                  props.leagues[0]?.totalRosters +
-                  "-team"
+              <div class="flex flex-col gap-0.5 leading-none w-40">
+                <span class="font-medium truncate">{{
+                  currentLeague?.name ?? "Loading... "
                 }}</span>
+                <span class="text-sm text-gray-800">{{ leagueMetadata }}</span>
               </div>
               <ChevronsUpDown class="ml-auto" />
             </SidebarMenuButton>
@@ -169,23 +184,17 @@ const shareLeague = () => {
             <DropdownMenuItem
               v-for="league in leagues"
               :key="league.leagueId"
-              @select="selectedVersion = league.leagueId"
+              @select="currentLeagueId = league.leagueId"
             >
-              <div>
-                <p>{{ league.name }}</p>
+              <div @click="selectLeague(league.leagueId)">
+                <p class="truncate max-w-40">{{ league.name }}</p>
                 <p class="text-xs text-gray-800">
-                  {{
-                    league.season +
-                    ": " +
-                    capitalize(league.seasonType) +
-                    " " +
-                    props.leagues[0]?.totalRosters +
-                    "-team"
-                  }}
+                  {{ leagueMetadata }}
                 </p>
               </div>
+
               <Check
-                v-if="league.leagueId === selectedVersion"
+                v-if="league.leagueId === currentLeagueId"
                 class="ml-auto"
               />
             </DropdownMenuItem>
