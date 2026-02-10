@@ -6,6 +6,7 @@ import { RosterType, LeagueInfoType } from "../../types/types";
 import { fakeProjectionData } from "../../api/helper";
 import { getProjections } from "../../api/api";
 import HeatMap from "./HeatMap.vue";
+import Card from "../ui/card/Card.vue";
 
 const store = useStore();
 const loading = ref(false);
@@ -370,14 +371,10 @@ const chartOptions = ref({
 <template>
   <div>
     <div v-if="!loading">
-      <div
-        class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
-      >
+      <Card class="w-full p-4 md:p-6 min-w-80">
         <div class="flex justify-between">
           <div>
-            <h1
-              class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-            >
+            <h1 class="pb-2 text-3xl font-bold leading-none">
               Roster Projections
             </h1>
           </div>
@@ -388,13 +385,11 @@ const chartOptions = ref({
           :options="chartOptions"
           :series="seriesData"
         ></apexchart>
-        <p
-          class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
-        >
+        <p class="mt-6 text-xs sm:-mb-4 footer-font text-muted-foreground">
           Rest of season projected points data from the Sleeper API. If the
           season is complete, entire season projections are shown.
         </p>
-      </div>
+      </Card>
       <HeatMap :formattedData="formattedData" class="mt-4" />
     </div>
     <div

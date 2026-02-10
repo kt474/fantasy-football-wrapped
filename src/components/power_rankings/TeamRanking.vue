@@ -7,6 +7,8 @@ import { useStore } from "../../store/store";
 import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
 import { fakeUsers } from "../../api/helper";
 import Roster from "./Roster.vue";
+import Card from "../ui/card/Card.vue";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const store = useStore();
 const props = defineProps<{
@@ -142,19 +144,10 @@ watch(
 );
 </script>
 <template>
-  <div
-    class="w-full py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6 min-w-80"
-  >
+  <Card class="w-full py-4 pl-4 md:py-6 md:pl-6 min-w-80">
     <div class="flex justify-between">
-      <h1
-        class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-      >
-        Player Rankings
-      </h1>
-      <div
-        class="inline-flex p-1 mr-4 bg-gray-200 rounded-lg md:mr-6 dark:bg-gray-600"
-        role="tablist"
-      >
+      <h1 class="pb-2 text-3xl font-bold leading-none">Player Rankings</h1>
+      <div class="inline-flex p-1 mr-4 rounded-lg md:mr-6" role="tablist">
         <button
           v-for="tab2 in switchTabs"
           :key="tab2.key"
@@ -173,17 +166,13 @@ watch(
       </div>
     </div>
     <div v-if="Object.keys(data).length === 0">
-      <p class="text-gray-600 dark:text-gray-200">
-        Please come back after week 1!
-      </p>
+      <p class="">Please come back after week 1!</p>
     </div>
     <div
       v-else-if="!loading && activeTab == 'score'"
-      class="flex flex-wrap mt-2 text-gray-800 dark:text-gray-200"
+      class="flex flex-wrap mt-2"
     >
-      <ul
-        class="flex flex-wrap text-sm font-medium text-center text-gray-600 border-b border-gray-200 dark:border-gray-700 dark:text-gray-200"
-      >
+      <ul class="flex flex-wrap text-sm font-medium text-center">
         <li class="cursor-pointer me-2">
           <button
             @click="changeTab('QB')"
@@ -268,10 +257,10 @@ watch(
         v-for="(players, position) in data"
         class="w-full mr-4 overflow-x-hidden md:mr-6"
       >
-        <div
+        <Card
           v-if="position === tab"
           v-for="(player, index) in players"
-          class="my-4 bg-white border border-gray-200 rounded-lg shadow dark:border-gray-700 h-36 dark:bg-gray-800"
+          class="my-4 h-36"
         >
           <div class="flex p-1 mt-1">
             <img
@@ -299,7 +288,7 @@ watch(
                   }}
                   {{ player.lastName }}
                 </p>
-                <div class="px-3 py-1 rounded-lg bg-gray-50 dark:bg-gray-900">
+                <div class="px-3 py-1 rounded-lg bg-muted">
                   <p class="text-sm truncate sm:text-base max-w-16 sm:max-w-52">
                     {{ getTeamName(player.id) }}
                   </p>
@@ -341,7 +330,7 @@ watch(
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
     <Roster
@@ -372,5 +361,5 @@ watch(
       ></div>
       <span class="sr-only">Loading...</span>
     </div>
-  </div>
+  </Card>
 </template>
