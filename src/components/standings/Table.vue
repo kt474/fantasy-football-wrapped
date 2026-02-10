@@ -412,7 +412,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                     />
                     <svg
                       v-else
-                      class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                      class="w-8 h-8"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -431,9 +431,8 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 <td
                   class="px-2 py-3 sm:px-6"
                   :class="{
-                    'text-blue-600 dark:text-blue-500 font-semibold':
-                      item.wins === mostWins,
-                    'text-red-600 dark:text-red-500 font-semibold':
+                    'text-primary font-semibold': item.wins === mostWins,
+                    'text-destructive font-semibold':
                       item.losses === mostLosses,
                   }"
                 >
@@ -443,9 +442,8 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 <td
                   class="px-2 py-3 sm:px-6"
                   :class="{
-                    'text-blue-600 dark:text-blue-500 font-semibold':
-                      item.pointsFor === mostPoints,
-                    'text-red-600 dark:text-red-500 font-semibold':
+                    'text-primary font-semibold': item.pointsFor === mostPoints,
+                    'text-destructive font-semibold':
                       item.pointsFor === leastPoints,
                   }"
                 >
@@ -454,9 +452,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 <td
                   class="px-2 py-3 sm:px-6"
                   :class="{
-                    'text-blue-600 dark:text-blue-500 font-semibold':
+                    'text-primary font-semibold':
                       item.pointsAgainst === mostPointsAgainst,
-                    'text-red-600 dark:text-red-500 font-semibold':
+                    'text-destructive font-semibold':
                       item.pointsAgainst === leastPointsAgainst,
                   }"
                 >
@@ -465,9 +463,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 <td
                   class="px-2 py-3 sm:px-6"
                   :class="{
-                    'text-blue-600 dark:text-blue-500 font-semibold':
+                    'text-primary font-semibold':
                       item.winsAgainstAll === mostWinsAgainstAll,
-                    'text-red-600 dark:text-red-500 font-semibold':
+                    'text-destructive font-semibold':
                       item.lossesAgainstAll === mostLossesAgainstAll,
                   }"
                 >
@@ -477,9 +475,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 <td
                   class="px-2 py-3 sm:px-6"
                   :class="{
-                    'text-blue-600 font-semibold dark:text-blue-500':
+                    'text-primary font-semibold':
                       item.winsWithMedian === mostMedianWins,
-                    'text-red-600 dark:text-red-500 font-semibold':
+                    'text-destructive font-semibold':
                       item.lossesWithMedian === mostMedianLosses,
                   }"
                 >
