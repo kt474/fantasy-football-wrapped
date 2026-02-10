@@ -120,8 +120,7 @@ const data = {
             />
             <span
               class="self-center -mb-1.5 ml-2.5 custom-font whitespace-nowrap dark:text-gray-50"
-              ><span class="text-blue-600 dark:text-blue-500">ff</span
-              >wrapped</span
+              ><span class="text-primary">ff</span>wrapped</span
             >
           </div>
         </SidebarMenuItem>

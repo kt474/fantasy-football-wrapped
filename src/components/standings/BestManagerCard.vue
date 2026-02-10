@@ -30,9 +30,7 @@ const bestManagerUser = computed<UserType | null>(() => {
   <div>
     <div class="flex justify-between px-3">
       <div class="">
-        <p class="text-lg font-semibold text-gray-900 dark:text-gray-50">
-          Best Manager
-        </p>
+        <p class="text-lg font-semibold">Best Manager</p>
         <div class="flex">
           <img
             alt="Best manager user avatar"
@@ -42,7 +40,7 @@ const bestManagerUser = computed<UserType | null>(() => {
           />
           <svg
             v-else
-            class="w-6 h-6 text-gray-800 dark:text-gray-50"
+            class="w-6 h-6"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
@@ -54,7 +52,7 @@ const bestManagerUser = computed<UserType | null>(() => {
           </svg>
           <p
             v-if="bestManager && bestManagerUser"
-            class="mx-3 text-gray-800 xl:truncate text-md dark:text-gray-200 xl:max-w-32 max-w-52"
+            class="mx-3 xl:truncate text-md xl:max-w-32 max-w-52"
           >
             {{
               store.showUsernames
@@ -62,25 +60,16 @@ const bestManagerUser = computed<UserType | null>(() => {
                 : bestManagerUser.name
             }}
           </p>
-          <p v-else class="mx-3 text-gray-800 text-md dark:text-gray-200">
-            Undecided
-          </p>
+          <p v-else class="mx-3 text-md">Undecided</p>
         </div>
       </div>
       <div class="flex flex-wrap mt-2">
-        <p
-          class="flex flex-col items-end ml-auto text-gray-800 text-md dark:text-gray-200"
-        >
-          <span
-            v-if="bestManager && bestManagerUser"
-            class="font-semibold text-gray-900 dark:text-gray-50"
-          >
+        <p class="flex flex-col items-end ml-auto text-md">
+          <span v-if="bestManager && bestManagerUser" class="font-semibold">
             {{ (bestManager.managerEfficiency * 100).toFixed(1) }}%
           </span>
           <span v-else class="font-semibold">0%</span>
-          <span class="text-sm text-gray-800 dark:text-gray-200"
-            >efficiency</span
-          >
+          <span class="text-sm">efficiency</span>
         </p>
       </div>
     </div>

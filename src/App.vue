@@ -131,24 +131,15 @@ const setHtmlBackground = () => {
             />
             <CardContainer />
             <Button
-              v-if="darkMode"
               @click="setColorMode()"
-              class="ml-auto"
+              class="ml-auto transition-colors text-foreground hover:text-foreground"
               variant="ghost"
               size="icon-sm"
             >
-              <Sun />
-              <span class="sr-only">Remove League</span>
-            </Button>
-            <Button
-              v-else
-              @click="setColorMode()"
-              class="ml-auto"
-              variant="ghost"
-              size="icon-sm"
-            >
-              <MoonStar />
-              <span class="sr-only">Remove League</span>
+              <component :is="darkMode ? Sun : MoonStar" class="w-4 h-4" />
+              <span class="sr-only">
+                {{ darkMode ? "Switch to light mode" : "Switch to dark mode" }}
+              </span>
             </Button>
           </header>
           <main class="flex-1 overflow-y-auto">
