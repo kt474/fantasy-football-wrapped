@@ -4,6 +4,15 @@ import { LeagueInfoType, WaiverMove } from "../../types/types.ts";
 import { getPlayersByIdsMap, getTradeValue } from "../../api/api.ts";
 import { useStore } from "../../store/store";
 import { fakeRosters, fakeUsers, fakeWaiverMoves } from "../../api/helper";
+import Card from "../ui/card/Card.vue";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectItem,
+  SelectValue,
+} from "../ui/select";
+import Separator from "../ui/separator/Separator.vue";
 
 type WaiverData = Record<string | number, WaiverMove[]>;
 
@@ -217,43 +226,36 @@ watch(
 </script>
 <template>
   <div class="flex flex-wrap mt-4 xl:flex-nowrap">
-    <div
-      class="w-full py-4 pl-4 overflow-auto bg-white rounded-lg shadow xl:w-2/3 dark:bg-gray-800 md:py-6 md:pl-6"
-    >
-      <h1
-        class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-      >
+    <Card class="w-full py-4 pl-4 overflow-auto xl:w-2/3 md:py-6 md:pl-6">
+      <h1 class="pb-2 text-3xl font-bold leading-none">
         Waivers & Free Agent Adds
       </h1>
       <p
-        class="mt-1 mb-3 text-sm text-gray-600 max-w-80 sm:max-w-2xl sm:text-base dark:text-gray-300"
+        class="mt-1 mb-3 text-sm text-muted-foreground max-w-80 sm:max-w-2xl sm:text-base"
       >
         Values below each player are the average positional ranking for every
         week after the player was added. If applicable, the winning bid (FAAB)
         is also listed next to each player.
       </p>
-      <label
-        for="Manager name"
-        class="block mb-1 text-sm text-gray-600 dark:text-gray-300"
-        >Manager</label
-      >
-      <select
-        aria-label="current week"
-        id="Manager name"
-        class="block p-2 text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        v-model="currentManager"
-      >
-        <option v-for="manager in managers" :key="manager" :value="manager">
-          {{ manager }}
-        </option>
-      </select>
+      <label for="Manager name" class="block mb-1 text-sm">Manager</label>
+      <Select v-model="currentManager">
+        <SelectTrigger class="w-52">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="manager in managers"
+            :key="manager"
+            :value="manager"
+          >
+            {{ manager }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
       <div v-if="currentManagerMoves.length > 0" class="flex">
-        <div
-          class="block w-full my-2 overflow-auto text-gray-900 bg-white custom-width dark:bg-gray-800 dark:text-gray-200"
-        >
-          <hr
-            class="w-11/12 h-px mt-2 mb-3 bg-gray-200 border-0 dark:bg-gray-700"
-          />
+        <div class="block w-full my-2 overflow-auto custom-width">
+          <Separator class="my-2" />
           <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
             <template
               v-for="move in currentManagerMoves"
@@ -265,24 +267,20 @@ watch(
                 </p>
                 <div class="flex mt-1">
                   <span
-                    :class="[
-                      move.value
-                        ? getValueColor(move.value)
-                        : 'bg-gray-300 dark:text-black',
-                    ]"
+                    :class="[move.value ? getValueColor(move.value) : '']"
                     class="text-xs me-2 px-2.5 py-1 rounded-full"
                     >{{ move.value ? move.value : "N/A" }}</span
                   >
-                  <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                  <p class="mt-1 text-xs text-muted-foreground">
                     {{ move.value ? getRatingLabel(move.value) : "" }}
                   </p>
                 </div>
               </div>
             </template>
           </div>
-          <div
+          <Card
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="flex p-3 mt-4 mr-4 text-sm border-2 border-gray-100 rounded-lg dark:border-gray-800 bg-gray-50 dark:bg-gray-700"
+            class="flex p-3 mt-4 mr-4 text-sm bg-muted"
           >
             <div class="mr-4">
               <p class="min-w-32">Budget spent:</p>
@@ -294,20 +292,20 @@ watch(
                 <template v-for="move in currentManagerMoves">
                   <div
                     v-if="move.status === 'failed' && move.bid"
-                    class="rounded-lg bg-gray-200 dark:bg-gray-800 p-1.5 mt-1.5"
+                    class="rounded-lg p-1.5 mt-1.5 bg-card"
                   >
                     <p class="font-medium">{{ move.adds }} (${{ move.bid }})</p>
                   </div>
                 </template>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
       <div v-else-if="currentManager === 'All Managers'">
         <div v-for="(moves, id) in waiverData">
-          <hr class="h-px mt-4 mb-3 bg-gray-200 border-0 dark:bg-gray-700" />
-          <p class="my-2 text-lg font-semibold text-gray-900 dark:text-gray-50">
+          <Separator class="mt-3 mb-2" />
+          <p class="my-2 text-lg font-semibold">
             {{
               store.showUsernames
                 ? getRosterName(Number(id)).username
@@ -319,29 +317,25 @@ watch(
           >
             <template v-for="move in moves" class="">
               <div v-if="move.adds && move.status === 'complete'">
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-50">
+                <p class="text-sm font-medium">
                   {{ move.adds }} <span v-if="move.bid">(${{ move.bid }})</span>
                 </p>
                 <div class="flex mt-1">
                   <span
-                    :class="[
-                      move.value
-                        ? getValueColor(move.value)
-                        : 'bg-gray-300 dark:text-black',
-                    ]"
+                    :class="[move.value ? getValueColor(move.value) : '']"
                     class="text-xs me-2 px-2.5 py-1 rounded-full"
                     >{{ move.value ? move.value : "N/A" }}</span
                   >
-                  <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                  <p class="mt-1 text-xs">
                     {{ move.value ? getRatingLabel(move.value) : "" }}
                   </p>
                 </div>
               </div>
             </template>
           </div>
-          <div
+          <Card
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="flex p-3 mt-4 mr-4 text-sm border-2 border-gray-100 rounded-lg dark:text-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-700"
+            class="flex p-3 mt-4 mr-4 text-sm border-2 bg-muted"
           >
             <div class="mr-4">
               <p class="min-w-32">Budget spent:</p>
@@ -355,14 +349,14 @@ watch(
                 <template v-for="move in moves">
                   <div
                     v-if="move.status === 'failed' && move.bid"
-                    class="rounded-lg bg-gray-200 dark:bg-gray-800 p-1.5 mt-1.5"
+                    class="rounded-lg bg-card p-1.5 mt-1.5"
                   >
                     <p class="font-medium">{{ move.adds }} (${{ move.bid }})</p>
                   </div>
                 </template>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
       <div
@@ -372,7 +366,7 @@ watch(
           currentManagerMoves.length == 0
         "
       >
-        <p class="mt-4 text-gray-600 dark:text-gray-200">
+        <p class="mt-4 text-muted-foreground">
           No waiver moves have been made.
         </p>
       </div>
@@ -416,19 +410,15 @@ watch(
           <span class="sr-only">Loading...</span>
         </div>
       </div>
-    </div>
-    <div
-      class="w-full py-4 pl-4 mt-4 overflow-auto bg-white rounded-lg shadow xl:ml-4 xl:mt-0 xl:w-1/3 dark:bg-gray-800 md:py-6 md:pl-6"
+    </Card>
+    <Card
+      class="w-full py-4 pl-4 mt-4 overflow-auto xl:ml-4 xl:mt-0 xl:w-1/3 md:py-6 md:pl-6"
     >
-      <p
-        class="mb-4 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-      >
-        Best Adds
-      </p>
+      <p class="mb-4 text-3xl font-bold leading-none">Best Adds</p>
       <div
         v-if="orderedData.length > 0"
         v-for="(move, index) in orderedData"
-        class="pr-6 mb-4 dark:text-gray-200"
+        class="pr-6 mb-4"
       >
         <div class="flex justify-between">
           <div class="flex mb-1">
@@ -448,7 +438,7 @@ watch(
               />
               <svg
                 v-else
-                class="w-8 h-8 text-gray-900 dark:text-gray-300"
+                class="w-8 h-8"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -463,7 +453,7 @@ watch(
               <p class="text-base font-medium">
                 {{ move.position }} {{ move.adds }}
               </p>
-              <div class="flex text-sm text-gray-600 dark:text-gray-400">
+              <div class="flex text-sm text-muted-foreground">
                 <p class="truncate max-w-36">
                   {{
                     store.showUsernames ? move.user?.username : move.user?.name
@@ -475,20 +465,16 @@ watch(
           </div>
           <div class="">
             <span
-              :class="[
-                move.value
-                  ? getValueColor(move.value)
-                  : 'bg-gray-300 dark:text-black',
-              ]"
+              :class="[move.value ? getValueColor(move.value) : '']"
               class="text-xs px-2.5 py-1 mb-1 rounded-full float-end"
               >{{ move.value ? move.value : "N/A" }}</span
             >
-            <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+            <p class="mt-1 text-xs text-muted-foreground">
               {{ move.value ? getRatingLabel(move.value) : "" }}
             </p>
           </div>
         </div>
-        <hr class="h-px mt-2 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
+        <Separator class="mt-3" />
       </div>
       <div
         v-else-if="
@@ -497,9 +483,7 @@ watch(
           store.leagueInfo[store.currentLeagueIndex].waivers.length === 0
         "
       >
-        <p class="text-gray-600 dark:text-gray-200">
-          No waiver moves have been made.
-        </p>
+        <p class="text-muted-foreground">No waiver moves have been made.</p>
       </div>
       <div
         v-else-if="
@@ -508,9 +492,7 @@ watch(
           !store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
         "
       >
-        <p class="text-gray-600 dark:text-gray-200">
-          Please come back after week 1!
-        </p>
+        <p class="text-muted-foreground">Please come back after week 1!</p>
       </div>
       <div
         v-else
@@ -584,7 +566,7 @@ watch(
         </div>
         <span class="sr-only">Loading...</span>
       </div>
-    </div>
+    </Card>
   </div>
 </template>
 <style scoped>
