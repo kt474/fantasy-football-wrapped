@@ -145,199 +145,116 @@ watch(
 </script>
 <template>
   <Card class="w-full py-4 pl-4 md:py-6 md:pl-6 min-w-80">
-    <div class="flex justify-between">
-      <h1 class="pb-2 text-3xl font-bold leading-none">Player Rankings</h1>
-      <div class="inline-flex p-1 mr-4 rounded-lg md:mr-6" role="tablist">
-        <button
-          v-for="tab2 in switchTabs"
-          :key="tab2.key"
-          @click="activeTab = tab2.key"
-          class="px-2 py-1 text-sm font-medium transition-colors duration-200 rounded-md sm:px-4 sm:py-2 focus:outline-none"
-          :class="
-            activeTab === tab2.key
-              ? 'bg-gray-50 shadow text-gray-900 dark:bg-gray-900 dark:text-gray-100'
-              : 'text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200'
-          "
-          role="tab"
-          :aria-selected="activeTab === tab2.key"
-        >
-          {{ tab2.label }}
-        </button>
+    <Tabs v-if="!loading" default-value="score">
+      <div class="flex justify-between">
+        <h1 class="pb-2 text-3xl font-bold leading-none">Player Rankings</h1>
+        <div class="inline-flex p-1 mr-4 rounded-lg md:mr-6">
+          <TabsList>
+            <TabsTrigger value="roster"> By Roster </TabsTrigger>
+            <TabsTrigger value="score"> Overall </TabsTrigger>
+          </TabsList>
+        </div>
       </div>
-    </div>
-    <div v-if="Object.keys(data).length === 0">
-      <p class="">Please come back after week 1!</p>
-    </div>
-    <div
-      v-else-if="!loading && activeTab == 'score'"
-      class="flex flex-wrap mt-2"
-    >
-      <ul class="flex flex-wrap text-sm font-medium text-center">
-        <li class="cursor-pointer me-2">
-          <button
-            @click="changeTab('QB')"
-            aria-current="page"
-            class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="[
-              tab === 'QB'
-                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
-            ]"
+      <div v-if="Object.keys(data).length === 0">
+        <p class="">Please come back after week 1!</p>
+      </div>
+      <TabsContent value="score">
+        <div class="flex flex-wrap mt-2">
+          <Tabs v-model="tab" class="w-full">
+            <TabsList class="flex rounded-t-lg w-fit">
+              <TabsTrigger
+                v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
+                :key="position"
+                :value="position"
+                class="px-4 py-2 text-sm"
+              >
+                {{ position }}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div
+            v-for="(players, position) in data"
+            class="w-full mr-4 overflow-x-hidden md:mr-6"
           >
-            QB
-          </button>
-        </li>
-        <li class="cursor-pointer me-2">
-          <button
-            @click="changeTab('RB')"
-            class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="[
-              tab === 'RB'
-                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
-            ]"
-          >
-            RB
-          </button>
-        </li>
-        <li class="cursor-pointer me-2">
-          <button
-            @click="changeTab('WR')"
-            class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="[
-              tab === 'WR'
-                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
-            ]"
-          >
-            WR
-          </button>
-        </li>
-        <li class="cursor-pointer me-2">
-          <button
-            @click="changeTab('TE')"
-            class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="[
-              tab === 'TE'
-                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
-            ]"
-          >
-            TE
-          </button>
-        </li>
-        <li class="cursor-pointer me-2">
-          <button
-            @click="changeTab('K')"
-            class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="[
-              tab === 'K'
-                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
-            ]"
-          >
-            K
-          </button>
-        </li>
-        <li class="cursor-pointer me-2">
-          <button
-            @click="changeTab('DEF')"
-            class="inline-block p-2 rounded-t-lg sm:p-4"
-            :class="[
-              tab === 'DEF'
-                ? 'text-blue-600 bg-white dark:bg-gray-800 dark:text-blue-500 shadow border-x border-t dark:border-gray-700'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800',
-            ]"
-          >
-            DEF
-          </button>
-        </li>
-      </ul>
-      <div
-        v-for="(players, position) in data"
-        class="w-full mr-4 overflow-x-hidden md:mr-6"
-      >
-        <Card
-          v-if="position === tab"
-          v-for="(player, index) in players"
-          class="my-4 h-36"
-        >
-          <div class="flex p-1 mt-1">
-            <img
-              v-if="player.position !== 'DEF'"
-              alt="Player image"
-              class="object-cover w-16 h-16 mx-2 sm:h-auto"
-              :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
-            />
-            <img
-              v-else
-              alt="Defense image"
-              class="object-cover w-16 h-16 my-auto ml-2"
-              :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
-            />
-            <div class="w-full mt-0.5 ml-3">
-              <div class="flex justify-between px-2 mt-1 mb-4">
-                <p
-                  class="text-base font-semibold truncate sm:text-lg max-w-24 sm:max-w-52"
-                >
-                  {{ index + 1 }}.
-                  {{
-                    player.position !== "DEF" && player.firstName
-                      ? `${player.firstName[0]}.`
-                      : ""
-                  }}
-                  {{ player.lastName }}
-                </p>
-                <div class="px-3 py-1 rounded-lg bg-muted">
-                  <p class="text-sm truncate sm:text-base max-w-16 sm:max-w-52">
-                    {{ getTeamName(player.id) }}
-                  </p>
+            <Card
+              v-if="position === tab"
+              v-for="(player, index) in players"
+              class="my-4 h-36"
+            >
+              <div class="flex p-1 mt-1">
+                <img
+                  v-if="player.position !== 'DEF'"
+                  alt="Player image"
+                  class="object-cover w-16 h-16 mx-2 sm:h-auto"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
+                />
+                <img
+                  v-else
+                  alt="Defense image"
+                  class="object-cover w-16 h-16 my-auto ml-2"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
+                />
+                <div class="w-full mt-0.5 ml-3">
+                  <div class="flex justify-between px-2 mt-1 mb-4">
+                    <p
+                      class="text-base font-semibold truncate sm:text-lg max-w-24 sm:max-w-52"
+                    >
+                      {{ index + 1 }}.
+                      {{
+                        player.position !== "DEF" && player.firstName
+                          ? `${player.firstName[0]}.`
+                          : ""
+                      }}
+                      {{ player.lastName }}
+                    </p>
+                    <div class="px-3 py-1 rounded-lg bg-muted">
+                      <p
+                        class="text-sm truncate sm:text-base max-w-16 sm:max-w-52"
+                      >
+                        {{ getTeamName(player.id) }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex">
+                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-muted">
+                      <p>Points:</p>
+                      <p class="text-base font-semibold sm:text-lg">
+                        {{ player.points ? player.points.toFixed(1) : 0 }}
+                      </p>
+                    </div>
+                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-muted">
+                      <p>PPG:</p>
+                      <p class="text-base font-semibold sm:text-lg">
+                        {{ player.ppg ? player.ppg.toFixed(1) : 0 }}
+                      </p>
+                    </div>
+                    <div
+                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-muted sm:inline-block"
+                    >
+                      <p>Overall Rank:</p>
+                      <p class="text-base font-semibold sm:text-lg">
+                        {{ player.overallRank }}
+                      </p>
+                    </div>
+                    <div
+                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-muted sm:inline-block"
+                    >
+                      <p>Games Played:</p>
+                      <p class="text-base font-semibold sm:text-lg">
+                        {{ player.gp }}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="flex">
-                <div
-                  class="w-full px-3 py-1 m-1 rounded-lg bg-gray-50 dark:bg-gray-900"
-                >
-                  <p class="text-gray-600 dark:text-gray-400">Points:</p>
-                  <p class="text-base font-semibold sm:text-lg">
-                    {{ player.points ? player.points.toFixed(1) : 0 }}
-                  </p>
-                </div>
-                <div
-                  class="w-full px-3 py-1 m-1 rounded-lg bg-gray-50 dark:bg-gray-900"
-                >
-                  <p class="text-gray-600 dark:text-gray-400">PPG:</p>
-                  <p class="text-base font-semibold sm:text-lg">
-                    {{ player.ppg ? player.ppg.toFixed(1) : 0 }}
-                  </p>
-                </div>
-                <div
-                  class="hidden w-full px-3 py-1 m-1 rounded-lg bg-gray-50 dark:bg-gray-900 sm:inline-block"
-                >
-                  <p class="text-gray-600 dark:text-gray-400">Overall Rank:</p>
-                  <p class="text-base font-semibold sm:text-lg">
-                    {{ player.overallRank }}
-                  </p>
-                </div>
-                <div
-                  class="hidden w-full px-3 py-1 m-1 rounded-lg bg-gray-50 dark:bg-gray-900 sm:inline-block"
-                >
-                  <p class="text-gray-600 dark:text-gray-400">Games Played:</p>
-                  <p class="text-base font-semibold sm:text-lg">
-                    {{ player.gp }}
-                  </p>
-                </div>
-              </div>
-            </div>
+            </Card>
           </div>
-        </Card>
-      </div>
-    </div>
-    <Roster
-      v-if="!loading && activeTab == 'roster' && allData"
-      :player-data="allData"
-      :table-data="tableData"
-    />
+        </div>
+      </TabsContent>
+      <TabsContent value="roster">
+        <Roster :player-data="allData" :table-data="tableData" />
+      </TabsContent>
+    </Tabs>
     <!-- Loading div -->
     <div v-else-if="loading" role="status" class="max-w-sm animate-pulse">
       <p class="mb-2 text-gray-900 dark:text-gray-200">

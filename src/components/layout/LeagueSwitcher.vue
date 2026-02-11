@@ -169,7 +169,7 @@ const shareLeague = () => {
           <DropdownMenuTrigger as-child>
             <SidebarMenuButton
               size="lg"
-              class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              class="text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div class="flex flex-col gap-0.5 leading-none w-40">
                 <span class="font-medium truncate">{{
@@ -181,10 +181,18 @@ const shareLeague = () => {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent class="w-60" align="start">
-            <DropdownMenuItem v-for="league in leagues" :key="league.leagueId">
-              <div @click="selectLeague(league.leagueId)">
-                <p class="truncate max-w-40">{{ league.name }}</p>
-                <p class="text-xs">
+            <DropdownMenuItem
+              v-for="league in leagues"
+              :key="league.leagueId"
+              @select="selectLeague(league.leagueId)"
+              class="flex items-start"
+            >
+              <div class="flex flex-col">
+                <p class="truncate max-w-40">
+                  {{ league.name }}
+                </p>
+
+                <p class="text-xs text-muted-foreground">
                   {{
                     league.season +
                     ": " +
@@ -197,7 +205,7 @@ const shareLeague = () => {
               </div>
               <Check
                 v-if="league.leagueId === currentLeagueId"
-                class="ml-auto"
+                class="w-4 h-4 mt-2 ml-auto text-primary"
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -222,15 +230,30 @@ const shareLeague = () => {
       class="data-[orientation=vertical]:h-8 mt-2 ml-2"
     />
     <div class="flex justify-between mt-2 ml-2">
-      <Button @click="removeLeague" variant="ghost" size="icon-sm">
+      <Button
+        @click="removeLeague"
+        variant="ghost"
+        size="icon-sm"
+        class="transition-colors text-foreground hover:text-foreground"
+      >
         <X />
         <span class="sr-only">Remove League</span>
       </Button>
-      <Button @click="refreshLeague" variant="ghost" size="icon-sm">
+      <Button
+        @click="refreshLeague"
+        variant="ghost"
+        size="icon-sm"
+        class="transition-colors text-foreground hover:text-foreground"
+      >
         <RefreshCcw />
         <span class="sr-only">Refresh League</span>
       </Button>
-      <Button @click="shareLeague" variant="ghost" size="icon-sm">
+      <Button
+        @click="shareLeague"
+        variant="ghost"
+        size="icon-sm"
+        class="transition-colors text-foreground hover:text-foreground"
+      >
         <Share />
         <span class="sr-only">Share League</span>
       </Button>

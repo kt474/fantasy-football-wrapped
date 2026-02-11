@@ -99,6 +99,14 @@ watch(
   }
 );
 
+watch(
+  () => store.darkMode,
+  (isDark) => {
+    document.documentElement.classList.toggle("dark", isDark);
+  },
+  { immediate: true }
+);
+
 const setHtmlBackground = () => {
   const html = document.querySelector("html");
   if (html) {
@@ -118,7 +126,7 @@ const setHtmlBackground = () => {
 </script>
 
 <template>
-  <div :class="{ dark: store.darkMode }">
+  <div>
     <div>
       <SidebarProvider>
         <AppSidebar />
