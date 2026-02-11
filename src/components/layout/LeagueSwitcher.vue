@@ -175,7 +175,7 @@ const shareLeague = () => {
                 <span class="font-medium truncate">{{
                   currentLeague?.name ?? "Loading... "
                 }}</span>
-                <span class="text-sm text-gray-800">{{ leagueMetadata }}</span>
+                <span class="text-sm">{{ leagueMetadata }}</span>
               </div>
               <ChevronsUpDown class="ml-auto" />
             </SidebarMenuButton>
@@ -184,7 +184,7 @@ const shareLeague = () => {
             <DropdownMenuItem v-for="league in leagues" :key="league.leagueId">
               <div @click="selectLeague(league.leagueId)">
                 <p class="truncate max-w-40">{{ league.name }}</p>
-                <p class="text-xs text-gray-800">
+                <p class="text-xs">
                   {{
                     league.season +
                     ": " +
@@ -203,13 +203,13 @@ const shareLeague = () => {
             <DropdownMenuSeparator />
             <Dialog>
               <template #trigger>
-                <div class="flex p-1 cursor-default hover:bg-neutral-100">
+                <div class="flex p-1 cursor-default">
                   <div
                     class="flex items-center justify-center bg-transparent border rounded-md size-6"
                   >
                     <Plus class="size-4" />
                   </div>
-                  <p class="ml-2 mt-0.5 text-sm text-gray-700">Add League</p>
+                  <p class="ml-2 mt-0.5 text-sm">Add League</p>
                 </div>
               </template>
             </Dialog>
