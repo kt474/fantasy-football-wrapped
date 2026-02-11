@@ -10,6 +10,7 @@ import {
 } from "../../types/types";
 import { getProjections } from "../../api/api";
 import { fakePlayoffData } from "../../api/helper";
+import Card from "../ui/card/Card.vue";
 const store = useStore();
 const loading = ref(false);
 const playoffOdds = ref<PlayoffProjection[]>([]);
@@ -269,22 +270,20 @@ const tableData = computed(() => {
 });
 </script>
 <template>
-  <div
+  <Card
     v-if="
       store.leagueInfo.length != 0 &&
       store.leagueInfo[store.currentLeagueIndex] &&
       store.leagueInfo[store.currentLeagueIndex].status !== 'complete'
     "
+    class="bg-muted"
   >
     <div
-      class="flex justify-between pb-2 shadow-md"
-      :class="`
-    ${store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'}
-    ${showData ? 'rounded-t-lg' : 'rounded-lg'}
-  `"
+      class="flex justify-between pb-2"
+      :class="`${showData ? 'rounded-t-lg' : 'rounded-lg'}`"
     >
       <p
-        class="w-full pt-2 text-lg font-semibold text-center text-gray-700 cursor-pointer dark:text-gray-200"
+        class="w-full pt-2 text-lg font-semibold text-center cursor-pointer dark:text-gray-200"
         @click="showData = !showData"
       >
         Playoff Odds
@@ -292,7 +291,7 @@ const tableData = computed(() => {
       <svg
         v-if="!showData"
         @click="showData = !showData"
-        class="w-6 h-6 mt-2.5 mr-3 sm:mr-4 text-gray-700 dark:text-gray-200 cursor-pointer"
+        class="w-6 h-6 mt-2.5 mr-3 sm:mr-4 cursor-pointer"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -309,7 +308,7 @@ const tableData = computed(() => {
       <svg
         v-else
         @click="showData = !showData"
-        class="w-6 h-6 mt-2 mr-3 text-gray-700 cursor-pointer sm:mr-4 dark:text-gray-200"
+        class="w-6 h-6 mt-2 mr-3 cursor-pointer sm:mr-4"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -324,29 +323,13 @@ const tableData = computed(() => {
         />
       </svg>
     </div>
-    <div
-      v-if="!loading"
-      :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
-      class="relative w-full overflow-x-auto bg-gray-100 rounded-b-lg shadow-md dark:bg-gray-700"
-    >
-      <table
-        v-if="showData"
-        class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-200"
-      >
-        <thead
-          :class="
-            store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
-          "
-          class="text-xs text-gray-700 uppercase dark:text-gray-200"
-        >
+    <div v-if="!loading" class="relative w-full overflow-x-auto bg-card">
+      <table v-if="showData" class="w-full text-sm text-left rtl:text-right">
+        <thead class="text-xs uppercase bg-muted">
           <tr>
-            <th scope="col" class="px-4 py-3 sm:px-6 w-60 dark:text-gray-200">
-              Team Name
-            </th>
+            <th scope="col" class="px-4 py-3 sm:px-6 w-60">Team Name</th>
             <th v-for="i in playoffTeams" scope="col" class="px-2 py-3">
-              <div
-                class="flex items-center w-8 cursor-pointer dark:text-gray-200"
-              >
+              <div class="flex items-center w-8 cursor-pointer">
                 {{ getOrdinalSuffix(i) }}
               </div>
             </th>
@@ -365,15 +348,14 @@ const tableData = computed(() => {
           <tr
             v-for="(item, index) in tableData"
             :key="index"
-            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+            class="border-b"
             :class="{
-              'border-b-blue-600 border-b-2 dark:border-b-blue-500':
-                index == playoffTeams - 1,
+              'border-primary border-b-2 ': index == playoffTeams - 1,
             }"
           >
             <th
               scope="row"
-              class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-gray-50"
+              class="px-4 font-medium truncate sm:px-6 max-w-52 whitespace-nowrap"
             >
               {{ store.showUsernames ? item.username : item.name }}
             </th>
@@ -391,9 +373,7 @@ const tableData = computed(() => {
                   : item.placement[i - 1]
               }}%
             </td>
-            <td
-              class="py-3 pl-5 border-l sm:pl-8 md:pl-14 lg:pl-24 xl:pl-32 dark:bg-gray-800 dark:border-gray-700"
-            >
+            <td class="py-3 pl-5 border-l sm:pl-8 md:pl-14 lg:pl-24 xl:pl-32">
               {{
                 store.leagueInfo.length > 0
                   ? Math.round(
@@ -413,7 +393,7 @@ const tableData = computed(() => {
       </table>
       <p
         v-if="showData"
-        class="max-w-3xl py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
+        class="max-w-3xl py-3 ml-2 text-xs text-muted-foreground sm:ml-6"
       >
         Playoff odds are estimated using Monte Carlo simulation based on team
         records, total points, and projected rest-of-season points. League
@@ -426,9 +406,7 @@ const tableData = computed(() => {
       role="status"
       class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
     >
-      <p
-        class="flex justify-center -mb-6 text-xl font-semibold text-gray-900 dark:text-gray-50"
-      >
+      <p class="flex justify-center -mb-6 text-xl font-semibold">
         Loading projection data...
       </p>
       <div
@@ -477,7 +455,7 @@ const tableData = computed(() => {
       </div>
       <span class="sr-only">Loading...</span>
     </div>
-  </div>
+  </Card>
 </template>
 <style scoped>
 .light-custom-bg-color {

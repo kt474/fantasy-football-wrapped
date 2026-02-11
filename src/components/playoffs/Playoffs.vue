@@ -12,6 +12,8 @@ import {
   fakePoints,
 } from "../../api/helper";
 import { RosterType, TableDataType } from "../../types/types";
+import Card from "../ui/card/Card.vue";
+import Separator from "../ui/separator/Separator.vue";
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
@@ -218,16 +220,12 @@ const numberOfLoserRounds = computed(() => {
   <div>
     <LeagueSummary :tableData="tableData" :finalPlacements="finalPlacements" />
     <div class="flex flex-wrap my-4 lg:flex-nowrap">
-      <div
-        class="block w-full p-4 overflow-x-auto text-black bg-white border border-gray-200 rounded-lg shadow lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-50"
-      >
+      <Card class="block w-full p-4 overflow-x-auto shadow lg:w-3/4">
         <p class="text-3xl font-bold">Winner's Bracket</p>
         <div class="flex flex-nowrap">
           <div v-for="index in numberOfWinnerRounds">
             <p class="mt-2 -mb-2 text-xl font-semibold">Round {{ index }}</p>
-            <hr
-              class="w-full h-px my-6 bg-gray-200 border-0 dark:bg-gray-700"
-            />
+            <Separator class="w-full h-px my-6" />
             <div v-for="matchup in winnersBracket">
               <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
                 <p class="text-lg font-semibold mt-7">Championship</p>
@@ -310,9 +308,9 @@ const numberOfLoserRounds = computed(() => {
                 5th Place
               </p>
               <!-- championship matchup -->
-              <div
+              <Card
                 v-if="index === matchup.r && matchup.p === 1"
-                class="block p-4 my-2 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-2 custom-card-width bg-muted"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -327,7 +325,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                     <svg
                       v-else
-                      class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                      class="w-8 h-8"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -337,7 +335,7 @@ const numberOfLoserRounds = computed(() => {
                         d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                       />
                     </svg>
-                    <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
+                    <div class="-mt-0.5 text-muted-foreground">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
                         {{
                           store.showUsernames
@@ -352,14 +350,14 @@ const numberOfLoserRounds = computed(() => {
                     class="mr-1"
                     :class="
                       matchup.t1 === matchup.w
-                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-600 dark:text-gray-300'
+                        ? 'text-primary font-semibold'
+                        : 'text-muted-foreground'
                     "
                   >
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
-                <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
+                <Separator class="h-px my-2" />
 
                 <div>
                   <div class="flex justify-between">
@@ -372,7 +370,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                       <svg
                         v-else
-                        class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                        class="w-8 h-8"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -382,7 +380,7 @@ const numberOfLoserRounds = computed(() => {
                           d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                         />
                       </svg>
-                      <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
+                      <div class="-mt-0.5 text-muted-foreground">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
                             store.showUsernames
@@ -399,18 +397,18 @@ const numberOfLoserRounds = computed(() => {
                       class="mt-1 mr-1"
                       :class="
                         matchup.t2 === matchup.w
-                          ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                          : 'text-gray-600 dark:text-gray-300 font-normal'
+                          ? 'text-primary font-semibold'
+                          : 'text-muted-foreground font-normal'
                       "
                     >
                       {{ getPointsScored(matchup.t2, index) }}
                     </p>
                   </div>
                 </div>
-              </div>
-              <div
+              </Card>
+              <Card
                 v-else-if="index === matchup.r"
-                class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-4 mr-4 custom-card-width bg-muted"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -425,7 +423,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                     <svg
                       v-else
-                      class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                      class="w-8 h-8"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -435,7 +433,7 @@ const numberOfLoserRounds = computed(() => {
                         d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                       />
                     </svg>
-                    <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
+                    <div class="-mt-0.5 text-muted-foreground">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
                         {{
                           store.showUsernames
@@ -450,14 +448,14 @@ const numberOfLoserRounds = computed(() => {
                     class="mt-0.5 mr-1"
                     :class="
                       matchup.t1 === matchup.w
-                        ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                        : 'text-gray-600 dark:text-gray-300 font-normal'
+                        ? 'text-primary font-semibold'
+                        : 'text-muted-foreground font-normal'
                     "
                   >
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
-                <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
+                <Separator class="h-px my-2" />
                 <div>
                   <div
                     v-if="matchRosterId(matchup.t2)"
@@ -472,7 +470,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                       <svg
                         v-else
-                        class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                        class="w-8 h-8"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -482,7 +480,7 @@ const numberOfLoserRounds = computed(() => {
                           d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                         />
                       </svg>
-                      <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
+                      <div class="-mt-0.5 text-muted-foreground">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
                             store.showUsernames
@@ -499,19 +497,19 @@ const numberOfLoserRounds = computed(() => {
                       class="mt-0.5 mr-1"
                       :class="
                         matchup.t2 === matchup.w
-                          ? 'text-blue-600 dark:text-blue-500 font-semibold'
-                          : 'text-gray-600 dark:text-gray-300 font-normal'
+                          ? 'text-primary font-semibold'
+                          : 'text-muted-foreground font-normal'
                       "
                     >
                       {{ getPointsScored(matchup.t2, index) }}
                     </p>
                   </div>
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         </div>
-      </div>
+      </Card>
       <FinalPlacements
         :class="[finalPlacements.length === 0 ? 'hidden lg:block' : '']"
         :rosters="finalPlacements"
@@ -519,14 +517,12 @@ const numberOfLoserRounds = computed(() => {
     </div>
     <!-- losers bracket -->
     <div class="flex flex-wrap lg:flex-nowrap">
-      <div
-        class="block w-full p-4 overflow-x-auto text-black bg-white border border-gray-200 rounded-lg shadow lg:mr-4 lg:w-3/4 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-50"
-      >
+      <Card class="block w-full p-4 overflow-x-auto lg:mr-4 lg:w-3/4">
         <p class="text-3xl font-bold">Loser's Bracket</p>
         <div class="flex flex-nowrap">
           <div v-for="index in numberOfLoserRounds">
             <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ index }}</p>
-            <hr class="h-px my-6 bg-gray-200 border-0 dark:bg-gray-700" />
+            <Separator class="h-px my-6" />
             <div v-for="matchup in losersBracket">
               <div v-if="matchup.p === 1 && index === matchup.r" class="flex">
                 <p class="text-lg font-semibold mt-7">
@@ -609,9 +605,9 @@ const numberOfLoserRounds = computed(() => {
                 {{ losersBracketFirstSecondTitle }}
               </p>
               <!-- last place matchup -->
-              <div
+              <Card
                 v-if="index === matchup.r && matchup.p === 1"
-                class="block p-4 my-2 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-2 mr-4 custom-card-width bg-muted"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -626,7 +622,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                     <svg
                       v-else
-                      class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                      class="w-8 h-8"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -636,7 +632,7 @@ const numberOfLoserRounds = computed(() => {
                         d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                       />
                     </svg>
-                    <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
+                    <div class="-mt-0.5 text-muted-foreground">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
                         {{
                           store.showUsernames
@@ -654,7 +650,7 @@ const numberOfLoserRounds = computed(() => {
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
-                <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
+                <Separator class="h-px my-2" />
                 <div>
                   <div
                     v-if="matchRosterId(matchup.t2)"
@@ -669,7 +665,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                       <svg
                         v-else
-                        class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                        class="w-8 h-8"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -679,7 +675,7 @@ const numberOfLoserRounds = computed(() => {
                           d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                         />
                       </svg>
-                      <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
+                      <div class="-mt-0.5 text-muted-foreground">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
                             store.showUsernames
@@ -700,10 +696,10 @@ const numberOfLoserRounds = computed(() => {
                     </p>
                   </div>
                 </div>
-              </div>
-              <div
+              </Card>
+              <Card
                 v-else-if="index === matchup.r"
-                class="block p-4 my-4 mr-4 bg-white border border-gray-200 rounded-lg shadow custom-card-width dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700"
+                class="block p-4 my-4 mr-4 custom-card-width bg-muted"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -718,7 +714,7 @@ const numberOfLoserRounds = computed(() => {
                     />
                     <svg
                       v-else
-                      class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                      class="w-8 h-8"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -728,7 +724,7 @@ const numberOfLoserRounds = computed(() => {
                         d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                       />
                     </svg>
-                    <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
+                    <div class="-mt-0.5 text-muted-foreground">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
                         {{
                           store.showUsernames
@@ -746,7 +742,7 @@ const numberOfLoserRounds = computed(() => {
                     {{ getPointsScored(matchup.t1, index) }}
                   </p>
                 </div>
-                <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
+                <Separator class="h-px my-2" />
                 <div>
                   <div
                     v-if="matchRosterId(matchup.t2)"
@@ -761,7 +757,7 @@ const numberOfLoserRounds = computed(() => {
                       />
                       <svg
                         v-else
-                        class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                        class="w-8 h-8"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -771,7 +767,7 @@ const numberOfLoserRounds = computed(() => {
                           d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
                         />
                       </svg>
-                      <div class="-mt-0.5 text-gray-600 dark:text-gray-300">
+                      <div class="-mt-0.5 text-muted-foreground">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
                             store.showUsernames
@@ -792,11 +788,11 @@ const numberOfLoserRounds = computed(() => {
                     </p>
                   </div>
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         </div>
-      </div>
+      </Card>
       <PlacementFlowChart
         :class="[finalPlacements.length === 0 ? 'hidden lg:block' : '']"
         :tableData="props.tableData"

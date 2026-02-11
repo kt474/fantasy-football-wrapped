@@ -2,6 +2,7 @@
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
+import Card from "../ui/card/Card.vue";
 const props = defineProps<{
   tableData: TableDataType[];
   finalPlacements: [];
@@ -144,12 +145,8 @@ watch(
 );
 </script>
 <template>
-  <div
-    class="block w-full p-4 mt-4 text-black bg-white border border-gray-200 rounded-lg shadow lg:mt-0 lg:w-1/4 min-w-60 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-50"
-  >
-    <h5
-      class="ml-0.5 text-2xl font-bold leading-none text-gray-900 dark:text-gray-50 text-pretty"
-    >
+  <Card class="block w-full p-4 mt-4 lg:mt-0 lg:w-1/4 min-w-60">
+    <h5 class="ml-0.5 text-2xl font-bold leading-none text-pretty">
       Regular Season vs Final Placement
     </h5>
     <apexchart
@@ -161,10 +158,8 @@ watch(
       :series="seriesData"
       class="flex justify-center ml-3 xl:ml-4"
     ></apexchart>
-    <div v-else class="text-gray-600 dark:text-gray-300">
-      <p class="pt-1 mt-2 border-t dark:bg-gray-800 dark:border-gray-700">
-        Season in progress
-      </p>
+    <div v-else class="text-muted-foreground">
+      <p class="pt-1 mt-2 border-t">Season in progress</p>
     </div>
-  </div>
+  </Card>
 </template>

@@ -4,6 +4,8 @@ import { Player } from "../../types/apiTypes.ts";
 import { generateSummary, getPlayersByIdsMap } from "../../api/api.ts";
 import { ref, onMounted, watch, computed } from "vue";
 import { useStore } from "../../store/store";
+import Card from "../ui/card/Card.vue";
+import Separator from "../ui/separator/Separator.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -147,19 +149,12 @@ const copyReport = () => {
 };
 </script>
 <template>
-  <div
-    v-if="showSummary"
-    class="h-full px-6 pt-4 mt-4 bg-white border border-gray-200 rounded-lg shadow custom-width dark:bg-gray-800 dark:border-gray-700"
-  >
+  <Card v-if="showSummary" class="h-full px-6 pt-4 mt-4 custom-width">
     <div class="flex justify-between">
-      <h5
-        class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
-      >
-        League Recap
-      </h5>
+      <h5 class="text-2xl font-bold sm:text-3xl">League Recap</h5>
       <svg
         @click="copyReport()"
-        class="w-6 h-6 mt-2 text-gray-800 cursor-pointer dark:text-gray-50 hover:text-blue-600 dark:hover:text-blue-400"
+        class="w-6 h-6 mt-2 cursor-pointer"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -175,22 +170,19 @@ const copyReport = () => {
         />
       </svg>
     </div>
-    <hr class="h-px mt-3 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
+    <Separator class="mt-3 mb-2" />
     <div v-if="summary">
-      <p
-        v-html="summary"
-        class="max-w-5xl my-3 text-gray-900 dark:text-gray-300"
-      ></p>
+      <p v-html="summary" class="max-w-5xl my-3"></p>
 
-      <p class="text-xs text-gray-500 mb dark:text-gray-300">
+      <p class="text-xs text-muted-foreground">
         Generated using GPT-4.1. Information provided may not always be
         accurate.
       </p>
-      <p class="mb-4 text-xs text-gray-500 dark:text-gray-300">
+      <p class="mb-4 text-xs text-muted-foreground">
         If you've enjoyed using ffwrapped this season please consider
         <a
           aria-label="buymeacoffee donation page"
-          class="text-blue-700 dark:text-blue-500 hover:underline"
+          class="text-primary hover:underline"
           href="https://buymeacoffee.com/kt474"
           title="buymeacofee donation page"
           target="_blank"
@@ -200,10 +192,7 @@ const copyReport = () => {
       </p>
     </div>
     <!-- Fake data for home page  -->
-    <div
-      v-else-if="store.leagueInfo.length == 0"
-      class="max-w-5xl text-gray-900 dark:text-gray-300"
-    >
+    <div v-else-if="store.leagueInfo.length == 0" class="max-w-5xl">
       <p class="mb-3">
         <b>Saquondo </b> took the league by storm, riding Jalen Hurts and Kyren
         Williams to a championship like a cowboy on a rocket-powered steed. With
@@ -301,5 +290,5 @@ const copyReport = () => {
         <span class="sr-only">Loading...</span>
       </div>
     </div>
-  </div>
+  </Card>
 </template>
