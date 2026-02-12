@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useStore } from "../../store/store";
 import { UserType } from "../../types/types";
+import Card from "../ui/card/Card.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -77,39 +78,23 @@ const extractRecord = (user: MatchupDataType[], opponent: UserType) => {
 };
 </script>
 <template>
-  <div>
-    <div
-      class="flex justify-between rounded-t-lg shadow-md"
-      :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
-    >
+  <Card>
+    <div class="flex justify-between">
       <p
-        class="w-full pt-2 text-lg font-semibold text-center text-gray-700 dark:text-gray-200"
+        class="w-full pt-2 text-lg font-semibold text-center rounded-t-lg bg-secondary"
       >
         All Time H2H Matchups
       </p>
     </div>
-    <div
-      :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
-      class="relative w-full overflow-x-auto bg-gray-100 rounded-b-lg shadow-md dark:bg-gray-700"
-    >
-      <table
-        class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-200"
-      >
-        <thead
-          :class="
-            store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
-          "
-          class="text-xs text-gray-700 dark:text-gray-200"
-        >
+    <div class="relative w-full overflow-x-auto">
+      <table class="w-full text-sm text-left rtl:text-right 0">
+        <thead class="text-xs bg-secondary">
           <tr>
-            <th
-              scope="col"
-              class="px-4 py-3 uppercase sm:px-6 w-60 dark:text-gray-200"
-            >
+            <th scope="col" class="px-4 py-3 uppercase sm:px-6 w-60">
               Team Name
             </th>
             <th v-for="item in props.tableData" scope="col" class="px-2 py-3">
-              <div class="flex items-center dark:text-gray-200 min-w-14">
+              <div class="flex items-center min-w-14">
                 {{
                   store.showUsernames
                     ? item.username
@@ -127,11 +112,11 @@ const extractRecord = (user: MatchupDataType[], opponent: UserType) => {
           <tr
             v-for="(item, index) in props.tableData"
             :key="index"
-            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+            class="border-b"
           >
             <th
               scope="row"
-              class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-52 whitespace-nowrap dark:text-gray-50"
+              class="px-4 font-medium truncate sm:px-6 max-w-52 whitespace-nowrap"
             >
               {{
                 store.showUsernames
@@ -146,27 +131,17 @@ const extractRecord = (user: MatchupDataType[], opponent: UserType) => {
             <td
               v-for="(user, rowIndex) in matchupData"
               class="px-2 py-3.5"
-              :class="{ 'bg-blue-100 dark:bg-blue-800': rowIndex == index }"
+              :class="{ 'text-primary font-semibold': rowIndex == index }"
             >
               {{ extractRecord(user, item) }}
             </td>
           </tr>
         </tbody>
       </table>
-      <p
-        class="py-3 ml-2 text-xs text-gray-500 sm:ml-6 footer-font dark:text-gray-300"
-      >
+      <p class="py-3 ml-2 text-xs sm:ml-6 text-muted-foreground">
         Table is meant to be read horizontally. For each team/row, each
         opponent/column is the record the team has against that opponent.
       </p>
     </div>
-  </div>
+  </Card>
 </template>
-<style scoped>
-.light-custom-bg-color {
-  background-color: #eff0f2;
-}
-.dark-custom-bg-color {
-  background-color: #374151;
-}
-</style>

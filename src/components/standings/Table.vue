@@ -45,7 +45,6 @@ import {
 } from "@/components/ui/tooltip";
 
 const tableOrder = ref("wins");
-const hover = ref("");
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];

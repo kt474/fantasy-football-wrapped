@@ -168,7 +168,7 @@ const getRosterName = (rosterId: number) => {
   }
 };
 
-const getAllMangersSpend = (groupedMoves: WaiverMove[]) => {
+const getAllManagersSpend = (groupedMoves: WaiverMove[]) => {
   return groupedMoves
     .filter((m) => m.status === "complete")
     .reduce((sum, m) => sum + (m.bid || 0), 0);
@@ -340,7 +340,7 @@ watch(
             <div class="mr-4">
               <p class="min-w-32">Budget spent:</p>
               <p class="mt-1 text-2xl font-semibold">
-                ${{ getAllMangersSpend(moves) }}
+                ${{ getAllManagersSpend(moves) }}
               </p>
             </div>
             <div>
