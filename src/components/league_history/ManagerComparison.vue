@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
+import Card from "../ui/card/Card.vue";
 
 const store = useStore();
 const manager1 = ref("");
@@ -128,8 +129,8 @@ const seriesData = computed(() => {
         currentManager1.value.pointSeason[0].points.length > 0
           ? currentManager1.value.pointSeason[0].points
           : currentManager1.value.pointSeason[1]
-          ? currentManager1.value.pointSeason[1].points
-          : [],
+            ? currentManager1.value.pointSeason[1].points
+            : [],
     },
     {
       name: store.showUsernames
@@ -139,8 +140,8 @@ const seriesData = computed(() => {
         currentManager2.value.pointSeason[0].points.length > 0
           ? currentManager2.value.pointSeason[0].points
           : currentManager2.value.pointSeason[1]
-          ? currentManager2.value.pointSeason[1].points
-          : [],
+            ? currentManager2.value.pointSeason[1].points
+            : [],
     },
   ];
 });
@@ -300,32 +301,15 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <div
-    v-if="manager1 && manager2"
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
-  >
-    <h5
-      class="-mt-1.5 mb-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-50"
-    >
+  <Card v-if="manager1 && manager2" class="w-full p-4 md:p-6">
+    <h5 class="-mt-1.5 mb-4 text-2xl font-bold sm:text-3xl">
       Manager Comparison
     </h5>
     <div class="relative overflow-x-auto rounded-lg">
-      <table
-        class="w-full min-w-[648px] text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
-      >
-        <thead
-          :class="
-            store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
-          "
-          class="text-xs text-gray-700 uppercase dark:text-gray-200"
-        >
+      <table class="w-full min-w-[648px] text-sm text-left rtl:text-right">
+        <thead class="text-xs uppercase bg-secondary">
           <tr>
-            <th
-              scope="col"
-              class="px-4 py-3 text-gray-700 sm:px-6 dark:text-gray-200"
-            >
-              Name
-            </th>
+            <th scope="col" class="px-4 py-3 sm:px-6">Name</th>
             <th scope="col" class="px-3 py-3 sm:px-6">
               <div class="flex mt-1 ml-0 lg:ml-20">
                 <img
@@ -336,7 +320,7 @@ const chartOptions = ref({
                 />
                 <svg
                   v-else
-                  class="w-8 h-8 -mt-0.5 text-gray-800 dark:text-gray-50"
+                  class="w-8 h-8 -mt-0.5"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -664,7 +648,7 @@ const chartOptions = ref({
       :options="chartOptions"
       :series="seriesData"
     ></apexchart>
-  </div>
+  </Card>
 </template>
 <style scoped>
 .light-custom-bg-color {

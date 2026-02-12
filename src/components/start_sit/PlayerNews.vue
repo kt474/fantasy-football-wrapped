@@ -263,9 +263,7 @@ watch(
   <Card class="py-4 pl-4 mb-4 md:py-6 md:pl-6">
     <p class="text-3xl font-bold leading-none">Start/Sit</p>
     <div class="my-4">
-      <label for="Manager name" class="block mb-1 text-sm text-muted-foreground"
-        >Manager</label
-      >
+      <label for="Manager name" class="block mb-1 text-sm">Manager</label>
       <Select v-model="currentManager">
         <SelectTrigger class="w-52">
           <SelectValue />
@@ -436,9 +434,7 @@ watch(
                     v-for="(score, index) in player.stats?.points"
                     class="flex-1 p-2 text-center border rounded-md dark:border-gray-700"
                   >
-                    <p
-                      class="text-xs text-gray-700 dark:text-gray-300 text-nowrap"
-                    >
+                    <p class="text-xs text-muted-foreground text-nowrap">
                       Week
                       {{
                         store.leagueInfo[store.currentLeagueIndex]?.currentWeek
