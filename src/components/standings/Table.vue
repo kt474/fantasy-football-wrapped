@@ -220,7 +220,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
             v-if="tableData.length > 0"
             class="w-full text-sm text-left rtl:text-right"
           >
-            <thead class="text-xs uppercase bg-accent">
+            <thead class="text-xs uppercase bg-secondary">
               <tr>
                 <th scope="col" class="px-4 py-3 sm:px-6">Team name</th>
                 <th scope="col" class="px-2 sm:px-6">
@@ -536,7 +536,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <TeamRanking
         v-if="seasonType !== 'Guillotine'"
         :tableData="tableData"
-        class="mt-4"
+        class="my-4"
       />
     </div>
     <div v-if="store.currentTab === 'Expected Wins'">
@@ -561,7 +561,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
     </div>
     <div v-if="store.currentTab === 'Playoffs'">
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
-      <Playoffs :tableData="tableData" />
+      <Playoffs class="mb-4" :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'Weekly Report'">
       <WeeklyReport

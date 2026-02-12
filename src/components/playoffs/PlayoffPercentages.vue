@@ -276,7 +276,7 @@ const tableData = computed(() => {
       store.leagueInfo[store.currentLeagueIndex] &&
       store.leagueInfo[store.currentLeagueIndex].status !== 'complete'
     "
-    class="bg-muted"
+    class="bg-secondary"
   >
     <div
       class="flex justify-between pb-2"
@@ -325,7 +325,7 @@ const tableData = computed(() => {
     </div>
     <div v-if="!loading" class="relative w-full overflow-x-auto bg-card">
       <table v-if="showData" class="w-full text-sm text-left rtl:text-right">
-        <thead class="text-xs uppercase bg-muted">
+        <thead class="text-xs uppercase bg-secondary">
           <tr>
             <th scope="col" class="px-4 py-3 sm:px-6 w-60">Team Name</th>
             <th v-for="i in playoffTeams" scope="col" class="px-2 py-3">

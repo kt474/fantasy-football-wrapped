@@ -471,26 +471,26 @@ watch(
                       class="mt-2 text-xs"
                       v-if="player.position === 'QB' && score !== 'DNP'"
                     >
-                      <p class="text-muted-foreground">
-                        Pass Yd:
+                      <p class="">
+                        <span class="text-muted-foreground">Pass Yd: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["pass_yd"]
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Pass Td:
-                        <span class="font-semibold text-muted-foreground">{{
-                          player.stats?.stats[index]["pass_td"]
+                      <p>
+                        <span class="text-muted-foreground">Pass Td: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["pass_td"] ?? 0
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Rush Yd:
+                      <p>
+                        <span class="text-muted-foreground">Rush Yd: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rush_yd"]
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Rush Td:
+                      <p>
+                        <span class="text-muted-foreground">Rush Td: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rush_td"]
                             ? player.stats?.stats[index]["rush_td"]
@@ -502,44 +502,44 @@ watch(
                       class="mt-2 text-xs"
                       v-if="player.position === 'RB' && score !== 'DNP'"
                     >
-                      <p class="text-muted-foreground">
-                        Rush Att:
+                      <p>
+                        <span class="text-muted-foreground">Rush Att: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rush_att"]
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Rush Yd:
+                      <p>
+                        <span class="text-muted-foreground">Rush Yd: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rush_yd"]
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Rush Td:
+                      <p>
+                        <span class="text-muted-foreground">Rush Td: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rush_td"]
                             ? player.stats?.stats[index]["rush_td"]
                             : 0
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Rec:
+                      <p>
+                        <span class="text-muted-foreground">Rec: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rec"]
                             ? player.stats?.stats[index]["rec"]
                             : 0
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Rec Yd:
+                      <p>
+                        <span class="text-muted-foreground">Rec Yd: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rec_yd"]
                             ? player.stats?.stats[index]["rec_yd"]
                             : 0
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Snaps:
+                      <p>
+                        <span class="text-muted-foreground"> Snaps: </span>
                         <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["team_snaps"]
@@ -561,20 +561,20 @@ watch(
                         score !== 'DNP'
                       "
                     >
-                      <p class="text-muted-foreground">
-                        Rec:
+                      <p>
+                        <span class="text-muted-foreground">Rec: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rec"]
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Rec Yd:
+                      <p>
+                        <span class="text-muted-foreground">Rec Yd: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rec_yd"]
                         }}</span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Rec Td:
+                      <p>
+                        <span class="text-muted-foreground">Rec Td: </span>
                         <span class="font-semibold">{{
                           player.stats?.stats[index]["rec_td"]
                             ? player.stats?.stats[index]["rec_td"]
@@ -582,8 +582,8 @@ watch(
                         }}</span>
                       </p>
 
-                      <p class="text-muted-foreground">
-                        Snaps:
+                      <p>
+                        <span class="text-muted-foreground">Snaps: </span>
                         <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["team_snaps"]
@@ -601,8 +601,8 @@ watch(
                       class="mt-2 text-xs"
                       v-if="player.position === 'K' && score !== 'DNP'"
                     >
-                      <p class="text-muted-foreground">
-                        FG:
+                      <p>
+                        <span class="text-muted-foreground">FG: </span>
                         <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["fgm"]
@@ -617,8 +617,8 @@ watch(
                           }}</span
                         >
                       </p>
-                      <p class="text-muted-foreground">
-                        XP:
+                      <p>
+                        <span class="text-muted-foreground">XP: </span>
                         <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["xpm"]
@@ -638,20 +638,20 @@ watch(
                       class="mt-2 text-xs"
                       v-if="player.position === 'DEF' && score !== 'DNP'"
                     >
-                      <p class="text-muted-foreground">
-                        Pts Allow:
+                      <p>
+                        <span class="text-muted-foreground">Pts Allow: </span>
                         <span class="font-semibold"
                           >{{ player.stats?.stats[index]["pts_allow"] }}
                         </span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Yds Allow:
+                      <p>
+                        <span class="text-muted-foreground">Yds Allow: </span>
                         <span class="font-semibold"
                           >{{ player.stats?.stats[index]["yds_allow"] }}
                         </span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Sack:
+                      <p>
+                        <span class="text-muted-foreground">Sack: </span>
                         <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["sack"]
@@ -660,8 +660,8 @@ watch(
                           }}
                         </span>
                       </p>
-                      <p class="text-muted-foreground">
-                        Int:
+                      <p>
+                        <span class="text-muted-foreground">Int: </span>
                         <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["int"]
@@ -670,8 +670,8 @@ watch(
                           }}
                         </span>
                       </p>
-                      <p class="text-muted-foreground">
-                        FF:
+                      <p>
+                        <span class="text-muted-foreground">FF: </span>
                         <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["ff"]

@@ -196,7 +196,7 @@ watch(
                       }}
                       {{ player.lastName }}
                     </p>
-                    <div class="px-3 py-1 rounded-lg bg-muted">
+                    <div class="px-3 py-1 rounded-lg bg-secondary">
                       <p
                         class="text-sm truncate sm:text-base max-w-16 sm:max-w-52"
                       >
@@ -205,20 +205,20 @@ watch(
                     </div>
                   </div>
                   <div class="flex">
-                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-muted">
+                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-secondary">
                       <p>Points:</p>
                       <p class="text-base font-semibold sm:text-lg">
                         {{ player.points ? player.points.toFixed(1) : 0 }}
                       </p>
                     </div>
-                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-muted">
+                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-secondary">
                       <p>PPG:</p>
                       <p class="text-base font-semibold sm:text-lg">
                         {{ player.ppg ? player.ppg.toFixed(1) : 0 }}
                       </p>
                     </div>
                     <div
-                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-muted sm:inline-block"
+                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-secondary sm:inline-block"
                     >
                       <p>Overall Rank:</p>
                       <p class="text-base font-semibold sm:text-lg">
@@ -226,7 +226,7 @@ watch(
                       </p>
                     </div>
                     <div
-                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-muted sm:inline-block"
+                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-secondary sm:inline-block"
                     >
                       <p>Games Played:</p>
                       <p class="text-base font-semibold sm:text-lg">

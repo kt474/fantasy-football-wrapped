@@ -577,7 +577,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                             : `${player.team}`
                         }}
                       </p>
-                      <p class="text-xs">
+                      <p class="text-xs text-muted-foreground">
                         {{ `${player.position} - ${player.team}` }}
                       </p>
                     </div>
@@ -685,7 +685,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                             : `${player.team}`
                         }}
                       </p>
-                      <p class="text-xs">
+                      <p class="text-xs text-muted-foreground">
                         {{ `${player.position} - ${player.team}` }}
                       </p>
                     </div>

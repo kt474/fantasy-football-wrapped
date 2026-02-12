@@ -648,7 +648,7 @@ watch(
 watch(() => currentWeek.value, fetchPlayerNames);
 </script>
 <template>
-  <Card class="h-full px-6 pt-4 mt-4 custom-width">
+  <Card class="h-full px-6 pt-4 my-4 custom-width">
     <Tabs default-value="Report">
       <div class="flex justify-between w-full mb-3">
         <h5 class="mr-4 text-2xl font-bold sm:text-3xl">
@@ -864,7 +864,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
         <div class="flex flex-wrap w-full mb-2 overflow-x-hidden">
           <Card
             v-for="index in numOfMatchups"
-            class="block px-4 py-2.5 my-2 mr-4 w-80 custom-min-width"
+            class="block px-4 py-2.5 my-2 mr-4 w-80 custom-min-width bg-secondary"
           >
             <div v-for="user in sortedTableData">
               <div v-if="user.matchups[currentWeek - 1] == index">
@@ -900,7 +900,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                               : "Ghost Roster"
                         }}
                       </p>
-                      <p class="ml-2 text-xs">
+                      <p class="ml-2 text-xs text-muted-foreground">
                         ({{ getRecord(user.recordByWeek, currentWeek) }})
                       </p>
                     </div>
@@ -935,7 +935,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
           <div v-if="!fetchingPlayers" class="flex flex-wrap">
             <Card
               v-for="player in bestPerformers"
-              class="px-4 py-3.5 my-2 mr-4 custom-player-card"
+              class="px-4 py-3.5 my-2 mr-4 custom-player-card bg-secondary"
             >
               <div v-if="player.player" class="flex justify-between">
                 <div class="flex">
@@ -959,7 +959,9 @@ watch(() => currentWeek.value, fetchPlayerNames);
                           : `${player.player.team} Defense`
                       }}
                     </p>
-                    <p class="truncate w-36">{{ player.user }}</p>
+                    <p class="truncate w-36 text-muted-foreground">
+                      {{ player.user }}
+                    </p>
                   </div>
                 </div>
                 <p class="mt-2 font-semibold">
@@ -978,7 +980,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
           <div v-if="!fetchingPlayers" class="flex flex-wrap">
             <Card
               v-for="player in worstPerformers"
-              class="px-4 py-3.5 my-2 mr-4 custom-player-card"
+              class="px-4 py-3.5 my-2 mr-4 custom-player-card bg-secondary"
             >
               <div v-if="player.player" class="flex justify-between">
                 <div class="flex">
@@ -1002,7 +1004,9 @@ watch(() => currentWeek.value, fetchPlayerNames);
                           : `${player.player.team} Defense`
                       }}
                     </p>
-                    <p class="truncate w-36">{{ player.user }}</p>
+                    <p class="truncate w-36 text-muted-foreground">
+                      {{ player.user }}
+                    </p>
                   </div>
                 </div>
                 <p class="mt-3.5 font-semibold">
@@ -1021,7 +1025,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
           <div v-if="!fetchingPlayers" class="flex flex-wrap">
             <Card
               v-for="player in benchPerformers"
-              class="px-4 py-3.5 my-2 mr-4 custom-player-card"
+              class="px-4 py-3.5 my-2 mr-4 custom-player-card bg-secondary"
             >
               <div v-if="player.player" class="flex justify-between">
                 <div class="flex">
@@ -1045,7 +1049,9 @@ watch(() => currentWeek.value, fetchPlayerNames);
                           : `${player.player.team} Defense`
                       }}
                     </p>
-                    <p class="truncate w-36">{{ player.user }}</p>
+                    <p class="truncate w-36 text-muted-foreground">
+                      {{ player.user }}
+                    </p>
                   </div>
                 </div>
                 <p class="mt-3 font-semibold">

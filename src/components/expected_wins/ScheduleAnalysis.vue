@@ -258,7 +258,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
           <li
             v-for="week in team.luckyWeeks"
             :key="week.week"
-            class="p-2.5 mb-2 bg-muted rounded"
+            class="p-2.5 mb-2 bg-secondary rounded"
           >
             <p class="font-semibold">Week {{ week.week }}</p>
             <p class="text-sm">
@@ -316,7 +316,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
           <li
             v-for="week in team.unluckyWeeks"
             :key="week.week"
-            class="p-2.5 mb-2 bg-muted rounded"
+            class="p-2.5 mb-2 bg-secondary rounded"
           >
             <p class="font-semibold">Week {{ week.week }}</p>
             <p class="text-sm">
@@ -338,7 +338,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
       </Card>
     </div>
   </Card>
-  <Card class="w-full p-4 mt-4 md:p-6">
+  <Card class="w-full p-4 my-4 md:p-6">
     <h1 class="pb-2 mb-2 text-3xl font-bold leading-none">Schedule Analysis</h1>
     <p class="max-w-3xl mb-4 text-sm text-muted-foreground sm:text-base">
       Actual record, expected number of wins, and best/worst possible records
@@ -356,7 +356,9 @@ const getDotPosition = (value: number, min: number, max: number) => {
           {{ team.teamName }}
         </h3>
         <div class="relative w-full h-10 mt-4">
-          <div class="absolute left-0 right-0 h-4 mx-3 rounded bg-muted"></div>
+          <div
+            class="absolute left-0 right-0 h-4 mx-3 rounded bg-secondary"
+          ></div>
           <div
             v-for="dot in [
               {
@@ -367,7 +369,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
               },
               {
                 key: 'actual',
-                color: 'p-2 bg-black',
+                color: 'p-[9px] bg-black',
                 label: 'Actual',
                 value: team.actualWins,
               },

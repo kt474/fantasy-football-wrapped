@@ -225,7 +225,7 @@ watch(
 );
 </script>
 <template>
-  <div class="flex flex-wrap mt-4 xl:flex-nowrap">
+  <div class="flex flex-wrap mt-4 mb-0 xl:flex-nowrap xl:mb-4">
     <Card class="w-full py-4 pl-4 overflow-auto xl:w-2/3 md:py-6 md:pl-6">
       <h1 class="pb-2 text-3xl font-bold leading-none">
         Waivers & Free Agent Adds
@@ -280,7 +280,7 @@ watch(
           </div>
           <Card
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="flex p-3 mt-4 mr-4 text-sm bg-muted"
+            class="flex p-3 mt-4 mr-4 text-sm bg-secondary"
           >
             <div class="mr-4">
               <p class="min-w-32">Budget spent:</p>
@@ -292,7 +292,7 @@ watch(
                 <template v-for="move in currentManagerMoves">
                   <div
                     v-if="move.status === 'failed' && move.bid"
-                    class="rounded-lg p-1.5 mt-1.5 bg-card"
+                    class="bg-accent py-1.5 pr-1.5 mt-1.5"
                   >
                     <p class="font-medium">{{ move.adds }} (${{ move.bid }})</p>
                   </div>
@@ -335,7 +335,7 @@ watch(
           </div>
           <Card
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="flex p-3 mt-4 mr-4 text-sm border-2 bg-muted"
+            class="flex p-3 mt-4 mr-4 text-sm border-2 bg-secondary"
           >
             <div class="mr-4">
               <p class="min-w-32">Budget spent:</p>
@@ -349,7 +349,7 @@ watch(
                 <template v-for="move in moves">
                   <div
                     v-if="move.status === 'failed' && move.bid"
-                    class="rounded-lg bg-card p-1.5 mt-1.5"
+                    class="bg-accent py-1.5 pr-1.5 mt-1.5"
                   >
                     <p class="font-medium">{{ move.adds }} (${{ move.bid }})</p>
                   </div>

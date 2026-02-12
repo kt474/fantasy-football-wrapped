@@ -78,7 +78,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
   <Card class="relative w-full overflow-x-auto md:max-w-xl">
     <TooltipProvider>
       <table class="w-full text-sm text-left rtl:text-right">
-        <thead class="text-xs uppercase bg-accent">
+        <thead class="text-xs uppercase bg-secondary">
           <tr>
             <th scope="col" class="px-4 py-3 sm:px-6">Team Name</th>
             <th scope="col" class="px-2 py-3">
