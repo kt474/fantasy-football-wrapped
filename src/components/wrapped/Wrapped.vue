@@ -769,7 +769,7 @@ watch(
 <template>
   <div>
     <div
-      class="flex justify-center gap-1.5 z-40 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 mt-4 -mb-6 relative opacity-20"
+      class="flex justify-center gap-1.5 z-40 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 my-4 -mb-6 relative opacity-20"
     >
       <button
         v-for="(_, index) in totalSlides"
