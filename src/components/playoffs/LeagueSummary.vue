@@ -154,7 +154,7 @@ const copyReport = () => {
       <h5 class="text-2xl font-bold sm:text-3xl">League Recap</h5>
       <svg
         @click="copyReport()"
-        class="w-6 h-6 mt-2 cursor-pointer"
+        class="w-6 h-6 mt-2 cursor-pointer hover:text-primary"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"

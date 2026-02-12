@@ -20,17 +20,6 @@ const allData = ref<Record<string, WeeklyEntry[]>>({});
 const loading = ref(false);
 const tab = ref("QB");
 
-const switchTabs = [
-  { label: "By Roster", key: "roster" },
-  { label: "Overall", key: "score" },
-];
-
-const activeTab = ref("score");
-
-const changeTab = (newTab: string) => {
-  tab.value = newTab;
-};
-
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   const rosterPlayers = props.tableData.flatMap((user) =>
