@@ -1,8 +1,24 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { getLeagueCount } from "@/api/api";
+import { watch, ref, onMounted } from "vue";
 import { useStore } from "@/store/store";
 import Switch from "@/components/ui/switch/Switch.vue";
-import Label from "@/components/ui/label/Label.vue";
+import { useRoute } from "vue-router";
+import Separator from "@/components/ui/separator/Separator.vue";
+
+const route = useRoute();
+const leagueCount = ref(11947); // initial load current unique league count value 2/13/26
+
+onMounted(async () => {
+  const leagueId = route.query.leagueId;
+  if (!leagueId) {
+    const data = await getLeagueCount();
+    const newCount = data?.league_id_count;
+    if (newCount) {
+      leagueCount.value = newCount;
+    }
+  }
+});
 
 const store = useStore();
 
@@ -87,8 +103,21 @@ watch(
             v-model="store.showUsernames"
             :disabled="store.leagueInfo.length == 0"
           />
-          <Label>Show usernames instead of team names</Label>
+          <label>Show usernames instead of team names</label>
         </div>
+        <div class="flex items-center justify-between mt-4">
+          <h3 class="text-3xl font-semibold">League Count</h3>
+        </div>
+        <div>
+          <p class="mt-2 text-xl font-medium">
+            {{ leagueCount.toLocaleString() }}
+            <span class="text-base font-normal">Fantasy leagues added</span>
+          </p>
+        </div>
+        <Separator class="mt-2" />
+        <p class="mt-2 text-sm text-muted-foreground">
+          &copy; 2024-2026. Kevin Tian
+        </p>
       </div>
     </div>
   </div>

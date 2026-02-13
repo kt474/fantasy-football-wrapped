@@ -11,7 +11,6 @@ import posthogPlugin from "../plugins/posthog";
 import ChangelogPage from "./views/Changelog.vue";
 import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import About from "./views/About.vue";
-import Contact from "./views/Contact.vue";
 import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
 
@@ -39,14 +38,6 @@ const routes = [
     meta: {
       title: "Privacy Policy",
       description: "We don’t collect or store your personal information.",
-    },
-  },
-  {
-    path: "/contact",
-    component: Contact,
-    meta: {
-      title: "Newsletter",
-      description: "Subscribe to our newsletter for updates and announcements.",
     },
   },
   {
