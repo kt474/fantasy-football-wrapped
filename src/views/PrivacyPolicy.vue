@@ -17,13 +17,9 @@ onMounted(() => {
 <template>
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto">
     <div class="container mx-auto mt-4">
-      <h1 class="mb-4 text-3xl font-semibold text-gray-800 dark:text-gray-300">
-        Privacy Policy
-      </h1>
+      <h1 class="mb-4 text-3xl font-semibold">Privacy Policy</h1>
 
-      <div
-        class="max-w-4xl text-base leading-relaxed text-gray-700 dark:text-gray-300"
-      >
+      <div class="max-w-4xl text-base leading-relaxed">
         <p class="mb-3 text-xl font-semibold">Introduction</p>
         ffwrapped ("we," "our," or "us") is committed to protecting your
         privacy. This Privacy Policy explains how we collect, use, and share
@@ -60,7 +56,7 @@ onMounted(() => {
         contact us at this
         <a
           href="mailto:kevin@ffwrapped.com?subject=privacy policy"
-          class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+          class="font-medium text-primary hover:underline"
           >email</a
         >.
       </div>

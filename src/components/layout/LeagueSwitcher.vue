@@ -11,7 +11,7 @@ import { capitalize } from "lodash";
 
 import { Button } from "@/components/ui/button";
 import Separator from "../ui/separator/Separator.vue";
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -185,7 +185,7 @@ const shareLeague = () => {
               v-for="league in leagues"
               :key="league.leagueId"
               @select="selectLeague(league.leagueId)"
-              class="flex items-start"
+              class="flex items-start cursor-pointer"
             >
               <div class="flex flex-col">
                 <p class="truncate max-w-40">
@@ -211,7 +211,9 @@ const shareLeague = () => {
             <DropdownMenuSeparator />
             <Dialog>
               <template #trigger>
-                <div class="flex p-1 cursor-default">
+                <div
+                  class="flex p-1 rounded-sm cursor-pointer hover:bg-secondary"
+                >
                   <div
                     class="flex items-center justify-center bg-transparent border rounded-md size-6"
                   >

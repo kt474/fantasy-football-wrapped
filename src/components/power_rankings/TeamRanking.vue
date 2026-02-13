@@ -246,9 +246,7 @@ watch(
     </Tabs>
     <!-- Loading div -->
     <div v-else-if="loading" role="status" class="max-w-sm animate-pulse">
-      <p class="mb-2 text-gray-900 dark:text-gray-200">
-        Loading player data...
-      </p>
+      <p class="mb-2">Loading player data...</p>
       <div
         class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"
       ></div>

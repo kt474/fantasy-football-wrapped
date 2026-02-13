@@ -283,7 +283,7 @@ const tableData = computed(() => {
       :class="`${showData ? 'rounded-t-lg' : 'rounded-lg'}`"
     >
       <p
-        class="w-full pt-2 text-lg font-semibold text-center cursor-pointer dark:text-gray-200"
+        class="w-full pt-2 text-lg font-semibold text-center cursor-pointer"
         @click="showData = !showData"
       >
         Playoff Odds

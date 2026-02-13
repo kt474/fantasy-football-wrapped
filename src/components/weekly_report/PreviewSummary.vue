@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { generatePreview } from "../../api/api";
 import { TableDataType } from "../../types/types";
+import Button from "../ui/button/Button.vue";
 
 const preview = ref<string>("");
 const loading = ref<boolean>(false);
@@ -102,28 +103,19 @@ const promptData = computed(() => {
 });
 </script>
 <template>
-  <div class="p-4 mx-0 mt-3 rounded bg-gray-50 dark:bg-gray-700 sm:mx-2">
-    <h3 class="font-semibold text-gray-800 dark:text-gray-50">
-      Matchup Preview
-    </h3>
-    <button
-      v-if="preview === ''"
-      @click="getPreview"
-      class="w-full px-3 py-2 mt-3 text-base font-medium text-center bg-blue-700 rounded-lg text-gray-50 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 sm:text-sm sm:w-auto sm:px-3 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-    >
-      Generate
-    </button>
+  <div class="p-4 mx-0 mt-3 rounded bg-secondary sm:mx-2">
+    <h3 class="font-semibold">Matchup Preview</h3>
+    <Button v-if="preview === ''" @click="getPreview"> Generate </Button>
     <div v-if="preview" class="mt-1">
       <p>{{ preview }}</p>
       <p
         v-if="preview !== 'Unable to generate preview. Please try again later.'"
-        class="mt-1 text-xs text-gray-500 dark:text-gray-400"
+        class="mt-1 text-xs text-muted-foreground"
       >
         Generated using GPT-4.1-mini. Information provided may not always be
         accurate.
       </p>
     </div>
-
     <p class="mt-2" v-if="loading">Loading...</p>
   </div>
 </template>

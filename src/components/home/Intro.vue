@@ -27,9 +27,9 @@
       aria-label="Sleeper website link"
       href="https://sleeper.com/"
       target="_blank"
-      class="inline-block mb-2 text-lg font-semibold text-center text-blue-600 dark:text-blue-500 lg:text-xl sm:px-16 xl:px-48 whitespace-nowrap"
+      class="inline-block mb-2 text-lg font-semibold text-center text-primary lg:text-xl sm:px-16 xl:px-48 whitespace-nowrap"
     >
-      https://sleeper.com/leagues/<span class="text-red-600 dark:text-red-500"
+      https://sleeper.com/leagues/<span class="text-destructive"
         >{League ID}</span
       >
     </a>

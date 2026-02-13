@@ -532,7 +532,7 @@ const worstManager = computed(() => {
                   </TooltipContent>
                 </Tooltip>
               </th>
-              <th scope="col" class="px-2 py-3 sm:px-6 dark:text-gray-200">
+              <th scope="col" class="px-2 py-3 sm:px-6">
                 <Tooltip>
                   <TooltipTrigger as-child>
                     <div>Seasons</div>
@@ -800,10 +800,7 @@ const worstManager = computed(() => {
           fill="currentFill"
         />
       </svg>
-      <p
-        v-if="loadingYear"
-        class="flex justify-center text-lg dark:text-gray-50"
-      >
+      <p v-if="loadingYear" class="flex justify-center text-lg">
         Loading
         <span class="font-bold">&nbsp;{{ loadingYear }}&nbsp;</span>season...
       </p>

@@ -220,7 +220,7 @@ const copyReport = () => {
     </div>
     <div v-else>
       <div role="status" class="space-y-2.5 animate-pulse max-w-lg mb-6">
-        <p class="mt-4 text-gray-900 dark:text-gray-300">Generating Recap...</p>
+        <p class="mt-4">Generating Recap...</p>
         <div class="flex items-center w-full">
           <div
             class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32"

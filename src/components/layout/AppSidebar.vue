@@ -119,7 +119,7 @@ const data = {
               class="h-6"
             />
             <span
-              class="self-center -mb-1.5 ml-2.5 custom-font whitespace-nowrap dark:text-gray-50"
+              class="self-center -mb-1.5 ml-2.5 custom-font whitespace-nowrap"
               ><span class="text-primary">ff</span>wrapped</span
             >
           </div>

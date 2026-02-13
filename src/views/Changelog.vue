@@ -543,14 +543,10 @@ const data = [
 <template>
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto">
     <div class="container mx-auto mt-4">
-      <h1 class="mb-4 text-3xl font-semibold text-gray-800 dark:text-gray-300">
-        Changelog
-      </h1>
+      <h1 class="mb-4 text-3xl font-semibold">Changelog</h1>
       <div v-for="entry in data" class="my-2 ml-1">
         <div class="flex">
-          <p
-            class="w-20 mb-1 mr-2 text-xl font-semibold text-gray-800 dark:text-gray-300"
-          >
+          <p class="w-20 mb-1 mr-2 text-xl font-semibold">
             {{ entry.date }}
           </p>
           <div v-for="content in entry.content" class="mt-0.5">
@@ -572,7 +568,7 @@ const data = [
           </div>
         </div>
         <div v-for="content in entry.content" class="max-w-4xl">
-          <ul class="space-y-1 text-gray-800 dark:text-gray-300">
+          <ul class="space-y-1">
             <li v-for="text in content.text" class="px-2 my-1 ml-20 text-base">
               {{ text }}
             </li>
