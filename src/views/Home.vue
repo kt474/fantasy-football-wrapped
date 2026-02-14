@@ -12,6 +12,7 @@ import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
+import Test from "./Test.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -111,9 +112,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container w-11/12 max-w-screen-xl mx-auto">
+  <div class="mx-auto">
     <SkeletonLoading v-if="isInitialLoading" />
-    <div v-else>
+    <Test />
+    <!-- <div v-else>
       <div v-if="store.currentLeagueId" class="container mx-auto">
         <Input v-if="store.showInput" class="custom-input-width" />
         <div v-if="store.showLeaguesList" class="container mx-auto">
@@ -138,15 +140,15 @@ onMounted(async () => {
       <div v-else-if="store.showLeaguesList" class="container mx-auto">
         <UserLeagueList />
       </div>
-      <!-- show loading screen on auto 24 hr refresh -->
+
       <SkeletonLoading v-else-if="showLoading" />
       <div v-else class="container mx-auto custom-background">
         <Intro />
         <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
         <Tabs class="mt-4" />
         <Table :users="fakeUsers" :rosters="fakeRosters" :points="fakePoints" />
-      </div>
-    </div>
+      </div> 
+    </div>-->
   </div>
 </template>
 <style scoped>

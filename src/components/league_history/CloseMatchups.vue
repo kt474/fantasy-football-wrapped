@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { useStore } from "../../store/store";
+import Card from "../ui/card/Card.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -116,17 +117,10 @@ const getWeek = (seasonsData: any[], index: number) => {
 </script>
 
 <template>
-  <div
-    class="flex flex-wrap justify-start mt-4 text-gray-900 dark:text-gray-50 md:flex-nowrap"
-  >
-    <div
-      class="w-full px-6 py-4 mr-0 bg-white rounded-lg shadow dark:bg-gray-800 md:mr-4"
-    >
+  <div class="flex flex-wrap justify-start mt-4 md:flex-nowrap">
+    <Card class="w-full px-6 py-4 mr-0 md:mr-4">
       <h5 class="mb-4 text-2xl font-bold sm:text-3xl">Closest Matchups</h5>
-      <div
-        v-for="matchup in closestMatchups"
-        class="p-4 mb-4 border border-gray-200 rounded-lg shadow dark:border-gray-700 dark:shadow-gray-600"
-      >
+      <Card v-for="matchup in closestMatchups" class="p-4 mb-4 bg-secondary">
         <div class="">
           <p class="mb-2 font-medium">
             {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
@@ -134,17 +128,17 @@ const getWeek = (seasonsData: any[], index: number) => {
 
           <div class="flex justify-between mt-1 mr-1">
             <div class="mb-2 mr-4 text-center">
-              <p class="text-2xl font-semibold text-gray-900 dark:text-gray-50">
+              <p class="text-2xl font-semibold">
                 {{ matchup.difference.toFixed(2) }}
               </p>
-              <p class="text-gray-700 dark:text-gray-200">
+              <p class="text-muted-foreground">
                 <span class="hidden sm:inline">Point</span
                 ><span class="inline sm:hidden">Pt.</span> Diff
               </p>
             </div>
             <div class="w-4/5">
               <div class="flex justify-between mb-2">
-                <p class="text-gray-700 dark:text-gray-200">
+                <p>
                   {{
                     store.showUsernames
                       ? matchup.teamA.username
@@ -154,15 +148,14 @@ const getWeek = (seasonsData: any[], index: number) => {
                 <p
                   class="font-semibold"
                   :class="{
-                    'text-blue-600 dark:text-blue-500':
-                      matchup.scoreA > matchup.scoreB,
+                    'text-primary': matchup.scoreA > matchup.scoreB,
                   }"
                 >
                   {{ matchup.scoreA }}
                 </p>
               </div>
               <div class="flex justify-between">
-                <p class="text-gray-700 dark:text-gray-200">
+                <p>
                   {{
                     store.showUsernames
                       ? matchup.teamB.username
@@ -172,8 +165,7 @@ const getWeek = (seasonsData: any[], index: number) => {
                 <p
                   class="font-semibold text"
                   :class="{
-                    'text-blue-600 dark:text-blue-500':
-                      matchup.scoreB > matchup.scoreA,
+                    'text-primary': matchup.scoreB > matchup.scoreA,
                   }"
                 >
                   {{ matchup.scoreB }}
@@ -182,16 +174,11 @@ const getWeek = (seasonsData: any[], index: number) => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    <div
-      class="w-full px-6 py-4 mt-4 bg-white rounded-lg shadow dark:bg-gray-800 md:mt-0"
-    >
+      </Card>
+    </Card>
+    <Card class="w-full px-6 py-4 mt-4 md:mt-0">
       <h5 class="mb-4 text-2xl font-bold sm:text-3xl">Biggest Blowouts</h5>
-      <div
-        v-for="matchup in farthestMatchups"
-        class="p-4 mb-4 border border-gray-200 rounded-lg shadow dark:border-gray-700 dark:shadow-gray-600"
-      >
+      <Card v-for="matchup in farthestMatchups" class="p-4 mb-4 bg-secondary">
         <div class="">
           <p class="mb-2 font-medium">
             {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
@@ -199,17 +186,17 @@ const getWeek = (seasonsData: any[], index: number) => {
 
           <div class="flex justify-between mt-1 mr-1">
             <div class="mb-2 mr-4 text-center">
-              <p class="text-2xl font-semibold text-gray-900 dark:text-gray-50">
+              <p class="text-2xl font-semibold">
                 {{ matchup.difference.toFixed(2) }}
               </p>
-              <p class="text-gray-700 dark:text-gray-200">
+              <p class="text-muted-foreground">
                 <span class="hidden sm:inline">Point</span
                 ><span class="inline sm:hidden">Pt.</span> Diff
               </p>
             </div>
             <div class="w-4/5">
               <div class="flex justify-between mb-2">
-                <p class="text-gray-700 dark:text-gray-200">
+                <p>
                   {{
                     store.showUsernames
                       ? matchup.teamA.username
@@ -219,15 +206,14 @@ const getWeek = (seasonsData: any[], index: number) => {
                 <p
                   class="font-semibold"
                   :class="{
-                    'text-blue-600 dark:text-blue-500':
-                      matchup.scoreA > matchup.scoreB,
+                    'text-primary': matchup.scoreA > matchup.scoreB,
                   }"
                 >
                   {{ matchup.scoreA }}
                 </p>
               </div>
               <div class="flex justify-between">
-                <p class="text-gray-700 dark:text-gray-200">
+                <p>
                   {{
                     store.showUsernames
                       ? matchup.teamB.username
@@ -237,8 +223,7 @@ const getWeek = (seasonsData: any[], index: number) => {
                 <p
                   class="font-semibold text"
                   :class="{
-                    'text-blue-600 dark:text-blue-500':
-                      matchup.scoreB > matchup.scoreA,
+                    'text-primary': matchup.scoreB > matchup.scoreA,
                   }"
                 >
                   {{ matchup.scoreB }}
@@ -247,7 +232,7 @@ const getWeek = (seasonsData: any[], index: number) => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </Card>
+    </Card>
   </div>
 </template>

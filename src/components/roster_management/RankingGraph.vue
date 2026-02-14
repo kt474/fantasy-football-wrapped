@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
+import Card from "../ui/card/Card.vue";
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
@@ -160,13 +161,11 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <div
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
-  >
+  <card class="w-full p-4 md:p-6 min-w-80">
     <div class="flex justify-between">
       <div>
         <h1
-          class="-mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
+          class="-mb-2 text-3xl font-bold leading-none "
         >
           Points vs Potential Points
         </h1>
@@ -180,11 +179,11 @@ const chartOptions = ref({
       :series="series"
     ></apexchart>
     <p
-      class="text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
+      class="text-xs text-muted-foreground sm:-mb-4"
       :class="props.tableData.length <= 12 ? 'mt-8' : 'mt-16'"
     >
       Potential points are the maximum number of points a team could have scored
       if weekly lineups were optimized
     </p>
-  </div>
+  </Card>
 </template>

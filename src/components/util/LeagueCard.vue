@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { capitalize } from "lodash";
 import { useStore } from "../../store/store";
-import { onMounted } from "vue";
-import { initFlowbite } from "flowbite";
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+
 import { getData, inputLeague } from "../../api/api";
 import { LeagueInfoType } from "../../types/types";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-onMounted(() => {
-  initFlowbite();
-});
 
 const props = defineProps<{
   leagueInfo: LeagueInfoType;
@@ -68,7 +72,7 @@ const removeLeague = () => {
       localStorage.removeItem("currentTab");
       removeHistoryLeagues();
       store.showUsernames = false;
-      store.currentTab = "standings";
+      store.currentTab = "Standings";
       // reset url if there are no leagues
       router.replace({
         path: "/",
@@ -120,7 +124,31 @@ const removeHistoryLeagues = () => {
 };
 </script>
 <template>
-  <div
+  <Breadcrumb>
+    <BreadcrumbList>
+      <BreadcrumbItem class="hidden md:block">
+        <!-- <CardContainer /> -->
+        <BreadcrumbPage>
+          {{ props.leagueInfo.name }}
+        </BreadcrumbPage>
+      </BreadcrumbItem>
+      <BreadcrumbSeparator class="hidden md:block" />
+      <BreadcrumbItem>
+        {{
+          props.leagueInfo.season +
+          ": " +
+          capitalize(props.leagueInfo.seasonType) +
+          " " +
+          props.leagueInfo.totalRosters +
+          "-team"
+        }}
+      </BreadcrumbItem>
+    </BreadcrumbList>
+  </Breadcrumb>
+  <!-- <div>
+    <h4 class="text-lg font-semibold">{{ props.leagueInfo.name }}</h4>
+  </div> -->
+  <!-- <div
     @click.self="selectLeague()"
     :class="{
       'border-b-4 border-b-blue-700 dark:border-b-blue-600':
@@ -214,7 +242,7 @@ const removeHistoryLeagues = () => {
         "-team"
       }}
     </p>
-  </div>
+  </div> -->
 </template>
 <style scoped>
 .card-width {

@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import { TableDataType } from "../../types/types";
 import { useStore } from "../../store/store";
+import Card from "../ui/card/Card.vue";
+import Separator from "../ui/separator/Separator.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -208,53 +210,47 @@ const getDotPosition = (value: number, min: number, max: number) => {
 };
 </script>
 <template>
-  <div
-    class="w-full p-4 mt-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
-  >
-    <h1
-      class="pb-2 mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-    >
+  <Card class="w-full p-4 mt-4 md:p-6">
+    <h1 class="pb-2 mb-2 text-3xl font-bold leading-none">
       Luckiest/Unluckiest Teams
     </h1>
-    <p
-      class="max-w-3xl mb-4 text-sm text-gray-600 sm:text-base dark:text-gray-300"
-    >
+    <p class="max-w-3xl mb-4 text-sm sm:text-base text-muted-foreground">
       Highlighting the specific weeks teams had lucky/unlucky matchups.
     </p>
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <div
-        class="flex flex-col px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600"
+      <Card
+        class="flex flex-col px-4 py-3"
         v-for="team in luckAnalysis.luckiest"
         :key="team.teamName"
       >
-        <h3 class="mb-3 text-xl font-semibold dark:text-gray-200">
+        <h3 class="mb-3 text-xl font-semibold">
           {{ team.teamName }}
         </h3>
         <div class="flex mb-3 text-center justify-evenly">
           <div>
-            <p class="text-gray-600 dark:text-gray-300">Wins</p>
-            <p class="text-2xl font-semibold dark:text-gray-200">
+            <p class="text-muted-foreground">Wins</p>
+            <p class="text-2xl font-semibold">
               {{ team.actualWins }}
             </p>
           </div>
-          <div class="w-px mx-4 bg-gray-200 dark:bg-gray-700"></div>
+          <Separator orientation="vertical" />
           <div>
-            <p class="text-gray-600 dark:text-gray-300">Expected</p>
-            <p class="text-2xl font-semibold dark:text-gray-200">
+            <p class="text-muted-foreground">Expected</p>
+            <p class="text-2xl font-semibold">
               {{ team.expectedWins.toFixed(2) }}
             </p>
           </div>
-          <div class="w-px mx-4 bg-gray-200 dark:bg-gray-700"></div>
+          <Separator orientation="vertical" />
           <div>
-            <p class="text-gray-600 dark:text-gray-300">Luck</p>
-            <p class="text-2xl font-semibold text-green-500">
+            <p class="text-muted-foreground">Luck</p>
+            <p class="text-2xl font-semibold text-primary">
               +{{ team.luckDiff.toFixed(2) }}
             </p>
           </div>
         </div>
         <h4
           v-if="team.luckyWeeks.length > 0"
-          class="my-2 text-gray-600 dark:text-gray-300"
+          class="my-2 text-muted-foreground"
         >
           Key Matchups
         </h4>
@@ -262,59 +258,57 @@ const getDotPosition = (value: number, min: number, max: number) => {
           <li
             v-for="week in team.luckyWeeks"
             :key="week.week"
-            class="p-2.5 mb-2 bg-gray-50 rounded dark:bg-gray-700 dark:text-gray-200"
+            class="p-2.5 mb-2 bg-secondary rounded"
           >
             <p class="font-semibold">Week {{ week.week }}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">
+            <p class="text-sm">
               Won with
-              <span class="font-semibold text-gray-800 dark:text-gray-200">{{
-                week.points
-              }}</span>
+              <span class="font-semibold text-primary">{{ week.points }}</span>
               pts ({{ week.rankText }}) vs {{ week.opponentName }}
             </p>
           </li>
         </ul>
         <div v-if="team.luckyWeeks.length === 0">
-          <p class="text-gray-800 dark:text-gray-200">
+          <p>
             <b>{{ team.teamName }}</b> did not have any individual weeks where
             they won with a particularly low score. Their luck came from facing
             opponents with below average scores.
           </p>
         </div>
-      </div>
-      <div
-        class="flex flex-col px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600"
+      </Card>
+      <Card
+        class="flex flex-col px-4 py-3"
         v-for="team in luckAnalysis.unluckiest"
         :key="team.teamName"
       >
-        <h3 class="mb-3 text-xl font-semibold dark:text-gray-200">
+        <h3 class="mb-3 text-xl font-semibold">
           {{ team.teamName }}
         </h3>
         <div class="flex mb-3 text-center justify-evenly">
           <div>
-            <p class="text-gray-600 dark:text-gray-300">Wins</p>
-            <p class="text-2xl font-semibold dark:text-gray-200">
+            <p class="text-muted-foreground">Wins</p>
+            <p class="text-2xl font-semibold">
               {{ team.actualWins }}
             </p>
           </div>
-          <div class="w-px mx-4 bg-gray-200 dark:bg-gray-700"></div>
+          <Separator orientation="vertical" />
           <div>
-            <p class="text-gray-600 dark:text-gray-300">Expected</p>
-            <p class="text-2xl font-semibold dark:text-gray-200">
+            <p class="text-muted-foreground">Expected</p>
+            <p class="text-2xl font-semibold">
               {{ team.expectedWins.toFixed(2) }}
             </p>
           </div>
-          <div class="w-px mx-4 bg-gray-200 dark:bg-gray-700"></div>
+          <Separator orientation="vertical" />
           <div>
-            <p class="text-gray-600 dark:text-gray-300">Luck</p>
-            <p class="text-2xl font-semibold text-red-500">
+            <p class="text-muted-foreground">Luck</p>
+            <p class="text-2xl font-semibold text-destructive">
               {{ team.luckDiff.toFixed(2) }}
             </p>
           </div>
         </div>
         <h4
           v-if="team.unluckyWeeks.length > 0"
-          class="my-2 text-gray-600 dark:text-gray-300"
+          class="my-2 text-muted-foreground"
         >
           Key Matchups
         </h4>
@@ -322,12 +316,12 @@ const getDotPosition = (value: number, min: number, max: number) => {
           <li
             v-for="week in team.unluckyWeeks"
             :key="week.week"
-            class="p-2.5 mb-2 bg-gray-50 rounded dark:bg-gray-700 dark:text-gray-200"
+            class="p-2.5 mb-2 bg-secondary rounded"
           >
             <p class="font-semibold">Week {{ week.week }}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">
+            <p class="text-sm">
               Lost with
-              <span class="font-semibold text-gray-800 dark:text-gray-200">{{
+              <span class="font-semibold text-destructive">{{
                 week.points
               }}</span>
               pts ({{ week.rankText }}) vs {{ week.opponentName }}
@@ -335,55 +329,47 @@ const getDotPosition = (value: number, min: number, max: number) => {
           </li>
         </ul>
         <div v-if="team.unluckyWeeks.length === 0">
-          <p class="text-gray-800 dark:text-gray-200">
+          <p class="text-muted-foreground">
             <b>{{ team.teamName }}</b> did not have any individual weeks where
             they lost with a particularly high score. Their bad luck came from
             facing opponents with above average scores.
           </p>
         </div>
-      </div>
+      </Card>
     </div>
-  </div>
-  <div
-    class="w-full p-4 mt-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6"
-  >
-    <h1
-      class="pb-2 mb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-    >
-      Schedule Analysis
-    </h1>
-    <p
-      class="max-w-3xl mb-4 text-sm text-gray-600 sm:text-base dark:text-gray-300"
-    >
+  </Card>
+  <Card class="w-full p-4 my-4 md:p-6">
+    <h1 class="pb-2 mb-2 text-3xl font-bold leading-none">Schedule Analysis</h1>
+    <p class="max-w-3xl mb-4 text-sm text-muted-foreground sm:text-base">
       Actual record, expected number of wins, and best/worst possible records
       (team names in parentheses indicate the teams with the schedule that would
       achieve those records).
     </p>
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 dark:text-gray-300">
-      <div
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <Card
         v-for="team in scheduleAnalysis"
         :key="team.teamName"
-        class="px-4 py-3 border rounded-lg shadow dark:shadow-gray-600 dark:border-gray-600"
+        class="px-4 py-3"
       >
-        <h3 class="mb-2 text-xl font-semibold dark:text-gray-200">
+        <h3 class="mb-2 text-xl font-semibold">
           {{ team.teamName }}
         </h3>
         <div class="relative w-full h-10 mt-4">
           <div
-            class="absolute left-0 right-0 h-4 mx-3 bg-gray-100 rounded-lg dark:bg-gray-700"
+            class="absolute left-0 right-0 h-4 mx-3 rounded bg-secondary"
           ></div>
           <div
             v-for="dot in [
               {
                 key: 'worst',
-                color: 'bg-red-500',
+                color: 'bg-destructive',
                 label: 'Worst',
                 value: team.worstPossibleRecord,
               },
               {
                 key: 'actual',
-                color: 'bg-gray-900 p-2 border-fuchsia-300 dark:bg-gray-200',
+                color: 'p-[9px] bg-black',
                 label: 'Actual',
                 value: team.actualWins,
               },
@@ -395,7 +381,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
               },
               {
                 key: 'expected',
-                color: 'bg-blue-500',
+                color: 'bg-primary',
                 label: 'Expected',
                 value: team.expectedWins,
               },
@@ -422,19 +408,19 @@ const getDotPosition = (value: number, min: number, max: number) => {
         </div>
         <div class="flex justify-between text-center">
           <div class="flex-1">
-            <p class="text-gray-600 dark:text-gray-300">Actual</p>
+            <p class="text-muted-foreground">Actual</p>
             <p class="text-xl font-semibold">
               {{ team.actualWins }}-{{ lastWeek - team.actualWins }}
             </p>
           </div>
           <div class="flex-1">
-            <p class="text-gray-600 dark:text-gray-300">Exp. Wins</p>
-            <p class="text-xl font-semibold text-blue-500">
+            <p class="text-muted-foreground">Exp. Wins</p>
+            <p class="text-xl font-semibold text-primary">
               {{ team.expectedWins.toFixed(2) }}
             </p>
           </div>
           <div class="flex-1">
-            <p class="text-gray-600 dark:text-gray-300">Best</p>
+            <p class="text-muted-foreground">Best</p>
             <p class="text-xl font-semibold text-green-500">
               {{ team.bestPossibleRecord }}-{{
                 lastWeek - team.bestPossibleRecord
@@ -443,8 +429,8 @@ const getDotPosition = (value: number, min: number, max: number) => {
             <p class="mt-1 text-xs">({{ team.bestScheduleTeam }})</p>
           </div>
           <div class="flex-1">
-            <p class="text-gray-600 dark:text-gray-300">Worst</p>
-            <p class="text-xl font-semibold text-red-500">
+            <p class="text-muted-foreground">Worst</p>
+            <p class="text-xl font-semibold text-destructive">
               {{ team.worstPossibleRecord }}-{{
                 lastWeek - team.worstPossibleRecord
               }}
@@ -452,7 +438,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
             <p class="mt-1 text-xs">({{ team.worstScheduleTeam }})</p>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
-  </div>
+  </Card>
 </template>

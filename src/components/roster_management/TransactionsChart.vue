@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
 import { fakeUsers, fakeTransactions } from "../../api/helper";
 import { RosterType } from "../../types/types";
+import Card from "../ui/card/Card.vue";
 
 const store = useStore();
 
@@ -269,14 +270,10 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <div
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
-  >
+  <Card class="w-full p-4 md:p-6 min-w-80">
     <div class="flex justify-between">
       <div>
-        <h1
-          class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-        >
+        <h1 class="pb-2 text-3xl font-bold leading-none">
           League Transactions
         </h1>
       </div>
@@ -288,11 +285,9 @@ const chartOptions = ref({
       :options="chartOptions"
       :series="transactionData.series"
     ></apexchart>
-    <p
-      class="mt-6 text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
-    >
+    <p class="mt-6 text-xs sm:-mb-4 text-muted-foreground">
       Transactions are roster changing moves which include: wavier claims, free
       agent additions, and trades.
     </p>
-  </div>
+  </Card>
 </template>

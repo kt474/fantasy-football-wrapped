@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useStore } from "../../store/store";
+import Card from "../ui/card/Card.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -28,35 +29,16 @@ const mostPoints = computed(() => {
 });
 </script>
 <template>
-  <div
-    class="relative w-full overflow-x-auto rounded-lg shadow-md md:max-w-2xl"
-    :class="store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'"
-  >
-    <p
-      class="w-full pt-2 text-lg font-semibold text-center text-gray-700 dark:text-gray-200"
-    >
+  <Card class="relative w-full overflow-x-auto md:max-w-2xl">
+    <p class="w-full pt-2 text-lg font-semibold text-center bg-secondary">
       All Time Weekly High Score
     </p>
-    <table
-      class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
-    >
-      <thead
-        :class="
-          store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
-        "
-        class="text-xs text-gray-700 uppercase dark:text-gray-300"
-      >
+    <table class="w-full text-sm text-left rtl:text-right">
+      <thead class="text-xs uppercase bg-secondary">
         <tr>
-          <th scope="col" class="px-4 py-6 sm:px-6 dark:text-gray-200">
-            Team Name
-          </th>
-
+          <th scope="col" class="px-4 py-6 sm:px-6">Team Name</th>
           <th scope="col" class="px-2 py-3">
-            <div
-              class="flex items-center cursor-pointer max-w-24 dark:text-gray-200"
-            >
-              Points
-            </div>
+            <div class="flex items-center cursor-pointer max-w-24">Points</div>
           </th>
           <th scope="col" class="px-1 py-3">
             <div>Season</div>
@@ -67,14 +49,10 @@ const mostPoints = computed(() => {
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="(item, index) in mostPoints"
-          :key="index"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-        >
+        <tr v-for="(item, index) in mostPoints" :key="index" class="border-b">
           <th
             scope="row"
-            class="px-4 font-medium text-gray-900 truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap dark:text-gray-50"
+            class="px-4 font-medium truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap"
           >
             {{ store.showUsernames ? item.username : item.name }}
           </th>
@@ -90,13 +68,5 @@ const mostPoints = computed(() => {
         </tr>
       </tbody>
     </table>
-  </div>
+  </Card>
 </template>
-<style scoped>
-.light-custom-bg-color {
-  background-color: #eff0f2;
-}
-.dark-custom-bg-color {
-  background-color: #374151;
-}
-</style>

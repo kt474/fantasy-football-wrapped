@@ -26,9 +26,7 @@ const mostTransactionsUser = computed<UserType | null>(() => {
   <div>
     <div class="flex px-3">
       <div>
-        <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">
-          Most Active
-        </p>
+        <p class="text-lg font-semibold">Most Active</p>
         <div class="flex xl:w-36 w-52">
           <img
             alt="Most transactions user avatar"
@@ -42,7 +40,7 @@ const mostTransactionsUser = computed<UserType | null>(() => {
           />
           <svg
             v-else
-            class="w-6 h-6 text-gray-800 dark:text-gray-50"
+            class="w-6 h-6"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
@@ -55,7 +53,7 @@ const mostTransactionsUser = computed<UserType | null>(() => {
 
           <p
             v-if="mostTransactions && mostTransactionsUser"
-            class="ml-3 text-gray-800 xl:truncate text-md dark:text-gray-50 xl:max-w-32 max-w-52"
+            class="ml-3 xl:truncate text-md xl:max-w-32 max-w-52"
           >
             {{
               store.showUsernames
@@ -63,16 +61,14 @@ const mostTransactionsUser = computed<UserType | null>(() => {
                 : mostTransactionsUser.name
             }}
           </p>
-          <p v-else class="ml-3 text-gray-800 text-md dark:text-gray-200">
-            Undecided
-          </p>
+          <p v-else class="ml-3 text-md">Undecided</p>
         </div>
       </div>
       <div class="flex flex-wrap w-24 mt-2 ml-auto">
         <p
-          class="flex flex-col items-end ml-auto text-right text-gray-800 text-md dark:text-gray-200 text-pretty"
+          class="flex flex-col items-end ml-auto text-right text-md text-pretty"
         >
-          <span class="font-semibold text-gray-900 dark:text-gray-50">
+          <span class="font-semibold">
             {{ mostTransactions ? mostTransactions[1] : "0" }}
           </span>
           <span class="text-sm">Roster moves</span>

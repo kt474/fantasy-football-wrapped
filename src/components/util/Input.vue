@@ -2,6 +2,17 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { LeagueInfoType } from "../../types/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import {
   getData,
   getLeague,
@@ -105,83 +116,11 @@ const onSubmit = async () => {
   // return to standings tab when league is added
   store.currentTab = "standings";
   localStorage.currentTab = "standings";
+  emit("submit");
 };
 </script>
 
-<template>
-  <div class="container mt-4">
-    <div
-      class="flex justify-start max-w-md mx-auto sm:max-w-lg lg:max-w-xl xl:max-w-full"
-    >
-      <select
-        aria-label="Input type"
-        v-model="inputType"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-base sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height custom-drop-width"
-      >
-        <option selected>League ID</option>
-        <option>Username</option>
-      </select>
-      <select
-        aria-label="Season year"
-        v-if="inputType === 'Username'"
-        v-model="seasonYear"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-base sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 mr-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 input-height custom-year-width"
-      >
-        <option selected>2025</option>
-        <option>2024</option>
-        <option>2023</option>
-        <option>2022</option>
-        <option>2021</option>
-      </select>
-      <div class="w-full">
-        <input
-          v-model="leagueIdInput"
-          type="text"
-          id="default-input"
-          @keydown.enter="onSubmit()"
-          :placeholder="
-            inputType === 'League ID' ? 'Enter League ID' : 'Enter Username'
-          "
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-base sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 min-w-16 sm:min-w-36"
-        />
-        <p
-          v-if="showErrorMsg"
-          id="helper-text-explanation"
-          class="mt-1 ml-0.5 -mb-2 text-xs text-red-600 dark:text-red-500"
-        >
-          {{ errorMsg }}
-        </p>
-        <p
-          v-if="showHelperMsg"
-          id="helper-text-explanation"
-          class="mt-2 -mb-2 text-xs dark:text-gray-50"
-        >
-          Loading leagues...
-        </p>
-      </div>
-      <div class="sm:ml-4">
-        <button
-          aria-label="Button to submit league ID"
-          @click="onSubmit()"
-          type="submit"
-          class="text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-base sm:text-sm w-full sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 hidden sm:block"
-        >
-          Submit
-        </button>
-      </div>
-    </div>
-    <div class="">
-      <button
-        aria-label="Button to submit league ID"
-        @click="onSubmit()"
-        type="submit"
-        class="text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-base sm:text-sm sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 block sm:hidden mt-4 w-full max-w-md mx-auto"
-      >
-        Submit
-      </button>
-    </div>
-  </div>
-</template>
+<template></template>
 <style scoped>
 .input-height {
   max-height: 46px;
