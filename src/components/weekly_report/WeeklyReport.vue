@@ -655,10 +655,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
           Weekly {{ activeTab }}
         </h5>
         <div class="flex flex-wrap justify-end">
-          <div
-            class="inline-flex px-1 pb-1 rounded-lg custom-margins"
-            role="tablist"
-          >
+          <div class="inline-flex pb-1 rounded-lg sm:mr-2" role="tablist">
             <TabsList>
               <TabsTrigger value="Preview"> Preview </TabsTrigger>
               <TabsTrigger value="Report"> Report </TabsTrigger>
@@ -1101,18 +1098,6 @@ watch(() => currentWeek.value, fetchPlayerNames);
   width: 291.5px;
   @media (width <= 640px) {
     min-width: 306px;
-  }
-}
-
-.custom-margins {
-  margin-right: 0rem;
-  margin-bottom: 0.5rem;
-}
-
-@media (min-width: 530px) {
-  .custom-margins {
-    margin-right: 0.5rem;
-    margin-bottom: 0rem;
   }
 }
 </style>

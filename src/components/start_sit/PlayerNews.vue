@@ -311,7 +311,7 @@ watch(
                 :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
               />
               <div class="flex justify-between w-full">
-                <div class="ml-4 md:ml-0">
+                <div class="ml-4 mr-2 md:ml-0">
                   <p class="text-lg font-medium md:text-base">
                     {{ player.name ? player.name : player.team }}
                   </p>
@@ -328,9 +328,12 @@ watch(
                   </p>
                 </div>
                 <div class="flex">
-                  <div v-if="player.projection?.stats" class="mr-2 sm:mr-4">
+                  <div
+                    v-if="player.projection?.stats"
+                    class="mr-2 mt-0.5 sm:mr-4"
+                  >
                     <p class="font-normal text-muted-foreground">Projected</p>
-                    <p class="text-xl font-semibold text-right">
+                    <p class="text-lg font-semibold text-right sm:text-xl">
                       {{ player.projection?.stats }}
                     </p>
                   </div>
@@ -338,7 +341,8 @@ watch(
                     @click="toggle(player.player_id)"
                     aria-label="Button to show all trades"
                     variant="secondary"
-                    class="flex mt-2 max-h-7 sm:max-h-16"
+                    size="sm"
+                    class="flex mt-2"
                   >
                     <svg
                       v-if="expanded[player.player_id]"

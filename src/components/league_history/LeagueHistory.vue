@@ -393,7 +393,7 @@ const worstManager = computed(() => {
 </script>
 <template>
   <div class="my-4">
-    <Card v-if="!isLoading" class="relative mt-4 overflow-hidden">
+    <Card v-if="!isLoading" class="relative mt-4 overflow-x-auto">
       <TooltipProvider>
         <table class="w-full text-sm text-left rtl:text-right">
           <thead class="text-xs uppercase bg-secondary">

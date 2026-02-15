@@ -292,7 +292,7 @@ watch(
                 <template v-for="move in currentManagerMoves">
                   <div
                     v-if="move.status === 'failed' && move.bid"
-                    class="bg-accent py-1.5 pr-1.5 mt-1.5"
+                    class="bg-accent sm:py-1.5 pr-1.5 mt-1.5"
                   >
                     <p class="font-medium">{{ move.adds }} (${{ move.bid }})</p>
                   </div>
@@ -412,7 +412,7 @@ watch(
       </div>
     </Card>
     <Card
-      class="w-full py-4 pl-4 mt-4 overflow-auto xl:ml-4 xl:mt-0 xl:w-1/3 md:py-6 md:pl-6"
+      class="w-full py-4 pl-4 mt-4 mb-4 overflow-auto xl:mb-0 xl:ml-4 xl:mt-0 xl:w-1/3 md:py-6 md:pl-6"
     >
       <p class="mb-4 text-3xl font-bold leading-none">Best Adds</p>
       <div
@@ -453,13 +453,18 @@ watch(
               <p class="text-base font-medium">
                 {{ move.position }} {{ move.adds }}
               </p>
-              <div class="flex text-sm text-muted-foreground">
+              <div
+                class="flex flex-col text-sm text-muted-foreground sm:flex-row"
+              >
                 <p class="truncate max-w-36">
                   {{
                     store.showUsernames ? move.user?.username : move.user?.name
                   }}
                 </p>
-                <p class="ml-1">&#183; Week {{ move.week }}</p>
+                <p class="sm:ml-1">
+                  <span class="hidden sm:inline">&#183;</span> Week
+                  {{ move.week }}
+                </p>
               </div>
             </div>
           </div>
