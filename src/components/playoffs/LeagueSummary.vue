@@ -149,7 +149,10 @@ const copyReport = () => {
 };
 </script>
 <template>
-  <Card v-if="showSummary" class="h-full px-6 pt-4 mt-4 custom-width">
+  <Card
+    v-if="showSummary"
+    class="w-full h-full px-6 pt-4 mx-auto mt-4 max-w-7xl"
+  >
     <div class="flex justify-between">
       <h5 class="text-2xl font-bold sm:text-3xl">League Recap</h5>
       <svg

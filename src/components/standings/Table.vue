@@ -212,9 +212,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       v-if="store.currentTab === 'Standings'"
       class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"
     >
-      <Card
-        class="relative w-full overflow-x-auto rounded-lg shadow-md xl:w-3/4"
-      >
+      <Card class="relative w-full min-w-0 mx-auto overflow-x-auto xl:w-3/4">
         <TooltipProvider>
           <table
             v-if="tableData.length > 0"
@@ -559,7 +557,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <Trades class="mt-4" />
       <Waivers class="mt-4" />
     </div>
-    <div v-if="store.currentTab === 'Playoffs'">
+    <div class="w-full" v-if="store.currentTab === 'Playoffs'">
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
       <Playoffs class="mb-4" :tableData="tableData" />
     </div>
@@ -572,7 +570,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
     </div>
     <div v-if="store.currentTab === 'Draft'">
-      <Draft class="mt-4" />
+      <Draft class="my-4" />
     </div>
     <div v-if="store.currentTab === 'Start/Sit'">
       <PlayerNews :tableData="tableData" class="mt-4" />

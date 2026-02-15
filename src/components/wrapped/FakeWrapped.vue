@@ -4,7 +4,7 @@ import WrappedSlide from "./WrappedSlide.vue";
 
 <template>
   <div
-    class="w-full h-screen mt-4 overflow-y-scroll font-sans text-white rounded-lg z-1 snap-y snap-mandatory bg-zinc-900 scroll-smooth"
+    class="w-full h-screen my-4 overflow-y-scroll font-sans text-white rounded-lg z-1 snap-y snap-mandatory bg-zinc-900 scroll-smooth"
   >
     <WrappedSlide bg-color="bg-gradient-to-r from-green-950 to-gray-900">
       <div class="absolute inset-0 pointer-events-none">

@@ -213,7 +213,7 @@ const numberOfLoserRounds = computed(() => {
 });
 </script>
 <template>
-  <div>
+  <div class="w-full">
     <LeagueSummary :tableData="tableData" :finalPlacements="finalPlacements" />
     <div class="flex flex-wrap my-4 lg:flex-nowrap">
       <Card class="block w-full p-4 overflow-x-auto shadow lg:w-3/4">
