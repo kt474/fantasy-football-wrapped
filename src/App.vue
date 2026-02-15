@@ -150,7 +150,7 @@ const setHtmlBackground = () => {
               </span>
             </Button>
           </header>
-          <main class="flex-1 overflow-y-auto">
+          <main class="flex-1 min-w-0 overflow-x-hidden overflow-y-auto">
             <RouterView />
           </main>
         </SidebarInset>
