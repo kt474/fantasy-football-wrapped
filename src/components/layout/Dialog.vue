@@ -142,78 +142,56 @@ const onSubmit = async () => {
     <DialogTrigger as-child>
       <slot name="trigger" />
     </DialogTrigger>
-    <DialogContent class="sm:max-w-lg">
+    <DialogContent class="">
       <DialogHeader>
         <DialogTitle>Add League</DialogTitle>
         <DialogDescription>
           Enter your Sleeper league ID or username.
         </DialogDescription>
       </DialogHeader>
-      <div class="flex items-center gap-2">
-        <div class="grid flex-1 gap-2">
-          <div class="container mt-2">
-            <div
-              class="flex justify-start max-w-md gap-2 mx-auto sm:max-w-lg lg:max-w-xl xl:max-w-full"
-            >
-              <Select v-model="inputType">
-                <SelectTrigger>
-                  <SelectValue placeholder="League ID" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="League ID"> League ID </SelectItem>
-                  <SelectItem value="Username"> Username </SelectItem>
-                </SelectContent>
-              </Select>
-              <Select v-if="inputType === 'Username'" v-model="seasonYear">
-                <SelectTrigger class="w-40">
-                  <SelectValue placeholder="2025" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2025"> 2025 </SelectItem>
-                  <SelectItem value="2024"> 2024 </SelectItem>
-                  <SelectItem value="2023"> 2023 </SelectItem>
-                  <SelectItem value="2022"> 2022 </SelectItem>
-                  <SelectItem value="2021"> 2021 </SelectItem>
-                </SelectContent>
-              </Select>
-              <div class="w-full mr-2">
-                <Input
-                  v-model="leagueIdInput"
-                  type="text"
-                  id="default-input"
-                  @keydown.enter="onSubmit()"
-                  :placeholder="
-                    inputType === 'League ID'
-                      ? 'Enter League ID'
-                      : 'Enter Username'
-                  "
-                />
-                <p
-                  v-if="showErrorMsg"
-                  id="helper-text-explanation"
-                  class="mt-1 ml-0.5 -mb-2 text-xs text-destructive"
-                >
-                  {{ errorMsg }}
-                </p>
-                <p
-                  v-if="showHelperMsg"
-                  id="helper-text-explanation"
-                  class="mt-2 -mb-2 text-xs"
-                >
-                  Loading leagues...
-                </p>
-              </div>
-              <div class="">
-                <Button
-                  aria-label="Button to submit league ID"
-                  @click="onSubmit()"
-                >
-                  Submit
-                </Button>
-              </div>
-            </div>
+      <div class="space-y-3">
+        <!-- Stack everything vertically on mobile, single row on desktop -->
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <div class="flex flex-row gap-2">
+            <Select v-model="inputType">
+              <SelectTrigger class="sm:w-32">
+                <SelectValue placeholder="League ID" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="League ID">League ID</SelectItem>
+                <SelectItem value="Username">Username</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select v-if="inputType === 'Username'" v-model="seasonYear">
+              <SelectTrigger class="sm:w-24">
+                <SelectValue placeholder="2025" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2025">2025</SelectItem>
+                <SelectItem value="2024">2024</SelectItem>
+                <SelectItem value="2023">2023</SelectItem>
+                <SelectItem value="2022">2022</SelectItem>
+                <SelectItem value="2021">2021</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          <Input
+            v-model="leagueIdInput"
+            type="text"
+            class="flex-1 min-h-9"
+            @keydown.enter="onSubmit()"
+            :placeholder="
+              inputType === 'League ID' ? 'Enter League ID' : 'Enter Username'
+            "
+          />
+          <Button @click="onSubmit()">Submit</Button>
         </div>
+        <p v-if="showErrorMsg" class="text-xs text-destructive">
+          {{ errorMsg }}
+        </p>
+        <p v-if="showHelperMsg" class="text-xs text-muted-foreground">
+          Loading leagues...
+        </p>
       </div>
     </DialogContent>
   </Dialog>

@@ -538,7 +538,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       />
     </div>
     <div v-if="store.currentTab === 'Expected Wins'">
-      <div class="flex flex-wrap md:flex-nowrap">
+      <div class="flex flex-wrap lg:flex-nowrap">
         <ExpectedWinsCard :tableData="tableData" class="mt-4" />
         <ExpectedWinsChart :tableData="tableData" class="mt-4 md:ml-4" />
       </div>

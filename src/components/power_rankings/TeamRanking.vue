@@ -137,7 +137,7 @@ watch(
     <Tabs v-if="!loading" default-value="score">
       <div class="flex justify-between">
         <h1 class="pb-2 text-3xl font-bold leading-none">Player Rankings</h1>
-        <div class="inline-flex p-1 mr-4 rounded-lg md:mr-6">
+        <div class="inline-flex p-1 mr-4 rounded-lg md:mr-6 max-h-12">
           <TabsList>
             <TabsTrigger value="roster"> By Roster </TabsTrigger>
             <TabsTrigger value="score"> Overall </TabsTrigger>
