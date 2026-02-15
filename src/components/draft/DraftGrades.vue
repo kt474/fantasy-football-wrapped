@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
+import Label from "../ui/label/Label.vue";
 const store = useStore();
 
 const projectionData: any = ref([]);
@@ -217,9 +218,9 @@ watch(
 </script>
 <template>
   <div class="">
-    <label for="Manager name" class="block mb-1 text-sm">Manager</label>
-    <Select v-model="currentManager">
-      <SelectTrigger class="w-52">
+    <Label for="manager" class="block mb-1 text-sm">Manager</Label>
+    <Select id="manager" v-model="currentManager">
+      <SelectTrigger id="manager" class="w-52">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

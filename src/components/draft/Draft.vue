@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
+import Label from "../ui/label/Label.vue";
 
 const store = useStore();
 const data = ref<DraftPick[]>([]);
@@ -26,11 +27,6 @@ const draftType = ref<string>("snake");
 const roundReversal = ref<number>(0);
 const sortOrder = ref("Draft Order");
 const scoringType = ref(""); // idp
-
-const tabs = [
-  { label: "Grades", key: "Grades" },
-  { label: "Recap", key: "Recap" },
-];
 
 const activeTab = ref("Recap");
 
@@ -271,7 +267,7 @@ const getValueColor = (value: number) => {
 };
 </script>
 <template>
-  <Card class="w-full p-4 overflow-x-auto md:p-6">
+  <Card class="w-full p-4 md:p-6">
     <Tabs default-value="Recap">
       <div class="flex justify-between mb-2">
         <h5 class="w-48 -mt-1.5 text-2xl font-bold sm:text-3xl">
@@ -291,12 +287,12 @@ const getValueColor = (value: number) => {
             positional rank compared to where they were drafted. The sum of
             these scores is listed by each manager's name.
           </p>
-          <form v-if="snakeDraftFormat" class="max-w-sm mb-4">
-            <label for="sort order" class="block text-sm mb-0.5"
-              >Sort Picks</label
+          <div v-if="snakeDraftFormat" class="max-w-sm mb-4">
+            <Label for="sort-order" class="block text-sm mb-0.5"
+              >Sort Picks</Label
             >
-            <Select v-model="sortOrder">
-              <SelectTrigger class="w-40">
+            <Select id="sort-order" v-model="sortOrder">
+              <SelectTrigger if="sort-order" class="w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -305,7 +301,7 @@ const getValueColor = (value: number) => {
                 <SelectItem value="Lowest Score"> Lowest Score </SelectItem>
               </SelectContent>
             </Select>
-          </form>
+          </div>
         </div>
       </TabsContent>
       <TabsContent value="Grades">
@@ -329,7 +325,7 @@ const getValueColor = (value: number) => {
       </TabsContent>
       <TabsContent value="Recap">
         <Separator class="h-px mt-1 mb-4" />
-        <div v-if="!loading">
+        <div v-if="!loading" class="overflow-x-auto">
           <div
             class="grid gap-0.5 mb-2"
             :style="{
@@ -479,10 +475,7 @@ const getValueColor = (value: number) => {
       </TabsContent>
       <TabsContent value="Grades">
         <DraftGrades
-          v-if="
-            data.length > 0 &&
-            (store.currentTab === 'Draft' || store.currentTab === 'wrapped')
-          "
+          v-if="data.length > 0 && store.currentTab === 'Draft'"
           :draft-data="data"
           :scoring-type="scoringType"
         />

@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
+import Label from "../ui/label/Label.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -76,7 +77,7 @@ const getValueColor = (value: number) => {
 </script>
 <template>
   <div>
-    <label for="Manager name" class="block mb-1 text-sm">Manager</label>
+    <Label class="block mb-1 text-sm">Manager</Label>
     <Select v-model="currentManager">
       <SelectTrigger class="w-52">
         <SelectValue />

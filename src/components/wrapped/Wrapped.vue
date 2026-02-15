@@ -750,19 +750,12 @@ const currentSlide = ref(0);
 
 onMounted(() => {
   getMatchups();
-  if (league.value.draftGrades) {
-    loading.value = false;
-  }
+  loading.value = false;
 });
 
 watch(
   () => store.currentLeagueId,
   () => getMatchups()
-);
-
-watch(
-  () => league.value?.draftGrades,
-  () => (loading.value = false)
 );
 </script>
 

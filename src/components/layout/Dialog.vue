@@ -142,7 +142,7 @@ const onSubmit = async () => {
     <DialogTrigger as-child>
       <slot name="trigger" />
     </DialogTrigger>
-    <DialogContent class="">
+    <DialogContent>
       <DialogHeader>
         <DialogTitle>Add League</DialogTitle>
         <DialogDescription>

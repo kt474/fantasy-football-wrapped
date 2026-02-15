@@ -23,6 +23,7 @@ import {
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
 import Button from "../ui/button/Button.vue";
+import Label from "../ui/label/Label.vue";
 
 const data: any = ref([]);
 const playerNames: any = ref([]);
@@ -263,8 +264,8 @@ watch(
   <Card class="py-4 pl-4 mb-4 md:py-6 md:pl-6">
     <p class="text-3xl font-bold leading-none">Start/Sit</p>
     <div class="my-4">
-      <label for="Manager name" class="block mb-1 text-sm">Manager</label>
-      <Select v-model="currentManager">
+      <Label for="Manager name" class="block mb-1 text-sm">Manager</Label>
+      <Select id="Manager name" v-model="currentManager">
         <SelectTrigger class="w-52">
           <SelectValue />
         </SelectTrigger>

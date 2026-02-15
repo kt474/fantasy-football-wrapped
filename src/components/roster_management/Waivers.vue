@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
+import Label from "../ui/label/Label.vue";
 
 type WaiverData = Record<string | number, WaiverMove[]>;
 
@@ -237,7 +238,7 @@ watch(
         week after the player was added. If applicable, the winning bid (FAAB)
         is also listed next to each player.
       </p>
-      <label for="Manager name" class="block mb-1 text-sm">Manager</label>
+      <Label class="block mb-1 text-sm">Manager</Label>
       <Select v-model="currentManager">
         <SelectTrigger class="w-52">
           <SelectValue />
