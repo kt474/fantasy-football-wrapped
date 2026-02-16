@@ -397,14 +397,14 @@ const chartOptions = ref({
       role="status"
       class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
     >
-      <p class="flex justify-center -mb-6 text-xl font-semibold">
+      <p class="flex justify-center mb-4 text-xl font-semibold sm:-mb-6">
         Loading projection data...
       </p>
       <div
         class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2.5"
       ></div>
       <div
-        class="w-48 h-2 mb-10 bg-gray-200 rounded-full dark:bg-gray-700"
+        class="w-48 h-2 mb-4 bg-gray-200 rounded-full sm:mb-10 dark:bg-gray-700"
       ></div>
       <div class="flex items-baseline mt-4">
         <div
@@ -426,7 +426,7 @@ const chartOptions = ref({
           class="w-full bg-gray-200 rounded-t-lg h-36 ms-6 dark:bg-gray-700"
         ></div>
         <div
-          class="w-full bg-gray-200 rounded-t-lg h-72 ms-6 dark:bg-gray-700"
+          class="w-full bg-gray-200 rounded-t-lg h-60 sm:h-72 ms-6 dark:bg-gray-700"
         ></div>
         <div
           class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"

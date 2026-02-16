@@ -19,7 +19,6 @@ export const useStore = defineStore("main", {
     showLeagueExistsAlert: false,
     showCopyReport: false,
     showLoadingAlert: false,
-    showEmailAlert: false,
     showInvalidLeagueAlert: false,
     showInput: false,
     leagueInfo: [] as LeagueInfoType[],
@@ -43,7 +42,7 @@ export const useStore = defineStore("main", {
       state.leagueInfo.map((league: LeagueInfoType) => league.users),
     leagueRosters: (state) =>
       state.leagueInfo.map(
-        (league: LeagueInfoType) => league.rosters as RosterType[]
+        (league: LeagueInfoType) => league.rosters as RosterType[],
       ),
     weeklyPoints: (state) =>
       state.leagueInfo.map((league: LeagueInfoType) => league.weeklyPoints),
@@ -56,9 +55,6 @@ export const useStore = defineStore("main", {
     },
   },
   actions: {
-    updateShowEmailAlert(payload: boolean) {
-      this.showEmailAlert = payload;
-    },
     updateShowUsernames(payload: boolean) {
       this.showUsernames = payload;
     },
@@ -90,7 +86,7 @@ export const useStore = defineStore("main", {
     addProjectionData(
       index: number,
       rosterId: string,
-      projectionData: { projection: number; position: string }[]
+      projectionData: { projection: number; position: string }[],
     ) {
       const updatedLeagueInfo = [...this.leagueInfo];
       updatedLeagueInfo[index] = {

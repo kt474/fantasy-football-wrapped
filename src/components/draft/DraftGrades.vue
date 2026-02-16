@@ -291,7 +291,7 @@ watch(
       </div>
     </div>
     <div v-else>
-      <p class="text-muted-foreground">Loading draft grades...</p>
+      <p class="text-muted-foreground mb-96">Loading draft grades...</p>
     </div>
   </div>
 </template>

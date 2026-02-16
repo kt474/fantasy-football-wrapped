@@ -156,12 +156,6 @@ const setHtmlBackground = () => {
         </SidebarInset>
       </SidebarProvider>
     </div>
-
-    <Alert
-      v-if="store.showEmailAlert"
-      alert-msg="Thanks for subscribing!"
-      type="success"
-    />
     <Alert
       v-if="store.showAddedAlert"
       alert-msg="League successfully added!"

@@ -12,7 +12,7 @@ import { capitalize } from "lodash";
 
 import { Button } from "@/components/ui/button";
 import Separator from "../ui/separator/Separator.vue";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,7 +88,7 @@ const removeLeague = () => {
     }
     store.$patch((state) => {
       state.leagueInfo = state.leagueInfo.filter(
-        (item) => item.leagueId !== currentLeagueId.value,
+        (item) => item.leagueId !== currentLeagueId.value
       );
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
@@ -123,7 +123,7 @@ const refreshLeague = async () => {
   selectLeague(currentLeagueId.value);
   store.$patch((state) => {
     state.leagueInfo = state.leagueInfo.filter(
-      (item) => item.leagueId !== currentLeagueId.value,
+      (item) => item.leagueId !== currentLeagueId.value
     );
   });
   if (localStorage.originalData) {
@@ -143,8 +143,26 @@ const refreshLeague = async () => {
     currentLeague.value.name,
     currentLeague.value.totalRosters,
     currentLeague.value.seasonType,
-    currentLeague.value.season,
+    currentLeague.value.season
   );
+};
+
+const isShareSupported = ref(false);
+
+if (typeof window !== "undefined") {
+  isShareSupported.value = !!navigator.share;
+}
+
+const sharePopup = async () => {
+  try {
+    await navigator.share({
+      title: `${currentLeague.value.name} ffwrapped`,
+      text: "ffwrapped",
+      url: window.location.href,
+    });
+  } catch (error) {
+    console.error("Sharing failed:", error);
+  }
 };
 
 const shareLeague = () => {
@@ -176,7 +194,9 @@ const shareLeague = () => {
                 <span class="font-medium truncate">{{
                   currentLeague?.name ?? "Loading... "
                 }}</span>
-                <span class="text-sm">{{ leagueMetadata }}</span>
+                <span class="text-sm text-muted-foreground">{{
+                  leagueMetadata
+                }}</span>
               </div>
               <ChevronsUpDown class="ml-auto" />
             </SidebarMenuButton>
@@ -213,14 +233,14 @@ const shareLeague = () => {
             <Dialog>
               <template #trigger>
                 <div
-                  class="flex p-1 rounded-sm cursor-pointer hover:bg-secondary"
+                  class="flex p-1.5 rounded-sm cursor-pointer hover:bg-secondary"
                 >
                   <div
                     class="flex items-center justify-center bg-transparent border rounded-md size-6"
                   >
                     <Plus class="size-4" />
                   </div>
-                  <p class="ml-2 mt-0.5 text-sm">Add League</p>
+                  <p class="ml-3 mt-0.5 text-sm">Add League</p>
                 </div>
               </template>
             </Dialog>
@@ -233,7 +253,7 @@ const shareLeague = () => {
       class="data-[orientation=vertical]:h-8 mt-2 ml-2"
     />
     <!-- Desktop: horizontal buttons -->
-    <div class="hidden md:flex justify-between mt-2 ml-2">
+    <div class="justify-between hidden mt-2 ml-2 md:flex">
       <Button
         @click="removeLeague"
         variant="ghost"
@@ -253,6 +273,17 @@ const shareLeague = () => {
         <span class="sr-only">Refresh League</span>
       </Button>
       <Button
+        v-if="isShareSupported"
+        @click="sharePopup"
+        variant="ghost"
+        size="icon-sm"
+        class="transition-colors text-foreground hover:text-foreground"
+      >
+        <Share />
+        <span class="sr-only">Share League</span>
+      </Button>
+      <Button
+        v-else
         @click="shareLeague"
         variant="ghost"
         size="icon-sm"
@@ -264,7 +295,7 @@ const shareLeague = () => {
     </div>
 
     <!-- Mobile: dropdown menu -->
-    <div class="flex md:hidden mt-2 ml-2">
+    <div class="flex mt-2 ml-2 md:hidden">
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
           <Button
@@ -288,7 +319,19 @@ const shareLeague = () => {
             Refresh
             <RefreshCcw class="ml-auto size-4" />
           </DropdownMenuItem>
-          <DropdownMenuItem @select="shareLeague" class="cursor-pointer p-2.5">
+          <DropdownMenuItem
+            v-if="isShareSupported"
+            @select="sharePopup"
+            class="cursor-pointer p-2.5"
+          >
+            Share
+            <Share class="ml-auto size-4" />
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            v-else
+            @select="shareLeague"
+            class="cursor-pointer p-2.5"
+          >
             Share
             <Share class="ml-auto size-4" />
           </DropdownMenuItem>

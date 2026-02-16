@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SidebarProps } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   Sidebar,
   SidebarContent,
@@ -38,6 +39,13 @@ const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const props = defineProps<SidebarProps>();
+const { isMobile, setOpenMobile } = useSidebar();
+
+const closeMobileSidebar = () => {
+  if (isMobile.value) {
+    setOpenMobile(false);
+  }
+};
 
 const goBackToHome = () => {
   const currentQueryParams = route.query;
@@ -50,6 +58,7 @@ const changeTab = (tab: string) => {
   }
   store.currentTab = tab;
   localStorage.currentTab = tab;
+  closeMobileSidebar();
 };
 
 const data = {
@@ -183,6 +192,7 @@ const data = {
               <router-link
                 :to="{ path: '/about', query: $route.query }"
                 class="cursor-pointer"
+                @click="closeMobileSidebar"
               >
                 <SidebarMenuButton as-child>
                   <div>
@@ -196,6 +206,7 @@ const data = {
               <router-link
                 :to="{ path: '/changelog', query: $route.query }"
                 class="cursor-pointer"
+                @click="closeMobileSidebar"
               >
                 <SidebarMenuButton as-child>
                   <div>
@@ -253,6 +264,7 @@ const data = {
               <router-link
                 :to="{ path: '/privacy', query: $route.query }"
                 class="cursor-pointer"
+                @click="closeMobileSidebar"
               >
                 <SidebarMenuButton as-child>
                   <div>
