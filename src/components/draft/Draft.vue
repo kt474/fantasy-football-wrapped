@@ -268,12 +268,12 @@ const getValueColor = (value: number) => {
 </script>
 <template>
   <Card class="w-full p-4 md:p-6">
-    <Tabs default-value="Recap">
+    <Tabs default-value="Recap" v-model="activeTab">
       <div class="flex justify-between mb-2">
         <h5 class="w-48 -mt-1.5 text-2xl font-bold sm:text-3xl">
           Draft {{ activeTab }}
         </h5>
-        <div class="inline-flex p-1 -mt-1 sm:-mt-1.5" role="tablist">
+        <div class="inline-flex p-1 -mt-1.5" role="tablist">
           <TabsList>
             <TabsTrigger value="Grades"> Grades </TabsTrigger>
             <TabsTrigger value="Recap"> Recap </TabsTrigger>

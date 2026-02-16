@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
+import UserLeagueList from "../components/home/UserLeagueList.vue";
+import { fakePoints, fakeRosters, fakeUsers } from "../api/helper";
+import Input from "@/components/ui/input/Input.vue";
+import Table from "../components/standings/Table.vue";
 import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
-import Test from "./Test.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -14,8 +18,14 @@ const store = useStore();
 const showLoading = ref(false);
 const isInitialLoading = ref(true);
 
+const systemDarkMode = window.matchMedia(
+  "(prefers-color-scheme: dark)"
+).matches;
+const clicked = ref(systemDarkMode);
+
 onMounted(async () => {
   try {
+    checkSystemTheme();
     if (localStorage.leagueInfo) {
       const savedLeagues = JSON.parse(localStorage.leagueInfo);
       await Promise.all(
@@ -102,11 +112,52 @@ onMounted(async () => {
     isInitialLoading.value = false;
   }
 });
+
+const checkSystemTheme = () => {
+  if (systemDarkMode && !localStorage.darkMode) {
+    clicked.value = true;
+    store.updateDarkMode(true);
+  } else if (localStorage.darkMode) {
+    clicked.value = JSON.parse(localStorage.darkMode);
+    store.updateDarkMode(clicked.value);
+  }
+};
 </script>
 
 <template>
-  <div class="mx-auto">
+  <div>
     <SkeletonLoading v-if="isInitialLoading" />
-    <Test />
+    <div v-else>
+      <div v-if="store.currentLeagueId" class="container mx-auto">
+        <Input v-if="store.showInput" class="custom-input-width" />
+        <div v-if="store.showLeaguesList" class="container mx-auto">
+          <UserLeagueList />
+        </div>
+        <div
+          v-if="
+            store.leagueUsers[store.currentLeagueIndex] &&
+            !store.loadingUserLeagues
+          "
+        >
+          <Table
+            :users="store.leagueUsers[store.currentLeagueIndex]"
+            :rosters="store.leagueRosters[store.currentLeagueIndex]"
+            :points="store.weeklyPoints[store.currentLeagueIndex]"
+          />
+        </div>
+        <SkeletonLoading v-else />
+      </div>
+      <div v-else-if="store.showLeaguesList" class="container mx-auto">
+        <UserLeagueList />
+      </div>
+
+      <SkeletonLoading v-else-if="showLoading" />
+      <div v-else class="container mx-auto">
+        <!-- <Intro />
+            <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" /> -->
+        <!-- <Tabs class="mt-4" /> -->
+        <Table :users="fakeUsers" :rosters="fakeRosters" :points="fakePoints" />
+      </div>
+    </div>
   </div>
 </template>
