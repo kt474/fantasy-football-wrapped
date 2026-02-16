@@ -503,7 +503,7 @@ watch(
       <div
         v-else
         role="status"
-        class="max-w-md p-4 space-y-4 border-gray-200 divide-y divide-gray-200 animate-pulse dark:divide-gray-700 md:p-6"
+        class="ml-2 space-y-4 border-gray-200 divide-y divide-gray-200 max-w-80 animate-pulse dark:divide-gray-700"
       >
         <div class="flex items-center justify-between">
           <div>

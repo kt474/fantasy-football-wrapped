@@ -772,10 +772,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
               store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
             "
           >
-            <div
-              role="status"
-              class="space-y-2.5 animate-pulse max-w-lg mt-2.5"
-            >
+            <div role="status" class="space-y-2.5 animate-pulse max-w-lg">
               <p class="">Generating Summary...</p>
               <div class="flex items-center w-full">
                 <div
