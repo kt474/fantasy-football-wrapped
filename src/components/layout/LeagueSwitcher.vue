@@ -6,6 +6,7 @@ import {
   X,
   RefreshCcw,
   Share,
+  EllipsisVertical,
 } from "lucide-vue-next";
 import { capitalize } from "lodash";
 
@@ -87,7 +88,7 @@ const removeLeague = () => {
     }
     store.$patch((state) => {
       state.leagueInfo = state.leagueInfo.filter(
-        (item) => item.leagueId !== currentLeagueId.value
+        (item) => item.leagueId !== currentLeagueId.value,
       );
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
@@ -122,7 +123,7 @@ const refreshLeague = async () => {
   selectLeague(currentLeagueId.value);
   store.$patch((state) => {
     state.leagueInfo = state.leagueInfo.filter(
-      (item) => item.leagueId !== currentLeagueId.value
+      (item) => item.leagueId !== currentLeagueId.value,
     );
   });
   if (localStorage.originalData) {
@@ -142,7 +143,7 @@ const refreshLeague = async () => {
     currentLeague.value.name,
     currentLeague.value.totalRosters,
     currentLeague.value.seasonType,
-    currentLeague.value.season
+    currentLeague.value.season,
   );
 };
 
@@ -231,7 +232,8 @@ const shareLeague = () => {
       orientation="vertical"
       class="data-[orientation=vertical]:h-8 mt-2 ml-2"
     />
-    <div class="flex justify-between mt-2 ml-2">
+    <!-- Desktop: horizontal buttons -->
+    <div class="hidden md:flex justify-between mt-2 ml-2">
       <Button
         @click="removeLeague"
         variant="ghost"
@@ -259,6 +261,39 @@ const shareLeague = () => {
         <Share />
         <span class="sr-only">Share League</span>
       </Button>
+    </div>
+
+    <!-- Mobile: dropdown menu -->
+    <div class="flex md:hidden mt-2 ml-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            class="transition-colors text-foreground hover:text-foreground"
+          >
+            <EllipsisVertical />
+            <span class="sr-only">League Actions</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem @select="removeLeague" class="cursor-pointer p-2.5">
+            Remove
+            <X class="ml-auto size-4" />
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            @select="refreshLeague"
+            class="cursor-pointer p-2.5"
+          >
+            Refresh
+            <RefreshCcw class="ml-auto size-4" />
+          </DropdownMenuItem>
+          <DropdownMenuItem @select="shareLeague" class="cursor-pointer p-2.5">
+            Share
+            <Share class="ml-auto size-4" />
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   </div>
 </template>
