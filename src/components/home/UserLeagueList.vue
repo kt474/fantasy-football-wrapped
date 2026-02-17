@@ -7,6 +7,7 @@ import { useRouter } from "vue-router";
 import { Button } from "../ui/button";
 import Card from "../ui/card/Card.vue";
 import Checkbox from "../ui/checkbox/Checkbox.vue";
+import { toast } from "vue-sonner";
 
 const router = useRouter();
 const checkedLeagues = ref<string[]>([]);
@@ -61,10 +62,7 @@ const addLeagues = async () => {
     store.updateLoadingUserLeagues(false);
     store.setLeaguesList([]);
     store.updateLoadingLeague("");
-    store.updateShowAddedAlert(true);
-    setTimeout(() => {
-      store.updateShowAddedAlert(false);
-    }, 3000);
+    toast.success("League added!");
   }
 };
 onMounted(() => {

@@ -10,6 +10,7 @@ import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 
 const route = useRoute();
 const router = useRouter();
@@ -85,18 +86,12 @@ onMounted(async () => {
         );
         store.updateLoadingLeague("");
       } else {
-        store.showInvalidLeagueAlert = true;
-        setTimeout(() => {
-          store.showInvalidLeagueAlert = false;
-        }, 8000);
+        toast.error("Invalid League ID");
       }
     } else if (leagueId === "undefined") {
       localStorage.removeItem("currentLeagueId");
       localStorage.removeItem("leagueInfo");
-      store.showLoadingAlert = true;
-      setTimeout(() => {
-        store.showLoadingAlert = false;
-      }, 8000);
+      toast.error("Error fetching data. Please try refreshing the page.");
       // this league has somehow been cached in google sitelinks
     } else if (leagueId === "1057743221285101568") {
       const newQuery = { ...route.query };
@@ -104,10 +99,7 @@ onMounted(async () => {
       router.replace({ path: route.path, query: newQuery });
     }
   } catch {
-    store.showLoadingAlert = true;
-    setTimeout(() => {
-      store.showLoadingAlert = false;
-    }, 8000);
+    toast.error("Error fetching data. Please try refreshing the page.");
   } finally {
     isInitialLoading.value = false;
   }

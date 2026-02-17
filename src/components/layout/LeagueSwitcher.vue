@@ -29,6 +29,7 @@ import {
 import { LeagueInfoType } from "@/types/types";
 import { useStore } from "../../store/store";
 import { useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 
 import { getData, inputLeague } from "../../api/api";
 import Dialog from "./Dialog.vue";
@@ -92,7 +93,7 @@ const removeLeague = () => {
       );
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
-    store.updateRemovedAlert(true);
+    toast.success("League removed!");
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentTab");
       removeHistoryLeagues();
@@ -113,9 +114,6 @@ const removeLeague = () => {
         localStorage.originalData = JSON.stringify(currentData);
       }
     }
-    setTimeout(() => {
-      store.updateRemovedAlert(false);
-    }, 3000);
   }
 };
 
@@ -133,11 +131,8 @@ const refreshLeague = async () => {
   }
   store.updateLoadingLeague(currentLeague.value?.name);
   store.updateLeagueInfo(await getData(currentLeagueId.value));
-  store.showRefreshAlert = true;
+  toast.success("League data refreshed!");
   store.updateLoadingLeague("");
-  setTimeout(() => {
-    store.showRefreshAlert = false;
-  }, 3000);
   await inputLeague(
     currentLeague.value.leagueId,
     currentLeague.value.name,
@@ -173,10 +168,7 @@ const shareLeague = () => {
     window.location.pathname;
   const updatedURL = `${currentUrl}?leagueId=${currentLeague.value.leagueId}`;
   navigator.clipboard.writeText(updatedURL);
-  store.showCopiedAlert = true;
-  setTimeout(() => {
-    store.showCopiedAlert = false;
-  }, 3000);
+  toast.success("Link copied to clipboard!");
 };
 </script>
 

@@ -6,6 +6,7 @@ import { ref, onMounted, watch, computed } from "vue";
 import { useStore } from "../../store/store";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
+import { toast } from "vue-sonner";
 
 const store = useStore();
 const props = defineProps<{
@@ -142,10 +143,7 @@ const copyReport = () => {
   navigator.clipboard.writeText(
     rawSummary.value + +"\n\nCreated with https://ffwrapped.com"
   );
-  store.showCopyReport = true;
-  setTimeout(() => {
-    store.showCopyReport = false;
-  }, 3000);
+  toast.success("Summary copied to clipboard!");
 };
 </script>
 <template>

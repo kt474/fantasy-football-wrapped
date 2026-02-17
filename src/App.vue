@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/sidebar";
 import { Sun, MoonStar } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
+import "vue-sonner/style.css";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "vue-sonner";
 
 const router = useRouter();
 const store = useStore();
@@ -23,14 +26,22 @@ const store = useStore();
 const systemDarkMode = window.matchMedia(
   "(prefers-color-scheme: dark)"
 ).matches;
-const clicked = ref(systemDarkMode);
+const savedDarkMode = localStorage.getItem("darkMode");
+// if savedDarkMode is null, use system preference
+// otherwise check if it is explicitly "true"
+const initialDarkMode =
+  savedDarkMode !== null ? savedDarkMode === "true" : systemDarkMode;
+
+const clicked = ref(initialDarkMode);
+// sync store immediately
+store.updateDarkMode(initialDarkMode);
 
 const darkMode = computed(() => {
   return store.darkMode;
 });
 
 watch(clicked, () => {
-  localStorage.darkMode = clicked.value;
+  localStorage.setItem("darkMode", String(clicked.value));
   store.updateDarkMode(clicked.value);
 });
 
@@ -69,10 +80,7 @@ watch(
       } else {
         localStorage.removeItem("currentLeagueId");
         localStorage.removeItem("leagueInfo");
-        store.showLoadingAlert = true;
-        setTimeout(() => {
-          store.showLoadingAlert = false;
-        }, 8000);
+        toast.error("Error fetching data. Please try refreshing the page.");
       }
     }
   }
@@ -81,15 +89,8 @@ watch(
 watch(
   () => store.leagueInfo.length,
   () => {
-    if (
-      store.leagueInfo.length > 0 &&
-      !store.showRemovedAlert &&
-      store.leagueSubmitted
-    ) {
-      store.updateShowAddedAlert(true);
-      setTimeout(() => {
-        store.updateShowAddedAlert(false);
-      }, 3000);
+    if (store.leagueInfo.length > 0 && store.leagueSubmitted) {
+      toast.success("League added!");
       store.leagueSubmitted = false;
     }
     localStorage.setItem(
@@ -156,40 +157,6 @@ const setHtmlBackground = () => {
         </SidebarInset>
       </SidebarProvider>
     </div>
-    <Alert
-      v-if="store.showAddedAlert"
-      alert-msg="League successfully added!"
-      type="success"
-    />
-    <Alert
-      v-if="store.showRefreshAlert"
-      alert-msg="League data refreshed!"
-      type="success"
-    />
-    <Alert
-      v-if="store.showRemovedAlert"
-      alert-msg="League removed!"
-      type="success"
-    />
-    <Alert
-      v-if="store.showCopiedAlert"
-      alert-msg="Link copied to clipboard!"
-      type="success"
-    />
-    <Alert
-      v-if="store.showCopyReport"
-      alert-msg="Summary copied to clipboard!"
-      type="success"
-    />
-    <Alert
-      v-if="store.showLoadingAlert"
-      alert-msg="Error fetching data. Please try refreshing the page."
-      type="error"
-    />
-    <Alert
-      v-if="store.showInvalidLeagueAlert"
-      alert-msg="Invalid League ID."
-      type="error"
-    />
+    <Toaster />
   </div>
 </template>

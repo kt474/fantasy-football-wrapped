@@ -10,8 +10,9 @@ import MostPoints from "./MostPoints.vue";
 import FewestPoints from "./FewestPoints.vue";
 import ManagerComparison from "./ManagerComparison.vue";
 import CloseMatchups from "./CloseMatchups.vue";
-import Alert from "../util/Alert.vue";
 import Card from "../ui/card/Card.vue";
+import { toast } from "vue-sonner";
+
 import {
   Tooltip,
   TooltipContent,
@@ -138,10 +139,7 @@ const addNewLeague = async (season: string) => {
         store.updateCurrentLeagueId(newLeagueInfo.leagueId);
         store.currentTab = "Standings";
         localStorage.currentTab = "Standings";
-        store.updateShowAddedAlert(true);
-        setTimeout(() => {
-          store.updateShowAddedAlert(false);
-        }, 3000);
+        toast.success("League added!");
         await inputLeague(
           newLeagueInfo.leagueId,
           newLeagueInfo.name,
@@ -150,16 +148,10 @@ const addNewLeague = async (season: string) => {
           newLeagueInfo.season
         );
       } else {
-        store.updateExistsAlert(true);
-        setTimeout(() => {
-          store.updateExistsAlert(false);
-        }, 3000);
+        toast.error("League already exists!");
       }
     } else {
-      store.updateExistsAlert(true);
-      setTimeout(() => {
-        store.updateExistsAlert(false);
-      }, 3000);
+      toast.error("League already exists!");
     }
   }
 };
@@ -761,11 +753,6 @@ const worstManager = computed(() => {
           </tbody>
         </table>
       </TooltipProvider>
-      <Alert
-        v-if="store.showLeagueExistsAlert"
-        alert-msg="League already exists"
-        type="error"
-      />
     </Card>
     <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
     <ManagerComparison

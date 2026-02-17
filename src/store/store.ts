@@ -12,14 +12,6 @@ import { DraftGrades, DraftPick } from "../types/apiTypes";
 export const useStore = defineStore("main", {
   state: () => ({
     darkMode: false,
-    showAddedAlert: false,
-    showRemovedAlert: false,
-    showRefreshAlert: false,
-    showCopiedAlert: false,
-    showLeagueExistsAlert: false,
-    showCopyReport: false,
-    showLoadingAlert: false,
-    showInvalidLeagueAlert: false,
     showInput: false,
     leagueInfo: [] as LeagueInfoType[],
     currentLeagueId: "",
@@ -42,7 +34,7 @@ export const useStore = defineStore("main", {
       state.leagueInfo.map((league: LeagueInfoType) => league.users),
     leagueRosters: (state) =>
       state.leagueInfo.map(
-        (league: LeagueInfoType) => league.rosters as RosterType[],
+        (league: LeagueInfoType) => league.rosters as RosterType[]
       ),
     weeklyPoints: (state) =>
       state.leagueInfo.map((league: LeagueInfoType) => league.weeklyPoints),
@@ -67,15 +59,6 @@ export const useStore = defineStore("main", {
     updateDarkMode(payload: boolean) {
       this.darkMode = payload;
     },
-    updateShowAddedAlert(payload: boolean) {
-      this.showAddedAlert = payload;
-    },
-    updateRemovedAlert(payload: boolean) {
-      this.showRemovedAlert = payload;
-    },
-    updateExistsAlert(payload: boolean) {
-      this.showLeagueExistsAlert = payload;
-    },
     updateLeagueInfo(payload: LeagueInfoType) {
       if (!this.leagueInfo.includes(payload)) {
         this.$patch((state) => {
@@ -86,7 +69,7 @@ export const useStore = defineStore("main", {
     addProjectionData(
       index: number,
       rosterId: string,
-      projectionData: { projection: number; position: string }[],
+      projectionData: { projection: number; position: string }[]
     ) {
       const updatedLeagueInfo = [...this.leagueInfo];
       updatedLeagueInfo[index] = {
