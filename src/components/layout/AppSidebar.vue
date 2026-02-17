@@ -47,6 +47,13 @@ const closeMobileSidebar = () => {
   }
 };
 
+const RouteTabChange = () => {
+  if (isMobile.value) {
+    setOpenMobile(false);
+  }
+  store.currentTab = "";
+};
+
 const goBackToHome = () => {
   const currentQueryParams = route.query;
   router.push({ path: "/", query: currentQueryParams });
@@ -192,9 +199,12 @@ const data = {
               <router-link
                 :to="{ path: '/about', query: $route.query }"
                 class="cursor-pointer"
-                @click="closeMobileSidebar"
+                @click="RouteTabChange"
               >
-                <SidebarMenuButton as-child>
+                <SidebarMenuButton
+                  :is-active="route.path === '/about'"
+                  as-child
+                >
                   <div>
                     <Info />
                     About
@@ -206,9 +216,12 @@ const data = {
               <router-link
                 :to="{ path: '/changelog', query: $route.query }"
                 class="cursor-pointer"
-                @click="closeMobileSidebar"
+                @click="RouteTabChange"
               >
-                <SidebarMenuButton as-child>
+                <SidebarMenuButton
+                  :is-active="route.path === '/changelog'"
+                  as-child
+                >
                   <div>
                     <ScrollText />
                     Changelog
@@ -264,9 +277,12 @@ const data = {
               <router-link
                 :to="{ path: '/privacy', query: $route.query }"
                 class="cursor-pointer"
-                @click="closeMobileSidebar"
+                @click="RouteTabChange"
               >
-                <SidebarMenuButton as-child>
+                <SidebarMenuButton
+                  as-child
+                  :is-active="route.path === '/privacy'"
+                >
                   <div>
                     <ShieldUser />
                     Privacy Policy
