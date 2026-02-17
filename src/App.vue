@@ -2,7 +2,6 @@
 import { onMounted, watch, ref, computed } from "vue";
 import AppSidebar from "@/components/layout/AppSidebar.vue";
 import CardContainer from "./components/util/CardContainer.vue";
-import Alert from "./components/util/Alert.vue";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./types/types";
 import { inject } from "@vercel/analytics";
