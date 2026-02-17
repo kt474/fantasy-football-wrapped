@@ -693,7 +693,7 @@ watch(
           </div>
         </div>
       </div>
-      <div class="mr-4 xl:mx-4 xl:flex-grow">
+      <div v-if="currentRoster" class="mr-4 xl:mx-4 xl:flex-grow">
         <h2 class="mb-4 text-2xl font-bold xl:-mt-12">Player News</h2>
         <div v-for="post in data">
           <Card class="p-4 mb-3 custom-max-width">
