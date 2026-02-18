@@ -19,7 +19,7 @@ const leagues = computed(() => {
       <div v-else>
         <Dialog>
           <template #trigger>
-            <Button type="button" size="sm" class="text-sm font-medium">
+            <Button type="button" size="sm" class="text-sm font-medium ml-1.5">
               Add League
             </Button>
           </template>

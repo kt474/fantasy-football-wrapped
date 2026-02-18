@@ -26,7 +26,7 @@ watch(
   () => store.showUsernames,
   (newValue) => {
     localStorage.setItem("showUsernames", JSON.stringify(newValue));
-  }
+  },
 );
 </script>
 <template>

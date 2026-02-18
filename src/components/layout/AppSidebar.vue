@@ -47,11 +47,19 @@ const closeMobileSidebar = () => {
   }
 };
 
+const scrollToTop = () => {
+  const main = document.getElementById("mainScrollSection");
+  if (main) {
+    main.scrollTop = 0;
+  }
+};
+
 const RouteTabChange = () => {
   if (isMobile.value) {
     setOpenMobile(false);
   }
   store.currentTab = "";
+  scrollToTop();
 };
 
 const goBackToHome = () => {
@@ -66,6 +74,7 @@ const changeTab = (tab: string) => {
   store.currentTab = tab;
   localStorage.currentTab = tab;
   closeMobileSidebar();
+  scrollToTop();
 };
 
 const data = {

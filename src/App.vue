@@ -23,7 +23,7 @@ const router = useRouter();
 const store = useStore();
 
 const systemDarkMode = window.matchMedia(
-  "(prefers-color-scheme: dark)"
+  "(prefers-color-scheme: dark)",
 ).matches;
 const savedDarkMode = localStorage.getItem("darkMode");
 // if savedDarkMode is null, use system preference
@@ -55,7 +55,7 @@ onMounted(async () => {
 
 watch(
   () => store.darkMode,
-  () => setHtmlBackground()
+  () => setHtmlBackground(),
 );
 
 watch(
@@ -82,7 +82,7 @@ watch(
         toast.error("Error fetching data. Please try refreshing the page.");
       }
     }
-  }
+  },
 );
 
 watch(
@@ -94,9 +94,9 @@ watch(
     }
     localStorage.setItem(
       "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
+      JSON.stringify(store.leagueInfo as LeagueInfoType[]),
     );
-  }
+  },
 );
 
 watch(
@@ -104,7 +104,7 @@ watch(
   (isDark) => {
     document.documentElement.classList.toggle("dark", isDark);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const setHtmlBackground = () => {
@@ -150,7 +150,10 @@ const setHtmlBackground = () => {
               </span>
             </Button>
           </header>
-          <main class="flex-1 min-w-0 overflow-x-hidden overflow-y-auto">
+          <main
+            id="mainScrollSection"
+            class="flex-1 min-w-0 overflow-x-hidden overflow-y-auto overscroll-none"
+          >
             <RouterView />
           </main>
         </SidebarInset>

@@ -146,7 +146,16 @@ const onSubmit = async () => {
       <DialogHeader>
         <DialogTitle>Add League</DialogTitle>
         <DialogDescription>
-          Enter your Sleeper league ID or username.
+          <p>
+            Enter your
+            <a
+              class="font-medium text-primary hover:underline"
+              href="https://sleeper.com/"
+              target="_blank"
+              >Sleeper</a
+            >
+            league ID or username.
+          </p>
         </DialogDescription>
       </DialogHeader>
       <div class="space-y-3">
@@ -180,6 +189,7 @@ const onSubmit = async () => {
             type="text"
             class="flex-1 min-h-9"
             @keydown.enter="onSubmit()"
+            :name="inputType === 'League ID' ? 'leagueId' : 'username'"
             :placeholder="
               inputType === 'League ID' ? 'Enter League ID' : 'Enter Username'
             "

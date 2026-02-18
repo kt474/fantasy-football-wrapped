@@ -37,7 +37,7 @@ None of the environment variables are required to get the project running locall
 It would also be helpful to familiarize yourself with the technologies used in this project:
 
 - Framework: Vue 3 and Typescript
-- UI: Flowbite and Tailwind CSS
+- UI: Vue Shadcn and Tailwind CSS
 - State managment: Pinia
 
 ### Pull Request Process
