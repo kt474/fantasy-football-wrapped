@@ -110,6 +110,9 @@ const onSubmit = async () => {
         errorMsg.value = "Only NFL leagues are supported";
         showErrorMsg.value = true;
       } else {
+        // return to standings tab when league is added
+        store.currentTab = "Standings";
+        localStorage.currentTab = "Standings";
         showErrorMsg.value = false;
         store.updateLoadingLeague(checkInput["name"]);
         store.updateCurrentLeagueId(leagueIdInput.value);
@@ -131,9 +134,6 @@ const onSubmit = async () => {
       leagueIdInput.value = "";
     }
   }
-  // return to standings tab when league is added
-  store.currentTab = "Standings";
-  localStorage.currentTab = "Standings";
 };
 </script>
 

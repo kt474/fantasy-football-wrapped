@@ -26,7 +26,7 @@ watch(
   () => store.showUsernames,
   (newValue) => {
     localStorage.setItem("showUsernames", JSON.stringify(newValue));
-  },
+  }
 );
 </script>
 <template>
@@ -114,7 +114,7 @@ watch(
             <span class="text-base font-normal">Fantasy leagues added</span>
           </p>
         </div>
-        <Separator class="mt-2" />
+        <Separator class="mt-3" />
         <p class="mt-2 text-sm text-muted-foreground">
           &copy; 2024-2026. Kevin Tian
         </p>
