@@ -59,7 +59,7 @@ const pinia = createPinia();
 const app = createApp(App);
 
 app.use(pinia);
-app.use(VueApexCharts);
+app.component("apexchart", VueApexCharts);
 app.use(router);
 // app.use(posthogPlugin);
 registerSW({ immediate: true });

@@ -37,7 +37,7 @@ import Dialog from "./Dialog.vue";
 const router = useRouter();
 const store = useStore();
 
-const props = defineProps<{
+defineProps<{
   leagues: LeagueInfoType[];
 }>();
 
