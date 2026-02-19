@@ -12,7 +12,7 @@ const isDark = computed(() => store.darkMode);
 <template>
   <section
     :class="[
-      'relative overflow-hidden text-center h-dvh',
+      'relative overflow-hidden text-center h-[calc(100dvh-4rem)]',
       isDark ? 'bg-slate-950' : 'bg-slate-50',
     ]"
   >
@@ -31,7 +31,7 @@ const isDark = computed(() => store.darkMode);
     />
 
     <div
-      class="relative z-10 flex items-center h-full px-4 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-10"
+      class="relative z-10 flex items-center h-full px-4 py-6 sm:px-8 lg:px-12"
     >
       <div class="mx-auto max-w-7xl">
         <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
@@ -75,93 +75,20 @@ const isDark = computed(() => store.darkMode);
             </div>
           </div>
 
-          <div class="hidden animate-rise-delayed md:block">
+          <div class="relative hidden h-[520px] overflow-hidden md:block">
             <div
-              class="max-w-xl p-5 mx-auto text-left border rounded-md shadow-2xl border-border/70 bg-background/85 backdrop-blur"
-            >
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <p class="text-sm text-muted-foreground">League Snapshot</p>
-                  <p class="font-semibold">KJ Dynasty 2025</p>
+              class="absolute inset-0 z-20 pointer-events-none showcase-fade"
+            />
+            <div class="h-full animate-rise">
+              <div class="showcase-lane-track">
+                <div class="showcase-lane-list">
+                  <slot name="header" />
                 </div>
-                <span
-                  class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                >
-                  +12% win outlook
-                </span>
-              </div>
-
-              <div class="grid grid-cols-3 gap-3">
-                <div class="p-3 border rounded-xl border-border/70 bg-card">
-                  <p class="text-xs text-muted-foreground">Record</p>
-                  <p class="text-xl font-semibold">8-3</p>
-                </div>
-                <div class="p-3 border rounded-xl border-border/70 bg-card">
-                  <p class="text-xs text-muted-foreground">Power Rank</p>
-                  <p class="text-xl font-semibold">#2</p>
-                </div>
-                <div class="p-3 border rounded-xl border-border/70 bg-card">
-                  <p class="text-xs text-muted-foreground">Bench Value</p>
-                  <p class="text-xl font-semibold">91.4</p>
-                </div>
-              </div>
-
-              <div class="p-4 mt-4 border rounded-xl border-border/70 bg-card">
-                <div
-                  class="flex items-center justify-between mb-2 text-xs text-muted-foreground"
-                >
-                  <span>Weekly Trend</span>
-                  <span>Last 6 weeks</span>
-                </div>
-                <div class="flex items-end h-24 gap-2">
-                  <span
-                    class="w-full rounded-t h-9 bg-sky-300/75 dark:bg-sky-700/80"
-                  />
-                  <span
-                    class="w-full h-12 rounded-t bg-sky-400/75 dark:bg-sky-600/80"
-                  />
-                  <span
-                    class="w-full h-8 rounded-t bg-sky-300/75 dark:bg-sky-700/80"
-                  />
-                  <span
-                    class="w-full h-16 rounded-t bg-blue-400/80 dark:bg-blue-600/85"
-                  />
-                  <span
-                    class="w-full h-20 rounded-t bg-blue-500/85 dark:bg-blue-500/90"
-                  />
-                  <span
-                    class="w-full rounded-t h-[4.5rem] bg-blue-400/80 dark:bg-blue-600/85"
-                  />
+                <div class="showcase-lane-list" aria-hidden="true">
+                  <slot name="header" />
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div
-          class="grid grid-cols-3 gap-3 mt-6 text-left md:hidden animate-rise-delayed"
-        >
-          <div
-            class="p-3 border rounded-xl border-border/70 bg-background/85 backdrop-blur"
-          >
-            <p class="text-xs text-muted-foreground">Record</p>
-            <p class="text-lg font-semibold">8-3</p>
-          </div>
-          <div
-            class="p-3 border rounded-xl border-border/70 bg-background/85 backdrop-blur"
-          >
-            <p class="text-xs text-muted-foreground">Power Rank</p>
-            <p class="text-lg font-semibold">#2</p>
-          </div>
-          <div
-            class="p-3 border rounded-xl border-border/70 bg-background/85 backdrop-blur"
-          >
-            <p class="text-xs text-muted-foreground">Win Outlook</p>
-            <p
-              class="text-lg font-semibold text-emerald-600 dark:text-emerald-400"
-            >
-              +12%
-            </p>
           </div>
         </div>
       </div>
@@ -218,22 +145,35 @@ const isDark = computed(() => store.darkMode);
     linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
 }
 
-.animate-rise {
-  animation: rise 520ms ease-out;
+.showcase-lane-track {
+  display: flex;
+  flex-direction: column;
+  animation: lane-scroll-up 60s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
-.animate-rise-delayed {
-  animation: rise 680ms ease-out;
+.showcase-lane-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
-@keyframes rise {
+:slotted(*) {
+  opacity: 0.75;
+  transition: opacity 180ms ease;
+}
+
+:slotted(*:hover) {
+  opacity: 0.9;
+}
+
+@keyframes lane-scroll-up {
   from {
-    opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(0);
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateY(-50%);
   }
 }
 </style>

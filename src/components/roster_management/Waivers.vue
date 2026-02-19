@@ -226,8 +226,14 @@ watch(
 );
 </script>
 <template>
-  <div class="flex flex-wrap mt-4 mb-0 xl:flex-nowrap xl:mb-4">
-    <Card class="w-full py-4 pl-4 overflow-auto xl:w-2/3 md:py-6 md:pl-6">
+  <div
+    class="flex flex-wrap mb-0 xl:flex-nowrap"
+    :class="{ 'mt-4 xl:mb-4': store.currentTab === 'Roster Management' }"
+  >
+    <Card
+      v-if="store.currentTab === 'Roster Management'"
+      class="w-full py-4 pl-4 overflow-auto xl:w-2/3 md:py-6 md:pl-6"
+    >
       <h1 class="pb-2 text-3xl font-bold leading-none">
         Waivers & Free Agent Adds
       </h1>
@@ -413,7 +419,11 @@ watch(
       </div>
     </Card>
     <Card
-      class="w-full py-4 pl-4 mt-4 mb-4 overflow-auto xl:mb-0 xl:ml-4 xl:mt-0 xl:w-1/3 md:py-6 md:pl-6"
+      class="w-full py-4 pl-4 mb-4 overflow-auto xl:mb-0 md:py-6 md:pl-6"
+      :class="{
+        'xl:w-1/3 xl:ml-4 xl:mt-0 mt-4':
+          store.currentTab === 'Roster Management',
+      }"
     >
       <p class="mb-4 text-3xl font-bold leading-none">Best Adds</p>
       <div

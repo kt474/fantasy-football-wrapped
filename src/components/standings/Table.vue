@@ -583,7 +583,23 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <FakeWrapped v-else />
     </div>
 
-    <div v-if="store.currentTab === 'Home'"><Intro /></div>
+    <div v-if="store.currentTab === 'Home'">
+      <Intro>
+        <template #header>
+          <PowerRankingData
+            class="mt-4"
+            :tableData="tableData"
+            :regularSeasonLength="15"
+            :totalRosters="10"
+          />
+          <TransactionsChart />
+          <Waivers />
+          <Projections />
+          <ExpectedWinsChart :tableData="tableData" />
+          <StandingsChart :tableData="tableData" />
+        </template>
+      </Intro>
+    </div>
   </div>
 </template>
 <style scoped>

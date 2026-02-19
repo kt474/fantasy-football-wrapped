@@ -285,11 +285,15 @@ const chartOptions = ref({
 <template>
   <div class="flex flex-wrap md:flex-nowrap">
     <PowerRankingCard
+      v-if="store.currentTab === 'Power Rankings'"
       :power-rankings="powerRankings"
       :regular-season-length="props.regularSeasonLength"
       class="w-full mb-4 md:w-1/3 md:mr-4 md:mb-0"
     />
-    <Card class="w-full p-4 rounded-lg shadow md:w-2/3 md:p-6 min-w-80">
+    <Card
+      class="w-full p-4 rounded-lg shadow md:p-6 min-w-80"
+      :class="{ 'md:w-2/3': store.currentTab === 'Power Rankings' }"
+    >
       <div class="flex justify-between">
         <div>
           <h1 class="pb-2 text-3xl font-bold leading-none">Power Rankings</h1>
