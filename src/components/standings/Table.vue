@@ -207,7 +207,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
 };
 </script>
 <template>
-  <div class="min-w-0 mx-4">
+  <div :class="['min-w-0', store.currentTab === 'Home' ? '' : 'mx-4']">
     <div
       v-if="store.currentTab === 'Standings'"
       class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"

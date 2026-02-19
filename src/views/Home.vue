@@ -120,7 +120,10 @@ const checkSystemTheme = () => {
   <div>
     <SkeletonLoading v-if="isInitialLoading" />
     <div v-else>
-      <div v-if="store.currentLeagueId" class="container mx-auto">
+      <div
+        v-if="store.currentLeagueId"
+        :class="store.currentTab === 'Home' ? '' : 'container mx-auto'"
+      >
         <Input v-if="store.showInput" class="custom-input-width" />
         <div v-if="store.showLeaguesList" class="container mx-auto">
           <UserLeagueList />
@@ -144,7 +147,7 @@ const checkSystemTheme = () => {
       </div>
 
       <SkeletonLoading v-else-if="showLoading" />
-      <div v-else class="container mx-auto">
+      <div v-else :class="store.currentTab === 'Home' ? '' : 'container mx-auto'">
         <!-- <Intro />
             <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" /> -->
         <!-- <Tabs class="mt-4" /> -->
