@@ -17,6 +17,17 @@ onMounted(() => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "2/20/26",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "Site has been completely redesigned to use a more user friendly side bar navigation.",
+        ],
+      },
+    ],
+  },
+  {
     date: "12/30/25",
     content: [
       {
