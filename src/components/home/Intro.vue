@@ -52,7 +52,7 @@ const isDark = computed(() => store.darkMode);
             </p>
             <h1
               id="intro-home-heading"
-              class="mt-4 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
+              class="max-w-xl mt-4 text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl"
             >
               All your
               <span

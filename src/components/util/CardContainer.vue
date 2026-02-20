@@ -16,7 +16,10 @@ const leagues = computed(() => {
   <div class="flex flex-1 min-w-0">
     <div class="flex w-full overflow-auto no-scrollbar">
       <LeagueSwitcher v-if="leagues.length > 0" :leagues="leagues" />
-      <div class="relative flex items-center w-full" v-else-if="store.currentTab !== 'Home'">
+      <div
+        class="relative flex items-center w-full"
+        v-else-if="store.currentTab !== 'Home' && !store.currentLeagueId"
+      >
         <Dialog>
           <template #trigger>
             <Button type="button" size="sm" class="text-sm font-medium ml-1.5">
@@ -25,7 +28,7 @@ const leagues = computed(() => {
           </template>
         </Dialog>
         <p
-          class="absolute inset-x-0 text-center font-medium whitespace-nowrap pointer-events-none"
+          class="absolute inset-x-0 mr-3 font-medium text-right pointer-events-none sm:mr-0 sm:text-center whitespace-nowrap"
         >
           Sample League
         </p>
