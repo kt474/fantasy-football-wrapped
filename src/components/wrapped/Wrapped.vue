@@ -183,7 +183,7 @@ const worstPicks = computed(() => {
 });
 
 const draftSteal = computed(() => {
-  if (league.value.draftPicks && league.value.draftPicks.length <= 48)
+  if (league.value?.draftPicks && league.value?.draftPicks.length <= 48)
     return [];
   if (league.value.draftMetadata?.draftType !== "auction") {
     return league.value.draftPicks
@@ -504,7 +504,7 @@ const winStreak = computed(() => {
 
 const totalSlides = computed(() => {
   let total = 17;
-  if (league.value.previousLeagues.length > 0) {
+  if (league.value?.previousLeagues.length > 0) {
     total += 1;
   }
   if (draftSteal.value && draftSteal.value.length > 0) {
@@ -750,26 +750,19 @@ const currentSlide = ref(0);
 
 onMounted(() => {
   getMatchups();
-  if (league.value.draftGrades) {
-    loading.value = false;
-  }
+  loading.value = false;
 });
 
 watch(
   () => store.currentLeagueId,
   () => getMatchups()
 );
-
-watch(
-  () => league.value.draftGrades,
-  () => (loading.value = false)
-);
 </script>
 
 <template>
   <div>
     <div
-      class="flex justify-center gap-1.5 z-40 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 mt-4 -mb-6 relative opacity-20"
+      class="flex justify-center gap-1.5 z-40 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 my-4 -mb-6 relative opacity-20"
     >
       <button
         v-for="(_, index) in totalSlides"

@@ -10,6 +10,7 @@ import { TableDataType, LeagueInfoType } from "../../types/types";
 import { Player } from "../../types/apiTypes";
 import { useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/helper";
+import { Card, CardTitle, CardHeader } from "../ui/card";
 
 const store = useStore();
 const props = defineProps<{
@@ -255,17 +256,12 @@ const cardHeight = computed(() => {
 });
 </script>
 <template>
-  <div
-    :class="[cardHeight]"
-    class="block w-auto px-6 py-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-  >
-    <h1 class="-mt-0.5 text-2xl font-semibold text-gray-900 dark:text-gray-50">
-      League News
-    </h1>
-    <div v-if="currentTrends.length > 0">
-      <ul
-        class="mr-0 text-gray-800 divide-y divide-gray-300 space-y dark:text-gray-200 dark:divide-gray-700"
-      >
+  <Card :class="[cardHeight]" class="p-0">
+    <CardHeader class="px-6 pt-4 pb-0">
+      <CardTitle class="text-2xl"> League News </CardTitle>
+    </CardHeader>
+    <div v-if="currentTrends.length > 0" class="px-6">
+      <ul class="mr-0 divide-y divide-gray-300 space-y">
         <li
           v-for="(trend, index) in currentTrends"
           :key="trend"
@@ -469,13 +465,11 @@ const cardHeight = computed(() => {
         store.leagueInfo[store.currentLeagueIndex]?.status === 'pre_draft'
       "
     >
-      <p class="mt-2 text-gray-600 dark:text-gray-200">
-        Please come back after week 1!
-      </p>
+      <p class="mt-2">Please come back after week 1!</p>
     </div>
-    <div v-else-if="currentTrends.length === 0" class="w-64">
+    <div v-else-if="currentTrends.length === 0" class="w-64 mx-auto">
       <div role="status" class="space-y-2.5 animate-pulse max-w-lg mb-6 px-2">
-        <p class="mt-4 text-gray-900 dark:text-gray-300">Analyzing League...</p>
+        <p class="mt-4">Analyzing League...</p>
         <div class="flex items-center w-full">
           <div
             class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32"
@@ -646,7 +640,7 @@ const cardHeight = computed(() => {
         <span class="sr-only">Loading...</span>
       </div>
     </div>
-  </div>
+  </Card>
 </template>
 <style scoped>
 @media (min-width: 1280px) {

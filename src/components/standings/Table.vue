@@ -35,9 +35,16 @@ import PlayerNews from "../start_sit/PlayerNews.vue";
 import ScheduleAnalysis from "../expected_wins/ScheduleAnalysis.vue";
 import Wrapped from "../wrapped/Wrapped.vue";
 import FakeWrapped from "../wrapped/FakeWrapped.vue";
+import Intro from "../home/Intro.vue";
+import Card from "../ui/card/Card.vue";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const tableOrder = ref("wins");
-const hover = ref("");
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
@@ -200,300 +207,288 @@ const getTeamName = (tableDataItem: TableDataType) => {
 };
 </script>
 <template>
-  <div>
+  <div :class="['min-w-0', store.currentTab === 'Home' ? '' : 'mx-4']">
     <div
-      v-if="store.currentTab === 'standings'"
+      v-if="store.currentTab === 'Standings'"
       class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"
     >
-      <div
-        class="relative w-full overflow-x-auto rounded-lg shadow-md xl:w-3/4 dark:bg-gray-900"
-      >
-        <table
-          v-if="tableData.length > 0"
-          class="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-300"
-        >
-          <thead
-            :class="
-              store.darkMode ? 'dark-custom-bg-color' : 'light-custom-bg-color'
-            "
-            class="text-xs text-gray-700 uppercase dark:text-gray-300"
+      <Card class="relative w-full min-w-0 mx-auto overflow-x-auto xl:w-3/4">
+        <TooltipProvider>
+          <table
+            v-if="tableData.length > 0"
+            class="w-full text-sm text-left rtl:text-right"
           >
-            <tr>
-              <th scope="col" class="px-4 py-3 sm:px-6 dark:text-gray-200">
-                Team name
-              </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
-                <div
-                  @click="tableOrder = 'wins'"
-                  @mouseover="hover = 'wins'"
-                  @mouseleave="hover = ''"
-                  class="flex items-center cursor-pointer dark:text-gray-200"
-                >
-                  Record
-                  <div>
-                    <svg
-                      class="w-3 h-3 ms-1.5 fill-gray-400"
-                      :class="{
-                        'fill-gray-600 dark:fill-gray-50': tableOrder == 'wins',
-                      }"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div
-                  :class="hover === 'wins' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-20 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
-                >
-                  Regular season wins and losses
-                </div>
-              </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
-                <div
-                  @click="tableOrder = 'points'"
-                  @mouseover="hover = 'points'"
-                  @mouseleave="hover = ''"
-                  class="flex items-center cursor-pointer dark:text-gray-200"
-                >
-                  Points
-                  <div>
-                    <svg
-                      class="w-3 h-3 ms-1.5 fill-gray-400"
-                      :class="{
-                        'fill-gray-600 dark:fill-gray-50':
-                          tableOrder == 'points',
-                      }"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div
-                  :class="hover === 'points' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-16 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 tooltip dark:bg-gray-600"
-                >
-                  Total regular season points
-                </div>
-              </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
-                <div
-                  @click="tableOrder = 'pointsAgainst'"
-                  @mouseover="hover = 'pointsAgainst'"
-                  @mouseleave="hover = ''"
-                  class="flex items-center w-20 cursor-pointer dark:text-gray-200"
-                >
-                  Points Against
-                  <div>
-                    <svg
-                      class="w-3 h-3 ms-1.5 fill-gray-400"
-                      :class="{
-                        'fill-gray-600 dark:fill-gray-50':
-                          tableOrder == 'pointsAgainst',
-                      }"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div
-                  :class="hover === 'pointsAgainst' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 sm:-ml-24 tooltip dark:bg-gray-600"
-                >
-                  Total regular season points against
-                </div>
-              </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
-                <div
-                  @click="tableOrder = 'recordAgainstAll'"
-                  @mouseover="hover = 'recordAgainstAll'"
-                  @mouseleave="hover = ''"
-                  class="flex items-center w-20 cursor-pointer dark:text-gray-200"
-                >
-                  Record vs. All
-                  <div>
-                    <svg
-                      class="w-3 h-3 ms-1.5 fill-gray-400"
-                      :class="{
-                        'fill-gray-600 dark:fill-gray-50':
-                          tableOrder == 'recordAgainstAll',
-                      }"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div
-                  :class="
-                    hover === 'recordAgainstAll' ? 'visible' : 'invisible'
-                  "
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 -ml-10 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
-                >
-                  Team record if each team played every other team each week.
-                </div>
-              </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
-                <div
-                  @click="tableOrder = 'medianRecord'"
-                  @mouseover="hover = 'medianRecord'"
-                  @mouseleave="hover = ''"
-                  class="flex items-center w-20 cursor-pointer dark:text-gray-200"
-                >
-                  Median Record
-                  <div>
-                    <svg
-                      class="w-3 h-3 ms-1.5 fill-gray-400"
-                      :class="{
-                        'fill-gray-600 dark:fill-gray-50':
-                          tableOrder == 'medianRecord',
-                      }"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div
-                  :class="hover === 'medianRecord' ? 'visible' : 'invisible'"
-                  class="absolute z-10 inline-block px-3 py-2 mt-2 text-sm font-medium normal-case bg-gray-900 rounded-lg shadow-sm text-gray-50 -ml-14 sm:-ml-20 max-w-60 tooltip dark:bg-gray-600 min-w-36"
-                >
-                  Team record where a win is awarded if a team's weekly score is
-                  higher than the league median, and a loss is added if the
-                  score is less than the median.
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(item, index) in tableData"
-              :key="index"
-              class="border-b odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 dark:border-gray-700"
-            >
-              <th
-                scope="row"
-                class="px-4 py-3 font-medium text-gray-900 sm:px-6 whitespace-nowrap dark:text-gray-50"
+            <thead class="text-xs uppercase bg-secondary">
+              <tr>
+                <th scope="col" class="px-4 py-3 sm:px-6">Team name</th>
+                <th scope="col" class="px-2 sm:px-6">
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <div
+                        @click="tableOrder = 'wins'"
+                        class="flex items-center uppercase cursor-pointer"
+                      >
+                        Record
+                        <div>
+                          <svg
+                            class="w-3 h-3 ms-1.5"
+                            :class="
+                              tableOrder === 'wins'
+                                ? 'text-foreground'
+                                : 'text-muted-foreground'
+                            "
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent class="bg-muted-foreground">
+                      Regular season wins and losses
+                    </TooltipContent>
+                  </Tooltip>
+                </th>
+                <th scope="col" class="px-2 sm:px-6">
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <div
+                        @click="tableOrder = 'points'"
+                        class="flex items-center uppercase cursor-pointer"
+                      >
+                        Points
+                        <div>
+                          <svg
+                            class="w-3 h-3 ms-1.5"
+                            :class="
+                              tableOrder === 'points'
+                                ? 'text-foreground'
+                                : 'text-muted-foreground'
+                            "
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent class="bg-muted-foreground">
+                      Total regular season points
+                    </TooltipContent>
+                  </Tooltip>
+                </th>
+                <th scope="col" class="px-2 sm:px-6">
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <div
+                        @click="tableOrder = 'pointsAgainst'"
+                        class="flex items-center w-20 text-left uppercase cursor-pointer"
+                      >
+                        Points Against
+                        <div>
+                          <svg
+                            class="w-3 h-3 ms-1.5"
+                            :class="
+                              tableOrder === 'pointsAgainst'
+                                ? 'text-foreground'
+                                : 'text-muted-foreground'
+                            "
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent class="bg-muted-foreground">
+                      Total regular season points against
+                    </TooltipContent>
+                  </Tooltip>
+                </th>
+                <th scope="col" class="px-2 py-3 sm:px-6">
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <div
+                        @click="tableOrder = 'recordAgainstAll'"
+                        class="flex items-center w-20 text-left uppercase cursor-pointer"
+                      >
+                        Record vs. All
+                        <div>
+                          <svg
+                            class="w-3 h-3 ms-1.5"
+                            :class="
+                              tableOrder === 'recordAgainstAll'
+                                ? 'text-foreground'
+                                : 'text-muted-foreground'
+                            "
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent class="w-40 bg-muted-foreground">
+                      Team record if each team played every other team each week
+                    </TooltipContent>
+                  </Tooltip>
+                </th>
+                <th scope="col" class="px-2 py-3 sm:px-6">
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <div
+                        @click="tableOrder = 'medianRecord'"
+                        class="flex items-center w-20 text-left uppercase cursor-pointer"
+                      >
+                        Median Record
+                        <div>
+                          <svg
+                            class="w-3 h-3 ms-1.5"
+                            :class="
+                              tableOrder === 'medianRecord'
+                                ? 'text-foreground'
+                                : 'text-muted-foreground'
+                            "
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent class="w-40 bg-muted-foreground">
+                      Team record where a win is awarded if a team's weekly
+                      score is higher than the league median, and a loss is
+                      added if the score is less than the median.
+                    </TooltipContent>
+                  </Tooltip>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(item, index) in tableData"
+                :key="index"
+                class="border-b"
               >
-                <div class="flex items-center">
-                  <img
-                    alt="User avatar"
-                    v-if="item.avatarImg"
-                    class="w-8 h-8 rounded-full"
-                    :src="item.avatarImg"
-                  />
-                  <svg
-                    v-else
-                    class="w-8 h-8 text-gray-800 dark:text-gray-50"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                <th
+                  scope="row"
+                  class="px-4 py-3 font-medium sm:px-6 whitespace-nowrap"
+                >
+                  <div class="flex items-center">
+                    <img
+                      alt="User avatar"
+                      v-if="item.avatarImg"
+                      class="w-8 h-8 rounded-full"
+                      :src="item.avatarImg"
                     />
-                  </svg>
-                  <p class="ml-2">{{ index + 1 }}.&nbsp;</p>
-                  <p class="truncate max-w-36 sm:max-w-48">
-                    {{ getTeamName(item) }}
-                  </p>
-                </div>
-              </th>
-              <td
-                class="px-2 py-3 sm:px-6"
-                :class="{
-                  'text-blue-600 dark:text-blue-500 font-semibold':
-                    item.wins === mostWins,
-                  'text-red-600 dark:text-red-500 font-semibold':
-                    item.losses === mostLosses,
-                }"
-              >
-                {{ item.wins }} - {{ item.losses }}
-                {{ item.ties != 0 ? `- ${item.ties}` : "" }}
-              </td>
-              <td
-                class="px-2 py-3 sm:px-6"
-                :class="{
-                  'text-blue-600 dark:text-blue-500 font-semibold':
-                    item.pointsFor === mostPoints,
-                  'text-red-600 dark:text-red-500 font-semibold':
-                    item.pointsFor === leastPoints,
-                }"
-              >
-                {{ item.pointsFor }}
-              </td>
-              <td
-                class="px-2 py-3 sm:px-6"
-                :class="{
-                  'text-blue-600 dark:text-blue-500 font-semibold':
-                    item.pointsAgainst === mostPointsAgainst,
-                  'text-red-600 dark:text-red-500 font-semibold':
-                    item.pointsAgainst === leastPointsAgainst,
-                }"
-              >
-                {{ item.pointsAgainst }}
-              </td>
-              <td
-                class="px-2 py-3 sm:px-6"
-                :class="{
-                  'text-blue-600 dark:text-blue-500 font-semibold':
-                    item.winsAgainstAll === mostWinsAgainstAll,
-                  'text-red-600 dark:text-red-500 font-semibold':
-                    item.lossesAgainstAll === mostLossesAgainstAll,
-                }"
-              >
-                {{ item.winsAgainstAll }} -
-                {{ item.lossesAgainstAll }}
-              </td>
-              <td
-                class="px-2 py-3 sm:px-6"
-                :class="{
-                  'text-blue-600 font-semibold dark:text-blue-500':
-                    item.winsWithMedian === mostMedianWins,
-                  'text-red-600 dark:text-red-500 font-semibold':
-                    item.lossesWithMedian === mostMedianLosses,
-                }"
-              >
-                {{ item.winsWithMedian ? item.winsWithMedian : 0 }} -
-                {{ item.lossesWithMedian ? item.lossesWithMedian : 0 }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                    <svg
+                      v-else
+                      class="w-8 h-8"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                      />
+                    </svg>
+                    <p class="ml-2">{{ index + 1 }}.&nbsp;</p>
+                    <p class="truncate max-w-36 sm:max-w-48">
+                      {{ getTeamName(item) }}
+                    </p>
+                  </div>
+                </th>
+                <td
+                  class="px-2 py-3 sm:px-6"
+                  :class="{
+                    'text-primary font-semibold': item.wins === mostWins,
+                    'text-destructive font-semibold':
+                      item.losses === mostLosses,
+                  }"
+                >
+                  {{ item.wins }} - {{ item.losses }}
+                  {{ item.ties != 0 ? `- ${item.ties}` : "" }}
+                </td>
+                <td
+                  class="px-2 py-3 sm:px-6"
+                  :class="{
+                    'text-primary font-semibold': item.pointsFor === mostPoints,
+                    'text-destructive font-semibold':
+                      item.pointsFor === leastPoints,
+                  }"
+                >
+                  {{ item.pointsFor }}
+                </td>
+                <td
+                  class="px-2 py-3 sm:px-6"
+                  :class="{
+                    'text-primary font-semibold':
+                      item.pointsAgainst === mostPointsAgainst,
+                    'text-destructive font-semibold':
+                      item.pointsAgainst === leastPointsAgainst,
+                  }"
+                >
+                  {{ item.pointsAgainst }}
+                </td>
+                <td
+                  class="px-2 py-3 sm:px-6"
+                  :class="{
+                    'text-primary font-semibold':
+                      item.winsAgainstAll === mostWinsAgainstAll,
+                    'text-destructive font-semibold':
+                      item.lossesAgainstAll === mostLossesAgainstAll,
+                  }"
+                >
+                  {{ item.winsAgainstAll }} -
+                  {{ item.lossesAgainstAll }}
+                </td>
+                <td
+                  class="px-2 py-3 sm:px-6"
+                  :class="{
+                    'text-primary font-semibold':
+                      item.winsWithMedian === mostMedianWins,
+                    'text-destructive font-semibold':
+                      item.lossesWithMedian === mostMedianLosses,
+                  }"
+                >
+                  {{ item.winsWithMedian ? item.winsWithMedian : 0 }} -
+                  {{ item.lossesWithMedian ? item.lossesWithMedian : 0 }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </TooltipProvider>
+      </Card>
       <div class="flex flex-col flex-1 w-full mt-4 xl:w-fit xl:ml-4 xl:mt-0">
         <CurrentTrends :tableData="tableData" />
-        <div
-          class="flex-1 px-3 py-3 mt-4 bg-white border border-gray-200 rounded-lg shadow md:w-auto dark:bg-gray-800 dark:border-gray-700 min-w-56 min-h-56"
-        >
+        <Card class="flex-1 px-2 py-4 mt-4 md:w-auto min-w-56 min-h-56">
           <BestManagerCard
             :rosters="store.currentLeagueId ? props.rosters : fakeRosters"
             :users="store.currentLeagueId ? props.users : fakeUsers"
@@ -512,15 +507,15 @@ const getTeamName = (tableDataItem: TableDataType) => {
             :rosters="store.currentLeagueId ? props.rosters : fakeRosters"
             class="mt-4"
           />
-        </div>
+        </Card>
       </div>
     </div>
     <StandingsChart
-      v-if="store.currentTab === 'standings'"
+      v-if="store.currentTab === 'Standings'"
       :tableData="tableData"
-      class="mt-4"
+      class="my-4"
     />
-    <div v-if="store.currentTab === 'powerRankings'">
+    <div v-if="store.currentTab === 'Power Rankings'">
       <PowerRankingData
         v-if="store.currentLeagueId"
         :tableData="tableData"
@@ -539,13 +534,13 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <TeamRanking
         v-if="seasonType !== 'Guillotine'"
         :tableData="tableData"
-        class="mt-4"
+        class="my-4"
       />
     </div>
-    <div v-if="store.currentTab === 'expectedWins'">
-      <div class="flex flex-wrap md:flex-nowrap">
+    <div v-if="store.currentTab === 'Expected Wins'">
+      <div class="flex flex-wrap lg:flex-nowrap">
         <ExpectedWinsCard :tableData="tableData" class="mt-4" />
-        <ExpectedWinsChart :tableData="tableData" class="mt-4 md:ml-4" />
+        <ExpectedWinsChart :tableData="tableData" class="mt-4 lg:ml-4" />
       </div>
       <div class="flex flex-wrap md:flex-nowrap">
         <ExpectedWinsChart2 :tableData="tableData" class="mt-4" />
@@ -553,7 +548,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       </div>
       <ScheduleAnalysis :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'managerEfficiency'">
+    <div v-if="store.currentTab === 'Roster Management'">
       <div class="flex flex-wrap md:flex-nowrap">
         <ManagementCard :tableData="tableData" class="mt-4" />
         <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
@@ -562,11 +557,11 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <Trades class="mt-4" />
       <Waivers class="mt-4" />
     </div>
-    <div v-if="store.currentTab === 'playoffs'">
+    <div class="w-full" v-if="store.currentTab === 'Playoffs'">
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
-      <Playoffs :tableData="tableData" />
+      <Playoffs class="mb-4" :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'weeklyReport'">
+    <div v-if="store.currentTab === 'Weekly Report'">
       <WeeklyReport
         v-if="store.currentLeagueId"
         :tableData="tableData"
@@ -574,20 +569,35 @@ const getTeamName = (tableDataItem: TableDataType) => {
       />
       <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
     </div>
-    <div v-if="store.currentTab === 'draft'">
-      <Draft class="mt-4" />
+    <div v-if="store.currentTab === 'Draft'">
+      <Draft class="my-4" />
     </div>
-    <div v-if="store.currentTab === 'startSit'">
+    <div v-if="store.currentTab === 'Start/Sit'">
       <PlayerNews :tableData="tableData" class="mt-4" />
     </div>
-    <div v-if="store.currentTab === 'leagueHistory'">
+    <div v-if="store.currentTab === 'League History'">
       <LeagueHistory :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'wrapped'">
-      <Wrapped :tableData="originalData" />
+    <div v-if="store.currentTab === 'Wrapped'">
+      <Wrapped v-if="store.currentLeagueId" :tableData="originalData" />
+      <FakeWrapped v-else />
     </div>
-    <div v-if="store.currentTab === 'fakeWrapped'">
-      <FakeWrapped />
+
+    <div v-if="store.currentTab === 'Home'">
+      <Intro>
+        <template #header>
+          <PowerRankingData
+            class="mt-4"
+            :tableData="tableData"
+            :regularSeasonLength="15"
+            :totalRosters="10"
+          />
+          <TransactionsChart />
+          <Waivers class="text-left" />
+          <Projections />
+          <ExpectedWinsChart :tableData="tableData" />
+        </template>
+      </Intro>
     </div>
   </div>
 </template>

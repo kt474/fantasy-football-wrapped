@@ -6,6 +6,7 @@ import { useStore } from "../../store/store";
 import { getPlayersByIdsMap, getSingleWeekProjection } from "../../api/api.ts";
 import { fakeWeeklyPreview, getWinProbability } from "../../api/helper.ts";
 import { Player } from "../../types/apiTypes.ts";
+import Card from "../ui/card/Card.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -468,10 +469,10 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
     v-if="!loading"
     class="flex flex-wrap mb-4 overflow-auto gap-x-4 gap-y-2"
   >
-    <div
+    <Card
       v-if="matchups.length > 0"
       v-for="matchup in matchups"
-      class="sm:px-2 px-1 py-2.5 mt-2 text-gray-700 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 w-full xl:w-[calc(50%-.5rem)] overflow-auto"
+      class="sm:px-2 px-1 py-2.5 mt-2 w-full xl:w-[calc(50%-.5rem)] overflow-auto"
     >
       <!-- Flex container for the two teams -->
       <div class="flex justify-between">
@@ -487,7 +488,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
               />
               <svg
                 v-else
-                class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                class="w-8 h-8"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -499,9 +500,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
               </svg>
               <div class="flex">
                 <div>
-                  <p
-                    class="w-24 px-2 -mt-1 font-semibold text-gray-800 truncate sm:w-36 dark:text-gray-50"
-                  >
+                  <p class="w-24 px-2 -mt-1 font-semibold truncate sm:w-36">
                     {{
                       store.showUsernames
                         ? matchup[0].username
@@ -512,7 +511,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           : "Ghost Roster"
                     }}
                   </p>
-                  <p class="ml-2 text-xs">
+                  <p class="ml-2 text-xs text-muted-foreground">
                     ({{ getRecord(matchup[0].recordByWeek, previewWeek) }})
                   </p>
                 </div>
@@ -522,8 +521,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                     :class="
                       getTotal(matchup[0]?.rosterId) >
                       getTotal(matchup[1]?.rosterId)
-                        ? 'text-blue-600 dark:text-blue-500'
-                        : 'text-red-600 dark:text-red-500'
+                        ? 'text-primary'
+                        : 'text-destructive'
                     "
                   >
                     {{ getTotal(matchup[0].rosterId) }}
@@ -538,8 +537,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 :class="
                   getTotal(matchup[0]?.rosterId) >
                   getTotal(matchup[1]?.rosterId)
-                    ? 'text-blue-600 dark:text-blue-500'
-                    : 'text-red-600 dark:text-red-500'
+                    ? 'text-primary'
+                    : 'text-destructive'
                 "
               >
                 {{ getTotal(matchup[0].rosterId) }}
@@ -551,9 +550,9 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 class="pb-1 mb-2"
                 v-for="player in getStarters(matchup[0].rosterId)"
               >
-                <div
+                <Card
                   v-if="player.name || player.team"
-                  class="flex justify-between py-2 pl-4 pr-4 mr-1 rounded sm:pl-1 bg-gray-50 dark:bg-gray-700"
+                  class="flex justify-between py-2 pl-4 pr-4 mr-1 rounded-md sm:pl-1"
                 >
                   <div class="flex items-center gap-1">
                     <img
@@ -570,7 +569,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                     />
                     <div>
                       <p
-                        class="w-16 text-sm font-medium text-gray-800 truncate sm:text-base sm:w-28 dark:text-gray-50"
+                        class="w-16 text-sm font-medium truncate sm:text-base sm:w-28"
                       >
                         {{
                           player.name
@@ -578,29 +577,22 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                             : `${player.team}`
                         }}
                       </p>
-                      <p class="text-xs">
+                      <p class="text-xs text-muted-foreground">
                         {{ `${player.position} - ${player.team}` }}
                       </p>
                     </div>
                   </div>
-                  <p
-                    class="mt-1.5 ml-2 font-medium text-gray-800 dark:text-gray-50 sm:text-base text-sm"
-                  >
+                  <p class="mt-1.5 ml-2 font-medium sm:text-base text-sm">
                     {{ player.projection }}
                   </p>
-                </div>
-                <div
-                  v-else
-                  class="px-4 py-4 mr-1 text-sm rounded bg-gray-50 dark:bg-gray-700"
-                >
-                  <p class="font-medium text-gray-800 dark:text-gray-50">
-                    Empty
-                  </p>
-                </div>
+                </Card>
+                <Card v-else class="px-4 py-4 mr-1 text-sm">
+                  <p class="font-medium">Empty</p>
+                </Card>
               </div>
             </div>
           </div>
-          <div class="flex w-px h-full bg-gray-300 dark:bg-gray-600"></div>
+          <div class="flex w-px h-full bg-muted"></div>
           <!-- Second team (index 1) -->
           <div class="w-60 sm:w-64">
             <div class="flex items-center justify-end mb-4">
@@ -611,8 +603,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                     :class="
                       getTotal(matchup[1]?.rosterId) >
                       getTotal(matchup[0]?.rosterId)
-                        ? 'text-blue-600 dark:text-blue-500'
-                        : 'text-red-600 dark:text-red-500'
+                        ? 'text-primary'
+                        : 'text-destructive'
                     "
                   >
                     {{ getTotal(matchup[1].rosterId) }}
@@ -621,7 +613,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 </div>
                 <div>
                   <p
-                    class="w-24 px-2 -mt-1 font-semibold text-right text-gray-800 truncate sm:w-36 dark:text-gray-50"
+                    class="w-24 px-2 -mt-1 font-semibold text-right truncate sm:w-36"
                   >
                     {{
                       store.showUsernames
@@ -633,7 +625,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                           : "Ghost Roster"
                     }}
                   </p>
-                  <p class="mr-2 text-xs float-end">
+                  <p class="mr-2 text-xs float-end text-muted-foreground">
                     ({{ getRecord(matchup[1].recordByWeek, previewWeek) }})
                   </p>
                 </div>
@@ -646,7 +638,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
               />
               <svg
                 v-else
-                class="w-8 h-8 text-gray-800 dark:text-gray-50"
+                class="w-8 h-8"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -663,8 +655,8 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 :class="
                   getTotal(matchup[1]?.rosterId) >
                   getTotal(matchup[0]?.rosterId)
-                    ? 'text-blue-600 dark:text-blue-500'
-                    : 'text-red-600 dark:text-red-500'
+                    ? 'text-primary'
+                    : 'text-destructive'
                 "
               >
                 {{ getTotal(matchup[1].rosterId) }}
@@ -676,28 +668,24 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 class="justify-end pb-1 mb-2"
                 v-for="player in getStarters(matchup[1].rosterId)"
               >
-                <div
-                  class="flex justify-between py-2 pl-4 pr-4 text-sm rounded sm:pr-1 bg-gray-50 dark:bg-gray-700 sm:text-base"
+                <Card
+                  class="flex justify-between py-2 pl-4 pr-4 text-sm rounded-md sm:pr-1 sm:text-base"
                   v-if="player.name || player.team"
                 >
-                  <p
-                    class="mr-2 mt-1.5 font-medium text-gray-800 dark:text-gray-50 sm:text-base text-sm"
-                  >
+                  <p class="mr-2 mt-1.5 font-medium sm:text-base text-sm">
                     {{ player.projection }}
                   </p>
 
                   <div class="flex items-center gap-1">
                     <div>
-                      <p
-                        class="w-16 font-medium text-gray-800 truncate sm:w-28 dark:text-gray-50"
-                      >
+                      <p class="w-16 font-medium truncate sm:w-28">
                         {{
                           player.name
                             ? formatName(player.name)
                             : `${player.team}`
                         }}
                       </p>
-                      <p class="text-xs">
+                      <p class="text-xs text-muted-foreground">
                         {{ `${player.position} - ${player.team}` }}
                       </p>
                     </div>
@@ -714,36 +702,29 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                       alt="Team avatar"
                     />
                   </div>
-                </div>
-                <div
-                  v-else
-                  class="px-4 py-4 text-sm rounded bg-gray-50 dark:bg-gray-700"
-                >
-                  <p class="font-medium text-gray-800 dark:text-gray-50">
-                    Empty
-                  </p>
+                </Card>
+                <div v-else class="px-4 py-4 text-sm rounded">
+                  <p class="font-medium">Empty</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="px-4 py-8 mx-0 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700">
+      <Card class="px-4 py-8 mx-0 rounded-md sm:mx-2">
         <div class="flex justify-between mb-1">
-          <span
-            class="text-sm font-medium text-gray-800 sm:text-base dark:text-gray-50"
-            >{{ getProjectedWinner(matchup[0], matchup[1]) }}</span
-          >
-          <span
-            class="text-sm font-medium text-blue-700 sm:text-base dark:text-gray-50"
+          <span class="text-sm font-medium sm:text-base">{{
+            getProjectedWinner(matchup[0], matchup[1])
+          }}</span>
+          <span class="text-sm font-medium text-primary sm:text-base"
             >{{
               getWinPercentage(matchup[0].rosterId, matchup[1].rosterId)
             }}%</span
           >
         </div>
-        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-500">
+        <div class="w-full rounded-full h-2.5 bg-secondary">
           <div
-            class="bg-blue-600 h-2.5 rounded-full"
+            class="bg-primary h-2.5 rounded-full"
             :style="{
               width:
                 getWinPercentage(matchup[0].rosterId, matchup[1].rosterId) +
@@ -751,15 +732,13 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
             }"
           ></div>
         </div>
-      </div>
+      </Card>
       <div
         v-if="!isPlayoffs"
-        class="flex justify-between p-4 mx-0 mt-3 rounded sm:mx-2 bg-gray-50 dark:bg-gray-700"
+        class="flex justify-between p-4 mx-0 mt-3 rounded sm:mx-2"
       >
         <div class="mr-2">
-          <p
-            class="w-32 font-semibold text-gray-800 truncate sm:w-auto dark:text-gray-50"
-          >
+          <p class="w-32 font-semibold truncate sm:w-auto">
             {{
               store.showUsernames
                 ? matchup[0].username
@@ -773,9 +752,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
           {{ generateString(cases[matchup[0].id]) }}
         </div>
         <div>
-          <p
-            class="w-32 font-semibold text-gray-800 truncate sm:w-auto dark:text-gray-50"
-          >
+          <p class="w-32 font-semibold truncate sm:w-auto">
             {{
               store.showUsernames
                 ? matchup[1].username
@@ -798,11 +775,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
         :matchup2="matchup[1]"
         :playerNames="playerNames"
       />
-      <p
-        class="my-4 mb-8 ml-4 font-semibold text-gray-800 sm:mb-0 dark:text-gray-200"
-      >
-        Recent Performances
-      </p>
+      <p class="my-4 mb-8 ml-4 font-semibold sm:mb-0">Recent Performances</p>
       <apexchart
         class="mt-4"
         type="line"
@@ -810,16 +783,16 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
         :options="chartOptions"
         :series="getSeriesData(matchup[0], matchup[1])"
       ></apexchart>
-    </div>
+    </Card>
     <div v-else>
-      <p class="text-gray-900 sm:w-1/2 mb-96 dark:text-gray-200">
+      <p class="sm:w-1/2 mb-96">
         The Sleeper API returns playoff matchup data on Wednesdays (4 AM EST).
         Please try again at a later time if no matchups are loaded.
       </p>
     </div>
   </div>
   <div v-else>
-    <p class="text-gray-900 mb-96 dark:text-gray-200">Loading...</p>
+    <p class="mb-96">Loading...</p>
   </div>
 </template>
 <style scoped></style>

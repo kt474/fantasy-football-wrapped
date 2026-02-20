@@ -6,6 +6,15 @@ import { LeagueInfoType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { standardDeviation, fakeUsers } from "../../api/helper";
 import { fakeDraftGrades } from "../../api/draft.ts";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectItem,
+  SelectValue,
+} from "../ui/select";
+import Separator from "../ui/separator/Separator.vue";
+import Label from "../ui/label/Label.vue";
 const store = useStore();
 
 const projectionData: any = ref([]);
@@ -208,23 +217,23 @@ watch(
 );
 </script>
 <template>
-  <div class="text-gray-900 dark:text-gray-200">
-    <label
-      for="Manager name"
-      class="block mb-1 text-sm text-gray-600 dark:text-gray-300"
-      >Manager</label
-    >
-    <select
-      aria-label="current week"
-      id="Manager name"
-      class="block p-2 text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      v-model="currentManager"
-    >
-      <option v-for="manager in managers" :key="manager.id" :value="manager">
-        {{ manager.name }}
-      </option>
-    </select>
-    <hr class="h-px mt-4 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
+  <div class="">
+    <Label for="manager" class="block mb-1 text-sm">Manager</Label>
+    <Select id="manager" v-model="currentManager">
+      <SelectTrigger id="manager" class="w-52">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem
+          v-for="manager in managers"
+          :key="manager.id"
+          :value="manager"
+        >
+          {{ manager.name }}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+    <Separator class="h-px mt-4 mb-2" />
     <div
       v-if="projectionData.length > 0"
       v-for="user in projectionData"
@@ -282,7 +291,7 @@ watch(
       </div>
     </div>
     <div v-else>
-      <p class="text-gray-600 dark:text-gray-300">Loading draft grades...</p>
+      <p class="text-muted-foreground mb-96">Loading draft grades...</p>
     </div>
   </div>
 </template>

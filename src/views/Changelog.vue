@@ -4,10 +4,6 @@ import { onMounted } from "vue";
 
 const router = useRouter();
 const route = useRoute();
-const goBackToHome = () => {
-  const currentQueryParams = route.query;
-  router.push({ path: "/", query: currentQueryParams });
-};
 
 onMounted(() => {
   // this league has somehow been cached in google sitelinks
@@ -547,14 +543,10 @@ const data = [
 <template>
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto">
     <div class="container mx-auto mt-4">
-      <h1 class="mb-4 text-3xl font-semibold text-gray-800 dark:text-gray-300">
-        Changelog
-      </h1>
+      <h1 class="mb-4 text-3xl font-semibold">Changelog</h1>
       <div v-for="entry in data" class="my-2 ml-1">
         <div class="flex">
-          <p
-            class="w-20 mb-1 mr-2 text-xl font-semibold text-gray-800 dark:text-gray-300"
-          >
+          <p class="w-20 mb-1 mr-2 text-xl font-semibold">
             {{ entry.date }}
           </p>
           <div v-for="content in entry.content" class="mt-0.5">
@@ -576,7 +568,7 @@ const data = [
           </div>
         </div>
         <div v-for="content in entry.content" class="max-w-4xl">
-          <ul class="space-y-1 text-gray-800 dark:text-gray-300">
+          <ul class="space-y-1">
             <li v-for="text in content.text" class="px-2 my-1 ml-20 text-base">
               {{ text }}
             </li>
@@ -584,13 +576,6 @@ const data = [
         </div>
         <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
       </div>
-      <button
-        aria-label="Button to go back one page"
-        @click="goBackToHome()"
-        class="text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-2"
-      >
-        Back
-      </button>
     </div>
   </div>
 </template>

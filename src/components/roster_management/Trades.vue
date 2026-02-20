@@ -10,6 +10,9 @@ import {
 } from "../../api/helper";
 import { useStore } from "../../store/store";
 import { Player } from "../../types/apiTypes.ts";
+import Card from "../ui/card/Card.vue";
+import Separator from "../ui/separator/Separator.vue";
+import Button from "../ui/button/Button.vue";
 
 const store = useStore();
 const tradeData: any = ref([]);
@@ -221,16 +224,10 @@ watch(
 );
 </script>
 <template>
-  <div
-    class="w-full py-4 pl-4 overflow-auto bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6"
-  >
-    <h1
-      class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-    >
-      League Trades
-    </h1>
+  <Card class="w-full py-4 pl-4 overflow-auto md:py-6 md:pl-6">
+    <h1 class="pb-2 text-3xl font-bold leading-none">League Trades</h1>
     <p
-      class="mt-1 mb-3 text-sm text-gray-600 max-w-80 sm:max-w-2xl sm:text-base dark:text-gray-300"
+      class="mt-1 mb-3 text-sm max-w-80 sm:max-w-2xl sm:text-base text-muted-foreground"
     >
       Values below each player are the average positional ranking for every week
       after the trade date (only weeks played are counted). Lower numbers
@@ -238,9 +235,9 @@ watch(
     </p>
     <div v-if="tradeData.length > 0">
       <div class="flex flex-wrap w-full">
-        <div
+        <Card
           v-for="trade in slicedTradeData"
-          class="block p-4 my-2 mr-4 overflow-y-hidden text-gray-900 bg-white border border-gray-200 rounded-lg shadow dark:shadow-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 custom-width"
+          class="block p-4 my-2 mr-4 overflow-y-hidden custom-width"
         >
           <!-- Team name and avatar -->
           <div v-if="trade.team1" class="flex justify-between h-8">
@@ -253,7 +250,7 @@ watch(
               />
               <svg
                 v-else
-                class="flex-shrink-0 w-8 h-8 text-gray-900 dark:text-gray-200"
+                class="flex-shrink-0 w-8 h-8"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -274,7 +271,7 @@ watch(
               </h2>
             </div>
             <svg
-              class="w-6 h-6 mx-2 mt-0.5 text-gray-700 sm:mx-4 dark:text-gray-200 min-w-4"
+              class="w-6 h-6 mx-2 mt-0.5 sm:mx-4 min-w-4"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -299,7 +296,7 @@ watch(
               />
               <svg
                 v-else
-                class="flex-shrink-0 w-8 h-8 text-gray-900 dark:text-gray-200"
+                class="flex-shrink-0 w-8 h-8"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -320,7 +317,7 @@ watch(
               </h2>
             </div>
           </div>
-          <hr class="h-px mt-3 mb-2 bg-gray-200 border-0 dark:bg-gray-700" />
+          <Separator class="mt-4 mb-2" />
           <div v-if="trade.team2" class="flex justify-between">
             <div
               class="w-44"
@@ -344,7 +341,7 @@ watch(
                     class="text-xs me-2 px-2.5 py-1 rounded-full"
                     >{{ roundToOneDecimal(trade.team1.value[index - 1]) }}</span
                   >
-                  <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                  <p class="mt-1 text-xs text-muted-foreground">
                     {{
                       trade.team1.value[index - 1]
                         ? getRatingLabel(trade.team1.value[index - 1])
@@ -389,7 +386,7 @@ watch(
                     class="text-xs me-2 px-2.5 py-1 rounded-full"
                     >{{ roundToOneDecimal(trade.team2.value[index - 1]) }}</span
                   >
-                  <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                  <p class="mt-1 text-xs text-muted-foreground">
                     {{
                       trade.team2.value[index - 1]
                         ? getRatingLabel(trade.team2.value[index - 1])
@@ -413,18 +410,18 @@ watch(
               </p>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
       <div v-if="tradeData.length > 6" class="flex justify-center mt-2">
-        <button
+        <Button
           v-if="tradeData.length > 6"
           @click="toggleTrades()"
           aria-label="Button to show all trades"
-          class="flex text-gray-900 mt-2 bg-gray-100 border border-gray-300 focus:outline-none hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-700 dark:text-white dark:border-gray-800 dark:hover:bg-gray-600 dark:hover:border-gray-600 dark:focus:ring-gray-600"
+          class="flex"
         >
           <svg
             v-if="showAllTrades"
-            class="w-5 h-5 mr-2 -ml-2 text-gray-900 dark:text-white"
+            class="w-5 h-5 mr-1.5"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -442,7 +439,7 @@ watch(
           </svg>
           <svg
             v-else
-            class="w-5 h-5 mr-2 -ml-2 text-gray-900 dark:text-white"
+            class="w-5 h-5 mr-1.5"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -464,7 +461,7 @@ watch(
               ? "Show Fewer Trades"
               : `Show All Trades (${tradeData.length})`
           }}
-        </button>
+        </Button>
       </div>
     </div>
     <div
@@ -474,7 +471,7 @@ watch(
         store.leagueInfo[store.currentLeagueIndex].trades.length === 0
       "
     >
-      <p class="text-gray-600 dark:text-gray-200">No trades have been made.</p>
+      <p class="text-muted-foreground">No trades have been made.</p>
     </div>
     <div v-else class="flex flex-wrap">
       <div
@@ -517,7 +514,7 @@ watch(
         <span class="sr-only">Loading...</span>
       </div>
     </div>
-  </div>
+  </Card>
 </template>
 <style scoped>
 .custom-width {

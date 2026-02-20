@@ -5,11 +5,6 @@ import { onMounted } from "vue";
 const router = useRouter();
 const route = useRoute();
 
-const goBackToHome = () => {
-  const currentQueryParams = route.query;
-  router.push({ path: "/", query: currentQueryParams });
-};
-
 onMounted(() => {
   // this league has somehow been cached in google sitelinks
   if (route.query.leagueId === "1057743221285101568") {
@@ -22,13 +17,9 @@ onMounted(() => {
 <template>
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto">
     <div class="container mx-auto mt-4">
-      <h1 class="mb-4 text-3xl font-semibold text-gray-800 dark:text-gray-300">
-        Privacy Policy
-      </h1>
+      <h1 class="mb-4 text-3xl font-semibold">Privacy Policy</h1>
 
-      <div
-        class="max-w-4xl text-base leading-relaxed text-gray-700 dark:text-gray-300"
-      >
+      <div class="max-w-4xl text-base leading-relaxed">
         <p class="mb-3 text-xl font-semibold">Introduction</p>
         ffwrapped ("we," "our," or "us") is committed to protecting your
         privacy. This Privacy Policy explains how we collect, use, and share
@@ -65,18 +56,10 @@ onMounted(() => {
         contact us at this
         <a
           href="mailto:kevin@ffwrapped.com?subject=privacy policy"
-          class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+          class="font-medium text-primary hover:underline"
           >email</a
         >.
       </div>
-
-      <button
-        aria-label="Button to go back one page"
-        @click="goBackToHome()"
-        class="text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-3 sm:px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-4"
-      >
-        Back
-      </button>
     </div>
   </div>
 </template>

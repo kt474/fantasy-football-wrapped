@@ -4,9 +4,13 @@ import { useStore } from "../../store/store";
 import { getData, inputLeague } from "../../api/api";
 import { seasonType } from "../../types/apiTypes";
 import { useRouter } from "vue-router";
+import { Button } from "../ui/button";
+import Card from "../ui/card/Card.vue";
+import Checkbox from "../ui/checkbox/Checkbox.vue";
+import { toast } from "vue-sonner";
 
 const router = useRouter();
-const checkedLeagues = ref([]);
+const checkedLeagues = ref<string[]>([]);
 const duplicateLeagueError = ref(false);
 const store = useStore();
 
@@ -58,34 +62,36 @@ const addLeagues = async () => {
     store.updateLoadingUserLeagues(false);
     store.setLeaguesList([]);
     store.updateLoadingLeague("");
-    store.updateShowAddedAlert(true);
-    setTimeout(() => {
-      store.updateShowAddedAlert(false);
-    }, 3000);
+    toast.success("League added!");
   }
 };
 onMounted(() => {
   window.scrollTo(0, 0);
 });
+
+const toggleLeague = (id: string) => {
+  if (checkedLeagues.value.includes(id)) {
+    checkedLeagues.value = checkedLeagues.value.filter((l) => l !== id);
+  } else {
+    checkedLeagues.value.push(id);
+  }
+};
 </script>
 <template>
-  <div class="w-full" :class="{ 'h-screen': !store.currentLeagueId }">
+  <div class="w-full px-6" :class="{ 'h-screen': !store.currentLeagueId }">
     <h3
-      class="my-4 text-2xl font-medium text-gray-900 dark:text-gray-50"
+      class="my-4 text-2xl font-medium"
       :class="{ hidden: store.currentLeagueId }"
     >
       Welcome {{ store.username }}!
     </h3>
-    <p
-      class="text-lg text-gray-800 dark:text-gray-200"
-      :class="{ 'my-2': store.currentLeagueId }"
-    >
+    <p class="text-lg" :class="{ 'my-2': store.currentLeagueId }">
       Select the leagues you would like to add
     </p>
     <div v-if="!store.currentLeagueId">
       <h3
         v-if="store.leaguesList.length > 0"
-        class="mb-2 text-lg text-gray-800 dark:text-gray-200"
+        class="mb-2 text-lg"
         :class="{ 'mt-2': store.currentLeagueId }"
       >
         <span class="font-semibold">{{ store.leaguesList.length }}</span>
@@ -93,7 +99,7 @@ onMounted(() => {
       </h3>
       <h3
         v-else
-        class="mb-2 text-xl font-medium text-gray-900 dark:text-gray-50"
+        class="mb-2 text-xl font-medium"
         :class="{ 'mt-2': store.currentLeagueId }"
       >
         No leagues available, please try another year
@@ -102,75 +108,75 @@ onMounted(() => {
     <ul
       class="flex flex-wrap w-full overflow-auto rounded-lg custom-max-height"
     >
-      <li v-for="(league, index) in store.leaguesList" class="w-64 mb-2 mr-2">
-        <input
-          type="checkbox"
-          :id="'league-' + index"
-          :value="league.league_id"
-          class="hidden peer"
-          v-model="checkedLeagues"
-        />
-        <label
-          :for="'league-' + index"
-          class="inline-flex items-center justify-between w-full px-4 py-2 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-blue-600 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+      <li
+        v-for="league in store.leaguesList"
+        :key="league.league_id"
+        class="w-64 mb-2 mr-2"
+      >
+        <Card
+          class="p-4 transition-colors border-2 cursor-pointer"
+          :class="
+            checkedLeagues.includes(league.league_id)
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:bg-muted/50'
+          "
+          @click="toggleLeague(league.league_id)"
         >
-          <div>
-            <h5
-              class="mb-1 text-lg font-medium text-gray-900 truncate dark:text-gray-50 max-w-52"
-            >
-              {{ league.name }}
-            </h5>
-            <div
-              class="w-full border-b border-gray-200 dark:border-gray-600"
-            ></div>
-            <p
-              class="mt-1 text-sm font-normal text-gray-600 dark:text-gray-300"
-            >
-              {{ seasonType[league["settings"]["type"]] }}:
-              {{ league.season }}
-              {{ league.total_rosters }}-team
-            </p>
+          <div class="flex items-start justify-between">
+            <div>
+              <h5 class="text-lg font-medium truncate max-w-52">
+                {{ league.name }}
+              </h5>
+
+              <p class="mt-2 text-sm text-muted-foreground">
+                {{ seasonType[league.settings.type] }}:
+                {{ league.season }}
+                {{ league.total_rosters }}-team
+              </p>
+            </div>
+            <Checkbox
+              :model-value="checkedLeagues.includes(league.league_id)"
+              class="mt-1.5"
+            />
           </div>
-        </label>
+        </Card>
       </li>
     </ul>
-    <p v-if="showError" class="mt-2 text-red-600 dark:text-red-500">
+    <p v-if="showError" class="mt-2 text-destructive">
       A maximum of 5 leagues can be added at a time
     </p>
-    <p v-if="duplicateLeagueError" class="-mt-1 text-red-600 dark:text-red-500">
+    <p v-if="duplicateLeagueError" class="-mt-1 text-destructive">
       A selected league already exists
     </p>
-    <p v-if="leagueCountError" class="-mt-1 text-red-600 dark:text-red-500">
+    <p v-if="leagueCountError" class="-mt-1 text-destructive">
       A maximum of 5 leagues can be active. Please remove a league first.
     </p>
-    <button
-      v-if="store.leaguesList.length > 0"
-      @click="addLeagues"
-      aria-label="Button to add leagues"
-      type="submit"
-      :disabled="checkedLeagues.length == 0 || showError || leagueCountError"
-      :class="{ 'cursor-not-allowed': checkedLeagues.length == 0 }"
-      class="text-gray-50 mt-4 sm:mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-    >
-      Continue
-      <span
-        class="inline-flex items-center justify-center w-4 h-4 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full ms-2"
-      >
-        {{ checkedLeagues.length }}
-      </span>
-    </button>
-    <button
-      v-else
+    <Button
+      class="mr-2"
       @click="
         store.leaguesList = [];
         store.showLeaguesList = false;
       "
       aria-label="Button to go back if there are no leagues"
       type="submit"
-      class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      variant="secondary"
     >
       Back
-    </button>
+    </Button>
+    <Button
+      v-if="store.leaguesList.length > 0"
+      @click="addLeagues"
+      class="mt-1"
+      :disabled="checkedLeagues.length == 0 || showError || leagueCountError"
+      :class="{ 'cursor-not-allowed': checkedLeagues.length == 0 }"
+    >
+      Continue
+      <span
+        class="inline-flex items-center justify-center w-4 h-4 text-xs font-semibold rounded-full ms-2"
+      >
+        {{ checkedLeagues.length }}
+      </span>
+    </Button>
   </div>
 </template>
 <style scoped>

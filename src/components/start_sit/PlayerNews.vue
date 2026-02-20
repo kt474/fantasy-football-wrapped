@@ -13,6 +13,17 @@ import { difference } from "lodash";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/helper";
 import { max, min } from "lodash";
 import { Player } from "../../types/apiTypes";
+import Card from "../ui/card/Card.vue";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectItem,
+  SelectValue,
+} from "../ui/select";
+import Separator from "../ui/separator/Separator.vue";
+import Button from "../ui/button/Button.vue";
+import Label from "../ui/label/Label.vue";
 
 const data: any = ref([]);
 const playerNames: any = ref([]);
@@ -250,35 +261,27 @@ watch(
 );
 </script>
 <template>
-  <div
-    class="py-4 pl-4 bg-white rounded-lg shadow dark:bg-gray-800 md:py-6 md:pl-6"
-  >
-    <p class="text-3xl font-bold leading-none text-gray-900 dark:text-gray-50">
-      Start/Sit
-    </p>
+  <Card class="py-4 pl-4 mb-4 md:py-6 md:pl-6">
+    <p class="text-3xl font-bold leading-none">Start/Sit</p>
     <div class="my-4">
-      <label
-        for="Manager name"
-        class="block mb-1 text-sm text-gray-600 dark:text-gray-300"
-        >Manager</label
-      >
-      <select
-        aria-label="Manager name"
-        id="Manager name"
-        class="block p-2 text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        v-model="currentManager"
-      >
-        <option
-          v-for="manager in managers"
-          :key="manager.rosterId"
-          :value="manager"
-        >
-          {{ manager.name }}
-        </option>
-      </select>
+      <Label for="Manager name" class="block mb-1 text-sm">Manager</Label>
+      <Select id="Manager name" v-model="currentManager">
+        <SelectTrigger class="w-52">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="manager in managers"
+            :key="manager.rosterId"
+            :value="manager"
+          >
+            {{ manager.name }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
-    <hr class="h-px mt-1 mb-3 mr-4 bg-gray-200 border-0 dark:bg-gray-700" />
-    <h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-50">
+    <Separator class="h-px mt-1 mb-3 mr-4" />
+    <h2 class="mb-4 text-2xl font-bold">
       Week
       {{
         store.leagueInfo[store.currentLeagueIndex]?.currentWeek
@@ -288,17 +291,12 @@ watch(
       Roster
     </h2>
     <div v-if="!loading" class="flex flex-wrap justify-between xl:flex-nowrap">
-      <div
-        v-if="currentRoster"
-        class="w-full max-w-3xl text-gray-900 dark:text-gray-200"
-      >
+      <div v-if="currentRoster" class="w-full max-w-3xl">
         <div v-for="(player, index) in currentRoster.players" class="">
           <div v-if="index === starterSize" class="w-full my-4">
             <p class="text-xl font-medium">BENCH</p>
           </div>
-          <div
-            class="pb-4 mb-3 mr-4 border-b md:flex-nowrap dark:border-gray-700"
-          >
+          <div class="pb-4 mb-3 mr-4 border-b md:flex-nowrap">
             <div class="flex w-full">
               <p class="w-8 mt-4 font-semibold">{{ player.position }}</p>
               <img
@@ -314,12 +312,12 @@ watch(
                 :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
               />
               <div class="flex justify-between w-full">
-                <div class="ml-4 md:ml-0">
+                <div class="ml-4 mr-2 md:ml-0">
                   <p class="text-lg font-medium md:text-base">
                     {{ player.name ? player.name : player.team }}
                   </p>
                   <p class="font-medium">
-                    <span class="font-normal text-gray-700 dark:text-gray-300"
+                    <span class="font-normal text-muted-foreground"
                       >{{
                         player.projection?.away === true
                           ? "@ "
@@ -331,24 +329,25 @@ watch(
                   </p>
                 </div>
                 <div class="flex">
-                  <div v-if="player.projection?.stats" class="mr-2 sm:mr-4">
-                    <p class="font-normal text-gray-700 dark:text-gray-300">
-                      Projected
-                    </p>
-                    <p
-                      class="text-xl font-semibold text-right text-gray-900 dark:text-gray-50"
-                    >
+                  <div
+                    v-if="player.projection?.stats"
+                    class="mr-2 mt-0.5 sm:mr-4"
+                  >
+                    <p class="font-normal text-muted-foreground">Projected</p>
+                    <p class="text-lg font-semibold text-right sm:text-xl">
                       {{ player.projection?.stats }}
                     </p>
                   </div>
-                  <button
+                  <Button
                     @click="toggle(player.player_id)"
                     aria-label="Button to show all trades"
-                    class="flex max-h-7 sm:max-h-16 text-gray-900 mt-2 bg-gray-50 border border-gray-300 focus:outline-none hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 font-medium rounded-lg text-sm px-0.5 sm:px-3 py-0.5 sm:py-2.5 mb-2 dark:bg-gray-700 dark:text-white dark:border-gray-800 dark:hover:bg-gray-600 dark:hover:border-gray-600 dark:focus:ring-gray-600"
+                    variant="secondary"
+                    size="sm"
+                    class="flex mt-2"
                   >
                     <svg
                       v-if="expanded[player.player_id]"
-                      class="w-5 h-5 text-gray-900 dark:text-white"
+                      class="w-5 h-5"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       width="24"
@@ -366,7 +365,7 @@ watch(
                     </svg>
                     <svg
                       v-else
-                      class="w-5 h-5 text-gray-900 dark:text-white"
+                      class="w-5 h-5"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       width="24"
@@ -382,42 +381,30 @@ watch(
                         d="m19 9-7 7-7-7"
                       />
                     </svg>
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
-            <div class="px-4 py-2 mt-2 rounded bg-gray-50 dark:bg-gray-700">
+            <div class="px-4 py-2 mt-2 rounded bg-secondary">
               <div class="flex justify-between">
                 <p class="mr-2 text-sm text-balance sm:text-base">
                   Recent <br />
                   Performances
                 </p>
                 <div class="text-center">
-                  <p
-                    class="text-xs text-gray-700 sm:text-sm dark:text-gray-200"
-                  >
-                    Avg Pts
-                  </p>
+                  <p class="text-xs sm:text-sm">Avg Pts</p>
                   <p class="text-sm font-semibold sm:text-base">
                     {{ getAverage(player.stats.points) }}
                   </p>
                 </div>
                 <div class="text-center">
-                  <p
-                    class="text-xs text-gray-700 sm:text-sm dark:text-gray-200"
-                  >
-                    High
-                  </p>
+                  <p class="text-xs sm:text-sm">High</p>
                   <p class="text-sm font-semibold sm:text-base">
                     {{ getMax(player.stats.points) }}
                   </p>
                 </div>
                 <div class="text-center">
-                  <p
-                    class="text-xs text-gray-700 sm:text-sm dark:text-gray-200"
-                  >
-                    Low
-                  </p>
+                  <p class="text-xs sm:text-sm">Low</p>
                   <p class="text-sm font-semibold sm:text-base">
                     {{ getMin(player.stats.points) }}
                   </p>
@@ -426,11 +413,7 @@ watch(
                   v-if="player.position !== 'K' && player.position !== 'DEF'"
                   class="text-center"
                 >
-                  <p
-                    class="text-xs text-gray-700 sm:text-sm dark:text-gray-200"
-                  >
-                    Avg Rank
-                  </p>
+                  <p class="text-xs sm:text-sm">Avg Rank</p>
                   <p
                     v-if="getAverage(player.stats.ranks) !== 0"
                     class="mt-0.5 text-sm font-semibold rounded-full sm:text-base"
@@ -456,9 +439,7 @@ watch(
                     v-for="(score, index) in player.stats?.points"
                     class="flex-1 p-2 text-center border rounded-md dark:border-gray-700"
                   >
-                    <p
-                      class="text-xs text-gray-700 dark:text-gray-300 text-nowrap"
-                    >
+                    <p class="text-xs text-muted-foreground text-nowrap">
                       Week
                       {{
                         store.leagueInfo[store.currentLeagueIndex]?.currentWeek
@@ -483,7 +464,7 @@ watch(
                       :class="[
                         player.stats?.ranks[index]
                           ? getValueColor(player.stats?.ranks[index])
-                          : 'bg-gray-300 dark:text-black',
+                          : '',
                       ]"
                       class="text-xs rounded-full p-0.5 mt-1.5 text-nowrap"
                     >
@@ -495,94 +476,76 @@ watch(
                       class="mt-2 text-xs"
                       v-if="player.position === 'QB' && score !== 'DNP'"
                     >
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Pass Yd:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{ player.stats?.stats[index]["pass_yd"] }}</span
-                        >
+                      <p class="">
+                        <span class="text-muted-foreground">Pass Yd: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["pass_yd"]
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Pass Td:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{ player.stats?.stats[index]["pass_td"] }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Pass Td: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["pass_td"] ?? 0
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rush Yd:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{ player.stats?.stats[index]["rush_yd"] }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rush Yd: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rush_yd"]
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rush Td:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{
-                            player.stats?.stats[index]["rush_td"]
-                              ? player.stats?.stats[index]["rush_td"]
-                              : 0
-                          }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rush Td: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rush_td"]
+                            ? player.stats?.stats[index]["rush_td"]
+                            : 0
+                        }}</span>
                       </p>
                     </div>
                     <div
                       class="mt-2 text-xs"
                       v-if="player.position === 'RB' && score !== 'DNP'"
                     >
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rush Att:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{ player.stats?.stats[index]["rush_att"] }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rush Att: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rush_att"]
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rush Yd:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{ player.stats?.stats[index]["rush_yd"] }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rush Yd: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rush_yd"]
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rush Td:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{
-                            player.stats?.stats[index]["rush_td"]
-                              ? player.stats?.stats[index]["rush_td"]
-                              : 0
-                          }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rush Td: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rush_td"]
+                            ? player.stats?.stats[index]["rush_td"]
+                            : 0
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rec:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{
-                            player.stats?.stats[index]["rec"]
-                              ? player.stats?.stats[index]["rec"]
-                              : 0
-                          }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rec: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rec"]
+                            ? player.stats?.stats[index]["rec"]
+                            : 0
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rec Yd:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{
-                            player.stats?.stats[index]["rec_yd"]
-                              ? player.stats?.stats[index]["rec_yd"]
-                              : 0
-                          }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rec Yd: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rec_yd"]
+                            ? player.stats?.stats[index]["rec_yd"]
+                            : 0
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Snaps:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
+                      <p>
+                        <span class="text-muted-foreground"> Snaps: </span>
+                        <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["team_snaps"]
                               ? (
@@ -603,36 +566,30 @@ watch(
                         score !== 'DNP'
                       "
                     >
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rec:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{ player.stats?.stats[index]["rec"] }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rec: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rec"]
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rec Yd:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{ player.stats?.stats[index]["rec_yd"] }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rec Yd: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rec_yd"]
+                        }}</span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Rec Td:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
-                          >{{
-                            player.stats?.stats[index]["rec_td"]
-                              ? player.stats?.stats[index]["rec_td"]
-                              : 0
-                          }}</span
-                        >
+                      <p>
+                        <span class="text-muted-foreground">Rec Td: </span>
+                        <span class="font-semibold">{{
+                          player.stats?.stats[index]["rec_td"]
+                            ? player.stats?.stats[index]["rec_td"]
+                            : 0
+                        }}</span>
                       </p>
 
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Snaps:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
+                      <p>
+                        <span class="text-muted-foreground">Snaps: </span>
+                        <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["team_snaps"]
                               ? (
@@ -649,10 +606,9 @@ watch(
                       class="mt-2 text-xs"
                       v-if="player.position === 'K' && score !== 'DNP'"
                     >
-                      <p class="text-gray-700 dark:text-gray-300">
-                        FG:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
+                      <p>
+                        <span class="text-muted-foreground">FG: </span>
+                        <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["fgm"]
                               ? player.stats?.stats[index]["fgm"]
@@ -666,10 +622,9 @@ watch(
                           }}</span
                         >
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        XP:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
+                      <p>
+                        <span class="text-muted-foreground">XP: </span>
+                        <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["xpm"]
                               ? player.stats?.stats[index]["xpm"]
@@ -688,24 +643,21 @@ watch(
                       class="mt-2 text-xs"
                       v-if="player.position === 'DEF' && score !== 'DNP'"
                     >
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Pts Allow:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
+                      <p>
+                        <span class="text-muted-foreground">Pts Allow: </span>
+                        <span class="font-semibold"
                           >{{ player.stats?.stats[index]["pts_allow"] }}
                         </span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Yds Allow:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
+                      <p>
+                        <span class="text-muted-foreground">Yds Allow: </span>
+                        <span class="font-semibold"
                           >{{ player.stats?.stats[index]["yds_allow"] }}
                         </span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Sack:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
+                      <p>
+                        <span class="text-muted-foreground">Sack: </span>
+                        <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["sack"]
                               ? player.stats?.stats[index]["sack"]
@@ -713,10 +665,9 @@ watch(
                           }}
                         </span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        Int:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
+                      <p>
+                        <span class="text-muted-foreground">Int: </span>
+                        <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["int"]
                               ? player.stats?.stats[index]["int"]
@@ -724,10 +675,9 @@ watch(
                           }}
                         </span>
                       </p>
-                      <p class="text-gray-700 dark:text-gray-300">
-                        FF:
-                        <span
-                          class="font-semibold text-gray-900 dark:text-gray-50"
+                      <p>
+                        <span class="text-muted-foreground">FF: </span>
+                        <span class="font-semibold"
                           >{{
                             player.stats?.stats[index]["ff"]
                               ? player.stats?.stats[index]["ff"]
@@ -743,16 +693,10 @@ watch(
           </div>
         </div>
       </div>
-      <div class="mr-4 xl:mx-4 xl:flex-grow">
-        <h2
-          class="mb-4 text-2xl font-bold text-gray-900 xl:-mt-12 dark:text-gray-50"
-        >
-          Player News
-        </h2>
+      <div v-if="currentRoster" class="mr-4 xl:mx-4 xl:flex-grow">
+        <h2 class="mb-4 text-2xl font-bold xl:-mt-12">Player News</h2>
         <div v-for="post in data">
-          <div
-            class="p-4 mb-3 bg-white border border-gray-200 rounded-lg shadow custom-max-width dark:bg-gray-800 dark:border-gray-700"
-          >
+          <Card class="p-4 mb-3 custom-max-width">
             <!-- Author Header -->
             <div class="flex items-center gap-3 mb-3">
               <img
@@ -761,22 +705,20 @@ watch(
                 class="w-12 h-12 rounded-full"
               />
               <div class="flex-1 min-w-0">
-                <div
-                  class="font-semibold text-gray-900 truncate dark:text-gray-200"
-                >
+                <div class="font-semibold truncate">
                   {{ post.author.displayName }}
                 </div>
-                <div class="text-sm text-gray-500 truncate dark:text-gray-400">
+                <div class="text-sm truncate text-muted-foreground">
                   @{{ post.author.handle }}
                 </div>
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">
+              <div class="text-sm text-muted-foreground">
                 {{ formatDate(post.record.createdAt) }}
               </div>
             </div>
             <!-- Post Text -->
             <div
-              class="mb-3 leading-relaxed text-gray-900 whitespace-pre-wrap overflow-x-clip dark:text-gray-200"
+              class="mb-3 leading-relaxed whitespace-pre-wrap overflow-x-clip"
             >
               {{ post.record.text }}
             </div>
@@ -785,7 +727,7 @@ watch(
               v-if="post.embed?.external"
               :href="post.embed.external.uri"
               target="_blank"
-              class="block mb-3 overflow-hidden no-underline transition-colors border border-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-700"
+              class="block mb-3 overflow-hidden no-underline border rounded-lg"
             >
               <img
                 v-if="post.embed.external.thumb"
@@ -794,24 +736,20 @@ watch(
                 class="w-32 h-auto"
               />
               <div class="p-3">
-                <div
-                  class="mb-1 font-semibold text-gray-900 dark:text-gray-200"
-                >
+                <div class="mb-1 font-semibold">
                   {{ post.embed.external.title }}
                 </div>
-                <div
-                  class="text-sm text-gray-600 line-clamp-2 dark:text-gray-400"
-                >
+                <div class="text-sm text-muted-foreground line-clamp-2">
                   {{ post.embed.external.description }}
                 </div>
               </div>
             </a>
-          </div>
+          </Card>
         </div>
       </div>
     </div>
-    <div v-else class="text-gray-900 mb-96 dark:text-gray-200">Loading...</div>
-  </div>
+    <div v-else class="mb-96">Loading...</div>
+  </Card>
 </template>
 <style scoped>
 .custom-max-width {

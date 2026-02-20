@@ -3,6 +3,15 @@ import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
 import { fakeUsers } from "../../api/helper";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectItem,
+  SelectValue,
+} from "../ui/select";
+import Separator from "../ui/separator/Separator.vue";
+import Label from "../ui/label/Label.vue";
 
 const store = useStore();
 const props = defineProps<{
@@ -68,22 +77,18 @@ const getValueColor = (value: number) => {
 </script>
 <template>
   <div>
-    <label
-      for="Manager name"
-      class="block mb-1 text-sm text-gray-600 dark:text-gray-300"
-      >Manager</label
-    >
-    <select
-      aria-label="current week"
-      id="Manager name"
-      class="block p-2 text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      v-model="currentManager"
-    >
-      <option v-for="manager in managers" :key="manager" :value="manager">
-        {{ manager }}
-      </option>
-    </select>
-    <hr class="h-px mr-6 my-4 mb-2.5 bg-gray-200 border-0 dark:bg-gray-700" />
+    <Label class="block mb-1 text-sm">Manager</Label>
+    <Select v-model="currentManager">
+      <SelectTrigger class="w-52">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem v-for="manager in managers" :key="manager" :value="manager">
+          {{ manager }}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+    <Separator class="my-4" />
     <div
       v-for="(positions, userId) in groupedPlayerData"
       :key="userId"
@@ -99,12 +104,10 @@ const getValueColor = (value: number) => {
           :key="position"
         >
           <template v-if="positions[position] && positions[position].length">
-            <p
-              class="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-50"
-            >
+            <p class="mb-2 text-lg font-semibold">
               {{ position }}
             </p>
-            <div class="gap-2 text-gray-700 dark:text-gray-300">
+            <div class="gap-2">
               <div
                 v-for="player in positions[position]"
                 :key="player.id"
@@ -145,7 +148,7 @@ const getValueColor = (value: number) => {
         </div>
       </div>
       <div v-else-if="currentManager === 'All Managers'">
-        <p class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
+        <p class="mb-1 text-lg font-semibold">
           {{ getNameFromId(Number(userId)) }}
         </p>
         <div class="flex flex-wrap gap-4 sm:gap-12">
@@ -155,12 +158,10 @@ const getValueColor = (value: number) => {
             :key="position"
           >
             <template v-if="positions[position] && positions[position].length">
-              <p
-                class="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-50"
-              >
+              <p class="mb-2 text-lg font-semibold">
                 {{ position }}
               </p>
-              <div class="gap-2 text-gray-700 dark:text-gray-300">
+              <div class="gap-2">
                 <div
                   v-for="player in positions[position]"
                   :key="player.id"
@@ -200,7 +201,7 @@ const getValueColor = (value: number) => {
             </template>
           </div>
         </div>
-        <hr class="h-px my-3 mr-6 bg-gray-200 border-0 dark:bg-gray-700" />
+        <Separator class="h-px my-3 mr-6" />
       </div>
     </div>
   </div>

@@ -3,6 +3,7 @@ import { max, min, cloneDeep } from "lodash";
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
+import Card from "../ui/card/Card.vue";
 const store = useStore();
 
 const props = defineProps<{
@@ -30,8 +31,8 @@ const categories = computed(() => {
         ? user.username
         : ""
       : user.name
-      ? user.name
-      : ""
+        ? user.name
+        : ""
   );
 });
 
@@ -209,14 +210,10 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <div
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
-  >
+  <Card class="w-full p-4 md:p-6 min-w-80">
     <div class="flex justify-between">
       <div>
-        <h1
-          class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-        >
+        <h1 class="pb-2 text-3xl font-bold leading-none">
           Expected Win Difference
         </h1>
       </div>
@@ -229,11 +226,11 @@ const chartOptions = ref({
       :series="seriesData"
     ></apexchart>
     <p
-      class="text-xs text-gray-500 sm:-mb-4 footer-font dark:text-gray-300"
+      class="text-xs text-muted-foreground sm:-mb-4 footer-font"
       :class="props.tableData.length <= 12 ? 'mt-2' : 'mt-6'"
     >
       Difference between number of actual wins and number of expected wins based
       off of simulating random matchups. Higher values indicate more luck.
     </p>
-  </div>
+  </Card>
 </template>

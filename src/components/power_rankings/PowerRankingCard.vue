@@ -2,6 +2,14 @@
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
 import { PowerRankingEntry } from "../../types/types";
+import Card from "../ui/card/Card.vue";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectItem,
+  SelectValue,
+} from "../ui/select";
 
 const store = useStore();
 
@@ -52,41 +60,33 @@ const listPadding = computed(() => {
 });
 </script>
 <template>
-  <div
-    class="px-6 pt-4 bg-white border border-gray-200 rounded-lg shadow min-h-96 custom-width dark:bg-gray-800 dark:border-gray-700"
-  >
+  <Card class="px-6 pt-4 min-h-96 custom-width">
     <div class="flex items-center justify-between sm:mt-1.5 mb-1.5">
-      <h5
-        class="w-20 text-xl font-bold leading-none text-gray-900 dark:text-gray-50 text-pretty"
-      >
+      <h5 class="w-20 text-xl font-bold leading-none text-pretty">
         Ranking score
       </h5>
-      <select
-        aria-label="current week"
-        id="rankings"
-        class="block p-2 text-sm text-gray-900 border border-gray-300 rounded-lg w-15 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 custom-padding"
-        v-model="currentWeek"
-      >
-        <option v-for="week in weeks" :key="week" :value="week">
-          {{ week === 1 ? "Preseason" : `Week ${week - 1}` }}
-        </option>
-      </select>
+      <Select v-model="currentWeek">
+        <SelectTrigger class="w-28">
+          <SelectValue placeholder="Select Week" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="week in weeks" :key="week" :value="week">
+            {{ week === 1 ? "Preseason" : `Week ${week - 1}` }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
     <div v-if="powerRankings.length > 0" class="flow-root">
-      <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+      <ul role="list" class="divide-y">
         <li v-for="(user, index) in rankingValues" :class="listPadding">
           <div class="flex items-center">
             <div class="flex-1 min-w-0 list-padding ms-1">
-              <p
-                class="w-48 text-sm font-medium text-gray-900 truncate dark:text-gray-50"
-              >
+              <p class="w-48 text-sm font-medium truncate">
                 {{ index + 1 }}.&nbsp;
                 {{ user.name ? user.name : "Ghost Roster" }}
               </p>
             </div>
-            <div
-              class="inline-flex items-center text-sm font-normal text-gray-600 dark:text-gray-300"
-            >
+            <div class="inline-flex items-center text-sm font-normal">
               {{ user.ratings[currentWeek - 1] }}
             </div>
           </div>
@@ -94,9 +94,9 @@ const listPadding = computed(() => {
       </ul>
     </div>
     <div v-else>
-      <p class="mt-2 mb-2 text-gray-600 dark:text-gray-200">Loading...</p>
+      <p class="mt-2 mb-2">Loading...</p>
     </div>
-  </div>
+  </Card>
 </template>
 <style scoped>
 .custom-width {

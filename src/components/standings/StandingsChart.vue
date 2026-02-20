@@ -2,6 +2,7 @@
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
+import { Card } from "../ui/card";
 const store = useStore();
 
 const props = defineProps<{
@@ -34,7 +35,9 @@ const seriesData = computed(() => [
 
 const userLabelList = computed(() =>
   props.tableData.map((user) => {
-    const label = store.showUsernames ? user.username ?? "" : user.name ?? "";
+    const label = store.showUsernames
+      ? (user.username ?? "")
+      : (user.name ?? "");
     const n = 17;
     return label.length > n ? label.slice(0, n - 1) + "..." : label;
   })
@@ -112,16 +115,10 @@ watch(
 );
 </script>
 <template>
-  <div
-    class="w-full p-4 bg-white rounded-lg shadow dark:bg-gray-800 md:p-6 min-w-80"
-  >
+  <Card class="w-full p-4 rounded-lg shadow md:p-6 min-w-80">
     <div class="flex justify-between">
       <div>
-        <h1
-          class="pb-2 text-3xl font-bold leading-none text-gray-900 dark:text-gray-50"
-        >
-          Win Percentages
-        </h1>
+        <h1 class="pb-2 text-3xl font-bold leading-none">Win Percentages</h1>
       </div>
     </div>
     <!-- chart overflows on safari sometimes  -->
@@ -133,5 +130,5 @@ watch(
       :series="seriesData"
       class="overflow-hidden"
     ></apexchart>
-  </div>
+  </Card>
 </template>

@@ -12,20 +12,11 @@ import { DraftGrades, DraftPick } from "../types/apiTypes";
 export const useStore = defineStore("main", {
   state: () => ({
     darkMode: false,
-    showAddedAlert: false,
-    showRemovedAlert: false,
-    showRefreshAlert: false,
-    showCopiedAlert: false,
-    showLeagueExistsAlert: false,
-    showCopyReport: false,
-    showLoadingAlert: false,
-    showEmailAlert: false,
-    showInvalidLeagueAlert: false,
     showInput: false,
     leagueInfo: [] as LeagueInfoType[],
     currentLeagueId: "",
     leagueSubmitted: false,
-    currentTab: "standings",
+    currentTab: "Home",
     showLeaguesList: false,
     leaguesList: [] as Record<string, any>[],
     username: "",
@@ -56,9 +47,6 @@ export const useStore = defineStore("main", {
     },
   },
   actions: {
-    updateShowEmailAlert(payload: boolean) {
-      this.showEmailAlert = payload;
-    },
     updateShowUsernames(payload: boolean) {
       this.showUsernames = payload;
     },
@@ -70,15 +58,6 @@ export const useStore = defineStore("main", {
     },
     updateDarkMode(payload: boolean) {
       this.darkMode = payload;
-    },
-    updateShowAddedAlert(payload: boolean) {
-      this.showAddedAlert = payload;
-    },
-    updateRemovedAlert(payload: boolean) {
-      this.showRemovedAlert = payload;
-    },
-    updateExistsAlert(payload: boolean) {
-      this.showLeagueExistsAlert = payload;
     },
     updateLeagueInfo(payload: LeagueInfoType) {
       if (!this.leagueInfo.includes(payload)) {

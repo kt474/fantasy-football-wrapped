@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import CardContainer from "../components/util/CardContainer.vue";
+
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "../api/helper";
-import Input from "../components/util/Input.vue";
-import Intro from "../components/home/Intro.vue";
+import Input from "@/components/ui/input/Input.vue";
 import Table from "../components/standings/Table.vue";
-import Tabs from "../components/util/Tabs.vue";
 import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 
 const route = useRoute();
 const router = useRouter();
@@ -20,8 +19,14 @@ const store = useStore();
 const showLoading = ref(false);
 const isInitialLoading = ref(true);
 
+const systemDarkMode = window.matchMedia(
+  "(prefers-color-scheme: dark)"
+).matches;
+const clicked = ref(systemDarkMode);
+
 onMounted(async () => {
   try {
+    checkSystemTheme();
     if (localStorage.leagueInfo) {
       const savedLeagues = JSON.parse(localStorage.leagueInfo);
       await Promise.all(
@@ -81,18 +86,12 @@ onMounted(async () => {
         );
         store.updateLoadingLeague("");
       } else {
-        store.showInvalidLeagueAlert = true;
-        setTimeout(() => {
-          store.showInvalidLeagueAlert = false;
-        }, 8000);
+        toast.error("Invalid League ID");
       }
     } else if (leagueId === "undefined") {
       localStorage.removeItem("currentLeagueId");
       localStorage.removeItem("leagueInfo");
-      store.showLoadingAlert = true;
-      setTimeout(() => {
-        store.showLoadingAlert = false;
-      }, 8000);
+      toast.error("Error fetching data. Please try refreshing the page.");
       // this league has somehow been cached in google sitelinks
     } else if (leagueId === "1057743221285101568") {
       const newQuery = { ...route.query };
@@ -100,21 +99,31 @@ onMounted(async () => {
       router.replace({ path: route.path, query: newQuery });
     }
   } catch {
-    store.showLoadingAlert = true;
-    setTimeout(() => {
-      store.showLoadingAlert = false;
-    }, 8000);
+    toast.error("Error fetching data. Please try refreshing the page.");
   } finally {
     isInitialLoading.value = false;
   }
 });
+
+const checkSystemTheme = () => {
+  if (systemDarkMode && !localStorage.darkMode) {
+    clicked.value = true;
+    store.updateDarkMode(true);
+  } else if (localStorage.darkMode) {
+    clicked.value = JSON.parse(localStorage.darkMode);
+    store.updateDarkMode(clicked.value);
+  }
+};
 </script>
 
 <template>
-  <div class="container w-11/12 max-w-screen-xl mx-auto">
+  <div>
     <SkeletonLoading v-if="isInitialLoading" />
     <div v-else>
-      <div v-if="store.currentLeagueId" class="container mx-auto">
+      <div
+        v-if="store.currentLeagueId"
+        :class="store.currentTab === 'Home' ? '' : 'container mx-auto'"
+      >
         <Input v-if="store.showInput" class="custom-input-width" />
         <div v-if="store.showLeaguesList" class="container mx-auto">
           <UserLeagueList />
@@ -125,8 +134,6 @@ onMounted(async () => {
             !store.loadingUserLeagues
           "
         >
-          <CardContainer />
-          <Tabs class="mt-4" />
           <Table
             :users="store.leagueUsers[store.currentLeagueIndex]"
             :rosters="store.leagueRosters[store.currentLeagueIndex]"
@@ -138,30 +145,14 @@ onMounted(async () => {
       <div v-else-if="store.showLeaguesList" class="container mx-auto">
         <UserLeagueList />
       </div>
-      <!-- show loading screen on auto 24 hr refresh -->
+
       <SkeletonLoading v-else-if="showLoading" />
-      <div v-else class="container mx-auto custom-background">
-        <Intro />
-        <Input class="w-11/12 mx-auto mb-20 lg:w-2/3 xl:w-1/2" />
-        <Tabs class="mt-4" />
+      <div
+        v-else
+        :class="store.currentTab === 'Home' ? '' : 'container mx-auto'"
+      >
         <Table :users="fakeUsers" :rosters="fakeRosters" :points="fakePoints" />
       </div>
     </div>
   </div>
 </template>
-<style scoped>
-.custom-input-width {
-  width: 18.9rem;
-  @media (min-width: 640px) {
-    width: 29.1rem;
-  }
-}
-.custom-background {
-  background: linear-gradient(
-    90deg,
-    rgba(36, 19, 0, 0) 0%,
-    rgba(90, 140, 255, 0.1) 54%,
-    rgba(0, 187, 255, 0) 100%
-  );
-}
-</style>

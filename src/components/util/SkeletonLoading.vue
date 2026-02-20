@@ -4,7 +4,10 @@ const store = useStore();
 </script>
 
 <template>
-  <div role="status" class="flex flex-wrap justify-center h-full mt-4 mb-32">
+  <div
+    role="status"
+    class="flex flex-wrap justify-center h-full mx-4 mt-4 mb-32"
+  >
     <svg
       aria-hidden="true"
       class="w-8 h-8 mb-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
