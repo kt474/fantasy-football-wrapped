@@ -242,6 +242,7 @@ const data = {
               <a
                 href="https://github.com/kt474/fantasy-football-wrapped"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <SidebarMenuButton as-child>
                   <div>
@@ -258,6 +259,7 @@ const data = {
                 href="https://buymeacoffee.com/kt474"
                 title="buymeacofee donation page"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <SidebarMenuButton as-child>
                   <div>
@@ -273,6 +275,7 @@ const data = {
                 href="https://discord.gg/sSVwNhyv7U"
                 title="discord community invite"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <SidebarMenuButton as-child>
                   <div>

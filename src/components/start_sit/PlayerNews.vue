@@ -728,6 +728,7 @@ watch(
               v-if="post.embed?.external"
               :href="post.embed.external.uri"
               target="_blank"
+              rel="noopener noreferrer"
               class="block mb-3 overflow-hidden no-underline border rounded-lg"
             >
               <img

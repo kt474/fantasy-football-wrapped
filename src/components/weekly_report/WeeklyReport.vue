@@ -723,6 +723,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                 href="https://buymeacoffee.com/kt474"
                 title="buymeacofee donation page"
                 target="_blank"
+                rel="noopener noreferrer"
                 >supporting</a
               >
               this project.

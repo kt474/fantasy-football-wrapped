@@ -76,6 +76,7 @@ const isDark = computed(() => store.darkMode);
                     class="font-medium text-primary hover:underline"
                     href="https://sleeper.com/"
                     target="_blank"
+                    rel="noopener noreferrer"
                     >Sleeper</a
                   >
                   league ID or username.

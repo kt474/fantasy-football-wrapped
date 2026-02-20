@@ -1,61 +1,119 @@
-import { expect, test } from "vitest";
-import { getData } from "../src/api/api.ts";
+import { afterEach, describe, expect, test, vi } from "vitest";
+import { getLeague, getRosters } from "../src/api/api.ts";
 
-test("Retrieving league data", async () => {
-  let data = await getData("992195707941212160");
-  expect(data.regularSeasonLength).toBe(14);
-  expect(data.lastScoredWeek).toBe(17);
-  expect(data.totalRosters).toBe(12);
-  expect(data.season).toBe("2023");
-  expect(data.seasonType).toBe("Redraft");
-  expect(data.leagueId).toBe("992195707941212160");
-  expect(data.leagueWinner).toBe("7");
-  expect(data.previousLeagueId).toBe("863906396951990272");
-  let rosters = data.rosters;
-  expect(rosters.length).toBe(12);
-  expect(rosters[0]).toEqual({
-    id: "730602883782926336",
-    pointsFor: 1379,
-    pointsAgainst: 1509,
-    potentialPoints: 1577,
-    managerEfficiency: 0.874,
-    wins: 5,
-    losses: 9,
-    ties: 0,
-    rosterId: 1,
-    recordByWeek: "LLLWWWLLLLWLWL",
-    players: [
-      "10222",
-      "10236",
-      "2747",
-      "4866",
-      "4981",
-      "6111",
-      "6797",
-      "6803",
-      "7543",
-      "7553",
-      "8112",
-      "8137",
-      "9511",
-      "9753",
-      "NYJ",
-    ],
+const mockFetchResponse = (status, data) =>
+  Promise.resolve({
+    status,
+    json: async () => data,
   });
-  expect(data.winnersBracket.length).toBe(7);
-  expect(data.losersBracket.length).toBe(7);
-  let weeklyPoints = data.weeklyPoints;
-  expect(weeklyPoints.length).toBe(12);
-  expect(weeklyPoints[0].rosterId).toBe(1);
-  expect(weeklyPoints[0].points.length).toBe(17);
-  expect(data.users.length).toBe(12);
-  expect(data.users[1]).toEqual({
-    id: "666116213100867584",
-    username: "kevkevkt",
-    name: "kevkevkt",
-    avatar: "a77d198f5c82bd93d3da5bd10493f7cd",
-    avatarImg:
-      "https://sleepercdn.com/avatars/thumbs/a77d198f5c82bd93d3da5bd10493f7cd",
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("Sleeper API data transforms", () => {
+  test("maps league response into app league shape", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        mockFetchResponse(200, {
+          name: "Sample League",
+          settings: {
+            playoff_week_start: 15,
+            last_scored_leg: 17,
+            league_average_match: 1,
+            type: 0,
+            playoff_teams: 6,
+            playoff_type: 1,
+            waiver_type: 2,
+          },
+          total_rosters: 12,
+          season: "2023",
+          league_id: "992195707941212160",
+          metadata: {
+            latest_league_winner_roster_id: "7",
+          },
+          previous_league_id: "863906396951990272",
+          status: "complete",
+          scoring_settings: {
+            rec: 1,
+          },
+          roster_positions: ["QB", "RB", "WR", "TE", "FLEX", "BN"],
+          draft_id: "111",
+          sport: "nfl",
+        })
+      );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const data = await getLeague("992195707941212160");
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(data).toEqual({
+      name: "Sample League",
+      regularSeasonLength: 14,
+      lastScoredWeek: 17,
+      medianScoring: 1,
+      totalRosters: 12,
+      season: "2023",
+      seasonType: "Redraft",
+      leagueId: "992195707941212160",
+      leagueWinner: "7",
+      previousLeagueId: "863906396951990272",
+      status: "complete",
+      scoringType: 1,
+      rosterPositions: ["QB", "RB", "WR", "TE", "FLEX", "BN"],
+      playoffTeams: 6,
+      playoffType: 1,
+      draftId: "111",
+      waiverType: 2,
+      sport: "nfl",
+    });
   });
-  expect(Object.keys(data.transactions).length).toBe(12);
+
+  test("maps roster response and computes manager efficiency", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        mockFetchResponse(200, [
+          {
+            owner_id: "730602883782926336",
+            settings: {
+              fpts: 1379,
+              fpts_against: 1509,
+              ppts: 1577,
+              wins: 5,
+              losses: 9,
+              ties: 0,
+            },
+            roster_id: 1,
+            metadata: {
+              record: "LLLWWWLLLLWLWL",
+            },
+            players: ["10222", "10236", "NYJ"],
+          },
+        ])
+      );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const rosters = await getRosters("992195707941212160");
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(rosters).toEqual([
+      {
+        id: "730602883782926336",
+        pointsFor: 1379,
+        pointsAgainst: 1509,
+        potentialPoints: 1577,
+        managerEfficiency: 0.874,
+        wins: 5,
+        losses: 9,
+        ties: 0,
+        rosterId: 1,
+        recordByWeek: "LLLWWWLLLLWLWL",
+        players: ["10222", "10236", "NYJ"],
+      },
+    ]);
+  });
 });

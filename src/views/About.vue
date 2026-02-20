@@ -44,6 +44,7 @@ watch(
               class="font-medium text-primary hover:underline"
               href="https://sleeper.com"
               target="_blank"
+              rel="noopener noreferrer"
               >Sleeper</a
             >
             fantasy football leagues.
@@ -56,6 +57,7 @@ watch(
               class="font-medium text-primary hover:underline"
               href="https://github.com/kt474/fantasy-football-wrapped"
               target="_blank"
+              rel="noopener noreferrer"
               >Github</a
             >. To report a bug or request new features, please join our
             <a
@@ -63,6 +65,7 @@ watch(
               class="font-medium text-primary hover:underline"
               href="https://discord.gg/sSVwNhyv7U"
               target="_blank"
+              rel="noopener noreferrer"
               >discord,</a
             >
             send an
@@ -77,6 +80,7 @@ watch(
               class="font-medium text-primary hover:underline"
               href="https://twitter.com/kevkevkt"
               target="_blank"
+              rel="noopener noreferrer"
               >twitter</a
             >.
           </p>
@@ -86,7 +90,11 @@ watch(
             greatly appreciated.
           </p>
           <div class="flex flex-wrap justify-evenly sm:flex-nowrap">
-            <a href="https://www.buymeacoffee.com/kt474" target="_blank"
+            <a
+              href="https://www.buymeacoffee.com/kt474"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               ><img
                 src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
                 alt="Buy Me A Coffee"

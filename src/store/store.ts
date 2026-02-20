@@ -60,7 +60,10 @@ export const useStore = defineStore("main", {
       this.darkMode = payload;
     },
     updateLeagueInfo(payload: LeagueInfoType) {
-      if (!this.leagueInfo.includes(payload)) {
+      const alreadyExists = this.leagueInfo.some(
+        (league) => league.leagueId === payload.leagueId
+      );
+      if (!alreadyExists) {
         this.$patch((state) => {
           state.leagueInfo.push(payload);
         });
