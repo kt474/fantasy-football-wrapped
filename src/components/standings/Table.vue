@@ -593,10 +593,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
             :totalRosters="10"
           />
           <TransactionsChart />
-          <Waivers />
+          <Waivers class="text-left" />
           <Projections />
           <ExpectedWinsChart :tableData="tableData" />
-          <StandingsChart :tableData="tableData" />
         </template>
       </Intro>
     </div>

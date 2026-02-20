@@ -141,6 +141,9 @@ const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
+      animations: {
+        enabled: false,
+      },
       width: "98%",
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       id: "power-ranking",
@@ -198,6 +201,9 @@ watch(
 
 const chartOptions = ref({
   chart: {
+    animations: {
+      enabled: false,
+    },
     width: "97%",
     foreColor: chartTextColor.value,
     id: "power-ranking",

@@ -23,7 +23,7 @@ const router = useRouter();
 const store = useStore();
 
 const systemDarkMode = window.matchMedia(
-  "(prefers-color-scheme: dark)",
+  "(prefers-color-scheme: dark)"
 ).matches;
 const savedDarkMode = localStorage.getItem("darkMode");
 // if savedDarkMode is null, use system preference
@@ -55,7 +55,7 @@ onMounted(async () => {
 
 watch(
   () => store.darkMode,
-  () => setHtmlBackground(),
+  () => setHtmlBackground()
 );
 
 watch(
@@ -82,7 +82,7 @@ watch(
         toast.error("Error fetching data. Please try refreshing the page.");
       }
     }
-  },
+  }
 );
 
 watch(
@@ -94,9 +94,9 @@ watch(
     }
     localStorage.setItem(
       "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[]),
+      JSON.stringify(store.leagueInfo as LeagueInfoType[])
     );
-  },
+  }
 );
 
 watch(
@@ -104,7 +104,7 @@ watch(
   (isDark) => {
     document.documentElement.classList.toggle("dark", isDark);
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 const setHtmlBackground = () => {
@@ -132,7 +132,9 @@ const setHtmlBackground = () => {
         <AppSidebar />
         <SidebarInset class="flex flex-col h-screen">
           <header class="flex items-center h-16 gap-2 px-4 border-b shrink-0">
-            <SidebarTrigger class="-ml-1" />
+            <SidebarTrigger
+              class="-ml-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            />
             <Separator
               orientation="vertical"
               class="data-[orientation=vertical]:h-4"
@@ -140,7 +142,7 @@ const setHtmlBackground = () => {
             <CardContainer />
             <Button
               @click="setColorMode()"
-              class="ml-auto transition-colors text-foreground hover:text-foreground"
+              class="ml-auto transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               variant="ghost"
               size="icon-sm"
             >

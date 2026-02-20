@@ -225,7 +225,7 @@ const shareLeague = () => {
             <Dialog>
               <template #trigger>
                 <div
-                  class="flex p-1.5 rounded-sm cursor-pointer hover:bg-secondary"
+                  class="flex p-1.5 rounded-sm cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 >
                   <div
                     class="flex items-center justify-center bg-transparent border rounded-md size-6"
@@ -250,7 +250,7 @@ const shareLeague = () => {
         @click="removeLeague"
         variant="ghost"
         size="icon-sm"
-        class="transition-colors text-foreground hover:text-foreground"
+        class="transition-colors text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       >
         <X />
         <span class="sr-only">Remove League</span>
@@ -259,7 +259,7 @@ const shareLeague = () => {
         @click="refreshLeague"
         variant="ghost"
         size="icon-sm"
-        class="transition-colors text-foreground hover:text-foreground"
+        class="transition-colors text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       >
         <RefreshCcw />
         <span class="sr-only">Refresh League</span>
@@ -269,7 +269,7 @@ const shareLeague = () => {
         @click="sharePopup"
         variant="ghost"
         size="icon-sm"
-        class="transition-colors text-foreground hover:text-foreground"
+        class="transition-colors text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       >
         <Share />
         <span class="sr-only">Share League</span>
@@ -279,7 +279,7 @@ const shareLeague = () => {
         @click="shareLeague"
         variant="ghost"
         size="icon-sm"
-        class="transition-colors text-foreground hover:text-foreground"
+        class="transition-colors text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       >
         <Share />
         <span class="sr-only">Share League</span>
@@ -293,7 +293,7 @@ const shareLeague = () => {
           <Button
             variant="ghost"
             size="icon-sm"
-            class="transition-colors text-foreground hover:text-foreground"
+            class="transition-colors text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <EllipsisVertical />
             <span class="sr-only">League Actions</span>

@@ -3,6 +3,7 @@ import { computed } from "vue";
 import LeagueInputForm from "@/components/shared/LeagueInputForm.vue";
 import { useLeagueInput } from "@/composables/useLeagueInput";
 import { useStore } from "@/store/store";
+import Card from "../ui/card/Card.vue";
 
 const { inputType, seasonYear, leagueIdInput, onSubmit } = useLeagueInput();
 const store = useStore();
@@ -11,22 +12,28 @@ const isDark = computed(() => store.darkMode);
 
 <template>
   <section
+    aria-labelledby="intro-home-heading"
     :class="[
-      'relative overflow-hidden text-center h-[calc(100dvh-4rem)]',
-      isDark ? 'bg-slate-950' : 'bg-slate-50',
+      'relative overflow-hidden text-center h-[calc(100dvh-4rem)] bg-background',
+      isDark ? 'intro-dark' : '',
     ]"
   >
-    <div :class="['absolute inset-0 saas-bg', isDark ? 'saas-bg-dark' : '']" />
     <div
+      aria-hidden="true"
+      :class="['absolute inset-0 saas-bg', isDark ? 'saas-bg-dark' : '']"
+    />
+    <div
+      aria-hidden="true"
       :class="[
         'absolute -translate-x-1/2 rounded-full -top-28 left-1/2 size-96 blur-3xl',
-        isDark ? 'bg-sky-500/5' : 'bg-sky-500/12',
+        isDark ? 'bg-sky-500/[0.03]' : 'bg-sky-500/12',
       ]"
     />
     <div
+      aria-hidden="true"
       :class="[
         'absolute rounded-full -bottom-24 -left-10 size-80 blur-3xl',
-        isDark ? 'bg-blue-500/[0.03]' : 'bg-blue-500/10',
+        isDark ? 'bg-blue-500/[0.02]' : 'bg-blue-500/10',
       ]"
     />
 
@@ -34,7 +41,9 @@ const isDark = computed(() => store.darkMode);
       class="relative z-10 flex items-center h-full px-4 py-6 sm:px-8 lg:px-12"
     >
       <div class="mx-auto max-w-7xl">
-        <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
+        <div
+          class="grid items-center gap-8 lg:grid-cols-2 lg:gap-10 lg:-translate-y-2"
+        >
           <div class="text-left animate-rise">
             <p
               class="inline-flex items-center px-3 py-1 text-xs font-semibold border rounded-full border-border/80 bg-background/80 text-muted-foreground backdrop-blur"
@@ -42,6 +51,7 @@ const isDark = computed(() => store.darkMode);
               Powering 12,000+ fantasy leagues
             </p>
             <h1
+              id="intro-home-heading"
               class="mt-4 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
             >
               All your
@@ -57,13 +67,18 @@ const isDark = computed(() => store.darkMode);
               Analyze your league with power rankings, roster insights, custom
               weekly reports, playoff odds, and much more.
             </p>
-            <div
-              class="max-w-4xl p-5 mx-auto mt-8 border rounded-md shadow-lg border-border/80 bg-background/90 backdrop-blur sm:p-6"
-            >
+            <Card class="p-4 mt-8 rounded-md">
               <div class="mb-4 text-left">
-                <p class="text-sm font-semibold">Add League</p>
+                <p class="text-sm font-semibold">Get started</p>
                 <p class="text-sm text-muted-foreground">
-                  Enter your Sleeper league ID or username.
+                  Enter your
+                  <a
+                    class="font-medium text-primary hover:underline"
+                    href="https://sleeper.com/"
+                    target="_blank"
+                    >Sleeper</a
+                  >
+                  league ID or username.
                 </p>
               </div>
               <LeagueInputForm
@@ -72,10 +87,13 @@ const isDark = computed(() => store.darkMode);
                 v-model:leagueIdInput="leagueIdInput"
                 @submit="onSubmit"
               />
-            </div>
+            </Card>
           </div>
 
-          <div class="relative hidden h-[520px] overflow-hidden md:block">
+          <div
+            aria-hidden="true"
+            class="relative hidden h-[480px] overflow-hidden lg:block"
+          >
             <div
               class="absolute inset-0 z-20 pointer-events-none showcase-fade"
             />
@@ -116,15 +134,15 @@ const isDark = computed(() => store.darkMode);
   background-image:
     radial-gradient(
       circle at 20% 12%,
-      rgba(14, 165, 233, 0.04),
+      rgba(14, 165, 233, 0.025),
       transparent 35%
     ),
     radial-gradient(
       circle at 82% 20%,
-      rgba(59, 130, 246, 0.05),
+      rgba(59, 130, 246, 0.03),
       transparent 38%
     ),
-    linear-gradient(to bottom, rgba(2, 6, 23, 0.96), rgba(2, 6, 23, 1));
+    linear-gradient(to bottom, hsl(222.2 20% 4.9%), hsl(222.2 20% 4.9%));
 }
 
 .saas-bg::after {
@@ -148,9 +166,11 @@ const isDark = computed(() => store.darkMode);
 .showcase-lane-track {
   display: flex;
   flex-direction: column;
-  animation: lane-scroll-up 60s linear infinite;
+  animation: lane-scroll-up 90s linear infinite;
   will-change: transform;
   transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  contain: layout paint;
 }
 
 .showcase-lane-list {
@@ -164,8 +184,32 @@ const isDark = computed(() => store.darkMode);
   transition: opacity 180ms ease;
 }
 
+.intro-dark :slotted(*) {
+  opacity: 0.7;
+}
+
 :slotted(*:hover) {
   opacity: 0.9;
+}
+
+.showcase-fade {
+  background: linear-gradient(
+    to bottom,
+    rgba(248, 250, 252, 1) 0%,
+    rgba(248, 250, 252, 0) 14%,
+    rgba(248, 250, 252, 0) 86%,
+    rgba(248, 250, 252, 1) 100%
+  );
+}
+
+.intro-dark .showcase-fade {
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 12, 16, 1) 0%,
+    rgba(10, 12, 16, 0) 14%,
+    rgba(10, 12, 16, 0) 86%,
+    rgba(10, 12, 16, 1) 100%
+  );
 }
 
 @keyframes lane-scroll-up {
@@ -174,6 +218,17 @@ const isDark = computed(() => store.darkMode);
   }
   to {
     transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase-lane-track {
+    animation: none;
+    transform: none;
+  }
+
+  :slotted(*) {
+    transition: none;
   }
 }
 </style>
