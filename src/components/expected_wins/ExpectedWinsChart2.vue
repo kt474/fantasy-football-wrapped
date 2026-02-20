@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { max, min, cloneDeep } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
+import max from "lodash/max";
+import min from "lodash/min";
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";

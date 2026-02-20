@@ -1,7 +1,6 @@
-import { createApp } from "vue";
+import { createApp, defineAsyncComponent } from "vue";
 import { createPinia } from "pinia";
 import { createRouter, createWebHistory } from "vue-router";
-import VueApexCharts from "vue3-apexcharts";
 // @ts-ignore
 import { registerSW } from "virtual:pwa-register";
 import "./index.css";
@@ -57,9 +56,10 @@ const router = createRouter({
 
 const pinia = createPinia();
 const app = createApp(App);
+const ApexChart = defineAsyncComponent(() => import("vue3-apexcharts"));
 
 app.use(pinia);
-app.component("apexchart", VueApexCharts);
+app.component("apexchart", ApexChart);
 app.use(router);
 // app.use(posthogPlugin);
 registerSW({ immediate: true });

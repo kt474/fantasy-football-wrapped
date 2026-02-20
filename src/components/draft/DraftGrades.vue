@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mean } from "lodash";
+import mean from "lodash/mean";
 import { ref, onMounted, computed, watch } from "vue";
 import { getDraftProjections } from "../../api/api";
 import { LeagueInfoType } from "../../types/types.ts";

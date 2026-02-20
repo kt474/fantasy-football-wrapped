@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
-import { groupBy } from "lodash";
+import groupBy from "lodash/groupBy";
 import { TableDataType, LeagueInfoType, WeeklyEntry } from "../../types/types";
 import { getStats } from "../../api/api";
 import { useStore } from "../../store/store";

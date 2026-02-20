@@ -1,15 +1,13 @@
 // helper methods
-import {
-  groupBy,
-  flatten,
-  zip,
-  mean,
-  max,
-  min,
-  countBy,
-  map,
-  sum,
-} from "lodash";
+import countBy from "lodash/countBy";
+import flatten from "lodash/flatten";
+import groupBy from "lodash/groupBy";
+import map from "lodash/map";
+import max from "lodash/max";
+import mean from "lodash/mean";
+import min from "lodash/min";
+import sum from "lodash/sum";
+import zip from "lodash/zip";
 import { getMatchup } from "./api";
 import { RosterType, UserType, PointsType } from "../types/types";
 import { WeeklyWaiver } from "../types/apiTypes";

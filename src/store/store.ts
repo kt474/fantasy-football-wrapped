@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { findIndex } from "lodash";
+import findIndex from "lodash/findIndex";
 import {
   LeagueInfoType,
   PlayoffProjection,

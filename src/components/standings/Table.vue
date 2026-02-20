@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { maxBy, minBy } from "lodash";
+import maxBy from "lodash/maxBy";
+import minBy from "lodash/minBy";
 import { fakeRosters, fakeUsers, createTableData } from "../../api/helper";
-import { computed, onMounted, ref, ComputedRef } from "vue";
+import {
+  computed,
+  onMounted,
+  ref,
+  ComputedRef,
+  defineAsyncComponent,
+} from "vue";
 import { useStore } from "../../store/store";
 import {
   TableDataType,
@@ -9,33 +16,6 @@ import {
   RosterType,
   PointsType,
 } from "../../types/types";
-import PowerRankingData from "../power_rankings/PowerRankingData.vue";
-import ExpectedWinsCard from "../expected_wins/ExpectedWinsCard.vue";
-import ExpectedWinsChart from "../expected_wins/ExpectedWinsChart.vue";
-import ExpectedWinsChart2 from "../expected_wins/ExpectedWinsChart2.vue";
-import BestManagerCard from "../standings/BestManagerCard.vue";
-import WorstManagerCard from "../standings/WorstManagerCard.vue";
-import TransactionsCard from "../standings/TransactionsCard.vue";
-import TransactionsChart from "../roster_management/TransactionsChart.vue";
-import Trades from "../roster_management/Trades.vue";
-import Waivers from "../roster_management/Waivers.vue";
-import StandingsChart from "../standings/StandingsChart.vue";
-import ManagementCard from "../roster_management/ManagementCard.vue";
-import RankingGraph from "../roster_management/RankingGraph.vue";
-import Playoffs from "../playoffs/Playoffs.vue";
-import LeagueHistory from "../league_history/LeagueHistory.vue";
-import Projections from "../power_rankings/Projections.vue";
-import PlayoffPercentages from "../playoffs/PlayoffPercentages.vue";
-import WeeklyReport from "../weekly_report/WeeklyReport.vue";
-import Draft from "../draft/Draft.vue";
-import TeamRanking from "../power_rankings/TeamRanking.vue";
-import CurrentTrends from "./CurrentTrends.vue";
-import ScheduleStrength from "../expected_wins/ScheduleStrength.vue";
-import PlayerNews from "../start_sit/PlayerNews.vue";
-import ScheduleAnalysis from "../expected_wins/ScheduleAnalysis.vue";
-import Wrapped from "../wrapped/Wrapped.vue";
-import FakeWrapped from "../wrapped/FakeWrapped.vue";
-import Intro from "../home/Intro.vue";
 import Card from "../ui/card/Card.vue";
 import {
   Tooltip,
@@ -43,6 +23,78 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+const PowerRankingData = defineAsyncComponent(
+  () => import("../power_rankings/PowerRankingData.vue")
+);
+const ExpectedWinsCard = defineAsyncComponent(
+  () => import("../expected_wins/ExpectedWinsCard.vue")
+);
+const ExpectedWinsChart = defineAsyncComponent(
+  () => import("../expected_wins/ExpectedWinsChart.vue")
+);
+const ExpectedWinsChart2 = defineAsyncComponent(
+  () => import("../expected_wins/ExpectedWinsChart2.vue")
+);
+const BestManagerCard = defineAsyncComponent(
+  () => import("../standings/BestManagerCard.vue")
+);
+const WorstManagerCard = defineAsyncComponent(
+  () => import("../standings/WorstManagerCard.vue")
+);
+const TransactionsCard = defineAsyncComponent(
+  () => import("../standings/TransactionsCard.vue")
+);
+const TransactionsChart = defineAsyncComponent(
+  () => import("../roster_management/TransactionsChart.vue")
+);
+const Trades = defineAsyncComponent(
+  () => import("../roster_management/Trades.vue")
+);
+const Waivers = defineAsyncComponent(
+  () => import("../roster_management/Waivers.vue")
+);
+const StandingsChart = defineAsyncComponent(
+  () => import("../standings/StandingsChart.vue")
+);
+const ManagementCard = defineAsyncComponent(
+  () => import("../roster_management/ManagementCard.vue")
+);
+const RankingGraph = defineAsyncComponent(
+  () => import("../roster_management/RankingGraph.vue")
+);
+const Playoffs = defineAsyncComponent(() => import("../playoffs/Playoffs.vue"));
+const LeagueHistory = defineAsyncComponent(
+  () => import("../league_history/LeagueHistory.vue")
+);
+const Projections = defineAsyncComponent(
+  () => import("../power_rankings/Projections.vue")
+);
+const PlayoffPercentages = defineAsyncComponent(
+  () => import("../playoffs/PlayoffPercentages.vue")
+);
+const WeeklyReport = defineAsyncComponent(
+  () => import("../weekly_report/WeeklyReport.vue")
+);
+const Draft = defineAsyncComponent(() => import("../draft/Draft.vue"));
+const TeamRanking = defineAsyncComponent(
+  () => import("../power_rankings/TeamRanking.vue")
+);
+const CurrentTrends = defineAsyncComponent(() => import("./CurrentTrends.vue"));
+const ScheduleStrength = defineAsyncComponent(
+  () => import("../expected_wins/ScheduleStrength.vue")
+);
+const PlayerNews = defineAsyncComponent(
+  () => import("../start_sit/PlayerNews.vue")
+);
+const ScheduleAnalysis = defineAsyncComponent(
+  () => import("../expected_wins/ScheduleAnalysis.vue")
+);
+const Wrapped = defineAsyncComponent(() => import("../wrapped/Wrapped.vue"));
+const FakeWrapped = defineAsyncComponent(
+  () => import("../wrapped/FakeWrapped.vue")
+);
+const Intro = defineAsyncComponent(() => import("../home/Intro.vue"));
 
 const tableOrder = ref("wins");
 const props = defineProps<{
@@ -586,16 +638,16 @@ const getTeamName = (tableDataItem: TableDataType) => {
     <div v-if="store.currentTab === 'Home'">
       <Intro>
         <template #header>
-          <PowerRankingData
-            class="mt-4"
-            :tableData="tableData"
-            :regularSeasonLength="15"
-            :totalRosters="10"
-          />
           <TransactionsChart />
           <Waivers class="text-left" />
           <Projections />
           <ExpectedWinsChart :tableData="tableData" />
+          <PowerRankingData
+            class="mb-4"
+            :tableData="tableData"
+            :regularSeasonLength="15"
+            :totalRosters="10"
+          />
         </template>
       </Intro>
     </div>

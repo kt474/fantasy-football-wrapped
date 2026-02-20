@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { mean, max, min, zip } from "lodash";
+import max from "lodash/max";
+import mean from "lodash/mean";
+import min from "lodash/min";
+import zip from "lodash/zip";
 import { useStore } from "../../store/store";
 import { getPowerRanking, winsOnWeek } from "../../api/helper";
 import {
@@ -141,9 +144,6 @@ const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
-      animations: {
-        enabled: false,
-      },
       width: "98%",
       foreColor: store.darkMode ? "#ffffff" : "#111827",
       id: "power-ranking",
@@ -201,9 +201,6 @@ watch(
 
 const chartOptions = ref({
   chart: {
-    animations: {
-      enabled: false,
-    },
     width: "97%",
     foreColor: chartTextColor.value,
     id: "power-ranking",

@@ -6,7 +6,8 @@ import {
   RosterType,
 } from "../../types/types.ts";
 import { useStore } from "../../store/store";
-import { maxBy, minBy } from "lodash";
+import maxBy from "lodash/maxBy";
+import minBy from "lodash/minBy";
 import WrappedSlide from "./WrappedSlide.vue";
 import Draft from "../draft/Draft.vue";
 import Trades from "../roster_management/Trades.vue";

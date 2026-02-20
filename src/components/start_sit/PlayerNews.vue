@@ -9,9 +9,10 @@ import {
   getSingleWeekStats,
 } from "../../api/api";
 import { TableDataType } from "../../types/types";
-import { difference } from "lodash";
+import difference from "lodash/difference";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/helper";
-import { max, min } from "lodash";
+import max from "lodash/max";
+import min from "lodash/min";
 import { Player } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 import {

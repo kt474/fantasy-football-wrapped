@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectValue,
 } from "../ui/select";
-import { max } from "lodash";
+import max from "lodash/max";
 import {
   fakeTopPerformers,
   fakeBottomPerformers,

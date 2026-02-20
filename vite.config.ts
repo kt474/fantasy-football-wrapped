@@ -5,10 +5,10 @@ import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     vue(),
-    vueDevTools(),
+    ...(mode === "development" ? [vueDevTools()] : []),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png"],
@@ -63,4 +63,18 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-});
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/apexcharts")) {
+            return "vendor-apexcharts";
+          }
+          if (id.includes("node_modules/vue3-apexcharts")) {
+            return "vendor-vue3-apexcharts";
+          }
+        },
+      },
+    },
+  },
+}));

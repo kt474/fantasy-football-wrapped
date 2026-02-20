@@ -8,7 +8,7 @@ import {
   Share,
   EllipsisVertical,
 } from "lucide-vue-next";
-import { capitalize } from "lodash";
+import capitalize from "lodash/capitalize";
 
 import { Button } from "@/components/ui/button";
 import Separator from "../ui/separator/Separator.vue";

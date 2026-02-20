@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { maxBy, toPairs } from "lodash";
+import maxBy from "lodash/maxBy";
+import toPairs from "lodash/toPairs";
 import { UserType, RosterType } from "../../types/types";
 import { useStore } from "../../store/store";
 

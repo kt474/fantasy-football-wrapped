@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";

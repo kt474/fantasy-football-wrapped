@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, Ref } from "vue";
-import { maxBy, minBy } from "lodash";
+import maxBy from "lodash/maxBy";
+import minBy from "lodash/minBy";
 import { useStore } from "../../store/store.ts";
 import { getData, inputLeague, getLeague } from "../../api/api.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";

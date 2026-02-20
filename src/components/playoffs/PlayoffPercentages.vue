@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { maxBy, sum } from "lodash";
+import maxBy from "lodash/maxBy";
+import sum from "lodash/sum";
 import { useStore } from "../../store/store";
 import {
   RosterType,
