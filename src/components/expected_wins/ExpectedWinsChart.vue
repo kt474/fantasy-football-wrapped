@@ -71,7 +71,7 @@ const updateChartColor = () => {
   };
 };
 
-watch([() => store.darkMode, () => store.showUsernames], () => {
+watch([() => store.darkMode], () => {
   updateChartColor();
 });
 
@@ -112,8 +112,8 @@ const chartOptions = ref({
   },
   xaxis: {
     tickAmount: seriesData.value[0].data.length - 1,
-    hideOverlappingLabels: false,
     labels: {
+      hideOverlappingLabels: false,
       formatter: function (str: string) {
         const n = 17;
         return str.length > n ? str.slice(0, n - 1) + "..." : str;
@@ -154,7 +154,7 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <Card class="w-full p-4 md:p-6 min-w-80">
+  <Card class="w-full p-4 md:p-6">
     <div class="flex justify-between">
       <div>
         <h1 class="pb-2 text-3xl font-bold leading-none">

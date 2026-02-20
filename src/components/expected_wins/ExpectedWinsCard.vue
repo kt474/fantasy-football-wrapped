@@ -77,7 +77,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
 };
 </script>
 <template>
-  <Card class="relative w-full overflow-x-auto lg:max-w-xl">
+  <Card>
     <TooltipProvider>
       <table class="w-full text-sm text-left rtl:text-right">
         <thead class="text-xs uppercase bg-secondary">

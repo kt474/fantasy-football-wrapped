@@ -64,7 +64,7 @@ const listPadding = computed(() => {
 });
 </script>
 <template>
-  <Card class="relative w-full max-w-xl overflow-x-auto">
+  <Card>
     <TooltipProvider>
       <table class="w-full text-sm text-left rtl:text-right">
         <thead class="text-xs uppercase bg-secondary">

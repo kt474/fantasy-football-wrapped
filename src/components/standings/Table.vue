@@ -590,9 +590,15 @@ const getTeamName = (tableDataItem: TableDataType) => {
       />
     </div>
     <div v-if="store.currentTab === 'Expected Wins'">
-      <div class="flex flex-wrap lg:flex-nowrap">
-        <ExpectedWinsCard :tableData="tableData" class="mt-4" />
-        <ExpectedWinsChart :tableData="tableData" class="mt-4 lg:ml-4" />
+      <div class="grid items-stretch grid-cols-1 gap-4 mt-4 xl:grid-cols-2">
+        <ExpectedWinsCard
+          :tableData="tableData"
+          class="w-full h-full min-w-0 overflow-auto"
+        />
+        <ExpectedWinsChart
+          :tableData="tableData"
+          class="w-full h-full min-w-0"
+        />
       </div>
       <div class="flex flex-wrap md:flex-nowrap">
         <ExpectedWinsChart2 :tableData="tableData" class="mt-4" />
@@ -601,9 +607,12 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <ScheduleAnalysis :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'Roster Management'">
-      <div class="flex flex-wrap md:flex-nowrap">
-        <ManagementCard :tableData="tableData" class="mt-4" />
-        <RankingGraph :tableData="tableData" class="mt-4 md:ml-4" />
+      <div class="grid items-stretch grid-cols-1 gap-4 mt-4 xl:grid-cols-2">
+        <ManagementCard
+          :tableData="tableData"
+          class="w-full h-full min-w-0 overflow-auto"
+        />
+        <RankingGraph :tableData="tableData" class="w-full h-full min-w-0" />
       </div>
       <TransactionsChart class="mt-4" />
       <Trades class="mt-4" />
