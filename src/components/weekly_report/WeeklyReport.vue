@@ -708,9 +708,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
               />
             </svg>
           </div>
-          <p v-if="weeks.length === 0" class="text-muted-foreground">
-            Please come back after week 1!
-          </p>
+          <p v-if="weeks.length === 0">Please come back after week 1!</p>
           <div v-if="weeklyReport" class="max-w-5xl">
             <p v-html="weeklyReport" class="mb-3"></p>
             <p class="text-xs text-muted-foreground">

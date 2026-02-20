@@ -26,7 +26,10 @@ const lastWeek = computed(() => {
   const league = store.leagueInfo[store.currentLeagueIndex];
   if (!league) return 14;
   const week = Math.min(league.lastScoredWeek, league.regularSeasonLength);
-  return league.medianScoring ? week * 2 : week;
+  if (week) {
+    return league.medianScoring ? week * 2 : week;
+  }
+  return 0;
 });
 
 const luckAnalysis = computed(() => {
@@ -170,7 +173,6 @@ const scheduleAnalysis = computed(() => {
         worstScheduleTeam = otherTeam.teamName;
       }
     });
-
     return {
       teamName: team.teamName,
       actualWins: team.actualWins,

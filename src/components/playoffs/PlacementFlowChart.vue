@@ -158,7 +158,7 @@ watch(
       :series="seriesData"
       class="flex justify-center ml-3 xl:ml-4"
     ></apexchart>
-    <div v-else class="text-muted-foreground">
+    <div v-else>
       <p class="pt-1 mt-2 border-t">Season in progress</p>
     </div>
   </Card>

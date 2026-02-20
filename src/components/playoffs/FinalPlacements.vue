@@ -30,7 +30,7 @@ const props = defineProps<{
         </li>
       </ul>
     </div>
-    <div v-else class="text-muted-foreground">
+    <div v-else>
       <p class="pt-1 mb-2 border-t">Season in progress</p>
     </div>
   </Card>

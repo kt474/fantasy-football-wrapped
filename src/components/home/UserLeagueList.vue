@@ -99,7 +99,7 @@ const toggleLeague = (id: string) => {
       </h3>
       <h3
         v-else
-        class="mb-2 text-xl font-medium"
+        class="mb-2 text-lg"
         :class="{ 'mt-2': store.currentLeagueId }"
       >
         No leagues available, please try another year

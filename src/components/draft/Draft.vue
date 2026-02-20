@@ -316,7 +316,7 @@ const getValueColor = (value: number) => {
           </p>
           <div v-if="data.length === 0">
             <Separator class="h-px mt-1 mb-4" />
-            <p class="w-1/2 mt-3 text-muted-foreground text-balance">
+            <p class="w-1/2 mt-3 text-balance">
               Draft has not happened yet. Please come back after draft is
               complete or try looking at the previous league season.
             </p>
@@ -364,10 +364,7 @@ const getValueColor = (value: number) => {
               <p v-else class="w-20 text-sm text-center truncate">No user</p>
             </div>
           </div>
-          <p
-            v-if="data.length === 0"
-            class="w-1/2 mt-3 ml-2 text-muted-foreground text-balance"
-          >
+          <p v-if="data.length === 0" class="w-1/2 mt-3 ml-2 text-balance">
             Draft has not happened yet. Please come back after draft is complete
             or try looking at the previous league season.
           </p>

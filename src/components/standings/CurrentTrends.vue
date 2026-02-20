@@ -465,7 +465,7 @@ const cardHeight = computed(() => {
         store.leagueInfo[store.currentLeagueIndex]?.status === 'pre_draft'
       "
     >
-      <p class="mt-2">Please come back after week 1!</p>
+      <p class="mt-2 ml-6">Please come back after week 1!</p>
     </div>
     <div v-else-if="currentTrends.length === 0" class="w-64 mx-auto">
       <div role="status" class="space-y-2.5 animate-pulse max-w-lg mb-6 px-2">

@@ -11,7 +11,14 @@ import {
   getAllLeagues,
 } from "@/api/api";
 
-export const SEASON_YEAR_OPTIONS = ["2025", "2024", "2023", "2022", "2021"];
+export const SEASON_YEAR_OPTIONS = [
+  "2026",
+  "2025",
+  "2024",
+  "2023",
+  "2022",
+  "2021",
+];
 
 export const useLeagueInput = () => {
   const store = useStore();

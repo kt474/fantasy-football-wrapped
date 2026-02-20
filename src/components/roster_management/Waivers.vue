@@ -508,7 +508,7 @@ watch(
           !store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
         "
       >
-        <p class="text-muted-foreground">Please come back after week 1!</p>
+        <p>Please come back after week 1!</p>
       </div>
       <div
         v-else

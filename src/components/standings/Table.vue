@@ -631,7 +631,19 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <LeagueHistory :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'Wrapped'">
-      <Wrapped v-if="store.currentLeagueId" :tableData="originalData" />
+      <Wrapped
+        v-if="
+          store.currentLeagueId &&
+          store.leagueInfo[store.currentLeagueIndex].season === '2025'
+        "
+        :tableData="originalData"
+      />
+      <div
+        class="p-4"
+        v-else-if="store.leagueInfo[store.currentLeagueIndex].season === '2026'"
+      >
+        <p>Come back after the season is complete!</p>
+      </div>
       <FakeWrapped v-else />
     </div>
 
