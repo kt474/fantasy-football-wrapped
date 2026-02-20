@@ -95,7 +95,7 @@ watch(
               target="_blank"
               rel="noopener noreferrer"
             >
-              ><img
+              <img
                 src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
                 alt="Buy Me A Coffee"
                 style="height: 55px !important; width: 217px !important"

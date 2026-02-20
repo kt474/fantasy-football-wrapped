@@ -2,11 +2,13 @@
 import LeagueSwitcher from "../layout/LeagueSwitcher.vue";
 import Dialog from "../layout/Dialog.vue";
 import { Button } from "../ui/button";
+import { useRoute } from "vue-router";
 
 import { useStore } from "../../store/store";
 import { computed } from "vue";
 
 const store = useStore();
+const route = useRoute();
 
 const leagues = computed(() => {
   return store.leagueInfo;
@@ -28,7 +30,8 @@ const leagues = computed(() => {
           </template>
         </Dialog>
         <p
-          class="absolute inset-x-0 mr-3 font-medium text-right pointer-events-none sm:mr-0 sm:text-center whitespace-nowrap"
+          v-if="route.path === '/'"
+          class="absolute inset-x-0 mr-4 font-medium text-right pointer-events-none sm:mr-0 sm:text-center whitespace-nowrap"
         >
           Sample League
         </p>
