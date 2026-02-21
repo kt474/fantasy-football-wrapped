@@ -140,8 +140,9 @@ const data = {
             <img
               height="24"
               width="24"
-              src="../../assets/football-helmet.png"
+              src="../../assets/football-helmet.webp"
               class="h-6"
+              alt="ffwrapped logo"
             />
             <span
               class="self-center -mb-1.5 ml-2.5 custom-font whitespace-nowrap"
