@@ -299,7 +299,7 @@ watch(
                 <template v-for="move in currentManagerMoves">
                   <div
                     v-if="move.status === 'failed' && move.bid"
-                    class="bg-accent sm:py-1.5 pr-1.5 mt-1.5"
+                    class="sm:py-1.5 pr-1.5 mt-1.5"
                   >
                     <p class="font-medium">{{ move.adds }} (${{ move.bid }})</p>
                   </div>
@@ -356,7 +356,7 @@ watch(
                 <template v-for="move in moves">
                   <div
                     v-if="move.status === 'failed' && move.bid"
-                    class="bg-accent py-1.5 pr-1.5 mt-1.5"
+                    class="py-1.5 pr-1.5 mt-1.5"
                   >
                     <p class="font-medium">{{ move.adds }} (${{ move.bid }})</p>
                   </div>
