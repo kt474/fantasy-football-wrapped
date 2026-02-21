@@ -20,7 +20,11 @@ const leagues = computed(() => {
       <LeagueSwitcher v-if="leagues.length > 0" :leagues="leagues" />
       <div
         class="relative flex items-center w-full"
-        v-else-if="store.currentTab !== 'Home' && !store.currentLeagueId"
+        v-else-if="
+          store.currentTab !== 'Home' &&
+          !store.currentLeagueId &&
+          !store.showLeaguesList
+        "
       >
         <Dialog>
           <template #trigger>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { watch, useSlots } from "vue";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,6 @@ import {
 import LeagueInputForm from "@/components/shared/LeagueInputForm.vue";
 import { useLeagueInput } from "@/composables/useLeagueInput";
 
-const open = ref(false);
 const {
   inputType,
   seasonYear,
@@ -22,6 +21,9 @@ const {
   onSubmit,
   clearError,
 } = useLeagueInput();
+
+const slots = useSlots();
+const open = defineModel<boolean>("open", { default: false });
 
 watch(
   () => open.value,
@@ -38,7 +40,7 @@ const handleSubmit = async () => {
 
 <template>
   <Dialog v-model:open="open">
-    <DialogTrigger as-child>
+    <DialogTrigger v-if="slots.trigger" as-child>
       <slot name="trigger" />
     </DialogTrigger>
     <DialogContent>

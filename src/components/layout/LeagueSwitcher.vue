@@ -12,7 +12,7 @@ import capitalize from "lodash/capitalize";
 
 import { Button } from "@/components/ui/button";
 import Separator from "../ui/separator/Separator.vue";
-import { computed, ref } from "vue";
+import { computed, nextTick, ref } from "vue";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +36,8 @@ import Dialog from "./Dialog.vue";
 
 const router = useRouter();
 const store = useStore();
+const leagueMenuOpen = ref(false);
+const addLeagueOpen = ref(false);
 
 defineProps<{
   leagues: LeagueInfoType[];
@@ -170,13 +172,19 @@ const shareLeague = () => {
   navigator.clipboard.writeText(updatedURL);
   toast.success("Link copied to clipboard!");
 };
+
+const openAddLeagueDialog = async () => {
+  leagueMenuOpen.value = false;
+  await nextTick();
+  addLeagueOpen.value = true;
+};
 </script>
 
 <template>
   <div class="flex">
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu v-model:open="leagueMenuOpen">
           <DropdownMenuTrigger as-child>
             <SidebarMenuButton
               size="lg"
@@ -222,22 +230,18 @@ const shareLeague = () => {
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <Dialog>
-              <template #trigger>
-                <div
-                  class="flex p-1.5 rounded-sm cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                >
-                  <div
-                    class="flex items-center justify-center bg-transparent border rounded-md size-6"
-                  >
-                    <Plus class="size-4" />
-                  </div>
-                  <p class="ml-3 mt-0.5 text-sm">Add League</p>
-                </div>
-              </template>
-            </Dialog>
+            <DropdownMenuItem
+              @select="openAddLeagueDialog"
+              class="flex items-start cursor-pointer"
+            >
+              <div class="flex items-center justify-center border rounded-md size-6">
+                <Plus class="size-4" />
+              </div>
+              <p class="ml-3 mt-0.5 text-sm">Add League</p>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <Dialog v-model:open="addLeagueOpen" />
       </SidebarMenuItem>
     </SidebarMenu>
     <Separator
