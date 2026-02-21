@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useStore } from "../../store/store";
+import { getPlayerNews, getPlayersByIdsMap } from "../../api/api";
 import {
-  getPlayerNews,
-  getStats,
-  getPlayersByIdsMap,
   getSingleWeekProjection,
   getSingleWeekStats,
-} from "../../api/api";
+  getStats,
+} from "@/api/sleeperApi";
 import { TableDataType } from "../../types/types";
 import difference from "lodash/difference";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/helper";

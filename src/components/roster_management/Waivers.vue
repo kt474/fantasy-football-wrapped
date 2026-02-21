@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, ComputedRef } from "vue";
 import { LeagueInfoType, WaiverMove } from "../../types/types.ts";
-import { getPlayersByIdsMap, getTradeValue } from "../../api/api.ts";
+import { getPlayersByIdsMap } from "../../api/api.ts";
+import { getTradeValue } from "@/api/sleeperApi.ts";
 import { useStore } from "../../store/store";
 import { fakeRosters, fakeUsers, fakeWaiverMoves } from "../../api/helper";
 import Card from "../ui/card/Card.vue";

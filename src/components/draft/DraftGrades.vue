@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import mean from "lodash/mean";
 import { ref, onMounted, computed, watch } from "vue";
-import { getDraftProjections } from "../../api/api";
+import { getDraftProjections } from "@/api/sleeperApi.ts";
 import { LeagueInfoType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { standardDeviation, fakeUsers } from "../../api/helper";

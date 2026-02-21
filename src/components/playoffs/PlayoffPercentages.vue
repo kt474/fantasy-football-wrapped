@@ -9,7 +9,7 @@ import {
   TableDataType,
   PlayoffProjection,
 } from "../../types/types";
-import { getProjections } from "../../api/api";
+import { getProjections } from "@/api/sleeperApi";
 import { fakePlayoffData } from "../../api/helper";
 import Card from "../ui/card/Card.vue";
 const store = useStore();

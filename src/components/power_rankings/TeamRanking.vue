@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from "vue";
 import groupBy from "lodash/groupBy";
 import { TableDataType, LeagueInfoType, WeeklyEntry } from "../../types/types";
-import { getStats } from "../../api/api";
+import { getStats } from "@/api/sleeperApi";
 import { useStore } from "../../store/store";
 import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
 import { fakeUsers } from "../../api/helper";
