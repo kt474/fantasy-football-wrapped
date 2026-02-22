@@ -44,7 +44,7 @@ const leagueIdInputModel = computed({
   <div class="flex flex-col gap-2 sm:flex-row">
     <div class="flex flex-row gap-2">
       <Select v-model="inputTypeModel">
-        <SelectTrigger class="sm:w-32">
+        <SelectTrigger class="sm:w-32" aria-label="Input type">
           <SelectValue placeholder="League ID" />
         </SelectTrigger>
         <SelectContent>
@@ -53,7 +53,7 @@ const leagueIdInputModel = computed({
         </SelectContent>
       </Select>
       <Select v-if="inputTypeModel === 'Username'" v-model="seasonYearModel">
-        <SelectTrigger class="sm:w-24">
+        <SelectTrigger class="sm:w-24" aria-label="Season">
           <SelectValue placeholder="2025" />
         </SelectTrigger>
         <SelectContent>
