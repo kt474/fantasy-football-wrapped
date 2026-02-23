@@ -30,6 +30,7 @@ import {
   HandCoins,
   MessageSquareMore,
   ShieldUser,
+  CircuitBoard,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
@@ -124,6 +125,10 @@ const data = {
         {
           title: "Wrapped",
           icon: Gift,
+        },
+        {
+          title: "ESPN",
+          icon: CircuitBoard,
         },
       ],
     },
