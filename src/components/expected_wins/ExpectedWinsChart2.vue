@@ -212,7 +212,7 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <Card class="w-full p-4 md:p-6 min-w-80">
+  <Card class="w-full p-4 md:p-6">
     <div class="flex justify-between">
       <div>
         <h1 class="pb-2 text-3xl font-bold leading-none">
