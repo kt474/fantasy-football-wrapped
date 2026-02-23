@@ -4,6 +4,7 @@ import {
   calculateDraftRank,
   getWaiverMoves,
 } from "./helper";
+import { authenticatedFetch } from "@/lib/authFetch";
 import mean from "lodash/mean";
 import round from "lodash/round";
 import {
@@ -35,7 +36,7 @@ export const getPlayerNews = async (
   if (playerNames && playerNames.length > 0) {
     url += `?keywords=${playerNames.join(",")}`;
   }
-  const response = await fetch(url);
+  const response = await authenticatedFetch(url);
   const result = await response.json();
   return result;
 };
@@ -48,7 +49,7 @@ export const getPlayersByIdsMap = async (
   }
   try {
     const url = `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`;
-    const response = await fetch(url);
+    const response = await authenticatedFetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -70,7 +71,7 @@ export const getPlayersByIdsMap = async (
 
 export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
   try {
-    const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);
+    const response = await authenticatedFetch(import.meta.env.VITE_LEAGUE_COUNT);
     return await response.json();
   } catch (error) {
     console.error(error);
@@ -84,7 +85,7 @@ export const generateTrends = async (
   bulletCount: number,
   leagueState: string = "in_season"
 ): Promise<Record<string, []>> => {
-  const response = await fetch(import.meta.env.VITE_TRENDS_RECAP, {
+  const response = await authenticatedFetch(import.meta.env.VITE_TRENDS_RECAP, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -104,7 +105,7 @@ export const generateSummary = async (
   metadata: Record<string, unknown>
 ): Promise<Record<string, string>> => {
   try {
-    const response = await fetch(import.meta.env.VITE_LEAGUE_RECAP, {
+    const response = await authenticatedFetch(import.meta.env.VITE_LEAGUE_RECAP, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -130,7 +131,7 @@ export const generateReport = async (
   metadata: Record<string, unknown>
 ): Promise<Record<string, string>> => {
   try {
-    const response = await fetch(import.meta.env.VITE_WEEKLY_REPORT, {
+    const response = await authenticatedFetch(import.meta.env.VITE_WEEKLY_REPORT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -155,7 +156,7 @@ export const generatePreview = async (
   prompt: Record<string, unknown>
 ): Promise<Record<string, string>> => {
   try {
-    const response = await fetch(import.meta.env.VITE_WEEKLY_PREVIEW, {
+    const response = await authenticatedFetch(import.meta.env.VITE_WEEKLY_PREVIEW, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -178,7 +179,7 @@ export const inputUsername = async (
   year: string
 ): Promise<void> => {
   try {
-    await fetch(import.meta.env.VITE_USERNAME_URL, {
+    await authenticatedFetch(import.meta.env.VITE_USERNAME_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -201,7 +202,7 @@ export const inputEmail = async (
   username: string
 ): Promise<void> => {
   try {
-    await fetch(import.meta.env.VITE_EMAIL_URL, {
+    await authenticatedFetch(import.meta.env.VITE_EMAIL_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -227,7 +228,7 @@ export const inputLeague = async (
   year: string
 ): Promise<void> => {
   try {
-    await fetch(import.meta.env.VITE_LEAGUE_URL, {
+    await authenticatedFetch(import.meta.env.VITE_LEAGUE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

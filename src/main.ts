@@ -12,6 +12,7 @@ import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import About from "./views/About.vue";
 import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
+import { useAuthStore } from "./store/auth";
 
 const routes = [
   { path: "/", component: Home },
@@ -59,6 +60,19 @@ const app = createApp(App);
 const ApexChart = defineAsyncComponent(() => import("vue3-apexcharts"));
 
 app.use(pinia);
+const authStore = useAuthStore(pinia);
+authStore.initialize();
+
+router.beforeEach(async (to) => {
+  if (!authStore.initialized) {
+    await authStore.initialize();
+  }
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return { path: "/" };
+  }
+  return true;
+});
+
 app.component("apexchart", ApexChart);
 app.use(router);
 // app.use(posthogPlugin);
