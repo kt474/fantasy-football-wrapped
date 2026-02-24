@@ -8,7 +8,7 @@ import mean from "lodash/mean";
 import min from "lodash/min";
 import sum from "lodash/sum";
 import zip from "lodash/zip";
-import { getMatchup } from "./api";
+import { getMatchup } from "./sleeperApi";
 import { RosterType, UserType, PointsType } from "../types/types";
 import { WeeklyWaiver } from "../types/apiTypes";
 

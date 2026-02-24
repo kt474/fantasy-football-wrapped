@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { fakeDraftData } from "../../api/draft.ts";
 import { ref, onMounted, computed, watch } from "vue";
-import { getDraftPicks, getDraftMetadata } from "../../api/api";
+import { getDraftPicks, getDraftMetadata } from "@/api/sleeperApi.ts";
 import { LeagueInfoType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { fakeUsers } from "../../api/helper.ts";

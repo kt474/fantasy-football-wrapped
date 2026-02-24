@@ -2,14 +2,9 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "@/store/store";
 import type { LeagueInfoType } from "@/types/types";
-import {
-  getData,
-  getLeague,
-  getUsername,
-  inputLeague,
-  inputUsername,
-  getAllLeagues,
-} from "@/api/api";
+import { getData, inputLeague, inputUsername } from "@/api/api";
+
+import { getLeague, getUsername, getAllLeagues } from "@/api/sleeperApi";
 
 export const SEASON_YEAR_OPTIONS = [
   "2026",
