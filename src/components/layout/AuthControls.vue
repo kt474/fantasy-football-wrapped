@@ -42,7 +42,7 @@ const signIn = async () => {
 const signUp = async () => {
   try {
     await authStore.signUpWithPassword(email.value, password.value);
-    toast.success("Account created. Check your email if confirmation is enabled.");
+    toast.success("Account created. Check your email for confirmation.");
     dialogOpen.value = false;
     resetForm();
   } catch (error: any) {
@@ -63,7 +63,9 @@ const signOut = async () => {
 <template>
   <div class="flex items-center gap-2">
     <template v-if="authStore.isAuthenticated">
-      <span class="hidden max-w-48 truncate text-xs text-muted-foreground sm:inline">
+      <span
+        class="hidden text-xs truncate max-w-48 text-muted-foreground sm:inline"
+      >
         {{ authStore.user?.email }}
       </span>
       <Button
@@ -82,9 +84,9 @@ const signOut = async () => {
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Sign in with Supabase</DialogTitle>
+            <DialogTitle>Sign in</DialogTitle>
             <DialogDescription>
-              Use your email and password to authenticate.
+              Enter your email and password to sign in or create an account.
             </DialogDescription>
           </DialogHeader>
           <div class="space-y-3">
