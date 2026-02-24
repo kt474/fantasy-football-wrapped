@@ -151,6 +151,34 @@ export const generateReport = async (
   }
 };
 
+export const generatePremiumReport = async (
+  prompt: Record<string, unknown>[],
+  metadata: Record<string, unknown>,
+  style: string
+): Promise<Record<string, string>> => {
+  try {
+    const response = await fetch(import.meta.env.VITE_PREMIUM_WEEKLY_REPORT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data: {
+          leagueMetadata: metadata,
+          matchups: prompt,
+        },
+        commentaryStyle: style,
+      }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error:", error);
+    return {
+      text: "Unable to generate report. Please try again later.",
+    };
+  }
+};
+
 export const generatePreview = async (
   prompt: Record<string, unknown>
 ): Promise<Record<string, string>> => {
