@@ -249,7 +249,7 @@ const data = {
                 </SidebarMenuButton>
               </router-link>
             </SidebarMenuItem>
-            <SidebarMenuItem>
+            <!-- <SidebarMenuItem>
               <a
                 href="https://github.com/kt474/fantasy-football-wrapped"
                 target="_blank"
@@ -262,9 +262,9 @@ const data = {
                   </div>
                 </SidebarMenuButton>
               </a>
-            </SidebarMenuItem>
+            </SidebarMenuItem> -->
 
-            <SidebarMenuItem>
+            <!-- <SidebarMenuItem>
               <a
                 aria-label="buymeacoffee donation page"
                 href="https://buymeacoffee.com/kt474"
@@ -279,8 +279,8 @@ const data = {
                   </div>
                 </SidebarMenuButton>
               </a>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
+            </SidebarMenuItem> -->
+            <!-- <SidebarMenuItem>
               <a
                 aria-label="discord community invite"
                 href="https://discord.gg/sSVwNhyv7U"
@@ -295,7 +295,7 @@ const data = {
                   </div>
                 </SidebarMenuButton>
               </a>
-            </SidebarMenuItem>
+            </SidebarMenuItem> -->
             <SidebarMenuItem>
               <router-link
                 :to="{ path: '/privacy', query: $route.query }"

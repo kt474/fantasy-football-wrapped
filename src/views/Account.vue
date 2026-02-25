@@ -4,9 +4,18 @@ import { useAuthStore } from "@/store/auth";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 const authStore = useAuthStore();
 const email = ref("");
 const password = ref("");
+const stripeCheckoutUrl = (import.meta.env.VITE_STRIPE_PAYMENT_LINK ??
+  "") as string;
 
 const resetForm = () => {
   email.value = "";
@@ -94,6 +103,31 @@ const signOut = async () => {
           Sign out
         </Button>
       </div>
+      <Card class="max-w-sm mt-6">
+        <CardHeader>
+          <CardTitle class="flex justify-between"
+            ><p>Premium</p>
+            <p>$2.99/Month</p></CardTitle
+          >
+        </CardHeader>
+        <CardContent class="space-y-2 text-sm">
+          <ul class="list-none text-muted-foreground">
+            <li>Expanded weekly analysis</li>
+            <li>Commentary style selection</li>
+            <li>Priority access to premium recap updates</li>
+          </ul>
+        </CardContent>
+        <CardFooter>
+          <a
+            v-if="stripeCheckoutUrl"
+            :href="stripeCheckoutUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button>Start 7-day free trial</Button>
+          </a>
+        </CardFooter>
+      </Card>
     </div>
   </div>
 </template>
