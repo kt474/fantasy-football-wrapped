@@ -3,6 +3,7 @@ import { TableDataType, LeagueInfoType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
+import { useAuthStore } from "@/store/auth";
 import {
   generateReport,
   generatePremiumReport,
@@ -29,6 +30,7 @@ import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 
 const store = useStore();
+const authStore = useAuthStore();
 const props = defineProps<{
   tableData: TableDataType[];
   regularSeasonLength: number;
@@ -39,11 +41,14 @@ const rawWeeklyReport = ref<string>("");
 const playerNames = ref<Player[][]>([]);
 const benchPlayerNames = ref<Player[][]>([]);
 const loading = ref(false);
+const tier = ref("Standard");
+const premiumLoading = ref(false);
 const fetchingPlayers = ref(false);
 
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("analytical");
 const premiumWeeklyReport = ref<string>("");
+const rawPremiumWeeklyReport = ref<string>("");
 
 const weeks = computed(() => {
   if (
@@ -141,6 +146,8 @@ const fetchPlayerNames = async () => {
 
 const getPremiumReport = async () => {
   if (store.leagueIds.length > 0) {
+    premiumWeeklyReport.value = "";
+    rawPremiumWeeklyReport.value = "";
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     let leagueMetadata: Record<string, string | number>;
     if (isPlayoffs.value) {
@@ -165,21 +172,25 @@ const getPremiumReport = async () => {
         currentWeek: currentWeek.value,
       };
     }
+    premiumLoading.value = true;
     const response = await generatePremiumReport(
       premiumReportPrompt.value,
       leagueMetadata,
       premiumCommentaryStyle.value
     );
-    premiumWeeklyReport.value = response.text;
-    // rawWeeklyReport.value = response.text;
-    // weeklyReport.value = response.text
-    //   .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-    //   .replace(/\n/g, "<br>");
-    // store.addWeeklyReport(currentLeague.leagueId, weeklyReport.value);
-    // localStorage.setItem(
-    //   "leagueInfo",
-    //   JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    // );
+    premiumLoading.value = false;
+    rawPremiumWeeklyReport.value = response.text;
+    premiumWeeklyReport.value = response.text
+      .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+      .replace(/\n/g, "<br>");
+    store.addPremiumWeeklyReport(
+      currentLeague.leagueId,
+      premiumWeeklyReport.value
+    );
+    localStorage.setItem(
+      "leagueInfo",
+      JSON.stringify(store.leagueInfo as LeagueInfoType[])
+    );
   }
 };
 
@@ -232,7 +243,7 @@ onMounted(async () => {
   ) {
     loading.value = true;
     await fetchPlayerNames();
-    // await getReport();
+    await getReport();
     loading.value = false;
   } else if (
     store.leagueInfo.length > 0 &&
@@ -245,6 +256,15 @@ onMounted(async () => {
       : "";
     weeklyReport.value = savedText;
     rawWeeklyReport.value = savedText
+      .replace(/<b>(.*?)<\/b>/g, "**$1**")
+      .replace(/<br>/g, "\n");
+
+    const premiumSavedText = store.leagueInfo[store.currentLeagueIndex]
+      .premiumWeeklyReport
+      ? (store.leagueInfo[store.currentLeagueIndex].premiumWeeklyReport ?? "")
+      : "";
+    premiumWeeklyReport.value = premiumSavedText;
+    rawPremiumWeeklyReport.value = premiumSavedText
       .replace(/<b>(.*?)<\/b>/g, "**$1**")
       .replace(/<br>/g, "\n");
   }
@@ -738,7 +758,9 @@ const getMatchupWinner = (matchupIndex: number | null, currentWeek: number) => {
 
 const copyReport = () => {
   navigator.clipboard.writeText(
-    rawWeeklyReport.value + "\n\nCreated with https://ffwrapped.com"
+    (tier.value === "Standard"
+      ? rawWeeklyReport.value
+      : rawPremiumWeeklyReport.value) + "\n\nCreated with https://ffwrapped.com"
   );
   toast.success("Summary copied to clipboard!");
 };
@@ -791,6 +813,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
             (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek ||
               store.leagueInfo.length == 0)
           "
+          v-model="tier"
           default-value="Standard"
         >
           <div>
@@ -818,164 +841,262 @@ watch(() => currentWeek.value, fetchPlayerNames);
                 />
               </svg>
             </div>
-
             <p v-if="weeks.length === 0">Please come back after week 1!</p>
             <TabsContent value="Premium">
-              <div class="flex">
-                <div>
-                  <p class="mb-1 text-xs">Commentary Style</p>
-                  <Select v-model="premiumCommentaryStyle">
-                    <SelectTrigger class="w-44">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="analytical">Analyst</SelectItem>
-                      <SelectItem value="hype">Hype</SelectItem>
-                      <SelectItem value="roast">Roast</SelectItem>
-                      <SelectItem value="cutthroat">Cutthroat</SelectItem>
-                      <SelectItem value="neutral">Neutral</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div v-if="authStore.isAuthenticated">
+                <div class="flex">
+                  <div>
+                    <p class="mb-1 text-xs">Commentary Style</p>
+                    <Select v-model="premiumCommentaryStyle">
+                      <SelectTrigger class="w-44">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="analytical">Analyst</SelectItem>
+                        <SelectItem value="hype">Hype</SelectItem>
+                        <SelectItem value="roast">Roast</SelectItem>
+                        <SelectItem value="cutthroat">Cutthroat</SelectItem>
+                        <SelectItem value="neutral">Neutral</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    @click="getPremiumReport"
+                    type="button"
+                    class="mt-5 ml-2"
+                    >Generate</Button
+                  >
                 </div>
-                <Button
-                  @click="getPremiumReport"
-                  type="button"
-                  class="mt-5 ml-2"
-                  >Generate</Button
+                <div v-if="premiumWeeklyReport">
+                  <p v-html="premiumWeeklyReport" class="my-2.5"></p>
+                  <p class="text-xs text-muted-foreground">
+                    Generated using GPT-5.2. Information provided may not always
+                    be accurate.
+                  </p>
+                </div>
+                <div
+                  v-else-if="
+                    premiumLoading &&
+                    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+                  "
                 >
+                  <div
+                    role="status"
+                    class="space-y-2.5 animate-pulse max-w-lg mt-2"
+                  >
+                    <p class="">Generating Premium Summary...</p>
+                    <div class="flex items-center w-full">
+                      <div
+                        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                      ></div>
+                    </div>
+                    <div class="flex items-center w-full max-w-[480px]">
+                      <div
+                        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+                      ></div>
+                    </div>
+                    <div class="flex items-center w-full max-w-[400px]">
+                      <div
+                        class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                      ></div>
+                    </div>
+                    <div class="flex items-center w-full max-w-[480px]">
+                      <div
+                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+                      ></div>
+                    </div>
+                    <div class="flex items-center w-full max-w-[440px]">
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-32"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
+                      ></div>
+                    </div>
+                    <div class="flex items-center w-full max-w-[360px]">
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
+                      ></div>
+                      <div
+                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                      ></div>
+                    </div>
+                    <span class="sr-only">Loading...</span>
+                  </div>
+                </div>
+              </div>
+              <div v-else>
+                <p class="max-w-2xl">
+                  Premium weekly reports include deeper analysis, a newer AI
+                  model, and customizable commentary styles. Available with an
+                  account + subscription.
+                </p>
               </div>
             </TabsContent>
-            <div v-if="weeklyReport" class="max-w-5xl">
-              <p v-html="weeklyReport" class="mb-3"></p>
-              <p class="text-xs text-muted-foreground">
-                Generated using GPT-5.1. Information provided may not always be
-                accurate.
-              </p>
-              <p class="text-xs text-muted-foreground">
-                If you enjoy these weekly reports please consider
-                <a
-                  aria-label="buymeacoffee donation page"
-                  class="text-primary hover:underline"
-                  href="https://buymeacoffee.com/kt474"
-                  title="buymeacofee donation page"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >supporting</a
-                >
-                this project.
-              </p>
-            </div>
-            <!-- Fake data for home page -->
-            <div v-else-if="store.leagueIds.length == 0" class="max-w-5xl">
-              <p class="mb-3">
-                Week 14 was a rollercoaster, and some of you might want to
-                demand a refund for that ride.
-                <b>The Princess McBride</b> retains the top spot with a solid
-                124.48 points, thanks to Josh Allen and Christian McCaffrey
-                doing their best superhero impressions. Meanwhile,
-                <b>Dak to the Future</b> looked more like back to the past,
-                scoring just 76.3 points and proving that even Patrick Mahomes
-                can’t carry a team of underperformers.
-              </p>
-              <p class="mb-3">
-                <b>Saquondo </b> narrowly edged out <b>LaPorta Potty </b> in a
-                high-scoring showdown, 129.62 to 123.26. Deebo Samuel was the
-                real MVP, putting up numbers like he was playing Madden on
-                rookie mode. <b>Baby Back Gibbs</b> and <b>Bijan Mustard</b> had
-                a snooze-fest, with the BBQ Ribs barely staying awake long
-                enough to win 95 to 82.64. Travis Kelce's performance was less
-                "Mr. Swift" and more "Mr. Swiftly Disappointing."
-              </p>
-              <p class="mb-3">
-                In the battle of the lower ranks, <b>Breece's Puffs</b> barely
-                squeaked by <b>Lamario Kart </b> 94.82 to 90.44. Tony Pollard
-                and James Cook did just enough to save the day, proving that
-                even a broken clock is right twice a day.
-              </p>
-              <p>
-                Finally, <b>Ja’Marr the Merrier</b> showed
-                <b>Just the Tua Us</b> who's boss, winning 90.04 to 82.64.
-                Russell Wilson must have found a new playbook, because he was
-                cooking, and not just in the kitchen.
-              </p>
-            </div>
-            <div
-              v-else-if="
-                loading &&
-                store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
-              "
-            >
-              <div role="status" class="space-y-2.5 animate-pulse max-w-lg">
-                <p class="">Generating Summary...</p>
-                <div class="flex items-center w-full">
-                  <div
-                    class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                  ></div>
-                </div>
-                <div class="flex items-center w-full max-w-[480px]">
-                  <div
-                    class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                  ></div>
-                </div>
-                <div class="flex items-center w-full max-w-[400px]">
-                  <div
-                    class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                  ></div>
-                </div>
-                <div class="flex items-center w-full max-w-[480px]">
-                  <div
-                    class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                  ></div>
-                </div>
-                <div class="flex items-center w-full max-w-[440px]">
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-32"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                  ></div>
-                </div>
-                <div class="flex items-center w-full max-w-[360px]">
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
-                  ></div>
-                  <div
-                    class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                  ></div>
-                </div>
-                <span class="sr-only">Loading...</span>
+            <TabsContent value="Standard">
+              <div v-if="weeklyReport" class="max-w-5xl">
+                <p v-html="weeklyReport" class="mb-3"></p>
+                <p class="text-xs text-muted-foreground">
+                  Generated using GPT-5.1. Information provided may not always
+                  be accurate.
+                </p>
+                <p class="text-xs text-muted-foreground">
+                  If you enjoy these weekly reports please consider
+                  <a
+                    aria-label="buymeacoffee donation page"
+                    class="text-primary hover:underline"
+                    href="https://buymeacoffee.com/kt474"
+                    title="buymeacofee donation page"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >supporting</a
+                  >
+                  this project.
+                </p>
               </div>
-            </div>
+              <!-- Fake data for home page -->
+              <div v-else-if="store.leagueIds.length == 0" class="max-w-5xl">
+                <p class="mb-3">
+                  Week 14 was a rollercoaster, and some of you might want to
+                  demand a refund for that ride.
+                  <b>The Princess McBride</b> retains the top spot with a solid
+                  124.48 points, thanks to Josh Allen and Christian McCaffrey
+                  doing their best superhero impressions. Meanwhile,
+                  <b>Dak to the Future</b> looked more like back to the past,
+                  scoring just 76.3 points and proving that even Patrick Mahomes
+                  can’t carry a team of underperformers.
+                </p>
+                <p class="mb-3">
+                  <b>Saquondo </b> narrowly edged out <b>LaPorta Potty </b> in a
+                  high-scoring showdown, 129.62 to 123.26. Deebo Samuel was the
+                  real MVP, putting up numbers like he was playing Madden on
+                  rookie mode. <b>Baby Back Gibbs</b> and
+                  <b>Bijan Mustard</b> had a snooze-fest, with the BBQ Ribs
+                  barely staying awake long enough to win 95 to 82.64. Travis
+                  Kelce's performance was less "Mr. Swift" and more "Mr. Swiftly
+                  Disappointing."
+                </p>
+                <p class="mb-3">
+                  In the battle of the lower ranks, <b>Breece's Puffs</b> barely
+                  squeaked by <b>Lamario Kart </b> 94.82 to 90.44. Tony Pollard
+                  and James Cook did just enough to save the day, proving that
+                  even a broken clock is right twice a day.
+                </p>
+                <p>
+                  Finally, <b>Ja’Marr the Merrier</b> showed
+                  <b>Just the Tua Us</b> who's boss, winning 90.04 to 82.64.
+                  Russell Wilson must have found a new playbook, because he was
+                  cooking, and not just in the kitchen.
+                </p>
+              </div>
+              <div
+                v-else-if="
+                  loading &&
+                  store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+                "
+              >
+                <div role="status" class="space-y-2.5 animate-pulse max-w-lg">
+                  <p class="">Generating Summary...</p>
+                  <div class="flex items-center w-full">
+                    <div
+                      class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                    ></div>
+                  </div>
+                  <div class="flex items-center w-full max-w-[480px]">
+                    <div
+                      class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+                    ></div>
+                  </div>
+                  <div class="flex items-center w-full max-w-[400px]">
+                    <div
+                      class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                    ></div>
+                  </div>
+                  <div class="flex items-center w-full max-w-[480px]">
+                    <div
+                      class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+                    ></div>
+                  </div>
+                  <div class="flex items-center w-full max-w-[440px]">
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-32"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
+                    ></div>
+                  </div>
+                  <div class="flex items-center w-full max-w-[360px]">
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
+                    ></div>
+                    <div
+                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                    ></div>
+                  </div>
+                  <span class="sr-only">Loading...</span>
+                </div>
+              </div>
+            </TabsContent>
             <Separator class="h-px mt-4 mb-2" />
           </div>
         </Tabs>

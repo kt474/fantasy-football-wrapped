@@ -26,6 +26,7 @@ import {
   DraftPick,
 } from "../types/apiTypes";
 import { LeagueInfoType, RosterType, UserType } from "../types/types";
+import { authenticatedFetch } from "@/lib/authFetch";
 
 export const getPlayerNews = async (
   playerNames: string[]
@@ -157,24 +158,29 @@ export const generatePremiumReport = async (
   style: string
 ): Promise<Record<string, string>> => {
   try {
-    const response = await fetch(import.meta.env.VITE_PREMIUM_WEEKLY_REPORT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: {
-          leagueMetadata: metadata,
-          matchups: prompt,
+    const response = await authenticatedFetch(
+      import.meta.env.VITE_PREMIUM_WEEKLY_REPORT,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        commentaryStyle: style,
-      }),
-    });
+        body: JSON.stringify({
+          data: {
+            leagueMetadata: metadata,
+            matchups: prompt,
+          },
+          commentaryStyle: style,
+        }),
+      }
+    );
+    if (response.status === 401) {
+      throw "Please sign in to use premium reports.";
+    }
     return await response.json();
   } catch (error) {
-    console.error("Error:", error);
     return {
-      text: "Unable to generate report. Please try again later.",
+      text: `Unable to generate report. Premium reports are only available to subscribed users.`,
     };
   }
 };
