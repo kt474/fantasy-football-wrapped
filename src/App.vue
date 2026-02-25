@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, watch, ref, computed } from "vue";
 import AppSidebar from "@/components/layout/AppSidebar.vue";
-import AuthControls from "@/components/layout/AuthControls.vue";
 import CardContainer from "./components/util/CardContainer.vue";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./types/types";
@@ -141,7 +140,6 @@ const setHtmlBackground = () => {
               class="data-[orientation=vertical]:h-4"
             />
             <CardContainer />
-            <AuthControls />
             <Button
               @click="setColorMode()"
               class="ml-auto transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
