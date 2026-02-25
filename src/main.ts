@@ -12,6 +12,7 @@ import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import About from "./views/About.vue";
 import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
+import Account from "./views/Account.vue";
 import { useAuthStore } from "./store/auth";
 
 const routes = [
@@ -38,6 +39,14 @@ const routes = [
     meta: {
       title: "Privacy Policy",
       description: "We don’t collect or store your personal information.",
+    },
+  },
+  {
+    path: "/account",
+    component: Account,
+    meta: {
+      title: "Account",
+      description: "Account page",
     },
   },
   {

@@ -89,7 +89,7 @@ const signOut = async () => {
               Enter your email and password to sign in or create an account.
             </DialogDescription>
           </DialogHeader>
-          <div class="space-y-3">
+          <div class="space-y-2">
             <Input
               v-model="email"
               type="email"

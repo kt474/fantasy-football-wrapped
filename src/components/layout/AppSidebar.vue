@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import type { SidebarProps } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
@@ -30,16 +31,25 @@ import {
   HandCoins,
   MessageSquareMore,
   ShieldUser,
+  CircleUserRound,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
 import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "@/store/auth";
 
 const store = useStore();
+const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const props = defineProps<SidebarProps>();
 const { isMobile, setOpenMobile } = useSidebar();
+
+const currentUser = computed(() => {
+  if (authStore.isAuthenticated) {
+    return authStore.user?.email?.match(/^[^@]+(?=@)/)?.[0] ?? "";
+  }
+});
 
 const closeMobileSidebar = () => {
   if (isMobile.value) {
@@ -302,6 +312,26 @@ const data = {
                   </div>
                 </SidebarMenuButton></router-link
               >
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <router-link
+                :to="{ path: '/account', query: $route.query }"
+                class="cursor-pointer"
+                @click="RouteTabChange"
+              >
+                <SidebarMenuButton
+                  :is-active="route.path === '/account'"
+                  as-child
+                >
+                  <div>
+                    <CircleUserRound />
+                    Account
+                    <span v-if="authStore.isAuthenticated"
+                      >({{ currentUser }})</span
+                    >
+                  </div>
+                </SidebarMenuButton>
+              </router-link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
