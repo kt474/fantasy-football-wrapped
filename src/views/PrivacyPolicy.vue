@@ -1,18 +1,66 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import { onMounted } from "vue";
+import { toast } from "vue-sonner";
+import { LeagueInfoType } from "../types/types";
+import { getData, getLeague, inputLeague } from "../api/api";
+import { useStore } from "@/store/store";
 
 const router = useRouter();
 const route = useRoute();
+const store = useStore();
 
-onMounted(() => {
+onMounted(async () => {
   // this league has somehow been cached in google sitelinks
   if (route.query.leagueId === "1057743221285101568") {
     const newQuery = { ...route.query };
     delete newQuery.leagueId;
     router.replace({ path: route.path, query: newQuery });
   }
+  await loadSavedLeagues();
 });
+
+const loadSavedLeagues = async () => {
+  try {
+    if (localStorage.leagueInfo) {
+      const savedLeagues = JSON.parse(localStorage.leagueInfo);
+      await Promise.all(
+        savedLeagues.map(async (league: LeagueInfoType) => {
+          if (!store.leagueIds.includes(league.leagueId)) {
+            store.updateLeagueInfo(league);
+          }
+        })
+      );
+      store.updateCurrentLeagueId(localStorage.currentLeagueId);
+      store.updateLoadingLeague("");
+    }
+    const leagueId = Array.isArray(route.query.leagueId)
+      ? route.query.leagueId[0]
+      : route.query.leagueId;
+    // sometimes on refresh the leagueId in the URL becomes undefined
+    if (leagueId && !store.leagueIds.includes(leagueId)) {
+      const checkInput = await getLeague(leagueId);
+      if (checkInput["name"]) {
+        store.updateCurrentLeagueId(leagueId);
+        store.updateLoadingLeague(checkInput["name"]);
+        const league = await getData(leagueId);
+        store.updateLeagueInfo(league);
+        await inputLeague(
+          leagueId,
+          league.name,
+          league.totalRosters,
+          league.seasonType,
+          league.season
+        );
+        store.updateLoadingLeague("");
+      } else {
+        toast.error("Invalid League ID");
+      }
+    }
+  } catch {
+    toast.error("Error fetching data. Please try refreshing the page.");
+  }
+};
 </script>
 <template>
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto">

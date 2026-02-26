@@ -20,7 +20,7 @@
     "lucide-vue-next": "^0.563.0",
     "pinia": "^2.1.7",
     "posthog-js": "^1.239.1",
-    "reka-ui": "^2.8.0",
+    "reka-ui": "^2.8.2",
     "tailwind-merge": "^3.4.0",
     "vue": "^3.3.11",
     "vue-router": "^4.5.0",

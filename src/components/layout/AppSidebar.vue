@@ -192,7 +192,9 @@ const data = {
               <SidebarMenuButton
                 v-else-if="!store.currentLeagueId"
                 as-child
-                :is-active="store.currentTab === childItem.title"
+                :is-active="
+                  store.currentTab === childItem.title && route.path === '/'
+                "
                 @click="changeTab(childItem.title)"
                 class="cursor-pointer"
               >
