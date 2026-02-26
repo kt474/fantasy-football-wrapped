@@ -27,9 +27,6 @@ import {
   Users,
   Info,
   ScrollText,
-  FolderGit,
-  HandCoins,
-  MessageSquareMore,
   ShieldUser,
   CircleUserRound,
 } from "lucide-vue-next";
@@ -251,53 +248,6 @@ const data = {
                 </SidebarMenuButton>
               </router-link>
             </SidebarMenuItem>
-            <!-- <SidebarMenuItem>
-              <a
-                href="https://github.com/kt474/fantasy-football-wrapped"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <SidebarMenuButton as-child>
-                  <div>
-                    <FolderGit />
-                    Github
-                  </div>
-                </SidebarMenuButton>
-              </a>
-            </SidebarMenuItem> -->
-
-            <!-- <SidebarMenuItem>
-              <a
-                aria-label="buymeacoffee donation page"
-                href="https://buymeacoffee.com/kt474"
-                title="buymeacofee donation page"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <SidebarMenuButton as-child>
-                  <div>
-                    <HandCoins />
-                    Donate
-                  </div>
-                </SidebarMenuButton>
-              </a>
-            </SidebarMenuItem> -->
-            <!-- <SidebarMenuItem>
-              <a
-                aria-label="discord community invite"
-                href="https://discord.gg/sSVwNhyv7U"
-                title="discord community invite"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <SidebarMenuButton as-child>
-                  <div>
-                    <MessageSquareMore />
-                    Discord
-                  </div>
-                </SidebarMenuButton>
-              </a>
-            </SidebarMenuItem> -->
             <SidebarMenuItem>
               <router-link
                 :to="{ path: '/privacy', query: $route.query }"
