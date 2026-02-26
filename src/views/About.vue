@@ -10,7 +10,7 @@ import { LeagueInfoType } from "../types/types";
 import { getData, getLeague, inputLeague } from "../api/api";
 
 const route = useRoute();
-const leagueCount = ref(11989); // initial load current unique league count value 2/19/26
+const leagueCount = ref(12009); // initial load current unique league count value 2/23/26
 
 onMounted(async () => {
   const leagueId = route.query.leagueId;
@@ -96,8 +96,7 @@ watch(
             fantasy football leagues.
           </p>
           <p class="text-base leading-relaxed">
-            Everything on this site is free to use and the source code can be
-            found on
+            The source code can be found on
             <a
               aria-label="Link to github repository"
               class="font-medium text-primary hover:underline"
@@ -112,7 +111,7 @@ watch(
               href="https://discord.gg/sSVwNhyv7U"
               target="_blank"
               rel="noopener noreferrer"
-              >discord,</a
+              >Discord,</a
             >
             send an
             <a
@@ -127,13 +126,14 @@ watch(
               href="https://twitter.com/kevkevkt"
               target="_blank"
               rel="noopener noreferrer"
-              >twitter</a
-            >.
+              >Twitter</a
+            >. Any suggestions are welcome!
           </p>
           <p class="text-base leading-relaxed">
-            Using this site will always be completely free (and ad free) but if
-            you would like to support this project, any donations would be
-            greatly appreciated.
+            I will always try to keep this site free (and ad free) but as the
+            userbase grows, the hosting and weekly AI recap costs also grow, so
+            if you find value in ffwrapped, any donations are greatly
+            appreciated.
           </p>
           <div class="flex flex-wrap justify-evenly sm:flex-nowrap">
             <a

@@ -66,7 +66,10 @@ const addLeagues = async () => {
   }
 };
 onMounted(() => {
-  window.scrollTo(0, 0);
+  const main = document.getElementById("mainScrollSection");
+  if (main) {
+    main.scrollTop = 0;
+  }
 });
 
 const toggleLeague = (id: string) => {
