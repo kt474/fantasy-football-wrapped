@@ -24,7 +24,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Check } from "lucide-vue-next";
-import upperCase from "lodash/upperCase";
+import Separator from "@/components/ui/separator/Separator.vue";
 
 type SubscriptionStatusResponse = {
   isPremium: boolean;
@@ -67,12 +67,72 @@ const subscriptionCacheKeyPrefix = "subscription-status";
 const subscriptionCacheTtlMs = 5 * 60 * 1000;
 
 const subscriptionStatusLabel = computed(() => {
-  if (subscriptionLoading.value) return "Loading...";
-  if (subscriptionStatus.value === "none") return "Not subscribed";
-  if (cancelDate.value) {
-    return `Active: service has been canceled and will end on ${new Date(cancelDate.value).toLocaleDateString()}`;
+  if (subscriptionLoading.value) return "Loading";
+
+  const status = subscriptionStatus.value.toLowerCase();
+  if (status === "none") return "Not Subscribed";
+  return status
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+});
+
+const subscriptionStatusBadgeClass = computed(() => {
+  if (subscriptionLoading.value) {
+    return "bg-muted text-muted-foreground border-border";
   }
-  return upperCase(subscriptionStatus.value);
+  const status = subscriptionStatus.value.toLowerCase();
+  if (status === "active" || status === "trialing") {
+    return "bg-emerald-100 text-emerald-900 border-emerald-200";
+  }
+  if (status === "none") {
+    return "bg-muted text-muted-foreground border-border";
+  }
+  if (status === "canceled" || cancelDate.value) {
+    return "bg-orange-100 text-orange-900 border-orange-200";
+  }
+
+  return "bg-slate-100 text-slate-900 border-slate-200";
+});
+
+const accountInitial = computed(() => {
+  const email = authStore.user?.email ?? "";
+  return email.charAt(0).toUpperCase() || "?";
+});
+
+const memberSinceLabel = computed(() => {
+  if (!authStore.user?.created_at) return "Unavailable";
+  return new Date(authStore.user.created_at).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+});
+
+const cancelTimelineLabel = computed(() => {
+  if (cancelDate.value) {
+    return new Date(cancelDate.value).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  return "No cancellation scheduled";
+});
+
+const subscriptionTimelineNote = computed(() => {
+  if (cancelDate.value) {
+    return `Your subscription remains active until ${cancelTimelineLabel.value}.`;
+  }
+  return "";
+});
+
+const accountSummaryContainerClass = computed(() => {
+  if (!authStore.isAuthenticated) return "";
+  if (!isPremium.value && subscriptionStatus.value === "none")
+    return "max-w-sm";
+  return "max-w-2xl";
 });
 
 const getCheckoutButtonText = computed(() => {
@@ -474,41 +534,70 @@ watch(
           </CardContent>
         </Card>
       </div>
-      <div v-else>
-        <p class="text-muted-foreground">
-          Email:
-          <span class="font-medium text-foreground">{{
-            authStore.user?.email
-          }}</span>
-        </p>
-        <p class="text-muted-foreground">
-          Subscription Status:
-          <span class="font-medium text-foreground">{{
-            subscriptionStatusLabel
-          }}</span>
-        </p>
-        <Button
-          class="mt-3"
-          :disabled="authStore.loading"
-          variant="outline"
-          size="sm"
-          @click="signOut"
-        >
-          Sign out
-        </Button>
-        <Button
-          @click="openBillingPortal"
-          v-if="isPremium"
-          :disabled="authStore.loading || portalLoading"
-          class="ml-2"
-          size="sm"
-        >
-          {{ "Manage subscription" }}
-        </Button>
+      <div v-else :class="accountSummaryContainerClass">
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Summary</CardTitle>
+            <CardDescription>
+              Your profile and subscription details
+            </CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex flex-wrap items-start gap-4">
+              <div
+                class="flex items-center justify-center w-12 h-12 mt-1 text-sm font-semibold rounded-full bg-accent"
+              >
+                {{ accountInitial }}
+              </div>
+              <div class="flex-1 min-w-[12rem]">
+                <p class="text-xs uppercase text-muted-foreground">Email</p>
+                <p class="font-medium break-all">{{ authStore.user?.email }}</p>
+                <p class="text-xs text-muted-foreground">
+                  Member since {{ memberSinceLabel }}
+                </p>
+              </div>
+              <span
+                class="inline-flex items-center px-3 py-1 text-xs font-medium border rounded-full"
+                :class="subscriptionStatusBadgeClass"
+              >
+                {{ subscriptionStatusLabel }}
+              </span>
+            </div>
+            <Separator />
+            <p
+              v-if="subscriptionTimelineNote"
+              class="text-sm text-muted-foreground"
+            >
+              {{ subscriptionTimelineNote }}
+            </p>
+
+            <div class="flex flex-wrap gap-2 pt-1">
+              <Button
+                v-if="isPremium || canManageSubscription"
+                @click="openBillingPortal"
+                :disabled="
+                  authStore.loading || portalLoading || subscriptionLoading
+                "
+                class="min-w-[9.5rem] justify-center"
+                size="sm"
+              >
+                {{ portalLoading ? "Opening..." : "Manage subscription" }}
+              </Button>
+              <Button
+                :disabled="authStore.loading"
+                variant="outline"
+                size="sm"
+                @click="signOut"
+              >
+                Sign out
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       <Card
         v-if="authStore.isAuthenticated && !isPremium && !subscriptionLoading"
-        class="max-w-sm mt-6"
+        class="max-w-sm mt-4"
       >
         <CardHeader>
           <CardTitle>Premium</CardTitle>
