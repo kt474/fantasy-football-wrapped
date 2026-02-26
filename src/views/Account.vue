@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription";
 import { useStore } from "@/store/store";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
@@ -26,20 +27,9 @@ import {
 import { Check } from "lucide-vue-next";
 import Separator from "@/components/ui/separator/Separator.vue";
 
-type SubscriptionStatusResponse = {
-  isPremium: boolean;
-  status: string;
-  currentPeriodEnd: string | null;
-  cancelAtPeriodEnd: boolean;
-  cancelDate: string | null;
-};
-
-type SubscriptionStatusCache = SubscriptionStatusResponse & {
-  cachedAt: number;
-};
-
 const store = useStore();
 const authStore = useAuthStore();
+const subscriptionStore = useSubscriptionStore();
 const route = useRoute();
 const router = useRouter();
 const showLogin = ref(true);
@@ -49,27 +39,18 @@ const signUpEmail = ref("");
 const signUpPassword = ref("");
 const checkoutLoading = ref(false);
 const portalLoading = ref(false);
-const subscriptionLoading = ref(false);
-const isPremium = ref(false);
-const subscriptionStatus = ref("none");
-const currentPeriodEnd = ref<string | null>(null);
-const cancelDate = ref<string | null>(null);
-const cancelAtPeriodEnd = ref(false);
 
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
   /\/$/,
   ""
 );
-const billingApiPath = `${backendBaseUrl}/api/billing/subscriptionStatus`;
 const checkoutApiPath = `${backendBaseUrl}/api/stripe/createCheckoutSession`;
 const portalApiPath = `${backendBaseUrl}/api/stripe/createPortalSession`;
-const subscriptionCacheKeyPrefix = "subscription-status";
-const subscriptionCacheTtlMs = 5 * 60 * 1000;
 
 const subscriptionStatusLabel = computed(() => {
-  if (subscriptionLoading.value) return "Loading";
+  if (subscriptionStore.loading) return "Loading";
 
-  const status = subscriptionStatus.value.toLowerCase();
+  const status = subscriptionStore.status.toLowerCase();
   if (status === "none") return "Not Subscribed";
   return status
     .split("_")
@@ -78,17 +59,17 @@ const subscriptionStatusLabel = computed(() => {
 });
 
 const subscriptionStatusBadgeClass = computed(() => {
-  if (subscriptionLoading.value) {
+  if (subscriptionStore.loading) {
     return "bg-muted text-muted-foreground border-border";
   }
-  const status = subscriptionStatus.value.toLowerCase();
+  const status = subscriptionStore.status.toLowerCase();
   if (status === "active" || status === "trialing") {
     return "bg-emerald-100 text-emerald-900 border-emerald-200";
   }
   if (status === "none") {
     return "bg-muted text-muted-foreground border-border";
   }
-  if (status === "canceled" || cancelDate.value) {
+  if (status === "canceled" || subscriptionStore.cancelDate) {
     return "bg-orange-100 text-orange-900 border-orange-200";
   }
 
@@ -110,8 +91,8 @@ const memberSinceLabel = computed(() => {
 });
 
 const cancelTimelineLabel = computed(() => {
-  if (cancelDate.value) {
-    return new Date(cancelDate.value).toLocaleDateString(undefined, {
+  if (subscriptionStore.cancelDate) {
+    return new Date(subscriptionStore.cancelDate).toLocaleDateString(undefined, {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -122,7 +103,7 @@ const cancelTimelineLabel = computed(() => {
 });
 
 const subscriptionTimelineNote = computed(() => {
-  if (cancelDate.value) {
+  if (subscriptionStore.cancelDate) {
     return `Your subscription remains active until ${cancelTimelineLabel.value}.`;
   }
   return "";
@@ -130,7 +111,7 @@ const subscriptionTimelineNote = computed(() => {
 
 const accountSummaryContainerClass = computed(() => {
   if (!authStore.isAuthenticated) return "";
-  if (!isPremium.value && subscriptionStatus.value === "none")
+  if (!subscriptionStore.isPremium && subscriptionStore.status === "none")
     return "max-w-sm";
   return "max-w-2xl";
 });
@@ -141,72 +122,8 @@ const getCheckoutButtonText = computed(() => {
 });
 
 const canManageSubscription = computed(() => {
-  return authStore.isAuthenticated && subscriptionStatus.value !== "none";
+  return subscriptionStore.canManageSubscription;
 });
-
-const getSubscriptionCacheKey = (userId = authStore.user?.id) => {
-  if (!userId) return null;
-  return `${subscriptionCacheKeyPrefix}:${userId}`;
-};
-
-const applySubscriptionStatus = (payload: SubscriptionStatusResponse) => {
-  isPremium.value = payload.isPremium;
-  subscriptionStatus.value = payload.status;
-  currentPeriodEnd.value = payload.currentPeriodEnd;
-  cancelAtPeriodEnd.value = payload.cancelAtPeriodEnd;
-  cancelDate.value = payload.cancelDate;
-};
-
-const saveSubscriptionStatusCache = (payload: SubscriptionStatusResponse) => {
-  const key = getSubscriptionCacheKey();
-  if (!key) return;
-
-  const cachePayload: SubscriptionStatusCache = {
-    ...payload,
-    cachedAt: Date.now(),
-  };
-  localStorage.setItem(key, JSON.stringify(cachePayload));
-};
-
-const clearSubscriptionStatusCache = (userId?: string) => {
-  const key = getSubscriptionCacheKey(userId);
-  if (key) {
-    localStorage.removeItem(key);
-    return;
-  }
-
-  for (let i = localStorage.length - 1; i >= 0; i -= 1) {
-    const localStorageKey = localStorage.key(i);
-    if (localStorageKey?.startsWith(`${subscriptionCacheKeyPrefix}:`)) {
-      localStorage.removeItem(localStorageKey);
-    }
-  }
-};
-
-const hydrateSubscriptionFromCache = () => {
-  const key = getSubscriptionCacheKey();
-  if (!key) return false;
-
-  const rawCache = localStorage.getItem(key);
-  if (!rawCache) return false;
-
-  try {
-    const cachePayload = JSON.parse(rawCache) as SubscriptionStatusCache;
-    if (
-      !cachePayload.cachedAt ||
-      Date.now() - cachePayload.cachedAt > subscriptionCacheTtlMs
-    ) {
-      localStorage.removeItem(key);
-      return false;
-    }
-
-    applySubscriptionStatus(cachePayload);
-    return true;
-  } catch {
-    localStorage.removeItem(key);
-    return false;
-  }
-};
 
 const resetSignInForm = () => {
   signInEmail.value = "";
@@ -255,44 +172,10 @@ const signOut = async () => {
   try {
     await authStore.signOut();
     toast.success("Signed out");
-    clearSubscriptionStatusCache(currentUserId);
-    isPremium.value = false;
-    subscriptionStatus.value = "none";
-    currentPeriodEnd.value = null;
-    cancelDate.value = null;
-    cancelAtPeriodEnd.value = false;
+    subscriptionStore.clearSubscriptionStatusCache(currentUserId);
+    subscriptionStore.resetSubscriptionState();
   } catch (error: any) {
     toast.error(error?.message ?? "Unable to sign out");
-  }
-};
-
-const fetchSubscriptionStatus = async ({ showLoading = true } = {}) => {
-  if (!authStore.isAuthenticated) return;
-
-  if (showLoading) {
-    subscriptionLoading.value = true;
-  }
-
-  try {
-    const response = await authenticatedFetch(billingApiPath);
-    if (!response.ok) {
-      if (response.status === 401) {
-        clearSubscriptionStatusCache();
-        subscriptionStatus.value = "none";
-        isPremium.value = false;
-        return;
-      }
-      throw new Error("Unable to fetch subscription status");
-    }
-    const payload = (await response.json()) as SubscriptionStatusResponse;
-    applySubscriptionStatus(payload);
-    saveSubscriptionStatusCache(payload);
-  } catch (error: any) {
-    toast.error(error?.message ?? "Unable to fetch subscription status");
-  } finally {
-    if (showLoading) {
-      subscriptionLoading.value = false;
-    }
   }
 };
 
@@ -361,7 +244,7 @@ const handleCheckoutQuery = async () => {
 
   if (checkoutState === "success") {
     toast.success("Checkout completed. Refreshing subscription status...");
-    await fetchSubscriptionStatus();
+    await subscriptionStore.fetchSubscriptionStatus({ showErrorToast: true });
   } else if (checkoutState === "canceled") {
     toast.error("Checkout canceled.");
   }
@@ -418,27 +301,9 @@ const loadSavedLeagues = async () => {
 
 onMounted(async () => {
   await loadSavedLeagues();
+  subscriptionStore.initialize();
   await handleCheckoutQuery();
-  const hydratedFromCache = hydrateSubscriptionFromCache();
-  await fetchSubscriptionStatus({ showLoading: !hydratedFromCache });
 });
-
-watch(
-  () => authStore.isAuthenticated,
-  async (isAuthenticated) => {
-    if (isAuthenticated) {
-      const hydratedFromCache = hydrateSubscriptionFromCache();
-      await fetchSubscriptionStatus({ showLoading: !hydratedFromCache });
-      return;
-    }
-    clearSubscriptionStatusCache();
-    isPremium.value = false;
-    subscriptionStatus.value = "none";
-    currentPeriodEnd.value = null;
-    cancelDate.value = null;
-    cancelAtPeriodEnd.value = false;
-  }
-);
 </script>
 <template>
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto">
@@ -573,10 +438,10 @@ watch(
 
             <div class="flex flex-wrap gap-2 pt-1">
               <Button
-                v-if="isPremium || canManageSubscription"
+                v-if="subscriptionStore.isPremium || canManageSubscription"
                 @click="openBillingPortal"
                 :disabled="
-                  authStore.loading || portalLoading || subscriptionLoading
+                  authStore.loading || portalLoading || subscriptionStore.loading
                 "
                 class="min-w-[9.5rem] justify-center"
                 size="sm"
@@ -596,7 +461,11 @@ watch(
         </Card>
       </div>
       <Card
-        v-if="authStore.isAuthenticated && !isPremium && !subscriptionLoading"
+        v-if="
+          authStore.isAuthenticated &&
+          !subscriptionStore.isPremium &&
+          !subscriptionStore.loading
+        "
         class="max-w-sm mt-4"
       >
         <CardHeader>

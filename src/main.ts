@@ -14,6 +14,7 @@ import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
 import Account from "./views/Account.vue";
 import { useAuthStore } from "./store/auth";
+import { useSubscriptionStore } from "./store/subscription";
 
 const routes = [
   { path: "/", component: Home },
@@ -71,6 +72,8 @@ const ApexChart = defineAsyncComponent(() => import("vue3-apexcharts"));
 app.use(pinia);
 const authStore = useAuthStore(pinia);
 authStore.initialize();
+const subscriptionStore = useSubscriptionStore(pinia);
+subscriptionStore.initialize();
 
 router.beforeEach(async (to) => {
   if (!authStore.initialized) {

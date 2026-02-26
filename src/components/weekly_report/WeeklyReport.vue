@@ -959,7 +959,14 @@ watch(() => currentWeek.value, fetchPlayerNames);
                 <p class="max-w-2xl">
                   Premium weekly reports include deeper analysis, a newer AI
                   model, and customizable commentary styles. Available with an
-                  account + subscription.
+                  account and
+                  <router-link
+                    :to="{ path: '/account', query: $route.query }"
+                    class="font-medium cursor-pointer text-primary hover:underline"
+                    @click="store.currentTab = ''"
+                  >
+                    Premium subscription</router-link
+                  >.
                 </p>
               </div>
             </TabsContent>
