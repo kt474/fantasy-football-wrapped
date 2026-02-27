@@ -4,6 +4,7 @@ import { Player } from "../../types/apiTypes.ts";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { useAuthStore } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription.ts";
 import {
   generateReport,
   generatePremiumReport,
@@ -31,6 +32,7 @@ import { toast } from "vue-sonner";
 
 const store = useStore();
 const authStore = useAuthStore();
+const subscriptionStore = useSubscriptionStore();
 const props = defineProps<{
   tableData: TableDataType[];
   regularSeasonLength: number;
@@ -843,7 +845,13 @@ watch(() => currentWeek.value, fetchPlayerNames);
             </div>
             <p v-if="weeks.length === 0">Please come back after week 1!</p>
             <TabsContent value="Premium">
-              <div v-if="authStore.isAuthenticated">
+              <div
+                v-if="
+                  authStore.isAuthenticated &&
+                  store.leagueIds.length !== 0 &&
+                  subscriptionStore.isPremium
+                "
+              >
                 <div class="flex">
                   <div>
                     <p class="mb-1 text-xs">Commentary Style</p>

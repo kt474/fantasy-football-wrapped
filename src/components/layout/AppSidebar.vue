@@ -29,14 +29,17 @@ import {
   ScrollText,
   ShieldUser,
   CircleUserRound,
+  BadgeCheck,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription";
 
 const store = useStore();
 const authStore = useAuthStore();
+const subStore = useSubscriptionStore();
 const route = useRoute();
 const router = useRouter();
 const props = defineProps<SidebarProps>();
@@ -278,8 +281,17 @@ const data = {
                   <div>
                     <CircleUserRound />
                     Account
-                    <span v-if="authStore.isAuthenticated"
-                      >({{ currentUser }})</span
+                    <span
+                      v-if="authStore.isAuthenticated && !subStore.isPremium"
+                      >({{ currentUser?.slice(0, 16) }})</span
+                    >
+                    <span
+                      class="flex"
+                      v-else-if="
+                        authStore.isAuthenticated && subStore.isPremium
+                      "
+                      >({{ currentUser?.slice(0, 16)
+                      }}<BadgeCheck class="mt-0.5 ml-2" :size="15" />)</span
                     >
                   </div>
                 </SidebarMenuButton>

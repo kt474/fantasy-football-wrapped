@@ -52,6 +52,7 @@ const subscriptionStatusLabel = computed(() => {
 
   const status = subscriptionStore.status.toLowerCase();
   if (status === "none") return "Not Subscribed";
+  if (status === "active") return "Premium Subscriber";
   return status
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -92,11 +93,14 @@ const memberSinceLabel = computed(() => {
 
 const cancelTimelineLabel = computed(() => {
   if (subscriptionStore.cancelDate) {
-    return new Date(subscriptionStore.cancelDate).toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    return new Date(subscriptionStore.cancelDate).toLocaleDateString(
+      undefined,
+      {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }
+    );
   }
 
   return "No cancellation scheduled";
@@ -414,8 +418,7 @@ onMounted(async () => {
               >
                 {{ accountInitial }}
               </div>
-              <div class="flex-1 min-w-[12rem]">
-                <p class="text-xs uppercase text-muted-foreground">Email</p>
+              <div class="flex-1 min-w-[12rem] mt-1.5">
                 <p class="font-medium break-all">{{ authStore.user?.email }}</p>
                 <p class="text-xs text-muted-foreground">
                   Member since {{ memberSinceLabel }}
@@ -441,7 +444,9 @@ onMounted(async () => {
                 v-if="subscriptionStore.isPremium || canManageSubscription"
                 @click="openBillingPortal"
                 :disabled="
-                  authStore.loading || portalLoading || subscriptionStore.loading
+                  authStore.loading ||
+                  portalLoading ||
+                  subscriptionStore.loading
                 "
                 class="min-w-[9.5rem] justify-center"
                 size="sm"
