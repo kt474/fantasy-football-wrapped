@@ -28,9 +28,9 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       const supabase = getSupabaseClient();
       const callbackUrl = new URL(window.location.href);
-      const hashParams = new URLSearchParams(callbackUrl.hash.replace(/^#/, ""));
       const recoveryType =
-        callbackUrl.searchParams.get("type") ?? hashParams.get("type");
+        callbackUrl.searchParams.get("type") ??
+        new URLSearchParams(callbackUrl.hash.replace(/^#/, "")).get("type");
       isPasswordRecovery.value = recoveryType === "recovery";
 
       const {
@@ -48,21 +48,6 @@ export const useAuthStore = defineStore("auth", () => {
           if (!error) {
             session.value = data.session;
             user.value = data.session?.user ?? null;
-          }
-        }
-
-        if (!session.value?.access_token) {
-          const accessToken = hashParams.get("access_token");
-          const refreshToken = hashParams.get("refresh_token");
-          if (accessToken && refreshToken) {
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
-            if (!error) {
-              session.value = data.session;
-              user.value = data.session?.user ?? null;
-            }
           }
         }
       }
