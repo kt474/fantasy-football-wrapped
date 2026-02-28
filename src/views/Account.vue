@@ -38,6 +38,8 @@ const signInEmail = ref("");
 const signInPassword = ref("");
 const signUpEmail = ref("");
 const signUpPassword = ref("");
+const recoveryPassword = ref("");
+const recoveryPasswordConfirm = ref("");
 const checkoutLoading = ref(false);
 const portalLoading = ref(false);
 
@@ -130,6 +132,13 @@ const canManageSubscription = computed(() => {
   return subscriptionStore.canManageSubscription;
 });
 
+const showPasswordRecoveryForm = computed(() => {
+  const mode = Array.isArray(route.query.mode)
+    ? route.query.mode[0]
+    : route.query.mode;
+  return authStore.isPasswordRecovery || mode === "reset-password";
+});
+
 const resetSignInForm = () => {
   signInEmail.value = "";
   signInPassword.value = "";
@@ -189,6 +198,48 @@ const signInWithGoogle = async () => {
     await authStore.signInWithGoogle(`${window.location.origin}/account`);
   } catch (error: any) {
     toast.error(`Unable to continue with Google. ${error?.message}`);
+  }
+};
+
+const sendPasswordResetEmail = async () => {
+  if (signInEmail.value === "") {
+    toast.error("Enter your email first, then click Forgot your password.");
+    return;
+  }
+  try {
+    await authStore.sendPasswordResetEmail(
+      signInEmail.value,
+      [window.location.origin, "/account?mode=reset-password"].join("")
+    );
+    toast.success("Password reset email sent. Check your inbox.");
+  } catch (error: any) {
+    toast.error(`Unable to send reset email. ${error?.message}`);
+  }
+};
+
+const resetPassword = async () => {
+  if (recoveryPassword.value.length < 6) {
+    toast.error("Password must be at least 6 characters.");
+    return;
+  }
+  if (recoveryPassword.value !== recoveryPasswordConfirm.value) {
+    toast.error("Passwords do not match.");
+    return;
+  }
+
+  try {
+    await authStore.updatePassword(recoveryPassword.value);
+    recoveryPassword.value = "";
+    recoveryPasswordConfirm.value = "";
+    toast.success("Password updated. You can now sign in.");
+    const newQuery = { ...route.query };
+    delete newQuery.mode;
+    await router.replace({
+      path: route.path,
+      query: newQuery,
+    });
+  } catch (error: any) {
+    toast.error(`Unable to update password. ${error?.message}`);
   }
 };
 
@@ -322,7 +373,44 @@ onMounted(async () => {
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto">
     <div class="container mx-auto mt-4">
       <h1 class="mb-4 text-3xl font-semibold">Account</h1>
-      <div v-if="!authStore.isAuthenticated">
+      <div v-if="showPasswordRecoveryForm">
+        <Card class="max-w-sm">
+          <CardHeader>
+            <CardTitle>Reset your password</CardTitle>
+            <CardDescription>
+              Set a new password for your account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup>
+              <Field>
+                <FieldLabel for="new-password"> New password </FieldLabel>
+                <Input
+                  v-model="recoveryPassword"
+                  type="password"
+                  placeholder="New password"
+                  autocomplete="new-password"
+                />
+              </Field>
+              <Field>
+                <FieldLabel for="confirm-password">
+                  Confirm password
+                </FieldLabel>
+                <Input
+                  v-model="recoveryPasswordConfirm"
+                  type="password"
+                  placeholder="Confirm password"
+                  autocomplete="new-password"
+                />
+              </Field>
+              <Field>
+                <Button @click="resetPassword"> Update Password </Button>
+              </Field>
+            </FieldGroup>
+          </CardContent>
+        </Card>
+      </div>
+      <div v-else-if="!authStore.isAuthenticated">
         <Card v-if="showLogin" class="max-w-sm">
           <CardHeader>
             <CardTitle>Create an account</CardTitle>
@@ -417,12 +505,12 @@ onMounted(async () => {
               <Field>
                 <div class="flex items-center">
                   <FieldLabel for="password"> Password </FieldLabel>
-                  <!-- <a
-                      href="#"
-                      class="inline-block ml-auto text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </a> -->
+                  <a
+                    class="inline-block ml-auto text-sm cursor-pointer underline-offset-4 hover:underline"
+                    @click="sendPasswordResetEmail"
+                  >
+                    Forgot your password?
+                  </a>
                 </div>
                 <Input
                   v-model="signInPassword"
@@ -542,7 +630,8 @@ onMounted(async () => {
         v-if="
           authStore.isAuthenticated &&
           !subscriptionStore.isPremium &&
-          !subscriptionStore.loading
+          !subscriptionStore.loading &&
+          !showPasswordRecoveryForm
         "
         class="max-w-sm mt-4"
       >

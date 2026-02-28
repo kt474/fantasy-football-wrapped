@@ -8,6 +8,7 @@ export const useAuthStore = defineStore("auth", () => {
   const user = ref<User | null>(null);
   const loading = ref(false);
   const initialized = ref(false);
+  const isPasswordRecovery = ref(false);
 
   let unsubscribeAuthChange: (() => void) | null = null;
 
@@ -25,6 +26,9 @@ export const useAuthStore = defineStore("auth", () => {
     const supabase = getSupabaseClient();
     const callbackUrl = new URL(window.location.href);
     const hashParams = new URLSearchParams(callbackUrl.hash.replace(/^#/, ""));
+    const recoveryType =
+      callbackUrl.searchParams.get("type") ?? hashParams.get("type");
+    isPasswordRecovery.value = recoveryType === "recovery";
 
     const {
       data: { session: initialSession },
@@ -60,7 +64,10 @@ export const useAuthStore = defineStore("auth", () => {
       }
     }
 
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "PASSWORD_RECOVERY") {
+        isPasswordRecovery.value = true;
+      }
       session.value = nextSession;
       user.value = nextSession?.user ?? null;
     });
@@ -121,6 +128,41 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
+  const sendPasswordResetEmail = async (email: string, redirectTo?: string) => {
+    if (!isSupabaseConfigured()) {
+      throw new Error("Supabase auth is not configured.");
+    }
+    loading.value = true;
+    try {
+      const supabase = getSupabaseClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+      if (error) throw error;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    if (!isSupabaseConfigured()) {
+      throw new Error("Supabase auth is not configured.");
+    }
+    loading.value = true;
+    try {
+      const supabase = getSupabaseClient();
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      isPasswordRecovery.value = false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const clearPasswordRecovery = () => {
+    isPasswordRecovery.value = false;
+  };
+
   const signOut = async () => {
     if (!isSupabaseConfigured()) return;
     loading.value = true;
@@ -145,12 +187,16 @@ export const useAuthStore = defineStore("auth", () => {
     user,
     loading,
     initialized,
+    isPasswordRecovery,
     isAuthenticated,
     isConfigured,
     initialize,
     signInWithPassword,
     signUpWithPassword,
     signInWithGoogle,
+    sendPasswordResetEmail,
+    updatePassword,
+    clearPasswordRecovery,
     signOut,
     dispose,
   };
