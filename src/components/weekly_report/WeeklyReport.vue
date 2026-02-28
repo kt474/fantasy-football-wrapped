@@ -29,6 +29,8 @@ import {
 import WeeklyPreview from "./WeeklyPreview.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
+import MarkdownIt from "markdown-it";
+import DOMPurify from "dompurify";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -38,7 +40,6 @@ const props = defineProps<{
   regularSeasonLength: number;
 }>();
 
-const weeklyReport = ref<string>("");
 const rawWeeklyReport = ref<string>("");
 const playerNames = ref<Player[][]>([]);
 const benchPlayerNames = ref<Player[][]>([]);
@@ -49,8 +50,21 @@ const fetchingPlayers = ref(false);
 
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("analytical");
-const premiumWeeklyReport = ref<string>("");
 const rawPremiumWeeklyReport = ref<string>("");
+
+const md = new MarkdownIt({
+  html: false,
+  linkify: true,
+  breaks: true,
+});
+
+const renderedWeeklyReport = computed(() => {
+  return DOMPurify.sanitize(md.render(rawWeeklyReport.value));
+});
+
+const renderedPremiumWeeklyReport = computed(() => {
+  return DOMPurify.sanitize(md.render(rawPremiumWeeklyReport.value));
+});
 
 const weeks = computed(() => {
   if (
@@ -148,7 +162,6 @@ const fetchPlayerNames = async () => {
 
 const getPremiumReport = async () => {
   if (store.leagueIds.length > 0) {
-    premiumWeeklyReport.value = "";
     rawPremiumWeeklyReport.value = "";
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     let leagueMetadata: Record<string, string | number>;
@@ -182,12 +195,9 @@ const getPremiumReport = async () => {
     );
     premiumLoading.value = false;
     rawPremiumWeeklyReport.value = response.text;
-    premiumWeeklyReport.value = response.text
-      .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-      .replace(/\n/g, "<br>");
     store.addPremiumWeeklyReport(
       currentLeague.leagueId,
-      premiumWeeklyReport.value
+      rawPremiumWeeklyReport.value
     );
     localStorage.setItem(
       "leagueInfo",
@@ -223,10 +233,7 @@ const getReport = async () => {
     }
     const response = await generateReport(reportPrompt.value, leagueMetadata);
     rawWeeklyReport.value = response.text;
-    weeklyReport.value = response.text
-      .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-      .replace(/\n/g, "<br>");
-    store.addWeeklyReport(currentLeague.leagueId, weeklyReport.value);
+    store.addWeeklyReport(currentLeague.leagueId, rawWeeklyReport.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -256,19 +263,12 @@ onMounted(async () => {
     const savedText = store.leagueInfo[store.currentLeagueIndex].weeklyReport
       ? (store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "")
       : "";
-    weeklyReport.value = savedText;
-    rawWeeklyReport.value = savedText
-      .replace(/<b>(.*?)<\/b>/g, "**$1**")
-      .replace(/<br>/g, "\n");
-
+    rawWeeklyReport.value = savedText;
     const premiumSavedText = store.leagueInfo[store.currentLeagueIndex]
       .premiumWeeklyReport
       ? (store.leagueInfo[store.currentLeagueIndex].premiumWeeklyReport ?? "")
       : "";
-    premiumWeeklyReport.value = premiumSavedText;
-    rawPremiumWeeklyReport.value = premiumSavedText
-      .replace(/<b>(.*?)<\/b>/g, "**$1**")
-      .replace(/<br>/g, "\n");
+    rawPremiumWeeklyReport.value = premiumSavedText;
   }
 });
 
@@ -718,7 +718,7 @@ watch(
       store.leagueInfo[store.currentLeagueIndex].seasonType !== "Guillotine" &&
       weeks.value.length > 0
     ) {
-      weeklyReport.value = "";
+      rawWeeklyReport.value = "";
       loading.value = true;
       await fetchPlayerNames();
       await getReport();
@@ -729,7 +729,7 @@ watch(
     ) {
       await fetchPlayerNames();
     }
-    weeklyReport.value =
+    rawWeeklyReport.value =
       store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "";
   }
 );
@@ -875,8 +875,11 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     >Generate</Button
                   >
                 </div>
-                <div v-if="premiumWeeklyReport">
-                  <p v-html="premiumWeeklyReport" class="my-2.5"></p>
+                <div v-if="rawPremiumWeeklyReport">
+                  <div
+                    v-html="renderedPremiumWeeklyReport"
+                    class="my-2.5 report-content"
+                  ></div>
                   <p class="text-xs text-muted-foreground">
                     Generated using GPT-5.2. Information provided may not always
                     be accurate.
@@ -979,8 +982,11 @@ watch(() => currentWeek.value, fetchPlayerNames);
               </div>
             </TabsContent>
             <TabsContent value="Standard">
-              <div v-if="weeklyReport" class="max-w-5xl">
-                <p v-html="weeklyReport" class="mb-3"></p>
+              <div v-if="rawWeeklyReport" class="max-w-5xl">
+                <div
+                  v-html="renderedWeeklyReport"
+                  class="mb-3 report-content"
+                ></div>
                 <p class="text-xs text-muted-foreground">
                   Generated using GPT-5.1. Information provided may not always
                   be accurate.
@@ -1366,5 +1372,9 @@ watch(() => currentWeek.value, fetchPlayerNames);
   @media (width <= 640px) {
     min-width: 306px;
   }
+}
+
+:deep(.report-content p + p) {
+  margin-top: 1rem;
 }
 </style>
