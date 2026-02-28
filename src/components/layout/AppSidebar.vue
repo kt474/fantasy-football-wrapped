@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import type { SidebarProps } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
@@ -26,20 +27,30 @@ import {
   Users,
   Info,
   ScrollText,
-  FolderGit,
-  HandCoins,
-  MessageSquareMore,
   ShieldUser,
+  CircleUserRound,
+  BadgeCheck,
+  Handshake,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
 import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription";
 
 const store = useStore();
+const authStore = useAuthStore();
+const subStore = useSubscriptionStore();
 const route = useRoute();
 const router = useRouter();
 const props = defineProps<SidebarProps>();
 const { isMobile, setOpenMobile } = useSidebar();
+
+const currentUser = computed(() => {
+  if (authStore.isAuthenticated) {
+    return authStore.user?.email?.match(/^[^@]+(?=@)/)?.[0] ?? "";
+  }
+});
 
 const closeMobileSidebar = () => {
   if (isMobile.value) {
@@ -182,7 +193,9 @@ const data = {
               <SidebarMenuButton
                 v-else-if="!store.currentLeagueId"
                 as-child
-                :is-active="store.currentTab === childItem.title"
+                :is-active="
+                  store.currentTab === childItem.title && route.path === '/'
+                "
                 @click="changeTab(childItem.title)"
                 class="cursor-pointer"
               >
@@ -240,53 +253,6 @@ const data = {
               </router-link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <a
-                href="https://github.com/kt474/fantasy-football-wrapped"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <SidebarMenuButton as-child>
-                  <div>
-                    <FolderGit />
-                    Github
-                  </div>
-                </SidebarMenuButton>
-              </a>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <a
-                aria-label="buymeacoffee donation page"
-                href="https://buymeacoffee.com/kt474"
-                title="buymeacofee donation page"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <SidebarMenuButton as-child>
-                  <div>
-                    <HandCoins />
-                    Donate
-                  </div>
-                </SidebarMenuButton>
-              </a>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <a
-                aria-label="discord community invite"
-                href="https://discord.gg/sSVwNhyv7U"
-                title="discord community invite"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <SidebarMenuButton as-child>
-                  <div>
-                    <MessageSquareMore />
-                    Discord
-                  </div>
-                </SidebarMenuButton>
-              </a>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <router-link
                 :to="{ path: '/privacy', query: $route.query }"
                 class="cursor-pointer"
@@ -302,6 +268,52 @@ const data = {
                   </div>
                 </SidebarMenuButton></router-link
               >
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <router-link
+                :to="{ path: '/terms', query: $route.query }"
+                class="cursor-pointer"
+                @click="RouteTabChange"
+              >
+                <SidebarMenuButton
+                  as-child
+                  :is-active="route.path === '/terms'"
+                >
+                  <div>
+                    <Handshake />
+                    Terms of Service
+                  </div>
+                </SidebarMenuButton></router-link
+              >
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <router-link
+                :to="{ path: '/account', query: $route.query }"
+                class="cursor-pointer"
+                @click="RouteTabChange"
+              >
+                <SidebarMenuButton
+                  :is-active="route.path === '/account'"
+                  as-child
+                >
+                  <div>
+                    <CircleUserRound />
+                    Account
+                    <span
+                      v-if="authStore.isAuthenticated && !subStore.isPremium"
+                      >({{ currentUser?.slice(0, 16) }})</span
+                    >
+                    <span
+                      class="flex"
+                      v-else-if="
+                        authStore.isAuthenticated && subStore.isPremium
+                      "
+                      >({{ currentUser?.slice(0, 16)
+                      }}<BadgeCheck class="mt-0.5 ml-2" :size="15" />)</span
+                    >
+                  </div>
+                </SidebarMenuButton>
+              </router-link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>

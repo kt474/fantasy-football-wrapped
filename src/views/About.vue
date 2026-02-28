@@ -5,9 +5,12 @@ import { useStore } from "@/store/store";
 import Switch from "@/components/ui/switch/Switch.vue";
 import { useRoute } from "vue-router";
 import Separator from "@/components/ui/separator/Separator.vue";
+import { toast } from "vue-sonner";
+import { LeagueInfoType } from "../types/types";
+import { getData, getLeague, inputLeague } from "../api/api";
 
 const route = useRoute();
-const leagueCount = ref(12009); // initial load current unique league count value 2/23/26
+const leagueCount = ref(12047); // initial load current unique league count value 2/26/26
 
 onMounted(async () => {
   const leagueId = route.query.leagueId;
@@ -18,9 +21,52 @@ onMounted(async () => {
       leagueCount.value = newCount;
     }
   }
+  await loadSavedLeagues();
 });
 
 const store = useStore();
+
+const loadSavedLeagues = async () => {
+  try {
+    if (localStorage.leagueInfo) {
+      const savedLeagues = JSON.parse(localStorage.leagueInfo);
+      await Promise.all(
+        savedLeagues.map(async (league: LeagueInfoType) => {
+          if (!store.leagueIds.includes(league.leagueId)) {
+            store.updateLeagueInfo(league);
+          }
+        })
+      );
+      store.updateCurrentLeagueId(localStorage.currentLeagueId);
+      store.updateLoadingLeague("");
+    }
+    const leagueId = Array.isArray(route.query.leagueId)
+      ? route.query.leagueId[0]
+      : route.query.leagueId;
+    // sometimes on refresh the leagueId in the URL becomes undefined
+    if (leagueId && !store.leagueIds.includes(leagueId)) {
+      const checkInput = await getLeague(leagueId);
+      if (checkInput["name"]) {
+        store.updateCurrentLeagueId(leagueId);
+        store.updateLoadingLeague(checkInput["name"]);
+        const league = await getData(leagueId);
+        store.updateLeagueInfo(league);
+        await inputLeague(
+          leagueId,
+          league.name,
+          league.totalRosters,
+          league.seasonType,
+          league.season
+        );
+        store.updateLoadingLeague("");
+      } else {
+        toast.error("Invalid League ID");
+      }
+    }
+  } catch {
+    toast.error("Error fetching data. Please try refreshing the page.");
+  }
+};
 
 watch(
   () => store.showUsernames,
@@ -87,7 +133,15 @@ watch(
             I will always try to keep this site free (and ad free) but as the
             userbase grows, the hosting and weekly AI recap costs also grow, so
             if you find value in ffwrapped, any donations are greatly
-            appreciated.
+            appreciated. If you’d like to support ffwrapped beyond donations,
+            consider subscribing to the
+            <router-link
+              :to="{ path: '/account', query: $route.query }"
+              class="font-medium cursor-pointer text-primary hover:underline"
+            >
+              Premium tier</router-link
+            >. Your support helps keep the platform running and improving for
+            everyone.
           </p>
           <div class="flex flex-wrap justify-evenly sm:flex-nowrap">
             <a

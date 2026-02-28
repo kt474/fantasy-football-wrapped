@@ -105,14 +105,16 @@ const promptData = computed(() => {
 <template>
   <div class="p-4 mx-0 mt-3 rounded bg-secondary sm:mx-2">
     <h3 class="font-semibold">Matchup Preview</h3>
-    <Button v-if="preview === ''" @click="getPreview"> Generate </Button>
+    <Button class="mt-2" v-if="preview === ''" @click="getPreview">
+      Generate
+    </Button>
     <div v-if="preview" class="mt-1">
       <p>{{ preview }}</p>
       <p
         v-if="preview !== 'Unable to generate preview. Please try again later.'"
         class="mt-1 text-xs text-muted-foreground"
       >
-        Generated using GPT-4.1-mini. Information provided may not always be
+        Generated using GPT-5-mini. Information provided may not always be
         accurate.
       </p>
     </div>

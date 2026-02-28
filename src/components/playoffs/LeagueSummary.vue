@@ -176,7 +176,7 @@ const copyReport = () => {
       <p v-html="summary" class="max-w-5xl my-3"></p>
 
       <p class="text-xs text-muted-foreground">
-        Generated using GPT-4.1. Information provided may not always be
+        Generated using GPT-5.1. Information provided may not always be
         accurate.
       </p>
       <p class="mb-4 text-xs text-muted-foreground">

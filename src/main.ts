@@ -12,6 +12,10 @@ import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import About from "./views/About.vue";
 import NotFound from "./views/404.vue";
 import Home from "./views/Home.vue";
+import Account from "./views/Account.vue";
+import { useAuthStore } from "./store/auth";
+import { useSubscriptionStore } from "./store/subscription";
+import Terms from "./views/Terms.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -36,7 +40,23 @@ const routes = [
     component: PrivacyPolicy,
     meta: {
       title: "Privacy Policy",
-      description: "We don’t collect or store your personal information.",
+      description: "Privacy policy.",
+    },
+  },
+  {
+    path: "/terms",
+    component: Terms,
+    meta: {
+      title: "Privacy Policy",
+      description: "Terms of service.",
+    },
+  },
+  {
+    path: "/account",
+    component: Account,
+    meta: {
+      title: "Account",
+      description: "Account page",
     },
   },
   {
@@ -59,6 +79,21 @@ const app = createApp(App);
 const ApexChart = defineAsyncComponent(() => import("vue3-apexcharts"));
 
 app.use(pinia);
+const authStore = useAuthStore(pinia);
+authStore.initialize();
+const subscriptionStore = useSubscriptionStore(pinia);
+subscriptionStore.initialize();
+
+router.beforeEach(async (to) => {
+  if (!authStore.initialized) {
+    await authStore.initialize();
+  }
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return { path: "/" };
+  }
+  return true;
+});
+
 app.component("apexchart", ApexChart);
 app.use(router);
 // app.use(posthogPlugin);
