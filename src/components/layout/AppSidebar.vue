@@ -30,6 +30,7 @@ import {
   ShieldUser,
   CircleUserRound,
   BadgeCheck,
+  Handshake,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
@@ -264,6 +265,23 @@ const data = {
                   <div>
                     <ShieldUser />
                     Privacy Policy
+                  </div>
+                </SidebarMenuButton></router-link
+              >
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <router-link
+                :to="{ path: '/terms', query: $route.query }"
+                class="cursor-pointer"
+                @click="RouteTabChange"
+              >
+                <SidebarMenuButton
+                  as-child
+                  :is-active="route.path === '/terms'"
+                >
+                  <div>
+                    <Handshake />
+                    Terms of Service
                   </div>
                 </SidebarMenuButton></router-link
               >

@@ -8,6 +8,7 @@ export const useAuthStore = defineStore("auth", () => {
   const user = ref<User | null>(null);
   const loading = ref(false);
   const initialized = ref(false);
+  const initializing = ref(false);
   const isPasswordRecovery = ref(false);
 
   let unsubscribeAuthChange: (() => void) | null = null;
@@ -16,63 +17,72 @@ export const useAuthStore = defineStore("auth", () => {
   const isConfigured = computed(() => isSupabaseConfigured());
 
   const initialize = async () => {
-    if (initialized.value) return;
-    initialized.value = true;
+    if (initialized.value || initializing.value) return;
 
     if (!isSupabaseConfigured()) {
+      initialized.value = true;
       return;
     }
 
-    const supabase = getSupabaseClient();
-    const callbackUrl = new URL(window.location.href);
-    const hashParams = new URLSearchParams(callbackUrl.hash.replace(/^#/, ""));
-    const recoveryType =
-      callbackUrl.searchParams.get("type") ?? hashParams.get("type");
-    isPasswordRecovery.value = recoveryType === "recovery";
+    initializing.value = true;
+    try {
+      const supabase = getSupabaseClient();
+      const callbackUrl = new URL(window.location.href);
+      const hashParams = new URLSearchParams(callbackUrl.hash.replace(/^#/, ""));
+      const recoveryType =
+        callbackUrl.searchParams.get("type") ?? hashParams.get("type");
+      isPasswordRecovery.value = recoveryType === "recovery";
 
-    const {
-      data: { session: initialSession },
-    } = await supabase.auth.getSession();
+      const {
+        data: { session: initialSession },
+      } = await supabase.auth.getSession();
 
-    session.value = initialSession;
-    user.value = initialSession?.user ?? null;
+      session.value = initialSession;
+      user.value = initialSession?.user ?? null;
 
-    if (!initialSession) {
-      const authCode = callbackUrl.searchParams.get("code");
-      if (authCode) {
-        const { data, error } =
-          await supabase.auth.exchangeCodeForSession(authCode);
-        if (!error) {
-          session.value = data.session;
-          user.value = data.session?.user ?? null;
-        }
-      }
-
-      if (!session.value?.access_token) {
-        const accessToken = hashParams.get("access_token");
-        const refreshToken = hashParams.get("refresh_token");
-        if (accessToken && refreshToken) {
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
+      if (!initialSession) {
+        const authCode = callbackUrl.searchParams.get("code");
+        if (authCode) {
+          const { data, error } =
+            await supabase.auth.exchangeCodeForSession(authCode);
           if (!error) {
             session.value = data.session;
             user.value = data.session?.user ?? null;
           }
         }
+
+        if (!session.value?.access_token) {
+          const accessToken = hashParams.get("access_token");
+          const refreshToken = hashParams.get("refresh_token");
+          if (accessToken && refreshToken) {
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+            if (!error) {
+              session.value = data.session;
+              user.value = data.session?.user ?? null;
+            }
+          }
+        }
       }
+
+      const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
+        if (event === "PASSWORD_RECOVERY") {
+          isPasswordRecovery.value = true;
+        }
+        session.value = nextSession;
+        user.value = nextSession?.user ?? null;
+      });
+
+      unsubscribeAuthChange = () => data.subscription.unsubscribe();
+      initialized.value = true;
+    } catch (error) {
+      initialized.value = false;
+      console.error("Failed to initialize auth store:", error);
+    } finally {
+      initializing.value = false;
     }
-
-    const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      if (event === "PASSWORD_RECOVERY") {
-        isPasswordRecovery.value = true;
-      }
-      session.value = nextSession;
-      user.value = nextSession?.user ?? null;
-    });
-
-    unsubscribeAuthChange = () => data.subscription.unsubscribe();
   };
 
   const signInWithPassword = async (email: string, password: string) => {

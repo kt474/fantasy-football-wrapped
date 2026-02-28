@@ -73,32 +73,34 @@ const loadSavedLeagues = async () => {
         privacy. This Privacy Policy explains how we collect, use, and share
         information when you use our website, ffwrapped.com.
         <p class="my-3 text-xl font-semibold">Information Collection and Use</p>
-        We do not collect any personal data from our users. You can browse and
-        use our website without providing any personal information.
-        <p class="my-3 text-xl font-semibold">Email Collection</p>
-        If you choose to subscribe to our newsletter or updates, we will collect
-        your email address. Your email will only be used to send you the content
-        you subscribed to, such as updates, newsletters, or promotional
-        materials. We will not share or sell your email address to third
-        parties. You can unsubscribe at any time by clicking the "unsubscribe"
-        link in any email we send.
-        <p class="my-3 text-xl font-semibold">Cookies</p>
-        We do not use cookies on our website.
+        You can browse most of ffwrapped without creating an account. If you
+        create an account or sign in, we process account data through Supabase
+        Authentication, including your email address, authentication provider,
+        and a user identifier.
+        <p class="my-3 text-xl font-semibold">Subscriptions and Billing</p>
+        If you start or manage a paid subscription, billing is processed by
+        Stripe. We do not store full payment card details on ffwrapped. We may
+        store and use subscription metadata (for example, subscription status
+        and billing period dates) to enable premium features and manage access.
+        <p class="my-3 text-xl font-semibold">Session Storage and Cookies</p>
+        Authentication and app state may use local browser storage and/or
+        storage mechanisms required by third-party providers (such as Supabase
+        and Stripe) to keep you signed in, secure your session, and support
+        account and billing flows.
         <p class="my-3 text-xl font-semibold">Analytics</p>
         To improve user experience and understand how our website is used, we
-        utilize PostHog, Umami, and Vercel Web Analytics. These services helps
-        us analyze traffic and usage patterns on our site without collecting any
-        personal data. The information collected is purely for the purpose of
-        understanding user behavior and enhancing our services. Neither of these
-        services use cookies.
+        utilize PostHog and Vercel Web Analytics. These services helps us
+        analyze traffic and usage patterns on our site. The information
+        collected is used to understand user behavior and improve the product.
         <p class="my-3 text-xl font-semibold">Third-Party Services</p>
-        Our website may include links to third-party services or use third-party
-        analytics tools. These services have their own privacy policies, and we
-        encourage you to review them.
+        Our website may include links to third-party services and relies on
+        third-party providers including Supabase (authentication), Stripe
+        (billing), and analytics tools. These services have their own privacy
+        policies, and we encourage you to review them.
         <p class="my-3 text-xl font-semibold">Changes to This Privacy Policy</p>
         We may update this Privacy Policy from time to time. Any changes will be
         posted on this page, and the "Last updated" date will be revised
-        accordingly. Last updated: October 4, 2025.
+        accordingly. Last updated: February 28, 2026.
         <p class="my-3 text-xl font-semibold">Contact Us</p>
         If you have any questions or concerns about this Privacy Policy, please
         contact us at this

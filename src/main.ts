@@ -15,6 +15,7 @@ import Home from "./views/Home.vue";
 import Account from "./views/Account.vue";
 import { useAuthStore } from "./store/auth";
 import { useSubscriptionStore } from "./store/subscription";
+import Terms from "./views/Terms.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -39,7 +40,15 @@ const routes = [
     component: PrivacyPolicy,
     meta: {
       title: "Privacy Policy",
-      description: "We don’t collect or store your personal information.",
+      description: "Privacy policy.",
+    },
+  },
+  {
+    path: "/terms",
+    component: Terms,
+    meta: {
+      title: "Privacy Policy",
+      description: "Terms of service.",
     },
   },
   {
