@@ -9,3 +9,10 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+declare module "markdown-it" {
+  export default class MarkdownIt {
+    constructor(...args: any[]);
+    render(src: string, env?: unknown): string;
+  }
+}
