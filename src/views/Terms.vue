@@ -63,8 +63,8 @@ const loadSavedLeagues = async () => {
       <div class="max-w-4xl text-base leading-relaxed">
         <p class="mb-3 text-xl font-semibold">Acceptance of Terms</p>
         By accessing or using ffwrapped ("Service"), you agree to be bound by
-        these Terms of Service ("Terms"). If you do not agree to these Terms,
-        do not use the Service.
+        these Terms of Service ("Terms"). If you do not agree to these Terms, do
+        not use the Service.
 
         <p class="my-3 text-xl font-semibold">Eligibility and Accounts</p>
         You must provide accurate information when creating an account and keep
@@ -74,10 +74,12 @@ const loadSavedLeagues = async () => {
 
         <p class="my-3 text-xl font-semibold">Service Description</p>
         ffwrapped provides fantasy football analysis, reports, and related
-        features. Some features are free and some are available only with a
-        paid subscription.
+        features. Some features are free and some are available only with a paid
+        subscription.
 
-        <p class="my-3 text-xl font-semibold">Subscriptions, Billing, and Trial</p>
+        <p class="my-3 text-xl font-semibold">
+          Subscriptions, Billing, and Trial
+        </p>
         Paid features are billed as recurring subscriptions through Stripe. By
         starting a subscription, you authorize recurring charges for the plan
         you selected until canceled. Prices, billing intervals, and trial terms
@@ -99,15 +101,15 @@ const loadSavedLeagues = async () => {
         using the Service for unlawful activity.
 
         <p class="my-3 text-xl font-semibold">Intellectual Property</p>
-        The Service, including site content, branding, and software, is owned
-        by ffwrapped or its licensors and is protected by applicable law. You
-        may not copy, modify, distribute, sell, or lease any part of the
-        Service except as permitted by law.
+        The Service, including site content, branding, and software, is owned by
+        ffwrapped or its licensors and is protected by applicable law. You may
+        not copy, modify, distribute, sell, or lease any part of the Service
+        except as permitted by law.
 
         <p class="my-3 text-xl font-semibold">Third-Party Services</p>
         The Service relies on third-party providers, including Supabase
-        (authentication), Stripe (billing), and analytics providers. Your use
-        of those services may be subject to their separate terms and privacy
+        (authentication), Stripe (billing), and analytics providers. Your use of
+        those services may be subject to their separate terms and privacy
         policies.
 
         <p class="my-3 text-xl font-semibold">Disclaimers</p>
@@ -127,11 +129,13 @@ const loadSavedLeagues = async () => {
         operators from claims, liabilities, damages, losses, and expenses
         arising out of your use of the Service or violation of these Terms.
 
-        <p class="my-3 text-xl font-semibold">Changes to the Service and Terms</p>
+        <p class="my-3 text-xl font-semibold">
+          Changes to the Service and Terms
+        </p>
         We may modify, suspend, or discontinue any part of the Service at any
-        time. We may also update these Terms from time to time. Continued use
-        of the Service after changes become effective constitutes acceptance of
-        the updated Terms.
+        time. We may also update these Terms from time to time. Continued use of
+        the Service after changes become effective constitutes acceptance of the
+        updated Terms.
 
         <p class="my-3 text-xl font-semibold">Governing Law</p>
         These Terms are governed by and construed in accordance with applicable
@@ -141,11 +145,10 @@ const loadSavedLeagues = async () => {
         <p class="my-3 text-xl font-semibold">Contact</p>
         If you have questions about these Terms, contact:
         <a
-          href="mailto:kevin@ffwrapped.com?subject=terms of service"
+          href="mailto:kt474@cornell.edu?subject=terms of service"
           class="font-medium text-primary hover:underline"
-          >kevin@ffwrapped.com</a
-        >.
-        <br /><br />
+          >kt474@cornell.edu</a
+        >. <br /><br />
         Last updated: February 28, 2026.
       </div>
     </div>

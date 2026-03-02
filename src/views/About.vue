@@ -115,7 +115,7 @@ watch(
             >
             send an
             <a
-              href="mailto:kevin@ffwrapped.com?subject=ffwrapped request"
+              href="mailto:kt474@cornell.edu?subject=ffwrapped request"
               class="font-medium text-primary hover:underline"
               >email,</a
             >
