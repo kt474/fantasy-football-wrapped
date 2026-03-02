@@ -845,14 +845,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
             </div>
             <p v-if="weeks.length === 0">Please come back after week 1!</p>
             <TabsContent value="Premium">
-              <div
-                v-if="
-                  authStore.isAuthenticated &&
-                  store.leagueIds.length !== 0 &&
-                  subscriptionStore.isPremium
-                "
-              >
-                <div class="flex">
+              <div v-if="store.leagueIds.length !== 0">
+                <div class="flex mb-4">
                   <div>
                     <p class="mb-1 text-xs">Commentary Style</p>
                     <Select v-model="premiumCommentaryStyle">
@@ -870,6 +864,9 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   </div>
                   <Button
                     @click="getPremiumReport"
+                    :disabled="
+                      !authStore.isAuthenticated || !subscriptionStore.isPremium
+                    "
                     type="button"
                     class="mt-5 ml-2"
                     >Generate</Button
@@ -964,6 +961,20 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     </div>
                     <span class="sr-only">Loading...</span>
                   </div>
+                </div>
+                <div v-else>
+                  <p class="max-w-2xl">
+                    Premium weekly reports include deeper analysis, a newer AI
+                    model, and customizable commentary styles. Available with an
+                    account and
+                    <router-link
+                      :to="{ path: '/account', query: $route.query }"
+                      class="font-medium cursor-pointer text-primary hover:underline"
+                      @click="store.currentTab = ''"
+                    >
+                      Premium subscription</router-link
+                    >.
+                  </p>
                 </div>
               </div>
               <div v-else>

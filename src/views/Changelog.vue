@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "3/02/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Users can now create an account with email/password or Google sign in. Accounts allow users to subscribe to the premium tier of features.",
+        ],
+      },
+    ],
+  },
+  {
     date: "2/20/26",
     content: [
       {
