@@ -3,13 +3,10 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
-import { useStore } from "@/store/store";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
 import { authenticatedFetch } from "@/lib/authFetch";
-import { LeagueInfoType } from "../types/types";
-import { getData, getLeague, inputLeague } from "../api/api";
 import {
   Card,
   CardContent,
@@ -28,7 +25,6 @@ import {
 import { Check } from "lucide-vue-next";
 import Separator from "@/components/ui/separator/Separator.vue";
 
-const store = useStore();
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
 const route = useRoute();
@@ -38,6 +34,8 @@ const signInEmail = ref("");
 const signInPassword = ref("");
 const signUpEmail = ref("");
 const signUpPassword = ref("");
+const signUpOtpCode = ref("");
+const pendingSignUpEmail = ref("");
 const recoveryPassword = ref("");
 const recoveryPasswordConfirm = ref("");
 const checkoutLoading = ref(false);
@@ -138,6 +136,7 @@ const showPasswordRecoveryForm = computed(() => {
     : route.query.mode;
   return authStore.isPasswordRecovery || mode === "reset-password";
 });
+const showSignUpOtpForm = computed(() => pendingSignUpEmail.value !== "");
 
 const resetSignInForm = () => {
   signInEmail.value = "";
@@ -147,6 +146,11 @@ const resetSignInForm = () => {
 const resetSignUpForm = () => {
   signUpEmail.value = "";
   signUpPassword.value = "";
+};
+
+const resetSignUpOtpForm = () => {
+  signUpOtpCode.value = "";
+  pendingSignUpEmail.value = "";
 };
 
 const signIn = async () => {
@@ -174,11 +178,42 @@ const signUp = async () => {
         signUpEmail.value,
         signUpPassword.value
       );
-      toast.success("Account created. Check your email for confirmation.");
+      pendingSignUpEmail.value = signUpEmail.value;
+      toast.success("Account created. Enter the code from your email.");
       resetSignUpForm();
     } catch (error: any) {
       toast.error(`Unable to create account. ${error?.message}`);
     }
+};
+
+const verifySignUpOtp = async () => {
+  if (pendingSignUpEmail.value === "" || signUpOtpCode.value === "") {
+    toast.error("Enter the verification code from your email.");
+    return;
+  }
+  try {
+    await authStore.verifySignUpOtp(
+      pendingSignUpEmail.value,
+      signUpOtpCode.value
+    );
+    toast.success("Email verified and signed in.");
+    resetSignUpOtpForm();
+  } catch (error: any) {
+    toast.error(`Unable to verify code. ${error?.message}`);
+  }
+};
+
+const resendSignUpOtp = async () => {
+  if (pendingSignUpEmail.value === "") {
+    toast.error("Create an account first.");
+    return;
+  }
+  try {
+    await authStore.resendSignUpOtp(pendingSignUpEmail.value);
+    toast.success("Verification code resent.");
+  } catch (error: any) {
+    toast.error(`Unable to resend code. ${error?.message}`);
+  }
 };
 
 const signOut = async () => {
@@ -321,50 +356,7 @@ const handleCheckoutQuery = async () => {
   }
 };
 
-const loadSavedLeagues = async () => {
-  try {
-    if (localStorage.leagueInfo) {
-      const savedLeagues = JSON.parse(localStorage.leagueInfo);
-      await Promise.all(
-        savedLeagues.map(async (league: LeagueInfoType) => {
-          if (!store.leagueIds.includes(league.leagueId)) {
-            store.updateLeagueInfo(league);
-          }
-        })
-      );
-      store.updateCurrentLeagueId(localStorage.currentLeagueId);
-      store.updateLoadingLeague("");
-    }
-    const leagueId = Array.isArray(route.query.leagueId)
-      ? route.query.leagueId[0]
-      : route.query.leagueId;
-    // sometimes on refresh the leagueId in the URL becomes undefined
-    if (leagueId && !store.leagueIds.includes(leagueId)) {
-      const checkInput = await getLeague(leagueId);
-      if (checkInput["name"]) {
-        store.updateCurrentLeagueId(leagueId);
-        store.updateLoadingLeague(checkInput["name"]);
-        const league = await getData(leagueId);
-        store.updateLeagueInfo(league);
-        await inputLeague(
-          leagueId,
-          league.name,
-          league.totalRosters,
-          league.seasonType,
-          league.season
-        );
-        store.updateLoadingLeague("");
-      } else {
-        toast.error("Invalid League ID");
-      }
-    }
-  } catch {
-    toast.error("Error fetching data. Please try refreshing the page.");
-  }
-};
-
 onMounted(async () => {
-  await loadSavedLeagues();
   subscriptionStore.initialize();
   await handleCheckoutQuery();
 });
@@ -411,7 +403,48 @@ onMounted(async () => {
         </Card>
       </div>
       <div v-else-if="!authStore.isAuthenticated">
-        <Card v-if="showLogin" class="max-w-sm">
+        <Card v-if="showSignUpOtpForm" class="max-w-sm">
+          <CardHeader>
+            <CardTitle>Verify your email</CardTitle>
+            <CardDescription>
+              Enter the code sent to {{ pendingSignUpEmail }}.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup>
+              <Field>
+                <FieldLabel for="verification-code">
+                  Verification code
+                </FieldLabel>
+                <Input
+                  v-model="signUpOtpCode"
+                  type="text"
+                  placeholder="123456"
+                  autocomplete="one-time-code"
+                />
+              </Field>
+              <Field>
+                <Button :disabled="authStore.loading" @click="verifySignUpOtp">
+                  Verify code
+                </Button>
+                <Button
+                  variant="outline"
+                  :disabled="authStore.loading"
+                  @click="resendSignUpOtp"
+                >
+                  Resend code
+                </Button>
+              </Field>
+              <FieldDescription class="text-center">
+                Wrong email?
+                <a class="cursor-pointer" @click="resetSignUpOtpForm"
+                  >Use a different email</a
+                >
+              </FieldDescription>
+            </FieldGroup>
+          </CardContent>
+        </Card>
+        <Card v-else-if="showLogin" class="max-w-sm">
           <CardHeader>
             <CardTitle>Create an account</CardTitle>
             <CardDescription>

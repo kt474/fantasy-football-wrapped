@@ -75,11 +75,9 @@ watch(
       }
       if (store.currentLeagueId !== "undefined") {
         // update league id in url
-        // sometimes errors to undefined, TODO
-        // router.replace({
-        //   query: { ...route.query, leagueId: store.currentLeagueId },
-        // });
-        store.currentTab = "Standings";
+        router.replace({
+          query: { ...route.query, leagueId: store.currentLeagueId },
+        });
       } else {
         localStorage.removeItem("currentLeagueId");
         localStorage.removeItem("leagueInfo");

@@ -104,6 +104,43 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
+  const verifySignUpOtp = async (email: string, token: string) => {
+    if (!isSupabaseConfigured()) {
+      throw new Error("Supabase auth is not configured.");
+    }
+    loading.value = true;
+    try {
+      const supabase = getSupabaseClient();
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: "signup",
+      });
+      if (error) throw error;
+      session.value = data.session;
+      user.value = data.user ?? null;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const resendSignUpOtp = async (email: string) => {
+    if (!isSupabaseConfigured()) {
+      throw new Error("Supabase auth is not configured.");
+    }
+    loading.value = true;
+    try {
+      const supabase = getSupabaseClient();
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+      });
+      if (error) throw error;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const signInWithGoogle = async (redirectTo?: string) => {
     if (!isSupabaseConfigured()) {
       throw new Error("Supabase auth is not configured.");
@@ -188,6 +225,8 @@ export const useAuthStore = defineStore("auth", () => {
     initialize,
     signInWithPassword,
     signUpWithPassword,
+    verifySignUpOtp,
+    resendSignUpOtp,
     signInWithGoogle,
     sendPasswordResetEmail,
     updatePassword,

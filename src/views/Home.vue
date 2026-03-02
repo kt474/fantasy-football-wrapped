@@ -9,11 +9,10 @@ import Table from "../components/standings/Table.vue";
 import { useStore } from "../store/store";
 import { getData, getLeague, inputLeague } from "../api/api";
 import { LeagueInfoType } from "../types/types";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
 
 const route = useRoute();
-const router = useRouter();
 const store = useStore();
 
 const showLoading = ref(false);
@@ -92,11 +91,6 @@ onMounted(async () => {
       localStorage.removeItem("currentLeagueId");
       localStorage.removeItem("leagueInfo");
       toast.error("Error fetching data. Please try refreshing the page.");
-      // this league has somehow been cached in google sitelinks
-    } else if (leagueId === "1057743221285101568") {
-      const newQuery = { ...route.query };
-      delete newQuery.leagueId;
-      router.replace({ path: route.path, query: newQuery });
     }
   } catch {
     toast.error("Error fetching data. Please try refreshing the page.");
