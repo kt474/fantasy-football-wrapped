@@ -13,18 +13,28 @@ const route = useRoute();
 const leagues = computed(() => {
   return store.leagueInfo;
 });
+
+const hasLeagueIdInUrl = computed(() => {
+  const leagueId = route.query.leagueId;
+  const normalizedLeagueId = Array.isArray(leagueId) ? leagueId[0] : leagueId;
+  return Boolean(normalizedLeagueId) && normalizedLeagueId !== "undefined";
+});
+
+const showAddLeagueButton = computed(() => {
+  const isHomeTabOnHomeRoute = route.path === "/" && store.currentTab === "Home";
+  return !hasLeagueIdInUrl.value && !isHomeTabOnHomeRoute;
+});
 </script>
 <template>
   <div class="flex flex-1 min-w-0">
     <div class="flex w-full overflow-auto no-scrollbar">
-      <LeagueSwitcher v-if="leagues.length > 0" :leagues="leagues" />
+      <LeagueSwitcher
+        v-if="hasLeagueIdInUrl && route.path === '/'"
+        :leagues="leagues"
+      />
       <div
         class="relative flex items-center w-full"
-        v-else-if="
-          store.currentTab !== 'Home' &&
-          !store.currentLeagueId &&
-          !store.showLeaguesList
-        "
+        v-else-if="showAddLeagueButton"
       >
         <Dialog>
           <template #trigger>

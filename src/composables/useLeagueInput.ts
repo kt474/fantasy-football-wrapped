@@ -1,5 +1,5 @@
 import { computed, onMounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useStore } from "@/store/store";
 import type { LeagueInfoType } from "@/types/types";
 import {
@@ -23,6 +23,7 @@ export const SEASON_YEAR_OPTIONS = [
 export const useLeagueInput = () => {
   const store = useStore();
   const router = useRouter();
+  const route = useRoute();
 
   const leagueIdInput = ref("");
   const inputType = ref("League ID");
@@ -35,8 +36,15 @@ export const useLeagueInput = () => {
     return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
   });
 
-  const updateURL = (leagueID: string) => {
-    router.replace({ query: { leagueId: leagueID } });
+  const resetRoute = async () => {
+    if (route.path !== "/") {
+      const currentQueryParams = route.query;
+      await router.replace({ path: "/", query: currentQueryParams });
+    }
+  };
+
+  const updateURL = async (leagueID: string) => {
+    await router.replace({ path: "/", query: { ...route.query, leagueId: leagueID } });
   };
 
   const clearError = () => {
@@ -81,6 +89,7 @@ export const useLeagueInput = () => {
       inputUsername(user.display_name, seasonYear.value);
       store.currentTab = "Standings";
       localStorage.currentTab = "Standings";
+      await resetRoute();
       return;
     }
 
@@ -108,6 +117,7 @@ export const useLeagueInput = () => {
     } else {
       store.currentTab = "Standings";
       localStorage.currentTab = "Standings";
+      await resetRoute();
       showErrorMsg.value = false;
       store.updateLoadingLeague(checkInput["name"]);
       store.updateCurrentLeagueId(leagueIdInput.value);
@@ -116,7 +126,7 @@ export const useLeagueInput = () => {
       store.leagueSubmitted = true;
       store.updateShowInput(false);
       store.updateLoadingLeague("");
-      updateURL(leagueIdInput.value);
+      await updateURL(leagueIdInput.value);
       await inputLeague(
         leagueIdInput.value,
         newLeagueInfo.name,
