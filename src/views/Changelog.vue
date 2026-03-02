@@ -600,7 +600,7 @@ const data = [
 ];
 </script>
 <template>
-  <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto">
+  <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto sm:ml-8">
     <div class="container mx-auto mt-4">
       <h1 class="mb-4 text-3xl font-semibold">Changelog</h1>
       <div v-for="entry in data" class="my-2 ml-1">

@@ -5,7 +5,7 @@ import CardContainer from "./components/util/CardContainer.vue";
 import { useStore } from "./store/store";
 import { LeagueInfoType } from "./types/types";
 import { inject } from "@vercel/analytics";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import { Separator } from "@/components/ui/separator";
 import {
@@ -20,6 +20,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "vue-sonner";
 
 const router = useRouter();
+const route = useRoute();
 const store = useStore();
 
 const systemDarkMode = window.matchMedia(
@@ -75,7 +76,10 @@ watch(
       if (store.currentLeagueId !== "undefined") {
         // update league id in url
         // sometimes errors to undefined, TODO
-        router.replace({ query: { leagueId: store.currentLeagueId } });
+        // router.replace({
+        //   query: { ...route.query, leagueId: store.currentLeagueId },
+        // });
+        store.currentTab = "Standings";
       } else {
         localStorage.removeItem("currentLeagueId");
         localStorage.removeItem("leagueInfo");
