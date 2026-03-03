@@ -47,6 +47,42 @@ const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
 );
 const checkoutApiPath = `${backendBaseUrl}/api/stripe/createCheckoutSession`;
 const portalApiPath = `${backendBaseUrl}/api/stripe/createPortalSession`;
+const stripeRedirectHosts = new Set([
+  "checkout.stripe.com",
+  "billing.stripe.com",
+  "buy.stripe.com",
+]);
+
+const getAllowedRedirectOrigins = () => {
+  const origins = new Set<string>();
+
+  origins.add(window.location.origin);
+  if (backendBaseUrl) {
+    try {
+      origins.add(new URL(backendBaseUrl).origin);
+    } catch {
+      // Ignore invalid backend URL; it simply won't be allowlisted.
+    }
+  }
+
+  return origins;
+};
+
+const isSafeRedirectUrl = (rawUrl: string) => {
+  let target: URL;
+  try {
+    target = new URL(rawUrl, window.location.origin);
+  } catch {
+    return false;
+  }
+
+  if (target.protocol !== "https:") return false;
+
+  const allowedOrigins = getAllowedRedirectOrigins();
+  if (allowedOrigins.has(target.origin)) return true;
+
+  return stripeRedirectHosts.has(target.hostname);
+};
 
 const subscriptionStatusLabel = computed(() => {
   if (subscriptionStore.loading) return "Loading";
@@ -301,6 +337,9 @@ const startCheckout = async () => {
     if (!payload.url) {
       throw new Error("Missing checkout url");
     }
+    if (!isSafeRedirectUrl(payload.url)) {
+      throw new Error("Blocked unsafe redirect URL");
+    }
     window.location.assign(payload.url);
   } catch (error: any) {
     checkoutLoading.value = false;
@@ -330,6 +369,9 @@ const openBillingPortal = async () => {
     const payload = (await response.json()) as { url?: string };
     if (!payload.url) {
       throw new Error("Missing billing portal url");
+    }
+    if (!isSafeRedirectUrl(payload.url)) {
+      throw new Error("Blocked unsafe redirect URL");
     }
     window.location.assign(payload.url);
   } catch (error: any) {

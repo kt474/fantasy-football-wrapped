@@ -7,6 +7,8 @@ import { useStore } from "../../store/store";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
+import MarkdownIt from "markdown-it";
+import DOMPurify from "dompurify";
 
 const store = useStore();
 const props = defineProps<{
@@ -14,9 +16,18 @@ const props = defineProps<{
   finalPlacements: any[];
 }>();
 
-const summary = ref("");
 const rawSummary = ref("");
 const playoffPromptData = ref([]);
+
+const md = new MarkdownIt({
+  html: false,
+  linkify: true,
+  breaks: true,
+});
+
+const renderedSummary = computed(() => {
+  return DOMPurify.sanitize(md.render(rawSummary.value));
+});
 
 const showSummary = computed(() => {
   if (store.leagueInfo.length > 0) {
@@ -41,10 +52,7 @@ onMounted(async () => {
   } else if (store.leagueInfo.length > 0) {
     const savedText =
       store.leagueInfo[store.currentLeagueIndex].yearEndReport ?? "";
-    summary.value = savedText;
-    rawSummary.value = savedText
-      .replace(/<b>(.*?)<\/b>/g, "**$1**")
-      .replace(/<br>/g, "\n");
+    rawSummary.value = savedText;
   }
 });
 
@@ -52,11 +60,11 @@ watch(
   () => store.currentLeagueId,
   async () => {
     if (!store.leagueInfo[store.currentLeagueIndex].yearEndReport) {
-      summary.value = "";
+      rawSummary.value = "";
       await fetchPlayerNames();
       await getSummary();
     }
-    summary.value =
+    rawSummary.value =
       store.leagueInfo[store.currentLeagueIndex].yearEndReport ?? "";
   }
 );
@@ -129,10 +137,7 @@ const getSummary = async () => {
     });
     const response = await generateSummary(userData, leagueMetadata);
     rawSummary.value = response.text;
-    summary.value = response.text
-      .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-      .replace(/\n/g, "<br>");
-    store.addYearEndReport(currentLeague.leagueId, summary.value);
+    store.addYearEndReport(currentLeague.leagueId, rawSummary.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -141,7 +146,7 @@ const getSummary = async () => {
 };
 const copyReport = () => {
   navigator.clipboard.writeText(
-    rawSummary.value + +"\n\nCreated with https://ffwrapped.com"
+    rawSummary.value + "\n\n Created with https://ffwrapped.com"
   );
   toast.success("Summary copied to clipboard!");
 };
@@ -172,8 +177,8 @@ const copyReport = () => {
       </svg>
     </div>
     <Separator class="mt-3 mb-2" />
-    <div v-if="summary">
-      <p v-html="summary" class="max-w-5xl my-3"></p>
+    <div v-if="renderedSummary">
+      <div v-html="renderedSummary" class="max-w-5xl my-3 report-content"></div>
 
       <p class="text-xs text-muted-foreground">
         Generated using GPT-5.1. Information provided may not always be
@@ -294,3 +299,8 @@ const copyReport = () => {
     </div>
   </Card>
 </template>
+<style scoped>
+:deep(.report-content p + p) {
+  margin-top: 1rem;
+}
+</style>

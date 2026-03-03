@@ -47,7 +47,7 @@ const routes = [
     path: "/terms",
     component: Terms,
     meta: {
-      title: "Privacy Policy",
+      title: "Terms",
       description: "Terms of service.",
     },
   },

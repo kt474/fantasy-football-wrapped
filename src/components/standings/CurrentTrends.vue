@@ -11,13 +11,27 @@ import { Player } from "../../types/apiTypes";
 import { useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/helper";
 import { Card, CardTitle, CardHeader } from "../ui/card";
+import MarkdownIt from "markdown-it";
+import DOMPurify from "dompurify";
 
 const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
+const md = new MarkdownIt({
+  html: false,
+  linkify: true,
+  breaks: true,
+});
+
 const currentTrends = ref<string[]>([]);
+
+const renderedCurrentTrends = computed(() => {
+  return currentTrends.value.map((trend) =>
+    DOMPurify.sanitize(md.render(trend))
+  );
+});
 
 const getCurrentStreak = (str: string): string => {
   const match = str.match(/([WL])\1*$/);
@@ -92,9 +106,7 @@ const getPreseasonData = async () => {
       } else {
         response = await generateTrends(result, 70, 3, seasonState);
       }
-      currentTrends.value = response.bulletPoints.map((trend: string) =>
-        trend.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-      );
+      currentTrends.value = response.bulletPoints;
       store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
       localStorage.setItem(
         "leagueInfo",
@@ -176,9 +188,7 @@ const formatData = async () => {
     } else {
       response = await generateTrends(userData, 70, 3);
     }
-    currentTrends.value = response.bulletPoints.map((trend: string) =>
-      trend.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-    );
+    currentTrends.value = response.bulletPoints;
     store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
     localStorage.setItem(
       "leagueInfo",
@@ -263,7 +273,7 @@ const cardHeight = computed(() => {
     <div v-if="currentTrends.length > 0" class="px-6">
       <ul class="mr-0 divide-y divide-gray-300 space-y">
         <li
-          v-for="(trend, index) in currentTrends"
+          v-for="(trend, index) in renderedCurrentTrends"
           :key="trend"
           class="flex gap-2 py-3"
         >
