@@ -1362,8 +1362,8 @@ export const fakeBenchPerformers = [
   },
 ];
 export const fakeHighlights = [
-  "<b>Collard Greens</b> is the hottest team, riding a dominant 5-game win streak and averaging 132 points per game over that span, vaulting to 3rd place.",
-  "<b>Saquondo </b> leads the league in total points (1646) but just saw a 4-game win streak snapped, opening the door for surging contenders.",
+  "**Collard Greens** is the hottest team, riding a dominant 5-game win streak and averaging 132 points per game over that span, vaulting to 3rd place.",
+  "**Saquondo** leads the league in total points (1646) but just saw a 4-game win streak snapped, opening the door for surging contenders.",
 ];
 export const fakeWaiverMoves = [
   {

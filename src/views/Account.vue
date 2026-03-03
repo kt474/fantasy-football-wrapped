@@ -398,7 +398,27 @@ const handleCheckoutQuery = async () => {
   }
 };
 
+const ensureLeagueIdQueryParam = async () => {
+  const existingLeagueId = Array.isArray(route.query.leagueId)
+    ? route.query.leagueId[0]
+    : route.query.leagueId;
+
+  if (existingLeagueId) return;
+
+  const currentLeagueId = window.localStorage.getItem("currentLeagueId");
+  if (!currentLeagueId) return;
+
+  await router.replace({
+    path: route.path,
+    query: {
+      ...route.query,
+      leagueId: currentLeagueId,
+    },
+  });
+};
+
 onMounted(async () => {
+  await ensureLeagueIdQueryParam();
   subscriptionStore.initialize();
   await handleCheckoutQuery();
 });

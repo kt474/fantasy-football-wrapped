@@ -96,6 +96,10 @@ const FakeWrapped = defineAsyncComponent(
 );
 const Intro = defineAsyncComponent(() => import("../home/Intro.vue"));
 
+const ScheduleSimulator = defineAsyncComponent(
+  () => import("../schedule_simulator/ScheduleSimulator.vue")
+);
+
 const tableOrder = ref("wins");
 const props = defineProps<{
   users: UserType[];
@@ -629,6 +633,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
         :regular-season-length="regularSeasonLength ? regularSeasonLength : 15"
       />
       <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
+    </div>
+    <div v-if="store.currentTab === 'Schedule Simulator'">
+      <ScheduleSimulator class="my-4" :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'Draft'">
       <Draft class="my-4" />
