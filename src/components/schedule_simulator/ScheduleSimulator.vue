@@ -4,13 +4,7 @@ import { TableDataType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 import { useStore } from "../../store/store";
 import { Button } from "../ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectItem,
-  SelectValue,
-} from "../ui/select";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 
 type SimulatedTeamRecord = {
   index: number;
@@ -28,8 +22,8 @@ const props = defineProps<{
 }>();
 
 const store = useStore();
-const selectedWeek = ref(0);
 const simulatedOpponents = ref<(number | null)[][]>([]);
+const selectedWeekValue = ref("week-1");
 
 const dataWeekCount = computed(() => {
   return Math.max(...props.tableData.map((team) => team.points.length), 0);
@@ -96,7 +90,6 @@ const resetSimulation = () => {
   simulatedOpponents.value = originalOpponents.value.map((teamWeeks) => [
     ...teamWeeks,
   ]);
-  selectedWeek.value = 0;
 };
 
 watch(
@@ -111,53 +104,74 @@ watch(
   displayedWeekCount,
   (count) => {
     if (count <= 0) {
-      selectedWeek.value = 0;
+      selectedWeekValue.value = "week-1";
       return;
     }
-    if (selectedWeek.value > count - 1) {
-      selectedWeek.value = count - 1;
+    const weekNumber = Number(selectedWeekValue.value.replace("week-", ""));
+    if (!Number.isFinite(weekNumber) || weekNumber < 1 || weekNumber > count) {
+      selectedWeekValue.value = "week-1";
     }
   },
   { immediate: true }
 );
 
-const selectedWeekMatchups = computed(() => {
-  const week = selectedWeek.value;
-  const rows: {
-    teamA: number;
-    teamB: number;
-    pointsA: number;
-    pointsB: number;
-    winner: number | null;
-    changed: boolean;
-  }[] = [];
-  const seen = new Set<number>();
+const matchupsByWeek = computed(() => {
+  return Array.from({ length: displayedWeekCount.value }, (_, week) => {
+    const rows: {
+      teamA: number;
+      teamB: number;
+      pointsA: number;
+      pointsB: number;
+      winner: number | null;
+      changed: boolean;
+    }[] = [];
+    const seen = new Set<number>();
 
-  props.tableData.forEach((team, teamIndex) => {
-    if (seen.has(teamIndex)) return;
-    const opponent = simulatedOpponents.value[teamIndex]?.[week];
-    if (opponent === null || opponent === undefined) return;
-    if (seen.has(opponent)) return;
+    props.tableData.forEach((team, teamIndex) => {
+      if (seen.has(teamIndex)) return;
+      const opponent = simulatedOpponents.value[teamIndex]?.[week];
+      if (opponent === null || opponent === undefined) return;
+      if (seen.has(opponent)) return;
 
-    const pointsA = team.points[week] ?? 0;
-    const pointsB = props.tableData[opponent]?.points[week] ?? 0;
-    const winner =
-      pointsA === pointsB ? null : pointsA > pointsB ? teamIndex : opponent;
-    const changed = originalOpponents.value[teamIndex]?.[week] !== opponent;
+      const pointsA = team.points[week] ?? 0;
+      const pointsB = props.tableData[opponent]?.points[week] ?? 0;
+      const winner =
+        pointsA === pointsB ? null : pointsA > pointsB ? teamIndex : opponent;
+      const changed = originalOpponents.value[teamIndex]?.[week] !== opponent;
 
-    rows.push({
-      teamA: teamIndex,
-      teamB: opponent,
-      pointsA,
-      pointsB,
-      winner,
-      changed,
+      rows.push({
+        teamA: teamIndex,
+        teamB: opponent,
+        pointsA,
+        pointsB,
+        winner,
+        changed,
+      });
+      seen.add(teamIndex);
+      seen.add(opponent);
     });
-    seen.add(teamIndex);
-    seen.add(opponent);
-  });
 
-  return rows;
+    return {
+      week: week + 1,
+      value: `week-${week + 1}`,
+      rows,
+    };
+  });
+});
+
+const selectedWeekData = computed(() => {
+  return (
+    matchupsByWeek.value.find((week) => week.value === selectedWeekValue.value) ||
+    matchupsByWeek.value[0] || { week: 1, value: "week-1", rows: [] }
+  );
+});
+
+const selectedWeekMatchups = computed(() => {
+  return selectedWeekData.value.rows;
+});
+
+const selectedWeekChangedCount = computed(() => {
+  return selectedWeekData.value.rows.filter((row) => row.changed).length;
 });
 
 const simulatedStandings = computed<SimulatedTeamRecord[]>(() => {
@@ -322,44 +336,53 @@ const randomizeEntireSchedule = () => {
   simulatedOpponents.value = nextOpponents;
 };
 </script>
+
 <template>
   <Card class="w-full h-full p-4 mt-4 md:p-6">
     <p class="text-3xl font-bold leading-none">Schedule Simulator (Beta)</p>
     <p class="mt-4 text-muted-foreground">
       Analyze the impact of weekly matchup scheduling on the final standings.
     </p>
-    <div class="flex flex-wrap items-end gap-2 mt-4">
-      <div class="flex flex-col">
-        <Select v-model="selectedWeek">
-          <SelectTrigger class="w-28">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="week in displayedWeekCount"
-              :key="week"
-              :value="week - 1"
-            >
-              Week {{ week }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <Button @click="randomizeEntireSchedule"> Randomize Schedule </Button>
+
+    <div class="flex flex-wrap items-center gap-2 mt-4">
+      <Button @click="randomizeEntireSchedule">Randomize Schedule</Button>
     </div>
+
     <div class="grid grid-cols-1 gap-4 mt-2 lg:grid-cols-2">
       <Card class="px-4 py-3">
-        <h3 class="text-lg font-semibold">Matchups</h3>
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="text-lg font-semibold">Matchups</h3>
+          <p class="text-xs text-muted-foreground">
+            Week {{ selectedWeekData.week }} · {{ selectedWeekChangedCount }} changed
+          </p>
+        </div>
+
+        <div class="mt-2 overflow-x-auto">
+          <Tabs v-model="selectedWeekValue" class="w-full">
+            <TabsList class="inline-flex h-9 w-max">
+              <TabsTrigger
+                v-for="weekData in matchupsByWeek"
+                :key="weekData.value"
+                :value="weekData.value"
+                class="px-3"
+              >
+                W{{ weekData.week }}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
         <div
           v-if="selectedWeekMatchups.length === 0"
-          class="mt-2 text-sm text-muted-foreground"
+          class="mt-3 text-sm text-muted-foreground"
         >
-          No matchups found for this week.
+          No matchups found for this view.
         </div>
-        <div v-else class="mt-2 space-y-2">
+
+        <div v-else class="mt-3 space-y-2">
           <div
             v-for="matchup in selectedWeekMatchups"
-            :key="`matchup-${selectedWeek}-${matchup.teamA}-${matchup.teamB}`"
+            :key="`matchup-${selectedWeekData.week}-${matchup.teamA}-${matchup.teamB}`"
             class="p-2 border rounded-md"
             :class="matchup.changed ? 'bg-secondary' : ''"
           >
@@ -370,9 +393,7 @@ const randomizeEntireSchedule = () => {
               >
                 {{ teamName(tableData[matchup.teamA]) }}
               </span>
-              <span class="mx-1 text-muted-foreground"
-                >({{ matchup.pointsA.toFixed(2) }})</span
-              >
+              <span class="mx-1 text-muted-foreground">({{ matchup.pointsA.toFixed(2) }})</span>
               vs
               <span
                 class="ml-1 font-medium"
@@ -380,9 +401,7 @@ const randomizeEntireSchedule = () => {
               >
                 {{ teamName(tableData[matchup.teamB]) }}
               </span>
-              <span class="mx-1 text-muted-foreground"
-                >({{ matchup.pointsB.toFixed(2) }})</span
-              >
+              <span class="mx-1 text-muted-foreground">({{ matchup.pointsB.toFixed(2) }})</span>
               <span
                 v-if="matchup.winner === null"
                 class="ml-2 text-xs text-muted-foreground"
@@ -432,8 +451,7 @@ const randomizeEntireSchedule = () => {
                         : 'text-muted-foreground'
                   "
                 >
-                  {{ team.winDelta > 0 ? "+" : ""
-                  }}{{ team.winDelta.toFixed(1) }}
+                  {{ team.winDelta > 0 ? "+" : "" }}{{ team.winDelta.toFixed(1) }}
                 </td>
                 <td
                   class="py-2 pr-2"
