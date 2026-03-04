@@ -31,6 +31,7 @@ import {
   CircleUserRound,
   BadgeCheck,
   Handshake,
+  Dices,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
@@ -123,6 +124,10 @@ const data = {
         {
           title: "Start/Sit",
           icon: Newspaper,
+        },
+        {
+          title: "Schedule Simulator",
+          icon: Dices,
         },
         {
           title: "Draft",
