@@ -5,6 +5,13 @@ import Card from "../ui/card/Card.vue";
 import { useStore } from "../../store/store";
 import { Button } from "../ui/button";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 type SimulatedTeamRecord = {
   index: number;
@@ -24,6 +31,22 @@ const props = defineProps<{
 const store = useStore();
 const simulatedOpponents = ref<(number | null)[][]>([]);
 const selectedWeekValue = ref("week-1");
+const monteCarloRuns = ref(1000);
+const selectedDistributionTeamValue = ref("0");
+const monteCarloDistributions = ref<number[][]>([]);
+const monteCarloSummaryByTeam = ref<
+  Record<
+    number,
+    {
+      mode: number;
+      average: number;
+      p10: number;
+      p50: number;
+      p90: number;
+    }
+  >
+>({});
+const monteCarloRunCount = ref(0);
 
 const dataWeekCount = computed(() => {
   return Math.max(...props.tableData.map((team) => team.points.length), 0);
@@ -80,11 +103,6 @@ const createOpponentMatrix = (tableData: TableDataType[]) => {
 };
 
 const originalOpponents = computed(() => createOpponentMatrix(props.tableData));
-const playoffSpots = computed(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
-  if (league?.playoffTeams) return league.playoffTeams;
-  return Math.max(1, Math.floor(props.tableData.length / 2));
-});
 
 const resetSimulation = () => {
   simulatedOpponents.value = originalOpponents.value.map((teamWeeks) => [
@@ -96,6 +114,7 @@ watch(
   [() => props.tableData, displayedWeekCount],
   () => {
     resetSimulation();
+    runMonteCarloDistribution();
   },
   { immediate: true, deep: true }
 );
@@ -110,6 +129,21 @@ watch(
     const weekNumber = Number(selectedWeekValue.value.replace("week-", ""));
     if (!Number.isFinite(weekNumber) || weekNumber < 1 || weekNumber > count) {
       selectedWeekValue.value = "week-1";
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.tableData.length,
+  (count) => {
+    if (count <= 0) {
+      selectedDistributionTeamValue.value = "0";
+      return;
+    }
+    const teamIndex = Number(selectedDistributionTeamValue.value);
+    if (!Number.isFinite(teamIndex) || teamIndex < 0 || teamIndex > count - 1) {
+      selectedDistributionTeamValue.value = "0";
     }
   },
   { immediate: true }
@@ -161,7 +195,9 @@ const matchupsByWeek = computed(() => {
 
 const selectedWeekData = computed(() => {
   return (
-    matchupsByWeek.value.find((week) => week.value === selectedWeekValue.value) ||
+    matchupsByWeek.value.find(
+      (week) => week.value === selectedWeekValue.value
+    ) ||
     matchupsByWeek.value[0] || { week: 1, value: "week-1", rows: [] }
   );
 });
@@ -254,7 +290,6 @@ const actualStandings = computed<SimulatedTeamRecord[]>(() => {
 const seedAndPlayoffByTeam = computed(() => {
   const actualSeedByTeam = new Map<number, number>();
   const simulatedSeedByTeam = new Map<number, number>();
-  const playoffCutoff = Math.min(playoffSpots.value, props.tableData.length);
 
   actualStandings.value.forEach((team, index) => {
     actualSeedByTeam.set(team.index, index + 1);
@@ -272,8 +307,6 @@ const seedAndPlayoffByTeam = computed(() => {
         actualSeed,
         simulatedSeed,
         seedDelta: actualSeed - simulatedSeed,
-        actualInPlayoffs: actualSeed <= playoffCutoff,
-        simulatedInPlayoffs: simulatedSeed <= playoffCutoff,
       };
       return acc;
     },
@@ -283,8 +316,6 @@ const seedAndPlayoffByTeam = computed(() => {
         actualSeed: number;
         simulatedSeed: number;
         seedDelta: number;
-        actualInPlayoffs: boolean;
-        simulatedInPlayoffs: boolean;
       }
     >
   );
@@ -298,6 +329,125 @@ const standingsWithSeedDelta = computed(() => {
     actualLosses: props.tableData[team.index]?.losses ?? 0,
     actualTies: props.tableData[team.index]?.ties ?? 0,
   }));
+});
+
+const distributionTeamOptions = computed(() => {
+  return props.tableData.map((team, index) => ({
+    value: String(index),
+    label: teamName(team),
+  }));
+});
+
+const selectedDistributionTeamIndex = computed(() => {
+  const index = Number(selectedDistributionTeamValue.value);
+  if (!Number.isFinite(index)) return 0;
+  return Math.min(Math.max(index, 0), Math.max(props.tableData.length - 1, 0));
+});
+
+const selectedDistributionSummary = computed(() => {
+  return (
+    monteCarloSummaryByTeam.value[selectedDistributionTeamIndex.value] || {
+      mode: 0,
+      average: 0,
+      p10: 0,
+      p50: 0,
+      p90: 0,
+    }
+  );
+});
+
+const monteCarloTeamSummaryRows = computed(() => {
+  return props.tableData
+    .map((team, index) => {
+      const summary = monteCarloSummaryByTeam.value[index] || {
+        mode: 0,
+        average: 0,
+        p10: 0,
+        p50: 0,
+        p90: 0,
+      };
+      return {
+        index,
+        name: teamName(team),
+        ...summary,
+      };
+    })
+    .sort((a, b) => b.average - a.average);
+});
+
+const selectedDistributionSeries = computed(() => {
+  const values =
+    monteCarloDistributions.value[selectedDistributionTeamIndex.value] || [];
+  const runCount = Math.max(monteCarloRunCount.value, 1);
+  const maxWins = displayedWeekCount.value;
+  const frequencies = new Map<number, number>();
+
+  for (let wins = 0; wins <= maxWins; wins += 1) {
+    frequencies.set(wins, 0);
+  }
+
+  values.forEach((value) => {
+    const key = Math.min(maxWins, Math.max(0, Math.round(value)));
+    frequencies.set(key, (frequencies.get(key) || 0) + 1);
+  });
+
+  const xValues = Array.from(frequencies.keys()).sort((a, b) => a - b);
+
+  return {
+    categories: xValues.map((value) => String(value)),
+    series: [
+      {
+        name: "Likelihood",
+        data: xValues.map((value) =>
+          Number((((frequencies.get(value) || 0) / runCount) * 100).toFixed(2))
+        ),
+      },
+    ],
+  };
+});
+
+const distributionChartOptions = computed(() => {
+  return {
+    chart: {
+      type: "area",
+      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      animations: { enabled: false },
+    },
+    stroke: {
+      curve: "smooth",
+      width: 2,
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shadeIntensity: 0.2,
+        opacityFrom: 0.45,
+        opacityTo: 0.05,
+      },
+    },
+    colors: ["#2563eb"],
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories: selectedDistributionSeries.value.categories,
+      title: {
+        text: "Wins",
+      },
+    },
+    yaxis: {
+      title: {
+        text: "Likelihood (%)",
+      },
+      min: 0,
+    },
+    tooltip: {
+      theme: store.darkMode ? "dark" : "light",
+      y: {
+        formatter: (value: number) => `${value.toFixed(2)}%`,
+      },
+    },
+  };
 });
 
 const randomizeEntireSchedule = () => {
@@ -335,6 +485,122 @@ const randomizeEntireSchedule = () => {
 
   simulatedOpponents.value = nextOpponents;
 };
+
+function percentile(sorted: number[], p: number) {
+  if (sorted.length === 0) return 0;
+  const index = Math.min(
+    sorted.length - 1,
+    Math.max(0, Math.floor((sorted.length - 1) * p))
+  );
+  return sorted[index];
+}
+
+function runMonteCarloDistribution() {
+  const teamCount = props.tableData.length;
+  const totalWeeks = displayedWeekCount.value;
+  const runs = Math.max(100, Math.min(10000, Math.floor(monteCarloRuns.value)));
+
+  if (teamCount === 0 || totalWeeks === 0) {
+    monteCarloDistributions.value = [];
+    monteCarloSummaryByTeam.value = {};
+    monteCarloRunCount.value = 0;
+    return;
+  }
+
+  const byesByWeek = Array.from({ length: totalWeeks }, (_, week) =>
+    Array.from({ length: teamCount }, (_, index) => index).filter(
+      (index) => originalOpponents.value[index]?.[week] === null
+    )
+  );
+
+  const valuesByTeam: number[][] = Array.from({ length: teamCount }, () => []);
+
+  for (let run = 0; run < runs; run++) {
+    const wins = Array.from({ length: teamCount }, () => 0);
+    const ties = Array.from({ length: teamCount }, () => 0);
+
+    for (let week = 0; week < totalWeeks; week++) {
+      const byes = byesByWeek[week];
+      const activeTeams = Array.from(
+        { length: teamCount },
+        (_, index) => index
+      ).filter((index) => !byes.includes(index));
+
+      for (let i = activeTeams.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [activeTeams[i], activeTeams[j]] = [activeTeams[j], activeTeams[i]];
+      }
+
+      for (let i = 0; i < activeTeams.length; i += 2) {
+        const teamA = activeTeams[i];
+        const teamB = activeTeams[i + 1];
+        if (teamA === undefined || teamB === undefined) continue;
+
+        const pointsA = props.tableData[teamA]?.points[week] ?? 0;
+        const pointsB = props.tableData[teamB]?.points[week] ?? 0;
+
+        if (pointsA > pointsB) {
+          wins[teamA] += 1;
+        } else if (pointsB > pointsA) {
+          wins[teamB] += 1;
+        } else {
+          ties[teamA] += 1;
+          ties[teamB] += 1;
+        }
+      }
+    }
+
+    for (let index = 0; index < teamCount; index++) {
+      valuesByTeam[index].push(
+        Number((wins[index] + ties[index] * 0.5).toFixed(1))
+      );
+    }
+  }
+
+  const summary: Record<
+    number,
+    {
+      mode: number;
+      average: number;
+      p10: number;
+      p50: number;
+      p90: number;
+    }
+  > = {};
+
+  valuesByTeam.forEach((values, index) => {
+    const sorted = [...values].sort((a, b) => a - b);
+    const freq = new Map<number, number>();
+    sorted.forEach((value) => {
+      freq.set(value, (freq.get(value) || 0) + 1);
+    });
+
+    let mode = 0;
+    let maxCount = -1;
+    freq.forEach((count, value) => {
+      if (count > maxCount) {
+        maxCount = count;
+        mode = value;
+      }
+    });
+
+    const avg =
+      sorted.reduce((total, value) => total + value, 0) /
+      Math.max(sorted.length, 1);
+
+    summary[index] = {
+      mode,
+      average: Number(avg.toFixed(2)),
+      p10: percentile(sorted, 0.1),
+      p50: percentile(sorted, 0.5),
+      p90: percentile(sorted, 0.9),
+    };
+  });
+
+  monteCarloDistributions.value = valuesByTeam;
+  monteCarloSummaryByTeam.value = summary;
+  monteCarloRunCount.value = runs;
+}
 </script>
 
 <template>
@@ -345,16 +611,13 @@ const randomizeEntireSchedule = () => {
     </p>
 
     <div class="flex flex-wrap items-center gap-2 mt-4">
-      <Button @click="randomizeEntireSchedule">Randomize Schedule</Button>
+      <Button @click="randomizeEntireSchedule">Randomize Schedules</Button>
     </div>
 
     <div class="grid grid-cols-1 gap-4 mt-2 lg:grid-cols-2">
       <Card class="px-4 py-3">
         <div class="flex items-center justify-between gap-2">
           <h3 class="text-lg font-semibold">Matchups</h3>
-          <p class="text-xs text-muted-foreground">
-            Week {{ selectedWeekData.week }} · {{ selectedWeekChangedCount }} changed
-          </p>
         </div>
 
         <div class="mt-2 overflow-x-auto">
@@ -393,7 +656,9 @@ const randomizeEntireSchedule = () => {
               >
                 {{ teamName(tableData[matchup.teamA]) }}
               </span>
-              <span class="mx-1 text-muted-foreground">({{ matchup.pointsA.toFixed(2) }})</span>
+              <span class="mx-1 text-muted-foreground"
+                >({{ matchup.pointsA.toFixed(2) }})</span
+              >
               vs
               <span
                 class="ml-1 font-medium"
@@ -401,7 +666,9 @@ const randomizeEntireSchedule = () => {
               >
                 {{ teamName(tableData[matchup.teamB]) }}
               </span>
-              <span class="mx-1 text-muted-foreground">({{ matchup.pointsB.toFixed(2) }})</span>
+              <span class="mx-1 text-muted-foreground"
+                >({{ matchup.pointsB.toFixed(2) }})</span
+              >
               <span
                 v-if="matchup.winner === null"
                 class="ml-2 text-xs text-muted-foreground"
@@ -451,7 +718,8 @@ const randomizeEntireSchedule = () => {
                         : 'text-muted-foreground'
                   "
                 >
-                  {{ team.winDelta > 0 ? "+" : "" }}{{ team.winDelta.toFixed(1) }}
+                  {{ team.winDelta > 0 ? "+" : ""
+                  }}{{ team.winDelta.toFixed(1) }}
                 </td>
                 <td
                   class="py-2 pr-2"
@@ -471,5 +739,72 @@ const randomizeEntireSchedule = () => {
         </div>
       </Card>
     </div>
+
+    <Card class="px-4 py-3 mt-4">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h3 class="text-lg font-semibold">Record Likelihood</h3>
+          <p class="text-sm text-muted-foreground">
+            Distribution of likely win totals from simulating 1000 randomized
+            schedules.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-end gap-2">
+          <div class="flex flex-col">
+            <Select v-model="selectedDistributionTeamValue">
+              <SelectTrigger class="w-44">
+                <SelectValue placeholder="Select team" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="team in distributionTeamOptions"
+                  :key="team.value"
+                  :value="team.value"
+                >
+                  {{ team.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      <apexchart
+        type="area"
+        width="100%"
+        height="320"
+        :options="distributionChartOptions"
+        :series="selectedDistributionSeries.series"
+        class="mt-2"
+      ></apexchart>
+
+      <div class="mt-4 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-muted-foreground">
+            <tr>
+              <th class="pb-2 text-left min-w-32">Team</th>
+              <th class="pb-2 text-left min-w-20">Most Likely</th>
+              <th class="pb-2 text-left min-w-16">Avg</th>
+              <th class="pb-2 text-left min-w-20">P10</th>
+              <th class="pb-2 text-left min-w-20">P50</th>
+              <th class="pb-2 text-left min-w-20">P90</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="team in monteCarloTeamSummaryRows"
+              :key="`mc-summary-${team.index}`"
+              class="border-t"
+            >
+              <td class="py-2 pr-2">{{ team.name }}</td>
+              <td class="py-2 pr-2">{{ team.mode.toFixed(1) }}</td>
+              <td class="py-2 pr-2">{{ team.average.toFixed(2) }}</td>
+              <td class="py-2 pr-2">{{ team.p10.toFixed(1) }}</td>
+              <td class="py-2 pr-2">{{ team.p50.toFixed(1) }}</td>
+              <td class="py-2 pr-2">{{ team.p90.toFixed(1) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Card>
   </Card>
 </template>

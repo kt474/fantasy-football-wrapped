@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "3/03/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "There is a new Schedule Simulator tool that shows the impact of scheduling on the final standings.",
+        ],
+      },
+    ],
+  },
+  {
     date: "3/02/26",
     content: [
       {
