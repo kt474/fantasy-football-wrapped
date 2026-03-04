@@ -100,6 +100,10 @@ const ScheduleSimulator = defineAsyncComponent(
   () => import("../schedule_simulator/ScheduleSimulator.vue")
 );
 
+const TradeLab = defineAsyncComponent(
+  () => import("../trade_lab/TradeLab.vue")
+);
+
 const tableOrder = ref("wins");
 const props = defineProps<{
   users: UserType[];
@@ -636,6 +640,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
     </div>
     <div v-if="store.currentTab === 'Schedule Simulator'">
       <ScheduleSimulator class="my-4" :tableData="tableData" />
+    </div>
+    <div v-if="store.currentTab === 'Trade Lab'">
+      <TradeLab class="my-4" :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'Draft'">
       <Draft class="my-4" />
