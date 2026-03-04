@@ -6,7 +6,7 @@ import { getPlayersByIdsMap, getSingleWeekProjection } from "../../api/api.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
-import { Button } from "../ui/button";
+import { Label } from "../ui/label/index.ts";
 import {
   Select,
   SelectContent,
@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { X } from "lucide-vue-next";
 
 type TradeLabPlayer = Player & {
   projection: number;
@@ -70,54 +71,6 @@ const teamBOutgoingPlayers = computed(() => {
     teamBSends.value.includes(player.player_id)
   );
 });
-
-const teamAOutgoingProjection = computed(() =>
-  teamAOutgoingPlayers.value.reduce(
-    (sum, player) => sum + (Number(player.projection) || 0),
-    0
-  )
-);
-
-const teamBOutgoingProjection = computed(() =>
-  teamBOutgoingPlayers.value.reduce(
-    (sum, player) => sum + (Number(player.projection) || 0),
-    0
-  )
-);
-
-const teamAAfterTradeProjection = computed(() => {
-  if (!teamA.value) return 0;
-  return (
-    teamA.value.totalProjection -
-    teamAOutgoingProjection.value +
-    teamBOutgoingProjection.value
-  );
-});
-
-const teamBAfterTradeProjection = computed(() => {
-  if (!teamB.value) return 0;
-  return (
-    teamB.value.totalProjection -
-    teamBOutgoingProjection.value +
-    teamAOutgoingProjection.value
-  );
-});
-
-const teamANet = computed(() =>
-  Number(
-    (
-      teamAAfterTradeProjection.value - (teamA.value?.totalProjection || 0)
-    ).toFixed(2)
-  )
-);
-
-const teamBNet = computed(() =>
-  Number(
-    (
-      teamBAfterTradeProjection.value - (teamB.value?.totalProjection || 0)
-    ).toFixed(2)
-  )
-);
 
 const getWeekLineup = (team: TableDataType, weekIndex: number) => {
   const starters =
@@ -330,7 +283,7 @@ onMounted(async () => {
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
       <h5 class="text-3xl font-bold leading-none">Trade Lab (Beta)</h5>
     </div>
-    <p class="mt-4 text-muted-foreground">
+    <p class="mt-4 mb-2 text-muted-foreground">
       Drag players into each team's package to brainstorm offers.
     </p>
 
@@ -338,55 +291,31 @@ onMounted(async () => {
       Loading players and projections...
     </div>
     <div v-else>
-      <div class="grid gap-3 mt-3 mb-2 lg:grid-cols-2">
-        <div>
-          <Select
-            :model-value="selectedTeamAId"
-            @update:model-value="handleTeamSelectionChange('A', Number($event))"
-          >
-            <SelectTrigger class="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="team in rosters"
-                :key="team.id"
-                :value="team.id"
-                :disabled="team.id === selectedTeamBId"
-              >
-                {{ team.managerName }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Select
-            :model-value="selectedTeamBId"
-            @update:model-value="handleTeamSelectionChange('B', Number($event))"
-          >
-            <SelectTrigger class="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="team in rosters"
-                :key="team.id"
-                :value="team.id"
-                :disabled="team.id === selectedTeamAId"
-              >
-                {{ team.managerName }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       <div class="grid gap-3 xl:grid-cols-3">
-        <Card class="p-3">
-          <p class="mb-2 font-semibold">{{ teamA?.managerName }}</p>
-          <p class="mb-2 text-xs text-muted-foreground">
-            Roster projection: {{ projectionText(teamA?.totalProjection || 0) }}
-          </p>
+        <Card class="px-4 py-3">
+          <div class="mb-2">
+            <Label class="block mb-1 text-sm">Manager</Label>
+            <Select
+              :model-value="selectedTeamAId"
+              @update:model-value="
+                handleTeamSelectionChange('A', Number($event))
+              "
+            >
+              <SelectTrigger class="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="team in rosters"
+                  :key="team.id"
+                  :value="team.id"
+                  :disabled="team.id === selectedTeamBId"
+                >
+                  {{ team.managerName }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div class="trade-player-list">
             <button
               v-for="player in teamA?.players || []"
@@ -399,20 +328,35 @@ onMounted(async () => {
                 'trade-player-chip-selected': isIncluded('A', player.player_id),
               }"
             >
-              <span class="font-medium">
-                {{ player.name || `${player.team} Defense` }}
-              </span>
-              <span class="text-xs text-muted-foreground">
-                {{ player.position }} • {{ projectionText(player.projection) }}
-                {{ player.isStarter ? "• Starter" : "" }}
-              </span>
+              <div class="flex">
+                <img
+                  v-if="player.position !== 'DEF'"
+                  class="object-cover rounded-full w-14"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                  alt="Player avatar"
+                />
+                <img
+                  v-else
+                  class="w-10 h-10 mx-2 rounded-full"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                  alt="Team avatar"
+                />
+                <div class="ml-2">
+                  <p class="font-medium">
+                    {{ player.name || `${player.team} Defense` }}
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    {{ player.position }} - {{ player.team }}
+                  </p>
+                </div>
+              </div>
             </button>
           </div>
         </Card>
 
         <Card class="p-3">
           <p class="mb-1 text-sm font-semibold">Trade Package</p>
-          <p class="text-xs text-muted-foreground">
+          <p class="text-sm text-muted-foreground">
             Drop from each roster into its matching side.
           </p>
           <Separator class="h-px my-2" />
@@ -437,19 +381,37 @@ onMounted(async () => {
                 :key="`send-a-${player.player_id}`"
                 class="trade-selected-player"
               >
-                <span>{{ player.name || `${player.team} Defense` }}</span>
+                <div class="flex">
+                  <img
+                    v-if="player.position !== 'DEF'"
+                    class="object-cover rounded-full w-14"
+                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                    alt="Player avatar"
+                  />
+                  <img
+                    v-else
+                    class="w-10 h-10 mx-2 rounded-full"
+                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                    alt="Team avatar"
+                  />
+                  <div class="ml-2">
+                    <p class="font-medium">
+                      {{ player.name || `${player.team} Defense` }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                      {{ player.position }} - {{ player.team }}
+                    </p>
+                  </div>
+                </div>
                 <button
                   type="button"
                   class="text-xs underline text-muted-foreground"
                   @click="removeFromPackage('A', player.player_id)"
                 >
-                  remove
+                  <X class="size-4" />
                 </button>
               </div>
             </div>
-            <p class="mt-2 text-xs text-muted-foreground">
-              Outgoing projection: {{ projectionText(teamAOutgoingProjection) }}
-            </p>
           </div>
 
           <div
@@ -472,44 +434,64 @@ onMounted(async () => {
                 :key="`send-b-${player.player_id}`"
                 class="trade-selected-player"
               >
-                <span>{{ player.name || `${player.team} Defense` }}</span>
+                <div class="flex">
+                  <img
+                    v-if="player.position !== 'DEF'"
+                    class="object-cover rounded-full w-14"
+                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                    alt="Player avatar"
+                  />
+                  <img
+                    v-else
+                    class="w-10 h-10 mx-2 rounded-full"
+                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                    alt="Team avatar"
+                  />
+                  <div class="ml-2">
+                    <p class="font-medium">
+                      {{ player.name || `${player.team} Defense` }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                      {{ player.position }} - {{ player.team }}
+                    </p>
+                  </div>
+                </div>
                 <button
                   type="button"
                   class="text-xs underline text-muted-foreground"
                   @click="removeFromPackage('B', player.player_id)"
                 >
-                  remove
+                  <X class="size-4" />
                 </button>
               </div>
             </div>
-            <p class="mt-2 text-xs text-muted-foreground">
-              Outgoing projection: {{ projectionText(teamBOutgoingProjection) }}
-            </p>
-          </div>
-
-          <Separator class="h-px my-3" />
-          <div class="text-sm">
-            <p class="font-semibold">Quick Impact</p>
-            <p class="mt-1">
-              {{ teamA?.managerName }} net:
-              <span :class="netClass(teamANet)">
-                {{ teamANet > 0 ? "+" : "" }}{{ projectionText(teamANet) }}
-              </span>
-            </p>
-            <p>
-              {{ teamB?.managerName }} net:
-              <span :class="netClass(teamBNet)">
-                {{ teamBNet > 0 ? "+" : "" }}{{ projectionText(teamBNet) }}
-              </span>
-            </p>
           </div>
         </Card>
 
-        <Card class="p-3">
-          <p class="mb-2 font-semibold">{{ teamB?.managerName }}</p>
-          <p class="mb-2 text-xs text-muted-foreground">
-            Roster projection: {{ projectionText(teamB?.totalProjection || 0) }}
-          </p>
+        <Card class="px-4 py-3">
+          <div class="mb-2">
+            <Label class="block mb-1 text-sm">Manager</Label>
+            <Select
+              :model-value="selectedTeamBId"
+              @update:model-value="
+                handleTeamSelectionChange('B', Number($event))
+              "
+            >
+              <SelectTrigger class="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="team in rosters"
+                  :key="team.id"
+                  :value="team.id"
+                  :disabled="team.id === selectedTeamAId"
+                >
+                  {{ team.managerName }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div class="trade-player-list">
             <button
               v-for="player in teamB?.players || []"
@@ -522,13 +504,28 @@ onMounted(async () => {
                 'trade-player-chip-selected': isIncluded('B', player.player_id),
               }"
             >
-              <span class="font-medium">
-                {{ player.name || `${player.team} Defense` }}
-              </span>
-              <span class="text-xs text-muted-foreground">
-                {{ player.position }} • {{ projectionText(player.projection) }}
-                {{ player.isStarter ? "• Starter" : "" }}
-              </span>
+              <div class="flex">
+                <img
+                  v-if="player.position !== 'DEF'"
+                  class="object-cover rounded-full w-14"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                  alt="Player avatar"
+                />
+                <img
+                  v-else
+                  class="w-10 h-10 mx-2 rounded-full"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                  alt="Team avatar"
+                />
+                <div class="ml-2">
+                  <p class="font-medium">
+                    {{ player.name || `${player.team} Defense` }}
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    {{ player.position }} - {{ player.team }}
+                  </p>
+                </div>
+              </div>
             </button>
           </div>
         </Card>
