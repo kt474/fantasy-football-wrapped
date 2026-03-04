@@ -206,10 +206,6 @@ const selectedWeekMatchups = computed(() => {
   return selectedWeekData.value.rows;
 });
 
-const selectedWeekChangedCount = computed(() => {
-  return selectedWeekData.value.rows.filter((row) => row.changed).length;
-});
-
 const simulatedStandings = computed<SimulatedTeamRecord[]>(() => {
   const weeks = displayedWeekCount.value;
   const records = props.tableData.map((team, index) => ({
@@ -342,18 +338,6 @@ const selectedDistributionTeamIndex = computed(() => {
   const index = Number(selectedDistributionTeamValue.value);
   if (!Number.isFinite(index)) return 0;
   return Math.min(Math.max(index, 0), Math.max(props.tableData.length - 1, 0));
-});
-
-const selectedDistributionSummary = computed(() => {
-  return (
-    monteCarloSummaryByTeam.value[selectedDistributionTeamIndex.value] || {
-      mode: 0,
-      average: 0,
-      p10: 0,
-      p50: 0,
-      p90: 0,
-    }
-  );
 });
 
 const monteCarloTeamSummaryRows = computed(() => {
