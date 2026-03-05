@@ -255,8 +255,8 @@ const rankLabel = (rank: number) => {
 };
 
 const waiverPaletteClass = (tier: number) => {
-  if (tier === 1) return "bg-emerald-400 dark:bg-emerald-600 text-gray-50";
-  if (tier === 2) return "bg-green-400 dark:bg-green-600 text-gray-50";
+  if (tier === 1) return "bg-emerald-500 dark:bg-emerald-600 text-gray-50";
+  if (tier === 2) return "bg-green-500 dark:bg-green-600 text-gray-50";
   if (tier === 3) return "bg-yellow-300 dark:bg-yellow-600 text-black";
   if (tier === 4) return "bg-orange-400 dark:bg-orange-500 text-gray-50";
   return "bg-red-400 dark:bg-red-600 text-gray-50";
@@ -279,6 +279,91 @@ const overallRankClass = (rank: number) => {
   if (rank <= 180) return waiverPaletteClass(4);
   return waiverPaletteClass(5);
 };
+
+const positionWeights: Record<string, number> = {
+  QB: 0.82,
+  RB: 1.3,
+  WR: 1.16,
+  TE: 1.08,
+  K: 0.35,
+  DEF: 0.45,
+};
+
+const depthMultipliers = [1, 0.64, 0.38, 0.2];
+
+const rankToScore = (rank: number) => {
+  if (!rank || rank <= 0) return 0;
+  return 100 / Math.sqrt(rank + 2);
+};
+
+const getPlayerTradeScore = (player: TradeLabPlayer) => {
+  const posScore = rankToScore(player.projection);
+  const overallScore = rankToScore(player.overallRank);
+  const baseScore = posScore * 0.67 + overallScore * 0.33;
+  const positionWeight = positionWeights[player.position] ?? 1;
+  return baseScore * positionWeight;
+};
+
+const getPackageTradeValue = (players: TradeLabPlayer[]) => {
+  if (players.length === 0) return 0;
+  const sortedScores = players
+    .map((player) => getPlayerTradeScore(player))
+    .sort((a, b) => b - a);
+
+  const total = sortedScores.reduce((sum, score, index) => {
+    const multiplier =
+      depthMultipliers[index] ?? depthMultipliers[depthMultipliers.length - 1];
+    return sum + score * multiplier;
+  }, 0);
+
+  return Number(total.toFixed(2));
+};
+
+const teamATradeValue = computed(() =>
+  getPackageTradeValue(teamAOutgoingPlayers.value)
+);
+const teamBTradeValue = computed(() =>
+  getPackageTradeValue(teamBOutgoingPlayers.value)
+);
+
+const tradeDelta = computed(() =>
+  Number((teamATradeValue.value - teamBTradeValue.value).toFixed(2))
+);
+
+const fairnessPercent = computed(() => {
+  const maxSide = Math.max(teamATradeValue.value, teamBTradeValue.value, 1);
+  return Number(((Math.abs(tradeDelta.value) / maxSide) * 100).toFixed(1));
+});
+
+const fairnessLabel = computed(() => {
+  if (teamATradeValue.value === 0 && teamBTradeValue.value === 0) {
+    return "No players selected";
+  }
+  if (fairnessPercent.value <= 10) return "Very fair";
+  if (fairnessPercent.value <= 22) return "Reasonably fair";
+  if (fairnessPercent.value <= 35) return "Slightly uneven";
+  return "Very uneven";
+});
+
+const fairnessPillClass = computed(() => {
+  if (teamATradeValue.value === 0 && teamBTradeValue.value === 0) {
+    return "bg-muted text-muted-foreground";
+  }
+  if (fairnessPercent.value <= 10) return waiverPaletteClass(1);
+  if (fairnessPercent.value <= 22) return waiverPaletteClass(2);
+  if (fairnessPercent.value <= 35) return waiverPaletteClass(4);
+  return waiverPaletteClass(5);
+});
+
+const tradeAdvantageText = computed(() => {
+  if (tradeDelta.value > 0) {
+    return `${teamB.value?.managerName || "Team B"} receives more value`;
+  }
+  if (tradeDelta.value < 0) {
+    return `${teamA.value?.managerName || "Team A"} receives more value`;
+  }
+  return "Both sides are even";
+});
 
 watch(
   () => store.currentLeagueId,
@@ -392,7 +477,7 @@ onMounted(async () => {
         <Card class="p-3">
           <p class="mb-1 text-sm font-semibold">Trade Package</p>
           <p class="text-sm text-muted-foreground">
-            Drop from each roster into its matching side.
+            Drop players from each roster into its matching side.
           </p>
           <Separator class="h-px my-2" />
 
@@ -402,15 +487,9 @@ onMounted(async () => {
             @drop.prevent="onDropToTradePackage('A')"
           >
             <p class="mb-2 text-sm font-semibold">
-              {{ teamA?.managerName }} sends
+              {{ teamA?.managerName }}
             </p>
-            <div
-              v-if="teamAOutgoingPlayers.length === 0"
-              class="text-sm text-muted-foreground"
-            >
-              Drop Team A players here
-            </div>
-            <div v-else class="space-y-1">
+            <div class="space-y-1">
               <div
                 v-for="player in teamAOutgoingPlayers"
                 :key="`send-a-${player.player_id}`"
@@ -470,15 +549,9 @@ onMounted(async () => {
             @drop.prevent="onDropToTradePackage('B')"
           >
             <p class="mb-2 text-sm font-semibold">
-              {{ teamB?.managerName }} sends
+              {{ teamB?.managerName }}
             </p>
-            <div
-              v-if="teamBOutgoingPlayers.length === 0"
-              class="text-sm text-muted-foreground"
-            >
-              Drop Team B players here
-            </div>
-            <div v-else class="space-y-1">
+            <div class="space-y-1">
               <div
                 v-for="player in teamBOutgoingPlayers"
                 :key="`send-b-${player.player_id}`"
@@ -530,6 +603,34 @@ onMounted(async () => {
                 </button>
               </div>
             </div>
+          </div>
+          <Separator class="h-px my-3" />
+          <div class="p-1">
+            <p class="mb-2 text-sm font-semibold">Trade Value Estimate</p>
+            <div class="flex items-center justify-between mb-1.5 text-sm">
+              <span>{{ teamA?.managerName }}</span>
+              <span class="font-semibold">{{ teamATradeValue }}</span>
+            </div>
+            <div class="flex items-center justify-between mb-2.5 text-sm">
+              <span>{{ teamB?.managerName }}</span>
+              <span class="font-semibold">{{ teamBTradeValue }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span :class="['rank-pill', fairnessPillClass]">
+                {{ fairnessLabel }}
+              </span>
+              <span class="text-xs text-muted-foreground">
+                gap: {{ fairnessPercent }}%
+              </span>
+            </div>
+            <p class="mt-2 text-xs text-muted-foreground">
+              {{ tradeAdvantageText }}
+            </p>
+            <Separator class="h-px mt-3" />
+            <p class="mt-4 text-xs text-muted-foreground">
+              Formula combines rank strength, position scarcity, and depth
+              discounts for multi-player packages.
+            </p>
           </div>
         </Card>
 
@@ -613,7 +714,7 @@ onMounted(async () => {
 .trade-player-list {
   display: grid;
   gap: 0.5rem;
-  max-height: 28rem;
+  max-height: 32rem;
   overflow-y: auto;
   padding-right: 0.25rem;
 }
@@ -665,5 +766,12 @@ onMounted(async () => {
   font-weight: 600;
   line-height: 1;
   padding: 0.3rem 0.45rem;
+}
+
+.trade-value-panel {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 0.65rem;
 }
 </style>
