@@ -47,6 +47,8 @@ const loading = ref(false);
 const tier = ref("Standard");
 const premiumLoading = ref(false);
 const fetchingPlayers = ref(false);
+const weeklyReportCaptureRef = ref<HTMLElement | null>(null);
+const exportingReportImage = ref(false);
 
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("analytical");
@@ -767,6 +769,156 @@ const copyReport = () => {
   toast.success("Summary copied to clipboard!");
 };
 
+const loadImage = (url: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Failed to load snapshot image"));
+    img.src = url;
+  });
+
+const stripCrossOriginImages = (root: HTMLElement) => {
+  const isSafeUrl = (url: string) => {
+    if (!url) return true;
+    if (url.startsWith("data:")) return true;
+    if (url.startsWith("/")) return true;
+    if (url.startsWith(window.location.origin)) return true;
+    return false;
+  };
+
+  const images = Array.from(root.querySelectorAll("img"));
+  images.forEach((img) => {
+    const src = img.getAttribute("src") || "";
+    if (isSafeUrl(src)) {
+      return;
+    }
+
+    const placeholder = document.createElement("div");
+    const widthAttr = img.getAttribute("width");
+    const heightAttr = img.getAttribute("height");
+    const parsedWidth = widthAttr ? Number.parseFloat(widthAttr) : NaN;
+    const parsedHeight = heightAttr ? Number.parseFloat(heightAttr) : NaN;
+    const width = Number.isFinite(parsedWidth) ? parsedWidth : img.clientWidth || 40;
+    const height = Number.isFinite(parsedHeight) ? parsedHeight : img.clientHeight || 40;
+    placeholder.style.width = `${width}px`;
+    placeholder.style.height = `${height}px`;
+    placeholder.style.borderRadius = "9999px";
+    placeholder.style.background = store.darkMode ? "#1f2937" : "#e5e7eb";
+    placeholder.style.flexShrink = "0";
+    img.replaceWith(placeholder);
+  });
+
+  const svgImageTags = Array.from(root.querySelectorAll("image"));
+  svgImageTags.forEach((tag) => {
+    const href =
+      tag.getAttribute("href") || tag.getAttribute("xlink:href") || "";
+    if (isSafeUrl(href)) {
+      return;
+    }
+    tag.remove();
+  });
+
+  const sourceTags = Array.from(root.querySelectorAll("source"));
+  sourceTags.forEach((tag) => {
+    const src = tag.getAttribute("src") || "";
+    const srcset = tag.getAttribute("srcset") || "";
+    if (!isSafeUrl(src) || (!isSafeUrl(srcset) && srcset.includes("http"))) {
+      tag.remove();
+    }
+  });
+
+  const canvasTags = Array.from(root.querySelectorAll("canvas"));
+  canvasTags.forEach((canvas) => {
+    const placeholder = document.createElement("div");
+    placeholder.style.width = `${canvas.clientWidth || 300}px`;
+    placeholder.style.height = `${canvas.clientHeight || 200}px`;
+    placeholder.style.background = store.darkMode ? "#111827" : "#f3f4f6";
+    placeholder.style.borderRadius = "8px";
+    canvas.replaceWith(placeholder);
+  });
+
+  const allNodes = Array.from(root.querySelectorAll<HTMLElement>("*"));
+  allNodes.forEach((node) => {
+    const style = node.getAttribute("style");
+    if (!style || !style.includes("url(")) {
+      return;
+    }
+    if (style.includes("http://") || style.includes("https://")) {
+      node.style.backgroundImage = "none";
+      node.style.maskImage = "none";
+      node.style.webkitMaskImage = "none";
+    }
+  });
+};
+
+const exportReportAsImage = async () => {
+  if (!weeklyReportCaptureRef.value || exportingReportImage.value) {
+    return;
+  }
+
+  try {
+    exportingReportImage.value = true;
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    const target = weeklyReportCaptureRef.value;
+    const rect = target.getBoundingClientRect();
+    const width = Math.max(1, Math.ceil(rect.width));
+    const height = Math.max(1, Math.ceil(rect.height));
+    const clone = target.cloneNode(true) as HTMLElement;
+    stripCrossOriginImages(clone);
+    clone.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+
+    const serialized = new XMLSerializer().serializeToString(clone);
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+        <foreignObject width="100%" height="100%">${serialized}</foreignObject>
+      </svg>
+    `;
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const objectUrl = URL.createObjectURL(blob);
+
+    try {
+      const img = await loadImage(objectUrl);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const canvas = document.createElement("canvas");
+      canvas.width = width * pixelRatio;
+      canvas.height = height * pixelRatio;
+      const context = canvas.getContext("2d");
+      if (!context) {
+        throw new Error("Canvas context unavailable");
+      }
+      context.scale(pixelRatio, pixelRatio);
+      context.fillStyle = store.darkMode ? "#0b1220" : "#ffffff";
+      context.fillRect(0, 0, width, height);
+      context.drawImage(img, 0, 0, width, height);
+
+      const link = document.createElement("a");
+      link.download = `weekly-report-${currentWeek.value}.png`;
+      try {
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } catch (error) {
+        const fallbackBlob = new Blob([svg], {
+          type: "image/svg+xml;charset=utf-8",
+        });
+        const fallbackUrl = URL.createObjectURL(fallbackBlob);
+        link.download = `weekly-report-${currentWeek.value}.svg`;
+        link.href = fallbackUrl;
+        link.click();
+        URL.revokeObjectURL(fallbackUrl);
+      }
+      toast.success("Weekly report image exported.");
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("Unable to export image. Try the Report tab for best results.");
+  } finally {
+    exportingReportImage.value = false;
+  }
+};
+
 watch(
   [() => props.regularSeasonLength, () => activeTab.value],
   () => (currentWeek.value = weeks.value[0])
@@ -775,12 +927,21 @@ watch(() => currentWeek.value, fetchPlayerNames);
 </script>
 <template>
   <Card class="h-full px-6 pt-4 my-4 custom-width">
-    <Tabs default-value="Report">
+    <div ref="weeklyReportCaptureRef">
+      <Tabs default-value="Report">
       <div class="flex justify-between w-full mb-3">
         <h5 class="mr-4 text-2xl font-bold sm:text-3xl">
           Weekly {{ activeTab }}
         </h5>
         <div class="flex flex-wrap justify-end">
+          <Button
+            type="button"
+            class="mb-1 mr-2 sm:mb-0"
+            :disabled="exportingReportImage"
+            @click="exportReportAsImage"
+          >
+            {{ exportingReportImage ? "Exporting..." : "Export Image" }}
+          </Button>
           <div class="inline-flex pb-1 rounded-lg sm:mr-2" role="tablist">
             <TabsList>
               <TabsTrigger value="Preview"> Preview </TabsTrigger>
@@ -1370,7 +1531,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
           :is-playoffs="isPlayoffs"
         />
       </TabsContent>
-    </Tabs>
+      </Tabs>
+    </div>
   </Card>
 </template>
 <style scoped>
