@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
-import { getPlayersByIdsMap, getSingleWeekProjection } from "../../api/api.ts";
+import { getPlayersByIdsMap, getStats } from "../../api/api.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
@@ -18,14 +18,13 @@ import { X } from "lucide-vue-next";
 
 type TradeLabPlayer = Player & {
   projection: number;
-  isStarter: boolean;
+  overallRank: number;
 };
 
 type TradeLabRoster = {
   id: number;
   managerName: string;
   players: TradeLabPlayer[];
-  totalProjection: number;
 };
 
 const store = useStore();
@@ -117,16 +116,24 @@ const fetchPlayers = async () => {
 
     const projectionEntries = await Promise.all(
       uniquePlayerIds.map(async (playerId) => {
-        const projection = await getSingleWeekProjection(
+        const projection = await getStats(
           playerId,
           currentLeague.season,
-          selectedWeek.value,
           currentLeague.scoringType
         );
-        return [playerId, Number(projection?.stats || 0)] as const;
+        return [
+          playerId,
+          {
+            rank: Number(projection?.rank || 0),
+            overallRank: Number(projection?.overallRank || 0),
+          },
+        ] as const;
       })
     );
-    const projectionMap = new Map<string, number>(projectionEntries);
+    const projectionMap = new Map<
+      string,
+      { rank: number; overallRank: number }
+    >(projectionEntries);
 
     rosters.value = props.tableData.map((team) => {
       const { starters, bench } = getWeekLineup(team, weekIndex);
@@ -134,15 +141,16 @@ const fetchPlayers = async () => {
         .map((playerId) => {
           const playerMeta = playerMap.get(playerId);
           if (!playerMeta) return null;
+          const playerProjection = projectionMap.get(playerId);
 
           return {
             ...playerMeta,
-            projection: Number(projectionMap.get(playerId) || 0),
-            isStarter: starters.includes(playerId),
+            projection: Number(playerProjection?.rank || 0),
+            overallRank: Number(playerProjection?.overallRank || 0),
           };
         })
         .filter((player): player is TradeLabPlayer => player !== null)
-        .sort((a, b) => b.projection - a.projection);
+        .sort((a, b) => a.overallRank - b.overallRank);
 
       const managerName = store.showUsernames
         ? team.username || team.name
@@ -152,11 +160,6 @@ const fetchPlayers = async () => {
         id: team.rosterId,
         managerName: managerName || `Roster ${team.rosterId}`,
         players: allPlayers,
-        totalProjection: Number(
-          allPlayers
-            .reduce((sum, player) => sum + player.projection, 0)
-            .toFixed(2)
-        ),
       };
     });
   } finally {
@@ -247,13 +250,35 @@ const isIncluded = (team: "A" | "B", playerId: string) => {
     : teamBSends.value.includes(playerId);
 };
 
-const projectionText = (value: number) => value.toFixed(2);
-const netClass = (value: number) =>
-  value > 0
-    ? "text-emerald-500"
-    : value < 0
-      ? "text-rose-500"
-      : "text-muted-foreground";
+const rankLabel = (rank: number) => {
+  return rank > 0 ? `#${rank}` : "N/A";
+};
+
+const waiverPaletteClass = (tier: number) => {
+  if (tier === 1) return "bg-emerald-400 dark:bg-emerald-600 text-gray-50";
+  if (tier === 2) return "bg-green-400 dark:bg-green-600 text-gray-50";
+  if (tier === 3) return "bg-yellow-300 dark:bg-yellow-600 text-black";
+  if (tier === 4) return "bg-orange-400 dark:bg-orange-500 text-gray-50";
+  return "bg-red-400 dark:bg-red-600 text-gray-50";
+};
+
+const posRankClass = (rank: number) => {
+  if (rank <= 0) return "bg-muted text-muted-foreground";
+  if (rank <= 12) return waiverPaletteClass(1);
+  if (rank <= 24) return waiverPaletteClass(2);
+  if (rank <= 36) return waiverPaletteClass(3);
+  if (rank <= 48) return waiverPaletteClass(4);
+  return waiverPaletteClass(5);
+};
+
+const overallRankClass = (rank: number) => {
+  if (rank <= 0) return "bg-muted text-muted-foreground";
+  if (rank <= 24) return waiverPaletteClass(1);
+  if (rank <= 60) return waiverPaletteClass(2);
+  if (rank <= 120) return waiverPaletteClass(3);
+  if (rank <= 180) return waiverPaletteClass(4);
+  return waiverPaletteClass(5);
+};
 
 watch(
   () => store.currentLeagueId,
@@ -328,7 +353,7 @@ onMounted(async () => {
                 'trade-player-chip-selected': isIncluded('A', player.player_id),
               }"
             >
-              <div class="flex">
+              <div class="flex w-full">
                 <img
                   v-if="player.position !== 'DEF'"
                   class="object-cover rounded-full w-14"
@@ -348,6 +373,16 @@ onMounted(async () => {
                   <p class="text-xs text-muted-foreground">
                     {{ player.position }} - {{ player.team }}
                   </p>
+                </div>
+                <div class="flex flex-col items-end gap-1 ml-auto">
+                  <span :class="['rank-pill', posRankClass(player.projection)]">
+                    POS {{ rankLabel(player.projection) }}
+                  </span>
+                  <span
+                    :class="['rank-pill', overallRankClass(player.overallRank)]"
+                  >
+                    OVR {{ rankLabel(player.overallRank) }}
+                  </span>
                 </div>
               </div>
             </button>
@@ -381,7 +416,7 @@ onMounted(async () => {
                 :key="`send-a-${player.player_id}`"
                 class="trade-selected-player"
               >
-                <div class="flex">
+                <div class="flex w-full">
                   <img
                     v-if="player.position !== 'DEF'"
                     class="object-cover rounded-full w-14"
@@ -401,6 +436,21 @@ onMounted(async () => {
                     <p class="text-xs text-muted-foreground">
                       {{ player.position }} - {{ player.team }}
                     </p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1 ml-auto mr-4">
+                    <span
+                      :class="['rank-pill', posRankClass(player.projection)]"
+                    >
+                      POS {{ rankLabel(player.projection) }}
+                    </span>
+                    <span
+                      :class="[
+                        'rank-pill',
+                        overallRankClass(player.overallRank),
+                      ]"
+                    >
+                      OVR {{ rankLabel(player.overallRank) }}
+                    </span>
                   </div>
                 </div>
                 <button
@@ -434,7 +484,7 @@ onMounted(async () => {
                 :key="`send-b-${player.player_id}`"
                 class="trade-selected-player"
               >
-                <div class="flex">
+                <div class="flex w-full">
                   <img
                     v-if="player.position !== 'DEF'"
                     class="object-cover rounded-full w-14"
@@ -454,6 +504,21 @@ onMounted(async () => {
                     <p class="text-xs text-muted-foreground">
                       {{ player.position }} - {{ player.team }}
                     </p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1 ml-auto mr-4">
+                    <span
+                      :class="['rank-pill', posRankClass(player.projection)]"
+                    >
+                      POS {{ rankLabel(player.projection) }}
+                    </span>
+                    <span
+                      :class="[
+                        'rank-pill',
+                        overallRankClass(player.overallRank),
+                      ]"
+                    >
+                      OVR {{ rankLabel(player.overallRank) }}
+                    </span>
                   </div>
                 </div>
                 <button
@@ -504,7 +569,7 @@ onMounted(async () => {
                 'trade-player-chip-selected': isIncluded('B', player.player_id),
               }"
             >
-              <div class="flex">
+              <div class="flex w-full">
                 <img
                   v-if="player.position !== 'DEF'"
                   class="object-cover rounded-full w-14"
@@ -524,6 +589,16 @@ onMounted(async () => {
                   <p class="text-xs text-muted-foreground">
                     {{ player.position }} - {{ player.team }}
                   </p>
+                </div>
+                <div class="flex flex-col items-end gap-1 ml-auto">
+                  <span :class="['rank-pill', posRankClass(player.projection)]">
+                    POS {{ rankLabel(player.projection) }}
+                  </span>
+                  <span
+                    :class="['rank-pill', overallRankClass(player.overallRank)]"
+                  >
+                    OVR {{ rankLabel(player.overallRank) }}
+                  </span>
                 </div>
               </div>
             </button>
@@ -582,5 +657,13 @@ onMounted(async () => {
   font-size: 0.9rem;
   justify-content: space-between;
   padding: 0.35rem 0.5rem;
+}
+
+.rank-pill {
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
 }
 </style>
