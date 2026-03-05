@@ -397,7 +397,7 @@ onMounted(async () => {
       Drag players into each team's package to brainstorm offers.
     </p>
 
-    <div v-if="loading" class="py-2">
+    <div v-if="loading" class="py-2 mb-96">
       Loading players and projections...
     </div>
     <div v-else>
@@ -426,7 +426,7 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="grid max-h-[32rem] gap-2 overflow-y-auto pr-1">
+          <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
             <button
               v-for="player in teamA?.players || []"
               :key="`A-${player.player_id}`"
@@ -435,7 +435,10 @@ onMounted(async () => {
               type="button"
               class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
               :class="{
-                'bg-primary/10 border-primary': isIncluded('A', player.player_id),
+                'bg-primary/10 border-primary': isIncluded(
+                  'A',
+                  player.player_id
+                ),
                 'hover:border-primary': !isIncluded('A', player.player_id),
               }"
             >
@@ -678,7 +681,7 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="grid max-h-[32rem] gap-2 overflow-y-auto pr-1">
+          <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
             <button
               v-for="player in teamB?.players || []"
               :key="`B-${player.player_id}`"
@@ -687,7 +690,10 @@ onMounted(async () => {
               type="button"
               class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
               :class="{
-                'bg-primary/10 border-primary': isIncluded('B', player.player_id),
+                'bg-primary/10 border-primary': isIncluded(
+                  'B',
+                  player.player_id
+                ),
                 'hover:border-primary': !isIncluded('B', player.player_id),
               }"
             >
