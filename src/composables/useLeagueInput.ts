@@ -2,6 +2,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "@/store/store";
 import type { LeagueInfoType } from "@/types/types";
+import type { LeagueOriginal } from "@/types/apiTypes";
 import {
   getData,
   getLeague,
@@ -104,14 +105,14 @@ export const useLeagueInput = () => {
       return;
     }
 
-    const checkInput: any = await getLeague(leagueIdInput.value);
-    if (!checkInput["name"]) {
+    const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
+    if (!checkInput.name) {
       errorMsg.value = "Invalid league ID";
       showErrorMsg.value = true;
     } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
       errorMsg.value = "League already added";
       showErrorMsg.value = true;
-    } else if (checkInput["sport"] !== "nfl") {
+    } else if (checkInput.sport !== "nfl") {
       errorMsg.value = "Only NFL leagues are supported";
       showErrorMsg.value = true;
     } else {
@@ -119,7 +120,7 @@ export const useLeagueInput = () => {
       localStorage.currentTab = "Standings";
       await resetRoute();
       showErrorMsg.value = false;
-      store.updateLoadingLeague(checkInput["name"]);
+      store.updateLoadingLeague(checkInput.name);
       store.updateCurrentLeagueId(leagueIdInput.value);
       const newLeagueInfo = await getData(leagueIdInput.value);
       store.updateLeagueInfo(newLeagueInfo);

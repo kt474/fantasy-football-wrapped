@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import { authenticatedFetch } from "@/lib/authFetch";
 import { useAuthStore } from "@/store/auth";
 import { toast } from "vue-sonner";
+import { getErrorMessage } from "@/lib/error";
 
 export type SubscriptionStatusResponse = {
   isPremium: boolean;
@@ -140,9 +141,11 @@ export const useSubscriptionStore = defineStore("subscription", () => {
       const payload = (await response.json()) as SubscriptionStatusResponse;
       applySubscriptionStatus(payload);
       saveSubscriptionStatusCache(payload);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (showErrorToast) {
-        toast.error(error?.message ?? "Unable to fetch subscription status");
+        toast.error(
+          getErrorMessage(error, "Unable to fetch subscription status")
+        );
       }
     } finally {
       if (showLoading) {
