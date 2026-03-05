@@ -758,6 +758,12 @@ const getMatchupWinner = (matchupIndex: number | null, currentWeek: number) => {
   return max(pointsArray);
 };
 
+const getUsersInMatchup = (matchupIndex: number | null) => {
+  return sortedTableData.value.filter(
+    (user) => user.matchups[currentWeek.value - 1] === matchupIndex
+  );
+};
+
 const copyReport = () => {
   navigator.clipboard.writeText(
     (tier.value === "Standard"
@@ -994,6 +1000,117 @@ watch(() => currentWeek.value, fetchPlayerNames);
             </TabsContent>
             <TabsContent value="Standard">
               <div v-if="rawWeeklyReport" class="max-w-5xl">
+                <div
+                  v-for="index in numOfMatchups"
+                  class="flex items-center gap-4 my-2 overflow-x-auto"
+                >
+                  <template
+                    v-for="(user, matchupUserIndex) in getUsersInMatchup(index)"
+                    :key="`${index}-${matchupUserIndex}`"
+                  >
+                    <div
+                      v-if="matchupUserIndex === 0"
+                      class="flex items-center min-w-0 gap-2 w-60"
+                    >
+                      <img
+                        v-if="user.avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full shrink-0"
+                        :src="user.avatarImg"
+                      />
+                      <svg
+                        v-else
+                        class="w-8 h-8 shrink-0"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                        />
+                      </svg>
+                      <div class="flex-1 min-w-0">
+                        <p class="px-2 -mt-1 truncate max-w-28 xl:max-w-44">
+                          {{
+                            store.showUsernames
+                              ? user.username
+                                ? user.username
+                                : "Ghost Roster"
+                              : user.name
+                                ? user.name
+                                : "Ghost Roster"
+                          }}
+                        </p>
+                        <p class="px-2 text-xs text-muted-foreground">
+                          ({{ getRecord(user.recordByWeek, currentWeek) }})
+                        </p>
+                      </div>
+                      <p
+                        class="w-12 mt-0.5 text-right tabular-nums shrink-0"
+                        :class="{
+                          'text-primary font-semibold':
+                            user.points[currentWeek - 1] ==
+                            getMatchupWinner(index, currentWeek - 1),
+                        }"
+                      >
+                        {{ user.points[currentWeek - 1] }}
+                      </p>
+                    </div>
+                    <div v-else class="flex items-center justify-end min-w-0 gap-2 w-60">
+                      <p
+                        class="w-12 mt-0.5 text-left tabular-nums shrink-0"
+                        :class="{
+                          'text-primary font-semibold':
+                            user.points[currentWeek - 1] ==
+                            getMatchupWinner(index, currentWeek - 1),
+                        }"
+                      >
+                        {{ user.points[currentWeek - 1] }}
+                      </p>
+                      <div class="flex-1 min-w-0 text-right">
+                        <p class="px-2 -mt-1 truncate max-w-28 xl:max-w-44">
+                          {{
+                            store.showUsernames
+                              ? user.username
+                                ? user.username
+                                : "Ghost Roster"
+                              : user.name
+                                ? user.name
+                                : "Ghost Roster"
+                          }}
+                        </p>
+                        <p class="px-2 text-xs text-muted-foreground">
+                          ({{ getRecord(user.recordByWeek, currentWeek) }})
+                        </p>
+                      </div>
+                      <img
+                        v-if="user.avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full shrink-0"
+                        :src="user.avatarImg"
+                      />
+                      <svg
+                        v-else
+                        class="w-8 h-8 shrink-0"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                        />
+                      </svg>
+                    </div>
+                    <p
+                      v-if="matchupUserIndex === 0"
+                      class="w-6 text-xs font-semibold text-center text-muted-foreground"
+                    >
+                      vs
+                    </p>
+                  </template>
+                </div>
                 <div
                   v-html="renderedWeeklyReport"
                   class="mb-3 report-content"
