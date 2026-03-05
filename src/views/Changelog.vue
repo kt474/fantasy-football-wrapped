@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "3/04/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "There is a new Trade Lab tool that allows you to brainstorm trades and evaluate fairness.",
+        ],
+      },
+    ],
+  },
+  {
     date: "3/03/26",
     content: [
       {

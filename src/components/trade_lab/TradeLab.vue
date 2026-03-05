@@ -397,7 +397,7 @@ onMounted(async () => {
       Drag players into each team's package to brainstorm offers.
     </p>
 
-    <div v-if="loading" class="py-2 mb-96">
+    <div v-if="loading" class="py-2">
       Loading players and projections...
     </div>
     <div v-else>
@@ -426,16 +426,17 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="trade-player-list">
+          <div class="grid max-h-[32rem] gap-2 overflow-y-auto pr-1">
             <button
               v-for="player in teamA?.players || []"
               :key="`A-${player.player_id}`"
               draggable="true"
               @dragstart="onPlayerDragStart(player.player_id, 'A')"
               type="button"
-              class="trade-player-chip"
+              class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
               :class="{
-                'trade-player-chip-selected': isIncluded('A', player.player_id),
+                'bg-primary/10 border-primary': isIncluded('A', player.player_id),
+                'hover:border-primary': !isIncluded('A', player.player_id),
               }"
             >
               <div class="flex w-full">
@@ -460,11 +461,19 @@ onMounted(async () => {
                   </p>
                 </div>
                 <div class="flex flex-col items-end gap-1 ml-auto">
-                  <span :class="['rank-pill', posRankClass(player.projection)]">
+                  <span
+                    :class="[
+                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                      posRankClass(player.projection),
+                    ]"
+                  >
                     POS {{ rankLabel(player.projection) }}
                   </span>
                   <span
-                    :class="['rank-pill', overallRankClass(player.overallRank)]"
+                    :class="[
+                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                      overallRankClass(player.overallRank),
+                    ]"
                   >
                     OVR {{ rankLabel(player.overallRank) }}
                   </span>
@@ -482,7 +491,7 @@ onMounted(async () => {
           <Separator class="h-px my-2" />
 
           <div
-            class="trade-drop-zone"
+            class="min-h-28 rounded-[0.7rem] border border-dashed border-border p-3"
             @dragover.prevent
             @drop.prevent="onDropToTradePackage('A')"
           >
@@ -493,7 +502,7 @@ onMounted(async () => {
               <div
                 v-for="player in teamAOutgoingPlayers"
                 :key="`send-a-${player.player_id}`"
-                class="trade-selected-player"
+                class="flex items-center justify-between rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
               >
                 <div class="flex w-full">
                   <img
@@ -518,13 +527,16 @@ onMounted(async () => {
                   </div>
                   <div class="flex flex-col items-end gap-1 ml-auto mr-4">
                     <span
-                      :class="['rank-pill', posRankClass(player.projection)]"
+                      :class="[
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        posRankClass(player.projection),
+                      ]"
                     >
                       POS {{ rankLabel(player.projection) }}
                     </span>
                     <span
                       :class="[
-                        'rank-pill',
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
                         overallRankClass(player.overallRank),
                       ]"
                     >
@@ -544,7 +556,7 @@ onMounted(async () => {
           </div>
 
           <div
-            class="mt-3 trade-drop-zone"
+            class="mt-3 min-h-28 rounded-[0.7rem] border border-dashed border-border p-3"
             @dragover.prevent
             @drop.prevent="onDropToTradePackage('B')"
           >
@@ -555,7 +567,7 @@ onMounted(async () => {
               <div
                 v-for="player in teamBOutgoingPlayers"
                 :key="`send-b-${player.player_id}`"
-                class="trade-selected-player"
+                class="flex items-center justify-between rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
               >
                 <div class="flex w-full">
                   <img
@@ -580,13 +592,16 @@ onMounted(async () => {
                   </div>
                   <div class="flex flex-col items-end gap-1 ml-auto mr-4">
                     <span
-                      :class="['rank-pill', posRankClass(player.projection)]"
+                      :class="[
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        posRankClass(player.projection),
+                      ]"
                     >
                       POS {{ rankLabel(player.projection) }}
                     </span>
                     <span
                       :class="[
-                        'rank-pill',
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
                         overallRankClass(player.overallRank),
                       ]"
                     >
@@ -616,7 +631,12 @@ onMounted(async () => {
               <span class="font-semibold">{{ teamBTradeValue }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <span :class="['rank-pill', fairnessPillClass]">
+              <span
+                :class="[
+                  'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                  fairnessPillClass,
+                ]"
+              >
                 {{ fairnessLabel }}
               </span>
               <span class="text-xs text-muted-foreground">
@@ -658,16 +678,17 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="trade-player-list">
+          <div class="grid max-h-[32rem] gap-2 overflow-y-auto pr-1">
             <button
               v-for="player in teamB?.players || []"
               :key="`B-${player.player_id}`"
               draggable="true"
               @dragstart="onPlayerDragStart(player.player_id, 'B')"
               type="button"
-              class="trade-player-chip"
+              class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
               :class="{
-                'trade-player-chip-selected': isIncluded('B', player.player_id),
+                'bg-primary/10 border-primary': isIncluded('B', player.player_id),
+                'hover:border-primary': !isIncluded('B', player.player_id),
               }"
             >
               <div class="flex w-full">
@@ -692,11 +713,19 @@ onMounted(async () => {
                   </p>
                 </div>
                 <div class="flex flex-col items-end gap-1 ml-auto">
-                  <span :class="['rank-pill', posRankClass(player.projection)]">
+                  <span
+                    :class="[
+                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                      posRankClass(player.projection),
+                    ]"
+                  >
                     POS {{ rankLabel(player.projection) }}
                   </span>
                   <span
-                    :class="['rank-pill', overallRankClass(player.overallRank)]"
+                    :class="[
+                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                      overallRankClass(player.overallRank),
+                    ]"
                   >
                     OVR {{ rankLabel(player.overallRank) }}
                   </span>
@@ -709,69 +738,3 @@ onMounted(async () => {
     </div>
   </Card>
 </template>
-
-<style scoped>
-.trade-player-list {
-  display: grid;
-  gap: 0.5rem;
-  max-height: 32rem;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-}
-
-.trade-player-chip {
-  align-items: flex-start;
-  background: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.6rem;
-  cursor: grab;
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.55rem 0.65rem;
-  text-align: left;
-  width: 100%;
-}
-
-.trade-player-chip:hover {
-  border-color: hsl(var(--primary));
-}
-
-.trade-player-chip-selected {
-  background: hsl(var(--primary) / 0.08);
-  border-color: hsl(var(--primary));
-}
-
-.trade-drop-zone {
-  border: 1px dashed hsl(var(--border));
-  border-radius: 0.7rem;
-  min-height: 7rem;
-  padding: 0.75rem;
-}
-
-.trade-selected-player {
-  align-items: center;
-  background: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-  display: flex;
-  font-size: 0.9rem;
-  justify-content: space-between;
-  padding: 0.35rem 0.5rem;
-}
-
-.rank-pill {
-  border-radius: 8px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  line-height: 1;
-  padding: 0.3rem 0.45rem;
-}
-
-.trade-value-panel {
-  background: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-  padding: 0.65rem;
-}
-</style>
