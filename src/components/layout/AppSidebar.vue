@@ -32,6 +32,7 @@ import {
   BadgeCheck,
   Handshake,
   Dices,
+  FlaskConical,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
@@ -128,6 +129,10 @@ const data = {
         {
           title: "Schedule Simulator",
           icon: Dices,
+        },
+        {
+          title: "Trade Lab",
+          icon: FlaskConical,
         },
         {
           title: "Draft",

@@ -1,0 +1,746 @@
+<script lang="ts" setup>
+import { computed, onMounted, ref, watch } from "vue";
+import { TableDataType } from "../../types/types.ts";
+import { useStore } from "../../store/store";
+import { getPlayersByIdsMap, getStats } from "../../api/api.ts";
+import { Player } from "../../types/apiTypes.ts";
+import Card from "../ui/card/Card.vue";
+import Separator from "../ui/separator/Separator.vue";
+import { Label } from "../ui/label/index.ts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { X } from "lucide-vue-next";
+
+type TradeLabPlayer = Player & {
+  projection: number;
+  overallRank: number;
+};
+
+type TradeLabRoster = {
+  id: number;
+  managerName: string;
+  players: TradeLabPlayer[];
+};
+
+const store = useStore();
+const props = defineProps<{
+  tableData: TableDataType[];
+}>();
+const rosters = ref<TradeLabRoster[]>([]);
+const loading = ref(false);
+const selectedWeek = ref(1);
+const selectedTeamAId = ref<number | null>(null);
+const selectedTeamBId = ref<number | null>(null);
+const teamASends = ref<string[]>([]);
+const teamBSends = ref<string[]>([]);
+const draggedPlayer = ref<{ playerId: string; fromTeam: "A" | "B" } | null>(
+  null
+);
+
+const activeLeague = computed(() => store.leagueInfo[store.currentLeagueIndex]);
+
+const fallbackWeek = computed(() => {
+  if (!activeLeague.value) return 1;
+  const nextWeek = Math.min((activeLeague.value.lastScoredWeek || 0) + 1, 18);
+  return Math.max(1, nextWeek);
+});
+
+const teamA = computed(() =>
+  rosters.value.find((team) => team.id === selectedTeamAId.value)
+);
+const teamB = computed(() =>
+  rosters.value.find((team) => team.id === selectedTeamBId.value)
+);
+
+const teamAOutgoingPlayers = computed(() => {
+  if (!teamA.value) return [];
+  return teamA.value.players.filter((player) =>
+    teamASends.value.includes(player.player_id)
+  );
+});
+
+const teamBOutgoingPlayers = computed(() => {
+  if (!teamB.value) return [];
+  return teamB.value.players.filter((player) =>
+    teamBSends.value.includes(player.player_id)
+  );
+});
+
+const getWeekLineup = (team: TableDataType, weekIndex: number) => {
+  const starters =
+    Array.isArray(team.starters?.[weekIndex]) && team.starters[weekIndex]
+      ? team.starters[weekIndex]
+      : [];
+  const benchByWeek = Array.isArray((team.benchPlayers as any)?.[weekIndex])
+    ? ((team.benchPlayers as any)[weekIndex] as string[])
+    : [];
+  const bench =
+    benchByWeek.length > 0
+      ? benchByWeek
+      : (team.players || []).filter((id) => !starters.includes(id));
+
+  return { starters, bench };
+};
+
+const fetchPlayers = async () => {
+  if (store.leagueIds.length === 0 || !activeLeague.value) {
+    rosters.value = [];
+    return;
+  }
+
+  loading.value = true;
+  const weekIndex = selectedWeek.value - 1;
+  const currentLeague = activeLeague.value;
+
+  try {
+    const uniquePlayerIds = Array.from(
+      new Set(
+        props.tableData
+          .map((team) => {
+            const lineup = getWeekLineup(team, weekIndex);
+            return [...lineup.starters, ...lineup.bench];
+          })
+          .flat()
+      )
+    );
+
+    const playerMap =
+      uniquePlayerIds.length > 0
+        ? await getPlayersByIdsMap(uniquePlayerIds)
+        : new Map<string, Player>();
+
+    const projectionEntries = await Promise.all(
+      uniquePlayerIds.map(async (playerId) => {
+        const projection = await getStats(
+          playerId,
+          currentLeague.season,
+          currentLeague.scoringType
+        );
+        return [
+          playerId,
+          {
+            rank: Number(projection?.rank || 0),
+            overallRank: Number(projection?.overallRank || 0),
+          },
+        ] as const;
+      })
+    );
+    const projectionMap = new Map<
+      string,
+      { rank: number; overallRank: number }
+    >(projectionEntries);
+
+    rosters.value = props.tableData.map((team) => {
+      const { starters, bench } = getWeekLineup(team, weekIndex);
+      const allPlayers = [...starters, ...bench]
+        .map((playerId) => {
+          const playerMeta = playerMap.get(playerId);
+          if (!playerMeta) return null;
+          const playerProjection = projectionMap.get(playerId);
+
+          return {
+            ...playerMeta,
+            projection: Number(playerProjection?.rank || 0),
+            overallRank: Number(playerProjection?.overallRank || 0),
+          };
+        })
+        .filter((player): player is TradeLabPlayer => player !== null)
+        .sort((a, b) => a.overallRank - b.overallRank);
+
+      const managerName = store.showUsernames
+        ? team.username || team.name
+        : team.name || team.username;
+
+      return {
+        id: team.rosterId,
+        managerName: managerName || `Roster ${team.rosterId}`,
+        players: allPlayers,
+      };
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const resetTrade = () => {
+  teamASends.value = [];
+  teamBSends.value = [];
+};
+
+const syncTeamSelections = () => {
+  if (rosters.value.length < 2) {
+    selectedTeamAId.value = rosters.value[0]?.id ?? null;
+    selectedTeamBId.value = null;
+    resetTrade();
+    return;
+  }
+
+  const existingA = rosters.value.some(
+    (team) => team.id === selectedTeamAId.value
+  );
+  const existingB = rosters.value.some(
+    (team) => team.id === selectedTeamBId.value
+  );
+
+  if (!existingA) selectedTeamAId.value = rosters.value[0].id;
+  if (!existingB) {
+    selectedTeamBId.value =
+      rosters.value.find((team) => team.id !== selectedTeamAId.value)?.id ??
+      null;
+  }
+
+  if (selectedTeamAId.value === selectedTeamBId.value) {
+    selectedTeamBId.value =
+      rosters.value.find((team) => team.id !== selectedTeamAId.value)?.id ??
+      null;
+  }
+
+  resetTrade();
+};
+
+const handleTeamSelectionChange = (team: "A" | "B", rosterId: number) => {
+  if (team === "A") {
+    selectedTeamAId.value = rosterId;
+    if (selectedTeamBId.value === rosterId) {
+      selectedTeamBId.value =
+        rosters.value.find((entry) => entry.id !== rosterId)?.id ?? null;
+    }
+  } else {
+    selectedTeamBId.value = rosterId;
+    if (selectedTeamAId.value === rosterId) {
+      selectedTeamAId.value =
+        rosters.value.find((entry) => entry.id !== rosterId)?.id ?? null;
+    }
+  }
+  resetTrade();
+};
+
+const onPlayerDragStart = (playerId: string, fromTeam: "A" | "B") => {
+  draggedPlayer.value = { playerId, fromTeam };
+};
+
+const onDropToTradePackage = (targetTeam: "A" | "B") => {
+  if (!draggedPlayer.value || draggedPlayer.value.fromTeam !== targetTeam)
+    return;
+
+  const source = targetTeam === "A" ? teamASends : teamBSends;
+  const playerId = draggedPlayer.value.playerId;
+  if (!source.value.includes(playerId)) {
+    source.value.push(playerId);
+  }
+  draggedPlayer.value = null;
+};
+
+const removeFromPackage = (targetTeam: "A" | "B", playerId: string) => {
+  if (targetTeam === "A") {
+    teamASends.value = teamASends.value.filter((id) => id !== playerId);
+    return;
+  }
+  teamBSends.value = teamBSends.value.filter((id) => id !== playerId);
+};
+
+const isIncluded = (team: "A" | "B", playerId: string) => {
+  return team === "A"
+    ? teamASends.value.includes(playerId)
+    : teamBSends.value.includes(playerId);
+};
+
+const rankLabel = (rank: number) => {
+  return rank > 0 ? `#${rank}` : "N/A";
+};
+
+const waiverPaletteClass = (tier: number) => {
+  if (tier === 1) return "bg-emerald-500 dark:bg-emerald-600 text-gray-50";
+  if (tier === 2) return "bg-green-500 dark:bg-green-600 text-gray-50";
+  if (tier === 3) return "bg-yellow-300 dark:bg-yellow-600 text-black";
+  if (tier === 4) return "bg-orange-400 dark:bg-orange-500 text-gray-50";
+  return "bg-red-400 dark:bg-red-600 text-gray-50";
+};
+
+const posRankClass = (rank: number) => {
+  if (rank <= 0) return "bg-muted text-muted-foreground";
+  if (rank <= 12) return waiverPaletteClass(1);
+  if (rank <= 24) return waiverPaletteClass(2);
+  if (rank <= 36) return waiverPaletteClass(3);
+  if (rank <= 48) return waiverPaletteClass(4);
+  return waiverPaletteClass(5);
+};
+
+const overallRankClass = (rank: number) => {
+  if (rank <= 0) return "bg-muted text-muted-foreground";
+  if (rank <= 24) return waiverPaletteClass(1);
+  if (rank <= 60) return waiverPaletteClass(2);
+  if (rank <= 120) return waiverPaletteClass(3);
+  if (rank <= 180) return waiverPaletteClass(4);
+  return waiverPaletteClass(5);
+};
+
+const positionWeights: Record<string, number> = {
+  QB: 0.82,
+  RB: 1.3,
+  WR: 1.16,
+  TE: 1.08,
+  K: 0.35,
+  DEF: 0.45,
+};
+
+const depthMultipliers = [1, 0.64, 0.38, 0.2];
+
+const rankToScore = (rank: number) => {
+  if (!rank || rank <= 0) return 0;
+  return 100 / Math.sqrt(rank + 2);
+};
+
+const getPlayerTradeScore = (player: TradeLabPlayer) => {
+  const posScore = rankToScore(player.projection);
+  const overallScore = rankToScore(player.overallRank);
+  const baseScore = posScore * 0.67 + overallScore * 0.33;
+  const positionWeight = positionWeights[player.position] ?? 1;
+  return baseScore * positionWeight;
+};
+
+const getPackageTradeValue = (players: TradeLabPlayer[]) => {
+  if (players.length === 0) return 0;
+  const sortedScores = players
+    .map((player) => getPlayerTradeScore(player))
+    .sort((a, b) => b - a);
+
+  const total = sortedScores.reduce((sum, score, index) => {
+    const multiplier =
+      depthMultipliers[index] ?? depthMultipliers[depthMultipliers.length - 1];
+    return sum + score * multiplier;
+  }, 0);
+
+  return Number(total.toFixed(2));
+};
+
+const teamATradeValue = computed(() =>
+  getPackageTradeValue(teamAOutgoingPlayers.value)
+);
+const teamBTradeValue = computed(() =>
+  getPackageTradeValue(teamBOutgoingPlayers.value)
+);
+
+const tradeDelta = computed(() =>
+  Number((teamATradeValue.value - teamBTradeValue.value).toFixed(2))
+);
+
+const fairnessPercent = computed(() => {
+  const maxSide = Math.max(teamATradeValue.value, teamBTradeValue.value, 1);
+  return Number(((Math.abs(tradeDelta.value) / maxSide) * 100).toFixed(1));
+});
+
+const fairnessLabel = computed(() => {
+  if (teamATradeValue.value === 0 && teamBTradeValue.value === 0) {
+    return "No players selected";
+  }
+  if (fairnessPercent.value <= 10) return "Very fair";
+  if (fairnessPercent.value <= 22) return "Reasonably fair";
+  if (fairnessPercent.value <= 35) return "Slightly uneven";
+  return "Very uneven";
+});
+
+const fairnessPillClass = computed(() => {
+  if (teamATradeValue.value === 0 && teamBTradeValue.value === 0) {
+    return "bg-muted text-muted-foreground";
+  }
+  if (fairnessPercent.value <= 10) return waiverPaletteClass(1);
+  if (fairnessPercent.value <= 22) return waiverPaletteClass(2);
+  if (fairnessPercent.value <= 35) return waiverPaletteClass(4);
+  return waiverPaletteClass(5);
+});
+
+const tradeAdvantageText = computed(() => {
+  if (tradeDelta.value > 0) {
+    return `${teamB.value?.managerName || "Team B"} receives more value`;
+  }
+  if (tradeDelta.value < 0) {
+    return `${teamA.value?.managerName || "Team A"} receives more value`;
+  }
+  return "Both sides are even";
+});
+
+watch(
+  () => store.currentLeagueId,
+  () => {
+    selectedWeek.value = fallbackWeek.value;
+    fetchPlayers();
+  }
+);
+
+watch(
+  () => selectedWeek.value,
+  () => fetchPlayers()
+);
+
+watch(
+  () => rosters.value,
+  () => syncTeamSelections()
+);
+
+onMounted(async () => {
+  selectedWeek.value = fallbackWeek.value;
+  await fetchPlayers();
+});
+</script>
+<template>
+  <Card class="w-full h-full p-4 mt-4 md:p-6">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+      <h5 class="text-3xl font-bold leading-none">Trade Lab (Beta)</h5>
+    </div>
+    <p class="mt-4 mb-2 text-muted-foreground">
+      Drag players into each team's package to brainstorm offers.
+    </p>
+
+    <div v-if="loading" class="py-2 mb-96">
+      Loading players and projections...
+    </div>
+    <div v-else>
+      <div class="grid gap-3 xl:grid-cols-3">
+        <Card class="px-4 py-3">
+          <div class="mb-2">
+            <Label class="block mb-1 text-sm">Manager</Label>
+            <Select
+              :model-value="selectedTeamAId"
+              @update:model-value="
+                handleTeamSelectionChange('A', Number($event))
+              "
+            >
+              <SelectTrigger class="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="team in rosters"
+                  :key="team.id"
+                  :value="team.id"
+                  :disabled="team.id === selectedTeamBId"
+                >
+                  {{ team.managerName }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
+            <button
+              v-for="player in teamA?.players || []"
+              :key="`A-${player.player_id}`"
+              draggable="true"
+              @dragstart="onPlayerDragStart(player.player_id, 'A')"
+              type="button"
+              class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
+              :class="{
+                'bg-primary/10 border-primary': isIncluded(
+                  'A',
+                  player.player_id
+                ),
+                'hover:border-primary': !isIncluded('A', player.player_id),
+              }"
+            >
+              <div class="flex w-full">
+                <img
+                  v-if="player.position !== 'DEF'"
+                  class="object-cover rounded-full w-14"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                  alt="Player avatar"
+                />
+                <img
+                  v-else
+                  class="w-10 h-10 mx-2 rounded-full"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                  alt="Team avatar"
+                />
+                <div class="ml-2">
+                  <p class="font-medium">
+                    {{ player.name || `${player.team} Defense` }}
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    {{ player.position }} - {{ player.team }}
+                  </p>
+                </div>
+                <div class="flex flex-col items-end gap-1 ml-auto">
+                  <span
+                    :class="[
+                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                      posRankClass(player.projection),
+                    ]"
+                  >
+                    POS {{ rankLabel(player.projection) }}
+                  </span>
+                  <span
+                    :class="[
+                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                      overallRankClass(player.overallRank),
+                    ]"
+                  >
+                    OVR {{ rankLabel(player.overallRank) }}
+                  </span>
+                </div>
+              </div>
+            </button>
+          </div>
+        </Card>
+
+        <Card class="p-3">
+          <p class="mb-1 text-sm font-semibold">Trade Package</p>
+          <p class="text-sm text-muted-foreground">
+            Drop players from each roster into its matching side.
+          </p>
+          <Separator class="h-px my-2" />
+
+          <div
+            class="min-h-28 rounded-[0.7rem] border border-dashed border-border p-3"
+            @dragover.prevent
+            @drop.prevent="onDropToTradePackage('A')"
+          >
+            <p class="mb-2 text-sm font-semibold">
+              {{ teamA?.managerName }}
+            </p>
+            <div class="space-y-1">
+              <div
+                v-for="player in teamAOutgoingPlayers"
+                :key="`send-a-${player.player_id}`"
+                class="flex items-center justify-between rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+              >
+                <div class="flex w-full">
+                  <img
+                    v-if="player.position !== 'DEF'"
+                    class="object-cover rounded-full w-14"
+                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                    alt="Player avatar"
+                  />
+                  <img
+                    v-else
+                    class="w-10 h-10 mx-2 rounded-full"
+                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                    alt="Team avatar"
+                  />
+                  <div class="ml-2">
+                    <p class="font-medium">
+                      {{ player.name || `${player.team} Defense` }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                      {{ player.position }} - {{ player.team }}
+                    </p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1 ml-auto mr-4">
+                    <span
+                      :class="[
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        posRankClass(player.projection),
+                      ]"
+                    >
+                      POS {{ rankLabel(player.projection) }}
+                    </span>
+                    <span
+                      :class="[
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        overallRankClass(player.overallRank),
+                      ]"
+                    >
+                      OVR {{ rankLabel(player.overallRank) }}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="text-xs underline text-muted-foreground"
+                  @click="removeFromPackage('A', player.player_id)"
+                >
+                  <X class="size-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="mt-3 min-h-28 rounded-[0.7rem] border border-dashed border-border p-3"
+            @dragover.prevent
+            @drop.prevent="onDropToTradePackage('B')"
+          >
+            <p class="mb-2 text-sm font-semibold">
+              {{ teamB?.managerName }}
+            </p>
+            <div class="space-y-1">
+              <div
+                v-for="player in teamBOutgoingPlayers"
+                :key="`send-b-${player.player_id}`"
+                class="flex items-center justify-between rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+              >
+                <div class="flex w-full">
+                  <img
+                    v-if="player.position !== 'DEF'"
+                    class="object-cover rounded-full w-14"
+                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                    alt="Player avatar"
+                  />
+                  <img
+                    v-else
+                    class="w-10 h-10 mx-2 rounded-full"
+                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                    alt="Team avatar"
+                  />
+                  <div class="ml-2">
+                    <p class="font-medium">
+                      {{ player.name || `${player.team} Defense` }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                      {{ player.position }} - {{ player.team }}
+                    </p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1 ml-auto mr-4">
+                    <span
+                      :class="[
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        posRankClass(player.projection),
+                      ]"
+                    >
+                      POS {{ rankLabel(player.projection) }}
+                    </span>
+                    <span
+                      :class="[
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        overallRankClass(player.overallRank),
+                      ]"
+                    >
+                      OVR {{ rankLabel(player.overallRank) }}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="text-xs underline text-muted-foreground"
+                  @click="removeFromPackage('B', player.player_id)"
+                >
+                  <X class="size-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+          <Separator class="h-px my-3" />
+          <div class="p-1">
+            <p class="mb-2 text-sm font-semibold">Trade Value Estimate</p>
+            <div class="flex items-center justify-between mb-1.5 text-sm">
+              <span>{{ teamA?.managerName }}</span>
+              <span class="font-semibold">{{ teamATradeValue }}</span>
+            </div>
+            <div class="flex items-center justify-between mb-2.5 text-sm">
+              <span>{{ teamB?.managerName }}</span>
+              <span class="font-semibold">{{ teamBTradeValue }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span
+                :class="[
+                  'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                  fairnessPillClass,
+                ]"
+              >
+                {{ fairnessLabel }}
+              </span>
+              <span class="text-xs text-muted-foreground">
+                gap: {{ fairnessPercent }}%
+              </span>
+            </div>
+            <p class="mt-2 text-xs text-muted-foreground">
+              {{ tradeAdvantageText }}
+            </p>
+            <Separator class="h-px mt-3" />
+            <p class="mt-4 text-xs text-muted-foreground">
+              Formula combines rank strength, position scarcity, and depth
+              discounts for multi-player packages.
+            </p>
+          </div>
+        </Card>
+
+        <Card class="px-4 py-3">
+          <div class="mb-2">
+            <Label class="block mb-1 text-sm">Manager</Label>
+            <Select
+              :model-value="selectedTeamBId"
+              @update:model-value="
+                handleTeamSelectionChange('B', Number($event))
+              "
+            >
+              <SelectTrigger class="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="team in rosters"
+                  :key="team.id"
+                  :value="team.id"
+                  :disabled="team.id === selectedTeamAId"
+                >
+                  {{ team.managerName }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
+            <button
+              v-for="player in teamB?.players || []"
+              :key="`B-${player.player_id}`"
+              draggable="true"
+              @dragstart="onPlayerDragStart(player.player_id, 'B')"
+              type="button"
+              class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
+              :class="{
+                'bg-primary/10 border-primary': isIncluded(
+                  'B',
+                  player.player_id
+                ),
+                'hover:border-primary': !isIncluded('B', player.player_id),
+              }"
+            >
+              <div class="flex w-full">
+                <img
+                  v-if="player.position !== 'DEF'"
+                  class="object-cover rounded-full w-14"
+                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                  alt="Player avatar"
+                />
+                <img
+                  v-else
+                  class="w-10 h-10 mx-2 rounded-full"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                  alt="Team avatar"
+                />
+                <div class="ml-2">
+                  <p class="font-medium">
+                    {{ player.name || `${player.team} Defense` }}
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    {{ player.position }} - {{ player.team }}
+                  </p>
+                </div>
+                <div class="flex flex-col items-end gap-1 ml-auto">
+                  <span
+                    :class="[
+                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                      posRankClass(player.projection),
+                    ]"
+                  >
+                    POS {{ rankLabel(player.projection) }}
+                  </span>
+                  <span
+                    :class="[
+                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                      overallRankClass(player.overallRank),
+                    ]"
+                  >
+                    OVR {{ rankLabel(player.overallRank) }}
+                  </span>
+                </div>
+              </div>
+            </button>
+          </div>
+        </Card>
+      </div>
+    </div>
+  </Card>
+</template>
