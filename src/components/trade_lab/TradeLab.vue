@@ -7,6 +7,16 @@ import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { Label } from "../ui/label/index.ts";
+import Button from "../ui/button/Button.vue";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import {
   Select,
   SelectContent,
@@ -14,7 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { X } from "lucide-vue-next";
+import { Input } from "@/components/ui/input";
+import { X, Plus } from "lucide-vue-next";
 
 type TradeLabPlayer = Player & {
   projection: number;
@@ -25,6 +36,12 @@ type TradeLabRoster = {
   id: number;
   managerName: string;
   players: TradeLabPlayer[];
+};
+
+type TradeDraftPickAsset = {
+  id: string;
+  season: number;
+  round: number;
 };
 
 const store = useStore();
@@ -38,6 +55,16 @@ const selectedTeamAId = ref<number | null>(null);
 const selectedTeamBId = ref<number | null>(null);
 const teamASends = ref<string[]>([]);
 const teamBSends = ref<string[]>([]);
+const teamAFaab = ref(0);
+const teamBFaab = ref(0);
+const pendingTeamAFaab = ref(0);
+const pendingTeamBFaab = ref(0);
+const teamAPicks = ref<TradeDraftPickAsset[]>([]);
+const teamBPicks = ref<TradeDraftPickAsset[]>([]);
+const pendingAPickSeason = ref<number | null>(null);
+const pendingAPickRound = ref<number | null>(null);
+const pendingBPickSeason = ref<number | null>(null);
+const pendingBPickRound = ref<number | null>(null);
 const draggedPlayer = ref<{ playerId: string; fromTeam: "A" | "B" } | null>(
   null
 );
@@ -48,6 +75,63 @@ const fallbackWeek = computed(() => {
   if (!activeLeague.value) return 1;
   const nextWeek = Math.min((activeLeague.value.lastScoredWeek || 0) + 1, 18);
   return Math.max(1, nextWeek);
+});
+
+const draftSeasons = computed(() => {
+  const baseYear =
+    Number(activeLeague.value?.season) || new Date().getFullYear();
+  return [baseYear, baseYear + 1, baseYear + 2];
+});
+
+const draftRounds = computed(() => {
+  const picks = activeLeague.value?.draftPicks || [];
+  const maxRoundFromLeague = picks.reduce((maxRound, pick) => {
+    return Math.max(maxRound, Number(pick.round || 0));
+  }, 0);
+  const maxRound = Math.max(maxRoundFromLeague, 6);
+  return Array.from({ length: maxRound }, (_, idx) => idx + 1);
+});
+
+const pendingAPickSeasonModel = computed({
+  get: () => String(pendingAPickSeason.value ?? ""),
+  set: (value: string) => {
+    pendingAPickSeason.value = Number(value);
+  },
+});
+
+const pendingAPickRoundModel = computed({
+  get: () => String(pendingAPickRound.value ?? ""),
+  set: (value: string) => {
+    pendingAPickRound.value = Number(value);
+  },
+});
+
+const pendingBPickSeasonModel = computed({
+  get: () => String(pendingBPickSeason.value ?? ""),
+  set: (value: string) => {
+    pendingBPickSeason.value = Number(value);
+  },
+});
+
+const pendingBPickRoundModel = computed({
+  get: () => String(pendingBPickRound.value ?? ""),
+  set: (value: string) => {
+    pendingBPickRound.value = Number(value);
+  },
+});
+
+const teamAFaabInputModel = computed({
+  get: () => String(pendingTeamAFaab.value ?? 0),
+  set: (value: string | number) => {
+    pendingTeamAFaab.value = Math.max(0, Number(value || 0));
+  },
+});
+
+const teamBFaabInputModel = computed({
+  get: () => String(pendingTeamBFaab.value ?? 0),
+  set: (value: string | number) => {
+    pendingTeamBFaab.value = Math.max(0, Number(value || 0));
+  },
 });
 
 const teamA = computed(() =>
@@ -170,6 +254,14 @@ const fetchPlayers = async () => {
 const resetTrade = () => {
   teamASends.value = [];
   teamBSends.value = [];
+  teamAFaab.value = 0;
+  teamBFaab.value = 0;
+  teamAPicks.value = [];
+  teamBPicks.value = [];
+  pendingAPickSeason.value = draftSeasons.value[0] ?? null;
+  pendingBPickSeason.value = draftSeasons.value[0] ?? null;
+  pendingAPickRound.value = draftRounds.value[0] ?? null;
+  pendingBPickRound.value = draftRounds.value[0] ?? null;
 };
 
 const syncTeamSelections = () => {
@@ -244,6 +336,60 @@ const removeFromPackage = (targetTeam: "A" | "B", playerId: string) => {
   teamBSends.value = teamBSends.value.filter((id) => id !== playerId);
 };
 
+const addDraftPickToPackage = (team: "A" | "B") => {
+  const season =
+    team === "A" ? pendingAPickSeason.value : pendingBPickSeason.value;
+  const round =
+    team === "A" ? pendingAPickRound.value : pendingBPickRound.value;
+  if (!season || !round) return;
+
+  const newPick: TradeDraftPickAsset = {
+    id: `${team}-${season}-${round}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    season,
+    round,
+  };
+
+  if (team === "A") {
+    teamAPicks.value.push(newPick);
+    return;
+  }
+
+  teamBPicks.value.push(newPick);
+};
+
+const openAssetsModal = (team: "A" | "B") => {
+  if (team === "A") {
+    pendingTeamAFaab.value = teamAFaab.value;
+    return;
+  }
+  pendingTeamBFaab.value = teamBFaab.value;
+};
+
+const addFaabToPackage = (team: "A" | "B") => {
+  if (team === "A") {
+    teamAFaab.value = Math.max(0, pendingTeamAFaab.value);
+    return;
+  }
+  teamBFaab.value = Math.max(0, pendingTeamBFaab.value);
+};
+
+const removeDraftPickFromPackage = (team: "A" | "B", pickId: string) => {
+  if (team === "A") {
+    teamAPicks.value = teamAPicks.value.filter((pick) => pick.id !== pickId);
+    return;
+  }
+
+  teamBPicks.value = teamBPicks.value.filter((pick) => pick.id !== pickId);
+};
+
+const clearFaab = (team: "A" | "B") => {
+  if (team === "A") {
+    teamAFaab.value = 0;
+    return;
+  }
+  teamBFaab.value = 0;
+};
+
 const isIncluded = (team: "A" | "B", playerId: string) => {
   return team === "A"
     ? teamASends.value.includes(playerId)
@@ -290,6 +436,7 @@ const positionWeights: Record<string, number> = {
 };
 
 const depthMultipliers = [1, 0.64, 0.38, 0.2];
+const faabValuePerDollar = 0.17;
 
 const rankToScore = (rank: number) => {
   if (!rank || rank <= 0) return 0;
@@ -319,11 +466,75 @@ const getPackageTradeValue = (players: TradeLabPlayer[]) => {
   return Number(total.toFixed(2));
 };
 
-const teamATradeValue = computed(() =>
+const getDraftPickTradeValue = (pick: TradeDraftPickAsset) => {
+  const roundBaseValue =
+    {
+      1: 38,
+      2: 24,
+      3: 14,
+      4: 8,
+      5: 5,
+      6: 3.2,
+      7: 2.2,
+      8: 1.6,
+      9: 1.2,
+      10: 0.9,
+      11: 0.7,
+      12: 0.55,
+    }[pick.round] ?? Math.max(0.4, 7 / (pick.round + 1));
+
+  const seasonGap = Math.max(0, pick.season - draftSeasons.value[0]);
+  const seasonMultiplier = Math.max(0.74, 1 - seasonGap * 0.1);
+
+  return Number((roundBaseValue * seasonMultiplier).toFixed(2));
+};
+
+const teamAPlayerValue = computed(() =>
   getPackageTradeValue(teamAOutgoingPlayers.value)
 );
-const teamBTradeValue = computed(() =>
+const teamBPlayerValue = computed(() =>
   getPackageTradeValue(teamBOutgoingPlayers.value)
+);
+
+const teamADraftPickValue = computed(() =>
+  Number(
+    teamAPicks.value
+      .reduce((sum, pick) => sum + getDraftPickTradeValue(pick), 0)
+      .toFixed(2)
+  )
+);
+const teamBDraftPickValue = computed(() =>
+  Number(
+    teamBPicks.value
+      .reduce((sum, pick) => sum + getDraftPickTradeValue(pick), 0)
+      .toFixed(2)
+  )
+);
+
+const teamAFaabValue = computed(() =>
+  Number((teamAFaab.value * faabValuePerDollar).toFixed(2))
+);
+const teamBFaabValue = computed(() =>
+  Number((teamBFaab.value * faabValuePerDollar).toFixed(2))
+);
+
+const teamATradeValue = computed(() =>
+  Number(
+    (
+      teamAPlayerValue.value +
+      teamADraftPickValue.value +
+      teamAFaabValue.value
+    ).toFixed(2)
+  )
+);
+const teamBTradeValue = computed(() =>
+  Number(
+    (
+      teamBPlayerValue.value +
+      teamBDraftPickValue.value +
+      teamBFaabValue.value
+    ).toFixed(2)
+  )
 );
 
 const tradeDelta = computed(() =>
@@ -337,7 +548,7 @@ const fairnessPercent = computed(() => {
 
 const fairnessLabel = computed(() => {
   if (teamATradeValue.value === 0 && teamBTradeValue.value === 0) {
-    return "No players selected";
+    return "No assets selected";
   }
   if (fairnessPercent.value <= 10) return "Very fair";
   if (fairnessPercent.value <= 22) return "Reasonably fair";
@@ -353,16 +564,6 @@ const fairnessPillClass = computed(() => {
   if (fairnessPercent.value <= 22) return waiverPaletteClass(2);
   if (fairnessPercent.value <= 35) return waiverPaletteClass(4);
   return waiverPaletteClass(5);
-});
-
-const tradeAdvantageText = computed(() => {
-  if (tradeDelta.value > 0) {
-    return `${teamB.value?.managerName || "Team B"} receives more value`;
-  }
-  if (tradeDelta.value < 0) {
-    return `${teamA.value?.managerName || "Team A"} receives more value`;
-  }
-  return "Both sides are even";
 });
 
 watch(
@@ -381,6 +582,44 @@ watch(
 watch(
   () => rosters.value,
   () => syncTeamSelections()
+);
+
+watch(
+  () => draftSeasons.value,
+  (newSeasons) => {
+    if (
+      !pendingAPickSeason.value ||
+      !newSeasons.includes(pendingAPickSeason.value)
+    ) {
+      pendingAPickSeason.value = newSeasons[0] ?? null;
+    }
+    if (
+      !pendingBPickSeason.value ||
+      !newSeasons.includes(pendingBPickSeason.value)
+    ) {
+      pendingBPickSeason.value = newSeasons[0] ?? null;
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => draftRounds.value,
+  (newRounds) => {
+    if (
+      !pendingAPickRound.value ||
+      !newRounds.includes(pendingAPickRound.value)
+    ) {
+      pendingAPickRound.value = newRounds[0] ?? null;
+    }
+    if (
+      !pendingBPickRound.value ||
+      !newRounds.includes(pendingBPickRound.value)
+    ) {
+      pendingBPickRound.value = newRounds[0] ?? null;
+    }
+  },
+  { immediate: true }
 );
 
 onMounted(async () => {
@@ -498,10 +737,123 @@ onMounted(async () => {
             @dragover.prevent
             @drop.prevent="onDropToTradePackage('A')"
           >
-            <p class="mb-2 text-sm font-semibold">
-              {{ teamA?.managerName }}
-            </p>
-            <div class="space-y-1">
+            <div class="flex justify-between gap-3">
+              <p class="text-sm font-semibold">
+                {{ teamA?.managerName }}
+              </p>
+              <Dialog>
+                <DialogTrigger as-child>
+                  <Button
+                    variant="secondary"
+                    size="xs"
+                    class="-mt-1"
+                    @click="openAssetsModal('A')"
+                  >
+                    <Plus class="size-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle> {{ teamA?.managerName }} Assets </DialogTitle>
+                    <DialogDescription>
+                      Add FAAB or draft picks.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div class="flex">
+                    <div class="mr-4">
+                      <Label for="faab" class="text-xs">FAAB</Label>
+                      <div class="flex gap-2 mt-0.5">
+                        <Input
+                          class="w-20"
+                          id="faab"
+                          type="number"
+                          min="0"
+                          v-model="teamAFaabInputModel"
+                        />
+                        <DialogClose as-child>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            @click="addFaabToPackage('A')"
+                          >
+                            Add
+                          </Button>
+                        </DialogClose>
+                      </div>
+                    </div>
+                    <div class="">
+                      <Label class="text-xs">Draft Pick</Label>
+                      <div class="flex gap-2 mt-0.5">
+                        <Select v-model="pendingAPickSeasonModel">
+                          <SelectTrigger class="w-24 text-xs">
+                            <SelectValue placeholder="Season" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem
+                              v-for="season in draftSeasons"
+                              :key="`modal-a-season-${season}`"
+                              :value="String(season)"
+                            >
+                              {{ season }}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select v-model="pendingAPickRoundModel">
+                          <SelectTrigger class="w-24 text-xs">
+                            <SelectValue placeholder="Round" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem
+                              v-for="round in draftRounds"
+                              :key="`modal-a-round-${round}`"
+                              :value="String(round)"
+                            >
+                              Round {{ round }}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <DialogClose as-child>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            @click="addDraftPickToPackage('A')"
+                          >
+                            Add
+                          </Button>
+                        </DialogClose>
+                      </div>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div class="space-y-1 overflow-y-auto max-h-32">
+              <div class="pt-2 mt-2 border-t border-border">
+                <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                  <span
+                    v-if="teamAFaab > 0"
+                    class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
+                  >
+                    ${{ teamAFaab }} FAAB
+                    <button type="button" @click="clearFaab('A')">
+                      <X class="size-3 text-muted-foreground" />
+                    </button>
+                  </span>
+                  <span
+                    v-for="pick in teamAPicks"
+                    :key="`a-pill-${pick.id}`"
+                    class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
+                  >
+                    {{ pick.season }} R{{ pick.round }}
+                    <button
+                      type="button"
+                      @click="removeDraftPickFromPackage('A', pick.id)"
+                    >
+                      <X class="size-3 text-muted-foreground" />
+                    </button>
+                  </span>
+                </div>
+              </div>
               <div
                 v-for="player in teamAOutgoingPlayers"
                 :key="`send-a-${player.player_id}`"
@@ -563,10 +915,123 @@ onMounted(async () => {
             @dragover.prevent
             @drop.prevent="onDropToTradePackage('B')"
           >
-            <p class="mb-2 text-sm font-semibold">
-              {{ teamB?.managerName }}
-            </p>
-            <div class="space-y-1">
+            <div class="flex justify-between gap-3">
+              <p class="mb-2 text-sm font-semibold">
+                {{ teamB?.managerName }}
+              </p>
+              <Dialog>
+                <DialogTrigger as-child>
+                  <Button
+                    variant="secondary"
+                    size="xs"
+                    class="-mt-0.5"
+                    @click="openAssetsModal('B')"
+                  >
+                    <Plus class="size-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle> {{ teamB?.managerName }} Assets </DialogTitle>
+                    <DialogDescription>
+                      Add FAAB or draft picks.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div class="flex">
+                    <div class="mr-4">
+                      <Label for="faab-b" class="text-xs">FAAB</Label>
+                      <div class="flex gap-2 mt-0.5">
+                        <Input
+                          class="w-20"
+                          id="faab-b"
+                          type="number"
+                          min="0"
+                          v-model="teamBFaabInputModel"
+                        />
+                        <DialogClose as-child>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            @click="addFaabToPackage('B')"
+                          >
+                            Add FAAB
+                          </Button>
+                        </DialogClose>
+                      </div>
+                    </div>
+                    <div class="">
+                      <Label class="text-xs">Draft Pick</Label>
+                      <div class="flex gap-2 mt-0.5">
+                        <Select v-model="pendingBPickSeasonModel">
+                          <SelectTrigger class="w-24 text-xs">
+                            <SelectValue placeholder="Season" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem
+                              v-for="season in draftSeasons"
+                              :key="`modal-b-season-${season}`"
+                              :value="String(season)"
+                            >
+                              {{ season }}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select v-model="pendingBPickRoundModel">
+                          <SelectTrigger class="w-24 text-xs">
+                            <SelectValue placeholder="Round" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem
+                              v-for="round in draftRounds"
+                              :key="`modal-b-round-${round}`"
+                              :value="String(round)"
+                            >
+                              Round {{ round }}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <DialogClose as-child>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            @click="addDraftPickToPackage('B')"
+                          >
+                            Add
+                          </Button>
+                        </DialogClose>
+                      </div>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div class="pt-2 mt-2 border-t border-border">
+              <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                <span
+                  v-if="teamBFaab > 0"
+                  class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
+                >
+                  ${{ teamBFaab }} FAAB
+                  <button type="button" @click="clearFaab('B')">
+                    <X class="size-3 text-muted-foreground" />
+                  </button>
+                </span>
+                <span
+                  v-for="pick in teamBPicks"
+                  :key="`b-pill-${pick.id}`"
+                  class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
+                >
+                  {{ pick.season }} R{{ pick.round }}
+                  <button
+                    type="button"
+                    @click="removeDraftPickFromPackage('B', pick.id)"
+                  >
+                    <X class="size-3 text-muted-foreground" />
+                  </button>
+                </span>
+              </div>
+            </div>
+            <div class="space-y-1 overflow-y-auto max-h-32">
               <div
                 v-for="player in teamBOutgoingPlayers"
                 :key="`send-b-${player.player_id}`"
@@ -629,9 +1094,17 @@ onMounted(async () => {
               <span>{{ teamA?.managerName }}</span>
               <span class="font-semibold">{{ teamATradeValue }}</span>
             </div>
+            <div class="mb-2 text-xs text-muted-foreground">
+              Players: {{ teamAPlayerValue }} | Picks:
+              {{ teamADraftPickValue }} | FAAB: {{ teamAFaabValue }}
+            </div>
             <div class="flex items-center justify-between mb-2.5 text-sm">
               <span>{{ teamB?.managerName }}</span>
               <span class="font-semibold">{{ teamBTradeValue }}</span>
+            </div>
+            <div class="mb-2 text-xs text-muted-foreground">
+              Players: {{ teamBPlayerValue }} | Picks:
+              {{ teamBDraftPickValue }} | FAAB: {{ teamBFaabValue }}
             </div>
             <div class="flex items-center justify-between">
               <span
@@ -646,13 +1119,10 @@ onMounted(async () => {
                 gap: {{ fairnessPercent }}%
               </span>
             </div>
-            <p class="mt-2 text-xs text-muted-foreground">
-              {{ tradeAdvantageText }}
-            </p>
             <Separator class="h-px mt-3" />
             <p class="mt-4 text-xs text-muted-foreground">
-              Formula combines rank strength, position scarcity, and depth
-              discounts for multi-player packages.
+              Formula combines player rank strength, position scarcity, and
+              depth discounts.
             </p>
           </div>
         </Card>
