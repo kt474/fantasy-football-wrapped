@@ -252,7 +252,7 @@ export interface WeeklyWaiver {
   created: number;
   settings: WaiverSettings | null;
   leg: number;
-  draft_picks: any[];
+  draft_picks: TransactionDraftPick[];
   creator: string;
   transaction_id: string;
   adds: { [key: string]: number } | null;
@@ -286,8 +286,13 @@ export interface WaiverBudget {
   sender: number;
 }
 
+export interface TransactionDraftPick {
+  owner_id: number;
+  [key: string]: unknown;
+}
+
 export interface DraftPick {
-  keeper?: any;
+  keeper?: boolean | null;
   firstName: string;
   lastName: string;
   amount?: number;

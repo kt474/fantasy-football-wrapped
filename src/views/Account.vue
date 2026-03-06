@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/field";
 import { Check } from "lucide-vue-next";
 import Separator from "@/components/ui/separator/Separator.vue";
+import { getErrorMessage } from "@/lib/error";
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
@@ -200,8 +201,8 @@ const signIn = async () => {
       );
       toast.success("Signed in");
       resetSignInForm();
-    } catch (error: any) {
-      toast.error(`Unable to sign in. ${error?.message}`);
+    } catch (error: unknown) {
+      toast.error(`Unable to sign in. ${getErrorMessage(error)}`);
     }
 };
 
@@ -217,8 +218,8 @@ const signUp = async () => {
       pendingSignUpEmail.value = signUpEmail.value;
       toast.success("Account created. Enter the code from your email.");
       resetSignUpForm();
-    } catch (error: any) {
-      toast.error(`Unable to create account. ${error?.message}`);
+    } catch (error: unknown) {
+      toast.error(`Unable to create account. ${getErrorMessage(error)}`);
     }
 };
 
@@ -234,8 +235,8 @@ const verifySignUpOtp = async () => {
     );
     toast.success("Email verified and signed in.");
     resetSignUpOtpForm();
-  } catch (error: any) {
-    toast.error(`Unable to verify code. ${error?.message}`);
+  } catch (error: unknown) {
+    toast.error(`Unable to verify code. ${getErrorMessage(error)}`);
   }
 };
 
@@ -247,8 +248,8 @@ const resendSignUpOtp = async () => {
   try {
     await authStore.resendSignUpOtp(pendingSignUpEmail.value);
     toast.success("Verification code resent.");
-  } catch (error: any) {
-    toast.error(`Unable to resend code. ${error?.message}`);
+  } catch (error: unknown) {
+    toast.error(`Unable to resend code. ${getErrorMessage(error)}`);
   }
 };
 
@@ -259,16 +260,16 @@ const signOut = async () => {
     toast.success("Signed out");
     subscriptionStore.clearSubscriptionStatusCache(currentUserId);
     subscriptionStore.resetSubscriptionState();
-  } catch (error: any) {
-    toast.error(error?.message ?? "Unable to sign out");
+  } catch (error: unknown) {
+    toast.error(getErrorMessage(error, "Unable to sign out"));
   }
 };
 
 const signInWithGoogle = async () => {
   try {
     await authStore.signInWithGoogle(`${window.location.origin}/account`);
-  } catch (error: any) {
-    toast.error(`Unable to continue with Google. ${error?.message}`);
+  } catch (error: unknown) {
+    toast.error(`Unable to continue with Google. ${getErrorMessage(error)}`);
   }
 };
 
@@ -283,8 +284,8 @@ const sendPasswordResetEmail = async () => {
       [window.location.origin, "/account?mode=reset-password"].join("")
     );
     toast.success("Password reset email sent. Check your inbox.");
-  } catch (error: any) {
-    toast.error(`Unable to send reset email. ${error?.message}`);
+  } catch (error: unknown) {
+    toast.error(`Unable to send reset email. ${getErrorMessage(error)}`);
   }
 };
 
@@ -309,8 +310,8 @@ const resetPassword = async () => {
       path: route.path,
       query: newQuery,
     });
-  } catch (error: any) {
-    toast.error(`Unable to update password. ${error?.message}`);
+  } catch (error: unknown) {
+    toast.error(`Unable to update password. ${getErrorMessage(error)}`);
   }
 };
 
@@ -341,9 +342,9 @@ const startCheckout = async () => {
       throw new Error("Blocked unsafe redirect URL");
     }
     window.location.assign(payload.url);
-  } catch (error: any) {
+  } catch (error: unknown) {
     checkoutLoading.value = false;
-    toast.error(error?.message ?? "Unable to start checkout");
+    toast.error(getErrorMessage(error, "Unable to start checkout"));
   }
 };
 
@@ -374,9 +375,9 @@ const openBillingPortal = async () => {
       throw new Error("Blocked unsafe redirect URL");
     }
     window.location.assign(payload.url);
-  } catch (error: any) {
+  } catch (error: unknown) {
     portalLoading.value = false;
-    toast.error(error?.message ?? "Unable to open billing portal");
+    toast.error(getErrorMessage(error, "Unable to open billing portal"));
   }
 };
 

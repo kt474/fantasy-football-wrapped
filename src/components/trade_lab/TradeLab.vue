@@ -161,8 +161,8 @@ const getWeekLineup = (team: TableDataType, weekIndex: number) => {
     Array.isArray(team.starters?.[weekIndex]) && team.starters[weekIndex]
       ? team.starters[weekIndex]
       : [];
-  const benchByWeek = Array.isArray((team.benchPlayers as any)?.[weekIndex])
-    ? ((team.benchPlayers as any)[weekIndex] as string[])
+  const benchByWeek = Array.isArray(team.benchPlayers?.[weekIndex])
+    ? team.benchPlayers[weekIndex]
     : [];
   const bench =
     benchByWeek.length > 0
