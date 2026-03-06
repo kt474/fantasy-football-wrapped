@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { getPlayersByIdsMap, getStats } from "../../api/api.ts";
@@ -68,6 +68,7 @@ const pendingBPickRound = ref<number | null>(null);
 const draggedPlayer = ref<{ playerId: string; fromTeam: "A" | "B" } | null>(
   null
 );
+const isMobile = ref(false);
 
 const activeLeague = computed(() => store.leagueInfo[store.currentLeagueIndex]);
 
@@ -312,8 +313,25 @@ const handleTeamSelectionChange = (team: "A" | "B", rosterId: number) => {
   resetTrade();
 };
 
+const updateMobileState = () => {
+  isMobile.value = window.innerWidth < 640;
+};
+
 const onPlayerDragStart = (playerId: string, fromTeam: "A" | "B") => {
   draggedPlayer.value = { playerId, fromTeam };
+};
+
+const onPlayerCardTap = (team: "A" | "B", playerId: string) => {
+  if (!isMobile.value) return;
+
+  const selectedPlayers = team === "A" ? teamASends : teamBSends;
+  if (selectedPlayers.value.includes(playerId)) {
+    selectedPlayers.value = selectedPlayers.value.filter(
+      (id) => id !== playerId
+    );
+    return;
+  }
+  selectedPlayers.value.push(playerId);
 };
 
 const onDropToTradePackage = (targetTeam: "A" | "B") => {
@@ -623,8 +641,14 @@ watch(
 );
 
 onMounted(async () => {
+  updateMobileState();
+  window.addEventListener("resize", updateMobileState);
   selectedWeek.value = fallbackWeek.value;
   await fetchPlayers();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", updateMobileState);
 });
 </script>
 <template>
@@ -634,6 +658,9 @@ onMounted(async () => {
     </div>
     <p class="mt-4 mb-2 text-muted-foreground">
       Drag players into each team's package to brainstorm offers.
+    </p>
+    <p v-if="isMobile" class="mb-2 text-xs text-muted-foreground">
+      Mobile: tap players to add/remove from each package.
     </p>
 
     <div v-if="loading" class="py-2 mb-96">
@@ -669,8 +696,9 @@ onMounted(async () => {
             <button
               v-for="player in teamA?.players || []"
               :key="`A-${player.player_id}`"
-              draggable="true"
+              :draggable="!isMobile"
               @dragstart="onPlayerDragStart(player.player_id, 'A')"
+              @click="onPlayerCardTap('A', player.player_id)"
               type="button"
               class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
               :class="{
@@ -754,12 +782,12 @@ onMounted(async () => {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle> {{ teamA?.managerName }} Assets </DialogTitle>
+                    <DialogTitle> Add Assets </DialogTitle>
                     <DialogDescription>
                       Add FAAB or draft picks.
                     </DialogDescription>
                   </DialogHeader>
-                  <div class="flex">
+                  <div class="flex flex-wrap sm:flex-nowrap">
                     <div class="mr-4">
                       <Label for="faab" class="text-xs">FAAB</Label>
                       <div class="flex gap-2 mt-0.5">
@@ -932,12 +960,12 @@ onMounted(async () => {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle> {{ teamB?.managerName }} Assets </DialogTitle>
+                    <DialogTitle> Add Assets </DialogTitle>
                     <DialogDescription>
                       Add FAAB or draft picks.
                     </DialogDescription>
                   </DialogHeader>
-                  <div class="flex">
+                  <div class="flex flex-wrap sm:flex-nowrap">
                     <div class="mr-4">
                       <Label for="faab-b" class="text-xs">FAAB</Label>
                       <div class="flex gap-2 mt-0.5">
@@ -954,7 +982,7 @@ onMounted(async () => {
                             variant="outline"
                             @click="addFaabToPackage('B')"
                           >
-                            Add FAAB
+                            Add
                           </Button>
                         </DialogClose>
                       </div>
@@ -1155,8 +1183,9 @@ onMounted(async () => {
             <button
               v-for="player in teamB?.players || []"
               :key="`B-${player.player_id}`"
-              draggable="true"
+              :draggable="!isMobile"
               @dragstart="onPlayerDragStart(player.player_id, 'B')"
+              @click="onPlayerCardTap('B', player.player_id)"
               type="button"
               class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
               :class="{
