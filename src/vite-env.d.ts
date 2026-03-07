@@ -12,7 +12,11 @@ interface ImportMeta {
 
 declare module "markdown-it" {
   export default class MarkdownIt {
-    constructor(...args: any[]);
+    constructor(...args: unknown[]);
     render(src: string, env?: unknown): string;
   }
+}
+
+declare module "virtual:pwa-register" {
+  export const registerSW: (options?: { immediate?: boolean }) => () => void;
 }

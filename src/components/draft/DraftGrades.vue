@@ -57,13 +57,13 @@ const getProjections = async () => {
         true ? qbs >= 2 : false,
         true ? props.scoringType === "idp" : false
       );
+      const projectedPoints = projections["projectedPoints"] ?? 0;
+      const adp = projections["adp"] ?? pick["pickNumber"];
       return {
         draftPick: pick,
-        adp: projections["adp"],
-        projectedPoints: projections["projectedPoints"],
-        draftValue:
-          projections["projectedPoints"] / 10 +
-          (pick["pickNumber"] - projections["adp"]),
+        adp,
+        projectedPoints,
+        draftValue: projectedPoints / 10 + (pick["pickNumber"] - adp),
       };
     })
   );

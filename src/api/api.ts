@@ -72,6 +72,48 @@ const mapWithConcurrency = async <T, R>(
   return results;
 };
 
+type SleeperPlayerStatsResponse = {
+  stats?: Record<string, number>;
+  player?: {
+    first_name?: string;
+    last_name?: string;
+    position?: string;
+  };
+  team?: string;
+  player_id?: string;
+};
+
+type SleeperWeekStatsMap = Record<string, { stats?: Record<string, number> }>;
+
+type SleeperWeekProjectionMap = Record<
+  string,
+  {
+    stats?: Record<string, number>;
+    opponent?: string;
+    is_away_team?: boolean;
+  }
+>;
+
+type SleeperLeagueResponse = {
+  name?: string;
+  settings?: Record<string, number>;
+  total_rosters?: number;
+  season?: string;
+  league_id?: string;
+  metadata?: Record<string, string | number | null> | null;
+  previous_league_id?: string | null;
+  status?: string;
+  scoring_settings?: Record<string, number>;
+  roster_positions?: string[];
+  draft_id?: string;
+  sport?: string;
+};
+
+type SleeperUserLookupResponse = {
+  user_id?: string;
+  display_name?: string;
+};
+
 export const getPlayerNews = async (
   playerNames: string[]
 ): Promise<Record<string, unknown>[]> => {
@@ -350,26 +392,26 @@ export const getStats = async (
       `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}`
     );
     assertOk(response, "Player stats request");
-    const result = await parseJson<Record<string, any>>(
+    const result = await parseJson<SleeperPlayerStatsResponse>(
       response,
       "Player stats"
     );
-    const stats = result["stats"];
-    const playerInfo = result["player"];
+    const stats = result.stats;
+    const playerInfo = result.player;
     if (!stats || !playerInfo) {
       return null;
     }
     return {
-      rank: stats[rank],
-      points: stats[ppg],
-      overallRank: stats[overall_rank],
-      ppg: stats["gp"] ? stats[ppg] / stats["gp"] : 0,
-      firstName: playerInfo["first_name"],
-      lastName: playerInfo["last_name"],
-      position: playerInfo["position"],
-      team: result["team"],
-      id: result["player_id"],
-      gp: stats["gp"],
+      rank: stats[rank] ?? 0,
+      points: stats[ppg] ?? 0,
+      overallRank: stats[overall_rank] ?? 0,
+      ppg: stats["gp"] ? (stats[ppg] ?? 0) / stats["gp"] : 0,
+      firstName: playerInfo.first_name ?? "",
+      lastName: playerInfo.last_name ?? "",
+      position: playerInfo.position ?? "",
+      team: result.team ?? "",
+      id: result.player_id ?? player,
+      gp: stats["gp"] ?? 0,
     };
   } catch (error) {
     console.error("Error fetching player stats:", error);
@@ -437,7 +479,7 @@ export const getSingleWeekProjection = async (
       `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
     );
     assertOk(response, "Single week projection request");
-    const allWeeks = await parseJson<Record<string, any>>(
+    const allWeeks = await parseJson<SleeperWeekProjectionMap>(
       response,
       "Single week projection"
     );
@@ -449,9 +491,9 @@ export const getSingleWeekProjection = async (
     }
     if (allWeeks[week] && allWeeks[week]["stats"]?.[scoring]) {
       return {
-        stats: allWeeks[week]["stats"][scoring],
-        opponent: allWeeks[week]["opponent"],
-        away: allWeeks[week]["is_away_team"],
+        stats: allWeeks[week]["stats"]?.[scoring] ?? 0,
+        opponent: allWeeks[week]["opponent"] ?? "",
+        away: allWeeks[week]["is_away_team"] ?? true,
       };
     }
   } catch (error) {
@@ -470,13 +512,13 @@ export const getSingleWeekStats = async (
   week: number,
   scoringType: number
 ): Promise<SingleWeekStats> => {
-  let allWeeks: Record<string, any> = {};
+  let allWeeks: SleeperWeekStatsMap = {};
   try {
     const response = await fetch(
       `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
     );
     assertOk(response, "Single week stats request");
-    allWeeks = await parseJson<Record<string, any>>(
+    allWeeks = await parseJson<SleeperWeekStatsMap>(
       response,
       "Single week stats"
     );
@@ -543,13 +585,13 @@ export const getWeeklyProjections = async (
   week: number,
   scoringType: number
 ): Promise<number> => {
-  let allWeeks: Record<string, any> = {};
+  let allWeeks: SleeperWeekProjectionMap = {};
   try {
     const response = await fetch(
       `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
     );
     assertOk(response, "Weekly projections request");
-    allWeeks = await parseJson<Record<string, any>>(
+    allWeeks = await parseJson<SleeperWeekProjectionMap>(
       response,
       "Weekly projections"
     );
@@ -565,12 +607,13 @@ export const getWeeklyProjections = async (
     scoring = "pts_half_ppr";
   }
   for (const scoredWeek in allWeeks) {
+    const weekStats = allWeeks[scoredWeek]?.stats;
     if (
-      allWeeks[scoredWeek] &&
-      allWeeks[scoredWeek]["stats"][scoring] &&
+      weekStats &&
+      weekStats[scoring] !== undefined &&
       Number(scoredWeek) >= week
     ) {
-      totalProjection += allWeeks[scoredWeek]["stats"][scoring];
+      totalProjection += weekStats[scoring] ?? 0;
     }
   }
   return Math.round(totalProjection);
@@ -620,13 +663,13 @@ export const getDraftProjections = async (
       `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
     );
     assertOk(response, "Draft projections request");
-    const playerInfo = await parseJson<Record<string, any>>(
+    const playerInfo = await parseJson<SleeperPlayerStatsResponse>(
       response,
       "Draft projections"
     );
     return {
-      adp: playerInfo["stats"]?.[adpName],
-      projectedPoints: playerInfo["stats"]?.[ptsName],
+      adp: playerInfo.stats?.[adpName],
+      projectedPoints: playerInfo.stats?.[ptsName],
     };
   } catch (e) {
     console.error(e);
@@ -648,7 +691,7 @@ export const getProjections = async (
       `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
     );
     assertOk(response, "Player projection request");
-    const playerInfo = await parseJson<Record<string, any>>(
+    const playerInfo = await parseJson<SleeperPlayerStatsResponse>(
       response,
       "Player projection"
     );
@@ -661,7 +704,7 @@ export const getProjections = async (
 
     return {
       projection: playerProjection,
-      position: playerInfo["player"]?.["position"] ?? "",
+      position: playerInfo.player?.position ?? "",
     };
   } catch (e) {
     console.error(e);
@@ -701,27 +744,35 @@ export const getLosersBracket = async (
   }
 };
 
-export const getUsername = async (username: string) => {
+export const getUsername = async (
+  username: string
+): Promise<SleeperUserLookupResponse | null> => {
   try {
     const response = await fetch(`https://api.sleeper.app/v1/user/${username}`);
     if (response.status === 404) {
       return null;
     }
     assertOk(response, "Username lookup request");
-    return await parseJson<Record<string, any>>(response, "Username lookup");
+    return await parseJson<SleeperUserLookupResponse>(
+      response,
+      "Username lookup"
+    );
   } catch (error) {
     console.error("Error fetching username:", error);
     return null;
   }
 };
 
-export const getAllLeagues = async (userId: string, season: string) => {
+export const getAllLeagues = async (
+  userId: string,
+  season: string
+): Promise<Record<string, unknown>[]> => {
   try {
     const response = await fetch(
       `https://api.sleeper.app/v1/user/${userId}/leagues/nfl/${season}`
     );
     assertOk(response, "User leagues request");
-    return await parseJson<Record<string, any>[]>(response, "User leagues");
+    return await parseJson<Record<string, unknown>[]>(response, "User leagues");
   } catch (error) {
     console.error("Error fetching user leagues:", error);
     return [];
@@ -732,7 +783,7 @@ export const getDraftMetadata = async (draftId: string) => {
   try {
     const response = await fetch(`https://api.sleeper.app/v1/draft/${draftId}`);
     assertOk(response, "Draft metadata request");
-    return await parseJson<Record<string, any>>(response, "Draft metadata");
+    return await parseJson<Record<string, unknown>>(response, "Draft metadata");
   } catch (error) {
     console.error("Error fetching draft metadata:", error);
     return {};
@@ -826,28 +877,35 @@ export const getLeague = async (leagueId: string): Promise<LeagueOriginal> => {
     };
   }
   assertOk(response, "League request");
-  const league = await parseJson<Record<string, any>>(response, "League");
+  const league = await parseJson<SleeperLeagueResponse>(response, "League");
+  const settings = league["settings"] ?? {};
+  const scoringSettings = league["scoring_settings"] ?? {};
+  const leagueType = settings["type"];
+
   return {
-    name: league["name"],
-    regularSeasonLength: league["settings"]["playoff_week_start"] - 1,
-    lastScoredWeek: league["settings"]["last_scored_leg"],
-    medianScoring: league["settings"]["league_average_match"],
-    totalRosters: league["total_rosters"],
-    season: league["season"],
-    seasonType: seasonType[league["settings"]["type"]],
-    leagueId: league["league_id"],
-    leagueWinner: league["metadata"]
-      ? league["metadata"]["latest_league_winner_roster_id"]
-      : null,
-    previousLeagueId: league["previous_league_id"],
-    status: league["status"],
-    scoringType: league["scoring_settings"]["rec"],
-    rosterPositions: league["roster_positions"],
-    playoffTeams: league["settings"]["playoff_teams"],
-    playoffType: league["settings"]["playoff_type"],
-    draftId: league["draft_id"],
-    waiverType: league["settings"]["waiver_type"],
-    sport: league["sport"],
+    name: league["name"] ?? "",
+    regularSeasonLength: Math.max(0, (settings["playoff_week_start"] ?? 1) - 1),
+    lastScoredWeek: settings["last_scored_leg"] ?? 0,
+    medianScoring: settings["league_average_match"] ?? 0,
+    totalRosters: league["total_rosters"] ?? 0,
+    season: league["season"] ?? "",
+    seasonType: seasonType[leagueType] ?? "",
+    leagueId: league["league_id"] ?? "",
+    leagueWinner:
+      league.metadata?.latest_league_winner_roster_id != null
+        ? String(league.metadata.latest_league_winner_roster_id)
+        : null,
+    previousLeagueId: league["previous_league_id"] ?? "",
+    status: league["status"] ?? "",
+    scoringType: scoringSettings["rec"] ?? 1,
+    rosterPositions: Array.isArray(league["roster_positions"])
+      ? league["roster_positions"]
+      : [],
+    playoffTeams: settings["playoff_teams"] ?? 0,
+    playoffType: settings["playoff_type"] ?? 0,
+    draftId: league["draft_id"] ?? "",
+    waiverType: settings["waiver_type"] ?? 0,
+    sport: league["sport"] ?? "",
   };
 };
 
@@ -858,20 +916,21 @@ export const getRosters = async (leagueId: string): Promise<RosterType[]> => {
   assertOk(response, "Rosters request");
   const rosters: Roster[] = await parseJson<Roster[]>(response, "Rosters");
   return rosters.map((roster) => {
+    const settings = roster["settings"] ?? {};
     return {
       id: roster["owner_id"],
-      pointsFor: roster["settings"]["fpts"],
-      pointsAgainst: roster["settings"]["fpts_against"],
-      potentialPoints: roster["settings"]["ppts"],
-      managerEfficiency: roster["settings"]["ppts"]
-        ? round(roster["settings"]["fpts"] / roster["settings"]["ppts"], 3)
+      pointsFor: settings["fpts"] ?? 0,
+      pointsAgainst: settings["fpts_against"] ?? 0,
+      potentialPoints: settings["ppts"] ?? 0,
+      managerEfficiency: settings["ppts"]
+        ? round((settings["fpts"] ?? 0) / settings["ppts"], 3)
         : 0,
-      wins: roster["settings"]["wins"],
-      losses: roster["settings"]["losses"],
-      ties: roster["settings"]["ties"],
+      wins: settings["wins"] ?? 0,
+      losses: settings["losses"] ?? 0,
+      ties: settings["ties"] ?? 0,
       rosterId: roster["roster_id"],
       recordByWeek: roster["metadata"] ? roster["metadata"]["record"] : "",
-      players: roster["players"],
+      players: Array.isArray(roster["players"]) ? roster["players"] : [],
     };
   });
 };
@@ -887,7 +946,7 @@ export const getUsers = async (leagueId: string): Promise<UserType[]> => {
       id: user["user_id"],
       name: user["metadata"]?.["team_name"] || user["display_name"],
       username: user["display_name"],
-      avatar: user["avatar"],
+      avatar: user["avatar"] ?? "",
     };
   });
 };
@@ -899,18 +958,21 @@ export const getMatchup = async (week: number, leagueId: string) => {
   assertOk(response, "Matchup request");
   const matchup: Matchup[] = await parseJson<Matchup[]>(response, "Matchup");
   return matchup.map((game) => {
-    const benchPlayers = game["players"]?.filter(
-      (value: string) => !game["starters"]?.includes(value)
-    );
+    const players = Array.isArray(game["players"]) ? game["players"] : [];
+    const starters = Array.isArray(game["starters"]) ? game["starters"] : [];
+    const playersPoints = game["players_points"] ?? {};
+    const benchPlayers = players.filter((value: string) => !starters.includes(value));
     const benchPoints = benchPlayers?.map(
-      (player: string) => game["players_points"][player]
+      (player: string) => playersPoints[player] ?? 0
     );
     return {
       rosterId: game["roster_id"],
       points: game["points"],
       matchupId: game["matchup_id"],
-      starters: game["starters"],
-      starterPoints: game["starters_points"],
+      starters,
+      starterPoints: Array.isArray(game["starters_points"])
+        ? game["starters_points"]
+        : [],
       benchPlayers: benchPlayers,
       benchPoints: benchPoints,
     };
@@ -938,7 +1000,14 @@ export const getTransactions = async (
 export const getCurrentLeagueState = async () => {
   const response = await fetch("https://api.sleeper.app/v1/state/nfl");
   assertOk(response, "Current league state request");
-  return await parseJson<Record<string, any>>(response, "Current league state");
+  const state = await parseJson<{ week?: number }>(
+    response,
+    "Current league state"
+  );
+  return {
+    ...state,
+    week: state.week ?? 0,
+  };
 };
 
 export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
@@ -1011,7 +1080,7 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     Promise.all(
       users.map(async (user) => ({
         ...user,
-        avatarImg: user.avatar ? await getAvatar(user.avatar) : null,
+        avatarImg: user.avatar ? await getAvatar(user.avatar) ?? undefined : undefined,
       }))
     ),
   ]);

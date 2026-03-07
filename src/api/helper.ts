@@ -9,8 +9,18 @@ import min from "lodash/min";
 import sum from "lodash/sum";
 import zip from "lodash/zip";
 import { getMatchup } from "./api";
-import { RosterType, UserType, PointsType } from "../types/types";
+import { RosterType, UserType, PointsType, TableDataType } from "../types/types";
 import { WeeklyWaiver } from "../types/apiTypes";
+
+type MatchupPointRow = {
+  rosterId: number;
+  points: number;
+  matchupId: number;
+  starters: string[];
+  starterPoints: number[];
+  benchPlayers: string[];
+  benchPoints: number[];
+};
 
 const getTierMultiplier = (position: string, rank: number) => {
   switch (position) {
@@ -130,10 +140,10 @@ export const createTableData = (
       combined.push(...ghostRosters);
     }
     const filtered: RosterType[] = combined.filter((a) => a !== null);
-    const combinedPoints = filtered.map((a: any) => ({
+    const combinedPoints = filtered.map((a: RosterType) => ({
       ...a,
-      ...points.find((b: any) => b.rosterId === a.rosterId),
-    }));
+      ...points.find((b: PointsType) => b.rosterId === a.rosterId),
+    })) as TableDataType[];
 
     const pointsArr: number[][] = [];
     combinedPoints.forEach((value) => {
@@ -141,8 +151,8 @@ export const createTableData = (
       if (medianScoring) weekLength = weekLength / 2;
       const pointsList = value.points ? value.points : [];
       pointsArr.push(pointsList.slice(0, weekLength));
-      value["winsAgainstAll"] = 0;
-      value["lossesAgainstAll"] = 0;
+      value.winsAgainstAll = 0;
+      value.lossesAgainstAll = 0;
     });
     const zipped = zip(...pointsArr).map((row) =>
       row.filter((v): v is number => v !== undefined)
@@ -155,9 +165,9 @@ export const createTableData = (
         const currentTeam = combinedPoints.find((obj) => {
           return obj.points[i] === zipped[i][j];
         });
-        if (currentTeam.pointsFor !== 0) {
-          currentTeam["winsAgainstAll"] += numberOfWins;
-          currentTeam["lossesAgainstAll"] +=
+        if (currentTeam && currentTeam.pointsFor !== 0) {
+          currentTeam.winsAgainstAll += numberOfWins;
+          currentTeam.lossesAgainstAll +=
             zipped[i].length - numberOfWins - 1;
         }
       }
@@ -196,13 +206,12 @@ export const createTableData = (
             (sum, wins) => sum + Math.pow(wins - meanWins, 2),
             0
           ) / numOfSimulations;
-        value["expectedWinsSTD"] = Math.sqrt(variance);
-        value["randomScheduleWins"] = randomScheduleWins / numOfSimulations;
+        value.expectedWinsSTD = Math.sqrt(variance);
+        value.randomScheduleWins = randomScheduleWins / numOfSimulations;
         if (medianScoring) {
-          value["randomScheduleWins"] =
-            (2 * randomScheduleWins) / numOfSimulations;
+          value.randomScheduleWins = (2 * randomScheduleWins) / numOfSimulations;
         }
-        value["rating"] = getPowerRanking(
+        value.rating = getPowerRanking(
           mean(value.points),
           Number(max(value.points)),
           Number(min(value.points)),
@@ -215,11 +224,11 @@ export const createTableData = (
           const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
           const addedWins = counts["true"] ? counts["true"] : 0;
           const addedLosses = counts["false"] ? counts["false"] : 0;
-          value["winsWithMedian"] = addedWins + value.wins;
-          value["lossesWithMedian"] = addedLosses + value.losses;
+          value.winsWithMedian = addedWins + value.wins;
+          value.lossesWithMedian = addedLosses + value.losses;
         } else {
-          value["winsWithMedian"] = value.wins;
-          value["lossesWithMedian"] = value.losses;
+          value.winsWithMedian = value.wins;
+          value.lossesWithMedian = value.losses;
         }
       });
 
@@ -231,7 +240,7 @@ export const createTableData = (
       });
 
       combinedPoints.forEach((user, index) => {
-        user["regularSeasonRank"] = index + 1;
+        user.regularSeasonRank = index + 1;
       });
       return combinedPoints;
     }
@@ -344,19 +353,16 @@ export const getWeeklyPoints = async (
     promises.push(getMatchup(i + 1, leagueId));
   }
   const allMatchups = await Promise.all(promises);
-  const grouped = Object.values(groupBy(flatten(allMatchups), "rosterId"));
-  const allTeams: Array<object> = [];
-  grouped.forEach((group: any) => {
-    let consolidatedObject: Record<
-      number,
-      {
-        rosterId: number;
-        points: number[];
-        matchupId: number;
-      }
-    > = group.reduce(
+  const validMatchups = flatten(allMatchups).filter(
+    (matchup): matchup is MatchupPointRow =>
+      Boolean(matchup) && typeof matchup.rosterId === "number"
+  );
+  const grouped = Object.values(groupBy(validMatchups, "rosterId"));
+  const allTeams: PointsType[] = [];
+  grouped.forEach((group: MatchupPointRow[]) => {
+    const consolidatedObject = group.reduce<Record<number, PointsType>>(
       (
-        result: any,
+        result,
         {
           rosterId,
           points,
@@ -369,8 +375,8 @@ export const getWeeklyPoints = async (
           rosterId: number;
           points: number;
           matchupId: number;
-          starters: number[];
-          starterPoints: string[];
+          starters: string[];
+          starterPoints: number[];
           benchPlayers: string[];
           benchPoints: number[];
         }
@@ -387,6 +393,9 @@ export const getWeeklyPoints = async (
           };
         }
         result[rosterId].points.push(points);
+        if (!result[rosterId].matchups) {
+          result[rosterId].matchups = [];
+        }
         result[rosterId].matchups.push(matchupId);
         result[rosterId].starters.push(starters);
         result[rosterId].starterPoints.push(starterPoints);
@@ -394,9 +403,12 @@ export const getWeeklyPoints = async (
         result[rosterId].benchPoints.push(benchPoints);
         return result;
       },
-      {}
+      {} as Record<number, PointsType>
     );
-    allTeams.push(Object.values(consolidatedObject)[0]);
+    const consolidatedValues = Object.values(consolidatedObject);
+    if (consolidatedValues.length > 0 && consolidatedValues[0]) {
+      allTeams.push(consolidatedValues[0]);
+    }
   });
   return allTeams;
 };

@@ -193,7 +193,7 @@ describe("Sleeper API data transforms", () => {
         id: "u2",
         name: "Manager Two",
         username: "Manager Two",
-        avatar: null,
+        avatar: "",
       },
     ]);
   });
