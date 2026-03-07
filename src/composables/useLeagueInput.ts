@@ -73,7 +73,7 @@ export const useLeagueInput = () => {
         return;
       }
       const user = await getUsername(leagueIdInput.value);
-      if (!user) {
+      if (!user?.user_id || !user?.display_name) {
         errorMsg.value = "Invalid username";
         showErrorMsg.value = true;
         return;
@@ -121,19 +121,31 @@ export const useLeagueInput = () => {
       showErrorMsg.value = false;
       store.updateLoadingLeague(checkInput["name"]);
       store.updateCurrentLeagueId(leagueIdInput.value);
-      const newLeagueInfo = await getData(leagueIdInput.value);
-      store.updateLeagueInfo(newLeagueInfo);
-      store.leagueSubmitted = true;
-      store.updateShowInput(false);
-      store.updateLoadingLeague("");
-      await updateURL(leagueIdInput.value);
-      await inputLeague(
-        leagueIdInput.value,
-        newLeagueInfo.name,
-        newLeagueInfo.totalRosters,
-        newLeagueInfo.seasonType,
-        newLeagueInfo.season
-      );
+      try {
+        const newLeagueInfo = await getData(leagueIdInput.value);
+        store.updateLeagueInfo(newLeagueInfo);
+        store.leagueSubmitted = true;
+        store.updateShowInput(false);
+        await updateURL(leagueIdInput.value);
+
+        try {
+          await inputLeague(
+            leagueIdInput.value,
+            newLeagueInfo.name,
+            newLeagueInfo.totalRosters,
+            newLeagueInfo.seasonType,
+            newLeagueInfo.season
+          );
+        } catch (error) {
+          console.error("Failed to save league metadata:", error);
+        }
+      } catch (error) {
+        console.error("Failed to load league:", error);
+        errorMsg.value = "Unable to load league right now. Please try again.";
+        showErrorMsg.value = true;
+      } finally {
+        store.updateLoadingLeague("");
+      }
     }
 
     leagueIdInput.value = "";

@@ -715,7 +715,7 @@ export const getUsers = async (leagueId: string): Promise<UserType[]> => {
   return users.map((user) => {
     return {
       id: user["user_id"],
-      name: user["metadata"]["team_name"] || user["display_name"],
+      name: user["metadata"]?.["team_name"] || user["display_name"],
       username: user["display_name"],
       avatar: user["avatar"],
     };

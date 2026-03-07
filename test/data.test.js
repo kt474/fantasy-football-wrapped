@@ -1,10 +1,17 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { getLeague, getRosters } from "../src/api/api.ts";
+import {
+  getLeague,
+  getPlayersByIdsMap,
+  getRosters,
+  getUsers,
+} from "../src/api/api.ts";
 
-const mockFetchResponse = (status, data) =>
+const mockFetchResponse = (status, data, overrides = {}) =>
   Promise.resolve({
     status,
+    ok: status >= 200 && status < 300,
     json: async () => data,
+    ...overrides,
   });
 
 afterEach(() => {
@@ -115,5 +122,107 @@ describe("Sleeper API data transforms", () => {
         players: ["10222", "10236", "NYJ"],
       },
     ]);
+  });
+
+  test("returns default league shape for 404 responses", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(mockFetchResponse(404, {}));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const data = await getLeague("missing-league");
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(data).toEqual({
+      name: "",
+      regularSeasonLength: 0,
+      medianScoring: 0,
+      totalRosters: 0,
+      season: "",
+      seasonType: "",
+      leagueId: "",
+      leagueWinner: "",
+      previousLeagueId: "",
+      lastScoredWeek: 0,
+      status: "",
+      scoringType: 1,
+      rosterPositions: [],
+      playoffTeams: 0,
+      playoffType: 0,
+      draftId: "",
+      waiverType: 0,
+      sport: "",
+    });
+  });
+
+  test("maps users even when team metadata is missing", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      mockFetchResponse(200, [
+        {
+          user_id: "u1",
+          metadata: null,
+          display_name: "Manager One",
+          avatar: "avatar-a",
+        },
+        {
+          user_id: "u2",
+          display_name: "Manager Two",
+          avatar: null,
+        },
+      ])
+    );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const users = await getUsers("league-id");
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(users).toEqual([
+      {
+        id: "u1",
+        name: "Manager One",
+        username: "Manager One",
+        avatar: "avatar-a",
+      },
+      {
+        id: "u2",
+        name: "Manager Two",
+        username: "Manager Two",
+        avatar: null,
+      },
+    ]);
+  });
+
+  test("returns empty player map when players endpoint is non-200", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(mockFetchResponse(500, { message: "server error" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const playersMap = await getPlayersByIdsMap(["1", "2"]);
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(playersMap.size).toBe(0);
+  });
+
+  test("maps players by id and ignores invalid player rows", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      mockFetchResponse(200, {
+        players: [
+          { player_id: "p1", first_name: "A", last_name: "B" },
+          { first_name: "Missing", last_name: "Id" },
+          null,
+        ],
+      })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const playersMap = await getPlayersByIdsMap(["p1"]);
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(playersMap.size).toBe(1);
+    expect(playersMap.get("p1")).toEqual({
+      player_id: "p1",
+      first_name: "A",
+      last_name: "B",
+    });
   });
 });
