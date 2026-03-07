@@ -4,6 +4,7 @@ import { LeagueInfoType, WaiverMove } from "../../types/types.ts";
 import { getPlayersByIdsMap, getTradeValue } from "../../api/api.ts";
 import { useStore } from "../../store/store";
 import { fakeRosters, fakeUsers, fakeWaiverMoves } from "../../api/helper";
+import { WeeklyWaiver } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 import {
   Select,
@@ -19,52 +20,64 @@ type WaiverData = Record<string | number, WaiverMove[]>;
 
 const store = useStore();
 const rawData = ref<WaiverMove[]>([]);
+type LeagueWaiverMove = Pick<
+  WeeklyWaiver,
+  "roster_ids" | "adds" | "leg" | "settings" | "status"
+>;
+type TempWaiverMove = {
+  roster_id: number;
+  adds: string;
+  week: number;
+  bid: number | null;
+  status: string;
+};
 
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  const temp = currentLeague.waivers
-    .filter((waiver: any) => waiver.adds)
-    .map((waiver: any) => ({
-      roster_id: waiver.roster_ids[0],
-      adds: Object.keys(waiver.adds)[0],
+  const temp: TempWaiverMove[] = (currentLeague.waivers as LeagueWaiverMove[])
+    .filter((waiver) => waiver.adds)
+    .map((waiver) => ({
+      roster_id: waiver.roster_ids?.[0] ?? 0,
+      adds: waiver.adds ? Object.keys(waiver.adds)[0] : "",
       week: waiver.leg,
-      bid: waiver.settings?.waiver_bid,
+      bid: waiver.settings?.waiver_bid ?? null,
       status: waiver.status,
-    }));
+    }))
+    .filter((waiver) => waiver.roster_id !== 0 && waiver.adds);
 
   // Step 1: Collect all unique player IDs from all trades
   const allUniquePlayerIds = new Set<string>();
-  temp.forEach((trade: any) => {
+  temp.forEach((trade) => {
     if (trade.adds) allUniquePlayerIds.add(trade.adds);
   });
 
   const uniquePlayerIdArray = Array.from(allUniquePlayerIds);
 
   // Step 2: Make ONE API call to fetch all unique players required across all trades
-  let playerLookupMap = new Map<string, any>();
+  let playerLookupMap = new Map<string, { name?: string; team?: string; position?: string; player_id?: string }>();
   if (uniquePlayerIdArray.length > 0) {
     playerLookupMap = await getPlayersByIdsMap(uniquePlayerIdArray);
   }
 
   // Step 3: Map `temp` data, using the pre-fetched `playerLookupMap`
   rawData.value = await Promise.all(
-    temp.map(async (trade: any) => {
+    temp.map(async (trade) => {
       const addsPlayer = playerLookupMap.get(trade.adds);
       return {
         id: trade.roster_id,
         user: getRosterName(trade.roster_id),
-        adds: addsPlayer.name ? addsPlayer.name : `${addsPlayer.team} Defense`,
+        adds: addsPlayer?.name ? addsPlayer.name : `${addsPlayer?.team ?? ""} Defense`,
         week: trade.week,
         value: await getTradeValue(
           trade.adds,
           currentLeague.season,
           trade.week + 1,
           currentLeague.scoringType,
-          addsPlayer.position
+          addsPlayer?.position
         ),
-        position: addsPlayer.position,
-        player_id: addsPlayer.player_id,
-        bid: trade.bid ? trade.bid : null,
+        position: addsPlayer?.position ?? "",
+        player_id: addsPlayer?.player_id ?? trade.adds,
+        bid: trade.bid ?? null,
         status: trade.status,
       };
     })
@@ -94,7 +107,7 @@ const totalSpent = computed(() => {
 });
 
 const waiverData: ComputedRef<WaiverData> = computed(() => {
-  const sortedData = rawData.value.reduce((acc: any, move) => {
+  const sortedData = rawData.value.reduce<WaiverData>((acc, move) => {
     const id = move.id;
     if (!acc[id]) {
       acc[id] = [];
@@ -106,7 +119,7 @@ const waiverData: ComputedRef<WaiverData> = computed(() => {
   }, {});
 
   Object.keys(sortedData).forEach((id) => {
-    sortedData[id].sort((a: any, b: any) => {
+    sortedData[id].sort((a, b) => {
       return a.week - b.week;
     });
   });
@@ -129,12 +142,12 @@ const orderedData = computed(() => {
           player.value != null &&
           player.status === "complete"
       )
-      .sort((a: any, b: any) => a.value - b.value)
+      .sort((a, b) => (a.value ?? Number.POSITIVE_INFINITY) - (b.value ?? Number.POSITIVE_INFINITY))
       .slice(0, 10);
   }
   return rawData.value
     .filter((player) => player.value != null)
-    .sort((a: any, b: any) => a.value - b.value)
+    .sort((a, b) => (a.value ?? Number.POSITIVE_INFINITY) - (b.value ?? Number.POSITIVE_INFINITY))
     .slice(0, 10);
 });
 

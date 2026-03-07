@@ -10,21 +10,52 @@ import {
 } from "../../api/helper";
 import { useStore } from "../../store/store";
 import { Player } from "../../types/apiTypes.ts";
+import { UserType } from "../../types/types.ts";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import Button from "../ui/button/Button.vue";
 
 const store = useStore();
-const tradeData: any = ref([]);
-const showAllTrades = ref(false);
-
-interface Trade {
+type TradePick = { owner_id: number; season: string; round: number };
+type TradeBudget = { receiver: number; amount: number };
+type LeagueTrade = {
   roster_ids: number[];
-  adds: Record<number, any[]>;
-  draft_picks: any[];
-  waiver_budget: any[];
+  adds?: Record<string, number>;
+  draft_picks?: TradePick[];
+  waiver_budget?: TradeBudget[];
+  leg: number;
+};
+type Trade = {
+  roster_ids: number[];
+  adds: Record<number, string[]>;
+  draft_picks: TradePick[];
+  waiver_budget: TradeBudget[];
   week: number;
-}
+};
+type TradeDisplayUser = Pick<UserType, "name" | "username" | "avatarImg">;
+type TradeCard = {
+  team1: {
+    user?: TradeDisplayUser;
+    players: string[];
+    playerIds?: string[];
+    draftPicks: TradePick[];
+    waiverBudget: TradeBudget[];
+    week?: number;
+    value: Array<number | null>;
+  };
+  team2: {
+    user?: TradeDisplayUser;
+    players: string[];
+    playerIds?: string[];
+    draftPicks: TradePick[];
+    waiverBudget: TradeBudget[];
+    week?: number;
+    value: Array<number | null>;
+  };
+};
+type TradeRow = TradeCard | (typeof fakeTrades)[number];
+const tradeData = ref<TradeRow[]>([]);
+const showAllTrades = ref(false);
 
 const toggleTrades = () => {
   showAllTrades.value = !showAllTrades.value;
@@ -39,25 +70,25 @@ const slicedTradeData = computed(() => {
 
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  const temp = currentLeague.trades.map((trade: any) => {
-    let grouped = [];
+  const temp: Trade[] = currentLeague.trades.map((trade: LeagueTrade) => {
+    let grouped: Record<number, string[]> = {};
     if (trade.adds) {
       grouped = Object.entries(trade.adds).reduce(
-        (acc: any, [key, value]: any) => {
+        (acc: Record<number, string[]>, [key, value]) => {
           if (!acc[value]) {
             acc[value] = [];
           }
           acc[value].push(key);
           return acc;
         },
-        {}
+        {} as Record<number, string[]>
       );
     }
     return {
       roster_ids: trade.roster_ids,
-      adds: grouped,
-      draft_picks: trade.draft_picks ? trade.draft_picks : [],
-      waiver_budget: trade.waiver_budget ? trade.waiver_budget : [],
+      adds: grouped ?? {},
+      draft_picks: trade.draft_picks ?? [],
+      waiver_budget: trade.waiver_budget ?? [],
       week: trade.leg,
     };
   });
@@ -116,7 +147,7 @@ const getData = async () => {
           week: trade.week,
           value: trade.adds[trade.roster_ids[1]]
             ? await Promise.all(
-                trade.adds[trade.roster_ids[1]].map((player) =>
+                trade.adds[trade.roster_ids[1]].map((player: string) =>
                   getTradeValue(
                     player,
                     currentLeague.season,
@@ -140,7 +171,7 @@ const getData = async () => {
           week: trade.week,
           value: trade.adds[trade.roster_ids[0]]
             ? await Promise.all(
-                trade.adds[trade.roster_ids[0]].map((player) =>
+                trade.adds[trade.roster_ids[0]].map((player: string) =>
                   getTradeValue(
                     player,
                     currentLeague.season,
@@ -171,7 +202,13 @@ const getRosterName = (rosterId: number) => {
   const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
     const userObject = users.find((user) => user.id === userId.id);
-    return userObject;
+    if (userObject) {
+      return {
+        name: userObject.name,
+        username: userObject.username,
+        avatarImg: userObject.avatarImg,
+      };
+    }
   }
 };
 
@@ -182,7 +219,8 @@ const getOrdinalSuffix = (number: number) => {
   return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
 };
 
-const getValueColor = (value: number) => {
+const getValueColor = (value: number | null | undefined) => {
+  if (value == null) return "bg-muted text-muted-foreground";
   if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
   if (value <= 25) return `bg-green-400 dark:bg-green-600 text-gray-50`;
   if (value <= 35) return "bg-yellow-300 dark-bg-yellow-600 text-black";
@@ -190,12 +228,21 @@ const getValueColor = (value: number) => {
   return `bg-red-400 dark:bg-red-600 text-gray-50`;
 };
 
-const getRatingLabel = (value: number) => {
+const getRatingLabel = (value: number | null | undefined) => {
+  if (value == null) return "";
   if (value <= 15) return "Excellent";
   if (value <= 25) return "Good";
   if (value <= 35) return "Average";
   if (value <= 45) return "Below Avg";
   return "Poor";
+};
+
+const getDisplayName = (
+  user: { name: string; username?: string },
+  showUsernames: boolean
+) => {
+  if (!showUsernames) return user.name;
+  return "username" in user && user.username ? user.username : user.name;
 };
 
 onMounted(async () => {
@@ -208,7 +255,9 @@ onMounted(async () => {
   } else if (store.leagueInfo.length == 0) {
     tradeData.value = fakeTrades;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
-    tradeData.value = store.leagueInfo[store.currentLeagueIndex].tradeNames;
+    tradeData.value =
+      (store.leagueInfo[store.currentLeagueIndex].tradeNames as TradeRow[]) ??
+      [];
   }
 });
 
@@ -219,7 +268,9 @@ watch(
       tradeData.value = [];
       await getData();
     }
-    tradeData.value = store.leagueInfo[store.currentLeagueIndex].tradeNames;
+    tradeData.value =
+      (store.leagueInfo[store.currentLeagueIndex].tradeNames as TradeRow[]) ??
+      [];
   }
 );
 </script>
@@ -263,11 +314,7 @@ watch(
               <h2
                 class="mt-0.5 ml-2 text-sm sm:text-base font-semibold truncate max-w-32 sm:max-w-44"
               >
-                {{
-                  store.showUsernames
-                    ? trade.team1.user.username
-                    : trade.team1.user.name
-                }}
+                {{ getDisplayName(trade.team1.user, store.showUsernames) }}
               </h2>
             </div>
             <svg
@@ -309,11 +356,7 @@ watch(
               <h2
                 class="mt-0.5 ml-2 text-sm sm:text-base font-semibold truncate max-w-32 sm:max-w-44"
               >
-                {{
-                  store.showUsernames
-                    ? trade.team2.user.username
-                    : trade.team2.user.name
-                }}
+                {{ getDisplayName(trade.team2.user, store.showUsernames) }}
               </h2>
             </div>
           </div>
@@ -339,7 +382,9 @@ watch(
                     v-if="trade.team1.value[index - 1]"
                     :class="[getValueColor(trade.team1.value[index - 1])]"
                     class="text-xs me-2 px-2.5 py-1 rounded-full"
-                    >{{ roundToOneDecimal(trade.team1.value[index - 1]) }}</span
+                    >{{
+                      roundToOneDecimal(trade.team1.value[index - 1] ?? 0)
+                    }}</span
                   >
                   <p class="mt-1 text-xs text-muted-foreground">
                     {{
@@ -384,7 +429,9 @@ watch(
                     v-if="trade.team2.value[index - 1]"
                     :class="[getValueColor(trade.team2.value[index - 1])]"
                     class="text-xs me-2 px-2.5 py-1 rounded-full"
-                    >{{ roundToOneDecimal(trade.team2.value[index - 1]) }}</span
+                    >{{
+                      roundToOneDecimal(trade.team2.value[index - 1] ?? 0)
+                    }}</span
                   >
                   <p class="mt-1 text-xs text-muted-foreground">
                     {{
