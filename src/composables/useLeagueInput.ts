@@ -5,12 +5,10 @@ import type { LeagueInfoType } from "@/types/types";
 import type { LeagueOriginal } from "@/types/apiTypes";
 import {
   getData,
-  getLeague,
-  getUsername,
   inputLeague,
   inputUsername,
-  getAllLeagues,
 } from "@/api/api";
+import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
 
 export const SEASON_YEAR_OPTIONS = [
   "2026",

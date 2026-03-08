@@ -3,11 +3,13 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useStore } from "../../store/store";
 import {
   getPlayerNews,
-  getStats,
   getPlayersByIdsMap,
+} from "../../api/api";
+import {
+  getStats,
   getSingleWeekProjection,
   getSingleWeekStats,
-} from "../../api/api";
+} from "../../api/sleeperApi";
 import { TableDataType } from "../../types/types";
 import difference from "lodash/difference";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/fakeLeague";

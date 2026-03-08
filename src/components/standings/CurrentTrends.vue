@@ -3,9 +3,8 @@ import { ref, onMounted, watch, computed } from "vue";
 import {
   generateTrends,
   getPlayersByIdsMap,
-  getDraftProjections,
-  getDraftPicks,
 } from "../../api/api";
+import { getDraftProjections, getDraftPicks } from "../../api/sleeperApi";
 import { TableDataType, LeagueInfoType } from "../../types/types";
 import { Player } from "../../types/apiTypes";
 import { useStore } from "../../store/store";

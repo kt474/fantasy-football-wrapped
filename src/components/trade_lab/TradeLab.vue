@@ -2,7 +2,8 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
-import { getPlayersByIdsMap, getStats } from "../../api/api.ts";
+import { getPlayersByIdsMap } from "../../api/api.ts";
+import { getStats } from "../../api/sleeperApi.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";

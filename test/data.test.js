@@ -1,15 +1,17 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import {
-  getAvatar,
   getData,
+  getPlayersByIdsMap,
+  generatePremiumReport,
+} from "../src/api/api.ts";
+import {
+  getAvatar,
   getDraftPicks,
   getLeague,
-  getPlayersByIdsMap,
   getRosters,
-  generatePremiumReport,
   getSingleWeekStats,
   getUsers,
-} from "../src/api/api.ts";
+} from "../src/api/sleeperApi.ts";
 import * as authFetchModule from "../src/lib/authFetch.ts";
 
 const mockFetchResponse = (status, data, overrides = {}) =>

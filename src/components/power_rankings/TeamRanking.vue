@@ -7,7 +7,7 @@ import {
   WeeklyEntry,
   PlayerType,
 } from "../../types/types";
-import { getStats } from "../../api/api";
+import { getStats } from "../../api/sleeperApi";
 import { useStore } from "../../store/store";
 import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
 import { fakeUsers } from "../../api/fakeLeague";
