@@ -14,8 +14,49 @@ const store = useStore();
 const manager1 = ref("");
 const manager2 = ref("");
 
+type PointSeasonEntry = {
+  season: string;
+  points: number[];
+};
+
+type ComparisonManager = {
+  id: string;
+  name: string;
+  username: string;
+  avatarImg?: string;
+  matchups: (number | null)[];
+  pointsArr: number[];
+  leagueWinner: (number | null)[];
+  rosterId: number;
+  pointSeason: PointSeasonEntry[];
+  wins: number;
+  losses: number;
+  points: number;
+  randomScheduleWins: number;
+  managerEfficiency: number;
+  seasons: string[];
+};
+
+const emptyManager: ComparisonManager = {
+  id: "",
+  name: "",
+  username: "",
+  avatarImg: "",
+  matchups: [],
+  pointsArr: [],
+  leagueWinner: [],
+  rosterId: 0,
+  pointSeason: [{ season: "", points: [] }],
+  wins: 0,
+  losses: 0,
+  points: 0,
+  randomScheduleWins: 0,
+  managerEfficiency: 0,
+  seasons: [""],
+};
+
 const props = defineProps<{
-  tableData: any[];
+  tableData: ComparisonManager[];
 }>();
 
 const managers = computed(() => {
@@ -24,19 +65,27 @@ const managers = computed(() => {
   );
 });
 
-const currentManager1 = computed(() => {
-  return props.tableData.find((user) =>
-    store.showUsernames
-      ? user.username.trim() === manager1.value.trim()
-      : user.name.trim() === manager1.value.trim()
+const currentManager1 = computed<ComparisonManager>(() => {
+  return (
+    props.tableData.find((user) =>
+      store.showUsernames
+        ? user.username.trim() === manager1.value.trim()
+        : user.name.trim() === manager1.value.trim()
+    ) ??
+    props.tableData[0] ??
+    emptyManager
   );
 });
 
-const currentManager2 = computed(() => {
-  return props.tableData.find((user) =>
-    store.showUsernames
-      ? user.username.trim() === manager2.value.trim()
-      : user.name.trim() === manager2.value.trim()
+const currentManager2 = computed<ComparisonManager>(() => {
+  return (
+    props.tableData.find((user) =>
+      store.showUsernames
+        ? user.username.trim() === manager2.value.trim()
+        : user.name.trim() === manager2.value.trim()
+    ) ??
+    props.tableData[0] ??
+    emptyManager
   );
 });
 
@@ -59,7 +108,7 @@ const matchupRecord = computed(() => {
     }
   }
 
-  matchups.forEach((matchup: any) => {
+  matchups.forEach((matchup: number) => {
     if (
       currentManager1.value.pointsArr[matchup] >
       currentManager2.value.pointsArr[matchup]
@@ -91,7 +140,7 @@ const matchupRecord2 = computed(() => {
     }
   }
 
-  matchups.forEach((matchup: any) => {
+  matchups.forEach((matchup: number) => {
     if (
       currentManager1.value.pointsArr[matchup] >
       currentManager2.value.pointsArr[matchup]
@@ -107,10 +156,10 @@ const matchupRecord2 = computed(() => {
 const manager1Champs = computed(() => {
   return (
     currentManager1.value.leagueWinner.filter(
-      (item: any) => item === currentManager1.value.rosterId
+      (item: number | null) => item === currentManager1.value.rosterId
     ).length >
     currentManager2.value.leagueWinner.filter(
-      (item: any) => item === currentManager2.value.rosterId
+      (item: number | null) => item === currentManager2.value.rosterId
     ).length
   );
 });
@@ -118,10 +167,10 @@ const manager1Champs = computed(() => {
 const manager2Champs = computed(() => {
   return (
     currentManager2.value.leagueWinner.filter(
-      (item: any) => item === currentManager2.value.rosterId
+      (item: number | null) => item === currentManager2.value.rosterId
     ).length >
     currentManager1.value.leagueWinner.filter(
-      (item: any) => item === currentManager1.value.rosterId
+      (item: number | null) => item === currentManager1.value.rosterId
     ).length
   );
 });
@@ -408,7 +457,7 @@ const chartOptions = ref({
               <p class="text-center">
                 {{
                   currentManager1.leagueWinner.filter(
-                    (item: any) => item === currentManager1.rosterId
+                    (item: number | null) => item === currentManager1.rosterId
                   ).length
                 }}
               </p>
@@ -422,7 +471,7 @@ const chartOptions = ref({
               <p class="text-center">
                 {{
                   currentManager2.leagueWinner.filter(
-                    (item: any) => item === currentManager2.rosterId
+                    (item: number | null) => item === currentManager2.rosterId
                   ).length
                 }}
               </p>

@@ -178,8 +178,17 @@ const getRosterName = (rosterId: number) => {
   const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
     const userObject = users.find((user) => user.id === userId.id);
-    return userObject;
+    if (userObject) {
+      return userObject;
+    }
   }
+  return {
+    id: String(rosterId),
+    avatar: "",
+    avatarImg: "",
+    name: "Ghost Roster",
+    username: "Ghost Roster",
+  };
 };
 
 const getAllManagersSpend = (groupedMoves: WaiverMove[]) => {

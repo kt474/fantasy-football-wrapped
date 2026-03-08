@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
-import { TableDataType } from "../../types/types";
+import { TableDataType, UserType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 const props = defineProps<{
   tableData: TableDataType[];
-  finalPlacements: [];
+  finalPlacements: UserType[];
 }>();
 const store = useStore();
 
@@ -33,7 +33,7 @@ const updateChartColor = () => {
 };
 
 const seriesData = computed(() => {
-  let result: any[] = [];
+  let result: Array<{ name: string; data: Array<{ x: string; y: number }> }> = [];
   props.tableData.forEach((user) => {
     result.push({
       name: store.showUsernames ? user.username : user.name,
@@ -45,21 +45,21 @@ const seriesData = computed(() => {
       ],
     });
   });
-  props.finalPlacements.forEach((user: any) => {
+  props.finalPlacements.forEach((user) => {
     result.forEach((res) => {
       if (user) {
         if (store.showUsernames) {
           if (res.name === user.username) {
             res.data.push({
               x: "Final Pos.",
-              y: user.placement,
+              y: user.placement ?? 0,
             });
           }
         } else {
           if (res.name === user.name) {
             res.data.push({
               x: "Final Pos.",
-              y: user.placement,
+              y: user.placement ?? 0,
             });
           }
         }
@@ -110,7 +110,7 @@ const chartOptions = ref({
   },
   dataLabels: {
     enabled: true,
-    formatter(val: any) {
+    formatter(val: number | string) {
       return `${val}`;
     },
   },

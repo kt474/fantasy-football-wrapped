@@ -90,8 +90,13 @@ const getData = async () => {
       playoffOdds.value = props.propsTableData.map((user, index) => {
         return {
           name: user.name,
+          username: user.username,
           id: user.id,
+          score: 0,
+          currentWins: user.wins,
+          originalWins: user.wins,
           placement: Array(numSimulations).fill(index + 1),
+          playoffPercentage: index + 1 <= playoffTeams.value ? numSimulations : 0,
           projectedWinsTotal: user.wins,
         };
       });
@@ -128,14 +133,14 @@ const getData = async () => {
         );
       }
 
-      const nameMapping: any = new Map(
+      const nameMapping = new Map(
         store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
           user.id,
           user.name,
         ])
       );
 
-      const userNameMapping: any = new Map(
+      const userNameMapping = new Map(
         store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
           user.id,
           user.username,
@@ -148,9 +153,9 @@ const getData = async () => {
         const projectedScore: number = roster.projections
           ? getTopProjectionsSum(roster.projections) / maxProjectedScore.value
           : 0;
-        playoffOdds.value.push({
-          name: nameMapping.get(roster.id),
-          username: userNameMapping.get(roster.id),
+          playoffOdds.value.push({
+          name: nameMapping.get(roster.id) ?? "",
+          username: userNameMapping.get(roster.id) ?? "",
           id: roster.id,
           score: calculatePowerScore(winScore, pointScore, projectedScore),
           currentWins: roster.wins,
@@ -167,7 +172,7 @@ const getData = async () => {
           i <= currentLeague.regularSeasonLength;
           i++
         ) {
-          playoffOdds.value.forEach((roster: any) => {
+          playoffOdds.value.forEach((roster) => {
             const randomOpponentIndex = Math.floor(
               Math.random() * currentLeague.totalRosters
             );
@@ -185,11 +190,9 @@ const getData = async () => {
         }
         const copyArray = playoffOdds.value
           .slice()
-          .sort((a: any, b: any) => b.currentWins - a.currentWins);
-        playoffOdds.value.forEach((roster: any) => {
-          const placement = copyArray.findIndex(
-            (obj: any) => obj.id === roster.id
-          );
+          .sort((a, b) => (b.currentWins ?? 0) - (a.currentWins ?? 0));
+        playoffOdds.value.forEach((roster) => {
+          const placement = copyArray.findIndex((obj) => obj.id === roster.id);
           roster.placement.push(placement + 1);
           roster.projectedWinsTotal += roster.currentWins / 2000;
           roster.currentWins = roster.originalWins;

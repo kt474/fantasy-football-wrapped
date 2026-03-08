@@ -11,7 +11,7 @@ import {
   fakeUsers,
   fakePoints,
 } from "../../api/helper";
-import { RosterType, TableDataType } from "../../types/types";
+import { PointsType, TableDataType, UserType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 const props = defineProps<{
@@ -90,24 +90,34 @@ const matchRosterId = (rosterId: number, placement?: number) => {
     : fakeUsers;
   const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
-    const userObject = users.find((user) => user.id === userId.id);
-    if (placement) {
-      userObject.placement = placement;
+    const userObject = users.find((user) => user.id === userId.id) as
+      | UserType
+      | undefined;
+    if (userObject) {
+      return {
+        ...userObject,
+        placement: placement ?? userObject.placement,
+      };
     }
-    return userObject;
   }
+  return {
+    id: String(rosterId),
+    name: "Unknown Team",
+    username: "Unknown Team",
+    avatar: "",
+    avatarImg: "",
+    placement,
+  } as UserType;
 };
 
 const getPointsScored = (rosterId: number, week: number) => {
   if (!store.leagueInfo[store.currentLeagueIndex]) {
-    const pointsArray: any = fakePoints.find(
-      (roster: any) => roster.rosterId === rosterId
-    );
-    return pointsArray.playoffPoints[week - 1];
+    const pointsArray = fakePoints.find((roster) => roster.rosterId === rosterId);
+    return pointsArray?.playoffPoints[week - 1];
   }
   const pointsArray = store.leagueInfo[
     store.currentLeagueIndex
-  ].weeklyPoints.find((roster: RosterType) => roster.rosterId === rosterId);
+  ].weeklyPoints.find((roster: PointsType) => roster.rosterId === rosterId);
   if (!pointsArray) return;
   return pointsArray.points[
     week - 1 + store.leagueInfo[store.currentLeagueIndex].regularSeasonLength
@@ -132,7 +142,7 @@ const finalPlacements = computed(() => {
   ) {
     return [];
   }
-  let result: any = [];
+  let result: UserType[] = [];
   winnersBracket.value.forEach((matchup) => {
     if (matchup.p === 1) {
       result.push(matchRosterId(matchup.w, 1));
@@ -191,13 +201,13 @@ const finalPlacements = computed(() => {
   }
   // some playoff formats leave teams out
   props.tableData.forEach((user) => {
-    if (result.every((obj: any) => obj !== undefined)) {
-      if (!result.find((res: any) => res.id === user.id)) {
+    if (result.every((obj) => obj !== undefined)) {
+      if (!result.find((res) => res.id === user.id)) {
         result.push(matchRosterId(user.rosterId, totalRosters.value / 2));
       }
     }
   });
-  return result.sort((a: any, b: any) => a.placement - b.placement);
+  return result.sort((a, b) => (a.placement ?? 0) - (b.placement ?? 0));
 });
 
 const numberOfWinnerRounds = computed(() => {

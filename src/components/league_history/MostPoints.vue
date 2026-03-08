@@ -4,14 +4,34 @@ import { useStore } from "../../store/store";
 import Card from "../ui/card/Card.vue";
 
 const store = useStore();
+
+interface PointSeasonEntry {
+  season: string;
+  points: number[];
+}
+
+interface LeagueHistoryRow {
+  name: string;
+  username: string;
+  pointSeason: PointSeasonEntry[];
+}
+
+interface PointDetail {
+  week: number;
+  name: string;
+  username: string;
+  season: string;
+  point: number;
+}
+
 const props = defineProps<{
-  tableData: any[];
+  tableData: LeagueHistoryRow[];
 }>();
 
 const mostPoints = computed(() => {
-  const allPointsWithDetails = props.tableData.flatMap((obj) =>
-    obj.pointSeason.flatMap((seasonObj: any) =>
-      seasonObj.points.map((point: number, index: number) => ({
+  const allPointsWithDetails: PointDetail[] = props.tableData.flatMap((obj) =>
+    obj.pointSeason.flatMap((seasonObj) =>
+      seasonObj.points.map((point: number, index: number): PointDetail => ({
         week: index + 1,
         name: obj.name,
         username: obj.username,

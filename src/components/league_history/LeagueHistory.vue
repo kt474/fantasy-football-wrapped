@@ -3,7 +3,7 @@ import { ref, onMounted, computed, watch, Ref } from "vue";
 import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
 import { useStore } from "../../store/store.ts";
-import { getData, inputLeague, getLeague } from "../../api/api.ts";
+import { getData, inputLeague } from "../../api/api.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
@@ -30,12 +30,6 @@ const isLoading = ref(false);
 const loadingYear = ref("");
 const tableOrder = ref("wins");
 const previousLeagues = ref<string[]>([]);
-
-interface LeagueData {
-  previousLeagueId?: string;
-  season?: string;
-  // Add other relevant fields
-}
 
 interface LeagueStore {
   leagueInfo: LeagueInfoType[];
@@ -66,19 +60,9 @@ interface HistoricalManagerRow {
   seasons: string[];
 }
 
-const fetchLeagueData = async (leagueId: string): Promise<LeagueData> => {
+const fetchLeagueData = async (leagueId: string): Promise<LeagueInfoType> => {
   try {
-    // Fetch league info and data in parallel
-    const [leagueInfo, leagueData]: [any, any] = await Promise.all([
-      getLeague(leagueId),
-      getData(leagueId),
-    ]);
-
-    // Combine the data
-    return {
-      ...leagueData,
-      season: leagueInfo.season,
-    };
+    return await getData(leagueId);
   } catch (error) {
     console.error(`Error fetching league data for ID ${leagueId}:`, error);
     throw error;
@@ -153,7 +137,7 @@ const addNewLeague = async (season: string) => {
   if (store.leagueInfo[store.currentLeagueIndex]) {
     const newLeagueInfo = store.leagueInfo[
       store.currentLeagueIndex
-    ].previousLeagues.find((league: any) => league.season === season);
+    ].previousLeagues.find((league) => league.season === season);
     if (newLeagueInfo) {
       if (
         !store.leagueInfo
@@ -333,7 +317,10 @@ const dataAllYears = computed(() => {
 const tableDataAllYears = computed(() => {
   const data = [...dataAllYears.value];
 
-  const sorters: Record<string, (a: any, b: any) => number> = {
+  const sorters: Record<
+    string,
+    (a: HistoricalManagerRow, b: HistoricalManagerRow) => number
+  > = {
     wins: (a, b) => {
       const ratioA = a.wins / a.losses;
       const ratioB = b.wins / b.losses;

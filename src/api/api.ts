@@ -25,7 +25,12 @@ import {
   NewLeagueInfoType,
   DraftPick,
 } from "../types/apiTypes";
-import { LeagueInfoType, RosterType, UserType } from "../types/types";
+import {
+  LeagueInfoType,
+  RosterType,
+  UserType,
+  UserLeagueListItem,
+} from "../types/types";
 import { authenticatedFetch } from "@/lib/authFetch";
 
 const assertOk = (response: Response, context: string) => {
@@ -766,13 +771,13 @@ export const getUsername = async (
 export const getAllLeagues = async (
   userId: string,
   season: string
-): Promise<Record<string, unknown>[]> => {
+): Promise<UserLeagueListItem[]> => {
   try {
     const response = await fetch(
       `https://api.sleeper.app/v1/user/${userId}/leagues/nfl/${season}`
     );
     assertOk(response, "User leagues request");
-    return await parseJson<Record<string, unknown>[]>(response, "User leagues");
+    return await parseJson<UserLeagueListItem[]>(response, "User leagues");
   } catch (error) {
     console.error("Error fetching user leagues:", error);
     return [];

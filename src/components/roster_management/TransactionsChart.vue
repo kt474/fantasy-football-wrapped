@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
 import { fakeUsers, fakeTransactions } from "../../api/helper";
-import { RosterType } from "../../types/types";
+import type { WeeklyWaiver } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 
 const store = useStore();
@@ -10,8 +10,12 @@ const store = useStore();
 const transactionData = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague) {
-    let trades: any[] = [];
-    currentLeague.trades.forEach((trade: any) => {
+    type TradeAsWaiver = Pick<
+      WeeklyWaiver,
+      "adds" | "draft_picks" | "waiver_budget" | "status" | "type"
+    > & { roster_ids: number[] };
+    const trades: TradeAsWaiver[] = [];
+    currentLeague.trades.forEach((trade) => {
       trade.roster_ids.forEach((id: number) => {
         trades.push({
           adds: trade.adds,
@@ -19,15 +23,12 @@ const transactionData = computed(() => {
           waiver_budget: trade.waiver_budget,
           status: trade.status,
           type: trade.type,
-          creator: currentLeague.rosters.find(
-            (roster: RosterType) => roster.rosterId === id
-          )?.id,
           roster_ids: [id],
         });
       });
     });
 
-    const allMoves = [...(currentLeague.waivers || []), ...trades];
+    const allMoves: TradeAsWaiver[] = [...(currentLeague.waivers || []), ...trades];
 
     const groupedMoves = allMoves
       .filter(
@@ -37,9 +38,9 @@ const transactionData = computed(() => {
             item.status === "complete" &&
             (item.adds || item.draft_picks || item.waiver_budget))
       )
-      .reduce((acc, item) => {
+      .reduce<Record<string, Record<string, number>>>((acc, item) => {
         const creatorId = item.roster_ids[0];
-        let type = item.type;
+        const type = item.type;
 
         if (!acc[creatorId]) {
           acc[creatorId] = {};
@@ -114,7 +115,7 @@ const getNameFromId = (rosterId: string) => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague) {
     const rosterObj = currentLeague.rosters.find(
-      (roster) => roster.rosterId == rosterId
+      (roster) => roster.rosterId === Number(rosterId)
     );
     if (rosterObj) {
       const userObj = currentLeague.users.find(

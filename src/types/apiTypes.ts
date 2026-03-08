@@ -223,10 +223,10 @@ export interface LeagueOriginal {
 export interface Bracket {
   m: number;
   r: number;
-  l: null;
-  w: number | null;
-  t1: number | null;
-  t2: number | null;
+  l: number;
+  w: number;
+  t1: number;
+  t2: number;
   t2_from?: BracketTeam;
   p?: number;
   t1_from?: BracketTeam;

@@ -10,6 +10,26 @@ const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
+interface LuckWeek {
+  week: number;
+  points: number;
+  opponentName: string;
+  opponentPoints: number;
+  wouldBeat: number;
+  wouldLose: number;
+  ranking: number;
+  rankText: string;
+}
+
+interface TeamLuckSummary {
+  teamName: string;
+  actualWins: number;
+  expectedWins: number;
+  luckDiff: number;
+  luckyWeeks: LuckWeek[];
+  unluckyWeeks: LuckWeek[];
+}
+
 const promptData = computed(() => {
   return props.tableData.map((user) => {
     return {
@@ -36,13 +56,13 @@ const luckAnalysis = computed(() => {
   const teams = promptData.value;
 
   // Calculate luck differential for each team
-  const teamLuck = teams.map((team) => ({
+  const teamLuck: TeamLuckSummary[] = teams.map((team) => ({
     teamName: team.teamName,
     actualWins: team.actualWins,
     expectedWins: team.expectedWins,
     luckDiff: team.actualWins - team.expectedWins,
-    luckyWeeks: [] as any[],
-    unluckyWeeks: [] as any[],
+    luckyWeeks: [],
+    unluckyWeeks: [],
   }));
 
   // Analyze each week for each team

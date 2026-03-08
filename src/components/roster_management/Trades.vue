@@ -11,6 +11,7 @@ import {
 import { useStore } from "../../store/store";
 import { Player } from "../../types/apiTypes.ts";
 import { UserType } from "../../types/types.ts";
+import type { TradeNameRow } from "../../types/types.ts";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import Button from "../ui/button/Button.vue";
@@ -20,9 +21,9 @@ type TradePick = { owner_id: number; season: string; round: number };
 type TradeBudget = { receiver: number; amount: number };
 type LeagueTrade = {
   roster_ids: number[];
-  adds?: Record<string, number>;
-  draft_picks?: TradePick[];
-  waiver_budget?: TradeBudget[];
+  adds?: Record<string, number> | null;
+  draft_picks?: unknown[];
+  waiver_budget?: unknown[];
   leg: number;
 };
 type Trade = {
@@ -87,8 +88,12 @@ const getData = async () => {
     return {
       roster_ids: trade.roster_ids,
       adds: grouped ?? {},
-      draft_picks: trade.draft_picks ?? [],
-      waiver_budget: trade.waiver_budget ?? [],
+      draft_picks: Array.isArray(trade.draft_picks)
+        ? (trade.draft_picks as TradePick[])
+        : [],
+      waiver_budget: Array.isArray(trade.waiver_budget)
+        ? (trade.waiver_budget as TradeBudget[])
+        : [],
       week: trade.leg,
     };
   });
@@ -185,7 +190,7 @@ const getData = async () => {
       };
     })
   );
-  store.addTradeNames(currentLeague.leagueId, tradeData.value);
+  store.addTradeNames(currentLeague.leagueId, tradeData.value as TradeNameRow[]);
   localStorage.setItem(
     "leagueInfo",
     JSON.stringify(store.leagueInfo as LeagueInfoType[])
