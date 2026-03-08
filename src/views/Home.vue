@@ -27,8 +27,9 @@ const clicked = ref(systemDarkMode);
 onMounted(async () => {
   try {
     checkSystemTheme();
-    if (localStorage.leagueInfo) {
-      const savedLeagues = JSON.parse(localStorage.leagueInfo);
+    const savedLeagueInfo = localStorage.getItem("leagueInfo");
+    if (savedLeagueInfo) {
+      const savedLeagues = JSON.parse(savedLeagueInfo);
       await Promise.all(
         savedLeagues.map(async (league: LeagueInfoType) => {
           if (!store.leagueIds.includes(league.leagueId)) {
@@ -37,10 +38,11 @@ onMounted(async () => {
             if (diff > 86400000) {
               // 1 day
               showLoading.value = true;
-              if (localStorage.originalData) {
-                const currentData = JSON.parse(localStorage.originalData);
+              const originalData = localStorage.getItem("originalData");
+              if (originalData) {
+                const currentData = JSON.parse(originalData);
                 delete currentData[league.leagueId];
-                localStorage.originalData = JSON.stringify(currentData);
+                localStorage.setItem("originalData", JSON.stringify(currentData));
               }
               store.updateLoadingLeague(league.name);
               const refreshedData = await getData(league.leagueId);
@@ -59,7 +61,7 @@ onMounted(async () => {
           }
         })
       );
-      store.updateCurrentLeagueId(localStorage.currentLeagueId);
+      store.updateCurrentLeagueId(localStorage.getItem("currentLeagueId") ?? "");
       store.updateLoadingLeague("");
     }
     const leagueId = Array.isArray(route.query.leagueId)
@@ -97,11 +99,12 @@ onMounted(async () => {
 });
 
 const checkSystemTheme = () => {
-  if (systemDarkMode && !localStorage.darkMode) {
+  const savedDarkMode = localStorage.getItem("darkMode");
+  if (systemDarkMode && savedDarkMode === null) {
     clicked.value = true;
     store.updateDarkMode(true);
-  } else if (localStorage.darkMode) {
-    clicked.value = JSON.parse(localStorage.darkMode);
+  } else if (savedDarkMode !== null) {
+    clicked.value = JSON.parse(savedDarkMode);
     store.updateDarkMode(clicked.value);
   }
 };

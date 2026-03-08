@@ -52,14 +52,15 @@ export const useLeagueInput = () => {
   };
 
   onMounted(() => {
-    if (localStorage.inputType) {
-      inputType.value = localStorage.inputType;
+    const savedInputType = localStorage.getItem("inputType");
+    if (savedInputType) {
+      inputType.value = savedInputType;
     }
   });
 
   watch(
     () => inputType.value,
-    () => (localStorage.inputType = inputType.value)
+    () => localStorage.setItem("inputType", inputType.value)
   );
 
   const onSubmit = async () => {
@@ -83,11 +84,11 @@ export const useLeagueInput = () => {
       store.setLeaguesList(leagues);
       store.updateShowLeaguesList(true);
       showHelperMsg.value = false;
-      localStorage.inputType = "League ID";
+      localStorage.setItem("inputType", "League ID");
       store.updateShowInput(false);
       inputUsername(user.display_name, seasonYear.value);
       store.currentTab = "Standings";
-      localStorage.currentTab = "Standings";
+      localStorage.setItem("currentTab", "Standings");
       await resetRoute();
       return;
     }
@@ -115,7 +116,7 @@ export const useLeagueInput = () => {
       showErrorMsg.value = true;
     } else {
       store.currentTab = "Standings";
-      localStorage.currentTab = "Standings";
+      localStorage.setItem("currentTab", "Standings");
       await resetRoute();
       showErrorMsg.value = false;
       store.updateLoadingLeague(checkInput["name"]);

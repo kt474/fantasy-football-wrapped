@@ -147,7 +147,7 @@ const addNewLeague = async (season: string) => {
         store.updateLeagueInfo(newLeagueInfo);
         store.updateCurrentLeagueId(newLeagueInfo.leagueId);
         store.currentTab = "Standings";
-        localStorage.currentTab = "Standings";
+        localStorage.setItem("currentTab", "Standings");
         toast.success("League added!");
         await inputLeague(
           newLeagueInfo.leagueId,

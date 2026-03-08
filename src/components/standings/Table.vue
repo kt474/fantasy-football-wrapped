@@ -118,14 +118,16 @@ interface savedData {
 }
 
 onMounted(() => {
-  if (localStorage.currentTab) {
-    store.currentTab = localStorage.currentTab;
+  const savedCurrentTab = localStorage.getItem("currentTab");
+  if (savedCurrentTab) {
+    store.currentTab = savedCurrentTab;
   }
 });
 
 const originalData = computed(() => {
-  if (localStorage.originalData && store.currentLeagueId) {
-    const savedData: savedData = JSON.parse(localStorage.originalData);
+  const originalDataStorage = localStorage.getItem("originalData");
+  if (originalDataStorage && store.currentLeagueId) {
+    const savedData: savedData = JSON.parse(originalDataStorage);
     if (savedData[store.currentLeagueId]) {
       return savedData[store.currentLeagueId];
     }
@@ -139,11 +141,12 @@ const originalData = computed(() => {
     );
     if (store.currentLeagueId) {
       let savedData: Record<string, TableDataType[]> = {};
-      if (localStorage.originalData) {
-        savedData = JSON.parse(localStorage.originalData);
+      const originalDataStorage = localStorage.getItem("originalData");
+      if (originalDataStorage) {
+        savedData = JSON.parse(originalDataStorage);
       }
       savedData[store.currentLeagueId] = combinedPoints;
-      localStorage.originalData = JSON.stringify(savedData);
+      localStorage.setItem("originalData", JSON.stringify(savedData));
     }
     return combinedPoints;
   }

@@ -85,7 +85,7 @@ const changeTab = (tab: string) => {
     goBackToHome();
   }
   store.currentTab = tab;
-  localStorage.currentTab = tab;
+  localStorage.setItem("currentTab", tab);
   closeMobileSidebar();
   scrollToTop();
 };
