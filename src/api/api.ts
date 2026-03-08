@@ -396,7 +396,7 @@ export const getStats = async (
       response,
       "Player stats"
     );
-    const stats = result.stats;
+    const stats = result.stats ?? null;
     const playerInfo = result.player;
     if (!stats || !playerInfo) {
       return null;
@@ -961,7 +961,9 @@ export const getMatchup = async (week: number, leagueId: string) => {
     const players = Array.isArray(game["players"]) ? game["players"] : [];
     const starters = Array.isArray(game["starters"]) ? game["starters"] : [];
     const playersPoints = game["players_points"] ?? {};
-    const benchPlayers = players.filter((value: string) => !starters.includes(value));
+    const benchPlayers = players.filter(
+      (value: string) => !starters.includes(value)
+    );
     const benchPoints = benchPlayers?.map(
       (player: string) => playersPoints[player] ?? 0
     );
@@ -1080,7 +1082,9 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     Promise.all(
       users.map(async (user) => ({
         ...user,
-        avatarImg: user.avatar ? await getAvatar(user.avatar) ?? undefined : undefined,
+        avatarImg: user.avatar
+          ? ((await getAvatar(user.avatar)) ?? undefined)
+          : undefined,
       }))
     ),
   ]);
