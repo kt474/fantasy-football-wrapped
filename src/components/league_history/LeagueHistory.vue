@@ -42,6 +42,30 @@ interface LeagueStore {
   currentLeagueIndex: number;
 }
 
+interface PointSeasonEntry {
+  season: string;
+  points: number[];
+}
+
+interface HistoricalManagerRow {
+  name: string;
+  username: string;
+  id: string;
+  wins: number;
+  losses: number;
+  ties: number;
+  points: number;
+  pointsArr: number[];
+  pointSeason: PointSeasonEntry[];
+  avatarImg?: string;
+  rosterId: number;
+  matchups: (number | null)[];
+  managerEfficiency: number;
+  randomScheduleWins: number;
+  leagueWinner: (number | null)[];
+  seasons: string[];
+}
+
 const fetchLeagueData = async (leagueId: string): Promise<LeagueData> => {
   try {
     // Fetch league info and data in parallel
@@ -183,58 +207,60 @@ watch(
 );
 
 const dataAllYears = computed(() => {
-  let result = props.tableData.map((user) => ({
-    name: user.name,
-    username: user.username,
-    id: user.id,
-    wins: user.wins,
-    losses: user.losses,
-    ties: user.ties,
-    points: user.pointsFor,
-    pointsArr: user.points ? [...user.points] : [],
-    pointSeason: store.leagueInfo[store.currentLeagueIndex]
-      ? [
-          {
-            season: store.leagueInfo[store.currentLeagueIndex].season,
-            points: user.points ? [...user.points] : [],
-          },
-        ]
-      : [
-          {
-            season: "2023",
-            points: Array.from({ length: 5 }, () =>
-              parseFloat((Math.random() * (200 - 100) + 100).toFixed(2))
-            ),
-          },
-          {
-            season: "2024",
-            points: Array.from({ length: 5 }, () =>
-              parseFloat((Math.random() * (200 - 100) + 100).toFixed(2))
-            ),
-          },
-        ],
-    avatarImg: user.avatarImg,
-    rosterId: user.rosterId,
-    matchups: user.matchups ? [...user.matchups] : [],
-    managerEfficiency: store.leagueInfo[store.currentLeagueIndex]
-      ? user.managerEfficiency
-      : 2 * user.managerEfficiency,
-    randomScheduleWins: store.leagueInfo[store.currentLeagueIndex]
-      ? user.randomScheduleWins
-      : 3 * user.randomScheduleWins,
-    leagueWinner:
+  const result: HistoricalManagerRow[] = props.tableData.map((user) => {
+    const latestWinner =
       store.leagueInfo[store.currentLeagueIndex] &&
       store.leagueInfo[store.currentLeagueIndex].status == "complete"
+        ? store.leagueInfo[store.currentLeagueIndex].leagueWinner
+          ? Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
+          : store.leagueInfo[store.currentLeagueIndex].legacyWinner ?? null
+        : null;
+
+    return {
+      name: user.name,
+      username: user.username,
+      id: user.id,
+      wins: user.wins,
+      losses: user.losses,
+      ties: user.ties,
+      points: user.pointsFor,
+      pointsArr: user.points ? [...user.points] : [],
+      pointSeason: store.leagueInfo[store.currentLeagueIndex]
         ? [
-            store.leagueInfo[store.currentLeagueIndex].leagueWinner
-              ? Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
-              : store.leagueInfo[store.currentLeagueIndex].legacyWinner,
+            {
+              season: store.leagueInfo[store.currentLeagueIndex].season,
+              points: user.points ? [...user.points] : [],
+            },
           ]
-        : [null],
-    seasons: store.leagueInfo[store.currentLeagueIndex]
-      ? [store.leagueInfo[store.currentLeagueIndex].season]
-      : ["2023", "2022", "2021"],
-  }));
+        : [
+            {
+              season: "2023",
+              points: Array.from({ length: 5 }, () =>
+                parseFloat((Math.random() * (200 - 100) + 100).toFixed(2))
+              ),
+            },
+            {
+              season: "2024",
+              points: Array.from({ length: 5 }, () =>
+                parseFloat((Math.random() * (200 - 100) + 100).toFixed(2))
+              ),
+            },
+          ],
+      avatarImg: user.avatarImg,
+      rosterId: user.rosterId,
+      matchups: user.matchups ? [...user.matchups] : [],
+      managerEfficiency: store.leagueInfo[store.currentLeagueIndex]
+        ? user.managerEfficiency
+        : 2 * user.managerEfficiency,
+      randomScheduleWins: store.leagueInfo[store.currentLeagueIndex]
+        ? user.randomScheduleWins
+        : 3 * user.randomScheduleWins,
+      leagueWinner: [latestWinner],
+      seasons: store.leagueInfo[store.currentLeagueIndex]
+        ? [store.leagueInfo[store.currentLeagueIndex].season]
+        : ["2023", "2022", "2021"],
+    };
+  });
 
   if (
     store.leagueInfo[store.currentLeagueIndex] &&
@@ -267,10 +293,8 @@ const dataAllYears = computed(() => {
               resultUser.seasons.push(league.season);
             }
             if (league.leagueWinner) {
-              // @ts-ignore
               resultUser.leagueWinner.push(Number(league.leagueWinner));
             } else if (league.legacyWinner) {
-              // @ts-ignore
               resultUser.leagueWinner.push(league.legacyWinner);
             }
             if (user.matchups?.length) {

@@ -188,7 +188,7 @@ const tableData: ComputedRef<TableDataType[]> = computed(() => {
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "medianRecord") {
-    return originalData.value.sort((a, b) => {
+    return data.sort((a, b) => {
       if (a.winsWithMedian !== b.winsWithMedian) {
         return b.winsWithMedian - a.winsWithMedian;
       }
