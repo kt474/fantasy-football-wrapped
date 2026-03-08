@@ -2,7 +2,7 @@
 import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType, PlayerType } from "../../types/types";
-import { fakeUsers } from "../../api/helper";
+import { fakeUsers } from "../../api/fakeLeague";
 import {
   Select,
   SelectContent,

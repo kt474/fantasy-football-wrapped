@@ -10,7 +10,7 @@ import {
 } from "../../api/api";
 import { TableDataType } from "../../types/types";
 import difference from "lodash/difference";
-import { fakePosts, fakeStartSit, fakeUsers } from "../../api/helper";
+import { fakePosts, fakeStartSit, fakeUsers } from "../../api/fakeLeague";
 import max from "lodash/max";
 import min from "lodash/min";
 import { Player, SingleWeekProjection, WeeklyStats } from "../../types/apiTypes";

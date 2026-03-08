@@ -25,7 +25,7 @@ import {
   fakeTopPerformers,
   fakeBottomPerformers,
   fakeBenchPerformers,
-} from "../../api/helper.ts";
+} from "../../api/fakeLeague.ts";
 import WeeklyPreview from "./WeeklyPreview.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";

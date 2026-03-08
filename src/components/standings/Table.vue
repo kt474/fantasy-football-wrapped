@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
-import { fakeRosters, fakeUsers, createTableData } from "../../api/helper";
+import { createTableData } from "../../api/helper";
+import { fakeRosters, fakeUsers } from "../../api/fakeLeague";
 import {
   computed,
   onMounted,

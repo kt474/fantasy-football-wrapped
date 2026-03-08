@@ -10,7 +10,7 @@ import {
   PlayoffProjection,
 } from "../../types/types";
 import { getProjections } from "../../api/api";
-import { fakePlayoffData } from "../../api/helper";
+import { fakePlayoffData } from "../../api/fakeLeague";
 import Card from "../ui/card/Card.vue";
 const store = useStore();
 const loading = ref(false);

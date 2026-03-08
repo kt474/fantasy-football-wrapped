@@ -9,7 +9,7 @@ import {
 import { TableDataType, LeagueInfoType } from "../../types/types";
 import { Player } from "../../types/apiTypes";
 import { useStore } from "../../store/store";
-import { fakeHighlights } from "../../api/helper";
+import { fakeHighlights } from "../../api/fakeLeague";
 import { Card, CardTitle, CardHeader } from "../ui/card";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";

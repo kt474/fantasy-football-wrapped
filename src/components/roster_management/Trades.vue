@@ -2,12 +2,8 @@
 import { ref, onMounted, watch, computed } from "vue";
 import { LeagueInfoType } from "../../types/types.ts";
 import { getPlayersByIdsMap, getTradeValue } from "../../api/api.ts";
-import {
-  fakeRosters,
-  fakeTrades,
-  fakeUsers,
-  roundToOneDecimal,
-} from "../../api/helper";
+import { fakeRosters, fakeTrades, fakeUsers } from "../../api/fakeLeague";
+import { roundToOneDecimal } from "../../api/helper";
 import { useStore } from "../../store/store";
 import { Player } from "../../types/apiTypes.ts";
 import { UserType } from "../../types/types.ts";

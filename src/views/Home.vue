@@ -3,7 +3,7 @@ import { onMounted, ref } from "vue";
 
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
-import { fakePoints, fakeRosters, fakeUsers } from "../api/helper";
+import { fakePoints, fakeRosters, fakeUsers } from "../api/fakeLeague";
 import Input from "@/components/ui/input/Input.vue";
 import Table from "../components/standings/Table.vue";
 import { useStore } from "../store/store";

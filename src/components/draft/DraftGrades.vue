@@ -5,7 +5,8 @@ import { getDraftProjections } from "../../api/api";
 import { LeagueInfoType } from "../../types/types.ts";
 import { DraftPick, PickObj } from "../../types/apiTypes.ts";
 import { useStore } from "../../store/store";
-import { standardDeviation, fakeUsers } from "../../api/helper";
+import { standardDeviation } from "../../api/helper";
+import { fakeUsers } from "../../api/fakeLeague";
 import { fakeDraftGrades } from "../../api/draft.ts";
 import {
   Select,

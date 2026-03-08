@@ -4,7 +4,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { getDraftPicks, getDraftMetadata } from "../../api/api";
 import { LeagueInfoType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
-import { fakeUsers } from "../../api/helper.ts";
+import { fakeUsers } from "../../api/fakeLeague.ts";
 import DraftGrades from "./DraftGrades.vue";
 import { DraftPick } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";

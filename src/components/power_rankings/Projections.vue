@@ -3,7 +3,7 @@ import intersection from "lodash/intersection";
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { RosterType, LeagueInfoType } from "../../types/types";
-import { fakeProjectionData } from "../../api/helper";
+import { fakeProjectionData } from "../../api/fakeLeague";
 import { getProjections } from "../../api/api";
 import HeatMap from "./HeatMap.vue";
 import Card from "../ui/card/Card.vue";

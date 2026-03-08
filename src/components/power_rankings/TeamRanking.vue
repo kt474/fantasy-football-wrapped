@@ -10,7 +10,7 @@ import {
 import { getStats } from "../../api/api";
 import { useStore } from "../../store/store";
 import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
-import { fakeUsers } from "../../api/helper";
+import { fakeUsers } from "../../api/fakeLeague";
 import Roster from "./Roster.vue";
 import Card from "../ui/card/Card.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

@@ -4,7 +4,8 @@ import { computed, onMounted, ref, watch } from "vue";
 import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
 import { getPlayersByIdsMap, getSingleWeekProjection } from "../../api/api.ts";
-import { fakeWeeklyPreview, getWinProbability } from "../../api/helper.ts";
+import { getWinProbability } from "../../api/helper.ts";
+import { fakeWeeklyPreview } from "../../api/fakeLeague.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 

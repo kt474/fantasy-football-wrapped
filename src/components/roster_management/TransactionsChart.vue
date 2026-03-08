@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
-import { fakeUsers, fakeTransactions } from "../../api/helper";
+import { fakeUsers, fakeTransactions } from "../../api/fakeLeague";
 import type { WeeklyWaiver } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 

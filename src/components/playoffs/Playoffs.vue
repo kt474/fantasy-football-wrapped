@@ -10,7 +10,7 @@ import {
   fakeRosters,
   fakeUsers,
   fakePoints,
-} from "../../api/helper";
+} from "../../api/fakeLeague";
 import { PointsType, TableDataType, UserType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
