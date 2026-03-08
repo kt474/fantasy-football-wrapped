@@ -1,12 +1,9 @@
 import { createApp, defineAsyncComponent } from "vue";
 import { createPinia } from "pinia";
 import { createRouter, createWebHistory } from "vue-router";
-// @ts-ignore
 import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import App from "./App.vue";
-// @ts-ignore
-import posthogPlugin from "../plugins/posthog";
 import ChangelogPage from "./views/Changelog.vue";
 import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import About from "./views/About.vue";

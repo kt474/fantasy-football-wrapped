@@ -1,4 +1,4 @@
-import { DraftPick, DraftGrades } from "./apiTypes";
+import type { DraftPick, DraftGrades } from "./apiTypes";
 
 export type LeagueInfoType = {
   name: string;
@@ -8,10 +8,10 @@ export type LeagueInfoType = {
   season: string;
   seasonType: string;
   leagueId: string;
-  leagueWinner: string;
+  leagueWinner: string | null;
   legacyWinner?: number;
   lastUpdated: number;
-  previousLeagueId: string;
+  previousLeagueId: string | null;
   lastScoredWeek: number;
   winnersBracket: Record<string, any>[];
   losersBracket: Record<string, any>[];
@@ -122,8 +122,8 @@ export type TableDataType = {
   players: string[];
   starters: string[][];
   starterPoints: number[][];
-  benchPlayers: string[];
-  benchPoints: number[];
+  benchPlayers: string[][];
+  benchPoints: number[][];
 };
 
 export type PowerRankingEntry = {

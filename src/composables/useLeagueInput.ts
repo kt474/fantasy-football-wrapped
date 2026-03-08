@@ -2,6 +2,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "@/store/store";
 import type { LeagueInfoType } from "@/types/types";
+import type { LeagueOriginal } from "@/types/apiTypes";
 import {
   getData,
   getLeague,
@@ -104,7 +105,7 @@ export const useLeagueInput = () => {
       return;
     }
 
-    const checkInput: any = await getLeague(leagueIdInput.value);
+    const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
     if (!checkInput["name"]) {
       errorMsg.value = "Invalid league ID";
       showErrorMsg.value = true;

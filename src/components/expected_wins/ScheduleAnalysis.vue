@@ -331,7 +331,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
           </li>
         </ul>
         <div v-if="team.unluckyWeeks.length === 0">
-          <p class="text-muted-foreground">
+          <p>
             <b>{{ team.teamName }}</b> did not have any individual weeks where
             they lost with a particularly high score. Their bad luck came from
             facing opponents with above average scores.

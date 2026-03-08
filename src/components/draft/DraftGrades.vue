@@ -3,6 +3,7 @@ import mean from "lodash/mean";
 import { ref, onMounted, computed, watch } from "vue";
 import { getDraftProjections } from "../../api/api";
 import { LeagueInfoType } from "../../types/types.ts";
+import { DraftPick, PickObj } from "../../types/apiTypes.ts";
 import { useStore } from "../../store/store";
 import { standardDeviation, fakeUsers } from "../../api/helper";
 import { fakeDraftGrades } from "../../api/draft.ts";
@@ -17,9 +18,19 @@ import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
 const store = useStore();
 
-const projectionData: any = ref([]);
+type DraftProjectionEntry = PickObj & {
+  draftPick: DraftPick;
+};
+type DraftGradeSummary = {
+  totalScore: number;
+  picks: DraftProjectionEntry[];
+  zScore: number;
+  grade: string;
+};
+
+const projectionData = ref<DraftGradeSummary[]>([]);
 const props = defineProps<{
-  draftData: any[];
+  draftData: DraftPick[];
   scoringType: string;
 }>();
 
@@ -57,37 +68,40 @@ const getProjections = async () => {
         true ? qbs >= 2 : false,
         true ? props.scoringType === "idp" : false
       );
+      const projectedPoints = projections["projectedPoints"] ?? 0;
+      const adp = projections["adp"] ?? pick["pickNumber"];
       return {
         draftPick: pick,
-        adp: projections["adp"],
-        projectedPoints: projections["projectedPoints"],
-        draftValue:
-          projections["projectedPoints"] / 10 +
-          (pick["pickNumber"] - projections["adp"]),
+        adp,
+        projectedPoints,
+        draftValue: projectedPoints / 10 + (pick["pickNumber"] - adp),
       };
     })
   );
 
-  const grouped = result.reduce((acc: any, obj: any) => {
+  const grouped = result.reduce<Record<number, DraftProjectionEntry[]>>(
+    (acc, obj) => {
     const key = obj.draftPick.rosterId;
     if (!acc[key]) {
       acc[key] = [];
     }
     acc[key].push(obj);
     return acc;
-  }, {});
+    },
+    {}
+  );
 
-  let totalDraftScores: any[] = [];
-  Object.values(grouped).forEach((group: any) => {
+  let totalDraftScores: DraftGradeSummary[] = [];
+  Object.values(grouped).forEach((group) => {
     let sum = 0;
-    let picks: any[] = [];
-    group.forEach((pick: any, index: number) => {
+    let picks: DraftProjectionEntry[] = [];
+    group.forEach((pick, index: number) => {
       if (index < 13) {
-        sum += pick["draftValue"] ? pick["draftValue"] : 0;
+        sum += pick.draftValue ?? 0;
       }
       picks.push(pick);
     });
-    totalDraftScores.push({ totalScore: sum, picks: picks });
+    totalDraftScores.push({ totalScore: sum, picks: picks, zScore: 0, grade: "F" });
   });
 
   const meanScore = mean(totalDraftScores.map((user) => user.totalScore));
@@ -194,9 +208,9 @@ onMounted(async () => {
     await getProjections();
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
     projectionData.value =
-      store.leagueInfo[store.currentLeagueIndex].draftGrades;
+      store.leagueInfo[store.currentLeagueIndex].draftGrades ?? [];
   } else if (store.leagueInfo.length === 0) {
-    projectionData.value = fakeDraftGrades;
+    projectionData.value = fakeDraftGrades as DraftGradeSummary[];
   }
 });
 
@@ -212,7 +226,7 @@ watch(
     }
     currentManager.value = managers.value[0];
     projectionData.value =
-      store.leagueInfo[store.currentLeagueIndex].draftGrades;
+      store.leagueInfo[store.currentLeagueIndex].draftGrades ?? [];
   }
 );
 </script>

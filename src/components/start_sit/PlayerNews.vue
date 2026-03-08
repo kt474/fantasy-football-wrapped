@@ -141,10 +141,13 @@ const fetchPlayerNames = async () => {
         const week = currentLeague.currentWeek
           ? currentLeague.currentWeek
           : currentLeague.lastScoredWeek;
-        const starterIds = [
-          ...(user.starters[week - 1] ?? []),
-          ...difference(user.players, user.starters[week - 1]),
-        ];
+
+        const starterIds = user?.starters
+          ? [
+              ...(user?.starters[week - 1] ?? []),
+              ...difference(user.players, user.starters[week - 1]),
+            ]
+          : [];
         // For each starter, fetch player and projection
         if (starterIds) {
           const starterNames = await Promise.all(
@@ -287,7 +290,7 @@ watch(
       {{
         store.leagueInfo[store.currentLeagueIndex]?.currentWeek
           ? store.leagueInfo[store.currentLeagueIndex]?.currentWeek
-          : 17
+          : 1
       }}
       Roster
     </h2>

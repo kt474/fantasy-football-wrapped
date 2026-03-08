@@ -6,6 +6,8 @@ import {
   RosterType,
   LeagueDraftMetadata,
   WaiverMove,
+  PlayerRankingsType,
+  PlayerType,
 } from "../types/types";
 import { DraftGrades, DraftPick } from "../types/apiTypes";
 
@@ -143,16 +145,22 @@ export const useStore = defineStore("main", {
         item.draftGrades = payload;
       }
     },
-    addPlayerRankings(leagueId: string, payload: any) {
+    addPlayerRankings(
+      leagueId: string,
+      payload: PlayerRankingsType | Record<string, any[]>
+    ) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
-        item.playerRankings = payload;
+        item.playerRankings = payload as PlayerRankingsType;
       }
     },
-    addRosterRankings(leagueId: string, payload: any) {
+    addRosterRankings(
+      leagueId: string,
+      payload: Record<string, PlayerType[] | unknown[]>
+    ) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
-        item.rosterRankings = payload;
+        item.rosterRankings = payload as Record<string, PlayerType[]>;
       }
     },
     addYearEndReport(leagueId: string, payload: string) {
