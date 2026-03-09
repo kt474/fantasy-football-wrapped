@@ -89,9 +89,9 @@
         <p class="my-3 text-xl font-semibold">Contact</p>
         If you have questions about these Terms, contact:
         <a
-          href="mailto:kt474@cornell.edu?subject=terms of service"
+          href="mailto:kevin@ffwrapped.com?subject=terms of service"
           class="font-medium text-primary hover:underline"
-          >kt474@cornell.edu</a
+          >kevin@ffwrapped.com</a
         >. <br /><br />
         Last updated: February 28, 2026.
       </div>
