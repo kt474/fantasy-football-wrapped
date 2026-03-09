@@ -3,8 +3,10 @@ import PreviewSummary from "./PreviewSummary.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
-import { getPlayersByIdsMap, getSingleWeekProjection } from "../../api/api.ts";
-import { fakeWeeklyPreview, getWinProbability } from "../../api/helper.ts";
+import { getPlayersByIdsMap } from "../../api/api.ts";
+import { getSingleWeekProjection } from "../../api/sleeperApi.ts";
+import { getWinProbability } from "../../api/helper.ts";
+import { fakeWeeklyPreview } from "../../api/fakeLeague.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 
@@ -14,7 +16,41 @@ const props = defineProps<{
   currentWeek: number;
   isPlayoffs: boolean;
 }>();
-const playerNames: any = ref([]);
+type ProjectedStarter = {
+  name: string;
+  player_id: string;
+  position: string;
+  projection: number;
+  team: string;
+};
+type PlayerProjectionRow = {
+  id: number;
+  players: ProjectedStarter[];
+  total: number;
+};
+type StandingSnapshot = {
+  wins: number;
+  losses: number;
+  rank: number;
+};
+type ScenarioResult = {
+  team: string;
+  baseCase: StandingSnapshot;
+  bestCase: StandingSnapshot;
+  worstCase: StandingSnapshot;
+};
+type SimulationTeam = {
+  id: string;
+  name: string;
+  recordByWeek: string;
+  pointsFor: number;
+  wins: number;
+  losses: number;
+  ties: number;
+  rank?: number;
+};
+
+const playerNames = ref<PlayerProjectionRow[]>([]);
 const loading = ref(false);
 
 const previewWeek = computed(() => {
@@ -86,8 +122,11 @@ const fetchPlayerNames = async () => {
                 currentLeague.scoringType
               );
               return {
-                ...player,
-                projection: projection?.stats,
+                name: player?.name ?? "",
+                player_id: player?.player_id ?? id,
+                position: player?.position ?? "",
+                team: player?.team ?? "",
+                projection: projection?.stats ?? 0,
               };
             })
           );
@@ -112,31 +151,39 @@ const fetchPlayerNames = async () => {
     playerNames.value = result;
     loading.value = false;
   } else {
-    playerNames.value = fakeWeeklyPreview;
+    playerNames.value = fakeWeeklyPreview.map((row) => ({
+      id: row.id,
+      players: row.players.map((player) => ({
+        name: player.name ?? "",
+        player_id: player.player_id ?? "",
+        position: player.position ?? "",
+        team: player.team ?? "",
+        projection: player.projection ?? 0,
+      })),
+      total: row.total ?? 0,
+    }));
   }
 };
 
 const getStarters = (id: number) => {
-  const playerObj: any = playerNames.value.find((user: any) => user.id === id);
-  if (playerObj) {
-    return playerObj.players;
-  }
+  const playerObj = playerNames.value.find((user) => user.id === id);
+  return playerObj?.players ?? [];
 };
 
 const getTotal = (id: number) => {
-  const playerObj: any = playerNames.value.find((user: any) => user.id === id);
+  const playerObj = playerNames.value.find((user) => user.id === id);
   if (playerObj) {
     return Math.round(playerObj.total * 100) / 100;
   }
   return 0;
 };
 
-const getProjectedWinner = (user1: any, user2: any) => {
-  const playerObj1: any = playerNames.value.find(
-    (user: any) => user.id === user1.rosterId
+const getProjectedWinner = (user1: TableDataType, user2: TableDataType) => {
+  const playerObj1 = playerNames.value.find(
+    (user) => user.id === user1.rosterId
   );
-  const playerObj2: any = playerNames.value.find(
-    (user: any) => user.id === user2.rosterId
+  const playerObj2 = playerNames.value.find(
+    (user) => user.id === user2.rosterId
   );
   if (playerObj1 && playerObj2) {
     if (store.showUsernames) {
@@ -160,12 +207,8 @@ const getProjectedWinner = (user1: any, user2: any) => {
 };
 
 const getWinPercentage = (id1: number, id2: number) => {
-  const playerObj1: any = playerNames.value.find(
-    (user: any) => user.id === id1
-  );
-  const playerObj2: any = playerNames.value.find(
-    (user: any) => user.id === id2
-  );
+  const playerObj1 = playerNames.value.find((user) => user.id === id1);
+  const playerObj2 = playerNames.value.find((user) => user.id === id2);
   let result = 0;
   if (playerObj1 && playerObj2) {
     result =
@@ -340,7 +383,7 @@ const chartOptions = ref({
   },
 });
 
-const rankTeams = (teams: any[]) => {
+const rankTeams = (teams: SimulationTeam[]) => {
   return [...teams].sort((a, b) => {
     if (b.wins !== a.wins) return b.wins - a.wins;
     if (b.pointsFor !== a.pointsFor) return b.pointsFor - a.pointsFor;
@@ -348,7 +391,7 @@ const rankTeams = (teams: any[]) => {
   });
 };
 
-const assignRanks = (sortedTeams: any[]) => {
+const assignRanks = (sortedTeams: SimulationTeam[]) => {
   return sortedTeams.map((team, i) => ({
     ...team,
     rank: i + 1,
@@ -356,7 +399,7 @@ const assignRanks = (sortedTeams: any[]) => {
 };
 
 // derive record up to a given week based on recordByWeek string
-const getRecordThroughWeek = (team: any, week: number) => {
+const getRecordThroughWeek = (team: SimulationTeam, week: number) => {
   const recStr = team.recordByWeek || "";
   let wins = 0,
     losses = 0,
@@ -371,12 +414,15 @@ const getRecordThroughWeek = (team: any, week: number) => {
   return { wins, losses, ties };
 };
 
-const simulateStandings = (matchups: any[], week: number) => {
+const simulateStandings = (matchups: TableDataType[][], week: number) => {
   // Build base team objects with records THROUGH this week
-  let allTeams = matchups.flat().map((team) => {
+  const allTeams: SimulationTeam[] = matchups.flat().map((team) => {
     const rec = getRecordThroughWeek(team, week);
     return {
-      ...team,
+      id: team.id,
+      name: team.name,
+      recordByWeek: team.recordByWeek,
+      pointsFor: team.pointsFor,
       wins: rec.wins,
       losses: rec.losses,
       ties: rec.ties,
@@ -384,9 +430,9 @@ const simulateStandings = (matchups: any[], week: number) => {
   });
 
   // ---- BASE CASE ----
-  let baseSorted = assignRanks(rankTeams(allTeams));
-  let results: any = {};
-  for (let team of baseSorted) {
+  const baseSorted = assignRanks(rankTeams(allTeams));
+  const results: Record<string, ScenarioResult> = {};
+  for (const team of baseSorted) {
     results[team.id] = {
       team: team.name,
       baseCase: { wins: team.wins, losses: team.losses, rank: team.rank },
@@ -398,19 +444,21 @@ const simulateStandings = (matchups: any[], week: number) => {
   // ---- PER MATCHUP SCENARIOS ----
   matchups.forEach(([teamA, teamB]) => {
     // Note: make new arrays from base state each time
-    let teamsAWin = allTeams.map((t) => ({ ...t }));
-    let a = teamsAWin.find((t) => t.id === teamA.id);
-    let b = teamsAWin.find((t) => t.id === teamB.id);
-    a.wins++;
-    b.losses++;
-    let rankedAWin = assignRanks(rankTeams(teamsAWin));
+    const teamsAWin = allTeams.map((t) => ({ ...t }));
+    const a = teamsAWin.find((t) => t.id === teamA.id);
+    const b = teamsAWin.find((t) => t.id === teamB.id);
+    if (!a || !b) return;
+    a.wins += 1;
+    b.losses += 1;
+    const rankedAWin = assignRanks(rankTeams(teamsAWin));
 
-    let teamsBWin = allTeams.map((t) => ({ ...t }));
-    let a2 = teamsBWin.find((t) => t.id === teamA.id);
-    let b2 = teamsBWin.find((t) => t.id === teamB.id);
-    b2.wins++;
-    a2.losses++;
-    let rankedBWin = assignRanks(rankTeams(teamsBWin));
+    const teamsBWin = allTeams.map((t) => ({ ...t }));
+    const a2 = teamsBWin.find((t) => t.id === teamA.id);
+    const b2 = teamsBWin.find((t) => t.id === teamB.id);
+    if (!a2 || !b2) return;
+    b2.wins += 1;
+    a2.losses += 1;
+    const rankedBWin = assignRanks(rankTeams(teamsBWin));
 
     // Update best/worst results
     [...rankedAWin, ...rankedBWin].forEach((scenarioTeam) => {
@@ -446,7 +494,8 @@ const getOrdinalSuffix = (number: number) => {
   return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
 };
 
-const generateString = (recordObj: any) => {
+const generateString = (recordObj?: ScenarioResult) => {
+  if (!recordObj) return "Placement Range: N/A";
   const bestCase = getOrdinalSuffix(recordObj.bestCase.rank);
   const worstCase = getOrdinalSuffix(recordObj.worstCase.rank);
   return `Placement Range: ${bestCase} - ${worstCase}`;

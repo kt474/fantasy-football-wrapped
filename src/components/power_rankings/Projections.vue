@@ -3,15 +3,23 @@ import intersection from "lodash/intersection";
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { RosterType, LeagueInfoType } from "../../types/types";
-import { fakeProjectionData } from "../../api/helper";
-import { getProjections } from "../../api/api";
+import { fakeProjectionData } from "../../api/fakeLeague";
+import { getProjections } from "../../api/sleeperApi";
 import HeatMap from "./HeatMap.vue";
 import Card from "../ui/card/Card.vue";
 
 const store = useStore();
 const loading = ref(false);
+type ProjectionByPosition = { projection: number; position: string };
+type FormattedProjectionRoster = {
+  name: string;
+  username?: string;
+  data: ProjectionByPosition[];
+  total: number;
+};
+
 const categories = computed(() => {
-  return formattedData.value.map((user: any) =>
+  return formattedData.value.map((user) =>
     store.showUsernames
       ? user.username
         ? user.username
@@ -45,10 +53,10 @@ const getData = async () => {
         : 0;
 
   await Promise.all(
-    currentLeague.rosters.map(async (roster: any) => {
-      const singleRoster: any[] = [];
+    currentLeague.rosters.map(async (roster: RosterType) => {
+      const singleRoster: ProjectionByPosition[] = [];
       if (!roster.players) return [];
-      const projectionPromises = roster.players.map((player: any) => {
+      const projectionPromises = roster.players.map((player: string) => {
         return getProjections(
           player,
           currentLeague.season,
@@ -77,7 +85,7 @@ const formattedData = computed(() => {
     store.leagueInfo.length == 0 ||
     !store.leagueInfo[store.currentLeagueIndex]
   ) {
-    return fakeProjectionData;
+    return fakeProjectionData as FormattedProjectionRoster[];
   }
   const topPositions: string[] = ["RB", "WR"];
   const otherPositions = intersection(
@@ -98,25 +106,29 @@ const formattedData = computed(() => {
       user.username,
     ])
   );
-  const mappedData: any[] = [];
+  const mappedData: Array<{
+    name: string;
+    username?: string;
+    data: ProjectionByPosition[];
+  }> = [];
   store.leagueInfo[store.currentLeagueIndex].rosters.forEach(
     (roster: RosterType) => {
       mappedData.push({
-        name: nameMapping.get(roster.id),
+        name: nameMapping.get(roster.id) ?? "",
         username: userNameMapping.get(roster.id),
-        data: roster.projections,
+        data: roster.projections ?? [],
       });
     }
   );
   const result = mappedData.map(
-    (roster: { name: string; data: any[]; username: string }) => {
+    (roster) => {
       const filteredData = roster.data ? roster.data : [];
 
       const groupedAndSortedTopPositions = topPositions.reduce(
-        (acc: any, position) => {
+        (acc: Record<string, ProjectionByPosition[]>, position) => {
           const sortedByProjection = filteredData
-            .filter((item: any) => item.position === position)
-            .sort((a: any, b: any) => b.projection - a.projection);
+            .filter((item) => item.position === position)
+            .sort((a, b) => b.projection - a.projection);
 
           acc[position] = sortedByProjection.slice(0, 3);
 
@@ -126,10 +138,10 @@ const formattedData = computed(() => {
       );
 
       const highestOtherPositions = otherPositions.reduce(
-        (acc: any, position) => {
-          const highest: number = filteredData
-            .filter((item: any) => item.position === position)
-            .sort((a: any, b: any) => b.projection - a.projection)[0];
+        (acc: ProjectionByPosition[], position) => {
+          const highest = filteredData
+            .filter((item) => item.position === position)
+            .sort((a, b) => b.projection - a.projection)[0];
 
           if (highest) {
             acc.push(highest);
@@ -145,14 +157,14 @@ const formattedData = computed(() => {
       // Total top 3 RBs and WRs
       let rbTotal = 0;
       let wrTotal = 0;
-      groupedAndSortedTopPositions["RB"].forEach(
-        (player: { projection: number; position: number }) => {
+      (groupedAndSortedTopPositions["RB"] ?? []).forEach(
+        (player) => {
           rbTotal += player.projection;
         }
       );
 
-      groupedAndSortedTopPositions["WR"].forEach(
-        (player: { projection: number; position: number }) => {
+      (groupedAndSortedTopPositions["WR"] ?? []).forEach(
+        (player) => {
           wrTotal += player.projection;
         }
       );
@@ -183,8 +195,8 @@ const seriesData = computed(() => {
   let def: number[] = [];
   let k: number[] = [];
 
-  formattedData.value.forEach((roster: any) => {
-    roster.data.forEach((player: any) => {
+  formattedData.value.forEach((roster) => {
+    roster.data.forEach((player) => {
       if (player.position === "RB") {
         rb.push(player.projection);
       } else if (player.position === "WR") {

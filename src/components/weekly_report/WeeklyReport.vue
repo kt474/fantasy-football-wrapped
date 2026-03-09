@@ -25,7 +25,7 @@ import {
   fakeTopPerformers,
   fakeBottomPerformers,
   fakeBenchPerformers,
-} from "../../api/helper.ts";
+} from "../../api/fakeLeague.ts";
 import WeeklyPreview from "./WeeklyPreview.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
@@ -51,6 +51,67 @@ const fetchingPlayers = ref(false);
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("analytical");
 const rawPremiumWeeklyReport = ref<string>("");
+
+interface PerformerGroup {
+  playerPoints: number[];
+  playerNames: Player[];
+  user: string;
+}
+
+interface PerformerEntry {
+  player: Player;
+  points: number;
+  user: string;
+}
+
+type PlayoffReportRow = Record<string, unknown> & {
+  name: string;
+  matchupNumber: number | null;
+  winner: boolean;
+  playerPoints: number[];
+  playerNames: string[];
+  pointsScored: number;
+  inLosersBracket: boolean;
+  inWinnersBracket: boolean;
+};
+
+type RegularSeasonReportRow = Record<string, unknown> & {
+  name: string;
+  matchupNumber: number | null;
+  playerPoints: number[];
+  pointsScored: number;
+  winner: boolean;
+  playerNames: string[];
+  currentRecord: string;
+  currentRank: number;
+};
+
+type PlayoffPremiumReportRow = Record<string, unknown> & {
+  name: string;
+  matchupNumber: number | null;
+  winner: boolean;
+  starterPlayerPoints: number[];
+  starterPlayerNames: string[];
+  benchPlayerPoints: number[];
+  benchPlayerNames: string[];
+  pointsScored: number;
+  inLosersBracket: boolean;
+  inWinnersBracket: boolean;
+};
+
+type RegularSeasonPremiumReportRow = Record<string, unknown> & {
+  name: string;
+  matchupNumber: number | null;
+  playerPoints: number[];
+  pointsScored: number;
+  winner: boolean;
+  starterPlayerPoints: number[];
+  starterPlayerNames: string[];
+  benchPlayerPoints: number[];
+  benchPlayerNames: string[];
+  currentRecord: string;
+  currentRank: number;
+};
 
 const md = new MarkdownIt({
   html: false,
@@ -144,16 +205,15 @@ const fetchPlayerNames = async () => {
     const benchPlayerIds = props.tableData
       .map((user) => [user.benchPlayers[currentWeek.value - 1]])
       .flat();
-    let benchPlayerLookupMap = new Map();
+    let benchPlayerLookupMap = new Map<string, Player>();
     if (benchPlayerIds.length > 0) {
       benchPlayerLookupMap = await getPlayersByIdsMap(benchPlayerIds);
     }
-    const benchResult: any = props.tableData.map((user: any) => {
-      const benchIds = user.benchPlayers[currentWeek.value - 1];
-      const benchNames = benchIds?.map((id: string) =>
-        benchPlayerLookupMap.get(id)
-      );
-      return benchNames;
+    const benchResult: Player[][] = props.tableData.map((user) => {
+      const benchIds = user.benchPlayers[currentWeek.value - 1] ?? [];
+      return benchIds
+        .map((id: string) => benchPlayerLookupMap.get(id))
+        .filter((player): player is Player => player !== undefined);
     });
     benchPlayerNames.value = benchResult;
     fetchingPlayers.value = false;
@@ -307,7 +367,7 @@ const bestPerformers = computed(() => {
     playerNames.value.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
-    const result: any[] = [];
+    const result: PerformerGroup[] = [];
     props.tableData.forEach((user: TableDataType, index: number) => {
       if (user.matchups[currentWeek.value - 1]) {
         const week: number = currentWeek.value - 1;
@@ -320,9 +380,9 @@ const bestPerformers = computed(() => {
     });
     return result
       .flatMap((group) =>
-        group.playerNames.map((player: string, idx: number) => ({
+        group.playerNames.map((player, idx: number): PerformerEntry => ({
           player,
-          points: group.playerPoints[idx],
+          points: group.playerPoints[idx] ?? 0,
           user: group.user,
         }))
       )
@@ -339,7 +399,7 @@ const worstPerformers = computed(() => {
     playerNames.value.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
-    const result: any[] = [];
+    const result: PerformerGroup[] = [];
     props.tableData.forEach((user: TableDataType, index: number) => {
       if (user.matchups[currentWeek.value - 1]) {
         const week: number = currentWeek.value - 1;
@@ -352,9 +412,9 @@ const worstPerformers = computed(() => {
     });
     return result
       .flatMap((group) =>
-        group.playerNames.map((player: string, idx: number) => ({
+        group.playerNames.map((player, idx: number): PerformerEntry => ({
           player,
-          points: group.playerPoints[idx],
+          points: group.playerPoints[idx] ?? 0,
           user: group.user,
         }))
       )
@@ -372,7 +432,7 @@ const benchPerformers = computed(() => {
     benchPlayerNames.value.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
-    const result: any[] = [];
+    const result: PerformerGroup[] = [];
     props.tableData.forEach((user: TableDataType, index: number) => {
       if (user.matchups[currentWeek.value - 1]) {
         const week: number = currentWeek.value - 1;
@@ -385,9 +445,9 @@ const benchPerformers = computed(() => {
     });
     return result
       .flatMap((group) =>
-        group.playerNames?.map((player: string, idx: number) => ({
+        group.playerNames.map((player, idx: number): PerformerEntry => ({
           player,
-          points: group.playerPoints[idx],
+          points: group.playerPoints[idx] ?? 0,
           user: group.user,
         }))
       )
@@ -400,7 +460,7 @@ const benchPerformers = computed(() => {
 });
 
 const reportPrompt = computed(() => {
-  const result: any[] = [];
+  const result: Array<PlayoffReportRow | RegularSeasonReportRow> = [];
   if (isPlayoffs.value) {
     props.tableData.forEach((user: TableDataType, index: number) => {
       if (user.matchups[currentWeek.value - 1]) {
@@ -411,7 +471,7 @@ const reportPrompt = computed(() => {
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
           playerPoints: user.starterPoints[week].slice(0, 7),
-          playerNames: playerNames.value[index]
+          playerNames: (playerNames.value[index] ?? [])
             .map((player) =>
               player.name ? player.name : `${player.team} Defense`
             )
@@ -451,7 +511,8 @@ const reportPrompt = computed(() => {
 });
 
 const premiumReportPrompt = computed(() => {
-  const result: any[] = [];
+  const result: Array<PlayoffPremiumReportRow | RegularSeasonPremiumReportRow> =
+    [];
   if (isPlayoffs.value) {
     props.tableData.forEach((user: TableDataType, index: number) => {
       if (user.matchups[currentWeek.value - 1]) {
@@ -462,12 +523,13 @@ const premiumReportPrompt = computed(() => {
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
           starterPlayerPoints: user.starterPoints[week],
-          starterPlayerNames: playerNames.value[index].map((player) =>
+          starterPlayerNames: (playerNames.value[index] ?? []).map((player) =>
             player.name ? player.name : `${player.team} Defense`
           ),
           benchPlayerPoints: user.benchPoints[week],
-          benchPlayerNames: benchPlayerNames.value[index].map((player) =>
-            player.name ? player.name : `${player.team} Defense`
+          benchPlayerNames: (benchPlayerNames.value[index] ?? []).map(
+            (player) =>
+              player.name ? player.name : `${player.team} Defense`
           ),
           pointsScored: user.points[week],
           inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
@@ -487,12 +549,13 @@ const premiumReportPrompt = computed(() => {
           winner:
             getMatchupWinner(user.matchups[week], week) === user.points[week],
           starterPlayerPoints: user.starterPoints[week],
-          starterPlayerNames: playerNames.value[index].map((player) =>
+          starterPlayerNames: (playerNames.value[index] ?? []).map((player) =>
             player.name ? player.name : `${player.team} Defense`
           ),
           benchPlayerPoints: user.benchPoints[week],
-          benchPlayerNames: benchPlayerNames.value[index].map((player) =>
-            player.name ? player.name : `${player.team} Defense`
+          benchPlayerNames: (benchPlayerNames.value[index] ?? []).map(
+            (player) =>
+              player.name ? player.name : `${player.team} Defense`
           ),
           currentRecord: `${user.wins}-${user.losses}`,
           currentRank: user.regularSeasonRank,

@@ -4,8 +4,17 @@ import { useStore } from "../../store/store";
 import { Card } from "../ui/card";
 
 const store = useStore();
+
+type ProjectionCell = { position: string; projection: number };
+type FormattedRoster = {
+  name: string;
+  username?: string;
+  data: ProjectionCell[];
+};
+type PositionRanking = { name: string; projection: number };
+
 const props = defineProps<{
-  formattedData: any[];
+  formattedData: FormattedRoster[];
 }>();
 
 watch(
@@ -26,9 +35,11 @@ const totalRosters = computed(() => {
 });
 
 const rankingMap = computed(() => {
-  if (props.formattedData.length === 0) return [];
-  const groupByPosition = props.formattedData.reduce((acc, player) => {
-    player.data.forEach((item: any) => {
+  if (props.formattedData.length === 0) return {};
+  const groupByPosition = props.formattedData.reduce<
+    Record<string, PositionRanking[]>
+  >((acc, player) => {
+    player.data.forEach((item) => {
       const position = item.position;
       if (!acc[position]) {
         acc[position] = [];
@@ -43,25 +54,24 @@ const rankingMap = computed(() => {
 
   Object.keys(groupByPosition).forEach((position) => {
     groupByPosition[position].sort(
-      (a: any, b: any) => b.projection - a.projection
+      (a, b) => b.projection - a.projection
     );
   });
   return groupByPosition;
 });
 
 const seriesData = computed(() => {
-  const result: any[] = [];
+  const result: Array<{ data: Array<{ x: string; y: number }>; name: string }> =
+    [];
   if (props.formattedData.length > 0) {
-    props.formattedData.forEach((roster: any) => {
-      const data: any[] = [];
-      roster.data.forEach((player: any) => {
+    props.formattedData.forEach((roster) => {
+      const data: Array<{ x: string; y: number }> = [];
+      roster.data.forEach((player) => {
         if (player.projection > 0) {
+          const positionRankings = rankingMap.value[player.position] ?? [];
           data.push({
             x: player.position,
-            y:
-              rankingMap.value[player.position].findIndex(
-                (user: any) => user.name === roster.name
-              ) + 1,
+            y: positionRankings.findIndex((user) => user.name === roster.name) + 1,
           });
           // if a roster doesn't have any players in a position
         } else {
@@ -73,7 +83,7 @@ const seriesData = computed(() => {
       });
       result.push({
         data: data,
-        name: store.showUsernames ? roster.username : roster.name,
+        name: store.showUsernames ? roster.username ?? roster.name : roster.name,
       });
     });
   }

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { fakeDraftData } from "../../api/draft.ts";
 import { ref, onMounted, computed, watch } from "vue";
-import { getDraftPicks, getDraftMetadata } from "../../api/api";
+import { getDraftPicks, getDraftMetadata } from "../../api/sleeperApi";
 import { LeagueInfoType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
-import { fakeUsers } from "../../api/helper.ts";
+import { fakeUsers } from "../../api/fakeLeague.ts";
 import DraftGrades from "./DraftGrades.vue";
 import { DraftPick } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
@@ -22,7 +22,15 @@ import Label from "../ui/label/Label.vue";
 const store = useStore();
 const data = ref<DraftPick[]>([]);
 const loading = ref(false);
-const draftOrder: any = ref([]);
+type DraftOrderUser = {
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  avatarImg: string;
+  placement: number;
+};
+const draftOrder = ref<DraftOrderUser[]>([]);
 const draftType = ref<string>("snake");
 const roundReversal = ref<number>(0);
 const sortOrder = ref("Draft Order");
@@ -45,22 +53,27 @@ const sortedData = computed(() => {
 
 const getDraftOrder = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  const metadata: any = await getDraftMetadata(currentLeague.draftId);
+  const metadata = (await getDraftMetadata(currentLeague.draftId)) as {
+    slot_to_roster_id?: Record<string, number | null>;
+    settings?: { reversal_round?: number };
+    type?: string;
+    metadata?: { scoring_type?: string };
+  };
   // sleeper api draft_order sometimes doesn't include all teams?
   // using slot_to_roster_id instead
-  const draftOrderData = Object.values(metadata["slot_to_roster_id"]).filter(
+  const draftOrderData = Object.values(metadata.slot_to_roster_id ?? {}).filter(
     (item) => item != null
   );
   draftOrder.value = draftOrderData.map((rosterId) => {
     const rosterObj = currentLeague.rosters.find(
       (roster) => roster.rosterId === rosterId
     );
-    if (rosterObj) return getTeamName(rosterObj.id);
-  });
+    return rosterObj ? getTeamName(rosterObj.id) : undefined;
+  }).filter((user): user is DraftOrderUser => Boolean(user));
 
-  roundReversal.value = metadata["settings"]["reversal_round"];
-  draftType.value = metadata["type"];
-  scoringType.value = metadata["metadata"]["scoring_type"];
+  roundReversal.value = metadata.settings?.reversal_round ?? 0;
+  draftType.value = metadata.type ?? "snake";
+  scoringType.value = metadata.metadata?.scoring_type ?? "";
 
   store.addDraftMetadata(currentLeague.leagueId, {
     order: draftOrder.value,
@@ -81,7 +94,7 @@ const draftSize = computed(() => {
 });
 
 const teamRanks = computed(() => {
-  return data.value.reduce((acc: any, pick: any) => {
+  return data.value.reduce<Record<string, number>>((acc, pick) => {
     acc[pick.userId] = (acc[pick.userId] || 0) + parseFloat(pick.pickRank);
     return acc;
   }, {});
@@ -112,7 +125,7 @@ onMounted(async () => {
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
     data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks ?? [];
     draftOrder.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"] ?? [];
     roundReversal.value =
       store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
         "roundReversal"
@@ -122,9 +135,9 @@ onMounted(async () => {
       "snake";
   } else if (store.leagueInfo.length == 0) {
     data.value = fakeDraftData;
-    draftOrder.value = data.value.slice(0, draftSize.value).map((pick: any) => {
+    draftOrder.value = data.value.slice(0, draftSize.value).map((pick) => {
       return getTeamName(pick.userId);
-    });
+    }) as DraftOrderUser[];
   }
 });
 
@@ -144,7 +157,7 @@ watch(
     }
     data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks ?? [];
     draftOrder.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"];
+      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"] ?? [];
     roundReversal.value =
       store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
         "roundReversal"
@@ -165,16 +178,19 @@ const getData = async () => {
     currentLeague.draftMetadata?.draftType
   );
   if (draftType.value === "snake") {
-    const roundGroups = draftPicks.reduce((acc: any, pick) => {
+    const roundGroups = draftPicks.reduce<Record<number, DraftPick[]>>(
+      (acc, pick) => {
       if (!acc[pick.round]) {
         acc[pick.round] = [];
       }
       acc[pick.round].push(pick);
       return acc;
-    }, {});
+      },
+      {}
+    );
 
     data.value = Object.entries(roundGroups)
-      .map(([round, picks]: [any, any]) => {
+      .map(([round, picks]) => {
         const roundNum = parseInt(round);
         if (roundReversal.value === 3) {
           // For round 1: never reverse
@@ -210,14 +226,28 @@ const getTeamName = (userId: string) => {
       (user) => user.id === userId
     );
     if (userObject) {
-      return userObject;
+      return {
+        ...userObject,
+        placement: userObject.placement ?? 0,
+      } as DraftOrderUser;
     }
   } else {
     const userObject = fakeUsers.find((user) => user.id === userId);
     if (userObject) {
-      return userObject;
+      return {
+        ...userObject,
+        placement: 0,
+      } as DraftOrderUser;
     }
   }
+  return {
+    id: userId,
+    name: "Unknown Team",
+    username: "Unknown Team",
+    avatar: "",
+    avatarImg: "",
+    placement: 0,
+  };
 };
 
 const getBgColor = (position: string) => {

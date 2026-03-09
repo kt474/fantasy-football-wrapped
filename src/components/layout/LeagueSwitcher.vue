@@ -83,7 +83,7 @@ const removeHistoryLeagues = () => {
   }
 };
 const removeLeague = () => {
-  if (localStorage.leagueInfo) {
+  if (localStorage.getItem("leagueInfo")) {
     if (currentLeague.value.previousLeagues) {
       currentLeague.value.previousLeagues.forEach((league: LeagueInfoType) => {
         localStorage.removeItem(league.leagueId);
@@ -107,13 +107,14 @@ const removeLeague = () => {
         query: {},
       });
     }
-    if (localStorage.originalData) {
-      const currentData = JSON.parse(localStorage.originalData);
+    const originalData = localStorage.getItem("originalData");
+    if (originalData) {
+      const currentData = JSON.parse(originalData);
       delete currentData[currentLeagueId.value];
       if (Object.keys(currentData).length == 0) {
         localStorage.removeItem("originalData");
       } else {
-        localStorage.originalData = JSON.stringify(currentData);
+        localStorage.setItem("originalData", JSON.stringify(currentData));
       }
     }
   }
@@ -126,10 +127,11 @@ const refreshLeague = async () => {
       (item) => item.leagueId !== currentLeagueId.value
     );
   });
-  if (localStorage.originalData) {
-    const currentData = JSON.parse(localStorage.originalData);
+  const originalData = localStorage.getItem("originalData");
+  if (originalData) {
+    const currentData = JSON.parse(originalData);
     delete currentData[currentLeagueId.value];
-    localStorage.originalData = JSON.stringify(currentData);
+    localStorage.setItem("originalData", JSON.stringify(currentData));
   }
   store.updateLoadingLeague(currentLeague.value?.name);
   store.updateLeagueInfo(await getData(currentLeagueId.value));

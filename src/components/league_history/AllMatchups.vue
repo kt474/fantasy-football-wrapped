@@ -1,20 +1,27 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useStore } from "../../store/store";
-import { UserType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 
 const store = useStore();
+
+interface MatchupTableRow {
+  username: string;
+  name: string;
+  matchups: (number | null)[];
+  pointsArr: number[];
+}
+
 const props = defineProps<{
-  tableData: any[];
+  tableData: MatchupTableRow[];
 }>();
 
 interface MatchupDataType {
   username: string;
-  record: Record;
+  record: MatchupRecord;
 }
 
-interface Record {
+interface MatchupRecord {
   losses: number;
   wins: number;
 }
@@ -22,8 +29,8 @@ interface Record {
 const matchupData = computed(() => {
   const result: MatchupDataType[][] = [];
   props.tableData.forEach((user) => {
-    const currentUser: any = [];
-    user.matchups.forEach((matchupId: number, index: number) => {
+    const currentUser: MatchupDataType[] = [];
+    user.matchups.forEach((matchupId: number | null, index: number) => {
       if (matchupId !== null) {
         const opponentList = props.tableData.filter(
           (opp) => opp.matchups[index] == matchupId
@@ -36,11 +43,10 @@ const matchupData = computed(() => {
           opponent.pointsArr[index] !== 0 &&
           user.pointsArr[index] !== 0
         ) {
-          if (
-            !currentUser
-              .map((opp: any) => opp.username)
-              .includes(opponent.username)
-          ) {
+          const existingOpponent = currentUser.find(
+            (opp) => opp.username === opponent.username
+          );
+          if (!existingOpponent) {
             if (user.pointsArr[index] > opponent.pointsArr[index]) {
               currentUser.push({
                 username: opponent.username,
@@ -54,13 +60,9 @@ const matchupData = computed(() => {
             }
           } else {
             if (user.pointsArr[index] > opponent.pointsArr[index]) {
-              currentUser.find((opp: any) => opp.username == opponent.username)[
-                "record"
-              ].wins += 1;
+              existingOpponent.record.wins += 1;
             } else {
-              currentUser.find((opp: any) => opp.username == opponent.username)[
-                "record"
-              ].losses += 1;
+              existingOpponent.record.losses += 1;
             }
           }
         }
@@ -71,7 +73,7 @@ const matchupData = computed(() => {
   return result;
 });
 
-const extractRecord = (user: MatchupDataType[], opponent: UserType) => {
+const extractRecord = (user: MatchupDataType[], opponent: MatchupTableRow) => {
   const opp = user.find((opp) => opp.username == opponent.username);
   // This is backwards but the chart is read horizontally
   return opp ? `${opp.record.losses} - ${opp.record.wins}` : "0 - 0";

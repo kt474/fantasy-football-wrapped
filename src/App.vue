@@ -66,7 +66,7 @@ watch(
       localStorage.removeItem("currentLeagueId");
       localStorage.removeItem("leagueInfo");
     } else {
-      localStorage.currentLeagueId = store.currentLeagueId;
+      localStorage.setItem("currentLeagueId", store.currentLeagueId);
       if (
         store.currentTab === "Wrapped" &&
         store.leagueInfo[store.currentLeagueIndex]?.season !== "2025"

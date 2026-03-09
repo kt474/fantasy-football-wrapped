@@ -1,4 +1,4 @@
-import { DraftPick, DraftGrades } from "./apiTypes";
+import type { Bracket, DraftPick, DraftGrades, WeeklyWaiver } from "./apiTypes";
 
 export type LeagueInfoType = {
   name: string;
@@ -8,22 +8,22 @@ export type LeagueInfoType = {
   season: string;
   seasonType: string;
   leagueId: string;
-  leagueWinner: string;
+  leagueWinner: string | null;
   legacyWinner?: number;
   lastUpdated: number;
-  previousLeagueId: string;
+  previousLeagueId: string | null;
   lastScoredWeek: number;
-  winnersBracket: Record<string, any>[];
-  losersBracket: Record<string, any>[];
-  users: any[];
-  rosters: any[];
-  weeklyPoints: any[];
-  transactions: Record<string, any>;
-  trades: any[];
-  waivers: any[];
+  winnersBracket: Bracket[];
+  losersBracket: Bracket[];
+  users: UserType[];
+  rosters: RosterType[];
+  weeklyPoints: PointsType[];
+  transactions: Record<string, number>;
+  trades: WeeklyWaiver[];
+  waivers: WeeklyWaiver[];
   waiverMoves?: WaiverMove[];
-  tradeNames?: any[];
-  previousLeagues: any[];
+  tradeNames?: TradeNameRow[];
+  previousLeagues: LeagueInfoType[];
   status: string;
   currentWeek: number;
   scoringType: number;
@@ -91,9 +91,30 @@ export type UserType = {
   avatar: string;
   avatarImg?: string;
   name: string;
-  username?: string;
+  username: string;
   placement?: number;
 };
+
+export interface TradeNameRow {
+  team1: {
+    user: { name: string; username?: string; avatarImg?: string };
+    players: string[];
+    playerIds: string[];
+    draftPicks: { owner_id: number; season: string; round: number }[];
+    waiverBudget: { receiver: number; amount: number }[];
+    week?: number;
+    value: Array<number | null>;
+  };
+  team2: {
+    user: { name: string; username?: string; avatarImg?: string };
+    players: string[];
+    playerIds: string[];
+    draftPicks: { owner_id: number; season: string; round: number }[];
+    waiverBudget: { receiver: number; amount: number }[];
+    week?: number;
+    value: Array<number | null>;
+  };
+}
 
 export type TableDataType = {
   name: string;
@@ -122,8 +143,8 @@ export type TableDataType = {
   players: string[];
   starters: string[][];
   starterPoints: number[][];
-  benchPlayers: string[];
-  benchPoints: number[];
+  benchPlayers: string[][];
+  benchPoints: number[][];
 };
 
 export type PowerRankingEntry = {
@@ -179,12 +200,24 @@ export interface Order {
 
 export interface PlayoffProjection {
   username?: string;
-  score?: number;
-  currentWins?: number;
-  originalWins?: number;
-  playoffPercentage?: number;
+  score: number;
+  currentWins: number;
+  originalWins: number;
+  playoffPercentage: number;
   name: string;
   id: string;
   placement: number[];
   projectedWinsTotal: number;
+}
+
+export interface UserLeagueListItem {
+  league_id: string;
+  name: string;
+  season: string;
+  total_rosters: number;
+  settings: {
+    type: number;
+    [key: string]: number | string | boolean | null | undefined;
+  };
+  sport?: string;
 }

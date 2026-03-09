@@ -22,7 +22,9 @@ import WrappedSlide from "./WrappedSlide.vue";
         ></div>
       </div>
       <div class="">
-        <h1 class="text-5xl font-bold md:text-8xl text-neutral-100">2025</h1>
+        <h1 class="text-5xl font-bold md:text-8xl text-neutral-100">
+          Your league's
+        </h1>
         <h1
           class="mb-8 text-6xl font-bold text-transparent md:text-9xl bg-gradient-to-r from-green-400 to-lime-600 bg-clip-text"
         >
@@ -34,6 +36,9 @@ import WrappedSlide from "./WrappedSlide.vue";
         >
           Come back after Week 17 and enter your league ID to see your league's
           <span class="font-bold text-gray-200">Wrapped</span>!
+        </p>
+        <p class="mt-4 text-sm text-gray-400">
+          Only supported for 2025 and 2026 season leagues.
         </p>
       </div>
     </WrappedSlide>

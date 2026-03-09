@@ -3,17 +3,19 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useStore } from "../../store/store";
 import {
   getPlayerNews,
-  getStats,
   getPlayersByIdsMap,
+} from "../../api/api";
+import {
+  getStats,
   getSingleWeekProjection,
   getSingleWeekStats,
-} from "../../api/api";
+} from "../../api/sleeperApi";
 import { TableDataType } from "../../types/types";
 import difference from "lodash/difference";
-import { fakePosts, fakeStartSit, fakeUsers } from "../../api/helper";
+import { fakePosts, fakeStartSit, fakeUsers } from "../../api/fakeLeague";
 import max from "lodash/max";
 import min from "lodash/min";
-import { Player } from "../../types/apiTypes";
+import { Player, SingleWeekProjection, WeeklyStats } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 import {
   Select,
@@ -26,16 +28,54 @@ import Separator from "../ui/separator/Separator.vue";
 import Button from "../ui/button/Button.vue";
 import Label from "../ui/label/Label.vue";
 
-const data: any = ref([]);
-const playerNames: any = ref([]);
+type NewsPost = {
+  author: {
+    avatar: string;
+    displayName: string;
+    handle: string;
+  };
+  record: {
+    createdAt: string;
+    text: string;
+  };
+  embed?: {
+    external?: {
+      uri: string;
+      thumb?: string;
+      title: string;
+      description: string;
+    };
+  };
+};
+
+type StartSitPlayer = {
+  name?: string;
+  player_id: string;
+  position?: string;
+  team?: string;
+  projection: SingleWeekProjection;
+  stats: {
+    points: (number | string)[];
+    ranks: (number | string)[];
+    stats: Array<Record<string, number | string | undefined>>;
+  };
+};
+
+type StartSitRoster = {
+  id: number;
+  players: StartSitPlayer[];
+};
+
+const data = ref<NewsPost[]>([]);
+const playerNames = ref<StartSitRoster[]>([]);
 const loading = ref<boolean>(false);
-const expanded = ref<Record<number, boolean>>({});
+const expanded = ref<Record<string, boolean>>({});
 const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
-const toggle = (id: number) => {
+const toggle = (id: string) => {
   expanded.value[id] = !expanded.value[id];
 };
 
@@ -66,12 +106,10 @@ const starterSize = computed(() => {
 const currentManager = ref(managers.value[0]);
 
 const currentRoster = computed(() => {
-  if (playerNames.value) {
-    return playerNames.value.find(
-      (team: any) => team.id === currentManager.value.rosterId
-    );
-  }
-  return [];
+  return (
+    playerNames.value.find((team) => team.id === currentManager.value.rosterId) ??
+    null
+  );
 });
 
 const getData = async () => {
@@ -83,10 +121,12 @@ const getData = async () => {
     }
     const currentPlayers =
       currentLeague.rosterRankings?.[currentRosterId].map(
-        (player: any) => `${player.firstName} ${player.lastName}`
+        (player) => `${player.firstName} ${player.lastName}`
       ) ?? [];
     const playerNews = await getPlayerNews(currentPlayers);
-    data.value = playerNews.map((post: any) => post.post);
+    data.value = playerNews
+      .map((post) => post.post as NewsPost)
+      .filter(Boolean);
   } else if (store.leagueInfo.length === 0) {
     data.value = fakePosts;
   }
@@ -108,19 +148,28 @@ const getRosterRankings = async () => {
     )
   );
 
-  const allPlayersWithRoster = allPlayers.map((stats, idx) => ({
-    ...stats,
-    rosterId: rosterPlayers[idx].rosterId,
-  }));
+  const allPlayersWithRoster = allPlayers.map((stats, idx) =>
+    stats
+      ? ({
+          ...stats,
+          rosterId: rosterPlayers[idx].rosterId,
+        } as WeeklyStats & { rosterId: number })
+      : null
+  );
 
-  const filtered = allPlayersWithRoster.filter((item) => item !== null);
+  const filtered = allPlayersWithRoster.filter(
+    (item): item is WeeklyStats & { rosterId: number } => item !== null
+  );
 
-  function groupByRosterId(arr: any[]) {
-    return arr.reduce((acc, item) => {
+  function groupByRosterId(arr: Array<WeeklyStats & { rosterId: number }>) {
+    return arr.reduce<Record<number, Array<WeeklyStats & { rosterId: number }>>>(
+      (acc, item) => {
       if (!acc[item.rosterId]) acc[item.rosterId] = [];
       acc[item.rosterId].push(item);
       return acc;
-    }, {});
+      },
+      {}
+    );
   }
 
   store.addRosterRankings(currentLeague.leagueId, groupByRosterId(filtered));
@@ -141,10 +190,13 @@ const fetchPlayerNames = async () => {
         const week = currentLeague.currentWeek
           ? currentLeague.currentWeek
           : currentLeague.lastScoredWeek;
-        const starterIds = [
-          ...(user.starters[week - 1] ?? []),
-          ...difference(user.players, user.starters[week - 1]),
-        ];
+
+        const starterIds = user?.starters
+          ? [
+              ...(user?.starters[week - 1] ?? []),
+              ...difference(user.players, user.starters[week - 1]),
+            ]
+          : [];
         // For each starter, fetch player and projection
         if (starterIds) {
           const starterNames = await Promise.all(
@@ -163,9 +215,16 @@ const fetchPlayerNames = async () => {
                 currentLeague.scoringType
               );
               return {
-                ...player,
+                name: player?.name,
+                player_id: player?.player_id ?? id,
+                position: player?.position,
+                team: player?.team,
                 projection,
-                stats,
+                stats: {
+                  points: stats.points as (number | string)[],
+                  ranks: stats.ranks as (number | string)[],
+                  stats: stats.stats as Array<Record<string, number | string | undefined>>,
+                },
               };
             })
           );
@@ -183,7 +242,7 @@ const fetchPlayerNames = async () => {
     );
     playerNames.value = result;
   } else {
-    playerNames.value = fakeStartSit;
+    playerNames.value = fakeStartSit as StartSitRoster[];
   }
 };
 
@@ -198,15 +257,17 @@ const formatDate = (dateStr: string) => {
   return date.toLocaleDateString();
 };
 
-const getValueColor = (value: number) => {
-  if (value <= 12) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
-  if (value <= 24) return `bg-green-400 dark:bg-green-600 text-gray-50`;
-  if (value <= 36) return "bg-yellow-300 dark-bg-yellow-600 text-black";
-  if (value <= 48) return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
+const getValueColor = (value: number | string) => {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return "";
+  if (numericValue <= 12) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
+  if (numericValue <= 24) return `bg-green-400 dark:bg-green-600 text-gray-50`;
+  if (numericValue <= 36) return "bg-yellow-300 dark-bg-yellow-600 text-black";
+  if (numericValue <= 48) return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
   return `bg-red-400 dark:bg-red-600 text-gray-50`;
 };
 
-function getAverage(arr: any[]) {
+function getAverage(arr: Array<number | string | undefined>) {
   const numbers = arr
     .filter((item) => item && item !== "DNP" && item !== 999)
     .map((item) => Number(item));
@@ -222,7 +283,7 @@ function getAverage(arr: any[]) {
   return Math.round((sum * 100) / numbers.length) / 100;
 }
 
-function getMax(arr: any[]) {
+function getMax(arr: Array<number | string | undefined>) {
   const numbers = arr
     .filter((item) => item && item !== "DNP")
     .map((item) => Number(item));
@@ -234,7 +295,7 @@ function getMax(arr: any[]) {
   return max(numbers);
 }
 
-function getMin(arr: any[]) {
+function getMin(arr: Array<number | string | undefined>) {
   const numbers = arr
     .filter((item) => item && item !== "DNP")
     .map((item) => Number(item));
@@ -287,7 +348,7 @@ watch(
       {{
         store.leagueInfo[store.currentLeagueIndex]?.currentWeek
           ? store.leagueInfo[store.currentLeagueIndex]?.currentWeek
-          : 17
+          : 1
       }}
       Roster
     </h2>
@@ -548,10 +609,10 @@ watch(
                         <span class="text-muted-foreground"> Snaps: </span>
                         <span class="font-semibold"
                           >{{
-                            player.stats?.stats[index]["team_snaps"]
+                            player.stats?.stats[index]?.["team_snaps"]
                               ? (
-                                  (player.stats?.stats[index]["snaps"] /
-                                    player.stats?.stats[index]["team_snaps"]) *
+                                  (Number(player.stats?.stats[index]?.["snaps"] ?? 0) /
+                                    Number(player.stats?.stats[index]?.["team_snaps"] ?? 1)) *
                                   100
                                 ).toFixed(0)
                               : 0
@@ -592,10 +653,10 @@ watch(
                         <span class="text-muted-foreground">Snaps: </span>
                         <span class="font-semibold"
                           >{{
-                            player.stats?.stats[index]["team_snaps"]
+                            player.stats?.stats[index]?.["team_snaps"]
                               ? (
-                                  (player.stats?.stats[index]["snaps"] /
-                                    player.stats?.stats[index]["team_snaps"]) *
+                                  (Number(player.stats?.stats[index]?.["snaps"] ?? 0) /
+                                    Number(player.stats?.stats[index]?.["team_snaps"] ?? 1)) *
                                   100
                                 ).toFixed(0)
                               : 0

@@ -2,7 +2,8 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
-import { getPlayersByIdsMap, getStats } from "../../api/api.ts";
+import { getPlayersByIdsMap } from "../../api/api.ts";
+import { getStats } from "../../api/sleeperApi.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
@@ -161,8 +162,8 @@ const getWeekLineup = (team: TableDataType, weekIndex: number) => {
     Array.isArray(team.starters?.[weekIndex]) && team.starters[weekIndex]
       ? team.starters[weekIndex]
       : [];
-  const benchByWeek = Array.isArray((team.benchPlayers as any)?.[weekIndex])
-    ? ((team.benchPlayers as any)[weekIndex] as string[])
+  const benchByWeek = Array.isArray(team.benchPlayers?.[weekIndex])
+    ? team.benchPlayers[weekIndex]
     : [];
   const bench =
     benchByWeek.length > 0

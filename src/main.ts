@@ -1,21 +1,19 @@
 import { createApp, defineAsyncComponent } from "vue";
 import { createPinia } from "pinia";
 import { createRouter, createWebHistory } from "vue-router";
-// @ts-ignore
 import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import App from "./App.vue";
-// @ts-ignore
-import posthogPlugin from "../plugins/posthog";
-import ChangelogPage from "./views/Changelog.vue";
-import PrivacyPolicy from "./views/PrivacyPolicy.vue";
-import About from "./views/About.vue";
-import NotFound from "./views/404.vue";
-import Home from "./views/Home.vue";
-import Account from "./views/Account.vue";
 import { useAuthStore } from "./store/auth";
 import { useSubscriptionStore } from "./store/subscription";
-import Terms from "./views/Terms.vue";
+
+const Home = () => import("./views/Home.vue");
+const About = () => import("./views/About.vue");
+const ChangelogPage = () => import("./views/Changelog.vue");
+const PrivacyPolicy = () => import("./views/PrivacyPolicy.vue");
+const Terms = () => import("./views/Terms.vue");
+const Account = () => import("./views/Account.vue");
+const NotFound = () => import("./views/404.vue");
 
 const routes = [
   { path: "/", component: Home },

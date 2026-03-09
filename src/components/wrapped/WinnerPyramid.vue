@@ -4,8 +4,15 @@ import { useStore } from "../../store/store";
 
 const store = useStore();
 
+interface PyramidLoser {
+  id?: string | number;
+  name: string;
+  username: string;
+  avatarImg?: string;
+}
+
 const props = defineProps<{
-  losers: any[];
+  losers: PyramidLoser[];
 }>();
 
 const pyramidRows = computed(() => {
