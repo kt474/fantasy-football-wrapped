@@ -118,7 +118,6 @@ export const useAuthStore = defineStore("auth", () => {
         token,
         type: "signup",
       });
-      await newUserAlert(email);
       if (error) throw error;
       session.value = data.session;
       user.value = data.user ?? null;
@@ -157,6 +156,7 @@ export const useAuthStore = defineStore("auth", () => {
           redirectTo,
         },
       });
+      await newUserAlert("google");
       if (error) throw error;
     } finally {
       loading.value = false;
