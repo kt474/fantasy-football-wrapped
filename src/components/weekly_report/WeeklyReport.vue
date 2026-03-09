@@ -990,11 +990,13 @@ watch(() => currentWeek.value, fetchPlayerNames);
         >
           <div>
             <div class="flex">
-              <p class="mb-2 text-xl font-bold">Summary</p>
-              <TabsList class="ml-4">
-                <TabsTrigger value="Standard"> Standard </TabsTrigger>
-                <TabsTrigger value="Premium"> Premium </TabsTrigger>
-              </TabsList>
+              <div class="flex flex-wrap sm:flex-nowrap">
+                <p class="mb-2 text-xl font-bold">Summary</p>
+                <TabsList class="sm:ml-4">
+                  <TabsTrigger value="Standard"> Standard </TabsTrigger>
+                  <TabsTrigger value="Premium"> Premium </TabsTrigger>
+                </TabsList>
+              </div>
               <Button
                 @click="downloadReportImage"
                 :disabled="isGeneratingImage"
@@ -1536,7 +1538,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
       </TabsContent>
     </Tabs>
   </Card>
-  <div class="fixed top-0 -left-[200vw] pointer-events-none">
+  <div class="fixed top-0 left-[-10000px] pointer-events-none">
     <div ref="shareCardRef">
       <WeeklyShareCard
         :league-name="store.leagueInfo[store.currentLeagueIndex]?.name"
