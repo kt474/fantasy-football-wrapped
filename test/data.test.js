@@ -1,10 +1,18 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import {
-  getLeague,
+  getData,
   getPlayersByIdsMap,
-  getRosters,
-  getUsers,
+  generatePremiumReport,
 } from "../src/api/api.ts";
+import {
+  getAvatar,
+  getDraftPicks,
+  getLeague,
+  getRosters,
+  getSingleWeekStats,
+  getUsers,
+} from "../src/api/sleeperApi.ts";
+import * as authFetchModule from "../src/lib/authFetch.ts";
 
 const mockFetchResponse = (status, data, overrides = {}) =>
   Promise.resolve({
@@ -16,6 +24,7 @@ const mockFetchResponse = (status, data, overrides = {}) =>
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe("Sleeper API data transforms", () => {
@@ -182,7 +191,7 @@ describe("Sleeper API data transforms", () => {
         id: "u2",
         name: "Manager Two",
         username: "Manager Two",
-        avatar: null,
+        avatar: "",
       },
     ]);
   });

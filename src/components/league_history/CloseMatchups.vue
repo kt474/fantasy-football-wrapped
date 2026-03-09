@@ -4,11 +4,36 @@ import { useStore } from "../../store/store";
 import Card from "../ui/card/Card.vue";
 
 const store = useStore();
+
+interface PointSeasonEntry {
+  season: string;
+  points: number[];
+}
+
+interface MatchupHistoryRow {
+  id: string;
+  name: string;
+  username: string;
+  matchups: (number | null)[];
+  pointsArr: number[];
+  pointSeason: PointSeasonEntry[];
+}
+
+interface MatchupDifference {
+  teamA: MatchupHistoryRow;
+  teamB: MatchupHistoryRow;
+  scoreA: number;
+  scoreB: number;
+  difference: number;
+  matchupId: number;
+  matchupIndex: number;
+}
+
 const props = defineProps<{
-  tableData: any[];
+  tableData: MatchupHistoryRow[];
 }>();
-const closestMatchups: any = ref([]);
-const farthestMatchups: any = ref([]);
+const closestMatchups = ref<MatchupDifference[]>([]);
+const farthestMatchups = ref<MatchupDifference[]>([]);
 
 onMounted(() => {
   getMatchups();
@@ -20,10 +45,10 @@ watch(
 );
 
 const getMatchups = () => {
-  const matchupDifferences: any[] = [];
+  const matchupDifferences: MatchupDifference[] = [];
 
   props.tableData.forEach((teamA) => {
-    teamA.matchups.forEach((matchupId: number, matchupIndex: number) => {
+    teamA.matchups.forEach((matchupId: number | null, matchupIndex: number) => {
       if (matchupId === null) {
         return;
       }
@@ -59,8 +84,8 @@ const getMatchups = () => {
     });
   });
 
-  const uniqueMatchups: any[] = [];
-  const processedMatchups = new Set();
+  const uniqueMatchups: MatchupDifference[] = [];
+  const processedMatchups = new Set<string>();
 
   matchupDifferences.forEach((matchup) => {
     const teamAId =
@@ -88,7 +113,7 @@ const getMatchups = () => {
   farthestMatchups.value = uniqueMatchups.slice(0, 5);
 };
 
-const getWeek = (seasonsData: any[], index: number) => {
+const getWeek = (seasonsData: PointSeasonEntry[], index: number) => {
   // We need to work with years in ascending order,
   // so let's sort a copy of the array.
   const sortedSeasons = [...seasonsData];

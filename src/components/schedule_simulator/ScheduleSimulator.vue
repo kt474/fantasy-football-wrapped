@@ -61,9 +61,7 @@ const displayedWeekCount = computed(() => {
 });
 
 const usesMedianScoring = computed(() => {
-  return (
-    store.leagueInfo[store.currentLeagueIndex]?.medianScoring === 1
-  );
+  return store.leagueInfo[store.currentLeagueIndex]?.medianScoring === 1;
 });
 
 const weeklyMedians = computed(() => {
@@ -96,7 +94,7 @@ const createOpponentMatrix = (tableData: TableDataType[]) => {
   const weeks = displayedWeekCount.value;
   const matrix: (number | null)[][] = tableData.map((team) =>
     Array.from({ length: weeks }, (_, week) => {
-      const matchupNumber = team.matchups[week];
+      const matchupNumber = team.matchups ? team.matchups[week] : null;
       if (matchupNumber === null || matchupNumber === undefined) return null;
       return null;
     })
@@ -105,7 +103,7 @@ const createOpponentMatrix = (tableData: TableDataType[]) => {
   for (let week = 0; week < weeks; week++) {
     const matchupMap = new Map<number, number[]>();
     tableData.forEach((team, teamIndex) => {
-      const matchupNumber = team.matchups[week];
+      const matchupNumber = team.matchups ? team.matchups[week] : null;
       if (matchupNumber === null || matchupNumber === undefined) return;
       const teams = matchupMap.get(matchupNumber) || [];
       teams.push(teamIndex);
@@ -248,7 +246,9 @@ const simulatedStandings = computed<SimulatedTeamRecord[]>(() => {
     const seen = new Set<number>();
     for (let teamIndex = 0; teamIndex < props.tableData.length; teamIndex++) {
       const opponent = simulatedOpponents.value[teamIndex]?.[week];
-      const teamPoints = props.tableData[teamIndex]?.points[week] ?? 0;
+      const teamPoints = props.tableData[teamIndex]?.points
+        ? props.tableData[teamIndex]?.points[week]
+        : 0;
       records[teamIndex].pointsFor += teamPoints;
 
       if (opponent === null || opponent === undefined || seen.has(teamIndex)) {

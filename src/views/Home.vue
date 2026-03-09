@@ -3,11 +3,12 @@ import { onMounted, ref } from "vue";
 
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
-import { fakePoints, fakeRosters, fakeUsers } from "../api/helper";
+import { fakePoints, fakeRosters, fakeUsers } from "../api/fakeLeague";
 import Input from "@/components/ui/input/Input.vue";
 import Table from "../components/standings/Table.vue";
 import { useStore } from "../store/store";
-import { getData, getLeague, inputLeague } from "../api/api";
+import { getData, inputLeague } from "../api/api";
+import { getLeague } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
 import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
@@ -26,8 +27,9 @@ const clicked = ref(systemDarkMode);
 onMounted(async () => {
   try {
     checkSystemTheme();
-    if (localStorage.leagueInfo) {
-      const savedLeagues = JSON.parse(localStorage.leagueInfo);
+    const savedLeagueInfo = localStorage.getItem("leagueInfo");
+    if (savedLeagueInfo) {
+      const savedLeagues = JSON.parse(savedLeagueInfo);
       await Promise.all(
         savedLeagues.map(async (league: LeagueInfoType) => {
           if (!store.leagueIds.includes(league.leagueId)) {
@@ -36,10 +38,11 @@ onMounted(async () => {
             if (diff > 86400000) {
               // 1 day
               showLoading.value = true;
-              if (localStorage.originalData) {
-                const currentData = JSON.parse(localStorage.originalData);
+              const originalData = localStorage.getItem("originalData");
+              if (originalData) {
+                const currentData = JSON.parse(originalData);
                 delete currentData[league.leagueId];
-                localStorage.originalData = JSON.stringify(currentData);
+                localStorage.setItem("originalData", JSON.stringify(currentData));
               }
               store.updateLoadingLeague(league.name);
               const refreshedData = await getData(league.leagueId);
@@ -58,18 +61,14 @@ onMounted(async () => {
           }
         })
       );
-      store.updateCurrentLeagueId(localStorage.currentLeagueId);
+      store.updateCurrentLeagueId(localStorage.getItem("currentLeagueId") ?? "");
       store.updateLoadingLeague("");
     }
     const leagueId = Array.isArray(route.query.leagueId)
       ? route.query.leagueId[0]
       : route.query.leagueId;
     // sometimes on refresh the leagueId in the URL becomes undefined
-    if (
-      leagueId &&
-      !store.leagueIds.includes(leagueId) &&
-      leagueId !== "1057743221285101568"
-    ) {
+    if (leagueId && !store.leagueIds.includes(leagueId)) {
       const checkInput = await getLeague(leagueId);
       if (checkInput["name"]) {
         store.updateCurrentLeagueId(leagueId);
@@ -100,11 +99,12 @@ onMounted(async () => {
 });
 
 const checkSystemTheme = () => {
-  if (systemDarkMode && !localStorage.darkMode) {
+  const savedDarkMode = localStorage.getItem("darkMode");
+  if (systemDarkMode && savedDarkMode === null) {
     clicked.value = true;
     store.updateDarkMode(true);
-  } else if (localStorage.darkMode) {
-    clicked.value = JSON.parse(localStorage.darkMode);
+  } else if (savedDarkMode !== null) {
+    clicked.value = JSON.parse(savedDarkMode);
     store.updateDarkMode(clicked.value);
   }
 };

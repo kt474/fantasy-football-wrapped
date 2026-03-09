@@ -16,8 +16,18 @@ const potentialPointsArray = computed(() => {
   return props.tableData.map((team) => team.potentialPoints);
 });
 
+interface RankingSeriesItem {
+  name: string;
+  data: number[];
+}
+
+interface ApexDataLabelContext {
+  dataPointIndex: number;
+  seriesIndex: number;
+}
+
 const series = computed(() => {
-  const result: any[] = [];
+  const result: RankingSeriesItem[] = [];
   const points = props.tableData.map((team) => team.pointsFor);
   points.sort((a, b) => b - a);
   const potentialPoints = props.tableData.map((team) => team.potentialPoints);
@@ -54,7 +64,7 @@ const updateChartColor = () => {
       },
     },
     dataLabels: {
-      formatter: (_: any, options: any) => {
+      formatter: (_: unknown, options: ApexDataLabelContext) => {
         if (options.dataPointIndex === 0) {
           return pointsArray.value[options.seriesIndex];
         }
@@ -137,7 +147,7 @@ const chartOptions = ref({
     width: 5,
   },
   dataLabels: {
-    formatter: (_: any, options: any) => {
+    formatter: (_: unknown, options: ApexDataLabelContext) => {
       if (options.dataPointIndex === 0) {
         return pointsArray.value[options.seriesIndex];
       }

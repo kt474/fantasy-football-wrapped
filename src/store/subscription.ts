@@ -140,9 +140,13 @@ export const useSubscriptionStore = defineStore("subscription", () => {
       const payload = (await response.json()) as SubscriptionStatusResponse;
       applySubscriptionStatus(payload);
       saveSubscriptionStatusCache(payload);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (showErrorToast) {
-        toast.error(error?.message ?? "Unable to fetch subscription status");
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to fetch subscription status";
+        toast.error(message);
       }
     } finally {
       if (showLoading) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TableDataType, LeagueInfoType } from "../../types/types.ts";
+import { TableDataType, LeagueInfoType, UserType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import { generateSummary, getPlayersByIdsMap } from "../../api/api.ts";
 import { ref, onMounted, watch, computed } from "vue";
@@ -13,11 +13,16 @@ import DOMPurify from "dompurify";
 const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
-  finalPlacements: any[];
+  finalPlacements: UserType[];
 }>();
 
 const rawSummary = ref("");
-const playoffPromptData = ref([]);
+type PlayoffPromptRow = {
+  playerNames: (string | undefined)[];
+  rosterId: number;
+  points: number[];
+};
+const playoffPromptData = ref<PlayoffPromptRow[]>([]);
 
 const md = new MarkdownIt({
   html: false,
@@ -74,7 +79,7 @@ const fetchPlayerNames = async () => {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     if (currentLeague) {
       const allPlayerIds = currentLeague.weeklyPoints
-        .map((user: any) => user.starters.at(-1))
+        .map((user) => user.starters[user.starters.length - 1] ?? [])
         .flat();
 
       let playerLookupMap = new Map<string, Player>();
@@ -82,8 +87,8 @@ const fetchPlayerNames = async () => {
         playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
       }
 
-      const result: any = currentLeague.weeklyPoints.map((user) => {
-        const starterIds = user.starters.at(-1);
+      const result = currentLeague.weeklyPoints.map((user) => {
+        const starterIds = user.starters[user.starters.length - 1] ?? [];
         const starterNames = starterIds?.map((id: string) =>
           playerLookupMap.get(id)?.name
             ? playerLookupMap.get(id)?.name
@@ -104,17 +109,18 @@ const fetchPlayerNames = async () => {
 const getSummary = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague && props.finalPlacements.length > 0) {
+    const winner = props.finalPlacements.find((val) => val.placement === 1);
+    const lastPlace = props.finalPlacements.find(
+      (val) => val.placement === currentLeague.totalRosters
+    );
+
     const leagueMetadata = {
       leagueWinner: store.showUsernames
-        ? props.finalPlacements.find((val) => val.placement === 1).username
-        : props.finalPlacements.find((val) => val.placement === 1).name,
+        ? winner?.username ?? ""
+        : winner?.name ?? "",
       lastPlace: store.showUsernames
-        ? props.finalPlacements.find(
-            (val) => val.placement === currentLeague.totalRosters
-          ).username
-        : props.finalPlacements.find(
-            (val) => val.placement === currentLeague.totalRosters
-          ).name,
+        ? lastPlace?.username ?? ""
+        : lastPlace?.name ?? "",
       playoffTeams: currentLeague.playoffTeams,
       season: currentLeague.season,
     };
@@ -126,12 +132,11 @@ const getSummary = async () => {
         losses: user.losses,
         totalPoints: user.pointsFor,
         regularSeasonRank: user.regularSeasonRank,
-        finalRank: props.finalPlacements.find((val) => val.name === user.name)
-          ? props.finalPlacements.find((val) => val.name === user.name)
-              .placement
-          : 0,
+        finalRank:
+          props.finalPlacements.find((val) => val.name === user.name)?.placement ??
+          0,
         playOffData: playoffPromptData.value.find(
-          (val: any) => val.rosterId === user.rosterId
+          (val) => val.rosterId === user.rosterId
         ),
       };
     });

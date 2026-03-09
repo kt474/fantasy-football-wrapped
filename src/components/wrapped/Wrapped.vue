@@ -21,8 +21,24 @@ const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
-const closestMatchups: any = ref([]);
-const farthestMatchups: any = ref([]);
+type MatchupDifference = {
+  teamA: TableDataType;
+  teamB: TableDataType;
+  scoreA: number;
+  scoreB: number;
+  difference: number;
+  matchupId: number;
+  matchupIndex: number;
+};
+type Streak = {
+  type: string;
+  length: number;
+  start: number;
+  end: number;
+};
+
+const closestMatchups = ref<MatchupDifference[]>([]);
+const farthestMatchups = ref<MatchupDifference[]>([]);
 const loading = ref<boolean>(true);
 
 const isShareSupported = ref(false);
@@ -227,9 +243,12 @@ const bestPickups = computed(() => {
 });
 
 const mostMoves = computed(() => {
-  const maxKey: any = Object.keys(league.value.transactions).reduce(
-    (a: any, b: any) =>
-      league.value.transactions[a] > league.value.transactions[b] ? a : b
+  const keys = Object.keys(league.value.transactions);
+  if (keys.length === 0) {
+    return { user: undefined, moves: 0 };
+  }
+  const maxKey = keys.reduce((a, b) =>
+    league.value.transactions[a] > league.value.transactions[b] ? a : b
   );
   const user = league.value.users.find((user) => user.id === maxKey);
   return {
@@ -240,11 +259,15 @@ const mostMoves = computed(() => {
 
 const fewestMoves = computed(() => {
   const activeRosterIds = league.value.rosters.map((roster) => roster.id);
-  const maxKey: any = Object.keys(league.value.transactions)
-    .filter((id) => activeRosterIds.includes(id))
-    .reduce((a: any, b: any) =>
-      league.value.transactions[b] > league.value.transactions[a] ? a : b
-    );
+  const filteredKeys = Object.keys(league.value.transactions).filter((id) =>
+    activeRosterIds.includes(id)
+  );
+  if (filteredKeys.length === 0) {
+    return { user: undefined, moves: 0 };
+  }
+  const maxKey = filteredKeys.reduce((a, b) =>
+    league.value.transactions[b] > league.value.transactions[a] ? a : b
+  );
   const user = league.value.users.find((user) => user.id === maxKey);
   return {
     user: user,
@@ -254,21 +277,45 @@ const fewestMoves = computed(() => {
 
 const totalBids = computed(() => {
   if (league.value.waiverMoves) {
-    const grouped: any[] = league.value.waiverMoves.reduce(
-      (acc: any, obj: any) => {
-        const userId = obj.user.id;
+    const grouped = league.value.waiverMoves.reduce<
+      Record<
+        string,
+        {
+          user: {
+            id?: string;
+            username: string;
+            avatarImg?: string;
+            name: string;
+          };
+          sumByStatus: Record<string, number>;
+          totalSpent: number;
+        }
+      >
+    >((acc, obj) => {
+        const user = obj.user as {
+          id?: string;
+          username?: string;
+          name?: string;
+          avatarImg?: string;
+        };
+        const userId = user.id ?? user.username ?? user.name ?? "unknown-user";
         const status = obj.status;
 
         if (!acc[userId]) {
           acc[userId] = {
-            user: obj.user,
+            user: {
+              id: user.id,
+              username: user.username ?? "",
+              name: user.name ?? "",
+              avatarImg: user.avatarImg,
+            },
             sumByStatus: {},
             totalSpent: 0,
           };
         }
         acc[userId].sumByStatus[status] =
-          (acc[userId].sumByStatus[status] || 0) + obj.bid;
-        acc[userId].totalSpent += obj.bid;
+          (acc[userId].sumByStatus[status] || 0) + (obj.bid ?? 0);
+        acc[userId].totalSpent += obj.bid ?? 0;
 
         return acc;
       },
@@ -285,17 +332,15 @@ const impactfulTrades = computed(() => {
   if (!league.value.tradeNames) return [];
 
   return league.value.tradeNames.slice().sort((a, b) => {
-    const aValues = [...(a.team1.value || []), ...(a.team2.value || [])];
-    const bValues = [...(b.team1.value || []), ...(b.team2.value || [])];
+    const aValues = [...a.team1.value, ...a.team2.value].filter(
+      (val): val is number => val != null
+    );
+    const bValues = [...b.team1.value, ...b.team2.value].filter(
+      (val): val is number => val != null
+    );
 
-    const minA = aValues.reduce(
-      (min, val) => (val != null && val < min ? val : min),
-      Infinity
-    );
-    const minB = bValues.reduce(
-      (min, val) => (val != null && val < min ? val : min),
-      Infinity
-    );
+    const minA = aValues.length > 0 ? Math.min(...aValues) : Infinity;
+    const minB = bValues.length > 0 ? Math.min(...bValues) : Infinity;
 
     return minA - minB;
   });
@@ -631,7 +676,7 @@ const getPointsAgainstRank = (points: number) => {
 };
 
 const getMatchups = () => {
-  const matchupDifferences: any[] = [];
+  const matchupDifferences: MatchupDifference[] = [];
 
   props.tableData.forEach((teamA) => {
     teamA.matchups.forEach((matchupId, matchupIndex: number) => {
@@ -670,7 +715,7 @@ const getMatchups = () => {
     });
   });
 
-  const uniqueMatchups: any[] = [];
+  const uniqueMatchups: MatchupDifference[] = [];
   const processedMatchups = new Set();
 
   matchupDifferences.forEach((matchup) => {
@@ -698,9 +743,11 @@ const getMatchups = () => {
   farthestMatchups.value = uniqueMatchups.slice(0, 5);
 };
 
-const getAllStreaks = (str: string) => {
-  const streaks: any[] = [];
-  if (!str) return streaks;
+const getAllStreaks = (str: string): Streak => {
+  const streaks: Streak[] = [];
+  if (!str) {
+    return { type: "-", length: 0, start: 0, end: 0 };
+  }
   let i = 0;
   while (i < str.length) {
     const ch = str[i];
@@ -732,21 +779,21 @@ const leagueWinner = computed(() => {
 
 const onScroll = () => {
   if (!slideshow.value) return;
-  const container: any = slideshow.value;
+  const container = slideshow.value;
   const slideHeight = container.clientHeight;
   currentSlide.value = Math.round(container.scrollTop / slideHeight);
 };
 
 const scrollToSlide = (index: number) => {
   if (!slideshow.value) return;
-  const container: any = slideshow.value;
+  const container = slideshow.value;
   container.scrollTo({
     top: index * container.clientHeight,
     behavior: "smooth",
   });
 };
 
-const slideshow = ref(null);
+const slideshow = ref<HTMLElement | null>(null);
 const currentSlide = ref(0);
 
 onMounted(() => {

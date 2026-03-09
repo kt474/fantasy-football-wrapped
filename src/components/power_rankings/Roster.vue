@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
-import { TableDataType } from "../../types/types";
-import { fakeUsers } from "../../api/helper";
+import { TableDataType, PlayerType } from "../../types/types";
+import { fakeUsers } from "../../api/fakeLeague";
 import {
   Select,
   SelectContent,
@@ -14,8 +14,10 @@ import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
 
 const store = useStore();
+type RosterPlayer = Partial<PlayerType>;
+
 const props = defineProps<{
-  playerData: any;
+  playerData: Record<string, RosterPlayer[]>;
   tableData: TableDataType[];
 }>();
 
@@ -27,15 +29,16 @@ const getNameFromId = (rosterId: number) => {
 };
 
 const groupedPlayerData = computed(() => {
-  const result: Record<string, Record<string, any[]>> = {};
+  const result: Record<string, Record<string, RosterPlayer[]>> = {};
   for (const userId in props.playerData) {
     const players = props.playerData[userId];
-    const positions: Record<string, any[]> = {};
+    const positions: Record<string, RosterPlayer[]> = {};
     for (const player of players) {
-      if (!positions[player.position]) {
-        positions[player.position] = [];
+      const position = player.position ?? "UNKNOWN";
+      if (!positions[position]) {
+        positions[position] = [];
       }
-      positions[player.position].push(player);
+      positions[position].push(player);
     }
     // Sort each position group by player.rank
     for (const pos in positions) {
@@ -56,7 +59,9 @@ const managers = computed(() => {
     const currentRosterIds = currentLeague.rosters.map((roster) => roster.id);
     const result = currentLeague.users
       .filter((user) => currentRosterIds.includes(user.id))
-      .map((user) => (store.showUsernames ? user.username : user.name));
+      .map((user) =>
+        store.showUsernames ? (user.username ?? user.name) : user.name
+      );
     result.unshift("All Managers");
     return result;
   } else if (store.leagueInfo.length == 0) {
@@ -65,7 +70,7 @@ const managers = computed(() => {
   return [];
 });
 
-const currentManager = ref(managers.value[0]);
+const currentManager = ref(managers.value[0] ?? "");
 
 const getValueColor = (value: number) => {
   if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
@@ -122,7 +127,7 @@ const getValueColor = (value: number) => {
                 <img
                   v-else
                   class="w-8 mx-2 rounded-full h-7"
-                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${(player.id ?? '').toLowerCase()}.png`"
                   alt="Team avatar"
                 />
                 <p class="w-auto truncate sm:w-28">
@@ -176,7 +181,7 @@ const getValueColor = (value: number) => {
                   <img
                     v-else
                     class="w-8 mx-2 rounded-full h-7"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
+                    :src="`https://sleepercdn.com/images/team_logos/nfl/${(player.id ?? '').toLowerCase()}.png`"
                     alt="Team avatar"
                   />
                   <p class="w-auto truncate sm:w-28">

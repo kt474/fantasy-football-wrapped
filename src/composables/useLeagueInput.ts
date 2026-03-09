@@ -2,14 +2,13 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "@/store/store";
 import type { LeagueInfoType } from "@/types/types";
+import type { LeagueOriginal } from "@/types/apiTypes";
 import {
   getData,
-  getLeague,
-  getUsername,
   inputLeague,
   inputUsername,
-  getAllLeagues,
 } from "@/api/api";
+import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
 
 export const SEASON_YEAR_OPTIONS = [
   "2026",
@@ -53,14 +52,15 @@ export const useLeagueInput = () => {
   };
 
   onMounted(() => {
-    if (localStorage.inputType) {
-      inputType.value = localStorage.inputType;
+    const savedInputType = localStorage.getItem("inputType");
+    if (savedInputType) {
+      inputType.value = savedInputType;
     }
   });
 
   watch(
     () => inputType.value,
-    () => (localStorage.inputType = inputType.value)
+    () => localStorage.setItem("inputType", inputType.value)
   );
 
   const onSubmit = async () => {
@@ -84,11 +84,11 @@ export const useLeagueInput = () => {
       store.setLeaguesList(leagues);
       store.updateShowLeaguesList(true);
       showHelperMsg.value = false;
-      localStorage.inputType = "League ID";
+      localStorage.setItem("inputType", "League ID");
       store.updateShowInput(false);
       inputUsername(user.display_name, seasonYear.value);
       store.currentTab = "Standings";
-      localStorage.currentTab = "Standings";
+      localStorage.setItem("currentTab", "Standings");
       await resetRoute();
       return;
     }
@@ -104,7 +104,7 @@ export const useLeagueInput = () => {
       return;
     }
 
-    const checkInput: any = await getLeague(leagueIdInput.value);
+    const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
     if (!checkInput["name"]) {
       errorMsg.value = "Invalid league ID";
       showErrorMsg.value = true;
@@ -116,7 +116,7 @@ export const useLeagueInput = () => {
       showErrorMsg.value = true;
     } else {
       store.currentTab = "Standings";
-      localStorage.currentTab = "Standings";
+      localStorage.setItem("currentTab", "Standings");
       await resetRoute();
       showErrorMsg.value = false;
       store.updateLoadingLeague(checkInput["name"]);

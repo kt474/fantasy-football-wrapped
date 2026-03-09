@@ -6,6 +6,10 @@ import {
   RosterType,
   LeagueDraftMetadata,
   WaiverMove,
+  PlayerRankingsType,
+  PlayerType,
+  UserLeagueListItem,
+  TradeNameRow,
 } from "../types/types";
 import { DraftGrades, DraftPick } from "../types/apiTypes";
 
@@ -18,7 +22,7 @@ export const useStore = defineStore("main", {
     leagueSubmitted: false,
     currentTab: "Home",
     showLeaguesList: false,
-    leaguesList: [] as Record<string, any>[],
+    leaguesList: [] as UserLeagueListItem[],
     username: "",
     loadingLeague: "",
     loadingUserLeagues: false,
@@ -113,7 +117,7 @@ export const useStore = defineStore("main", {
         item.currentTrends = payload;
       }
     },
-    addTradeNames(leagueId: string, payload: any[]) {
+    addTradeNames(leagueId: string, payload: TradeNameRow[]) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
         item.tradeNames = payload;
@@ -143,16 +147,22 @@ export const useStore = defineStore("main", {
         item.draftGrades = payload;
       }
     },
-    addPlayerRankings(leagueId: string, payload: any) {
+    addPlayerRankings(
+      leagueId: string,
+      payload: PlayerRankingsType | Record<string, unknown[]>
+    ) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
-        item.playerRankings = payload;
+        item.playerRankings = payload as PlayerRankingsType;
       }
     },
-    addRosterRankings(leagueId: string, payload: any) {
+    addRosterRankings(
+      leagueId: string,
+      payload: Record<string, PlayerType[] | unknown[]>
+    ) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
-        item.rosterRankings = payload;
+        item.rosterRankings = payload as Record<string, PlayerType[]>;
       }
     },
     addYearEndReport(leagueId: string, payload: string) {
@@ -170,7 +180,7 @@ export const useStore = defineStore("main", {
     updateShowLeaguesList(payload: boolean) {
       this.showLeaguesList = payload;
     },
-    setLeaguesList(payload: any[]) {
+    setLeaguesList(payload: UserLeagueListItem[]) {
       this.leaguesList = payload;
     },
   },

@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import groupBy from "lodash/groupBy";
-import { TableDataType, LeagueInfoType, WeeklyEntry } from "../../types/types";
-import { getStats } from "../../api/api";
+import {
+  TableDataType,
+  LeagueInfoType,
+  WeeklyEntry,
+  PlayerType,
+} from "../../types/types";
+import { getStats } from "../../api/sleeperApi";
 import { useStore } from "../../store/store";
 import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
-import { fakeUsers } from "../../api/helper";
+import { fakeUsers } from "../../api/fakeLeague";
 import Roster from "./Roster.vue";
 import Card from "../ui/card/Card.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +20,9 @@ const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
-const data = ref<Record<string, any[]>>({});
+type RankingPlayer = Partial<PlayerType>;
+
+const data = ref<Record<string, RankingPlayer[]>>({});
 const allData = ref<Record<string, WeeklyEntry[]>>({});
 const loading = ref(false);
 const tab = ref("QB");
@@ -66,8 +73,11 @@ const getData = async () => {
         .slice(0, 5),
     ])
   );
-  data.value = sorted;
-  store.addPlayerRankings(currentLeague.leagueId, data.value);
+  data.value = sorted as Record<string, RankingPlayer[]>;
+  store.addPlayerRankings(
+    currentLeague.leagueId,
+    data.value as unknown as Record<string, PlayerType[]>
+  );
   localStorage.setItem(
     "leagueInfo",
     JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -78,7 +88,7 @@ const getTeamName = (playerId: string) => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague) {
     const roster = currentLeague.rosters.find((roster) =>
-      roster.players.includes(playerId)
+      roster.players?.includes(playerId)
     );
     const user = currentLeague.users.find((user) => user?.id === roster?.id);
     if (user) {
@@ -110,7 +120,7 @@ onMounted(async () => {
     allData.value =
       store.leagueInfo[store.currentLeagueIndex].rosterRankings ?? {};
   } else if (store.leagueInfo.length === 0) {
-    data.value = fakePlayerRankings;
+    data.value = fakePlayerRankings as unknown as Record<string, RankingPlayer[]>;
     allData.value = fakeRosterData;
   }
 });
@@ -181,7 +191,7 @@ watch(
                   v-else
                   alt="Defense image"
                   class="object-cover w-16 h-16 my-auto ml-2"
-                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.id.toLowerCase()}.png`"
+                  :src="`https://sleepercdn.com/images/team_logos/nfl/${(player.id ?? '').toLowerCase()}.png`"
                 />
                 <div class="w-full mt-0.5 ml-3">
                   <div class="flex justify-between px-2 mt-1 mb-4">
@@ -200,7 +210,7 @@ watch(
                       <p
                         class="text-sm truncate sm:text-base max-w-16 sm:max-w-52"
                       >
-                        {{ getTeamName(player.id) }}
+                        {{ getTeamName(player.id ?? "") }}
                       </p>
                     </div>
                   </div>

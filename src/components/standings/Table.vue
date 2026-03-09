@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
-import { fakeRosters, fakeUsers, createTableData } from "../../api/helper";
+import { createTableData } from "../../api/helper";
+import { fakeRosters, fakeUsers } from "../../api/fakeLeague";
 import {
   computed,
   onMounted,
@@ -117,14 +118,16 @@ interface savedData {
 }
 
 onMounted(() => {
-  if (localStorage.currentTab) {
-    store.currentTab = localStorage.currentTab;
+  const savedCurrentTab = localStorage.getItem("currentTab");
+  if (savedCurrentTab) {
+    store.currentTab = savedCurrentTab;
   }
 });
 
 const originalData = computed(() => {
-  if (localStorage.originalData && store.currentLeagueId) {
-    const savedData: savedData = JSON.parse(localStorage.originalData);
+  const originalDataStorage = localStorage.getItem("originalData");
+  if (originalDataStorage && store.currentLeagueId) {
+    const savedData: savedData = JSON.parse(originalDataStorage);
     if (savedData[store.currentLeagueId]) {
       return savedData[store.currentLeagueId];
     }
@@ -138,11 +141,12 @@ const originalData = computed(() => {
     );
     if (store.currentLeagueId) {
       let savedData: Record<string, TableDataType[]> = {};
-      if (localStorage.originalData) {
-        savedData = JSON.parse(localStorage.originalData);
+      const originalDataStorage = localStorage.getItem("originalData");
+      if (originalDataStorage) {
+        savedData = JSON.parse(originalDataStorage);
       }
       savedData[store.currentLeagueId] = combinedPoints;
-      localStorage.originalData = JSON.stringify(savedData);
+      localStorage.setItem("originalData", JSON.stringify(savedData));
     }
     return combinedPoints;
   }
@@ -188,7 +192,7 @@ const tableData: ComputedRef<TableDataType[]> = computed(() => {
       return b.pointsFor - a.pointsFor;
     });
   } else if (tableOrder.value === "medianRecord") {
-    return originalData.value.sort((a, b) => {
+    return data.sort((a, b) => {
       if (a.winsWithMedian !== b.winsWithMedian) {
         return b.winsWithMedian - a.winsWithMedian;
       }

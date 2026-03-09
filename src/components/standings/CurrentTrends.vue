@@ -3,13 +3,12 @@ import { ref, onMounted, watch, computed } from "vue";
 import {
   generateTrends,
   getPlayersByIdsMap,
-  getDraftProjections,
-  getDraftPicks,
 } from "../../api/api";
+import { getDraftProjections, getDraftPicks } from "../../api/sleeperApi";
 import { TableDataType, LeagueInfoType } from "../../types/types";
 import { Player } from "../../types/apiTypes";
 import { useStore } from "../../store/store";
-import { fakeHighlights } from "../../api/helper";
+import { fakeHighlights } from "../../api/fakeLeague";
 import { Card, CardTitle, CardHeader } from "../ui/card";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
