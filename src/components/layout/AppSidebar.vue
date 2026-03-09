@@ -165,6 +165,7 @@ const data = {
               class="h-6"
               alt="ffwrapped logo"
             />
+            <!-- Icon creddit to https://www.flaticon.com/free-icons/american-football -->
             <span
               class="self-center -mb-1.5 ml-2.5 custom-font whitespace-nowrap"
               ><span class="text-primary">ff</span>wrapped</span

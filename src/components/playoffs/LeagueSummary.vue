@@ -9,6 +9,8 @@ import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
+import { Copy } from "lucide-vue-next";
+import { Button } from "../ui/button/index.ts";
 
 const store = useStore();
 const props = defineProps<{
@@ -116,11 +118,11 @@ const getSummary = async () => {
 
     const leagueMetadata = {
       leagueWinner: store.showUsernames
-        ? winner?.username ?? ""
-        : winner?.name ?? "",
+        ? (winner?.username ?? "")
+        : (winner?.name ?? ""),
       lastPlace: store.showUsernames
-        ? lastPlace?.username ?? ""
-        : lastPlace?.name ?? "",
+        ? (lastPlace?.username ?? "")
+        : (lastPlace?.name ?? ""),
       playoffTeams: currentLeague.playoffTeams,
       season: currentLeague.season,
     };
@@ -133,8 +135,8 @@ const getSummary = async () => {
         totalPoints: user.pointsFor,
         regularSeasonRank: user.regularSeasonRank,
         finalRank:
-          props.finalPlacements.find((val) => val.name === user.name)?.placement ??
-          0,
+          props.finalPlacements.find((val) => val.name === user.name)
+            ?.placement ?? 0,
         playOffData: playoffPromptData.value.find(
           (val) => val.rosterId === user.rosterId
         ),
@@ -160,23 +162,9 @@ const copyReport = () => {
   <Card v-if="showSummary" class="w-full h-full px-6 pt-4 mx-auto mt-4">
     <div class="flex justify-between">
       <h5 class="text-2xl font-bold sm:text-3xl">League Recap</h5>
-      <svg
-        @click="copyReport()"
-        class="w-6 h-6 mt-2 cursor-pointer hover:text-primary"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke="currentColor"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"
-        />
-      </svg>
+      <Button @click="copyReport()" variant="outline" size="sm">
+        <Copy class="size-4" />
+      </Button>
     </div>
     <Separator class="mt-3 mb-2" />
     <div v-if="renderedSummary">

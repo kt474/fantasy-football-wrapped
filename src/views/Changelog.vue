@@ -2,6 +2,15 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "3/09/26",
+    content: [
+      {
+        type: "Feature",
+        text: ["You can now download the weekly reports as shareable images."],
+      },
+    ],
+  },
+  {
     date: "3/04/26",
     content: [
       {

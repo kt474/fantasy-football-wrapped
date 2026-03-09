@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { TableDataType, LeagueInfoType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, ref, watch, onMounted, nextTick } from "vue";
 import { useStore } from "../../store/store";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
@@ -27,10 +27,13 @@ import {
   fakeBenchPerformers,
 } from "../../api/fakeLeague.ts";
 import WeeklyPreview from "./WeeklyPreview.vue";
+import WeeklyShareCard from "./WeeklyShareCard.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
+import { toPng } from "html-to-image";
+import { Copy, Download } from "lucide-vue-next";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -380,11 +383,13 @@ const bestPerformers = computed(() => {
     });
     return result
       .flatMap((group) =>
-        group.playerNames.map((player, idx: number): PerformerEntry => ({
-          player,
-          points: group.playerPoints[idx] ?? 0,
-          user: group.user,
-        }))
+        group.playerNames.map(
+          (player, idx: number): PerformerEntry => ({
+            player,
+            points: group.playerPoints[idx] ?? 0,
+            user: group.user,
+          })
+        )
       )
       .sort((a, b) => b.points - a.points)
       .slice(0, 4);
@@ -412,11 +417,13 @@ const worstPerformers = computed(() => {
     });
     return result
       .flatMap((group) =>
-        group.playerNames.map((player, idx: number): PerformerEntry => ({
-          player,
-          points: group.playerPoints[idx] ?? 0,
-          user: group.user,
-        }))
+        group.playerNames.map(
+          (player, idx: number): PerformerEntry => ({
+            player,
+            points: group.playerPoints[idx] ?? 0,
+            user: group.user,
+          })
+        )
       )
       .sort((a, b) => a.points - b.points)
       .slice(0, 4);
@@ -445,11 +452,13 @@ const benchPerformers = computed(() => {
     });
     return result
       .flatMap((group) =>
-        group.playerNames.map((player, idx: number): PerformerEntry => ({
-          player,
-          points: group.playerPoints[idx] ?? 0,
-          user: group.user,
-        }))
+        group.playerNames.map(
+          (player, idx: number): PerformerEntry => ({
+            player,
+            points: group.playerPoints[idx] ?? 0,
+            user: group.user,
+          })
+        )
       )
       .sort((a, b) => b.points - a.points)
       .slice(0, 4);
@@ -528,8 +537,7 @@ const premiumReportPrompt = computed(() => {
           ),
           benchPlayerPoints: user.benchPoints[week],
           benchPlayerNames: (benchPlayerNames.value[index] ?? []).map(
-            (player) =>
-              player.name ? player.name : `${player.team} Defense`
+            (player) => (player.name ? player.name : `${player.team} Defense`)
           ),
           pointsScored: user.points[week],
           inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
@@ -554,8 +562,7 @@ const premiumReportPrompt = computed(() => {
           ),
           benchPlayerPoints: user.benchPoints[week],
           benchPlayerNames: (benchPlayerNames.value[index] ?? []).map(
-            (player) =>
-              player.name ? player.name : `${player.team} Defense`
+            (player) => (player.name ? player.name : `${player.team} Defense`)
           ),
           currentRecord: `${user.wins}-${user.losses}`,
           currentRank: user.regularSeasonRank,
@@ -830,6 +837,106 @@ const copyReport = () => {
   toast.success("Summary copied to clipboard!");
 };
 
+const isGeneratingImage = ref(false);
+const shareCardRef = ref<HTMLElement | null>(null);
+
+const getManagerName = (user: TableDataType) => {
+  if (store.showUsernames) {
+    return user.username ? user.username : "Ghost Roster";
+  }
+  return user.name ? user.name : "Ghost Roster";
+};
+
+const exportTopTeams = computed(() => {
+  const weekIndex = currentWeek.value - 1;
+  return [...sortedTableData.value]
+    .filter((user) => user.matchups[weekIndex] !== null)
+    .sort((a, b) => b.points[weekIndex] - a.points[weekIndex])
+    .slice(0, 6)
+    .map((user) => ({
+      name: getManagerName(user),
+      points: user.points[weekIndex],
+      avatar: user.avatarImg,
+    }));
+});
+
+const exportHotPlayers = computed(() => {
+  return bestPerformers.value.slice(0, 4).map((entry) => ({
+    name: entry.player.name ? entry.player.name : `${entry.player.team} DEF`,
+    user: entry.user,
+    points: entry.points,
+    player_id: entry.player.player_id,
+    position: entry.player.position,
+  }));
+});
+
+const exportColdPlayers = computed(() => {
+  return worstPerformers.value.slice(0, 4).map((entry) => ({
+    name: entry.player.name ? entry.player.name : `${entry.player.team} DEF`,
+    user: entry.user,
+    points: entry.points,
+    player_id: entry.player.player_id,
+    position: entry.player.position,
+  }));
+});
+
+const exportBenchPlayers = computed(() => {
+  return benchPerformers.value.slice(0, 4).map((entry) => ({
+    name: entry.player.name ? entry.player.name : `${entry.player.team} DEF`,
+    user: entry.user,
+    points: entry.points,
+    player_id: entry.player.player_id,
+    position: entry.player.position,
+  }));
+});
+
+const exportSummary = computed(() => {
+  const sourceText =
+    tier.value === "Premium" && rawPremiumWeeklyReport.value
+      ? rawPremiumWeeklyReport.value
+      : rawWeeklyReport.value;
+  if (!sourceText) {
+    return "";
+  }
+  return sourceText;
+});
+
+const downloadReportImage = async () => {
+  if (isGeneratingImage.value) {
+    return;
+  }
+  if (!shareCardRef.value || exportTopTeams.value.length === 0) {
+    toast.error("No weekly data available yet");
+    return;
+  }
+
+  isGeneratingImage.value = true;
+  try {
+    await nextTick();
+    const exportWidth = shareCardRef.value.scrollWidth;
+    const exportHeight = shareCardRef.value.scrollHeight;
+    const dataUrl = await toPng(shareCardRef.value, {
+      cacheBust: true,
+      pixelRatio: 2,
+      backgroundColor: "#ffffff",
+      width: exportWidth,
+      height: exportHeight,
+      canvasWidth: exportWidth * 2,
+      canvasHeight: exportHeight * 2,
+    });
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `ffwrapped-week-${currentWeek.value}.png`;
+    link.click();
+    toast.success("Weekly report image downloaded");
+  } catch (error) {
+    console.error(error);
+    toast.error("Unable to generate image");
+  } finally {
+    isGeneratingImage.value = false;
+  }
+};
+
 watch(
   [() => props.regularSeasonLength, () => activeTab.value],
   () => (currentWeek.value = weeks.value[0])
@@ -888,23 +995,17 @@ watch(() => currentWeek.value, fetchPlayerNames);
                 <TabsTrigger value="Standard"> Standard </TabsTrigger>
                 <TabsTrigger value="Premium"> Premium </TabsTrigger>
               </TabsList>
-              <svg
-                @click="copyReport()"
-                class="w-6 h-6 mt-0.5 ml-auto cursor-pointer hover:text-primary"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
+              <Button
+                @click="downloadReportImage"
+                :disabled="isGeneratingImage"
+                size="sm"
+                class="ml-auto mr-2"
               >
-                <path
-                  stroke="currentColor"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"
-                />
-              </svg>
+                <Download />
+              </Button>
+              <Button @click="copyReport()" variant="outline" size="sm">
+                <Copy class="size-4" />
+              </Button>
             </div>
             <p v-if="weeks.length === 0">Please come back after week 1!</p>
             <TabsContent value="Premium">
@@ -1435,6 +1536,19 @@ watch(() => currentWeek.value, fetchPlayerNames);
       </TabsContent>
     </Tabs>
   </Card>
+  <div class="fixed top-0 -left-[200vw] pointer-events-none">
+    <div ref="shareCardRef">
+      <WeeklyShareCard
+        :league-name="store.leagueInfo[store.currentLeagueIndex]?.name"
+        :week="currentWeek"
+        :top-teams="exportTopTeams"
+        :hot-players="exportHotPlayers"
+        :cold-players="exportColdPlayers"
+        :bench-players="exportBenchPlayers"
+        :summary="exportSummary"
+      />
+    </div>
+  </div>
 </template>
 <style scoped>
 .custom-min-width {

@@ -51,6 +51,7 @@ It would also be helpful to familiarize yourself with the technologies used in t
 
 - [Sleeper API](https://docs.sleeper.com/)
 - [Avatars](https://getavataaars.com/)
+- [Icon](https://www.flaticon.com/free-icons/american-football)
 
 ## Contact
 
