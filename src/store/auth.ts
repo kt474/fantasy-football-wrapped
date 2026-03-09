@@ -2,6 +2,7 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
+import { newUserAlert } from "@/api/api";
 
 export const useAuthStore = defineStore("auth", () => {
   const session = ref<Session | null>(null);
@@ -98,6 +99,7 @@ export const useAuthStore = defineStore("auth", () => {
         email,
         password,
       });
+      await newUserAlert(email);
       if (error) throw error;
     } finally {
       loading.value = false;
@@ -116,6 +118,7 @@ export const useAuthStore = defineStore("auth", () => {
         token,
         type: "signup",
       });
+      await newUserAlert(email);
       if (error) throw error;
       session.value = data.session;
       user.value = data.user ?? null;

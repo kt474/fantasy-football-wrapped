@@ -1,5 +1,13 @@
-import { getWeeklyPoints, getTotalTransactions, getWaiverMoves } from "./helper";
-import { LeagueCountResponse, NewLeagueInfoType, Player } from "../types/apiTypes";
+import {
+  getWeeklyPoints,
+  getTotalTransactions,
+  getWaiverMoves,
+} from "./helper";
+import {
+  LeagueCountResponse,
+  NewLeagueInfoType,
+  Player,
+} from "../types/apiTypes";
 import { LeagueInfoType } from "../types/types";
 import { authenticatedFetch } from "@/lib/authFetch";
 import {
@@ -286,13 +294,33 @@ export const inputLeague = async (
   }
 };
 
+export const newUserAlert = async (email: string): Promise<void> => {
+  try {
+    const response = await fetch(import.meta.env.VITE_ACCOUNT_ALERT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data: {
+          email: email,
+        },
+      }),
+    });
+    assertOk(response, "New user alert");
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
 export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
-  const [leagueInfo, rosters, winnersBracket, losersBracket] = await Promise.all([
-    getLeague(leagueId),
-    getRosters(leagueId),
-    getWinnersBracket(leagueId),
-    getLosersBracket(leagueId),
-  ]);
+  const [leagueInfo, rosters, winnersBracket, losersBracket] =
+    await Promise.all([
+      getLeague(leagueId),
+      getRosters(leagueId),
+      getWinnersBracket(leagueId),
+      getLosersBracket(leagueId),
+    ]);
 
   const newLeagueInfo: NewLeagueInfoType = {
     ...leagueInfo,
