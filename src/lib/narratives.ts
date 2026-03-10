@@ -44,6 +44,10 @@ export type LeagueDNA = {
     uniqueChampions: number;
     championDiversityIndex: number;
     titlesByManager: Record<string, number>;
+    championships: {
+      season: string;
+      winner: string;
+    }[];
   };
   activity: {
     totalTrades: number;
@@ -329,6 +333,36 @@ const buildLeagueDNA = (
     },
     {} as Record<string, number>
   );
+  const championships = seasons
+    .map((season) => {
+      const winnerRosterId = getChampionRosterId(season);
+      if (winnerRosterId === null) {
+        return null;
+      }
+
+      const winnerRoster = season.rosters.find(
+        (roster) => roster.rosterId === winnerRosterId
+      );
+      const winnerUser = winnerRoster
+        ? season.users.find((user) => user.id === winnerRoster.id)
+        : null;
+
+      return {
+        season: season.season,
+        winner: winnerUser
+          ? winnerUser.username || winnerUser.name
+          : `Roster ${winnerRosterId}`,
+      };
+    })
+    .filter(
+      (
+        championship
+      ): championship is {
+        season: string;
+        winner: string;
+      } => Boolean(championship)
+    )
+    .sort((left, right) => Number(right.season) - Number(left.season));
   const uniqueChampions = Object.keys(titlesByManager).length;
   const championDiversity = seasonCount ? uniqueChampions / seasonCount : 0;
 
@@ -400,6 +434,7 @@ const buildLeagueDNA = (
       uniqueChampions,
       championDiversityIndex: clamp(championDiversity),
       titlesByManager,
+      championships,
     },
     activity: {
       totalTrades: tradesPerSeason.reduce((sum, count) => sum + count, 0),

@@ -19,7 +19,7 @@ const narratives = computed(() => buildNarrativeBundle(seasons.value));
 </script>
 <template>
   <div class="space-y-4">
-    <LeagueDNACard :league-d-n-a="narratives.leagueDNA" />
+    <LeagueDNACard class="mt-4" :league-d-n-a="narratives.leagueDNA" />
     <div class="grid gap-4 xl:grid-cols-2">
       <ManagerArchetypesCard :archetypes="narratives.managerArchetypes" />
       <GreatestRivalriesCard :rivalries="narratives.rivalries" />
