@@ -612,7 +612,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
           class="w-full h-full min-w-0"
         />
       </div>
-      <div class="grid items-stretch grid-cols-1 gap-4 mt-4 2xl:grid-cols-2">
+      <div class="grid items-stretch grid-cols-1 gap-4 mt-4 xl:grid-cols-2">
         <ExpectedWinsChart2
           :tableData="tableData"
           class="w-full h-full min-w-0"
