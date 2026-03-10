@@ -17,7 +17,7 @@ const champions = computed(() => props.leagueDNA.parity.championships);
 </script>
 
 <template>
-  <Card class="p-4 md:p-6">
+  <Card class="px-6 py-4">
     <div>
       <p class="text-3xl font-bold">League Narratives</p>
     </div>
@@ -50,10 +50,7 @@ const champions = computed(() => props.leagueDNA.parity.championships);
     </div>
 
     <div class="mt-4">
-      <div class="">
-        <p class="font-semibold">Champions</p>
-      </div>
-
+      <p class="text-lg font-semibold">Champions</p>
       <div
         v-if="champions.length"
         class="grid gap-2 mt-3 text-sm sm:grid-cols-2"

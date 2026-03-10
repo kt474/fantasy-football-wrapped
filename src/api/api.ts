@@ -48,21 +48,15 @@ export interface ManagerBlurbsPayload {
   managers: {
     userId: string;
     name: string;
-    avatarImg?: string;
     seasons: number;
     titles: number;
-    record: {
-      wins: number;
-      losses: number;
-      ties: number;
-    };
+    record: string;
     winRate: number;
     totalPointsFor: number;
     totalPointsAgainst: number;
     totalTrades: number;
     totalWaivers: number;
     averageEfficiency: number;
-    averagePointsPerSeason: number;
     relative: {
       titlesRank: number;
       winRateRank: number;
@@ -71,7 +65,6 @@ export interface ManagerBlurbsPayload {
       tradesRank: number;
       waiversRank: number;
       efficiencyRank: number;
-      pointsPerSeasonRank: number;
     };
   }[];
 }

@@ -101,21 +101,19 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
   managers: narratives.value.managerArchetypes.map((manager) => ({
     userId: manager.userId,
     name: manager.displayName,
-    avatarImg: manager.avatarImg,
     seasons: manager.seasons,
     titles: manager.titles,
-    record: {
-      wins: manager.totalWins,
-      losses: manager.totalLosses,
-      ties: manager.totalTies,
-    },
+    record:
+      manager.totalTies === 0
+        ? `${manager.totalWins}-${manager.totalLosses}`
+        : `${manager.totalWins}-${manager.totalLosses}-${manager.totalTies}`,
     winRate: manager.winRate,
     totalPointsFor: manager.totalPointsFor,
     totalPointsAgainst: manager.totalPointsAgainst,
     totalTrades: manager.totalTrades,
     totalWaivers: manager.totalWaivers,
     averageEfficiency: manager.averageEfficiency,
-    averagePointsPerSeason: manager.averagePointsPerSeason,
+    playoffAppearances: manager.playoffAppearances,
     relative: {
       titlesRank: relativeRanks.value.titles[manager.userId],
       winRateRank: relativeRanks.value.winRate[manager.userId],
@@ -124,7 +122,6 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
       tradesRank: relativeRanks.value.trades[manager.userId],
       waiversRank: relativeRanks.value.waivers[manager.userId],
       efficiencyRank: relativeRanks.value.efficiency[manager.userId],
-      pointsPerSeasonRank: relativeRanks.value.pointsPerSeason[manager.userId],
     },
   })),
 }));

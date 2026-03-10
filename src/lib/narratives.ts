@@ -1,17 +1,22 @@
 import { LeagueInfoType, PointsType } from "../types/types";
-import { WeeklyWaiver, WaiverStatus, WaiverType } from "../types/apiTypes";
+import {
+  Bracket,
+  WeeklyWaiver,
+  WaiverStatus,
+  WaiverType,
+} from "../types/apiTypes";
 
-export type HistoricalSeasonInput = Pick<
-  LeagueInfoType,
-  | "season"
-  | "leagueId"
-  | "leagueWinner"
-  | "rosters"
-  | "weeklyPoints"
-  | "users"
-  | "trades"
-  | "waivers"
->;
+export type HistoricalSeasonInput = {
+  season: string;
+  leagueId: string;
+  leagueWinner: string | null;
+  rosters: LeagueInfoType["rosters"];
+  weeklyPoints: LeagueInfoType["weeklyPoints"];
+  users: LeagueInfoType["users"];
+  trades: LeagueInfoType["trades"];
+  waivers: LeagueInfoType["waivers"];
+  playoffs: Bracket[];
+};
 
 export type ManagerSeasonRecord = {
   userId: string;
@@ -31,7 +36,7 @@ export type ManagerSeasonRecord = {
   tradeCount: number;
   waiverCount: number;
   isChampion: boolean;
-  placement?: number;
+  madePlayoffs: boolean;
 };
 
 export type LeagueDNA = {
@@ -89,10 +94,10 @@ export type ManagerArchetype = {
   averageWaiversPerSeason: number;
   winRate: number;
   weeklyScoreStdDev: number;
+  playoffAppearances: number;
 };
 
 export type NarrativeBundle = {
-  managerSeasons: ManagerSeasonRecord[];
   leagueDNA: LeagueDNA;
   managerArchetypes: ManagerArchetype[];
 };
@@ -112,6 +117,7 @@ type ManagerAggregate = {
   totalWaivers: number;
   avgEfficiency: number;
   scoreVariance: number;
+  playoffAppearances: number;
 };
 
 type MatchupRecord = {
@@ -183,7 +189,6 @@ const buildSeasonRecords = (
 ): ManagerSeasonRecord[] => {
   const championRosterId = getChampionRosterId(season);
   const records: ManagerSeasonRecord[] = [];
-
   season.rosters.forEach((roster) => {
     const user = season.users.find((candidate) => candidate.id === roster.id);
     const points = season.weeklyPoints.find(
@@ -208,6 +213,9 @@ const buildSeasonRecords = (
       pointsAgainst: roster.pointsAgainst,
       managerEfficiency: roster.managerEfficiency,
       weeklyScores: points.points,
+      madePlayoffs: season.playoffs.some(
+        (obj) => obj.t1 === roster.rosterId || obj.t2 === roster.rosterId
+      ),
       matchupIds: points.matchups ?? [],
       tradeCount: countTransactionsForManager(
         season.trades,
@@ -222,16 +230,13 @@ const buildSeasonRecords = (
         "waiver"
       ),
       isChampion: championRosterId === roster.rosterId,
-      placement: user.placement,
     });
   });
-
   return records;
 };
 
 const aggregateManagers = (records: ManagerSeasonRecord[]) => {
   const map = new Map<string, ManagerAggregate>();
-
   records.forEach((record) => {
     const existing = map.get(record.userId);
     const weeklyVariance = stdDev(record.weeklyScores);
@@ -252,6 +257,7 @@ const aggregateManagers = (records: ManagerSeasonRecord[]) => {
         totalWaivers: record.waiverCount,
         avgEfficiency: record.managerEfficiency,
         scoreVariance: weeklyVariance,
+        playoffAppearances: record.madePlayoffs ? 1 : 0,
       });
       return;
     }
@@ -265,6 +271,7 @@ const aggregateManagers = (records: ManagerSeasonRecord[]) => {
     existing.totalPointsFor += record.pointsFor;
     existing.totalPointsAgainst += record.pointsAgainst;
     existing.totalTrades += record.tradeCount;
+    existing.playoffAppearances += record.madePlayoffs ? 1 : 0;
     existing.totalWaivers += record.waiverCount;
     existing.avgEfficiency =
       (existing.avgEfficiency * (totalSeasons - 1) + record.managerEfficiency) /
@@ -467,6 +474,7 @@ const buildManagerArchetypes = (records: ManagerSeasonRecord[]) => {
         totalTrades: manager.totalTrades,
         totalWaivers: manager.totalWaivers,
         averageEfficiency: manager.avgEfficiency,
+        playoffAppearances: manager.playoffAppearances,
         averagePointsPerSeason,
         averageTradesPerSeason,
         averageWaiversPerSeason,
@@ -541,6 +549,7 @@ export const normalizeHistoricalSeasons = (
     users: season.users,
     trades: season.trades,
     waivers: season.waivers,
+    playoffs: season.winnersBracket,
   }));
 };
 
@@ -553,7 +562,6 @@ export const buildNarrativeBundle = (
   const managerAggregates = aggregateManagers(managerSeasons);
 
   return {
-    managerSeasons,
     leagueDNA: buildLeagueDNA(seasons, managerAggregates),
     managerArchetypes: buildManagerArchetypes(managerSeasons),
   };
