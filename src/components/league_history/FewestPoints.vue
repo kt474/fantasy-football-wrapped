@@ -32,13 +32,15 @@ const mostPoints = computed(() => {
   const allPointsWithDetails: PointDetail[] = props.tableData.flatMap((obj) =>
     obj.pointSeason.flatMap((seasonObj) =>
       seasonObj.points
-        .map((point: number, index: number): PointDetail => ({
-          week: index + 1,
-          name: obj.name,
-          username: obj.username,
-          season: seasonObj.season,
-          point,
-        }))
+        .map(
+          (point: number, index: number): PointDetail => ({
+            week: index + 1,
+            name: obj.name,
+            username: obj.username,
+            season: seasonObj.season,
+            point,
+          })
+        )
         .filter((entry) => entry.point !== 0)
     )
   );
@@ -51,7 +53,7 @@ const mostPoints = computed(() => {
 });
 </script>
 <template>
-  <Card class="relative w-full overflow-x-auto md:max-w-2xl">
+  <Card class="relative w-full overflow-x-auto md:max-w-2xl lg:max-w-3xl">
     <p class="w-full pt-2 text-lg font-semibold text-center bg-secondary">
       All Time Weekly Low Score
     </p>

@@ -198,7 +198,7 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <Card class="w-full p-4 md:p-6 min-w-80">
+  <Card class="w-full min-w-0 p-4 overflow-hidden md:p-6">
     <div class="flex justify-between">
       <div>
         <h1 class="pb-2 text-3xl font-bold leading-none">
@@ -207,11 +207,12 @@ const chartOptions = ref({
       </div>
     </div>
     <apexchart
-      width="100%"
+      width="99.9%"
       height="475"
       type="bar"
       :options="chartOptions"
       :series="seriesData"
+      class="overflow-hidden"
     ></apexchart>
     <p
       class="text-xs text-muted-foreground sm:-mb-4 footer-font"
