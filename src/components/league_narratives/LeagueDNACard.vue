@@ -49,7 +49,7 @@ const champions = computed(() => props.leagueDNA.parity.championships);
       </div>
     </div>
 
-    <Card class="p-4 mt-4">
+    <div class="mt-4">
       <div class="">
         <p class="font-semibold">Champions</p>
       </div>
@@ -72,6 +72,6 @@ const champions = computed(() => props.leagueDNA.parity.championships);
       <p v-else class="mt-3 text-sm text-muted-foreground">
         No champion data available.
       </p>
-    </Card>
+    </div>
   </Card>
 </template>

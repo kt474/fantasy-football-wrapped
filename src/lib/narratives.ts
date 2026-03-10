@@ -91,38 +91,10 @@ export type ManagerArchetype = {
   weeklyScoreStdDev: number;
 };
 
-export type RivalryProfile = {
-  manager1Id: string;
-  manager2Id: string;
-  manager1Name: string;
-  manager2Name: string;
-  manager1Avatar?: string;
-  manager2Avatar?: string;
-  gamesPlayed: number;
-  manager1Wins: number;
-  manager2Wins: number;
-  ties: number;
-  avgMargin: number;
-  closeGames: number;
-  blowouts: number;
-  score: number;
-  closeGameRate: number;
-  matchupHistory: {
-    season: string;
-    week: number;
-    winnerId: string | null;
-    winnerName: string | null;
-    margin: number;
-    manager1Points: number;
-    manager2Points: number;
-  }[];
-};
-
 export type NarrativeBundle = {
   managerSeasons: ManagerSeasonRecord[];
   leagueDNA: LeagueDNA;
   managerArchetypes: ManagerArchetype[];
-  rivalries: RivalryProfile[];
 };
 
 type ManagerAggregate = {
@@ -546,113 +518,6 @@ const buildMatchupRecords = (
   return matchups;
 };
 
-const buildRivalries = (
-  seasons: HistoricalSeasonInput[],
-  managerSeasons: ManagerSeasonRecord[]
-) => {
-  const rivalryMap = new Map<string, RivalryProfile>();
-  +seasons.forEach((season) => {
-    const seasonRecords = managerSeasons.filter(
-      (record) => record.season === season.season
-    );
-    const matchupRecords = buildMatchupRecords(season, seasonRecords);
-    const matchupGroups = new Map<string, MatchupRecord[]>();
-
-    matchupRecords.forEach((record) => {
-      const key = `${record.season}-${record.week}-${record.matchupId}`;
-      const existing = matchupGroups.get(key) ?? [];
-      existing.push(record);
-      matchupGroups.set(key, existing);
-    });
-
-    matchupGroups.forEach((records) => {
-      if (records.length !== 2) {
-        return;
-      }
-
-      const [left, right] = records.sort((a, b) =>
-        a.managerId.localeCompare(b.managerId)
-      );
-      const rivalryKey = `${left.managerId}-${right.managerId}`;
-      const margin = Math.abs(left.points - right.points);
-      const existing = rivalryMap.get(rivalryKey) ?? {
-        manager1Id: left.managerId,
-        manager2Id: right.managerId,
-        manager1Name: left.managerName,
-        manager2Name: right.managerName,
-        manager1Avatar: left.avatarImg,
-        manager2Avatar: right.avatarImg,
-        gamesPlayed: 0,
-        manager1Wins: 0,
-        manager2Wins: 0,
-        ties: 0,
-        avgMargin: 0,
-        closeGames: 0,
-        blowouts: 0,
-        score: 0,
-        closeGameRate: 0,
-        matchupHistory: [],
-      };
-
-      existing.gamesPlayed += 1;
-      existing.avgMargin += margin;
-      if (margin <= 10) {
-        existing.closeGames += 1;
-      }
-      if (margin >= 25) {
-        existing.blowouts += 1;
-      }
-
-      let winnerId: string | null = null;
-      let winnerName: string | null = null;
-      if (left.points > right.points) {
-        existing.manager1Wins += 1;
-        winnerId = left.managerId;
-        winnerName = left.managerName;
-      } else if (right.points > left.points) {
-        existing.manager2Wins += 1;
-        winnerId = right.managerId;
-        winnerName = right.managerName;
-      } else {
-        existing.ties += 1;
-      }
-
-      existing.matchupHistory.push({
-        season: left.season,
-        week: left.week,
-        winnerId,
-        winnerName,
-        margin,
-        manager1Points: left.points,
-        manager2Points: right.points,
-      });
-
-      rivalryMap.set(rivalryKey, existing);
-    });
-  });
-
-  return Array.from(rivalryMap.values())
-    .map((rivalry) => {
-      const avgMargin = rivalry.gamesPlayed
-        ? rivalry.avgMargin / rivalry.gamesPlayed
-        : 0;
-      const balanceBonus = Math.min(rivalry.manager1Wins, rivalry.manager2Wins);
-      const score =
-        rivalry.gamesPlayed * 2 + balanceBonus * 3 + rivalry.closeGames * 2;
-
-      return {
-        ...rivalry,
-        avgMargin,
-        score,
-        closeGameRate: rivalry.gamesPlayed
-          ? rivalry.closeGames / rivalry.gamesPlayed
-          : 0,
-      } satisfies RivalryProfile;
-    })
-    .filter((rivalry) => rivalry.gamesPlayed >= 2)
-    .sort((left, right) => right.score - left.score);
-};
-
 export const normalizeHistoricalSeasons = (
   currentLeague?: LeagueInfoType
 ): HistoricalSeasonInput[] => {
@@ -691,6 +556,5 @@ export const buildNarrativeBundle = (
     managerSeasons,
     leagueDNA: buildLeagueDNA(seasons, managerAggregates),
     managerArchetypes: buildManagerArchetypes(managerSeasons),
-    rivalries: buildRivalries(seasons, managerSeasons),
   };
 };

@@ -3,11 +3,12 @@ import { computed } from "vue";
 import { useStore } from "../../store/store.ts";
 import LeagueDNACard from "./LeagueDNACard.vue";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
-import GreatestRivalriesCard from "./GreatestRivalriesCard.vue";
+
 import {
   buildNarrativeBundle,
   normalizeHistoricalSeasons,
 } from "@/lib/narratives";
+import type { ManagerBlurbsPayload } from "@/api/api";
 
 const store = useStore();
 
@@ -16,13 +17,124 @@ const seasons = computed(() =>
 );
 
 const narratives = computed(() => buildNarrativeBundle(seasons.value));
+
+const getDescendingRankMap = (
+  values: { userId: string; value: number }[]
+): Record<string, number> => {
+  const sorted = [...values].sort((left, right) => right.value - left.value);
+  const rankMap: Record<string, number> = {};
+
+  sorted.forEach((entry, index) => {
+    const previous = sorted[index - 1];
+    if (previous && previous.value === entry.value) {
+      rankMap[entry.userId] = rankMap[previous.userId];
+      return;
+    }
+    rankMap[entry.userId] = index + 1;
+  });
+
+  return rankMap;
+};
+
+const relativeRanks = computed(() => {
+  const managers = narratives.value.managerArchetypes;
+
+  return {
+    titles: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.titles,
+      }))
+    ),
+    winRate: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.winRate,
+      }))
+    ),
+    pointsFor: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.totalPointsFor,
+      }))
+    ),
+    pointsAgainst: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.totalPointsAgainst,
+      }))
+    ),
+    trades: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.totalTrades,
+      }))
+    ),
+    waivers: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.totalWaivers,
+      }))
+    ),
+    efficiency: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.averageEfficiency,
+      }))
+    ),
+    pointsPerSeason: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.averagePointsPerSeason,
+      }))
+    ),
+  };
+});
+
+const managerPayload = computed<ManagerBlurbsPayload>(() => ({
+  league: {
+    leagueId: store.leagueInfo[store.currentLeagueIndex]?.leagueId ?? "",
+    leagueName: store.leagueInfo[store.currentLeagueIndex]?.name ?? "",
+    seasonsAnalyzed: narratives.value.leagueDNA.sample.seasonsAnalyzed,
+    totalManagers: narratives.value.leagueDNA.sample.distinctManagers,
+  },
+  managers: narratives.value.managerArchetypes.map((manager) => ({
+    userId: manager.userId,
+    name: manager.displayName,
+    avatarImg: manager.avatarImg,
+    seasons: manager.seasons,
+    titles: manager.titles,
+    record: {
+      wins: manager.totalWins,
+      losses: manager.totalLosses,
+      ties: manager.totalTies,
+    },
+    winRate: manager.winRate,
+    totalPointsFor: manager.totalPointsFor,
+    totalPointsAgainst: manager.totalPointsAgainst,
+    totalTrades: manager.totalTrades,
+    totalWaivers: manager.totalWaivers,
+    averageEfficiency: manager.averageEfficiency,
+    averagePointsPerSeason: manager.averagePointsPerSeason,
+    relative: {
+      titlesRank: relativeRanks.value.titles[manager.userId],
+      winRateRank: relativeRanks.value.winRate[manager.userId],
+      pointsForRank: relativeRanks.value.pointsFor[manager.userId],
+      pointsAgainstRank: relativeRanks.value.pointsAgainst[manager.userId],
+      tradesRank: relativeRanks.value.trades[manager.userId],
+      waiversRank: relativeRanks.value.waivers[manager.userId],
+      efficiencyRank: relativeRanks.value.efficiency[manager.userId],
+      pointsPerSeasonRank: relativeRanks.value.pointsPerSeason[manager.userId],
+    },
+  })),
+}));
 </script>
 <template>
   <div class="space-y-4">
     <LeagueDNACard class="mt-4" :league-d-n-a="narratives.leagueDNA" />
-    <div class="grid gap-4 xl:grid-cols-2">
-      <ManagerArchetypesCard :archetypes="narratives.managerArchetypes" />
-      <GreatestRivalriesCard :rivalries="narratives.rivalries" />
-    </div>
+    <ManagerArchetypesCard
+      :archetypes="narratives.managerArchetypes"
+      :payload="managerPayload"
+    />
   </div>
 </template>

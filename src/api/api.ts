@@ -38,6 +38,52 @@ const parseJson = async <T>(
   }
 };
 
+export interface ManagerBlurbsPayload {
+  league: {
+    leagueId: string;
+    leagueName: string;
+    seasonsAnalyzed: number;
+    totalManagers: number;
+  };
+  managers: {
+    userId: string;
+    name: string;
+    avatarImg?: string;
+    seasons: number;
+    titles: number;
+    record: {
+      wins: number;
+      losses: number;
+      ties: number;
+    };
+    winRate: number;
+    totalPointsFor: number;
+    totalPointsAgainst: number;
+    totalTrades: number;
+    totalWaivers: number;
+    averageEfficiency: number;
+    averagePointsPerSeason: number;
+    relative: {
+      titlesRank: number;
+      winRateRank: number;
+      pointsForRank: number;
+      pointsAgainstRank: number;
+      tradesRank: number;
+      waiversRank: number;
+      efficiencyRank: number;
+      pointsPerSeasonRank: number;
+    };
+  }[];
+}
+
+export interface ManagerBlurbsResponse {
+  blurbs: {
+    userId: string;
+    name: string;
+    blurb: string;
+  }[];
+}
+
 export const getPlayerNews = async (
   playerNames: string[]
 ): Promise<Record<string, unknown>[]> => {
@@ -216,6 +262,42 @@ export const generatePremiumReport = async (
     return {
       text: "Unable to generate premium report right now. Please try again later.",
     };
+  }
+};
+
+export const generateManagerArchetype = async (
+  payload: ManagerBlurbsPayload
+): Promise<ManagerBlurbsResponse> => {
+  try {
+    const response = await authenticatedFetch(
+      import.meta.env.VITE_MANAGER_ARCHETYPE,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: payload,
+        }),
+      }
+    );
+    if (response.status === 401) {
+      throw new Error("Please sign in to use premium reports.");
+    }
+    assertOk(response, "Manager archetype request");
+    return await parseJson<ManagerBlurbsResponse>(
+      response,
+      "Manager Archetype"
+    );
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Unable to generate report.";
+    if (message.includes("Please sign in")) {
+      throw new Error("Please sign in to use premium reports.");
+    }
+    throw new Error(
+      "Unable to generate premium report right now. Please try again later."
+    );
   }
 };
 
