@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store.ts";
 import LeagueDNACard from "./LeagueDNACard.vue";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
 
 import {
   buildNarrativeBundle,
+  type NarrativeBundle,
   normalizeHistoricalSeasons,
 } from "@/lib/narratives";
 import type { ManagerBlurbsPayload } from "@/api/api";
@@ -16,7 +17,49 @@ const seasons = computed(() =>
   normalizeHistoricalSeasons(store.leagueInfo[store.currentLeagueIndex])
 );
 
-const narratives = computed(() => buildNarrativeBundle(seasons.value));
+const narratives = ref<NarrativeBundle>({
+  leagueDNA: {
+    sample: {
+      seasonsAnalyzed: 0,
+      distinctManagers: 0,
+      averageTeamsPerSeason: 0,
+    },
+    parity: {
+      uniqueChampions: 0,
+      championDiversityIndex: 0,
+      titlesByManager: {},
+      championships: [],
+    },
+    activity: {
+      totalTrades: 0,
+      totalWaivers: 0,
+      avgTradesPerSeason: 0,
+      avgWaiversPerSeason: 0,
+      avgTradesPerTeamSeason: 0,
+      avgWaiversPerTeamSeason: 0,
+    },
+    scoring: {
+      averageWeeklyScore: 0,
+      weeklyScoreStdDev: 0,
+      highestWeeklyScore: 0,
+      lowestWeeklyScore: 0,
+    },
+    volatility: {
+      averageWeeklyMargin: 0,
+      closeGameRate: 0,
+      blowoutRate: 0,
+    },
+  },
+  managerArchetypes: [],
+});
+
+watch(
+  seasons,
+  async (nextSeasons) => {
+    narratives.value = await buildNarrativeBundle(nextSeasons);
+  },
+  { immediate: true }
+);
 
 const getDescendingRankMap = (
   values: { userId: string; value: number }[]
@@ -88,6 +131,12 @@ const relativeRanks = computed(() => {
         value: manager.averagePointsPerSeason,
       }))
     ),
+    tradeValueGained: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.tradeValueGained,
+      }))
+    ),
   };
 });
 
@@ -111,6 +160,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
     totalPointsFor: manager.totalPointsFor,
     totalPointsAgainst: manager.totalPointsAgainst,
     totalTrades: manager.totalTrades,
+    tradeValueGained: Math.round(manager.tradeValueGained),
     totalWaivers: manager.totalWaivers,
     averageEfficiency: manager.averageEfficiency,
     playoffAppearances: manager.playoffAppearances,
@@ -122,6 +172,8 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
       tradesRank: relativeRanks.value.trades[manager.userId],
       waiversRank: relativeRanks.value.waivers[manager.userId],
       efficiencyRank: relativeRanks.value.efficiency[manager.userId],
+      tradeValueGainedRank:
+        relativeRanks.value.tradeValueGained[manager.userId],
     },
   })),
 }));

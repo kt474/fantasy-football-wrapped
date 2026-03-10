@@ -1,4 +1,5 @@
-import { LeagueInfoType, PointsType } from "../types/types";
+import { getTradeValue } from "../api/sleeperApi";
+import { LeagueInfoType } from "../types/types";
 import {
   Bracket,
   WeeklyWaiver,
@@ -10,6 +11,7 @@ export type HistoricalSeasonInput = {
   season: string;
   leagueId: string;
   leagueWinner: string | null;
+  scoringType: number;
   rosters: LeagueInfoType["rosters"];
   weeklyPoints: LeagueInfoType["weeklyPoints"];
   users: LeagueInfoType["users"];
@@ -34,6 +36,7 @@ export type ManagerSeasonRecord = {
   weeklyScores: number[];
   matchupIds: (number | null)[];
   tradeCount: number;
+  tradeValueGained: number;
   waiverCount: number;
   isChampion: boolean;
   madePlayoffs: boolean;
@@ -87,6 +90,7 @@ export type ManagerArchetype = {
   totalPointsFor: number;
   totalPointsAgainst: number;
   totalTrades: number;
+  tradeValueGained: number;
   totalWaivers: number;
   averageEfficiency: number;
   averagePointsPerSeason: number;
@@ -114,21 +118,11 @@ type ManagerAggregate = {
   totalPointsFor: number;
   totalPointsAgainst: number;
   totalTrades: number;
+  tradeValueGained: number;
   totalWaivers: number;
   avgEfficiency: number;
   scoreVariance: number;
   playoffAppearances: number;
-};
-
-type MatchupRecord = {
-  season: string;
-  rosterId: number;
-  managerId: string;
-  managerName: string;
-  avatarImg?: string;
-  matchupId: number;
-  week: number;
-  points: number;
 };
 
 const clamp = (value: number, min = 0, max = 1) =>
@@ -145,6 +139,14 @@ const stdDev = (values: number[]) => {
   const variance =
     values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
   return Math.sqrt(variance);
+};
+
+const getTradeScore = (rank: number | null) => {
+  if (rank === null) {
+    return 0;
+  }
+
+  return Math.max(0, 100 - rank);
 };
 
 const countTransactionsForManager = (
@@ -184,55 +186,108 @@ const getChampionRosterId = (season: HistoricalSeasonInput) => {
   return Number.isNaN(parsed) ? null : parsed;
 };
 
-const buildSeasonRecords = (
+const getTradeValueDeltaForRoster = async (
+  season: HistoricalSeasonInput,
+  rosterId: number
+): Promise<number> => {
+  const completedTrades = season.trades.filter(
+    (trade) =>
+      trade.status === WaiverStatus.Complete &&
+      trade.type === WaiverType.Trade &&
+      trade.roster_ids.includes(rosterId) &&
+      trade.adds
+  );
+
+  if (!completedTrades.length) {
+    return 0;
+  }
+
+  const tradeDeltas = await Promise.all(
+    completedTrades.map(async (trade) => {
+      const playerIds = Object.keys(trade.adds ?? {});
+      const playerValues = await Promise.all(
+        playerIds.map(async (playerId) => ({
+          score: getTradeScore(
+            (await getTradeValue(
+              playerId,
+              season.season,
+              trade.leg,
+              season.scoringType
+            )) ?? null
+          ),
+          receivingRosterId: trade.adds?.[playerId] ?? null,
+        }))
+      );
+
+      return playerValues.reduce((sum, player) => {
+        if (player.receivingRosterId === rosterId) {
+          return sum + player.score;
+        }
+        return sum - player.score;
+      }, 0);
+    })
+  );
+
+  return tradeDeltas.reduce((sum, delta) => sum + delta, 0);
+};
+
+const buildSeasonRecords = async (
   season: HistoricalSeasonInput
-): ManagerSeasonRecord[] => {
+): Promise<ManagerSeasonRecord[]> => {
   const championRosterId = getChampionRosterId(season);
-  const records: ManagerSeasonRecord[] = [];
-  season.rosters.forEach((roster) => {
-    const user = season.users.find((candidate) => candidate.id === roster.id);
-    const points = season.weeklyPoints.find(
-      (weeklyEntry) => weeklyEntry.rosterId === roster.rosterId
-    );
+  const records: Array<ManagerSeasonRecord | null> = await Promise.all(
+    season.rosters.map(async (roster) => {
+      const user = season.users.find((candidate) => candidate.id === roster.id);
+      const points = season.weeklyPoints.find(
+        (weeklyEntry) => weeklyEntry.rosterId === roster.rosterId
+      );
 
-    if (!user || !points) {
-      return;
-    }
+      if (!user || !points) {
+        return null;
+      }
 
-    records.push({
-      userId: user.id,
-      rosterId: roster.rosterId,
-      season: season.season,
-      name: user.name,
-      username: user.username,
-      avatarImg: user.avatarImg,
-      wins: roster.wins,
-      losses: roster.losses,
-      ties: roster.ties,
-      pointsFor: roster.pointsFor,
-      pointsAgainst: roster.pointsAgainst,
-      managerEfficiency: roster.managerEfficiency,
-      weeklyScores: points.points,
-      madePlayoffs: season.playoffs.some(
-        (obj) => obj.t1 === roster.rosterId || obj.t2 === roster.rosterId
-      ),
-      matchupIds: points.matchups ?? [],
-      tradeCount: countTransactionsForManager(
-        season.trades,
-        user.id,
-        roster.rosterId,
-        "trade"
-      ),
-      waiverCount: countTransactionsForManager(
-        season.waivers,
-        user.id,
-        roster.rosterId,
-        "waiver"
-      ),
-      isChampion: championRosterId === roster.rosterId,
-    });
-  });
-  return records;
+      return {
+        userId: user.id,
+        rosterId: roster.rosterId,
+        season: season.season,
+        name: user.name,
+        username: user.username,
+        avatarImg: user.avatarImg,
+        wins: roster.wins,
+        losses: roster.losses,
+        ties: roster.ties,
+        pointsFor: roster.pointsFor,
+        pointsAgainst: roster.pointsAgainst,
+        managerEfficiency: roster.managerEfficiency,
+        weeklyScores: points.points,
+        madePlayoffs: season.playoffs.some(
+          (obj) => obj.t1 === roster.rosterId || obj.t2 === roster.rosterId
+        ),
+        matchupIds: points.matchups ?? [],
+        tradeCount: countTransactionsForManager(
+          season.trades,
+          user.id,
+          roster.rosterId,
+          "trade"
+        ),
+        tradeValueGained: await getTradeValueDeltaForRoster(
+          season,
+          roster.rosterId
+        ),
+        waiverCount: countTransactionsForManager(
+          season.waivers,
+          user.id,
+          roster.rosterId,
+          "waiver"
+        ),
+        isChampion: championRosterId === roster.rosterId,
+      } satisfies ManagerSeasonRecord;
+    })
+  );
+
+  return records.filter(
+    (record): record is ManagerSeasonRecord => record !== null
+  );
 };
 
 const aggregateManagers = (records: ManagerSeasonRecord[]) => {
@@ -254,6 +309,7 @@ const aggregateManagers = (records: ManagerSeasonRecord[]) => {
         totalPointsFor: record.pointsFor,
         totalPointsAgainst: record.pointsAgainst,
         totalTrades: record.tradeCount,
+        tradeValueGained: record.tradeValueGained,
         totalWaivers: record.waiverCount,
         avgEfficiency: record.managerEfficiency,
         scoreVariance: weeklyVariance,
@@ -271,6 +327,7 @@ const aggregateManagers = (records: ManagerSeasonRecord[]) => {
     existing.totalPointsFor += record.pointsFor;
     existing.totalPointsAgainst += record.pointsAgainst;
     existing.totalTrades += record.tradeCount;
+    existing.tradeValueGained += record.tradeValueGained;
     existing.playoffAppearances += record.madePlayoffs ? 1 : 0;
     existing.totalWaivers += record.waiverCount;
     existing.avgEfficiency =
@@ -387,20 +444,23 @@ const buildLeagueDNA = (
   );
 
   const allMargins = seasons.flatMap((season) => {
-    const seasonRecords = buildSeasonRecords(season);
-    const matchupRecords = buildMatchupRecords(season, seasonRecords);
-    const matchupGroups = new Map<string, MatchupRecord[]>();
+    const matchupGroups = new Map<string, number[]>();
 
-    matchupRecords.forEach((record) => {
-      const key = `${record.season}-${record.week}-${record.matchupId}`;
-      const existing = matchupGroups.get(key) ?? [];
-      existing.push(record);
-      matchupGroups.set(key, existing);
+    season.weeklyPoints.forEach((entry) => {
+      entry.matchups?.forEach((matchupId, weekIndex) => {
+        if (matchupId === null || matchupId === undefined) {
+          return;
+        }
+        const key = `${season.season}-${weekIndex + 1}-${matchupId}`;
+        const existing = matchupGroups.get(key) ?? [];
+        existing.push(entry.points[weekIndex] ?? 0);
+        matchupGroups.set(key, existing);
+      });
     });
 
     return Array.from(matchupGroups.values())
-      .filter((records) => records.length === 2)
-      .map((records) => Math.abs(records[0].points - records[1].points));
+      .filter((scores) => scores.length === 2)
+      .map((scores) => Math.abs(scores[0] - scores[1]));
   });
 
   return {
@@ -472,6 +532,7 @@ const buildManagerArchetypes = (records: ManagerSeasonRecord[]) => {
         totalPointsFor: manager.totalPointsFor,
         totalPointsAgainst: manager.totalPointsAgainst,
         totalTrades: manager.totalTrades,
+        tradeValueGained: manager.tradeValueGained,
         totalWaivers: manager.totalWaivers,
         averageEfficiency: manager.avgEfficiency,
         playoffAppearances: manager.playoffAppearances,
@@ -488,42 +549,6 @@ const buildManagerArchetypes = (records: ManagerSeasonRecord[]) => {
       }
       return right.winRate - left.winRate;
     });
-};
-
-const buildMatchupRecords = (
-  season: HistoricalSeasonInput,
-  seasonRecords: ManagerSeasonRecord[]
-) => {
-  const rosterMap = new Map<number, ManagerSeasonRecord>(
-    seasonRecords.map((record) => [record.rosterId, record])
-  );
-  const matchups: MatchupRecord[] = [];
-
-  season.weeklyPoints.forEach((entry: PointsType) => {
-    const manager = rosterMap.get(entry.rosterId);
-    if (!manager || !entry.matchups) {
-      return;
-    }
-
-    entry.matchups.forEach((matchupId, weekIndex) => {
-      if (matchupId === null || matchupId === undefined) {
-        return;
-      }
-
-      matchups.push({
-        season: season.season,
-        rosterId: entry.rosterId,
-        managerId: manager.userId,
-        managerName: manager.username || manager.name,
-        avatarImg: manager.avatarImg,
-        matchupId,
-        week: weekIndex + 1,
-        points: entry.points[weekIndex] ?? 0,
-      });
-    });
-  });
-
-  return matchups;
 };
 
 export const normalizeHistoricalSeasons = (
@@ -544,6 +569,7 @@ export const normalizeHistoricalSeasons = (
         : season.legacyWinner !== null && season.legacyWinner !== undefined
           ? String(season.legacyWinner)
           : null,
+    scoringType: season.scoringType,
     rosters: season.rosters,
     weeklyPoints: season.weeklyPoints,
     users: season.users,
@@ -553,12 +579,13 @@ export const normalizeHistoricalSeasons = (
   }));
 };
 
-export const buildNarrativeBundle = (
+export const buildNarrativeBundle = async (
   seasons: HistoricalSeasonInput[]
-): NarrativeBundle => {
-  const managerSeasons = seasons.flatMap((season) =>
-    buildSeasonRecords(season)
+): Promise<NarrativeBundle> => {
+  const managerSeasonGroups = await Promise.all(
+    seasons.map((season) => buildSeasonRecords(season))
   );
+  const managerSeasons = managerSeasonGroups.flat();
   const managerAggregates = aggregateManagers(managerSeasons);
 
   return {

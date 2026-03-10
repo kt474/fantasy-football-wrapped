@@ -55,6 +55,7 @@ export interface ManagerBlurbsPayload {
     totalPointsFor: number;
     totalPointsAgainst: number;
     totalTrades: number;
+    tradeValueGained: number;
     totalWaivers: number;
     averageEfficiency: number;
     relative: {
