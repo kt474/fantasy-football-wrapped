@@ -24,6 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Narratives from "../league_narratives/Narratives.vue";
 
 const PowerRankingData = defineAsyncComponent(
   () => import("../power_rankings/PowerRankingData.vue")
@@ -662,6 +663,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
     </div>
     <div v-if="store.currentTab === 'League History'">
       <LeagueHistory :tableData="tableData" />
+    </div>
+    <div v-if="store.currentTab === 'League Narratives'">
+      <Narratives />
     </div>
     <div v-if="store.currentTab === 'Wrapped'">
       <Wrapped

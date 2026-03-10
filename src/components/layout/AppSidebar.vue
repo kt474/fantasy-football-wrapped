@@ -33,6 +33,7 @@ import {
   Handshake,
   Dices,
   FlaskConical,
+  BookMarked,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
@@ -141,6 +142,10 @@ const data = {
         {
           title: "League History",
           icon: FolderClock,
+        },
+        {
+          title: "League Narratives",
+          icon: BookMarked,
         },
         {
           title: "Wrapped",
