@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { ref, onMounted } from "vue";
 import Card from "../ui/card/Card.vue";
-import Button from "../ui/button/Button.vue";
 import { generateManagerArchetype, type ManagerBlurbsPayload } from "@/api/api";
 import type { ManagerArchetype } from "@/lib/narratives";
 import { toast } from "vue-sonner";
+import { useStore } from "@/store/store";
+import { LeagueInfoType } from "@/types/types";
+import Separator from "../ui/separator/Separator.vue";
+import { useAuthStore } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription.ts";
 
+const store = useStore();
+const authStore = useAuthStore();
+const subscriptionStore = useSubscriptionStore();
 const props = defineProps<{
   archetypes: ManagerArchetype[];
   payload: ManagerBlurbsPayload;
@@ -13,10 +20,6 @@ const props = defineProps<{
 
 const isLoading = ref(false);
 const blurbsByUserId = ref<Record<string, string>>({});
-
-const hasBlurbs = computed(
-  () => Object.keys(blurbsByUserId.value).length === props.archetypes.length
-);
 
 const getManagerArchetypes = async () => {
   try {
@@ -29,6 +32,14 @@ const getManagerArchetypes = async () => {
       },
       {} as Record<string, string>
     );
+    store.addManagerProfiles(
+      store.leagueInfo[store.currentLeagueIndex].leagueId,
+      blurbsByUserId.value
+    );
+    localStorage.setItem(
+      "leagueInfo",
+      JSON.stringify(store.leagueInfo as LeagueInfoType[])
+    );
   } catch (error) {
     const message =
       error instanceof Error
@@ -39,6 +50,19 @@ const getManagerArchetypes = async () => {
     isLoading.value = false;
   }
 };
+
+onMounted(async () => {
+  if (
+    Object.keys(
+      store.leagueInfo[store.currentLeagueIndex].managerProfiles ?? {}
+    ).length > 0
+  ) {
+    blurbsByUserId.value =
+      store.leagueInfo[store.currentLeagueIndex].managerProfiles ?? {};
+  } else if (authStore.isAuthenticated && subscriptionStore.isPremium) {
+    await getManagerArchetypes();
+  }
+});
 </script>
 
 <template>
@@ -47,18 +71,20 @@ const getManagerArchetypes = async () => {
       <div>
         <p class="text-3xl font-bold leading-none">Manager Profiles</p>
         <p class="mt-4 text-muted-foreground">
-          Career profiles and historical stats for every manager.
+          Career stats and historical trends for every manager.
+          <span v-if="!subscriptionStore.isPremium">
+            Custom manager descriptions are available with a</span
+          >
+          <router-link
+            :to="{ path: '/account', query: $route.query }"
+            class="font-medium cursor-pointer text-primary hover:underline"
+            @click="store.currentTab = ''"
+          >
+            Premium subscription</router-link
+          >.
         </p>
+        <p class="text-muted-foreground"></p>
       </div>
-      <Button @click="getManagerArchetypes" :disabled="isLoading">
-        {{
-          isLoading
-            ? "Generating..."
-            : hasBlurbs
-              ? "Regenerate blurbs"
-              : "Generate blurbs"
-        }}
-      </Button>
     </div>
     <div class="grid gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3">
       <div
@@ -80,12 +106,18 @@ const getManagerArchetypes = async () => {
             </p>
           </div>
         </div>
-
+        <Separator class="mt-2" />
         <p
           v-if="blurbsByUserId[archetype.userId]"
-          class="mt-4 text-sm leading-relaxed text-muted-foreground"
+          class="mt-2 text-sm leading-relaxed max-h-44 text-muted-foreground"
         >
           {{ blurbsByUserId[archetype.userId] }}
+        </p>
+        <p
+          class="my-4 text-sm leading-relaxed text-muted-foreground"
+          v-else-if="isLoading"
+        >
+          Loading manager description...
         </p>
 
         <div

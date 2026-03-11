@@ -264,7 +264,7 @@ export const generateManagerArchetype = async (
 ): Promise<ManagerBlurbsResponse> => {
   try {
     const response = await authenticatedFetch(
-      import.meta.env.VITE_MANAGER_ARCHETYPE,
+      import.meta.env.VITE_MANAGER_PROFILES,
       {
         method: "POST",
         headers: {
