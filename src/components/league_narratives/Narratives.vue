@@ -2,7 +2,8 @@
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store.ts";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
-
+import LeagueHistory from "../league_history/LeagueHistory.vue";
+import { TableDataType } from "@/types/types.ts";
 import {
   buildNarrativeBundle,
   type NarrativeBundle,
@@ -12,6 +13,9 @@ import type { ManagerBlurbsPayload } from "@/api/api";
 
 const store = useStore();
 
+const props = defineProps<{
+  tableData: TableDataType[];
+}>();
 const seasons = computed(() =>
   normalizeHistoricalSeasons(store.leagueInfo[store.currentLeagueIndex])
 );
@@ -51,6 +55,7 @@ const narratives = ref<NarrativeBundle>({
   },
   managerArchetypes: [],
 });
+const isLeagueHistoryReady = ref(false);
 
 watch(
   seasons,
@@ -179,9 +184,16 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
 </script>
 <template>
   <div class="my-4 space-y-4">
+    <LeagueHistory
+      v-show="false"
+      :table-data="tableData"
+      @ready="isLeagueHistoryReady = true"
+    />
     <ManagerArchetypesCard
+      v-if="isLeagueHistoryReady"
       :archetypes="narratives.managerArchetypes"
       :payload="managerPayload"
     />
+    <div v-else>Loading all seasons...</div>
   </div>
 </template>
