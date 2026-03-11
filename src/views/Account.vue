@@ -64,25 +64,6 @@ const stripeRedirectHosts = new Set([
   "buy.stripe.com",
 ]);
 
-const planOptions: PlanOption[] = [
-  {
-    id: "monthly",
-    price: "$4",
-    period: "/month",
-    title: "Monthly",
-    subtitle: "7-day free trial, then billed monthly.",
-    cta: "Start 7-day free trial",
-  },
-  {
-    id: "season_pass",
-    price: "$15",
-    period: "/season",
-    title: "Season Pass",
-    subtitle: "One-time payment through season end (2/15/27).",
-    cta: "Buy season pass",
-  },
-];
-
 const getAllowedRedirectOrigins = () => {
   const origins = new Set<string>();
 
@@ -219,6 +200,34 @@ const accountSummaryContainerClass = computed(() => {
     return "max-w-sm";
   return "max-w-2xl";
 });
+
+const canStartTrial = computed(() => {
+  const status = subscriptionStore.status.toLowerCase();
+  if (subscriptionStore.planType === "monthly") return false;
+  if (status !== "none") return false;
+  return true;
+});
+
+const planOptions = computed<PlanOption[]>(() => [
+  {
+    id: "monthly",
+    price: "$4",
+    period: "/month",
+    title: "Monthly",
+    subtitle: canStartTrial.value
+      ? "7-day free trial, then billed monthly."
+      : "Billed monthly. Cancel anytime.",
+    cta: canStartTrial.value ? "Start 7-day free trial" : "Subscribe monthly",
+  },
+  {
+    id: "season_pass",
+    price: "$15",
+    period: "/season",
+    title: "Season Pass",
+    subtitle: "One-time payment through season end (2/15/27).",
+    cta: "Buy season pass",
+  },
+]);
 
 const getCheckoutButtonText = (plan: PlanOption) => {
   if (checkoutLoadingPlan.value === plan.id) return "Redirecting...";
@@ -813,7 +822,6 @@ onMounted(async () => {
           authStore.isAuthenticated &&
           !subscriptionStore.isPremium &&
           !subscriptionStore.loading &&
-          subscriptionStore.status.toLowerCase() !== 'canceled' &&
           !showPasswordRecoveryForm
         "
         class="max-w-xl mt-4"

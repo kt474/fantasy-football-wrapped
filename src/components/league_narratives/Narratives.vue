@@ -165,6 +165,11 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
       :archetypes="narratives.managerArchetypes"
       :payload="managerPayload"
     />
+    <ManagerArchetypesCard
+      v-else-if="store.leagueInfo.length === 0"
+      :archetypes="[]"
+      :payload="managerPayload"
+    />
     <div v-else>Loading all seasons...</div>
   </div>
 </template>
