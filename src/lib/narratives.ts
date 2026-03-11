@@ -558,8 +558,10 @@ export const normalizeHistoricalSeasons = (
     return [];
   }
 
-  const seasons = [currentLeague, ...(currentLeague.previousLeagues ?? [])];
-
+  const seasons = [
+    currentLeague,
+    ...(currentLeague.previousLeagues ?? []),
+  ].filter((season) => season.lastScoredWeek !== 0);
   return seasons.map((season) => ({
     season: season.season,
     leagueId: season.leagueId,

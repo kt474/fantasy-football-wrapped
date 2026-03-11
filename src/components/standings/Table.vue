@@ -664,7 +664,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
     <div v-if="store.currentTab === 'League History'">
       <LeagueHistory :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'League Narratives'">
+    <div v-if="store.currentTab === 'Manager Profiles'">
       <Narratives />
     </div>
     <div v-if="store.currentTab === 'Wrapped'">

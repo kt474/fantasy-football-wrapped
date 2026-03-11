@@ -2,10 +2,7 @@
 import { computed, ref } from "vue";
 import Card from "../ui/card/Card.vue";
 import Button from "../ui/button/Button.vue";
-import {
-  generateManagerArchetype,
-  type ManagerBlurbsPayload,
-} from "@/api/api";
+import { generateManagerArchetype, type ManagerBlurbsPayload } from "@/api/api";
 import type { ManagerArchetype } from "@/lib/narratives";
 import { toast } from "vue-sonner";
 
@@ -45,12 +42,12 @@ const getManagerArchetypes = async () => {
 </script>
 
 <template>
-  <Card class="p-4">
+  <Card class="p-4 md:p-6">
     <div class="flex items-center justify-between gap-4">
       <div>
-        <p class="text-lg font-semibold">Manager Archetypes</p>
-        <p class="text-sm text-muted-foreground">
-          Career profile plus optional AI-generated manager blurbs.
+        <p class="text-3xl font-bold leading-none">Manager Profiles</p>
+        <p class="mt-4 text-muted-foreground">
+          Career profiles and historical stats for every manager.
         </p>
       </div>
       <Button @click="getManagerArchetypes" :disabled="isLoading">
@@ -63,7 +60,7 @@ const getManagerArchetypes = async () => {
         }}
       </Button>
     </div>
-    <div class="grid gap-4 mt-4 sm:grid-cols-3">
+    <div class="grid gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3">
       <div
         v-for="archetype in archetypes"
         :key="archetype.userId"
@@ -145,10 +142,16 @@ const getManagerArchetypes = async () => {
               {{ archetype.totalWaivers }}
             </p>
           </div>
-          <div class="px-3 py-2 rounded-md bg-secondary sm:col-span-2">
+          <div class="px-3 py-2 rounded-md bg-secondary">
             <p class="text-xs uppercase">Titles</p>
             <p class="mt-1 font-medium text-foreground">
               {{ archetype.titles }}
+            </p>
+          </div>
+          <div class="px-3 py-2 rounded-md bg-secondary">
+            <p class="text-xs uppercase">Playoff Appearances</p>
+            <p class="mt-1 font-medium text-foreground">
+              {{ archetype.playoffAppearances }}
             </p>
           </div>
         </div>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store.ts";
-import LeagueDNACard from "./LeagueDNACard.vue";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
 
 import {
@@ -157,7 +156,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
         ? `${manager.totalWins}-${manager.totalLosses}`
         : `${manager.totalWins}-${manager.totalLosses}-${manager.totalTies}`,
     winRate: manager.winRate,
-    totalPointsFor: manager.totalPointsFor,
+    totalPointsScored: manager.totalPointsFor,
     totalPointsAgainst: manager.totalPointsAgainst,
     totalTrades: manager.totalTrades,
     tradeValueGained: Math.round(manager.tradeValueGained),
@@ -167,7 +166,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
     relative: {
       titlesRank: relativeRanks.value.titles[manager.userId],
       winRateRank: relativeRanks.value.winRate[manager.userId],
-      pointsForRank: relativeRanks.value.pointsFor[manager.userId],
+      pointsScoredRank: relativeRanks.value.pointsFor[manager.userId],
       pointsAgainstRank: relativeRanks.value.pointsAgainst[manager.userId],
       tradesRank: relativeRanks.value.trades[manager.userId],
       waiversRank: relativeRanks.value.waivers[manager.userId],
@@ -179,8 +178,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
 }));
 </script>
 <template>
-  <div class="space-y-4">
-    <LeagueDNACard class="mt-4" :league-d-n-a="narratives.leagueDNA" />
+  <div class="my-4 space-y-4">
     <ManagerArchetypesCard
       :archetypes="narratives.managerArchetypes"
       :payload="managerPayload"

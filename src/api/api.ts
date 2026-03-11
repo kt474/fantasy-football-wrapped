@@ -52,7 +52,7 @@ export interface ManagerBlurbsPayload {
     titles: number;
     record: string;
     winRate: number;
-    totalPointsFor: number;
+    totalPointsScored: number;
     totalPointsAgainst: number;
     totalTrades: number;
     tradeValueGained: number;
@@ -61,7 +61,7 @@ export interface ManagerBlurbsPayload {
     relative: {
       titlesRank: number;
       winRateRank: number;
-      pointsForRank: number;
+      pointsScoredRank: number;
       pointsAgainstRank: number;
       tradesRank: number;
       waiversRank: number;

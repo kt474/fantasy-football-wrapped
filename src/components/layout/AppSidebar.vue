@@ -33,7 +33,7 @@ import {
   Handshake,
   Dices,
   FlaskConical,
-  BookMarked,
+  IdCard,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
@@ -144,8 +144,8 @@ const data = {
           icon: FolderClock,
         },
         {
-          title: "League Narratives",
-          icon: BookMarked,
+          title: "Manager Profiles",
+          icon: IdCard,
         },
         {
           title: "Wrapped",
