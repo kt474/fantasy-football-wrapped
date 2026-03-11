@@ -19,24 +19,33 @@
         <p class="my-3 text-xl font-semibold">Service Description</p>
         ffwrapped provides fantasy football analysis, reports, and related
         features. Some features are free and some are available only with a paid
-        subscription.
+        plan.
 
         <p class="my-3 text-xl font-semibold">
-          Subscriptions, Billing, and Trial
+          Paid Plans, Billing, and Trial
         </p>
-        Paid features are billed as recurring subscriptions through Stripe. By
-        starting a subscription, you authorize recurring charges for the plan
-        you selected until canceled. Prices, billing intervals, and trial terms
-        are shown at checkout and on the account page.
+        Paid features are billed through Stripe. We may offer recurring
+        subscription plans, one-time seasonal passes, or both. By purchasing a
+        paid plan, you authorize the charges shown at checkout for the plan you
+        selected. For recurring plans, you authorize recurring charges at the
+        billing interval shown at checkout until canceled. Prices, billing
+        intervals, access periods, and any trial terms are shown at checkout
+        and on the account page.
         <br /><br />
-        If a free trial is offered, you will be charged when the trial ends
-        unless you cancel before renewal. You can manage or cancel your
-        subscription from your account billing portal.
+        If a free trial is offered on a recurring plan, you will be charged
+        when the trial ends unless you cancel before renewal. If a seasonal
+        pass or other one-time plan is offered, access lasts for the period
+        described at checkout and ends automatically without renewal unless
+        otherwise stated.
 
         <p class="my-3 text-xl font-semibold">Cancellation and Refunds</p>
-        You may cancel your subscription at any time through the billing portal.
-        Unless stated otherwise at checkout or required by law, payments are
-        non-refundable and partial billing periods are not prorated.
+        Recurring subscriptions may be canceled at any time through the billing
+        portal and remain active through the end of the then-current billing
+        period unless otherwise stated. One-time seasonal passes and other
+        one-time purchases are not recurring subscriptions and do not require
+        cancellation. Unless stated otherwise at checkout or required by law,
+        payments are non-refundable and partial billing periods are not
+        prorated.
 
         <p class="my-3 text-xl font-semibold">Acceptable Use</p>
         You agree not to misuse the Service, including by attempting to access
@@ -93,7 +102,7 @@
           class="font-medium text-primary hover:underline"
           >kevin@ffwrapped.com</a
         >. <br /><br />
-        Last updated: February 28, 2026.
+        Last updated: March 11, 2026.
       </div>
     </div>
   </div>

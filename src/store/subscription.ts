@@ -1,4 +1,4 @@
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { defineStore } from "pinia";
 import { authenticatedFetch } from "@/lib/authFetch";
 import { useAuthStore } from "@/store/auth";
@@ -7,9 +7,13 @@ import { toast } from "vue-sonner";
 export type SubscriptionStatusResponse = {
   isPremium: boolean;
   status: string;
+  planType: string | null;
   currentPeriodEnd: string | null;
+  trialEnd: string | null;
   cancelAtPeriodEnd: boolean;
   cancelDate: string | null;
+  seasonPassExpiresAt: string | null;
+  canManageSubscription: boolean;
 };
 
 type SubscriptionStatusCache = SubscriptionStatusResponse & {
@@ -30,9 +34,13 @@ export const useSubscriptionStore = defineStore("subscription", () => {
   const loading = ref(false);
   const isPremium = ref(false);
   const status = ref("none");
+  const planType = ref<string | null>(null);
   const currentPeriodEnd = ref<string | null>(null);
+  const trialEnd = ref<string | null>(null);
   const cancelAtPeriodEnd = ref(false);
   const cancelDate = ref<string | null>(null);
+  const seasonPassExpiresAt = ref<string | null>(null);
+  const canManageSubscription = ref(false);
   const initialized = ref(false);
 
   const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
@@ -40,10 +48,6 @@ export const useSubscriptionStore = defineStore("subscription", () => {
     ""
   );
   const billingApiPath = `${backendBaseUrl}/api/billing/subscriptionStatus`;
-
-  const canManageSubscription = computed(() => {
-    return authStore.isAuthenticated && status.value !== "none";
-  });
 
   const getCacheKey = (userId = authStore.user?.id) => {
     if (!userId) return null;
@@ -53,17 +57,25 @@ export const useSubscriptionStore = defineStore("subscription", () => {
   const applySubscriptionStatus = (payload: SubscriptionStatusResponse) => {
     isPremium.value = payload.isPremium;
     status.value = payload.status;
+    planType.value = payload.planType;
     currentPeriodEnd.value = payload.currentPeriodEnd;
+    trialEnd.value = payload.trialEnd;
     cancelAtPeriodEnd.value = payload.cancelAtPeriodEnd;
     cancelDate.value = payload.cancelDate;
+    seasonPassExpiresAt.value = payload.seasonPassExpiresAt;
+    canManageSubscription.value = payload.canManageSubscription;
   };
 
   const resetSubscriptionState = () => {
     isPremium.value = false;
     status.value = "none";
+    planType.value = null;
     currentPeriodEnd.value = null;
+    trialEnd.value = null;
     cancelAtPeriodEnd.value = false;
     cancelDate.value = null;
+    seasonPassExpiresAt.value = null;
+    canManageSubscription.value = false;
   };
 
   const saveSubscriptionStatusCache = (payload: SubscriptionStatusResponse) => {
@@ -179,9 +191,12 @@ export const useSubscriptionStore = defineStore("subscription", () => {
     loading,
     isPremium,
     status,
+    planType,
     currentPeriodEnd,
+    trialEnd,
     cancelAtPeriodEnd,
     cancelDate,
+    seasonPassExpiresAt,
     initialized,
     canManageSubscription,
     initialize,

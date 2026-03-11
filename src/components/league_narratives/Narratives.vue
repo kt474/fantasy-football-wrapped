@@ -24,6 +24,9 @@ const narratives = ref<NarrativeBundle>({
   managerArchetypes: [],
 });
 const isLeagueHistoryReady = ref(false);
+const areNarrativesReady = computed(
+  () => narratives.value.managerArchetypes.length > 0
+);
 
 watch(
   seasons,
@@ -158,7 +161,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
       @ready="isLeagueHistoryReady = true"
     />
     <ManagerArchetypesCard
-      v-if="isLeagueHistoryReady"
+      v-if="isLeagueHistoryReady && areNarrativesReady"
       :archetypes="narratives.managerArchetypes"
       :payload="managerPayload"
     />

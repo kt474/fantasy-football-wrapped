@@ -38,8 +38,19 @@ const signUpOtpCode = ref("");
 const pendingSignUpEmail = ref("");
 const recoveryPassword = ref("");
 const recoveryPasswordConfirm = ref("");
-const checkoutLoading = ref(false);
+const checkoutLoadingPlan = ref<CheckoutPlan | null>(null);
 const portalLoading = ref(false);
+
+type CheckoutPlan = "monthly" | "season_pass";
+
+type PlanOption = {
+  id: CheckoutPlan;
+  price: string;
+  period: string;
+  title: string;
+  subtitle: string;
+  cta: string;
+};
 
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
   /\/$/,
@@ -52,6 +63,25 @@ const stripeRedirectHosts = new Set([
   "billing.stripe.com",
   "buy.stripe.com",
 ]);
+
+const planOptions: PlanOption[] = [
+  {
+    id: "monthly",
+    price: "$4",
+    period: "/month",
+    title: "Monthly",
+    subtitle: "7-day free trial, then billed monthly.",
+    cta: "Start 7-day free trial",
+  },
+  {
+    id: "season_pass",
+    price: "$15",
+    period: "/season",
+    title: "Season Pass",
+    subtitle: "One-time payment through season end (2/15/27).",
+    cta: "Buy season pass",
+  },
+];
 
 const getAllowedRedirectOrigins = () => {
   const origins = new Set<string>();
@@ -89,6 +119,7 @@ const subscriptionStatusLabel = computed(() => {
 
   const status = subscriptionStore.status.toLowerCase();
   if (status === "none") return "Not Subscribed";
+  if (status === "season_pass") return "Season Pass Active";
   if (status === "active") return "Premium Subscriber";
   return status
     .split("_")
@@ -101,7 +132,11 @@ const subscriptionStatusBadgeClass = computed(() => {
     return "bg-muted text-muted-foreground border-border";
   }
   const status = subscriptionStore.status.toLowerCase();
-  if (status === "active" || status === "trialing") {
+  if (
+    status === "active" ||
+    status === "trialing" ||
+    status === "season_pass"
+  ) {
     return "bg-emerald-100 text-emerald-900 border-emerald-200";
   }
   if (status === "none") {
@@ -143,7 +178,35 @@ const cancelTimelineLabel = computed(() => {
   return "No cancellation scheduled";
 });
 
+const trialTimelineLabel = computed(() => {
+  if (!subscriptionStore.trialEnd) return "No trial end date";
+  return new Date(subscriptionStore.trialEnd).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+});
+
+const seasonPassTimelineLabel = computed(() => {
+  if (!subscriptionStore.seasonPassExpiresAt)
+    return "No season pass expiration";
+  return new Date(subscriptionStore.seasonPassExpiresAt).toLocaleDateString(
+    undefined,
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }
+  );
+});
+
 const subscriptionTimelineNote = computed(() => {
+  if (subscriptionStore.status.toLowerCase() === "trialing") {
+    return `Your free trial ends on ${trialTimelineLabel.value}.`;
+  }
+  if (subscriptionStore.status.toLowerCase() === "season_pass") {
+    return `Your season pass is active through ${seasonPassTimelineLabel.value}.`;
+  }
   if (subscriptionStore.cancelDate) {
     return `Your subscription remains active until ${cancelTimelineLabel.value}.`;
   }
@@ -157,14 +220,10 @@ const accountSummaryContainerClass = computed(() => {
   return "max-w-2xl";
 });
 
-const getCheckoutButtonText = computed(() => {
-  if (checkoutLoading.value) return "Redirecting...";
-  return "Start 7-day free trial";
-});
-
-const canManageSubscription = computed(() => {
-  return subscriptionStore.canManageSubscription;
-});
+const getCheckoutButtonText = (plan: PlanOption) => {
+  if (checkoutLoadingPlan.value === plan.id) return "Redirecting...";
+  return plan.cta;
+};
 
 const showPasswordRecoveryForm = computed(() => {
   const mode = Array.isArray(route.query.mode)
@@ -341,19 +400,20 @@ const resetPassword = async () => {
   }
 };
 
-const startCheckout = async () => {
+const startCheckout = async (plan: CheckoutPlan) => {
   if (!authStore.isAuthenticated) {
-    toast.error("Please sign in before starting a trial.");
+    toast.error("Please sign in before choosing a plan.");
     return;
   }
 
-  checkoutLoading.value = true;
+  checkoutLoadingPlan.value = plan;
   try {
     const response = await authenticatedFetch(checkoutApiPath, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({ plan }),
     });
 
     if (!response.ok) {
@@ -369,13 +429,13 @@ const startCheckout = async () => {
     }
     window.location.assign(payload.url);
   } catch (error: unknown) {
-    checkoutLoading.value = false;
+    checkoutLoadingPlan.value = null;
     toast.error(getErrorMessage(error, "Unable to start checkout"));
   }
 };
 
 const openBillingPortal = async () => {
-  if (!canManageSubscription.value) {
+  if (!subscriptionStore.canManageSubscription) {
     toast.error("No subscription found to manage.");
     return;
   }
@@ -724,7 +784,7 @@ onMounted(async () => {
 
             <div class="flex flex-wrap gap-2 pt-1">
               <Button
-                v-if="subscriptionStore.isPremium || canManageSubscription"
+                v-if="subscriptionStore.canManageSubscription"
                 @click="openBillingPortal"
                 :disabled="
                   authStore.loading ||
@@ -753,28 +813,40 @@ onMounted(async () => {
           authStore.isAuthenticated &&
           !subscriptionStore.isPremium &&
           !subscriptionStore.loading &&
-          subscriptionStore.status.toLowerCase() != 'canceled' &&
+          subscriptionStore.status.toLowerCase() !== 'canceled' &&
           !showPasswordRecoveryForm
         "
-        class="max-w-sm mt-4"
+        class="max-w-xl mt-4"
       >
         <CardHeader>
           <CardTitle>Premium</CardTitle>
           <CardDescription>
-            Smarter weekly league recaps, built for your league context.
+            Everything you need for deeper league insights
           </CardDescription>
         </CardHeader>
         <CardContent class="text-sm">
-          <div>
-            <p class="text-5xl font-medium">
-              $2.99
-              <span class="-ml-2 text-base font-normal text-muted-foreground"
-                >/month</span
+          <div class="flex flex-col gap-6 sm:flex-row sm:gap-8">
+            <div v-for="plan in planOptions" :key="plan.id" class="flex-1">
+              <p class="text-sm font-medium text-muted-foreground">
+                {{ plan.title }}
+              </p>
+              <p class="mt-1 text-5xl font-medium">
+                {{ plan.price }}
+                <span class="-ml-2 text-base font-normal text-muted-foreground">
+                  {{ plan.period }}
+                </span>
+              </p>
+              <p class="mt-2 min-h-[2.5rem] text-muted-foreground">
+                {{ plan.subtitle }}
+              </p>
+              <Button
+                class="w-full my-7"
+                :disabled="checkoutLoadingPlan !== null"
+                @click="startCheckout(plan.id)"
               >
-            </p>
-            <Button class="w-full my-7" @click="startCheckout">
-              {{ getCheckoutButtonText }}
-            </Button>
+                {{ getCheckoutButtonText(plan) }}
+              </Button>
+            </div>
           </div>
           <div>
             <p class="mb-3">What's included:</p>
@@ -782,7 +854,13 @@ onMounted(async () => {
               <div class="flex align-middle">
                 <Check :size="20" class="mr-2" />
                 <p class="text-muted-foreground">
-                  More detailed, customizable weekly recaps
+                  Smarter, customizable, weekly league recaps
+                </p>
+              </div>
+              <div class="flex align-middle">
+                <Check :size="20" class="mr-2" />
+                <p class="text-muted-foreground">
+                  Custom manager profiles, built for your league context
                 </p>
               </div>
               <div class="flex align-middle">
@@ -790,10 +868,6 @@ onMounted(async () => {
                 <p class="text-muted-foreground">
                   Access to all future premium features
                 </p>
-              </div>
-              <div class="flex align-middle">
-                <Check :size="20" class="mr-2" />
-                <p class="text-muted-foreground">Cancel anytime</p>
               </div>
             </div>
           </div>

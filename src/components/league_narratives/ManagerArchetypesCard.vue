@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { computed, ref, watch } from "vue";
 import Card from "../ui/card/Card.vue";
 import { generateManagerArchetype, type ManagerBlurbsPayload } from "@/api/api";
 import type { ManagerArchetype } from "@/lib/narratives";
@@ -20,8 +20,13 @@ const props = defineProps<{
 
 const isLoading = ref(false);
 const blurbsByUserId = ref<Record<string, string>>({});
+const hasRequestedBlurbs = ref(false);
 
 const getManagerArchetypes = async () => {
+  if (!props.payload.managers.length) {
+    return;
+  }
+
   try {
     isLoading.value = true;
     const result = await generateManagerArchetype(props.payload);
@@ -51,18 +56,50 @@ const getManagerArchetypes = async () => {
   }
 };
 
-onMounted(async () => {
-  if (
-    Object.keys(
-      store.leagueInfo[store.currentLeagueIndex].managerProfiles ?? {}
-    ).length > 0
-  ) {
-    blurbsByUserId.value =
-      store.leagueInfo[store.currentLeagueIndex].managerProfiles ?? {};
-  } else if (authStore.isAuthenticated && subscriptionStore.isPremium) {
+const storedManagerProfiles = computed(
+  () => store.leagueInfo[store.currentLeagueIndex]?.managerProfiles ?? {}
+);
+
+watch(
+  storedManagerProfiles,
+  async (profiles) => {
+    if (Object.keys(profiles).length > 0) {
+      blurbsByUserId.value = profiles;
+      return;
+    }
+
+    if (
+      hasRequestedBlurbs.value ||
+      !authStore.isAuthenticated ||
+      !subscriptionStore.isPremium ||
+      !props.payload.managers.length
+    ) {
+      return;
+    }
+
+    hasRequestedBlurbs.value = true;
+    await getManagerArchetypes();
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.payload.managers.length,
+  async (managerCount) => {
+    if (
+      managerCount === 0 ||
+      Object.keys(storedManagerProfiles.value).length > 0 ||
+      hasRequestedBlurbs.value ||
+      !authStore.isAuthenticated ||
+      !subscriptionStore.isPremium
+    ) {
+      return;
+    }
+
+    hasRequestedBlurbs.value = true;
     await getManagerArchetypes();
   }
-});
+);
 </script>
 
 <template>
@@ -73,15 +110,15 @@ onMounted(async () => {
         <p class="mt-4 text-muted-foreground">
           Career stats and historical trends for every manager.
           <span v-if="!subscriptionStore.isPremium">
-            Custom manager descriptions are available with a</span
-          >
-          <router-link
-            :to="{ path: '/account', query: $route.query }"
-            class="font-medium cursor-pointer text-primary hover:underline"
-            @click="store.currentTab = ''"
-          >
-            Premium subscription</router-link
-          >.
+            Custom manager descriptions are available with a
+            <router-link
+              :to="{ path: '/account', query: $route.query }"
+              class="font-medium cursor-pointer text-primary hover:underline"
+              @click="store.currentTab = ''"
+            >
+              Premium subscription</router-link
+            >.
+          </span>
         </p>
         <p class="text-muted-foreground"></p>
       </div>
