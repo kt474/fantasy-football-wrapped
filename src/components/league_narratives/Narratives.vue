@@ -157,7 +157,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
   <div class="my-4 space-y-4">
     <LeagueHistory
       v-show="false"
-      :table-data="tableData"
+      :table-data="props.tableData"
       @ready="isLeagueHistoryReady = true"
     />
     <ManagerArchetypesCard
