@@ -25,11 +25,21 @@ const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
+const emit = defineEmits<{
+  (event: "ready"): void;
+}>();
 
 const isLoading = ref(false);
 const loadingYear = ref("");
 const tableOrder = ref("wins");
 const previousLeagues = ref<string[]>([]);
+const hasEmittedReady = ref(false);
+
+const emitReady = () => {
+  if (hasEmittedReady.value) return;
+  hasEmittedReady.value = true;
+  emit("ready");
+};
 
 interface LeagueStore {
   leagueInfo: LeagueInfoType[];
@@ -174,6 +184,8 @@ onMounted(async () => {
     await getPreviousLeagues(store, previousLeagues, loadingYear);
     isLoading.value = false;
   }
+
+  emitReady();
 });
 
 watch(

@@ -38,6 +38,46 @@ const parseJson = async <T>(
   }
 };
 
+export interface ManagerBlurbsPayload {
+  league: {
+    leagueId: string;
+    leagueName: string;
+    seasonsAnalyzed: number;
+    totalManagers: number;
+  };
+  managers: {
+    userId: string;
+    name: string;
+    seasons: number;
+    titles: number;
+    record: string;
+    winRate: number;
+    totalPointsScored: number;
+    totalPointsAgainst: number;
+    totalTrades: number;
+    tradeValueGained: number;
+    totalWaivers: number;
+    averageEfficiency: number;
+    relative: {
+      titlesRank: number;
+      winRateRank: number;
+      pointsScoredRank: number;
+      pointsAgainstRank: number;
+      tradesRank: number;
+      waiversRank: number;
+      efficiencyRank: number;
+    };
+  }[];
+}
+
+export interface ManagerBlurbsResponse {
+  blurbs: {
+    userId: string;
+    name: string;
+    blurb: string;
+  }[];
+}
+
 export const getPlayerNews = async (
   playerNames: string[]
 ): Promise<Record<string, unknown>[]> => {
@@ -216,6 +256,42 @@ export const generatePremiumReport = async (
     return {
       text: "Unable to generate premium report right now. Please try again later.",
     };
+  }
+};
+
+export const generateManagerArchetype = async (
+  payload: ManagerBlurbsPayload
+): Promise<ManagerBlurbsResponse> => {
+  try {
+    const response = await authenticatedFetch(
+      import.meta.env.VITE_MANAGER_PROFILES,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: payload,
+        }),
+      }
+    );
+    if (response.status === 401) {
+      throw new Error("Please sign in to generate manager profiles");
+    }
+    assertOk(response, "Manager archetype request");
+    return await parseJson<ManagerBlurbsResponse>(
+      response,
+      "Manager Archetype"
+    );
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Unable to generate report.";
+    if (message.includes("Please sign in")) {
+      throw new Error("Please sign in to generate manager profiles.");
+    }
+    throw new Error(
+      "Unable to generate manager profiles right now. Please try again later."
+    );
   }
 };
 

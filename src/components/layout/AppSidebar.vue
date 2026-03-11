@@ -33,6 +33,7 @@ import {
   Handshake,
   Dices,
   FlaskConical,
+  IdCard,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
@@ -141,6 +142,10 @@ const data = {
         {
           title: "League History",
           icon: FolderClock,
+        },
+        {
+          title: "Manager Profiles",
+          icon: IdCard,
         },
         {
           title: "Wrapped",

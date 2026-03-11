@@ -32,6 +32,7 @@ export type LeagueInfoType = {
   playoffProjections?: PlayoffProjection[];
   weeklyReport?: string;
   premiumWeeklyReport?: string;
+  managerProfiles?: Record<string, string>;
   yearEndReport?: string;
   currentTrends?: string[];
   playoffType: number;
