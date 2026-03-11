@@ -14,11 +14,12 @@
         create an account or sign in, we process account data through Supabase
         Authentication, including your email address, authentication provider,
         and a user identifier.
-        <p class="my-3 text-xl font-semibold">Subscriptions and Billing</p>
-        If you start or manage a paid subscription, billing is processed by
-        Stripe. We do not store full payment card details on ffwrapped. We may
-        store and use subscription metadata (for example, subscription status
-        and billing period dates) to enable premium features and manage access.
+        <p class="my-3 text-xl font-semibold">Paid Plans and Billing</p>
+        If you purchase or manage a paid plan, billing is processed by Stripe.
+        We do not store full payment card details on ffwrapped. We may store
+        and use billing and access metadata, such as subscription status,
+        billing period dates, purchase records, and seasonal access expiration
+        dates, to enable premium features and manage access.
         <p class="my-3 text-xl font-semibold">Session Storage and Cookies</p>
         Authentication and app state may use local browser storage and/or
         storage mechanisms required by third-party providers (such as Supabase
@@ -37,7 +38,7 @@
         <p class="my-3 text-xl font-semibold">Changes to This Privacy Policy</p>
         We may update this Privacy Policy from time to time. Any changes will be
         posted on this page, and the "Last updated" date will be revised
-        accordingly. Last updated: February 28, 2026.
+        accordingly. Last updated: March 11, 2026.
         <p class="my-3 text-xl font-semibold">Contact Us</p>
         If you have any questions or concerns about this Privacy Policy, please
         contact us at this

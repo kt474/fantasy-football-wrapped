@@ -1136,7 +1136,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     account and
                     <router-link
                       :to="{ path: '/account', query: $route.query }"
-                      class="font-medium cursor-pointer text-primary hover:underline"
+                      class="font-medium cursor-pointer hover:underline"
                       @click="store.currentTab = ''"
                     >
                       Premium subscription</router-link
@@ -1151,7 +1151,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   account and
                   <router-link
                     :to="{ path: '/account', query: $route.query }"
-                    class="font-medium cursor-pointer text-primary hover:underline"
+                    class="font-medium cursor-pointer hover:underline"
                     @click="store.currentTab = ''"
                   >
                     Premium subscription</router-link

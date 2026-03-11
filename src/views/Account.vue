@@ -186,7 +186,7 @@ const subscriptionTimelineNote = computed(() => {
     return `Your free trial ends on ${trialTimelineLabel.value}.`;
   }
   if (subscriptionStore.status.toLowerCase() === "season_pass") {
-    return `Your season pass is active through ${seasonPassTimelineLabel.value}.`;
+    return `Your premium tier season pass is active through ${seasonPassTimelineLabel.value}.`;
   }
   if (subscriptionStore.cancelDate) {
     return `Your subscription remains active until ${cancelTimelineLabel.value}.`;
@@ -833,7 +833,7 @@ onMounted(async () => {
           </CardDescription>
         </CardHeader>
         <CardContent class="text-sm">
-          <div class="flex flex-col gap-6 sm:flex-row sm:gap-8">
+          <div class="flex flex-col gap-0 sm:flex-row sm:gap-8">
             <div v-for="plan in planOptions" :key="plan.id" class="flex-1">
               <p class="text-sm font-medium text-muted-foreground">
                 {{ plan.title }}
@@ -860,19 +860,19 @@ onMounted(async () => {
             <p class="mb-3">What's included:</p>
             <div>
               <div class="flex align-middle">
-                <Check :size="20" class="mr-2" />
+                <Check class="w-5 h-5 mr-2 shrink-0" />
                 <p class="text-muted-foreground">
                   Smarter, customizable, weekly league recaps
                 </p>
               </div>
               <div class="flex align-middle">
-                <Check :size="20" class="mr-2" />
+                <Check class="w-5 h-5 mr-2 shrink-0" />
                 <p class="text-muted-foreground">
                   Custom manager profiles, built for your league context
                 </p>
               </div>
               <div class="flex align-middle">
-                <Check :size="20" class="mr-2" />
+                <Check class="w-5 h-5 mr-2 shrink-0" />
                 <p class="text-muted-foreground">
                   Access to all future premium features
                 </p>

@@ -9,6 +9,7 @@ import { LeagueInfoType } from "@/types/types";
 import Separator from "../ui/separator/Separator.vue";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
+import { Button } from "@/components/ui/button";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -20,7 +21,6 @@ const props = defineProps<{
 
 const isLoading = ref(false);
 const blurbsByUserId = ref<Record<string, string>>({});
-const hasRequestedBlurbs = ref(false);
 
 const getManagerArchetypes = async () => {
   if (!props.payload.managers.length) {
@@ -60,68 +60,57 @@ const storedManagerProfiles = computed(
   () => store.leagueInfo[store.currentLeagueIndex]?.managerProfiles ?? {}
 );
 
+const canGenerateArchetypes = computed(
+  () =>
+    authStore.isAuthenticated &&
+    subscriptionStore.isPremium &&
+    props.payload.managers.length > 0 &&
+    !isLoading.value
+);
+
+const generateButtonLabel = computed(() => {
+  if (isLoading.value) return "Generating...";
+  return "Generate profiles";
+});
+
 watch(
   storedManagerProfiles,
-  async (profiles) => {
+  (profiles) => {
     if (Object.keys(profiles).length > 0) {
       blurbsByUserId.value = profiles;
       return;
     }
-
-    if (
-      hasRequestedBlurbs.value ||
-      !authStore.isAuthenticated ||
-      !subscriptionStore.isPremium ||
-      !props.payload.managers.length
-    ) {
-      return;
-    }
-
-    hasRequestedBlurbs.value = true;
-    await getManagerArchetypes();
+    blurbsByUserId.value = {};
   },
   { immediate: true }
-);
-
-watch(
-  () => props.payload.managers.length,
-  async (managerCount) => {
-    if (
-      managerCount === 0 ||
-      Object.keys(storedManagerProfiles.value).length > 0 ||
-      hasRequestedBlurbs.value ||
-      !authStore.isAuthenticated ||
-      !subscriptionStore.isPremium
-    ) {
-      return;
-    }
-
-    hasRequestedBlurbs.value = true;
-    await getManagerArchetypes();
-  }
 );
 </script>
 
 <template>
   <Card class="p-4 md:p-6">
-    <div class="flex items-center justify-between gap-4">
+    <div class="flex flex-wrap justify-between gap-4 sm:flex-nowrap">
       <div>
         <p class="text-3xl font-bold leading-none">Manager Profiles</p>
-        <p class="mt-4 text-muted-foreground">
-          Career stats and historical trends for every manager.
+        <p class="mt-4 sm:w-2/3 text-muted-foreground">
+          Each manager’s long-term record and historic trends.
           <span v-if="!subscriptionStore.isPremium">
-            Custom manager descriptions are available with a
+            A
             <router-link
               :to="{ path: '/account', query: $route.query }"
-              class="font-medium cursor-pointer text-primary hover:underline"
+              class="font-medium cursor-pointer hover:underline"
               @click="store.currentTab = ''"
             >
               Premium subscription</router-link
-            >.
+            >
+            unlocks custom profile descriptions that highlight their tendencies,
+            strengths, and league identity.
           </span>
         </p>
         <p class="text-muted-foreground"></p>
       </div>
+      <Button :disabled="!canGenerateArchetypes" @click="getManagerArchetypes">
+        {{ generateButtonLabel }}
+      </Button>
     </div>
     <div class="grid gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3">
       <div
