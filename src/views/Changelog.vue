@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "3/11/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "There is a new Manager Profiles tabs has custom manager profiles and historical trends.",
+        ],
+      },
+    ],
+  },
+  {
     date: "3/09/26",
     content: [
       {

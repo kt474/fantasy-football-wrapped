@@ -21,38 +21,6 @@ const seasons = computed(() =>
 );
 
 const narratives = ref<NarrativeBundle>({
-  leagueDNA: {
-    sample: {
-      seasonsAnalyzed: 0,
-      distinctManagers: 0,
-      averageTeamsPerSeason: 0,
-    },
-    parity: {
-      uniqueChampions: 0,
-      championDiversityIndex: 0,
-      titlesByManager: {},
-      championships: [],
-    },
-    activity: {
-      totalTrades: 0,
-      totalWaivers: 0,
-      avgTradesPerSeason: 0,
-      avgWaiversPerSeason: 0,
-      avgTradesPerTeamSeason: 0,
-      avgWaiversPerTeamSeason: 0,
-    },
-    scoring: {
-      averageWeeklyScore: 0,
-      weeklyScoreStdDev: 0,
-      highestWeeklyScore: 0,
-      lowestWeeklyScore: 0,
-    },
-    volatility: {
-      averageWeeklyMargin: 0,
-      closeGameRate: 0,
-      blowoutRate: 0,
-    },
-  },
   managerArchetypes: [],
 });
 const isLeagueHistoryReady = ref(false);
@@ -148,8 +116,8 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
   league: {
     leagueId: store.leagueInfo[store.currentLeagueIndex]?.leagueId ?? "",
     leagueName: store.leagueInfo[store.currentLeagueIndex]?.name ?? "",
-    seasonsAnalyzed: narratives.value.leagueDNA.sample.seasonsAnalyzed,
-    totalManagers: narratives.value.leagueDNA.sample.distinctManagers,
+    seasonsAnalyzed: seasons.value.length,
+    totalManagers: narratives.value.managerArchetypes.length,
   },
   managers: narratives.value.managerArchetypes.map((manager) => ({
     userId: manager.userId,

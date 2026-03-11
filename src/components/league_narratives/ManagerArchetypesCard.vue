@@ -109,7 +109,7 @@ onMounted(async () => {
         <Separator class="mt-2" />
         <p
           v-if="blurbsByUserId[archetype.userId]"
-          class="mt-2 text-sm leading-relaxed max-h-44 text-muted-foreground"
+          class="mt-2 text-sm leading-relaxed text-muted-foreground"
         >
           {{ blurbsByUserId[archetype.userId] }}
         </p>

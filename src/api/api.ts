@@ -276,7 +276,7 @@ export const generateManagerArchetype = async (
       }
     );
     if (response.status === 401) {
-      throw new Error("Please sign in to use premium reports.");
+      throw new Error("Please sign in to generate manager profiles");
     }
     assertOk(response, "Manager archetype request");
     return await parseJson<ManagerBlurbsResponse>(
@@ -287,10 +287,10 @@ export const generateManagerArchetype = async (
     const message =
       error instanceof Error ? error.message : "Unable to generate report.";
     if (message.includes("Please sign in")) {
-      throw new Error("Please sign in to use premium reports.");
+      throw new Error("Please sign in to generate manager profiles.");
     }
     throw new Error(
-      "Unable to generate premium report right now. Please try again later."
+      "Unable to generate manager profiles right now. Please try again later."
     );
   }
 };

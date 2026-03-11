@@ -42,42 +42,6 @@ export type ManagerSeasonRecord = {
   madePlayoffs: boolean;
 };
 
-export type LeagueDNA = {
-  sample: {
-    seasonsAnalyzed: number;
-    distinctManagers: number;
-    averageTeamsPerSeason: number;
-  };
-  parity: {
-    uniqueChampions: number;
-    championDiversityIndex: number;
-    titlesByManager: Record<string, number>;
-    championships: {
-      season: string;
-      winner: string;
-    }[];
-  };
-  activity: {
-    totalTrades: number;
-    totalWaivers: number;
-    avgTradesPerSeason: number;
-    avgWaiversPerSeason: number;
-    avgTradesPerTeamSeason: number;
-    avgWaiversPerTeamSeason: number;
-  };
-  scoring: {
-    averageWeeklyScore: number;
-    weeklyScoreStdDev: number;
-    highestWeeklyScore: number;
-    lowestWeeklyScore: number;
-  };
-  volatility: {
-    averageWeeklyMargin: number;
-    closeGameRate: number;
-    blowoutRate: number;
-  };
-};
-
 export type ManagerArchetype = {
   userId: string;
   displayName: string;
@@ -102,7 +66,6 @@ export type ManagerArchetype = {
 };
 
 export type NarrativeBundle = {
-  leagueDNA: LeagueDNA;
   managerArchetypes: ManagerArchetype[];
 };
 
@@ -124,9 +87,6 @@ type ManagerAggregate = {
   scoreVariance: number;
   playoffAppearances: number;
 };
-
-const clamp = (value: number, min = 0, max = 1) =>
-  Math.min(max, Math.max(min, value));
 
 const average = (values: number[]) => {
   if (!values.length) return 0;
@@ -341,170 +301,6 @@ const aggregateManagers = (records: ManagerSeasonRecord[]) => {
   return Array.from(map.values());
 };
 
-const buildLeagueDNA = (
-  seasons: HistoricalSeasonInput[],
-  managerAggregates: ManagerAggregate[]
-): LeagueDNA => {
-  const seasonCount = seasons.length;
-  const rosterCounts = seasons.map((season) => season.rosters.length);
-  const titlesByManager = seasons.reduce(
-    (accumulator, season) => {
-      const winnerRosterId = getChampionRosterId(season);
-      if (winnerRosterId === null) {
-        return accumulator;
-      }
-
-      const winnerRoster = season.rosters.find(
-        (roster) => roster.rosterId === winnerRosterId
-      );
-      const winnerUser = winnerRoster
-        ? season.users.find((user) => user.id === winnerRoster.id)
-        : null;
-      const winnerName = winnerUser
-        ? winnerUser.username || winnerUser.name
-        : `Roster ${winnerRosterId}`;
-
-      accumulator[winnerName] = (accumulator[winnerName] ?? 0) + 1;
-      return accumulator;
-    },
-    {} as Record<string, number>
-  );
-  const championships = seasons
-    .map((season) => {
-      const winnerRosterId = getChampionRosterId(season);
-      if (winnerRosterId === null) {
-        return null;
-      }
-
-      const winnerRoster = season.rosters.find(
-        (roster) => roster.rosterId === winnerRosterId
-      );
-      const winnerUser = winnerRoster
-        ? season.users.find((user) => user.id === winnerRoster.id)
-        : null;
-
-      return {
-        season: season.season,
-        winner: winnerUser
-          ? winnerUser.username || winnerUser.name
-          : `Roster ${winnerRosterId}`,
-      };
-    })
-    .filter(
-      (
-        championship
-      ): championship is {
-        season: string;
-        winner: string;
-      } => Boolean(championship)
-    )
-    .sort((left, right) => Number(right.season) - Number(left.season));
-  const uniqueChampions = Object.keys(titlesByManager).length;
-  const championDiversity = seasonCount ? uniqueChampions / seasonCount : 0;
-
-  const tradesPerSeason = seasons.map(
-    (season) =>
-      season.trades.filter(
-        (trade) =>
-          trade.status === WaiverStatus.Complete &&
-          trade.type === WaiverType.Trade
-      ).length
-  );
-  const waiversPerTeamSeason = seasons.map((season, index) => {
-    const waiverCount = season.waivers.filter(
-      (waiver) =>
-        waiver.status === WaiverStatus.Complete &&
-        (waiver.type === WaiverType.Waiver ||
-          waiver.type === WaiverType.FreeAgent)
-    ).length;
-    return rosterCounts[index] ? waiverCount / rosterCounts[index] : 0;
-  });
-  const waiversPerSeason = seasons.map(
-    (season) =>
-      season.waivers.filter(
-        (waiver) =>
-          waiver.status === WaiverStatus.Complete &&
-          (waiver.type === WaiverType.Waiver ||
-            waiver.type === WaiverType.FreeAgent)
-      ).length
-  );
-
-  const scoringSamples = seasons.flatMap((season) =>
-    season.weeklyPoints.flatMap((pointsEntry) => pointsEntry.points)
-  );
-  const scoringAverage = average(scoringSamples);
-  const scoringDeviation = stdDev(scoringSamples);
-  const avgTradesPerSeason = average(tradesPerSeason);
-  const avgWaiversPerSeason = average(waiversPerSeason);
-  const avgWaiversPerTeamSeason = average(waiversPerTeamSeason);
-  const avgTradesPerTeamSeason = average(
-    tradesPerSeason.map((tradeCount, index) =>
-      rosterCounts[index] ? tradeCount / rosterCounts[index] : 0
-    )
-  );
-
-  const allMargins = seasons.flatMap((season) => {
-    const matchupGroups = new Map<string, number[]>();
-
-    season.weeklyPoints.forEach((entry) => {
-      entry.matchups?.forEach((matchupId, weekIndex) => {
-        if (matchupId === null || matchupId === undefined) {
-          return;
-        }
-        const key = `${season.season}-${weekIndex + 1}-${matchupId}`;
-        const existing = matchupGroups.get(key) ?? [];
-        existing.push(entry.points[weekIndex] ?? 0);
-        matchupGroups.set(key, existing);
-      });
-    });
-
-    return Array.from(matchupGroups.values())
-      .filter((scores) => scores.length === 2)
-      .map((scores) => Math.abs(scores[0] - scores[1]));
-  });
-
-  return {
-    sample: {
-      seasonsAnalyzed: seasonCount,
-      distinctManagers: managerAggregates.length,
-      averageTeamsPerSeason: average(rosterCounts),
-    },
-    parity: {
-      uniqueChampions,
-      championDiversityIndex: clamp(championDiversity),
-      titlesByManager,
-      championships,
-    },
-    activity: {
-      totalTrades: tradesPerSeason.reduce((sum, count) => sum + count, 0),
-      totalWaivers: waiversPerSeason.reduce((sum, count) => sum + count, 0),
-      avgTradesPerSeason,
-      avgWaiversPerSeason,
-      avgTradesPerTeamSeason,
-      avgWaiversPerTeamSeason,
-    },
-    scoring: {
-      averageWeeklyScore: scoringAverage,
-      weeklyScoreStdDev: scoringDeviation,
-      highestWeeklyScore: scoringSamples.length
-        ? Math.max(...scoringSamples)
-        : 0,
-      lowestWeeklyScore: scoringSamples.length
-        ? Math.min(...scoringSamples)
-        : 0,
-    },
-    volatility: {
-      averageWeeklyMargin: average(allMargins),
-      closeGameRate: allMargins.length
-        ? allMargins.filter((margin) => margin <= 10).length / allMargins.length
-        : 0,
-      blowoutRate: allMargins.length
-        ? allMargins.filter((margin) => margin >= 25).length / allMargins.length
-        : 0,
-    },
-  };
-};
-
 const buildManagerArchetypes = (records: ManagerSeasonRecord[]) => {
   const aggregates = aggregateManagers(records);
 
@@ -588,10 +384,8 @@ export const buildNarrativeBundle = async (
     seasons.map((season) => buildSeasonRecords(season))
   );
   const managerSeasons = managerSeasonGroups.flat();
-  const managerAggregates = aggregateManagers(managerSeasons);
 
   return {
-    leagueDNA: buildLeagueDNA(seasons, managerAggregates),
     managerArchetypes: buildManagerArchetypes(managerSeasons),
   };
 };
