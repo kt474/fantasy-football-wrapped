@@ -7,7 +7,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "There is a new Manager Profiles tabs has custom manager profiles and historical trends.",
+          "There is a new Manager Profiles tab that has custom manager profile descriptions and historical trends.",
         ],
       },
     ],

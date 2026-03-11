@@ -22,6 +22,7 @@ const getTrustedOrigins = () => {
   const envUrls = [
     import.meta.env.VITE_BACKEND_URL,
     import.meta.env.VITE_PREMIUM_WEEKLY_REPORT,
+    import.meta.env.VITE_MANAGER_PROFILES,
   ].filter(Boolean) as string[];
 
   envUrls.forEach((url) => {
