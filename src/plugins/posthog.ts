@@ -1,8 +1,8 @@
-//./plugins/posthog.js
 import posthog from "posthog-js";
+import type { App, Plugin } from "vue";
 
-export default {
-  install(app) {
+const posthogPlugin: Plugin = {
+  install(app: App) {
     app.config.globalProperties.$posthog = posthog.init(
       import.meta.env.VITE_POSTHOG_KEY,
       {
@@ -12,3 +12,5 @@ export default {
     );
   },
 };
+
+export default posthogPlugin;
