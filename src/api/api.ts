@@ -58,6 +58,8 @@ export interface ManagerBlurbsPayload {
     tradeValueGained: number;
     totalWaivers: number;
     averageEfficiency: number;
+    averageDraftPickRank: number | null;
+    playoffAppearances: number;
     relative: {
       titlesRank: number;
       winRateRank: number;
@@ -66,6 +68,8 @@ export interface ManagerBlurbsPayload {
       tradesRank: number;
       waiversRank: number;
       efficiencyRank: number;
+      tradeValueGainedRank: number;
+      draftAbilityRank: number;
     };
   }[];
 }

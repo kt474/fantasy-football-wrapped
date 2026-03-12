@@ -17,6 +17,7 @@ const subscriptionStore = useSubscriptionStore();
 const props = defineProps<{
   archetypes: ManagerArchetype[];
   payload: ManagerBlurbsPayload;
+  preparePayload?: () => Promise<ManagerBlurbsPayload>;
 }>();
 
 const isLoading = ref(false);
@@ -29,7 +30,10 @@ const getManagerArchetypes = async () => {
 
   try {
     isLoading.value = true;
-    const result = await generateManagerArchetype(props.payload);
+    const payload = props.preparePayload
+      ? await props.preparePayload()
+      : props.payload;
+    const result = await generateManagerArchetype(payload);
     blurbsByUserId.value = result.blurbs.reduce(
       (accumulator, entry) => {
         accumulator[entry.userId] = entry.blurb;

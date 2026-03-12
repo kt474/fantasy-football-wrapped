@@ -3,13 +3,14 @@ import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store.ts";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
 import LeagueHistory from "../league_history/LeagueHistory.vue";
-import { TableDataType } from "@/types/types.ts";
+import { LeagueInfoType, TableDataType } from "@/types/types.ts";
 import {
   buildNarrativeBundle,
   type NarrativeBundle,
   normalizeHistoricalSeasons,
 } from "@/lib/narratives";
 import type { ManagerBlurbsPayload } from "@/api/api";
+import { getDraftMetadata, getDraftPicks } from "@/api/sleeperApi";
 
 const store = useStore();
 
@@ -28,10 +29,58 @@ const areNarrativesReady = computed(
   () => narratives.value.managerArchetypes.length > 0
 );
 
+const hydrateLeagueDraftPicks = async (league: LeagueInfoType) => {
+  if (!league.draftId || league.draftPicks?.length) {
+    return;
+  }
+
+  const draftMetadata = await getDraftMetadata(league.draftId);
+  const draftType =
+    typeof draftMetadata.type === "string" ? draftMetadata.type : undefined;
+
+  league.draftPicks = await getDraftPicks(
+    league.draftId,
+    league.season,
+    league.scoringType,
+    league.seasonType,
+    draftType
+  );
+};
+
+const ensureHistoricalDraftData = async () => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (!currentLeague) {
+    return;
+  }
+
+  const leagues = [currentLeague, ...(currentLeague.previousLeagues ?? [])];
+  await Promise.all(leagues.map((league) => hydrateLeagueDraftPicks(league)));
+  localStorage.setItem("leagueInfo", JSON.stringify(store.leagueInfo));
+};
+
+const rebuildNarratives = async () => {
+  narratives.value = await buildNarrativeBundle(
+    normalizeHistoricalSeasons(store.leagueInfo[store.currentLeagueIndex])
+  );
+};
+
+const prepareManagerPayload = async () => {
+  if (store.leagueInfo.length > 0) {
+    await ensureHistoricalDraftData();
+    await rebuildNarratives();
+  }
+
+  return managerPayload.value;
+};
+
 watch(
-  seasons,
-  async (nextSeasons) => {
-    narratives.value = await buildNarrativeBundle(nextSeasons);
+  [seasons, isLeagueHistoryReady],
+  async ([, historyReady]) => {
+    if (store.leagueInfo.length > 0 && !historyReady) {
+      return;
+    }
+
+    await rebuildNarratives();
   },
   { immediate: true }
 );
@@ -112,6 +161,12 @@ const relativeRanks = computed(() => {
         value: manager.tradeValueGained,
       }))
     ),
+    draftPickRank: getDescendingRankMap(
+      managers.map((manager) => ({
+        userId: manager.userId,
+        value: manager.averageDraftPickRank ?? -10,
+      }))
+    ),
   };
 });
 
@@ -138,6 +193,10 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
     tradeValueGained: Math.round(manager.tradeValueGained),
     totalWaivers: manager.totalWaivers,
     averageEfficiency: manager.averageEfficiency,
+    averageDraftPickRank:
+      manager.averageDraftPickRank === null
+        ? null
+        : Number(manager.averageDraftPickRank.toFixed(2)),
     playoffAppearances: manager.playoffAppearances,
     relative: {
       titlesRank: relativeRanks.value.titles[manager.userId],
@@ -149,6 +208,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
       efficiencyRank: relativeRanks.value.efficiency[manager.userId],
       tradeValueGainedRank:
         relativeRanks.value.tradeValueGained[manager.userId],
+      draftAbilityRank: relativeRanks.value.draftPickRank[manager.userId],
     },
   })),
 }));
@@ -164,6 +224,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => ({
       v-if="isLeagueHistoryReady && areNarrativesReady"
       :archetypes="narratives.managerArchetypes"
       :payload="managerPayload"
+      :prepare-payload="prepareManagerPayload"
     />
     <ManagerArchetypesCard
       v-else-if="store.leagueInfo.length === 0"

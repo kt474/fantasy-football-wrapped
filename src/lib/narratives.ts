@@ -2,6 +2,7 @@ import { getTradeValue } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
 import {
   Bracket,
+  DraftPick,
   WeeklyWaiver,
   WaiverStatus,
   WaiverType,
@@ -18,6 +19,7 @@ export type HistoricalSeasonInput = {
   trades: LeagueInfoType["trades"];
   waivers: LeagueInfoType["waivers"];
   playoffs: Bracket[];
+  draftPicks?: DraftPick[];
 };
 
 export type ManagerSeasonRecord = {
@@ -38,6 +40,8 @@ export type ManagerSeasonRecord = {
   tradeCount: number;
   tradeValueGained: number;
   waiverCount: number;
+  draftPickRankTotal: number;
+  draftPickCount: number;
   isChampion: boolean;
   madePlayoffs: boolean;
 };
@@ -63,6 +67,7 @@ export type ManagerArchetype = {
   winRate: number;
   weeklyScoreStdDev: number;
   playoffAppearances: number;
+  averageDraftPickRank: number | null;
 };
 
 export type NarrativeBundle = {
@@ -86,6 +91,8 @@ type ManagerAggregate = {
   avgEfficiency: number;
   scoreVariance: number;
   playoffAppearances: number;
+  draftPickRankTotal: number;
+  draftPickCount: number;
 };
 
 const average = (values: number[]) => {
@@ -144,6 +151,39 @@ const getChampionRosterId = (season: HistoricalSeasonInput) => {
   if (!season.leagueWinner) return null;
   const parsed = Number(season.leagueWinner);
   return Number.isNaN(parsed) ? null : parsed;
+};
+
+const getDraftSummaryForManager = (
+  draftPicks: DraftPick[] | undefined,
+  userId: string
+) => {
+  if (!draftPicks?.length) {
+    return {
+      draftPickRankTotal: 0,
+      draftPickCount: 0,
+    };
+  }
+
+  return draftPicks.reduce(
+    (accumulator, pick) => {
+      if (pick.userId !== userId) {
+        return accumulator;
+      }
+
+      const pickRank = Number.parseFloat(pick.pickRank);
+      if (Number.isNaN(pickRank)) {
+        return accumulator;
+      }
+
+      accumulator.draftPickRankTotal += pickRank;
+      accumulator.draftPickCount += 1;
+      return accumulator;
+    },
+    {
+      draftPickRankTotal: 0,
+      draftPickCount: 0,
+    }
+  );
 };
 
 const getTradeValueDeltaForRoster = async (
@@ -206,6 +246,8 @@ const buildSeasonRecords = async (
         return null;
       }
 
+      const draftSummary = getDraftSummaryForManager(season.draftPicks, user.id);
+
       return {
         userId: user.id,
         rosterId: roster.rosterId,
@@ -240,6 +282,8 @@ const buildSeasonRecords = async (
           roster.rosterId,
           "waiver"
         ),
+        draftPickRankTotal: draftSummary.draftPickRankTotal,
+        draftPickCount: draftSummary.draftPickCount,
         isChampion: championRosterId === roster.rosterId,
       } satisfies ManagerSeasonRecord;
     })
@@ -274,6 +318,8 @@ const aggregateManagers = (records: ManagerSeasonRecord[]) => {
         avgEfficiency: record.managerEfficiency,
         scoreVariance: weeklyVariance,
         playoffAppearances: record.madePlayoffs ? 1 : 0,
+        draftPickRankTotal: record.draftPickRankTotal,
+        draftPickCount: record.draftPickCount,
       });
       return;
     }
@@ -290,6 +336,8 @@ const aggregateManagers = (records: ManagerSeasonRecord[]) => {
     existing.tradeValueGained += record.tradeValueGained;
     existing.playoffAppearances += record.madePlayoffs ? 1 : 0;
     existing.totalWaivers += record.waiverCount;
+    existing.draftPickRankTotal += record.draftPickRankTotal;
+    existing.draftPickCount += record.draftPickCount;
     existing.avgEfficiency =
       (existing.avgEfficiency * (totalSeasons - 1) + record.managerEfficiency) /
       totalSeasons;
@@ -309,6 +357,9 @@ const buildManagerArchetypes = (records: ManagerSeasonRecord[]) => {
       const averagePointsPerSeason = manager.totalPointsFor / manager.seasons;
       const averageTradesPerSeason = manager.totalTrades / manager.seasons;
       const averageWaiversPerSeason = manager.totalWaivers / manager.seasons;
+      const averageDraftPickRank = manager.draftPickCount
+        ? manager.draftPickRankTotal / manager.draftPickCount
+        : null;
       const winRate =
         (manager.totalWins + manager.totalTies * 0.5) /
         Math.max(
@@ -337,6 +388,7 @@ const buildManagerArchetypes = (records: ManagerSeasonRecord[]) => {
         averageWaiversPerSeason,
         winRate,
         weeklyScoreStdDev: manager.scoreVariance,
+        averageDraftPickRank,
       } satisfies ManagerArchetype;
     })
     .sort((left, right) => {
@@ -374,6 +426,7 @@ export const normalizeHistoricalSeasons = (
     trades: season.trades,
     waivers: season.waivers,
     playoffs: season.winnersBracket,
+    draftPicks: season.draftPicks,
   }));
 };
 
