@@ -800,7 +800,7 @@ onMounted(async () => {
         <CardHeader>
           <CardTitle>Premium</CardTitle>
           <CardDescription>
-            Premium tools for commissioners looking to boost league engagement.
+            Premium tools for deeper insights across every league you manage.
           </CardDescription>
         </CardHeader>
         <CardContent class="text-sm">
@@ -869,7 +869,7 @@ onMounted(async () => {
               <p class="mt-3 min-h-[2.5rem] text-muted-foreground">
                 {{
                   canStartTrial
-                    ? "7-day free trial, then billed monthly."
+                    ? "7-day free trial, then billed monthly. Cancel anytime."
                     : "Billed monthly. Cancel anytime."
                 }}
               </p>
