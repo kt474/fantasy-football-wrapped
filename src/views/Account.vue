@@ -43,15 +43,6 @@ const portalLoading = ref(false);
 
 type CheckoutPlan = "monthly" | "season_pass";
 
-type PlanOption = {
-  id: CheckoutPlan;
-  price: string;
-  period: string;
-  title: string;
-  subtitle: string;
-  cta: string;
-};
-
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
   /\/$/,
   ""
@@ -208,30 +199,10 @@ const canStartTrial = computed(() => {
   return true;
 });
 
-const planOptions = computed<PlanOption[]>(() => [
-  {
-    id: "monthly",
-    price: "$4",
-    period: "/month",
-    title: "Monthly",
-    subtitle: canStartTrial.value
-      ? "7-day free trial, then billed monthly."
-      : "Billed monthly. Cancel anytime.",
-    cta: canStartTrial.value ? "Start 7-day free trial" : "Subscribe monthly",
-  },
-  {
-    id: "season_pass",
-    price: "$15",
-    period: "/season",
-    title: "Season Pass",
-    subtitle: "One-time payment through season end (2/15/27).",
-    cta: "Buy season pass",
-  },
-]);
-
-const getCheckoutButtonText = (plan: PlanOption) => {
-  if (checkoutLoadingPlan.value === plan.id) return "Redirecting...";
-  return plan.cta;
+const getCheckoutButtonText = (plan: CheckoutPlan) => {
+  if (checkoutLoadingPlan.value === plan) return "Redirecting...";
+  if (plan === "season_pass") return "Buy season pass";
+  return canStartTrial.value ? "Start 7-day free trial" : "Subscribe monthly";
 };
 
 const showPasswordRecoveryForm = computed(() => {
@@ -829,35 +800,14 @@ onMounted(async () => {
         <CardHeader>
           <CardTitle>Premium</CardTitle>
           <CardDescription>
-            Everything you need for deeper league insights
+            Premium tools for commissioners looking to boost league engagement.
           </CardDescription>
         </CardHeader>
         <CardContent class="text-sm">
-          <div class="flex flex-col gap-0 sm:flex-row sm:gap-8">
-            <div v-for="plan in planOptions" :key="plan.id" class="flex-1">
-              <p class="text-sm font-medium text-muted-foreground">
-                {{ plan.title }}
-              </p>
-              <p class="mt-1 text-5xl font-medium">
-                {{ plan.price }}
-                <span class="-ml-2 text-base font-normal text-muted-foreground">
-                  {{ plan.period }}
-                </span>
-              </p>
-              <p class="mt-2 min-h-[2.5rem] text-muted-foreground">
-                {{ plan.subtitle }}
-              </p>
-              <Button
-                class="w-full my-7"
-                :disabled="checkoutLoadingPlan !== null"
-                @click="startCheckout(plan.id)"
-              >
-                {{ getCheckoutButtonText(plan) }}
-              </Button>
-            </div>
-          </div>
-          <div>
-            <p class="mb-3">What's included:</p>
+          <div class="p-4 mb-5 border rounded-xl">
+            <p class="mb-3 text-sm font-semibold">
+              Every premium plan includes:
+            </p>
             <div>
               <div class="flex align-middle">
                 <Check class="w-5 h-5 mr-2 shrink-0" />
@@ -865,18 +815,72 @@ onMounted(async () => {
                   Smarter, customizable, weekly league recaps
                 </p>
               </div>
-              <div class="flex align-middle">
+              <div class="flex mt-3 align-middle">
                 <Check class="w-5 h-5 mr-2 shrink-0" />
                 <p class="text-muted-foreground">
-                  Custom manager profiles, built for your league context
+                  Manager profiles built around your league
                 </p>
               </div>
-              <div class="flex align-middle">
+              <div class="flex mt-3 align-middle">
                 <Check class="w-5 h-5 mr-2 shrink-0" />
                 <p class="text-muted-foreground">
                   Access to all future premium features
                 </p>
               </div>
+            </div>
+          </div>
+          <div class="flex flex-col gap-4 sm:flex-row">
+            <div class="relative flex-1 p-5 border rounded-xl bg-muted/40">
+              <p
+                class="text-sm font-semibold tracking-[0.12em] uppercase text-muted-foreground"
+              >
+                Season Pass
+              </p>
+              <p class="mt-2 text-5xl font-medium leading-none">
+                $15
+                <span class="-ml-1 text-base font-normal text-muted-foreground">
+                  /season
+                </span>
+              </p>
+              <p class="mt-3 min-h-[2.5rem] text-muted-foreground">
+                One payment for premium access through Feb 15, 2027.
+              </p>
+
+              <Button
+                class="w-full mt-8"
+                :disabled="checkoutLoadingPlan !== null"
+                @click="startCheckout('season_pass')"
+              >
+                {{ getCheckoutButtonText("season_pass") }}
+              </Button>
+            </div>
+            <div class="flex-1 p-5 border rounded-xl">
+              <p
+                class="text-sm font-semibold tracking-[0.12em] uppercase text-muted-foreground"
+              >
+                Monthly
+              </p>
+              <p class="mt-2 text-5xl font-medium leading-none">
+                $4
+                <span class="-ml-1 text-base font-normal text-muted-foreground">
+                  /month
+                </span>
+              </p>
+              <p class="mt-3 min-h-[2.5rem] text-muted-foreground">
+                {{
+                  canStartTrial
+                    ? "7-day free trial, then billed monthly."
+                    : "Billed monthly. Cancel anytime."
+                }}
+              </p>
+              <Button
+                class="w-full mt-8"
+                :disabled="checkoutLoadingPlan !== null"
+                variant="outline"
+                @click="startCheckout('monthly')"
+              >
+                {{ getCheckoutButtonText("monthly") }}
+              </Button>
             </div>
           </div>
         </CardContent>
