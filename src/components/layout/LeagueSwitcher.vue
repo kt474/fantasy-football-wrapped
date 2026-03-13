@@ -47,8 +47,8 @@ const currentLeague = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex];
 });
 
-const currentLeagueId = computed(() => {
-  return store.currentLeagueId;
+const currentLeagueKey = computed(() => {
+  return store.currentLeagueKey;
 });
 
 const leagueMetadata = computed(() => {
@@ -65,8 +65,8 @@ const leagueMetadata = computed(() => {
   return "";
 });
 
-const selectLeague = (leagueId: string) => {
-  store.updateCurrentLeagueId(leagueId);
+const selectLeague = (leagueKey: string) => {
+  store.updateCurrentLeagueKey(leagueKey);
 };
 const removeHistoryLeagues = () => {
   // Regular expression to match keys starting with a digit
@@ -86,17 +86,18 @@ const removeLeague = () => {
   if (localStorage.getItem("leagueInfo")) {
     if (currentLeague.value.previousLeagues) {
       currentLeague.value.previousLeagues.forEach((league: LeagueInfoType) => {
+        localStorage.removeItem(league.leagueKey);
         localStorage.removeItem(league.leagueId);
       });
     }
     store.$patch((state) => {
       state.leagueInfo = state.leagueInfo.filter(
-        (item) => item.leagueId !== currentLeagueId.value
+        (item) => item.leagueKey !== currentLeagueKey.value
       );
     });
-    store.updateCurrentLeagueId(store.leagueIds[0] || "");
+    store.updateCurrentLeagueKey(store.leagueKeys[0] || "");
     toast.success("League removed!");
-    if (store.currentLeagueId === "") {
+    if (store.currentLeagueKey === "") {
       localStorage.removeItem("currentTab");
       removeHistoryLeagues();
       store.showUsernames = false;
@@ -110,7 +111,8 @@ const removeLeague = () => {
     const originalData = localStorage.getItem("originalData");
     if (originalData) {
       const currentData = JSON.parse(originalData);
-      delete currentData[currentLeagueId.value];
+      delete currentData[currentLeagueKey.value];
+      delete currentData[currentLeague.value?.leagueId ?? ""];
       if (Object.keys(currentData).length == 0) {
         localStorage.removeItem("originalData");
       } else {
@@ -121,20 +123,26 @@ const removeLeague = () => {
 };
 
 const refreshLeague = async () => {
-  selectLeague(currentLeagueId.value);
+  selectLeague(currentLeagueKey.value);
   store.$patch((state) => {
     state.leagueInfo = state.leagueInfo.filter(
-      (item) => item.leagueId !== currentLeagueId.value
+      (item) => item.leagueKey !== currentLeagueKey.value
     );
   });
   const originalData = localStorage.getItem("originalData");
   if (originalData) {
     const currentData = JSON.parse(originalData);
-    delete currentData[currentLeagueId.value];
+    delete currentData[currentLeagueKey.value];
+    delete currentData[currentLeague.value?.leagueId ?? ""];
     localStorage.setItem("originalData", JSON.stringify(currentData));
   }
   store.updateLoadingLeague(currentLeague.value?.name);
-  store.updateLeagueInfo(await getData(currentLeagueId.value));
+  store.updateLeagueInfo(
+    await getData({
+      provider: currentLeague.value.provider,
+      leagueId: currentLeague.value.leagueId,
+    })
+  );
   toast.success("League data refreshed!");
   store.updateLoadingLeague("");
   await inputLeague(
@@ -170,7 +178,7 @@ const shareLeague = () => {
     "//" +
     window.location.host +
     window.location.pathname;
-  const updatedURL = `${currentUrl}?leagueId=${currentLeague.value.leagueId}`;
+  const updatedURL = `${currentUrl}?provider=${currentLeague.value.provider}&leagueId=${currentLeague.value.leagueId}`;
   navigator.clipboard.writeText(updatedURL);
   toast.success("Link copied to clipboard!");
 };
@@ -206,8 +214,8 @@ const openAddLeagueDialog = async () => {
           <DropdownMenuContent class="w-60" align="start">
             <DropdownMenuItem
               v-for="league in leagues"
-              :key="league.leagueId"
-              @select="selectLeague(league.leagueId)"
+              :key="league.leagueKey"
+              @select="selectLeague(league.leagueKey)"
               class="flex items-start cursor-pointer"
             >
               <div class="flex flex-col">
@@ -227,7 +235,7 @@ const openAddLeagueDialog = async () => {
                 </p>
               </div>
               <Check
-                v-if="league.leagueId === currentLeagueId"
+                v-if="league.leagueKey === currentLeagueKey"
                 class="w-4 h-4 mt-2 ml-auto text-primary"
               />
             </DropdownMenuItem>

@@ -12,6 +12,7 @@ import {
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
+import { getPlayerImageUrl } from "@/lib/assets";
 
 const store = useStore();
 type RosterPlayer = Partial<PlayerType>;
@@ -121,13 +122,27 @@ const getValueColor = (value: number) => {
                 <img
                   v-if="player.position !== 'DEF'"
                   class="object-cover w-12 mr-2 -mt-1 -ml-2 rounded-full"
-                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
+                  :src="
+                    getPlayerImageUrl(
+                      store.currentLeagueProvider,
+                      player.id ?? '',
+                      player.position,
+                      player.team
+                    )
+                  "
                   alt="player_img"
                 />
                 <img
                   v-else
                   class="w-8 mx-2 rounded-full h-7"
-                  :src="`https://sleepercdn.com/images/team_logos/nfl/${(player.id ?? '').toLowerCase()}.png`"
+                  :src="
+                    getPlayerImageUrl(
+                      store.currentLeagueProvider,
+                      player.id ?? '',
+                      player.position,
+                      player.team
+                    )
+                  "
                   alt="Team avatar"
                 />
                 <p class="w-auto truncate sm:w-28">
@@ -175,13 +190,27 @@ const getValueColor = (value: number) => {
                   <img
                     v-if="player.position !== 'DEF'"
                     class="object-cover w-12 mr-2 -mt-1 -ml-2 rounded-full"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
+                    :src="
+                      getPlayerImageUrl(
+                        store.currentLeagueProvider,
+                        player.id ?? '',
+                        player.position,
+                        player.team
+                      )
+                    "
                     alt="player_img"
                   />
                   <img
                     v-else
                     class="w-8 mx-2 rounded-full h-7"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${(player.id ?? '').toLowerCase()}.png`"
+                    :src="
+                      getPlayerImageUrl(
+                        store.currentLeagueProvider,
+                        player.id ?? '',
+                        player.position,
+                        player.team
+                      )
+                    "
                     alt="Team avatar"
                   />
                   <p class="w-auto truncate sm:w-28">

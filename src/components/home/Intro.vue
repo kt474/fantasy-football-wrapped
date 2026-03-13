@@ -5,7 +5,8 @@ import { useLeagueInput } from "@/composables/useLeagueInput";
 import { useStore } from "@/store/store";
 import Card from "../ui/card/Card.vue";
 
-const { inputType, seasonYear, leagueIdInput, onSubmit } = useLeagueInput();
+const { provider, inputType, seasonYear, leagueIdInput, onSubmit } =
+  useLeagueInput();
 const store = useStore();
 const isDark = computed(() => store.darkMode);
 </script>
@@ -71,18 +72,12 @@ const isDark = computed(() => store.darkMode);
               <div class="mb-4 text-left">
                 <p class="text-sm font-semibold">Get started</p>
                 <p class="text-sm text-muted-foreground">
-                  Enter your
-                  <a
-                    class="font-medium text-primary hover:underline"
-                    href="https://sleeper.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >Sleeper</a
-                  >
-                  league ID or username.
+                  Enter a Sleeper league ID or username, or an ESPN public
+                  league ID and season.
                 </p>
               </div>
               <LeagueInputForm
+                v-model:provider="provider"
                 v-model:inputType="inputType"
                 v-model:seasonYear="seasonYear"
                 v-model:leagueIdInput="leagueIdInput"

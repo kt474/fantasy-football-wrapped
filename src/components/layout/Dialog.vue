@@ -12,6 +12,7 @@ import LeagueInputForm from "@/components/shared/LeagueInputForm.vue";
 import { useLeagueInput } from "@/composables/useLeagueInput";
 
 const {
+  provider,
   inputType,
   seasonYear,
   leagueIdInput,
@@ -47,21 +48,12 @@ const handleSubmit = async () => {
       <DialogHeader>
         <DialogTitle>Add League</DialogTitle>
         <DialogDescription>
-          <p>
-            Enter your
-            <a
-              class="font-medium text-primary hover:underline"
-              href="https://sleeper.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Sleeper</a
-            >
-            league ID or username.
-          </p>
+          <p>Add a Sleeper or ESPN league.</p>
         </DialogDescription>
       </DialogHeader>
       <div class="space-y-3">
         <LeagueInputForm
+          v-model:provider="provider"
           v-model:inputType="inputType"
           v-model:seasonYear="seasonYear"
           v-model:leagueIdInput="leagueIdInput"

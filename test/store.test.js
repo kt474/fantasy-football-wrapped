@@ -17,6 +17,8 @@ const createStorageMock = () => {
 };
 
 const buildLeague = (leagueId) => ({
+  provider: "sleeper",
+  leagueKey: `sleeper:${leagueId}`,
   name: "League",
   regularSeasonLength: 14,
   medianScoring: 0,
@@ -96,7 +98,7 @@ afterEach(() => {
 });
 
 describe("main store", () => {
-  test("updateLeagueInfo does not add duplicate league ids", () => {
+  test("updateLeagueInfo does not add duplicate league keys", () => {
     const store = useStore();
     const league = buildLeague("league-1");
 
@@ -105,6 +107,27 @@ describe("main store", () => {
 
     expect(store.leagueInfo).toHaveLength(1);
     expect(store.leagueInfo[0].name).toBe("League");
+  });
+
+  test("updateCurrentLeagueId stores provider-aware identity", () => {
+    const store = useStore();
+    store.updateLeagueInfo(buildLeague("league-1"));
+
+    store.updateCurrentLeagueId("league-1");
+
+    expect(store.currentLeagueKey).toBe("sleeper:league-1");
+    expect(store.currentLeagueId).toBe("league-1");
+    expect(store.currentLeagueProvider).toBe("sleeper");
+  });
+
+  test("active league getters resolve from league key before league data is loaded", () => {
+    const store = useStore();
+
+    store.updateCurrentLeagueId("league-1", "sleeper");
+
+    expect(store.currentLeagueKey).toBe("sleeper:league-1");
+    expect(store.currentLeagueId).toBe("league-1");
+    expect(store.currentLeagueProvider).toBe("sleeper");
   });
 
   test("addProjectionData updates only the targeted roster", () => {

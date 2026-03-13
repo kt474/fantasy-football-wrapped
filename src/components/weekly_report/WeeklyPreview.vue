@@ -9,6 +9,7 @@ import { getWinProbability } from "../../api/helper.ts";
 import { fakeWeeklyPreview } from "../../api/fakeLeague.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
+import { getPlayerImageUrl } from "@/lib/assets";
 
 const store = useStore();
 const props = defineProps<{
@@ -607,13 +608,27 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                     <img
                       v-if="player.position !== 'DEF'"
                       class="hidden object-cover rounded-full w-14 sm:block"
-                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                      :src="
+                        getPlayerImageUrl(
+                          store.currentLeagueProvider,
+                          player.player_id,
+                          player.position,
+                          player.team
+                        )
+                      "
                       alt="Player avatar"
                     />
                     <img
                       v-else
                       class="hidden w-10 h-10 mx-2 rounded-full sm:block"
-                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                      :src="
+                        getPlayerImageUrl(
+                          store.currentLeagueProvider,
+                          player.player_id,
+                          player.position,
+                          player.team
+                        )
+                      "
                       alt="Team avatar"
                     />
                     <div>
@@ -741,13 +756,27 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                     <img
                       v-if="player.position !== 'DEF'"
                       class="hidden object-cover rounded-full w-14 sm:block"
-                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                      :src="
+                        getPlayerImageUrl(
+                          store.currentLeagueProvider,
+                          player.player_id,
+                          player.position,
+                          player.team
+                        )
+                      "
                       alt="Player avatar"
                     />
                     <img
                       v-else
                       class="hidden w-10 h-10 mx-2 rounded-full sm:block"
-                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                      :src="
+                        getPlayerImageUrl(
+                          store.currentLeagueProvider,
+                          player.player_id,
+                          player.position,
+                          player.team
+                        )
+                      "
                       alt="Team avatar"
                     />
                   </div>

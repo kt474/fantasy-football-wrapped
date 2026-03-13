@@ -12,6 +12,10 @@ import {
   getSingleWeekStats,
   getUsers,
 } from "../src/api/sleeperApi.ts";
+import {
+  getEspnLeague,
+  getEspnLeagueBundle,
+} from "../src/api/espnApi.ts";
 import * as authFetchModule from "../src/lib/authFetch.ts";
 
 const mockFetchResponse = (status, data, overrides = {}) =>
@@ -25,6 +29,451 @@ const mockFetchResponse = (status, data, overrides = {}) =>
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+});
+
+const createEspnLeagueFixture = (season) => ({
+  id: 42654852,
+  seasonId: Number(season),
+  settings: {
+    name: "Public ESPN League",
+    size: 2,
+    lineupSlotCounts: {
+      0: 1,
+      2: 2,
+      4: 2,
+      6: 1,
+      23: 1,
+      20: 5,
+    },
+    scoringSettings: {
+      scoringItems: [{ statId: 53, points: 1 }],
+    },
+    scheduleSettings: {
+      matchupPeriodCount: 14,
+      playoffTeamCount: 4,
+    },
+  },
+  status: {
+    currentMatchupPeriod: 5,
+    latestScoringPeriod: 4,
+  },
+  members: [
+    {
+      id: "m1",
+      displayName: "Alpha Manager",
+      firstName: "Alpha",
+      lastName: "Manager",
+    },
+    {
+      id: "m2",
+      displayName: "Beta Manager",
+      firstName: "Beta",
+      lastName: "Manager",
+    },
+  ],
+  teams: [
+    {
+      id: 1,
+      primaryOwner: "m1",
+      location: "Alpha",
+      nickname: "Wolves",
+      abbrev: "AW",
+      logo: "https://example.com/alpha.png",
+      points: 208,
+      record: {
+        overall: {
+          wins: 3,
+          losses: 1,
+          ties: 0,
+          pointsFor: 208,
+          pointsAgainst: 178,
+        },
+      },
+      roster: {
+        entries: [
+          { playerPoolEntry: { player: { id: 101 } } },
+          { playerPoolEntry: { player: { id: 102 } } },
+          { playerPoolEntry: { player: { id: 103 } } },
+        ],
+      },
+    },
+    {
+      id: 2,
+      primaryOwner: "m2",
+      location: "Beta",
+      nickname: "Bears",
+      abbrev: "BB",
+      logo: "https://example.com/beta.png",
+      points: 178,
+      record: {
+        overall: {
+          wins: 1,
+          losses: 3,
+          ties: 0,
+          pointsFor: 178,
+          pointsAgainst: 208,
+        },
+      },
+      roster: {
+        entries: [
+          { playerPoolEntry: { player: { id: 201 } } },
+          { playerPoolEntry: { player: { id: 202 } } },
+        ],
+      },
+    },
+  ],
+  schedule: [
+    {
+      id: 101,
+      matchupPeriodId: 1,
+      winner: "HOME",
+      home: {
+        teamId: 1,
+        totalPoints: 52,
+        rosterForCurrentScoringPeriod: {
+          entries: [
+            {
+              lineupSlotId: 0,
+              playerPoolEntry: {
+                appliedStatTotal: 10,
+                player: { id: 101, defaultPositionId: 1 },
+              },
+            },
+            {
+              lineupSlotId: 2,
+              playerPoolEntry: {
+                appliedStatTotal: 8,
+                player: { id: 102, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 2,
+              playerPoolEntry: {
+                appliedStatTotal: 7,
+                player: { id: 103, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 4,
+              playerPoolEntry: {
+                appliedStatTotal: 12,
+                player: { id: 104, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 4,
+              playerPoolEntry: {
+                appliedStatTotal: 5,
+                player: { id: 105, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 6,
+              playerPoolEntry: {
+                appliedStatTotal: 6,
+                player: { id: 106, defaultPositionId: 4 },
+              },
+            },
+            {
+              lineupSlotId: 23,
+              playerPoolEntry: {
+                appliedStatTotal: 4,
+                player: { id: 107, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 20,
+              playerPoolEntry: {
+                appliedStatTotal: 15,
+                player: { id: 108, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 20,
+              playerPoolEntry: {
+                appliedStatTotal: 14,
+                player: { id: 109, defaultPositionId: 3 },
+              },
+            },
+          ],
+        },
+      },
+      away: {
+        teamId: 2,
+        totalPoints: 45,
+        rosterForCurrentScoringPeriod: {
+          entries: [
+            {
+              lineupSlotId: 0,
+              playerPoolEntry: {
+                appliedStatTotal: 9,
+                player: { id: 201, defaultPositionId: 1 },
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: 102,
+      matchupPeriodId: 2,
+      winner: "HOME",
+      home: {
+        teamId: 2,
+        totalPoints: 48,
+        rosterForCurrentScoringPeriod: {
+          entries: [
+            {
+              lineupSlotId: 0,
+              playerPoolEntry: {
+                appliedStatTotal: 11,
+                player: { id: 202, defaultPositionId: 1 },
+              },
+            },
+          ],
+        },
+      },
+      away: {
+        teamId: 1,
+        totalPoints: 44,
+        rosterForCurrentScoringPeriod: {
+          entries: [
+            {
+              lineupSlotId: 0,
+              playerPoolEntry: {
+                appliedStatTotal: 8,
+                player: { id: 110, defaultPositionId: 1 },
+              },
+            },
+            {
+              lineupSlotId: 2,
+              playerPoolEntry: {
+                appliedStatTotal: 7,
+                player: { id: 111, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 2,
+              playerPoolEntry: {
+                appliedStatTotal: 6,
+                player: { id: 112, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 4,
+              playerPoolEntry: {
+                appliedStatTotal: 7,
+                player: { id: 113, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 4,
+              playerPoolEntry: {
+                appliedStatTotal: 6,
+                player: { id: 114, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 6,
+              playerPoolEntry: {
+                appliedStatTotal: 5,
+                player: { id: 115, defaultPositionId: 4 },
+              },
+            },
+            {
+              lineupSlotId: 23,
+              playerPoolEntry: {
+                appliedStatTotal: 5,
+                player: { id: 116, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 20,
+              playerPoolEntry: {
+                appliedStatTotal: 10,
+                player: { id: 117, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 20,
+              playerPoolEntry: {
+                appliedStatTotal: 9,
+                player: { id: 118, defaultPositionId: 3 },
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: 103,
+      matchupPeriodId: 3,
+      winner: "HOME",
+      home: {
+        teamId: 1,
+        totalPoints: 55,
+        rosterForCurrentScoringPeriod: {
+          entries: [
+            {
+              lineupSlotId: 0,
+              playerPoolEntry: {
+                appliedStatTotal: 11,
+                player: { id: 119, defaultPositionId: 1 },
+              },
+            },
+            {
+              lineupSlotId: 2,
+              playerPoolEntry: {
+                appliedStatTotal: 8,
+                player: { id: 120, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 2,
+              playerPoolEntry: {
+                appliedStatTotal: 7,
+                player: { id: 121, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 4,
+              playerPoolEntry: {
+                appliedStatTotal: 10,
+                player: { id: 122, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 4,
+              playerPoolEntry: {
+                appliedStatTotal: 6,
+                player: { id: 123, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 6,
+              playerPoolEntry: {
+                appliedStatTotal: 7,
+                player: { id: 124, defaultPositionId: 4 },
+              },
+            },
+            {
+              lineupSlotId: 23,
+              playerPoolEntry: {
+                appliedStatTotal: 6,
+                player: { id: 125, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 20,
+              playerPoolEntry: {
+                appliedStatTotal: 12,
+                player: { id: 126, defaultPositionId: 2 },
+              },
+            },
+          ],
+        },
+      },
+      away: {
+        teamId: 2,
+        totalPoints: 43,
+        rosterForCurrentScoringPeriod: {
+          entries: [
+            {
+              lineupSlotId: 0,
+              playerPoolEntry: {
+                appliedStatTotal: 8,
+                player: { id: 203, defaultPositionId: 1 },
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: 104,
+      matchupPeriodId: 4,
+      winner: "HOME",
+      home: {
+        teamId: 1,
+        totalPoints: 57,
+        rosterForCurrentScoringPeriod: {
+          entries: [
+            {
+              lineupSlotId: 0,
+              playerPoolEntry: {
+                appliedStatTotal: 12,
+                player: { id: 127, defaultPositionId: 1 },
+              },
+            },
+            {
+              lineupSlotId: 2,
+              playerPoolEntry: {
+                appliedStatTotal: 7,
+                player: { id: 128, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 2,
+              playerPoolEntry: {
+                appliedStatTotal: 7,
+                player: { id: 129, defaultPositionId: 2 },
+              },
+            },
+            {
+              lineupSlotId: 4,
+              playerPoolEntry: {
+                appliedStatTotal: 10,
+                player: { id: 130, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 4,
+              playerPoolEntry: {
+                appliedStatTotal: 8,
+                player: { id: 131, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 6,
+              playerPoolEntry: {
+                appliedStatTotal: 7,
+                player: { id: 132, defaultPositionId: 4 },
+              },
+            },
+            {
+              lineupSlotId: 23,
+              playerPoolEntry: {
+                appliedStatTotal: 6,
+                player: { id: 133, defaultPositionId: 3 },
+              },
+            },
+            {
+              lineupSlotId: 20,
+              playerPoolEntry: {
+                appliedStatTotal: 11,
+                player: { id: 134, defaultPositionId: 2 },
+              },
+            },
+          ],
+        },
+      },
+      away: {
+        teamId: 2,
+        totalPoints: 42,
+        rosterForCurrentScoringPeriod: {
+          entries: [
+            {
+              lineupSlotId: 0,
+              playerPoolEntry: {
+                appliedStatTotal: 7,
+                player: { id: 204, defaultPositionId: 1 },
+              },
+            },
+          ],
+        },
+      },
+    },
+  ],
 });
 
 describe("Sleeper API data transforms", () => {
@@ -64,6 +513,8 @@ describe("Sleeper API data transforms", () => {
 
     expect(fetchMock).toHaveBeenCalledOnce();
     expect(data).toEqual({
+      provider: "sleeper",
+      leagueKey: "sleeper:992195707941212160",
       name: "Sample League",
       regularSeasonLength: 14,
       lastScoredWeek: 17,
@@ -137,6 +588,8 @@ describe("Sleeper API data transforms", () => {
 
     expect(fetchMock).toHaveBeenCalledOnce();
     expect(data).toEqual({
+      provider: "sleeper",
+      leagueKey: "sleeper:",
       name: "",
       regularSeasonLength: 0,
       medianScoring: 0,
@@ -512,5 +965,109 @@ describe("Sleeper API data transforms", () => {
     expect(leagueData.waivers).toHaveLength(3);
     expect(leagueData.weeklyPoints).toHaveLength(2);
     expect(leagueData.legacyWinner).toBe(1);
+  });
+});
+
+describe("ESPN API data transforms", () => {
+  test("maps ESPN league metadata and uses only completed weeks", async () => {
+    const season = String(new Date().getFullYear());
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(mockFetchResponse(200, createEspnLeagueFixture(season)));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const data = await getEspnLeague("42654852", season);
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(data).toMatchObject({
+      provider: "espn",
+      leagueKey: "espn:42654852",
+      name: "Public ESPN League",
+      season,
+      leagueId: "42654852",
+      status: "in_season",
+      regularSeasonLength: 14,
+      lastScoredWeek: 4,
+      totalRosters: 2,
+      playoffTeams: 4,
+      scoringType: 1,
+    });
+  });
+
+  test("builds ESPN rosters and weekly points from completed matchup data", async () => {
+    const season = String(new Date().getFullYear());
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(mockFetchResponse(200, createEspnLeagueFixture(season)));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const bundle = await getEspnLeagueBundle("42654852", season);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(bundle.lastScoredWeek).toBe(4);
+    expect(bundle.currentWeek).toBe(5);
+
+    const alphaRoster = bundle.rosters.find((roster) => roster.rosterId === 1);
+    const alphaWeeklyPoints = bundle.weeklyPoints.find(
+      (weekly) => weekly.rosterId === 1
+    );
+
+    expect(alphaRoster).toMatchObject({
+      id: "m1",
+      rosterId: 1,
+      pointsFor: 208,
+      pointsAgainst: 178,
+      wins: 3,
+      losses: 1,
+      ties: 0,
+      recordByWeek: "WLWW",
+    });
+    expect(alphaRoster.potentialPoints).toBe(247);
+    expect(alphaRoster.managerEfficiency).toBe(0.842);
+
+    expect(alphaWeeklyPoints.points).toEqual([52, 44, 55, 57]);
+    expect(alphaWeeklyPoints.matchups).toEqual([101, 102, 103, 104]);
+    expect(alphaWeeklyPoints.starters[0]).toEqual([
+      "101",
+      "102",
+      "103",
+      "104",
+      "105",
+      "106",
+      "107",
+    ]);
+    expect(alphaWeeklyPoints.benchPlayers[0]).toEqual(["108", "109"]);
+    expect(alphaWeeklyPoints.points).toHaveLength(4);
+  });
+
+  test("returns default ESPN league shape for missing leagues", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(mockFetchResponse(404, {}));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const data = await getEspnLeague("missing-league", "2025");
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(data).toEqual({
+      provider: "espn",
+      leagueKey: "espn:",
+      name: "",
+      regularSeasonLength: 0,
+      medianScoring: 0,
+      totalRosters: 0,
+      season: "",
+      seasonType: "",
+      leagueId: "",
+      leagueWinner: null,
+      previousLeagueId: null,
+      lastScoredWeek: 0,
+      status: "",
+      scoringType: 1,
+      rosterPositions: [],
+      playoffTeams: 0,
+      playoffType: 0,
+      draftId: "",
+      waiverType: 0,
+      sport: "",
+    });
   });
 });

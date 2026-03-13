@@ -9,20 +9,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { FantasyProviderId } from "@/types/types";
 import { SEASON_YEAR_OPTIONS } from "@/composables/useLeagueInput";
+import { providerCapabilities } from "@/api/providers/capabilities";
 
 const props = defineProps<{
+  provider: FantasyProviderId;
   inputType: string;
   seasonYear: string;
   leagueIdInput: string;
 }>();
 
 const emit = defineEmits<{
+  "update:provider": [value: FantasyProviderId];
   "update:inputType": [value: string];
   "update:seasonYear": [value: string];
   "update:leagueIdInput": [value: string];
   submit: [];
 }>();
+
+const providerModel = computed({
+  get: () => props.provider,
+  set: (value: FantasyProviderId) => emit("update:provider", value),
+});
 
 const inputTypeModel = computed({
   get: () => props.inputType,
@@ -38,21 +47,39 @@ const leagueIdInputModel = computed({
   get: () => props.leagueIdInput,
   set: (value: string) => emit("update:leagueIdInput", value),
 });
+
+const supportsUsernameLookup = computed(() => {
+  return providerCapabilities[providerModel.value].usernameLookup;
+});
 </script>
 
 <template>
   <div class="flex flex-col gap-2 sm:flex-row">
-    <div class="flex flex-row gap-2">
+    <div class="flex flex-row flex-wrap gap-2">
+      <Select v-model="providerModel">
+        <SelectTrigger class="sm:w-28" aria-label="Provider">
+          <SelectValue placeholder="Sleeper" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="sleeper">Sleeper</SelectItem>
+          <SelectItem value="espn">ESPN</SelectItem>
+        </SelectContent>
+      </Select>
       <Select v-model="inputTypeModel">
         <SelectTrigger class="sm:w-32" aria-label="Input type">
           <SelectValue placeholder="League ID" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="League ID">League ID</SelectItem>
-          <SelectItem value="Username">Username</SelectItem>
+          <SelectItem v-if="supportsUsernameLookup" value="Username">
+            Username
+          </SelectItem>
         </SelectContent>
       </Select>
-      <Select v-if="inputTypeModel === 'Username'" v-model="seasonYearModel">
+      <Select
+        v-if="inputTypeModel === 'Username' || providerModel === 'espn'"
+        v-model="seasonYearModel"
+      >
         <SelectTrigger class="sm:w-24" aria-label="Season">
           <SelectValue placeholder="2025" />
         </SelectTrigger>
@@ -74,7 +101,11 @@ const leagueIdInputModel = computed({
       @keydown.enter="emit('submit')"
       :name="inputTypeModel === 'League ID' ? 'leagueId' : 'username'"
       :placeholder="
-        inputTypeModel === 'League ID' ? 'Enter League ID' : 'Enter Username'
+        inputTypeModel === 'League ID'
+          ? providerModel === 'espn'
+            ? 'Enter League ID'
+            : 'Enter League ID'
+          : 'Enter Username'
       "
     />
     <Button @click="emit('submit')">Submit</Button>

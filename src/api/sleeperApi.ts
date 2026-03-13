@@ -19,6 +19,7 @@ import {
   Player,
 } from "../types/apiTypes";
 import { RosterType, UserType, UserLeagueListItem } from "../types/types";
+import { buildLeagueKey, DEFAULT_FANTASY_PROVIDER } from "@/lib/leagueIdentity";
 
 const assertOk = (response: Response, context: string) => {
   if (!response.ok) {
@@ -579,6 +580,8 @@ export const getLeague = async (leagueId: string): Promise<LeagueOriginal> => {
   const response = await fetch(`https://api.sleeper.app/v1/league/${leagueId}`);
   if (response.status === 404) {
     return {
+      provider: DEFAULT_FANTASY_PROVIDER,
+      leagueKey: buildLeagueKey(DEFAULT_FANTASY_PROVIDER, ""),
       name: "",
       regularSeasonLength: 0,
       medianScoring: 0,
@@ -606,6 +609,11 @@ export const getLeague = async (leagueId: string): Promise<LeagueOriginal> => {
   const leagueType = settings["type"];
 
   return {
+    provider: DEFAULT_FANTASY_PROVIDER,
+    leagueKey: buildLeagueKey(
+      DEFAULT_FANTASY_PROVIDER,
+      league["league_id"] ?? ""
+    ),
     name: league["name"] ?? "",
     regularSeasonLength: Math.max(0, (settings["playoff_week_start"] ?? 1) - 1),
     lastScoredWeek: settings["last_scored_leg"] ?? 0,

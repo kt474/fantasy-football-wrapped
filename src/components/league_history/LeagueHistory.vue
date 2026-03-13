@@ -20,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { normalizeLeagueInfo } from "@/lib/leagueIdentity";
 
 const store = useStore();
 const props = defineProps<{
@@ -263,10 +264,11 @@ const dataAllYears = computed(() => {
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.length > 0
   ) {
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.forEach(
-      (league: LeagueInfoType) => {
+      (storedLeague: LeagueInfoType) => {
+        const league = normalizeLeagueInfo(storedLeague);
         let tableData;
-        if (localStorage.getItem(league.leagueId)) {
-          tableData = JSON.parse(<string>localStorage.getItem(league.leagueId));
+        if (localStorage.getItem(league.leagueKey)) {
+          tableData = JSON.parse(<string>localStorage.getItem(league.leagueKey));
         } else {
           tableData = createTableData(
             league.users,
@@ -274,7 +276,7 @@ const dataAllYears = computed(() => {
             league.weeklyPoints,
             league.medianScoring && league.medianScoring === 1 ? true : false
           );
-          localStorage.setItem(league.leagueId, JSON.stringify(tableData));
+          localStorage.setItem(league.leagueKey, JSON.stringify(tableData));
         }
         tableData.forEach((user: TableDataType) => {
           const resultUser = result.find((ru) => ru.id === user.id);

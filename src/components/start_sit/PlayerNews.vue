@@ -27,6 +27,7 @@ import {
 import Separator from "../ui/separator/Separator.vue";
 import Button from "../ui/button/Button.vue";
 import Label from "../ui/label/Label.vue";
+import { getPlayerImageUrl } from "@/lib/assets";
 
 type NewsPost = {
   author: {
@@ -365,13 +366,27 @@ watch(
                 v-if="player.position !== 'DEF'"
                 alt="Player image"
                 class="object-cover mx-2 rounded-full w-14 h-14"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                :src="
+                  getPlayerImageUrl(
+                    store.currentLeagueProvider,
+                    player.player_id,
+                    player.position,
+                    player.team
+                  )
+                "
               />
               <img
                 v-else
                 alt="Defense image"
                 class="mx-2 rounded-full h-14"
-                :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                :src="
+                  getPlayerImageUrl(
+                    store.currentLeagueProvider,
+                    player.player_id,
+                    player.position,
+                    player.team
+                  )
+                "
               />
               <div class="flex justify-between w-full">
                 <div class="ml-4 mr-2 md:ml-0">

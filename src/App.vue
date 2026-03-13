@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import "vue-sonner/style.css";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "vue-sonner";
+import { DEFAULT_FANTASY_PROVIDER } from "@/lib/leagueIdentity";
 
 const router = useRouter();
 const route = useRoute();
@@ -60,13 +61,20 @@ watch(
 );
 
 watch(
-  () => store.currentLeagueId,
+  () => store.currentLeagueKey,
   () => {
-    if (store.currentLeagueId === "") {
+    if (store.currentLeagueKey === "") {
+      localStorage.removeItem("currentLeagueKey");
       localStorage.removeItem("currentLeagueId");
+      localStorage.removeItem("currentLeagueProvider");
       localStorage.removeItem("leagueInfo");
     } else {
+      localStorage.setItem("currentLeagueKey", store.currentLeagueKey);
       localStorage.setItem("currentLeagueId", store.currentLeagueId);
+      localStorage.setItem(
+        "currentLeagueProvider",
+        store.currentLeagueProvider
+      );
       if (
         store.currentTab === "Wrapped" &&
         store.leagueInfo[store.currentLeagueIndex]?.season !== "2025"
@@ -74,12 +82,18 @@ watch(
         store.currentTab = "Standings";
       }
       if (store.currentLeagueId !== "undefined") {
-        // update league id in url
         router.replace({
-          query: { ...route.query, leagueId: store.currentLeagueId },
+          query: {
+            ...route.query,
+            provider: store.currentLeagueProvider ?? DEFAULT_FANTASY_PROVIDER,
+            leagueId: store.currentLeagueId,
+            season: store.leagueInfo[store.currentLeagueIndex]?.season,
+          },
         });
       } else {
+        localStorage.removeItem("currentLeagueKey");
         localStorage.removeItem("currentLeagueId");
+        localStorage.removeItem("currentLeagueProvider");
         localStorage.removeItem("leagueInfo");
         toast.error("Error fetching data. Please try refreshing the page.");
       }

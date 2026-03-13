@@ -1,25 +1,11 @@
-import {
-  getWeeklyPoints,
-  getTotalTransactions,
-  getWaiverMoves,
-} from "./helper";
-import {
-  LeagueCountResponse,
-  NewLeagueInfoType,
-  Player,
-} from "../types/apiTypes";
-import { LeagueInfoType } from "../types/types";
+import { LeagueCountResponse, Player } from "../types/apiTypes";
+import { FantasyProviderId, LeagueInfoType } from "../types/types";
 import { authenticatedFetch } from "@/lib/authFetch";
-import {
-  getAvatar,
-  getCurrentLeagueState,
-  getLeague,
-  getLosersBracket,
-  getRosters,
-  getTransactions,
-  getUsers,
-  getWinnersBracket,
-} from "./sleeperApi";
+import type { ProviderLeagueRef } from "./providers/types";
+import type { FantasyProvider } from "./providers/types";
+import { espnProvider } from "./providers/espnProvider";
+import { sleeperProvider } from "./providers/sleeperProvider";
+import { DEFAULT_FANTASY_PROVIDER } from "@/lib/leagueIdentity";
 
 const assertOk = (response: Response, context: string) => {
   if (!response.ok) {
@@ -81,6 +67,22 @@ export interface ManagerBlurbsResponse {
     blurb: string;
   }[];
 }
+
+const providers: Partial<Record<FantasyProviderId, FantasyProvider>> = {
+  sleeper: sleeperProvider,
+  espn: espnProvider,
+};
+
+const normalizeLeagueRef = (
+  league: string | ProviderLeagueRef
+): ProviderLeagueRef =>
+  typeof league === "string"
+    ? { provider: DEFAULT_FANTASY_PROVIDER, leagueId: league }
+    : {
+        provider: league.provider ?? DEFAULT_FANTASY_PROVIDER,
+        leagueId: league.leagueId,
+        season: league.season,
+      };
 
 export const getPlayerNews = async (
   playerNames: string[]
@@ -393,96 +395,27 @@ export const newUserAlert = async (email: string): Promise<void> => {
   }
 };
 
-export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
-  const [leagueInfo, rosters, winnersBracket, losersBracket] =
-    await Promise.all([
-      getLeague(leagueId),
-      getRosters(leagueId),
-      getWinnersBracket(leagueId),
-      getLosersBracket(leagueId),
-    ]);
+export const getData = async (
+  league: string | ProviderLeagueRef
+): Promise<LeagueInfoType> => {
+  const ref = normalizeLeagueRef(league);
+  const provider = providers[ref.provider];
 
-  const newLeagueInfo: NewLeagueInfoType = {
-    ...leagueInfo,
-    rosters,
-    winnersBracket,
-    losersBracket,
-    previousLeagues: [],
-    currentWeek: 0,
-  };
-
-  let numberOfWeeks: number = 0;
-  let currentWeek: number = 0;
-  let legacyWinner: number | null = 0;
-
-  if (
-    newLeagueInfo.status === "in_season" ||
-    newLeagueInfo.status === "post_season"
-  ) {
-    const leagueState = await getCurrentLeagueState();
-    currentWeek = leagueState.week;
-    numberOfWeeks = currentWeek;
-    newLeagueInfo.currentWeek = currentWeek;
-  } else {
-    numberOfWeeks = newLeagueInfo.regularSeasonLength;
-    winnersBracket.forEach((matchup) => {
-      if (matchup.p === 1) {
-        legacyWinner = matchup.w;
-      }
-    });
+  if (!provider) {
+    throw new Error(`Unsupported provider: ${ref.provider}`);
   }
 
-  const [weeklyPoints, users, weeklyTransactionResults] = await Promise.all([
-    getWeeklyPoints(
-      leagueId,
-      currentWeek !== 0 ? currentWeek : newLeagueInfo.lastScoredWeek
-    ),
-    getUsers(leagueId),
-    Promise.all(
-      Array.from({ length: numberOfWeeks + 1 }, async (_, i) => {
-        const weeklyTransaction = await getTransactions(leagueId, i + 1);
-        const waiverMoves = getWaiverMoves(weeklyTransaction);
-        return {
-          totals: getTotalTransactions(weeklyTransaction),
-          trades: waiverMoves["trades"],
-          waivers: waiverMoves["waivers"],
-        };
-      })
-    ),
-  ]);
+  return provider.getLeagueBundle(ref);
+};
 
-  const [processedUsers] = await Promise.all([
-    Promise.all(
-      users.map(async (user) => ({
-        ...user,
-        avatarImg: user.avatar
-          ? ((await getAvatar(user.avatar)) ?? undefined)
-          : undefined,
-      }))
-    ),
-  ]);
+export const validateLeague = async (
+  league: ProviderLeagueRef
+) => {
+  const provider = providers[league.provider];
 
-  const transactions = weeklyTransactionResults.reduce(
-    (acc, obj) => {
-      Object.entries(obj.totals).forEach(([id, value]) => {
-        acc[id] = (acc[id] || 0) + (value as number);
-      });
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  if (!provider) {
+    throw new Error(`Unsupported provider: ${league.provider}`);
+  }
 
-  const trades = weeklyTransactionResults.flatMap((result) => result.trades);
-  const waivers = weeklyTransactionResults.flatMap((result) => result.waivers);
-
-  return {
-    ...newLeagueInfo,
-    weeklyPoints,
-    users: processedUsers,
-    transactions,
-    trades,
-    waivers,
-    legacyWinner: legacyWinner,
-    lastUpdated: new Date().getTime(),
-  };
+  return provider.validateLeague(league);
 };
