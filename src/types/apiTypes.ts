@@ -1,4 +1,4 @@
-import type { LeagueInfoType, RosterType } from "./types";
+import type { FantasyProviderId, LeagueInfoType, RosterType } from "./types";
 
 export const seasonType: { [key: number]: string } = {
   0: "Redraft",
@@ -200,6 +200,8 @@ export interface SeasonStatsWeekly {
 }
 
 export interface LeagueOriginal {
+  provider: FantasyProviderId;
+  leagueKey: string;
   name: string;
   regularSeasonLength: number;
   medianScoring: number;

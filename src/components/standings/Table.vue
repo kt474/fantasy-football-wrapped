@@ -18,6 +18,7 @@ import {
   PointsType,
 } from "../../types/types";
 import Card from "../ui/card/Card.vue";
+import UnsupportedFeatureCard from "../util/UnsupportedFeatureCard.vue";
 import {
   Tooltip,
   TooltipContent,
@@ -25,6 +26,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Narratives from "../league_narratives/Narratives.vue";
+import { isTabSupported } from "@/api/providers/capabilities";
 
 const PowerRankingData = defineAsyncComponent(
   () => import("../power_rankings/PowerRankingData.vue")
@@ -127,9 +129,12 @@ onMounted(() => {
 
 const originalData = computed(() => {
   const originalDataStorage = localStorage.getItem("originalData");
-  if (originalDataStorage && store.currentLeagueId) {
+  if (originalDataStorage && store.currentLeagueKey) {
     const savedData: savedData = JSON.parse(originalDataStorage);
-    if (savedData[store.currentLeagueId]) {
+    if (savedData[store.currentLeagueKey]) {
+      return savedData[store.currentLeagueKey];
+    }
+    if (store.currentLeagueId && savedData[store.currentLeagueId]) {
       return savedData[store.currentLeagueId];
     }
   }
@@ -140,13 +145,13 @@ const originalData = computed(() => {
       props.points,
       medianScoring.value
     );
-    if (store.currentLeagueId) {
+    if (store.currentLeagueKey) {
       let savedData: Record<string, TableDataType[]> = {};
       const originalDataStorage = localStorage.getItem("originalData");
       if (originalDataStorage) {
         savedData = JSON.parse(originalDataStorage);
       }
-      savedData[store.currentLeagueId] = combinedPoints;
+      savedData[store.currentLeagueKey] = combinedPoints;
       localStorage.setItem("originalData", JSON.stringify(savedData));
     }
     return combinedPoints;
@@ -270,11 +275,22 @@ const getTeamName = (tableDataItem: TableDataType) => {
   }
   return tableDataItem.name ? tableDataItem.name : `Ghost Roster`;
 };
+
+const currentLeagueProvider = computed(() => store.currentLeagueProvider);
+
+const currentTabSupported = computed(() => {
+  return isTabSupported(currentLeagueProvider.value, store.currentTab || "Home");
+});
 </script>
 <template>
   <div :class="['min-w-0', store.currentTab === 'Home' ? '' : 'mx-4']">
+    <UnsupportedFeatureCard
+      v-if="store.currentLeagueId && !currentTabSupported"
+      :provider="currentLeagueProvider"
+      :feature="store.currentTab"
+    />
     <div
-      v-if="store.currentTab === 'Standings'"
+      v-else-if="store.currentTab === 'Standings'"
       class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"
     >
       <Card class="relative w-full min-w-0 mx-auto overflow-x-auto xl:w-3/4">
@@ -576,11 +592,11 @@ const getTeamName = (tableDataItem: TableDataType) => {
       </div>
     </div>
     <StandingsChart
-      v-if="store.currentTab === 'Standings'"
+      v-if="currentTabSupported && store.currentTab === 'Standings'"
       :tableData="tableData"
       class="my-4"
     />
-    <div v-if="store.currentTab === 'Power Rankings'">
+    <div v-if="currentTabSupported && store.currentTab === 'Power Rankings'">
       <PowerRankingData
         v-if="store.currentLeagueId"
         :tableData="tableData"
@@ -602,7 +618,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
         class="my-4"
       />
     </div>
-    <div v-if="store.currentTab === 'Expected Wins'">
+    <div v-if="currentTabSupported && store.currentTab === 'Expected Wins'">
       <div class="grid items-stretch grid-cols-1 gap-4 mt-4 xl:grid-cols-2">
         <ExpectedWinsCard
           :tableData="tableData"
@@ -625,7 +641,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       </div>
       <ScheduleAnalysis :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'Roster Management'">
+    <div v-if="currentTabSupported && store.currentTab === 'Roster Management'">
       <div class="grid items-stretch grid-cols-1 gap-4 mt-4 xl:grid-cols-2">
         <ManagementCard
           :tableData="tableData"
@@ -637,11 +653,11 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <Trades class="mt-4" />
       <Waivers class="mt-4" />
     </div>
-    <div class="w-full" v-if="store.currentTab === 'Playoffs'">
+    <div class="w-full" v-if="currentTabSupported && store.currentTab === 'Playoffs'">
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
       <Playoffs class="mb-4" :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'Weekly Report'">
+    <div v-if="currentTabSupported && store.currentTab === 'Weekly Report'">
       <WeeklyReport
         v-if="store.currentLeagueId"
         :tableData="tableData"
@@ -649,25 +665,25 @@ const getTeamName = (tableDataItem: TableDataType) => {
       />
       <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
     </div>
-    <div v-if="store.currentTab === 'Schedule Simulator'">
+    <div v-if="currentTabSupported && store.currentTab === 'Schedule Simulator'">
       <ScheduleSimulator class="my-4" :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'Trade Lab'">
+    <div v-if="currentTabSupported && store.currentTab === 'Trade Lab'">
       <TradeLab class="my-4" :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'Draft'">
+    <div v-if="currentTabSupported && store.currentTab === 'Draft'">
       <Draft class="my-4" />
     </div>
-    <div v-if="store.currentTab === 'Start/Sit'">
+    <div v-if="currentTabSupported && store.currentTab === 'Start/Sit'">
       <PlayerNews :tableData="tableData" class="mt-4" />
     </div>
-    <div v-if="store.currentTab === 'League History'">
+    <div v-if="currentTabSupported && store.currentTab === 'League History'">
       <LeagueHistory :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'Manager Profiles'">
+    <div v-if="currentTabSupported && store.currentTab === 'Manager Profiles'">
       <Narratives :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'Wrapped'">
+    <div v-if="currentTabSupported && store.currentTab === 'Wrapped'">
       <Wrapped
         v-if="
           store.currentLeagueId &&
@@ -686,7 +702,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <FakeWrapped v-else />
     </div>
 
-    <div v-if="store.currentTab === 'Home'">
+    <div v-if="currentTabSupported && store.currentTab === 'Home'">
       <Intro>
         <template #header>
           <TransactionsChart />

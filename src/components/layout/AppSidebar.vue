@@ -40,6 +40,7 @@ import { useStore } from "../../store/store";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
+import { isTabSupported } from "@/api/providers/capabilities";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -90,6 +91,22 @@ const changeTab = (tab: string) => {
   closeMobileSidebar();
   scrollToTop();
 };
+
+const visibleNavItems = computed(() => {
+  const provider = store.currentLeagueProvider;
+
+  return data.navMain[0].items.filter((item) => {
+    if (item.title === "Home") {
+      return true;
+    }
+
+    if (!store.currentLeagueId) {
+      return true;
+    }
+
+    return isTabSupported(provider, item.title);
+  });
+});
 
 const data = {
   navMain: [
@@ -185,11 +202,11 @@ const data = {
       class="mr-2 mt-2 data-[orientation=vertical]:h-4"
     />
     <SidebarContent>
-      <SidebarGroup v-for="item in data.navMain">
+      <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem
-              v-for="childItem in item.items"
+              v-for="childItem in visibleNavItems"
               :key="childItem.title"
             >
               <SidebarMenuButton

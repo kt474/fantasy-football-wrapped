@@ -1,6 +1,10 @@
 import type { Bracket, DraftPick, DraftGrades, WeeklyWaiver } from "./apiTypes";
 
+export type FantasyProviderId = "sleeper" | "espn";
+
 export type LeagueInfoType = {
+  provider: FantasyProviderId;
+  leagueKey: string;
   name: string;
   regularSeasonLength: number;
   medianScoring: number;
@@ -213,6 +217,7 @@ export interface PlayoffProjection {
 
 export interface UserLeagueListItem {
   league_id: string;
+  provider?: FantasyProviderId;
   name: string;
   season: string;
   total_rosters: number;

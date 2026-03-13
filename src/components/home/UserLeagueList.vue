@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import Card from "../ui/card/Card.vue";
 import Checkbox from "../ui/checkbox/Checkbox.vue";
 import { toast } from "vue-sonner";
+import { DEFAULT_FANTASY_PROVIDER } from "@/lib/leagueIdentity";
 
 const router = useRouter();
 const checkedLeagues = ref<string[]>([]);
@@ -15,7 +16,9 @@ const duplicateLeagueError = ref(false);
 const store = useStore();
 
 const updateURL = (leagueID: string) => {
-  router.replace({ query: { leagueId: leagueID } });
+  router.replace({
+    query: { provider: DEFAULT_FANTASY_PROVIDER, leagueId: leagueID },
+  });
 };
 
 const showError = computed(() => {
@@ -44,10 +47,12 @@ const addLeagues = async () => {
         const addedLeague = store.leaguesList.find(
           (value) => value.league_id == league
         );
+        const provider = addedLeague?.provider ?? DEFAULT_FANTASY_PROVIDER;
         store.updateLoadingLeague(addedLeague?.name ?? "");
 
-        const newLeagueInfo = await getData(league);
+        const newLeagueInfo = await getData({ provider, leagueId: league });
         store.updateLeagueInfo(newLeagueInfo);
+        store.updateCurrentLeagueId(league, provider);
         updateURL(league);
 
         await inputLeague(

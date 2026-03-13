@@ -16,6 +16,7 @@ import {
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
+import { getPlayerImageUrl } from "@/lib/assets";
 
 type WaiverData = Record<string | number, WaiverMove[]>;
 
@@ -462,13 +463,25 @@ watch(
                 alt="User avatar"
                 v-if="move.position !== 'DEF'"
                 class="object-cover rounded-full w-14"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${move.player_id}.jpg`"
+                :src="
+                  getPlayerImageUrl(
+                    store.currentLeagueProvider,
+                    move.player_id,
+                    move.position
+                  )
+                "
               />
               <img
                 alt="User avatar"
                 v-else-if="move.position === 'DEF'"
                 class="h-10 rounded-full w-14"
-                :src="`https://sleepercdn.com/images/team_logos/nfl/${move.player_id.toLowerCase()}.png`"
+                :src="
+                  getPlayerImageUrl(
+                    store.currentLeagueProvider,
+                    move.player_id,
+                    move.position
+                  )
+                "
               />
               <svg
                 v-else

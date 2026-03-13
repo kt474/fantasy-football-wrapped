@@ -34,6 +34,7 @@ import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
 import { toPng } from "html-to-image";
 import { Copy, Download } from "lucide-vue-next";
+import { getPlayerImageUrl } from "@/lib/assets";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -1391,13 +1392,27 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     v-if="player.player.position !== 'DEF'"
                     alt="Player image"
                     class="w-14 sm:h-auto object-cover mr-2.5"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player.player_id}.jpg`"
+                    :src="
+                      getPlayerImageUrl(
+                        store.currentLeagueProvider,
+                        player.player.player_id,
+                        player.player.position,
+                        player.player.team
+                      )
+                    "
                   />
                   <img
                     v-else
                     alt="Defense image"
                     class="object-cover w-14 mr-2.5 sm:h-auto"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player.player_id.toLowerCase()}.png`"
+                    :src="
+                      getPlayerImageUrl(
+                        store.currentLeagueProvider,
+                        player.player.player_id,
+                        player.player.position,
+                        player.player.team
+                      )
+                    "
                   />
                   <div>
                     <p class="font-semibold truncate w-36">
@@ -1436,13 +1451,27 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     v-if="player.player?.position !== 'DEF'"
                     alt="Player image"
                     class="w-14 sm:h-auto object-cover mr-2.5"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player.player_id}.jpg`"
+                    :src="
+                      getPlayerImageUrl(
+                        store.currentLeagueProvider,
+                        player.player.player_id,
+                        player.player.position,
+                        player.player.team
+                      )
+                    "
                   />
                   <img
                     v-else
                     alt="Defense image"
                     class="object-cover w-14 mr-2.5 sm:h-auto"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player.player_id.toLowerCase()}.png`"
+                    :src="
+                      getPlayerImageUrl(
+                        store.currentLeagueProvider,
+                        player.player.player_id,
+                        player.player.position,
+                        player.player.team
+                      )
+                    "
                   />
                   <div>
                     <p class="font-semibold truncate w-36">
@@ -1481,13 +1510,27 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     v-if="player.player?.position !== 'DEF'"
                     alt="Player image"
                     class="w-14 sm:h-auto object-cover mr-2.5"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player.player_id}.jpg`"
+                    :src="
+                      getPlayerImageUrl(
+                        store.currentLeagueProvider,
+                        player.player.player_id,
+                        player.player.position,
+                        player.player.team
+                      )
+                    "
                   />
                   <img
                     v-else
                     alt="Defense image"
                     class="object-cover w-14 mr-2.5 sm:h-auto"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player.player_id.toLowerCase()}.png`"
+                    :src="
+                      getPlayerImageUrl(
+                        store.currentLeagueProvider,
+                        player.player.player_id,
+                        player.player.position,
+                        player.player.team
+                      )
+                    "
                   />
                   <div>
                     <p class="font-semibold truncate w-36">

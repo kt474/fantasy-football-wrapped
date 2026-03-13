@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
+import { getPlayerImageUrl } from "@/lib/assets";
 
 interface ShareTeam {
   name: string;
@@ -135,13 +136,25 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
                 v-if="player.position !== 'DEF'"
                 alt="Player image"
                 class="object-cover rounded h-9 w-9"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                :src="
+                  getPlayerImageUrl(
+                    'sleeper',
+                    player.player_id,
+                    player.position
+                  )
+                "
               />
               <img
                 v-else
                 alt="Defense image"
                 class="object-cover rounded h-9 w-9"
-                :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                :src="
+                  getPlayerImageUrl(
+                    'sleeper',
+                    player.player_id,
+                    player.position
+                  )
+                "
               />
               <div class="min-w-0">
                 <p class="font-medium truncate">{{ player.name }}</p>
@@ -173,13 +186,25 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
                 v-if="player.position !== 'DEF'"
                 alt="Player image"
                 class="object-cover rounded h-9 w-9"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                :src="
+                  getPlayerImageUrl(
+                    'sleeper',
+                    player.player_id,
+                    player.position
+                  )
+                "
               />
               <img
                 v-else
                 alt="Defense image"
                 class="object-cover rounded h-9 w-9"
-                :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                :src="
+                  getPlayerImageUrl(
+                    'sleeper',
+                    player.player_id,
+                    player.position
+                  )
+                "
               />
               <div class="min-w-0">
                 <p class="font-medium truncate">{{ player.name }}</p>
@@ -211,13 +236,25 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
                 v-if="player.position !== 'DEF'"
                 alt="Player image"
                 class="object-cover rounded h-9 w-9"
-                :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                :src="
+                  getPlayerImageUrl(
+                    'sleeper',
+                    player.player_id,
+                    player.position
+                  )
+                "
               />
               <img
                 v-else
                 alt="Defense image"
                 class="object-cover rounded h-9 w-9"
-                :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                :src="
+                  getPlayerImageUrl(
+                    'sleeper',
+                    player.player_id,
+                    player.position
+                  )
+                "
               />
               <div class="min-w-0">
                 <p class="font-medium truncate">{{ player.name }}</p>

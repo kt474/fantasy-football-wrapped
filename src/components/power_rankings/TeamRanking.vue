@@ -10,10 +10,10 @@ import {
 import { getStats } from "../../api/sleeperApi";
 import { useStore } from "../../store/store";
 import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
-import { fakeUsers } from "../../api/fakeLeague";
 import Roster from "./Roster.vue";
 import Card from "../ui/card/Card.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getPlayerImageUrl } from "@/lib/assets";
 
 const store = useStore();
 const props = defineProps<{
@@ -85,22 +85,14 @@ const getData = async () => {
 };
 
 const getTeamName = (playerId: string) => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  if (currentLeague) {
-    const roster = currentLeague.rosters.find((roster) =>
-      roster.players?.includes(playerId)
-    );
-    const user = currentLeague.users.find((user) => user?.id === roster?.id);
-    if (user) {
-      if (store.showUsernames) {
-        return user.username ? user.username : "";
-      }
-      return user.name ? user.name : "";
-    }
-    return "";
-  } else {
-    return fakeUsers[Math.floor(Math.random() * fakeUsers.length)].name;
+  const team = props.tableData.find((user) => user.players?.includes(playerId));
+  if (!team) return "";
+
+  if (store.showUsernames) {
+    return team.username ?? team.name ?? "";
   }
+
+  return team.name ?? "";
 };
 
 onMounted(async () => {
@@ -185,13 +177,27 @@ watch(
                   v-if="player.position !== 'DEF'"
                   alt="Player image"
                   class="object-cover w-16 h-16 mx-2 sm:h-auto"
-                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
+                  :src="
+                    getPlayerImageUrl(
+                      store.currentLeagueProvider,
+                      player.id ?? '',
+                      player.position,
+                      player.team
+                    )
+                  "
                 />
                 <img
                   v-else
                   alt="Defense image"
                   class="object-cover w-16 h-16 my-auto ml-2"
-                  :src="`https://sleepercdn.com/images/team_logos/nfl/${(player.id ?? '').toLowerCase()}.png`"
+                  :src="
+                    getPlayerImageUrl(
+                      store.currentLeagueProvider,
+                      player.id ?? '',
+                      player.position,
+                      player.team
+                    )
+                  "
                 />
                 <div class="w-full mt-0.5 ml-3">
                   <div class="flex justify-between px-2 mt-1 mb-4">

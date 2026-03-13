@@ -1,14 +1,16 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "@/store/store";
-import type { LeagueInfoType } from "@/types/types";
+import type { FantasyProviderId, LeagueInfoType } from "@/types/types";
 import type { LeagueOriginal } from "@/types/apiTypes";
 import {
   getData,
   inputLeague,
   inputUsername,
+  validateLeague,
 } from "@/api/api";
-import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
+import { getAllLeagues, getUsername } from "@/api/sleeperApi";
+import { buildLeagueKey, DEFAULT_FANTASY_PROVIDER } from "@/lib/leagueIdentity";
 
 export const SEASON_YEAR_OPTIONS = [
   "2026",
@@ -24,6 +26,7 @@ export const useLeagueInput = () => {
   const router = useRouter();
   const route = useRoute();
 
+  const provider = ref<FantasyProviderId>(DEFAULT_FANTASY_PROVIDER);
   const leagueIdInput = ref("");
   const inputType = ref("League ID");
   const seasonYear = ref("2025");
@@ -31,8 +34,8 @@ export const useLeagueInput = () => {
   const errorMsg = ref("");
   const showHelperMsg = ref(false);
 
-  const leagueIds = computed(() => {
-    return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
+  const leagueKeys = computed(() => {
+    return store.leagueInfo.map((league: LeagueInfoType) => league.leagueKey);
   });
 
   const resetRoute = async () => {
@@ -43,7 +46,15 @@ export const useLeagueInput = () => {
   };
 
   const updateURL = async (leagueID: string) => {
-    await router.replace({ path: "/", query: { ...route.query, leagueId: leagueID } });
+    await router.replace({
+      path: "/",
+      query: {
+        ...route.query,
+        provider: provider.value,
+        season: provider.value === "espn" ? seasonYear.value : undefined,
+        leagueId: leagueID,
+      },
+    });
   };
 
   const clearError = () => {
@@ -52,11 +63,25 @@ export const useLeagueInput = () => {
   };
 
   onMounted(() => {
+    const savedProvider = localStorage.getItem("leagueProvider");
+    if (savedProvider === "espn" || savedProvider === "sleeper") {
+      provider.value = savedProvider;
+    }
     const savedInputType = localStorage.getItem("inputType");
     if (savedInputType) {
       inputType.value = savedInputType;
     }
   });
+
+  watch(
+    () => provider.value,
+    () => {
+      localStorage.setItem("leagueProvider", provider.value);
+      if (provider.value === "espn" && inputType.value === "Username") {
+        inputType.value = "League ID";
+      }
+    }
+  );
 
   watch(
     () => inputType.value,
@@ -66,7 +91,7 @@ export const useLeagueInput = () => {
   const onSubmit = async () => {
     clearError();
 
-    if (inputType.value === "Username") {
+    if (provider.value === "sleeper" && inputType.value === "Username") {
       if (leagueIdInput.value === "") {
         errorMsg.value = "Please enter a username";
         showErrorMsg.value = true;
@@ -104,14 +129,22 @@ export const useLeagueInput = () => {
       return;
     }
 
-    const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
-    if (!checkInput["name"]) {
+    const checkInput = (await validateLeague({
+      provider: provider.value,
+      leagueId: leagueIdInput.value,
+      season: provider.value === "espn" ? seasonYear.value : undefined,
+    })) as LeagueOriginal | null;
+    if (!checkInput?.name) {
       errorMsg.value = "Invalid league ID";
       showErrorMsg.value = true;
-    } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
+    } else if (
+      (leagueKeys.value as string[]).includes(
+        buildLeagueKey(provider.value, leagueIdInput.value)
+      )
+    ) {
       errorMsg.value = "League already added";
       showErrorMsg.value = true;
-    } else if (checkInput["sport"] !== "nfl") {
+    } else if (checkInput.sport !== "nfl") {
       errorMsg.value = "Only NFL leagues are supported";
       showErrorMsg.value = true;
     } else {
@@ -119,10 +152,14 @@ export const useLeagueInput = () => {
       localStorage.setItem("currentTab", "Standings");
       await resetRoute();
       showErrorMsg.value = false;
-      store.updateLoadingLeague(checkInput["name"]);
-      store.updateCurrentLeagueId(leagueIdInput.value);
+      store.updateLoadingLeague(checkInput.name);
+      store.updateCurrentLeagueId(leagueIdInput.value, provider.value);
       try {
-        const newLeagueInfo = await getData(leagueIdInput.value);
+        const newLeagueInfo = await getData({
+          provider: provider.value,
+          leagueId: leagueIdInput.value,
+          season: provider.value === "espn" ? seasonYear.value : undefined,
+        });
         store.updateLeagueInfo(newLeagueInfo);
         store.leagueSubmitted = true;
         store.updateShowInput(false);
@@ -152,6 +189,7 @@ export const useLeagueInput = () => {
   };
 
   return {
+    provider,
     inputType,
     seasonYear,
     leagueIdInput,
