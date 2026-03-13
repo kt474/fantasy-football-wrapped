@@ -429,7 +429,7 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     newLeagueInfo.currentWeek = currentWeek;
   } else {
     numberOfWeeks = newLeagueInfo.regularSeasonLength;
-    winnersBracket.forEach((matchup) => {
+    winnersBracket?.forEach((matchup) => {
       if (matchup.p === 1) {
         legacyWinner = matchup.w;
       }

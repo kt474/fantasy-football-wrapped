@@ -328,7 +328,7 @@ onMounted(async () => {
     store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
   ) {
     await fetchPlayerNames();
-    const savedText = store.leagueInfo[store.currentLeagueIndex].weeklyReport
+    const savedText = store.leagueInfo[store.currentLeagueIndex]?.weeklyReport
       ? (store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "")
       : "";
     rawWeeklyReport.value = savedText;

@@ -552,7 +552,10 @@ const getTeamName = (tableDataItem: TableDataType) => {
         </TooltipProvider>
       </Card>
       <div class="flex flex-col flex-1 w-full mt-4 xl:w-fit xl:ml-4 xl:mt-0">
-        <CurrentTrends :tableData="tableData" />
+        <CurrentTrends
+          v-if="seasonType !== 'Guillotine'"
+          :tableData="tableData"
+        />
         <Card class="flex-1 px-2 py-4 mt-4 md:w-auto min-w-56 min-h-56">
           <BestManagerCard
             :rosters="store.currentLeagueId ? props.rosters : fakeRosters"
@@ -641,7 +644,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <PlayoffPercentages :propsTableData="sortedPropsTableData" class="mt-4" />
       <Playoffs class="mb-4" :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'Weekly Report'">
+    <div
+      v-if="store.currentTab === 'Weekly Report' && seasonType !== 'Guillotine'"
+    >
       <WeeklyReport
         v-if="store.currentLeagueId"
         :tableData="tableData"
@@ -649,7 +654,11 @@ const getTeamName = (tableDataItem: TableDataType) => {
       />
       <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
     </div>
-    <div v-if="store.currentTab === 'Schedule Simulator'">
+    <div
+      v-if="
+        store.currentTab === 'Schedule Simulator' && seasonType !== 'Guillotine'
+      "
+    >
       <ScheduleSimulator class="my-4" :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'Trade Lab'">
@@ -664,14 +673,19 @@ const getTeamName = (tableDataItem: TableDataType) => {
     <div v-if="store.currentTab === 'League History'">
       <LeagueHistory :tableData="tableData" />
     </div>
-    <div v-if="store.currentTab === 'Manager Profiles'">
+    <div
+      v-if="
+        store.currentTab === 'Manager Profiles' && seasonType !== 'Guillotine'
+      "
+    >
       <Narratives :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'Wrapped'">
       <Wrapped
         v-if="
           store.currentLeagueId &&
-          store.leagueInfo[store.currentLeagueIndex]?.season === '2025'
+          store.leagueInfo[store.currentLeagueIndex]?.season === '2025' &&
+          seasonType !== 'Guillotine'
         "
         :tableData="originalData"
       />
