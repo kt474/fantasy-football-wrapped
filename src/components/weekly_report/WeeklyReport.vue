@@ -294,7 +294,12 @@ const getReport = async () => {
         currentWeek: currentWeek.value,
       };
     }
-    const response = await generateReport(reportPrompt.value, leagueMetadata);
+    const response = await generateReport(
+      reportPrompt.value,
+      leagueMetadata,
+      currentLeague.leagueId,
+      currentWeek.value
+    );
     rawWeeklyReport.value = response.text;
     store.addWeeklyReport(currentLeague.leagueId, rawWeeklyReport.value);
     localStorage.setItem(
