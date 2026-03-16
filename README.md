@@ -14,6 +14,7 @@ Current features:
 - Weekly matchup previews
 - Start/sit stats with latest player news
 - Draft grades and recap
+- Schedule simulator, trade calculator, and manager profiles
 - League history stats
 - Yearly spotify wrapped style presentation
 
@@ -59,7 +60,5 @@ Please report any issues or request new features in the [issues](https://github.
 
 ## TODO
 
-- IOS App
 - ESPN Support
 - Yahoo Support
-- Site Redesign
