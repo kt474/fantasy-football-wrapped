@@ -95,6 +95,6 @@ router.beforeEach(async (to) => {
 
 app.component("apexchart", ApexChart);
 app.use(router);
-// app.use(posthogPlugin);
+app.use(posthogPlugin);
 registerSW({ immediate: true });
 app.mount("#app");
