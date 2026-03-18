@@ -42,7 +42,10 @@ onMounted(async () => {
               if (originalData) {
                 const currentData = JSON.parse(originalData);
                 delete currentData[league.leagueId];
-                localStorage.setItem("originalData", JSON.stringify(currentData));
+                localStorage.setItem(
+                  "originalData",
+                  JSON.stringify(currentData)
+                );
               }
               store.updateLoadingLeague(league.name);
               const refreshedData = await getData(league.leagueId);
@@ -61,7 +64,9 @@ onMounted(async () => {
           }
         })
       );
-      store.updateCurrentLeagueId(localStorage.getItem("currentLeagueId") ?? "");
+      store.updateCurrentLeagueId(
+        localStorage.getItem("currentLeagueId") ?? ""
+      );
       store.updateLoadingLeague("");
     }
     const leagueId = Array.isArray(route.query.leagueId)
@@ -82,6 +87,8 @@ onMounted(async () => {
           league.seasonType,
           league.season
         );
+        store.currentTab = "Standings";
+        localStorage.setItem("currentTab", "Standings");
         store.updateLoadingLeague("");
       } else {
         toast.error("Invalid League ID");
