@@ -147,6 +147,26 @@ const getRosterEntries = (team: Record<string, unknown>) => {
     : [];
 };
 
+const getWeeklyEntryPoints = (entry: Record<string, unknown>) => {
+  const playerPoolEntry =
+    (entry.playerPoolEntry as Record<string, unknown> | undefined) ?? {};
+  const player =
+    (playerPoolEntry.player as Record<string, unknown> | undefined) ?? {};
+  const stats = Array.isArray(player.stats)
+    ? (player.stats as Array<Record<string, unknown>>)
+    : [];
+
+  const actualWeekStats = stats.find(
+    (stat) =>
+      Number(stat.statSourceId ?? -1) === 0 &&
+      Number(stat.statSplitTypeId ?? -1) === 1
+  );
+
+  return Number(
+    actualWeekStats?.appliedTotal ?? playerPoolEntry.appliedStatTotal ?? 0
+  );
+};
+
 const getRosterMap = (teams: Array<Record<string, unknown>> = []) => {
   return teams.map((team) => {
     const record = getTeamRecord(team);
@@ -168,58 +188,89 @@ const getRosterMap = (teams: Array<Record<string, unknown>> = []) => {
       players: rosterEntries
         .map((entry) => String(entry.playerId ?? ""))
         .filter(Boolean),
-      playerNames: rosterEntries
-        .map((entry) => String(entry.playerPoolEntry.player.fullName ?? ""))
-        .filter(Boolean),
+      playerNames: rosterEntries.map((entry: any) =>
+        String(entry.playerPoolEntry.player.fullName ?? "")
+      ),
     } satisfies RosterType;
   });
 };
 
 const getWeeklyPointsMap = (
   teams: Array<Record<string, unknown>> = [],
-  schedule: Array<Record<string, unknown>> = []
+  schedule: Array<Array<Record<string, unknown>>> = []
 ) => {
   const weeklyPoints = new Map<number, PointsType>();
-  teams.forEach((team) => {
-    const rosterEntries = getRosterEntries(team);
-    const starters = rosterEntries
-      .filter((entry) => Number(entry.lineupSlotId ?? 20) !== 20)
-      .filter((entry) => Number(entry.lineupSlotId ?? 21) !== 21)
-      .map((entry) => String(entry.playerId ?? ""))
-      .filter(Boolean);
-    const bench = rosterEntries
-      .filter((entry) => Number(entry.lineupSlotId ?? 20) === 20)
-      .map((entry) => String(entry.playerId ?? ""))
-      .filter(Boolean);
-    const rosterId = Number(team.id ?? 0);
 
+  teams.forEach((team) => {
+    const rosterId = Number(team.id ?? 0);
     weeklyPoints.set(rosterId, {
       rosterId,
-      points: [],
-      matchups: [],
-      starters: starters.length ? [starters] : [],
-      starterPoints: starters.length ? [starters.map(() => 0)] : [],
-      benchPlayers: bench.length ? [bench] : [],
-      benchPoints: bench.length ? [bench.map(() => 0)] : [],
+      points: Array(schedule.length).fill(0),
+      matchups: Array(schedule.length).fill(0),
+      starters: Array.from({ length: schedule.length }, () => [] as string[]),
+      starterPoints: Array.from(
+        { length: schedule.length },
+        () => [] as number[]
+      ),
+      benchPlayers: Array.from(
+        { length: schedule.length },
+        () => [] as string[]
+      ),
+      benchPoints: Array.from(
+        { length: schedule.length },
+        () => [] as number[]
+      ),
     });
   });
 
-  schedule.forEach((matchup) => {
-    const matchupId = Number(matchup.id ?? matchup.matchupPeriodId ?? 0);
-    const home = matchup.home as Record<string, unknown> | undefined;
-    const away = matchup.away as Record<string, unknown> | undefined;
+  schedule.forEach((weekEntries, weekIndex) => {
+    weekEntries.forEach((teamWeek) => {
+      const rosterId = Number(teamWeek.teamId ?? 0);
+      const roster =
+        (teamWeek.roster as Record<string, unknown> | undefined) ?? {};
+      const entries = Array.isArray(roster.entries)
+        ? (roster.entries as Array<Record<string, unknown>>)
+        : [];
+      const pointsRow = weeklyPoints.get(rosterId);
 
-    [home, away].forEach((side) => {
-      if (!side) {
+      if (!pointsRow) {
         return;
       }
-      const teamId = Number(side.teamId ?? 0);
-      const entry = weeklyPoints.get(teamId);
-      if (!entry) {
-        return;
+
+      const starters: string[] = [];
+      const starterPoints: number[] = [];
+      const benchPlayers: string[] = [];
+      const benchPointValues: number[] = [];
+
+      entries.forEach((entry) => {
+        const playerId = String(entry.playerId ?? "");
+        const lineupSlotId = Number(entry.lineupSlotId ?? 20);
+        const playerPoints = getWeeklyEntryPoints(entry);
+
+        if (!playerId) {
+          return;
+        }
+
+        if (lineupSlotId === 20) {
+          benchPlayers.push(playerId);
+          benchPointValues.push(playerPoints);
+          return;
+        }
+
+        if (lineupSlotId !== 21) {
+          starters.push(playerId);
+          starterPoints.push(playerPoints);
+        }
+      });
+
+      pointsRow.points[weekIndex] = Number(teamWeek.totalPoints ?? 0);
+      if (pointsRow.matchups) {
+        pointsRow.matchups[weekIndex] = Number(teamWeek.matchupId ?? 0);
       }
-      entry.points.push(Number(side.totalPoints ?? 0));
-      entry.matchups?.push(matchupId || 0);
+      pointsRow.starters[weekIndex] = starters;
+      pointsRow.starterPoints[weekIndex] = starterPoints;
+      pointsRow.benchPlayers[weekIndex] = benchPlayers;
+      pointsRow.benchPoints[weekIndex] = benchPointValues;
     });
   });
 
@@ -330,10 +381,10 @@ export const getRosterData = async (season: string, league_id: string) => {
   }
 };
 
-export const getMatchups = async (season: string, league_id: string) => {
+export const getDraftData = async (season: string, league_id: string) => {
   try {
     const response = await fetch(
-      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore`
+      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mDraftDetail`
     );
     return safeJson(response);
   } catch (e) {
@@ -341,10 +392,14 @@ export const getMatchups = async (season: string, league_id: string) => {
   }
 };
 
-export const getDraftData = async (season: string, league_id: string) => {
+export const getPlayerStats = async (
+  season: string,
+  league_id: string,
+  week: number
+) => {
   try {
     const response = await fetch(
-      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mDraftDetail`
+      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore&view=mScoreboard&scoringPeriodId=${String(week)}`
     );
     return safeJson(response);
   } catch (e) {
@@ -357,14 +412,12 @@ export const getLeagueInfoLike = async (
   leagueId: string
 ): Promise<LeagueInfoType | null> => {
   try {
-    const [league, teamData, rosterData, matchupData, draftData] =
-      await Promise.all([
-        getLeagueData(season, leagueId),
-        getTeamData(season, leagueId),
-        getRosterData(season, leagueId),
-        getMatchups(season, leagueId),
-        getDraftData(season, leagueId),
-      ]);
+    const [league, teamData, rosterData, draftData] = await Promise.all([
+      getLeagueData(season, leagueId),
+      getTeamData(season, leagueId),
+      getRosterData(season, leagueId),
+      getDraftData(season, leagueId),
+    ]);
 
     const leagueRoot = (league ?? {}) as Record<string, unknown>;
     const settings =
@@ -388,9 +441,6 @@ export const getLeagueInfoLike = async (
       ? (rosterData.teams as Array<Record<string, unknown>>)
       : [];
     const teams = mergeTeams(teamDataTeams, rosterDataTeams);
-    const schedule = Array.isArray(matchupData?.schedule)
-      ? (matchupData.schedule as Array<Record<string, unknown>>)
-      : [];
     const regularSeasonLength = Number(
       scheduleSettings.matchupPeriodCount ??
         scheduleSettings.regularSeasonMatchupPeriodCount ??
@@ -399,6 +449,32 @@ export const getLeagueInfoLike = async (
     const currentWeek = Number(status.currentMatchupPeriod ?? 0);
     const finalScoringPeriod = Number(status.finalScoringPeriod ?? 0);
     const lastScoredWeek = Math.max(finalScoringPeriod, currentWeek - 1, 0);
+
+    let schedule = [];
+    for (let i = 1; i <= lastScoredWeek; i++) {
+      let scheduleData = await getPlayerStats(season, leagueId, i);
+      const filtered = scheduleData.schedule
+        .filter(
+          (matchup: any) =>
+            matchup.home?.rosterForMatchupPeriod &&
+            matchup.away?.rosterForMatchupPeriod
+        )
+        .flatMap((matchup: any, matchupIndex: number) => [
+          {
+            matchupId: matchupIndex + 1,
+            teamId: matchup.home.teamId,
+            totalPoints: matchup.home.totalPoints,
+            roster: matchup.home.rosterForCurrentScoringPeriod,
+          },
+          {
+            matchupId: matchupIndex + 1,
+            teamId: matchup.away.teamId,
+            totalPoints: matchup.away.totalPoints,
+            roster: matchup.away.rosterForCurrentScoringPeriod,
+          },
+        ]);
+      schedule.push(filtered);
+    }
 
     return {
       name: String(settings.name ?? leagueRoot.name ?? ""),

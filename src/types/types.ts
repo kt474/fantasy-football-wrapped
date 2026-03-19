@@ -59,6 +59,7 @@ export type RosterType = {
   recordByWeek: string;
   players?: string[];
   projections?: { projection: number; position: string }[];
+  playerNames?: string[];
 };
 
 export type PointsType = {
