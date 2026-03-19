@@ -167,7 +167,41 @@ const getWeeklyEntryPoints = (entry: Record<string, unknown>) => {
   );
 };
 
-const getRosterMap = (teams: Array<Record<string, unknown>> = []) => {
+const getWeeklyResult = (teamPoints: number, opponentPoints: number) => {
+  if (teamPoints > opponentPoints) {
+    return "W";
+  }
+  if (teamPoints < opponentPoints) {
+    return "L";
+  }
+  return "T";
+};
+
+const getRecordByWeekMap = (
+  teams: Array<Record<string, unknown>> = [],
+  schedule: Array<Array<Record<string, unknown>>> = []
+) => {
+  const recordMap = new Map<number, string>();
+
+  teams.forEach((team) => {
+    recordMap.set(Number(team.id ?? 0), "");
+  });
+
+  schedule.forEach((weekEntries) => {
+    weekEntries.forEach((teamWeek) => {
+      const teamId = Number(teamWeek.teamId ?? 0);
+      const currentRecord = recordMap.get(teamId) ?? "";
+      recordMap.set(teamId, `${currentRecord}${String(teamWeek.result ?? "")}`);
+    });
+  });
+
+  return recordMap;
+};
+
+const getRosterMap = (
+  teams: Array<Record<string, unknown>> = [],
+  recordByWeekMap: Map<number, string> = new Map()
+) => {
   return teams.map((team) => {
     const record = getTeamRecord(team);
     const rosterEntries = getRosterEntries(team);
@@ -184,7 +218,7 @@ const getRosterMap = (teams: Array<Record<string, unknown>> = []) => {
       wins: record.wins,
       losses: record.losses,
       ties: record.ties,
-      recordByWeek: "",
+      recordByWeek: recordByWeekMap.get(Number(team.id ?? 0)) ?? "",
       players: rosterEntries
         .map((entry) => String(entry.playerId ?? ""))
         .filter(Boolean),
@@ -459,22 +493,30 @@ export const getLeagueInfoLike = async (
             matchup.home?.rosterForMatchupPeriod &&
             matchup.away?.rosterForMatchupPeriod
         )
-        .flatMap((matchup: any, matchupIndex: number) => [
-          {
-            matchupId: matchupIndex + 1,
-            teamId: matchup.home.teamId,
-            totalPoints: matchup.home.totalPoints,
-            roster: matchup.home.rosterForCurrentScoringPeriod,
-          },
-          {
-            matchupId: matchupIndex + 1,
-            teamId: matchup.away.teamId,
-            totalPoints: matchup.away.totalPoints,
-            roster: matchup.away.rosterForCurrentScoringPeriod,
-          },
-        ]);
+        .flatMap((matchup: any, matchupIndex: number) => {
+          const homePoints = Number(matchup.home.totalPoints ?? 0);
+          const awayPoints = Number(matchup.away.totalPoints ?? 0);
+
+          return [
+            {
+              matchupId: matchupIndex + 1,
+              teamId: matchup.home.teamId,
+              totalPoints: homePoints,
+              result: getWeeklyResult(homePoints, awayPoints),
+              roster: matchup.home.rosterForCurrentScoringPeriod,
+            },
+            {
+              matchupId: matchupIndex + 1,
+              teamId: matchup.away.teamId,
+              totalPoints: awayPoints,
+              result: getWeeklyResult(awayPoints, homePoints),
+              roster: matchup.away.rosterForCurrentScoringPeriod,
+            },
+          ];
+        });
       schedule.push(filtered);
     }
+    const recordByWeekMap = getRecordByWeekMap(teams, schedule);
 
     return {
       name: String(settings.name ?? leagueRoot.name ?? ""),
@@ -491,7 +533,7 @@ export const getLeagueInfoLike = async (
       winnersBracket: [],
       losersBracket: [],
       users: getManagerMap(members, teams),
-      rosters: getRosterMap(teams),
+      rosters: getRosterMap(teams, recordByWeekMap),
       weeklyPoints: getWeeklyPointsMap(teams, schedule),
       transactions: {},
       trades: [],
