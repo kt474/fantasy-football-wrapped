@@ -52,8 +52,9 @@ const getTeamRecord = (team: Record<string, unknown>) => {
     wins: Number(overall.wins ?? 0),
     losses: Number(overall.losses ?? 0),
     ties: Number(overall.ties ?? 0),
-    pointsFor: Number(overall.pointsFor ?? team.points ?? 0),
-    pointsAgainst: Number(overall.pointsAgainst ?? 0),
+    pointsFor:
+      Math.round(Number(overall.pointsFor ?? team.points ?? 0) * 10) / 10,
+    pointsAgainst: Math.round(Number(overall.pointsAgainst ?? 0) * 10) / 10,
   };
 };
 
@@ -85,6 +86,7 @@ const getManagerMap = (
     return {
       id,
       avatar: String(member.id ?? ""),
+      avatarImg: String(member.id ?? ""),
       name: teamNameByOwner.get(id) || fullName || username,
       username,
     } satisfies UserType;
@@ -98,6 +100,7 @@ const getManagerMap = (
       ({
         id: String(team.primaryOwner ?? team.id ?? ""),
         avatar: String(team.logo ?? ""),
+        avatarImg: String(team.logo ?? ""),
         name: String(team.name ?? ""),
         username: String(team.name ?? ""),
         placement:
@@ -198,23 +201,136 @@ const getRecordByWeekMap = (
   return recordMap;
 };
 
+const getPotentialLineupSlotIds = (
+  lineupSlotCounts: Record<string, number> = {}
+) => {
+  const slotIds = Object.entries(lineupSlotCounts).flatMap(([slotId, count]) =>
+    Array.from({ length: Number(count ?? 0) }, () => Number(slotId))
+  );
+
+  return slotIds
+    .filter((slotId) => slotId !== 20 && slotId !== 21)
+    .sort((a, b) => {
+      const aIsFlexible = a === 3 || a === 5 || a === 7 || a === 23;
+      const bIsFlexible = b === 3 || b === 5 || b === 7 || b === 23;
+      if (aIsFlexible === bIsFlexible) {
+        return a - b;
+      }
+      return aIsFlexible ? 1 : -1;
+    });
+};
+
+const getPotentialPointsForWeek = (
+  entries: Array<Record<string, unknown>> = [],
+  lineupSlotCounts: Record<string, number> = {}
+) => {
+  const slotIds = getPotentialLineupSlotIds(lineupSlotCounts);
+  const players = entries
+    .map((entry) => {
+      const playerPoolEntry =
+        (entry.playerPoolEntry as Record<string, unknown> | undefined) ?? {};
+      const player =
+        (playerPoolEntry.player as Record<string, unknown> | undefined) ?? {};
+      return {
+        eligibleSlots: Array.isArray(player.eligibleSlots)
+          ? (player.eligibleSlots as unknown[]).map((slot) => Number(slot))
+          : [],
+        points: getWeeklyEntryPoints(entry),
+      };
+    })
+    .filter((player) => player.eligibleSlots.length > 0);
+
+  const memo = new Map<string, number>();
+
+  const dfs = (slotIndex: number, usedMask: number) => {
+    if (slotIndex >= slotIds.length) {
+      return 0;
+    }
+
+    const key = `${slotIndex}:${usedMask}`;
+    const cached = memo.get(key);
+    if (cached != null) {
+      return cached;
+    }
+
+    let best = 0;
+    const slotId = slotIds[slotIndex];
+
+    players.forEach((player, playerIndex) => {
+      const playerMask = 1 << playerIndex;
+      if ((usedMask & playerMask) !== 0) {
+        return;
+      }
+      if (!player.eligibleSlots.includes(slotId)) {
+        return;
+      }
+
+      best = Math.max(
+        best,
+        player.points + dfs(slotIndex + 1, usedMask | playerMask)
+      );
+    });
+
+    memo.set(key, best);
+    return best;
+  };
+
+  return dfs(0, 0);
+};
+
+const getPotentialPointsMap = (
+  teams: Array<Record<string, unknown>> = [],
+  schedule: Array<Array<Record<string, unknown>>> = [],
+  lineupSlotCounts: Record<string, number> = {}
+) => {
+  const potentialPointsMap = new Map<number, number>();
+  console.log(schedule);
+  teams.forEach((team) => {
+    potentialPointsMap.set(Number(team.id ?? 0), 0);
+  });
+
+  schedule.forEach((weekEntries) => {
+    weekEntries.forEach((teamWeek) => {
+      const teamId = Number(teamWeek.teamId ?? 0);
+      const roster =
+        (teamWeek.roster as Record<string, unknown> | undefined) ?? {};
+      const entries = Array.isArray(roster.entries)
+        ? (roster.entries as Array<Record<string, unknown>>)
+        : [];
+      const weeklyPotential = getPotentialPointsForWeek(
+        entries,
+        lineupSlotCounts
+      );
+      const currentTotal = potentialPointsMap.get(teamId) ?? 0;
+
+      potentialPointsMap.set(
+        teamId,
+        Math.round((currentTotal + weeklyPotential) * 100) / 100
+      );
+    });
+  });
+
+  return potentialPointsMap;
+};
+
 const getRosterMap = (
   teams: Array<Record<string, unknown>> = [],
-  recordByWeekMap: Map<number, string> = new Map()
+  recordByWeekMap: Map<number, string> = new Map(),
+  potentialPointsMap: Map<number, number> = new Map()
 ) => {
   return teams.map((team) => {
     const record = getTeamRecord(team);
     const rosterEntries = getRosterEntries(team);
-    const valuesByStat =
-      (team.valuesByStat as Record<string, number> | undefined) ?? {};
+    const potentialPoints = potentialPointsMap.get(Number(team.id ?? 0)) ?? 0;
 
     return {
       id: String(team.primaryOwner ?? team.id ?? ""),
       rosterId: Number(team.id ?? 0),
       pointsFor: record.pointsFor,
       pointsAgainst: record.pointsAgainst,
-      potentialPoints: Number(valuesByStat["0"] ?? record.pointsFor),
-      managerEfficiency: 0,
+      potentialPoints: potentialPoints,
+      managerEfficiency:
+        Math.round((record.pointsFor * 1000) / potentialPoints) / 1000,
       wins: record.wins,
       losses: record.losses,
       ties: record.ties,
@@ -222,9 +338,6 @@ const getRosterMap = (
       players: rosterEntries
         .map((entry) => String(entry.playerId ?? ""))
         .filter(Boolean),
-      playerNames: rosterEntries.map((entry: any) =>
-        String(entry.playerPoolEntry.player.fullName ?? "")
-      ),
     } satisfies RosterType;
   });
 };
@@ -503,20 +616,30 @@ export const getLeagueInfoLike = async (
               teamId: matchup.home.teamId,
               totalPoints: homePoints,
               result: getWeeklyResult(homePoints, awayPoints),
-              roster: matchup.home.rosterForCurrentScoringPeriod,
+              roster:
+                matchup.home.rosterForMatchupPeriod ??
+                matchup.home.rosterForCurrentScoringPeriod,
             },
             {
               matchupId: matchupIndex + 1,
               teamId: matchup.away.teamId,
               totalPoints: awayPoints,
               result: getWeeklyResult(awayPoints, homePoints),
-              roster: matchup.away.rosterForCurrentScoringPeriod,
+              roster:
+                matchup.away.rosterForMatchupPeriod ??
+                matchup.away.rosterForCurrentScoringPeriod,
             },
           ];
         });
       schedule.push(filtered);
     }
     const recordByWeekMap = getRecordByWeekMap(teams, schedule);
+    const potentialPointsMap = getPotentialPointsMap(
+      teams,
+      schedule,
+      (rosterSettings.lineupSlotCounts as Record<string, number> | undefined) ??
+        {}
+    );
 
     return {
       name: String(settings.name ?? leagueRoot.name ?? ""),
@@ -533,7 +656,7 @@ export const getLeagueInfoLike = async (
       winnersBracket: [],
       losersBracket: [],
       users: getManagerMap(members, teams),
-      rosters: getRosterMap(teams, recordByWeekMap),
+      rosters: getRosterMap(teams, recordByWeekMap, potentialPointsMap),
       weeklyPoints: getWeeklyPointsMap(teams, schedule),
       transactions: {},
       trades: [],
