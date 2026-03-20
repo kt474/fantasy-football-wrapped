@@ -55,7 +55,10 @@ const getData = async () => {
   const uniquePlayerIdArray = Array.from(allUniquePlayerIds);
 
   // Step 2: Make ONE API call to fetch all unique players required across all trades
-  let playerLookupMap = new Map<string, { name?: string; team?: string; position?: string; player_id?: string }>();
+  let playerLookupMap = new Map<
+    string,
+    { name?: string; team?: string; position?: string; player_id?: string }
+  >();
   if (uniquePlayerIdArray.length > 0) {
     playerLookupMap = await getPlayersByIdsMap(uniquePlayerIdArray);
   }
@@ -67,7 +70,9 @@ const getData = async () => {
       return {
         id: trade.roster_id,
         user: getRosterName(trade.roster_id),
-        adds: addsPlayer?.name ? addsPlayer.name : `${addsPlayer?.team ?? ""} Defense`,
+        adds: addsPlayer?.name
+          ? addsPlayer.name
+          : `${addsPlayer?.team ?? ""} Defense`,
         week: trade.week,
         value: await getTradeValue(
           trade.adds,
@@ -143,12 +148,20 @@ const orderedData = computed(() => {
           player.value != null &&
           player.status === "complete"
       )
-      .sort((a, b) => (a.value ?? Number.POSITIVE_INFINITY) - (b.value ?? Number.POSITIVE_INFINITY))
+      .sort(
+        (a, b) =>
+          (a.value ?? Number.POSITIVE_INFINITY) -
+          (b.value ?? Number.POSITIVE_INFINITY)
+      )
       .slice(0, 10);
   }
   return rawData.value
     .filter((player) => player.value != null)
-    .sort((a, b) => (a.value ?? Number.POSITIVE_INFINITY) - (b.value ?? Number.POSITIVE_INFINITY))
+    .sort(
+      (a, b) =>
+        (a.value ?? Number.POSITIVE_INFINITY) -
+        (b.value ?? Number.POSITIVE_INFINITY)
+    )
     .slice(0, 10);
 });
 
@@ -490,7 +503,7 @@ watch(
               <div
                 class="flex flex-col text-sm text-muted-foreground sm:flex-row"
               >
-                <p class="truncate max-w-36">
+                <p class="truncate max-w-32">
                   {{
                     store.showUsernames ? move.user?.username : move.user?.name
                   }}
