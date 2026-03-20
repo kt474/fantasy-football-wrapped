@@ -284,7 +284,6 @@ const getPotentialPointsMap = (
   lineupSlotCounts: Record<string, number> = {}
 ) => {
   const potentialPointsMap = new Map<number, number>();
-  console.log(schedule);
   teams.forEach((team) => {
     potentialPointsMap.set(Number(team.id ?? 0), 0);
   });
@@ -554,6 +553,21 @@ export const getPlayerStats = async (
   }
 };
 
+export const getWaivers = async (
+  season: string,
+  league_id: string,
+  week: number
+) => {
+  try {
+    const response = await fetch(
+      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTransactions2&scoringPeriodId=${String(week)}`
+    );
+    return safeJson(response);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const getLeagueInfoLike = async (
   season: string,
   leagueId: string
@@ -598,8 +612,17 @@ export const getLeagueInfoLike = async (
     const lastScoredWeek = Math.max(finalScoringPeriod, currentWeek - 1, 0);
 
     let schedule = [];
+    let waivers = [];
     for (let i = 1; i <= lastScoredWeek; i++) {
-      let scheduleData = await getPlayerStats(season, leagueId, i);
+      const scheduleData = await getPlayerStats(season, leagueId, i);
+      const waiverData = await getWaivers(season, leagueId, i);
+
+      const filteredWaivers = waiverData.transactions.filter(
+        (transaction: any) =>
+          transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
+      );
+      waivers.push(filteredWaivers);
+
       const filtered = scheduleData.schedule
         .filter(
           (matchup: any) =>
@@ -660,7 +683,7 @@ export const getLeagueInfoLike = async (
       weeklyPoints: getWeeklyPointsMap(teams, schedule),
       transactions: {},
       trades: [],
-      waivers: [],
+      waivers: waivers.flat(),
       previousLeagues: [],
       status: getLeagueStatus(currentWeek, lastScoredWeek, regularSeasonLength),
       currentWeek,
