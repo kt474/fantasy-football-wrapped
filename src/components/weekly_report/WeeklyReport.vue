@@ -1138,8 +1138,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
                 <div v-else>
                   <p class="max-w-3xl">
                     Premium weekly reports include deeper analysis, a newer AI
-                    model, customizable commentary styles, and an audio option.
-                    Available with an account and
+                    model, customizable commentary styles, and a podcast-style
+                    audio version. Available with an account and
                     <router-link
                       :to="{ path: '/account', query: $route.query }"
                       class="font-medium cursor-pointer hover:underline"
@@ -1157,8 +1157,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
               <div v-else>
                 <p class="max-w-3xl">
                   Premium weekly reports include deeper analysis, a newer AI
-                  model, customizable commentary styles, and an audio option.
-                  Available with an account and
+                  model, customizable commentary styles, and a podcast-style
+                  audio version. Available with an account and
                   <router-link
                     :to="{ path: '/account', query: $route.query }"
                     class="font-medium cursor-pointer hover:underline"
