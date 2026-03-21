@@ -28,6 +28,7 @@ import {
 } from "../../api/fakeLeague.ts";
 import WeeklyPreview from "./WeeklyPreview.vue";
 import WeeklyShareCard from "./WeeklyShareCard.vue";
+import AudioRecap from "./AudioRecap.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import MarkdownIt from "markdown-it";
@@ -52,7 +53,7 @@ const premiumLoading = ref(false);
 const fetchingPlayers = ref(false);
 
 const activeTab = ref("Report");
-const premiumCommentaryStyle = ref("analytical");
+const premiumCommentaryStyle = ref("roast");
 const rawPremiumWeeklyReport = ref<string>("");
 
 interface PerformerGroup {
@@ -1025,9 +1026,9 @@ watch(() => currentWeek.value, fetchPlayerNames);
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="roast">Roast (default)</SelectItem>
                         <SelectItem value="analytical">Analyst</SelectItem>
                         <SelectItem value="hype">Hype</SelectItem>
-                        <SelectItem value="roast">Roast</SelectItem>
                         <SelectItem value="cutthroat">Cutthroat</SelectItem>
                         <SelectItem value="neutral">Neutral</SelectItem>
                         <SelectItem value="newspaper">Newspaper</SelectItem>
@@ -1135,10 +1136,10 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   </div>
                 </div>
                 <div v-else>
-                  <p class="max-w-2xl">
+                  <p class="max-w-3xl">
                     Premium weekly reports include deeper analysis, a newer AI
-                    model, and customizable commentary styles. Available with an
-                    account and
+                    model, customizable commentary styles, and a podcast-style
+                    audio version. Available with an account and
                     <router-link
                       :to="{ path: '/account', query: $route.query }"
                       class="font-medium cursor-pointer hover:underline"
@@ -1148,12 +1149,16 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     >.
                   </p>
                 </div>
+                <AudioRecap
+                  :recap-text="rawPremiumWeeklyReport"
+                  :file-name="`ffwrapped-week-${currentWeek}-recap.mp3`"
+                />
               </div>
               <div v-else>
-                <p class="max-w-2xl">
+                <p class="max-w-3xl">
                   Premium weekly reports include deeper analysis, a newer AI
-                  model, and customizable commentary styles. Available with an
-                  account and
+                  model, customizable commentary styles, and a podcast-style
+                  audio version. Available with an account and
                   <router-link
                     :to="{ path: '/account', query: $route.query }"
                     class="font-medium cursor-pointer hover:underline"

@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "3/21/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Premium weekly reports now include a podcast-style audio option.",
+        ],
+      },
+    ],
+  },
+  {
     date: "3/11/26",
     content: [
       {
