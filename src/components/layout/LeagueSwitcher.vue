@@ -84,6 +84,7 @@ const removeHistoryLeagues = () => {
 };
 const removeLeague = () => {
   if (localStorage.getItem("leagueInfo")) {
+    const removedLeagueId = currentLeagueId.value;
     if (currentLeague.value.previousLeagues) {
       currentLeague.value.previousLeagues.forEach((league: LeagueInfoType) => {
         localStorage.removeItem(league.leagueId);
@@ -91,7 +92,7 @@ const removeLeague = () => {
     }
     store.$patch((state) => {
       state.leagueInfo = state.leagueInfo.filter(
-        (item) => item.leagueId !== currentLeagueId.value
+        (item) => item.leagueId !== removedLeagueId
       );
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
@@ -110,7 +111,7 @@ const removeLeague = () => {
     const originalData = localStorage.getItem("originalData");
     if (originalData) {
       const currentData = JSON.parse(originalData);
-      delete currentData[currentLeagueId.value];
+      delete currentData[removedLeagueId];
       if (Object.keys(currentData).length == 0) {
         localStorage.removeItem("originalData");
       } else {
@@ -236,7 +237,9 @@ const openAddLeagueDialog = async () => {
               @select="openAddLeagueDialog"
               class="flex items-start cursor-pointer"
             >
-              <div class="flex items-center justify-center border rounded-md size-6">
+              <div
+                class="flex items-center justify-center border rounded-md size-6"
+              >
                 <Plus class="size-4" />
               </div>
               <p class="ml-3 mt-0.5 text-sm">Add League</p>
