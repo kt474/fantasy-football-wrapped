@@ -267,6 +267,32 @@ export const generatePremiumReport = async (
   }
 };
 
+export const generateWeeklyReportAudio = async (
+  text: string
+): Promise<Blob> => {
+  try {
+    const response = await authenticatedFetch(
+      import.meta.env.VITE_WEEKLY_REPORT_AUDIO,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+        }),
+      }
+    );
+    assertOk(response, "Weekly report audio request");
+    return await response.blob();
+  } catch (error) {
+    console.error("Error:", error);
+    throw new Error(
+      "Unable to generate audio recap right now. Please try again later."
+    );
+  }
+};
+
 export const generateManagerArchetype = async (
   payload: ManagerBlurbsPayload
 ): Promise<ManagerBlurbsResponse> => {

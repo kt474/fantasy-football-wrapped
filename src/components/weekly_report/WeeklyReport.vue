@@ -28,6 +28,7 @@ import {
 } from "../../api/fakeLeague.ts";
 import WeeklyPreview from "./WeeklyPreview.vue";
 import WeeklyShareCard from "./WeeklyShareCard.vue";
+import AudioRecap from "./AudioRecap.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import MarkdownIt from "markdown-it";
@@ -1135,10 +1136,10 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   </div>
                 </div>
                 <div v-else>
-                  <p class="max-w-2xl">
+                  <p class="max-w-3xl">
                     Premium weekly reports include deeper analysis, a newer AI
-                    model, and customizable commentary styles. Available with an
-                    account and
+                    model, customizable commentary styles, and an audio option.
+                    Available with an account and
                     <router-link
                       :to="{ path: '/account', query: $route.query }"
                       class="font-medium cursor-pointer hover:underline"
@@ -1148,12 +1149,16 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     >.
                   </p>
                 </div>
+                <AudioRecap
+                  :recap-text="rawPremiumWeeklyReport"
+                  :file-name="`ffwrapped-week-${currentWeek}-recap.mp3`"
+                />
               </div>
               <div v-else>
-                <p class="max-w-2xl">
+                <p class="max-w-3xl">
                   Premium weekly reports include deeper analysis, a newer AI
-                  model, and customizable commentary styles. Available with an
-                  account and
+                  model, customizable commentary styles, and an audio option.
+                  Available with an account and
                   <router-link
                     :to="{ path: '/account', query: $route.query }"
                     class="font-medium cursor-pointer hover:underline"
