@@ -664,6 +664,17 @@ export const getLeagueInfoLike = async (
         {}
     );
 
+    const excludedIds = new Set(["NightlyLeagueUpdateTaskProcessor", "kona"]);
+
+    const transactions = waivers.flat().reduce((acc, item) => {
+      const id = item.memberId;
+
+      if (excludedIds.has(id)) return acc; // skip
+
+      acc[id] = (acc[id] || 0) + 1;
+      return acc;
+    }, {});
+
     return {
       name: String(settings.name ?? leagueRoot.name ?? ""),
       regularSeasonLength,
@@ -681,7 +692,7 @@ export const getLeagueInfoLike = async (
       users: getManagerMap(members, teams),
       rosters: getRosterMap(teams, recordByWeekMap, potentialPointsMap),
       weeklyPoints: getWeeklyPointsMap(teams, schedule),
-      transactions: {},
+      transactions: transactions,
       trades: [],
       waivers: waivers.flat(),
       previousLeagues: [],
