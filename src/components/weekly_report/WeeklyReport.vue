@@ -53,7 +53,7 @@ const premiumLoading = ref(false);
 const fetchingPlayers = ref(false);
 
 const activeTab = ref("Report");
-const premiumCommentaryStyle = ref("analytical");
+const premiumCommentaryStyle = ref("roast");
 const rawPremiumWeeklyReport = ref<string>("");
 
 interface PerformerGroup {
@@ -1026,9 +1026,9 @@ watch(() => currentWeek.value, fetchPlayerNames);
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="roast">Roast (default)</SelectItem>
                         <SelectItem value="analytical">Analyst</SelectItem>
                         <SelectItem value="hype">Hype</SelectItem>
-                        <SelectItem value="roast">Roast</SelectItem>
                         <SelectItem value="cutthroat">Cutthroat</SelectItem>
                         <SelectItem value="neutral">Neutral</SelectItem>
                         <SelectItem value="newspaper">Newspaper</SelectItem>
