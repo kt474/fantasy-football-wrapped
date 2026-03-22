@@ -115,6 +115,28 @@ const props = defineProps<{
   points: PointsType[];
 }>();
 const store = useStore();
+const tabOptions = [
+  "Home",
+  "Standings",
+  "Power Rankings",
+  "Expected Wins",
+  "Roster Management",
+  "Playoffs",
+  "Weekly Report",
+  "Schedule Simulator",
+  "Trade Lab",
+  "Draft",
+  "Start/Sit",
+  "League History",
+  "Manager Profiles",
+  "Wrapped",
+  "ESPN",
+];
+const showStandingsTab = computed(() => {
+  return (
+    store.currentTab === "Standings" || !tabOptions.includes(store.currentTab)
+  );
+});
 
 interface savedData {
   [key: string]: TableDataType[];
@@ -276,7 +298,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
 <template>
   <div :class="['min-w-0', store.currentTab === 'Home' ? '' : 'mx-4']">
     <div
-      v-if="store.currentTab === 'Standings'"
+      v-if="showStandingsTab"
       class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"
     >
       <Card class="relative w-full min-w-0 mx-auto overflow-x-auto xl:w-3/4">
@@ -581,7 +603,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       </div>
     </div>
     <StandingsChart
-      v-if="store.currentTab === 'Standings'"
+      v-if="showStandingsTab"
       :tableData="tableData"
       class="my-4"
     />
@@ -704,7 +726,6 @@ const getTeamName = (tableDataItem: TableDataType) => {
     <div v-if="store.currentTab === 'ESPN'">
       <EspnTest />
     </div>
-
     <div v-if="store.currentTab === 'Home'">
       <Intro>
         <template #header>
