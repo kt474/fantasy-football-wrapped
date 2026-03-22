@@ -337,6 +337,9 @@ const getRosterMap = (
       players: rosterEntries
         .map((entry) => String(entry.playerId ?? ""))
         .filter(Boolean),
+      playerNames: rosterEntries.map((entry: any) =>
+        String(entry.playerPoolEntry.player.fullName ?? "")
+      ),
     } satisfies RosterType;
   });
 };
@@ -346,7 +349,6 @@ const getWeeklyPointsMap = (
   schedule: Array<Array<Record<string, unknown>>> = []
 ) => {
   const weeklyPoints = new Map<number, PointsType>();
-
   teams.forEach((team) => {
     const rosterId = Number(team.id ?? 0);
     weeklyPoints.set(rosterId, {
@@ -354,6 +356,10 @@ const getWeeklyPointsMap = (
       points: Array(schedule.length).fill(0),
       matchups: Array(schedule.length).fill(0),
       starters: Array.from({ length: schedule.length }, () => [] as string[]),
+      starterNames: Array.from(
+        { length: schedule.length },
+        () => [] as string[]
+      ),
       starterPoints: Array.from(
         { length: schedule.length },
         () => [] as number[]
@@ -385,18 +391,19 @@ const getWeeklyPointsMap = (
 
       const starters: string[] = [];
       const starterPoints: number[] = [];
+      const starterNames: string[] = [];
       const benchPlayers: string[] = [];
       const benchPointValues: number[] = [];
 
-      entries.forEach((entry) => {
+      entries.forEach((entry: any) => {
         const playerId = String(entry.playerId ?? "");
+        const playerName = String(entry.playerPoolEntry.player.fullName);
         const lineupSlotId = Number(entry.lineupSlotId ?? 20);
         const playerPoints = getWeeklyEntryPoints(entry);
 
         if (!playerId) {
           return;
         }
-
         if (lineupSlotId === 20) {
           benchPlayers.push(playerId);
           benchPointValues.push(playerPoints);
@@ -406,6 +413,7 @@ const getWeeklyPointsMap = (
         if (lineupSlotId !== 21) {
           starters.push(playerId);
           starterPoints.push(playerPoints);
+          starterNames.push(playerName);
         }
       });
 
@@ -417,9 +425,11 @@ const getWeeklyPointsMap = (
       pointsRow.starterPoints[weekIndex] = starterPoints;
       pointsRow.benchPlayers[weekIndex] = benchPlayers;
       pointsRow.benchPoints[weekIndex] = benchPointValues;
+      if (pointsRow.starterNames) {
+        pointsRow.starterNames[weekIndex] = starterNames;
+      }
     });
   });
-
   return Array.from(weeklyPoints.values());
 };
 
@@ -626,8 +636,8 @@ export const getLeagueInfoLike = async (
       const filtered = scheduleData.schedule
         .filter(
           (matchup: any) =>
-            matchup.home?.rosterForMatchupPeriod &&
-            matchup.away?.rosterForMatchupPeriod
+            matchup.home?.rosterForCurrentScoringPeriod &&
+            matchup.away?.rosterForCurrentScoringPeriod
         )
         .flatMap((matchup: any, matchupIndex: number) => {
           const homePoints = Number(matchup.home.totalPoints ?? 0);
@@ -640,8 +650,8 @@ export const getLeagueInfoLike = async (
               totalPoints: homePoints,
               result: getWeeklyResult(homePoints, awayPoints),
               roster:
-                matchup.home.rosterForMatchupPeriod ??
-                matchup.home.rosterForCurrentScoringPeriod,
+                matchup.home.rosterForCurrentScoringPeriod ??
+                matchup.home.rosterForMatchupPeriod,
             },
             {
               matchupId: matchupIndex + 1,
@@ -649,8 +659,8 @@ export const getLeagueInfoLike = async (
               totalPoints: awayPoints,
               result: getWeeklyResult(awayPoints, homePoints),
               roster:
-                matchup.away.rosterForMatchupPeriod ??
-                matchup.away.rosterForCurrentScoringPeriod,
+                matchup.away.rosterForCurrentScoringPeriod ??
+                matchup.away.rosterForMatchupPeriod,
             },
           ];
         });
@@ -676,6 +686,7 @@ export const getLeagueInfoLike = async (
     }, {});
 
     return {
+      platform: "espn",
       name: String(settings.name ?? leagueRoot.name ?? ""),
       regularSeasonLength,
       medianScoring: 0,

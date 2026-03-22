@@ -1,6 +1,7 @@
 import type { Bracket, DraftPick, DraftGrades, WeeklyWaiver } from "./apiTypes";
 
 export type LeagueInfoType = {
+  platform?: string;
   name: string;
   regularSeasonLength: number;
   medianScoring: number;
@@ -68,6 +69,7 @@ export type PointsType = {
   matchups?: number[];
   starters: string[][];
   starterPoints: number[][];
+  starterNames?: string[][];
   benchPlayers: string[][];
   benchPoints: number[][];
 };
@@ -145,6 +147,7 @@ export type TableDataType = {
   players: string[];
   starters: string[][];
   starterPoints: number[][];
+  starterNames?: string[][];
   benchPlayers: string[][];
   benchPoints: number[][];
 };
