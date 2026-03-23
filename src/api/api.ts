@@ -130,6 +130,52 @@ export const getPlayersByIdsMap = async (
   }
 };
 
+export interface PlayerNameTeamLookup {
+  name: string;
+  team: string;
+}
+
+interface PlayerIdLookupResponse {
+  name: string;
+  team?: string;
+  player_id: string | null;
+}
+
+interface PlayerIdLookupListResponse {
+  players: PlayerIdLookupResponse[];
+}
+
+export const getPlayerIdsByNameTeamMap = async (
+  players: PlayerNameTeamLookup[]
+): Promise<(string | null)[]> => {
+  if (players.length === 0) {
+    return [];
+  }
+
+  try {
+    const endpoint = import.meta.env.VITE_PLAYER_ID_LOOKUP;
+    const url = new URL(endpoint);
+
+    players.forEach(({ name, team }) => {
+      url.searchParams.append("name", name);
+      url.searchParams.append("team", team);
+    });
+
+    const response = await fetch(url.toString());
+    assertOk(response, "Player ID lookup request");
+
+    const result = await parseJson<
+      PlayerIdLookupResponse | PlayerIdLookupListResponse
+    >(response, "Player ID lookup");
+    const matches = "players" in result ? result.players : [result];
+
+    return players.map((_, index) => matches[index]?.player_id ?? null);
+  } catch (error) {
+    console.error("Error fetching player IDs by name/team:", error);
+    return [];
+  }
+};
+
 export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
   try {
     const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);

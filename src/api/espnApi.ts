@@ -5,6 +5,7 @@ import type {
   RosterType,
   UserType,
 } from "@/types/types";
+import { getPlayerIdsByNameTeamMap } from "@/api/api";
 
 const ESPN_BASE_URL = "https://lm-api-reads.fantasy.espn.com";
 
@@ -32,6 +33,46 @@ const LINEUP_SLOT_MAP: Record<number, string> = {
   20: "BENCH",
   21: "IR",
   23: "FLEX",
+};
+
+const TEAM_MAP: Record<number, string> = {
+  0: "FA", // Free Agent
+  1: "ATL",
+  2: "BUF",
+  3: "CHI",
+  4: "CIN",
+  5: "CLE",
+  6: "DAL",
+  7: "DEN",
+  8: "DET",
+  9: "GB",
+  10: "TEN",
+  11: "IND",
+  12: "KC",
+  13: "LV",
+  14: "LAR",
+  15: "MIA",
+  16: "MIN",
+  17: "NE",
+  18: "NO",
+  19: "NYG",
+  20: "NYJ",
+  21: "PHI",
+  22: "ARI",
+  23: "PIT",
+  24: "LAC",
+  25: "SF",
+  26: "SEA",
+  27: "TB",
+  28: "WSH",
+  29: "CAR",
+  30: "JAX",
+  33: "BAL",
+  34: "HOU",
+};
+
+const getTeam = (posId: number) => {
+  return TEAM_MAP[posId] || "UNKNOWN";
 };
 
 const safeJson = async (response: Response) => {
@@ -312,36 +353,44 @@ const getPotentialPointsMap = (
   return potentialPointsMap;
 };
 
-const getRosterMap = (
+const getRosterMap = async (
   teams: Array<Record<string, unknown>> = [],
   recordByWeekMap: Map<number, string> = new Map(),
   potentialPointsMap: Map<number, number> = new Map()
 ) => {
-  return teams.map((team) => {
-    const record = getTeamRecord(team);
-    const rosterEntries = getRosterEntries(team);
-    const potentialPoints = potentialPointsMap.get(Number(team.id ?? 0)) ?? 0;
+  return Promise.all(
+    teams.map(async (team) => {
+      const record = getTeamRecord(team);
+      const rosterEntries = getRosterEntries(team);
+      const potentialPoints = potentialPointsMap.get(Number(team.id ?? 0)) ?? 0;
 
-    return {
-      id: String(team.primaryOwner ?? team.id ?? ""),
-      rosterId: Number(team.id ?? 0),
-      pointsFor: record.pointsFor,
-      pointsAgainst: record.pointsAgainst,
-      potentialPoints: potentialPoints,
-      managerEfficiency:
-        Math.round((record.pointsFor * 1000) / potentialPoints) / 1000,
-      wins: record.wins,
-      losses: record.losses,
-      ties: record.ties,
-      recordByWeek: recordByWeekMap.get(Number(team.id ?? 0)) ?? "",
-      players: rosterEntries
-        .map((entry) => String(entry.playerId ?? ""))
-        .filter(Boolean),
-      playerNames: rosterEntries.map((entry: any) =>
-        String(entry.playerPoolEntry.player.fullName ?? "")
-      ),
-    } satisfies RosterType;
-  });
+      const playerNames = rosterEntries.map((entry: any) => ({
+        name: String(entry.playerPoolEntry.player.fullName ?? ""),
+        team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
+      }));
+
+      console.log(playerNames);
+
+      const playerIds = await getPlayerIdsByNameTeamMap(playerNames);
+
+      return {
+        id: String(team.primaryOwner ?? team.id ?? ""),
+        rosterId: Number(team.id ?? 0),
+        pointsFor: record.pointsFor,
+        pointsAgainst: record.pointsAgainst,
+        potentialPoints: potentialPoints,
+        managerEfficiency:
+          Math.round((record.pointsFor * 1000) / potentialPoints) / 1000,
+        wins: record.wins,
+        losses: record.losses,
+        ties: record.ties,
+        recordByWeek: recordByWeekMap.get(Number(team.id ?? 0)) ?? "",
+        players: playerIds.filter((playerId): playerId is string =>
+          Boolean(playerId)
+        ),
+      } satisfies RosterType;
+    })
+  );
 };
 
 const getWeeklyPointsMap = (
@@ -701,7 +750,7 @@ export const getLeagueInfoLike = async (
       winnersBracket: [],
       losersBracket: [],
       users: getManagerMap(members, teams),
-      rosters: getRosterMap(teams, recordByWeekMap, potentialPointsMap),
+      rosters: await getRosterMap(teams, recordByWeekMap, potentialPointsMap),
       weeklyPoints: getWeeklyPointsMap(teams, schedule),
       transactions: transactions,
       trades: [],

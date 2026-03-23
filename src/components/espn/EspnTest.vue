@@ -16,9 +16,9 @@ const testApi = async () => {
 <template>
   <div class="p-4">
     <Button @click="testApi()">Fetch Data</Button>
-    <div v-for="move in data.waivers">
+    <!-- <div v-for="move in data.waivers">
       {{ move.type }}
-    </div>
-    <!-- <pre class="mt-4 overflow-x-auto text-sm">{{ data }}</pre> -->
+    </div> -->
+    <pre class="mt-4 overflow-x-auto text-sm">{{ data }}</pre>
   </div>
 </template>
