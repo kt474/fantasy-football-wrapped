@@ -5,7 +5,10 @@ import type {
   RosterType,
   UserType,
 } from "@/types/types";
-import { getPlayerIdsByNameTeamMap } from "@/api/api";
+import {
+  getPlayerIdLookupMap,
+  type PlayerNameTeamLookup,
+} from "@/api/api";
 
 const ESPN_BASE_URL = "https://lm-api-reads.fantasy.espn.com";
 
@@ -74,6 +77,9 @@ const TEAM_MAP: Record<number, string> = {
 const getTeam = (posId: number) => {
   return TEAM_MAP[posId] || "UNKNOWN";
 };
+
+const getPlayerLookupKey = ({ name, team }: PlayerNameTeamLookup): string =>
+  `${name.trim().toLowerCase()}::${team.trim().toUpperCase()}`;
 
 const safeJson = async (response: Response) => {
   if (!response.ok) {
@@ -356,7 +362,8 @@ const getPotentialPointsMap = (
 const getRosterMap = async (
   teams: Array<Record<string, unknown>> = [],
   recordByWeekMap: Map<number, string> = new Map(),
-  potentialPointsMap: Map<number, number> = new Map()
+  potentialPointsMap: Map<number, number> = new Map(),
+  playerLookupMap: Map<string, string> = new Map()
 ) => {
   return Promise.all(
     teams.map(async (team) => {
@@ -369,9 +376,9 @@ const getRosterMap = async (
         team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
       }));
 
-      console.log(playerNames);
-
-      const playerIds = await getPlayerIdsByNameTeamMap(playerNames);
+      const playerIds = playerNames
+        .map((player) => playerLookupMap.get(getPlayerLookupKey(player)) ?? null)
+        .filter((playerId): playerId is string => Boolean(playerId));
 
       return {
         id: String(team.primaryOwner ?? team.id ?? ""),
@@ -393,9 +400,10 @@ const getRosterMap = async (
   );
 };
 
-const getWeeklyPointsMap = (
+const getWeeklyPointsMap = async (
   teams: Array<Record<string, unknown>> = [],
-  schedule: Array<Array<Record<string, unknown>>> = []
+  schedule: Array<Array<Record<string, unknown>>> = [],
+  playerLookupMap: Map<string, string> = new Map()
 ) => {
   const weeklyPoints = new Map<number, PointsType>();
   teams.forEach((team) => {
@@ -424,61 +432,74 @@ const getWeeklyPointsMap = (
     });
   });
 
-  schedule.forEach((weekEntries, weekIndex) => {
-    weekEntries.forEach((teamWeek) => {
-      const rosterId = Number(teamWeek.teamId ?? 0);
-      const roster =
-        (teamWeek.roster as Record<string, unknown> | undefined) ?? {};
-      const entries = Array.isArray(roster.entries)
-        ? (roster.entries as Array<Record<string, unknown>>)
-        : [];
-      const pointsRow = weeklyPoints.get(rosterId);
+  await Promise.all(
+    schedule.map(async (weekEntries, weekIndex) => {
+      await Promise.all(
+        weekEntries.map(async (teamWeek) => {
+          const rosterId = Number(teamWeek.teamId ?? 0);
+          const roster =
+            (teamWeek.roster as Record<string, unknown> | undefined) ?? {};
+          const entries = Array.isArray(roster.entries)
+            ? (roster.entries as Array<Record<string, unknown>>)
+            : [];
+          const pointsRow = weeklyPoints.get(rosterId);
 
-      if (!pointsRow) {
-        return;
-      }
+          if (!pointsRow) {
+            return;
+          }
 
-      const starters: string[] = [];
-      const starterPoints: number[] = [];
-      const starterNames: string[] = [];
-      const benchPlayers: string[] = [];
-      const benchPointValues: number[] = [];
+          const starterPoints: number[] = [];
+          const starterNames: string[] = [];
+          const starterLookupInput: Array<{ name: string; team: string }> = [];
+          const benchPointValues: number[] = [];
+          const benchLookupInput: Array<{ name: string; team: string }> = [];
 
-      entries.forEach((entry: any) => {
-        const playerId = String(entry.playerId ?? "");
-        const playerName = String(entry.playerPoolEntry.player.fullName);
-        const lineupSlotId = Number(entry.lineupSlotId ?? 20);
-        const playerPoints = getWeeklyEntryPoints(entry);
+          entries.forEach((entry: any) => {
+            const playerId = String(entry.playerId ?? "");
+            const playerName = String(entry.playerPoolEntry.player.fullName);
+            const playerTeam = getTeam(entry.playerPoolEntry.player.proTeamId);
+            const lineupSlotId = Number(entry.lineupSlotId ?? 20);
+            const playerPoints = getWeeklyEntryPoints(entry);
 
-        if (!playerId) {
-          return;
-        }
-        if (lineupSlotId === 20) {
-          benchPlayers.push(playerId);
-          benchPointValues.push(playerPoints);
-          return;
-        }
+            if (!playerId) {
+              return;
+            }
+            if (lineupSlotId === 20) {
+              benchPointValues.push(playerPoints);
+              benchLookupInput.push({
+                name: playerName,
+                team: playerTeam,
+              });
+              return;
+            }
 
-        if (lineupSlotId !== 21) {
-          starters.push(playerId);
-          starterPoints.push(playerPoints);
-          starterNames.push(playerName);
-        }
-      });
+            if (lineupSlotId !== 21) {
+              starterPoints.push(playerPoints);
+              starterNames.push(playerName);
+              starterLookupInput.push({
+                name: playerName,
+                team: playerTeam,
+              });
+            }
+          });
 
-      pointsRow.points[weekIndex] = Number(teamWeek.totalPoints ?? 0);
-      if (pointsRow.matchups) {
-        pointsRow.matchups[weekIndex] = Number(teamWeek.matchupId ?? 0);
-      }
-      pointsRow.starters[weekIndex] = starters;
-      pointsRow.starterPoints[weekIndex] = starterPoints;
-      pointsRow.benchPlayers[weekIndex] = benchPlayers;
-      pointsRow.benchPoints[weekIndex] = benchPointValues;
-      if (pointsRow.starterNames) {
-        pointsRow.starterNames[weekIndex] = starterNames;
-      }
-    });
-  });
+          pointsRow.points[weekIndex] = Number(teamWeek.totalPoints ?? 0);
+          if (pointsRow.matchups) {
+            pointsRow.matchups[weekIndex] = Number(teamWeek.matchupId ?? 0);
+          }
+          pointsRow.starters[weekIndex] = starterLookupInput
+            .map((player) => playerLookupMap.get(getPlayerLookupKey(player)) ?? null);
+          pointsRow.benchPlayers[weekIndex] = benchLookupInput
+            .map((player) => playerLookupMap.get(getPlayerLookupKey(player)) ?? null);
+          pointsRow.starterPoints[weekIndex] = starterPoints;
+          pointsRow.benchPoints[weekIndex] = benchPointValues;
+          if (pointsRow.starterNames) {
+            pointsRow.starterNames[weekIndex] = starterNames;
+          }
+        })
+      );
+    })
+  );
   return Array.from(weeklyPoints.values());
 };
 
@@ -722,6 +743,29 @@ export const getLeagueInfoLike = async (
       (rosterSettings.lineupSlotCounts as Record<string, number> | undefined) ??
         {}
     );
+    const allPlayerLookups: PlayerNameTeamLookup[] = [
+      ...teams.flatMap((team) =>
+        getRosterEntries(team).map((entry: any) => ({
+          name: String(entry.playerPoolEntry.player.fullName ?? ""),
+          team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
+        }))
+      ),
+      ...schedule.flatMap((weekEntries) =>
+        weekEntries.flatMap((teamWeek: Record<string, unknown>) => {
+          const roster =
+            (teamWeek.roster as Record<string, unknown> | undefined) ?? {};
+          const entries = Array.isArray(roster.entries)
+            ? (roster.entries as Array<Record<string, unknown>>)
+            : [];
+
+          return entries.map((entry: any) => ({
+            name: String(entry.playerPoolEntry.player.fullName ?? ""),
+            team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
+          }));
+        })
+      ),
+    ];
+    const playerLookupMap = await getPlayerIdLookupMap(allPlayerLookups);
 
     const excludedIds = new Set(["NightlyLeagueUpdateTaskProcessor", "kona"]);
 
@@ -750,8 +794,17 @@ export const getLeagueInfoLike = async (
       winnersBracket: [],
       losersBracket: [],
       users: getManagerMap(members, teams),
-      rosters: await getRosterMap(teams, recordByWeekMap, potentialPointsMap),
-      weeklyPoints: getWeeklyPointsMap(teams, schedule),
+      rosters: await getRosterMap(
+        teams,
+        recordByWeekMap,
+        potentialPointsMap,
+        playerLookupMap
+      ),
+      weeklyPoints: await getWeeklyPointsMap(
+        teams,
+        schedule,
+        playerLookupMap
+      ),
       transactions: transactions,
       trades: [],
       waivers: waivers.flat(),

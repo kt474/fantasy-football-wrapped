@@ -145,18 +145,25 @@ interface PlayerIdLookupListResponse {
   players: PlayerIdLookupResponse[];
 }
 
-export const getPlayerIdsByNameTeamMap = async (
+const getPlayerLookupKey = ({ name, team }: PlayerNameTeamLookup): string =>
+  `${name.trim().toLowerCase()}::${team.trim().toUpperCase()}`;
+
+export const getPlayerIdLookupMap = async (
   players: PlayerNameTeamLookup[]
-): Promise<(string | null)[]> => {
+): Promise<Map<string, string>> => {
   if (players.length === 0) {
-    return [];
+    return new Map();
   }
+
+  const uniquePlayers = Array.from(
+    new Map(players.map((player) => [getPlayerLookupKey(player), player])).values()
+  );
 
   try {
     const endpoint = import.meta.env.VITE_PLAYER_ID_LOOKUP;
     const url = new URL(endpoint);
 
-    players.forEach(({ name, team }) => {
+    uniquePlayers.forEach(({ name, team }) => {
       url.searchParams.append("name", name);
       url.searchParams.append("team", team);
     });
@@ -168,12 +175,35 @@ export const getPlayerIdsByNameTeamMap = async (
       PlayerIdLookupResponse | PlayerIdLookupListResponse
     >(response, "Player ID lookup");
     const matches = "players" in result ? result.players : [result];
+    const playerLookupMap = new Map<string, string>();
 
-    return players.map((_, index) => matches[index]?.player_id ?? null);
+    uniquePlayers.forEach((player, index) => {
+      const playerId = matches[index]?.player_id;
+
+      if (playerId) {
+        playerLookupMap.set(getPlayerLookupKey(player), playerId);
+      }
+    });
+
+    return playerLookupMap;
   } catch (error) {
     console.error("Error fetching player IDs by name/team:", error);
+    return new Map();
+  }
+};
+
+export const getPlayerIdsByNameTeamMap = async (
+  players: PlayerNameTeamLookup[]
+): Promise<(string | null)[]> => {
+  if (players.length === 0) {
     return [];
   }
+
+  const playerLookupMap = await getPlayerIdLookupMap(players);
+
+  return players.map(
+    (player) => playerLookupMap.get(getPlayerLookupKey(player)) ?? null
+  );
 };
 
 export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
