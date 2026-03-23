@@ -294,6 +294,14 @@ const getTeamName = (tableDataItem: TableDataType) => {
   }
   return tableDataItem.name ? tableDataItem.name : `Ghost Roster`;
 };
+
+const FALLBACK =
+  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
+const handleImageError = (e: Event) => {
+  const img = e.target as HTMLImageElement;
+  if (img.src === FALLBACK) return;
+  img.src = FALLBACK;
+};
 </script>
 <template>
   <div :class="['min-w-0', store.currentTab === 'Home' ? '' : 'mx-4']">
@@ -495,6 +503,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       v-if="item.avatarImg"
                       class="w-8 h-8 rounded-full"
                       :src="item.avatarImg"
+                      @error="handleImageError"
                     />
                     <svg
                       v-else

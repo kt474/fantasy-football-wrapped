@@ -512,6 +512,14 @@ watch([() => props.currentWeek, () => store.currentLeagueId], () =>
 watch([() => store.darkMode, () => store.currentLeagueId], () =>
   updateChartColor()
 );
+
+const FALLBACK =
+  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
+const handleImageError = (e: Event) => {
+  const img = e.target as HTMLImageElement;
+  if (img.src === FALLBACK) return;
+  img.src = FALLBACK;
+};
 </script>
 <template>
   <div
@@ -534,6 +542,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 alt="User avatar"
                 class="w-8 h-8 -mt-2 rounded-full"
                 :src="matchup[0].avatarImg"
+                @error="handleImageError"
               />
               <svg
                 v-else
@@ -684,6 +693,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 alt="User avatar"
                 class="w-8 h-8 -mt-2 rounded-full"
                 :src="matchup[1].avatarImg"
+                @error="handleImageError"
               />
               <svg
                 v-else

@@ -77,6 +77,14 @@ const generateButtonLabel = computed(() => {
   return "Generate profiles";
 });
 
+const FALLBACK =
+  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
+const handleImageError = (e: Event) => {
+  const img = e.target as HTMLImageElement;
+  if (img.src === FALLBACK) return;
+  img.src = FALLBACK;
+};
+
 watch(
   storedManagerProfiles,
   (profiles) => {
@@ -127,6 +135,7 @@ watch(
             v-if="archetype.avatarImg"
             :src="archetype.avatarImg"
             :alt="`${archetype.displayName} avatar`"
+            @error="handleImageError"
             class="w-10 h-10 rounded-full"
           />
           <div>

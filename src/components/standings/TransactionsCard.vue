@@ -22,6 +22,13 @@ const mostTransactionsUser = computed<UserType | null>(() => {
   if (!entry) return null;
   return props.users.find((user) => user.id === entry[0]) ?? null;
 });
+const FALLBACK =
+  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
+const handleImageError = (e: Event) => {
+  const img = e.target as HTMLImageElement;
+  if (img.src === FALLBACK) return;
+  img.src = FALLBACK;
+};
 </script>
 <template>
   <div>
@@ -38,6 +45,7 @@ const mostTransactionsUser = computed<UserType | null>(() => {
             "
             class="w-6 h-6 rounded-full"
             :src="mostTransactionsUser.avatarImg"
+            @error="handleImageError"
           />
           <svg
             v-else

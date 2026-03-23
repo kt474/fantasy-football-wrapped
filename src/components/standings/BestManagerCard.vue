@@ -25,6 +25,14 @@ const bestManagerUser = computed<UserType | null>(() => {
   if (!manager) return null;
   return props.users.find((user) => user.id === manager.id) ?? null;
 });
+
+const FALLBACK =
+  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
+const handleImageError = (e: Event) => {
+  const img = e.target as HTMLImageElement;
+  if (img.src === FALLBACK) return;
+  img.src = FALLBACK;
+};
 </script>
 <template>
   <div>
@@ -37,6 +45,7 @@ const bestManagerUser = computed<UserType | null>(() => {
             v-if="bestManager && bestManagerUser && bestManagerUser.avatarImg"
             class="w-6 h-6 rounded-full"
             :src="bestManagerUser.avatarImg"
+            @error="handleImageError"
           />
           <svg
             v-else

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { TableDataType, LeagueInfoType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
-import { computed, ref, watch, onMounted, nextTick } from "vue";
+import { computed, ref, watch, onMounted, nextTick, handleError } from "vue";
 import { useStore } from "../../store/store";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
@@ -943,6 +943,14 @@ const downloadReportImage = async () => {
   }
 };
 
+const FALLBACK =
+  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
+const handleImageError = (e: Event) => {
+  const img = e.target as HTMLImageElement;
+  if (img.src === FALLBACK) return;
+  img.src = FALLBACK;
+};
+
 watch(
   [() => props.regularSeasonLength, () => activeTab.value],
   () => (currentWeek.value = weeks.value[0])
@@ -1333,6 +1341,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                       alt="User avatar"
                       class="w-8 h-8 rounded-full"
                       :src="user.avatarImg"
+                      @error="handleImageError"
                     />
                     <svg
                       v-else
