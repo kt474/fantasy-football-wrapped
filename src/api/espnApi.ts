@@ -650,6 +650,15 @@ export const getWaivers = async (
   }
 };
 
+const getScoringType = (scoringItems: any[]): number => {
+  const receptions = scoringItems.find((i) => i.statId === 53);
+  return receptions?.points ?? 0;
+};
+
+const getLeagueFormat = (draftSettings: any): "Redraft" | "Keeper" => {
+  return (draftSettings?.keeperCount ?? 0) > 0 ? "Keeper" : "Redraft";
+};
+
 export const getLeagueInfoLike = async (
   season: string,
   leagueId: string
@@ -663,15 +672,10 @@ export const getLeagueInfoLike = async (
     ]);
 
     const leagueRoot = (league ?? {}) as Record<string, unknown>;
-    const settings =
-      (leagueRoot.settings as Record<string, unknown> | undefined) ?? {};
-    const scheduleSettings =
-      (settings.scheduleSettings as Record<string, unknown> | undefined) ?? {};
-    const rosterSettings =
-      (settings.rosterSettings as Record<string, unknown> | undefined) ?? {};
-    const acquisitionSettings =
-      (settings.acquisitionSettings as Record<string, unknown> | undefined) ??
-      {};
+    const settings: any = leagueRoot.settings;
+    const scheduleSettings = settings.scheduleSettings;
+    const rosterSettings = settings.rosterSettings;
+    const acquisitionSettings = settings.acquisitionSettings;
     const status =
       (leagueRoot.status as Record<string, unknown> | undefined) ?? {};
     const members = Array.isArray(leagueRoot.members)
@@ -784,18 +788,20 @@ export const getLeagueInfoLike = async (
       return acc;
     }, {});
 
+    console.log(settings);
+
     return {
       platform: "espn",
       name: String(settings.name ?? leagueRoot.name ?? ""),
       regularSeasonLength,
-      medianScoring: 0,
+      medianScoring: 0, // how do we check for median scoring?
       totalRosters: Number(settings.size ?? teams.length ?? 0),
       season,
-      seasonType: "Redraft",
+      seasonType: getLeagueFormat(settings.draftSettings),
       leagueId,
       leagueWinner: getLeagueWinner(teams),
       lastUpdated: Date.now(),
-      previousLeagueId: null,
+      previousLeagueId: null, // previous years have the same id, just change the year
       lastScoredWeek,
       winnersBracket: [],
       losersBracket: [],
@@ -813,7 +819,7 @@ export const getLeagueInfoLike = async (
       previousLeagues: [],
       status: getLeagueStatus(currentWeek, lastScoredWeek, regularSeasonLength),
       currentWeek,
-      scoringType: 1,
+      scoringType: getScoringType(settings.scoringSettings.scoringItems),
       rosterPositions: getRosterPositions(
         (rosterSettings.lineupSlotCounts as
           | Record<string, number>
@@ -827,8 +833,7 @@ export const getLeagueInfoLike = async (
           draftData,
         teams
       ),
-      waiverType:
-        Number(acquisitionSettings.acquisitionBudget ?? 0) > 0 ? 2 : 0,
+      waiverType: acquisitionSettings.isUsingAcquisitionBudget ? 2 : 0,
       sport: "nfl",
     };
   } catch (error) {
