@@ -61,10 +61,8 @@ onBeforeUnmount(() => revokeAudioUrl());
 </script>
 
 <template>
-  <section class="p-4 mt-4 border rounded-lg bg-muted/30">
-    <div
-      class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
-    >
+  <section class="py-4 mt-4 md:max-w-96">
+    <div class="flex flex-row items-center gap-3">
       <div>
         <p class="font-semibold">Audio replay</p>
       </div>
@@ -76,7 +74,7 @@ onBeforeUnmount(() => revokeAudioUrl());
         >
           <LoaderCircle v-if="isGenerating" class="mr-2 size-4 animate-spin" />
           <Volume2 v-else class="mr-2 size-4" />
-          {{ hasAudio ? "Regenerate audio" : "Generate audio" }}
+          Generate
         </Button>
         <Button
           v-if="hasAudio"
