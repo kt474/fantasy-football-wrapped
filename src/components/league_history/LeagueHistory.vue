@@ -34,17 +34,13 @@ const loadingYear = ref("");
 const tableOrder = ref("wins");
 const previousLeagues = ref<string[]>([]);
 const hasEmittedReady = ref(false);
+const previousLeagueLoads = new Map<string, Promise<void>>();
 
 const emitReady = () => {
   if (hasEmittedReady.value) return;
   hasEmittedReady.value = true;
   emit("ready");
 };
-
-interface LeagueStore {
-  leagueInfo: LeagueInfoType[];
-  currentLeagueIndex: number;
-}
 
 interface PointSeasonEntry {
   season: string;
@@ -70,6 +66,33 @@ interface HistoricalManagerRow {
   seasons: string[];
 }
 
+const replacePreviousLeagues = (
+  league: LeagueInfoType,
+  leagues: LeagueInfoType[]
+) => {
+  league.previousLeagues.splice(0, league.previousLeagues.length, ...leagues);
+};
+
+const dedupePreviousLeagues = (league: LeagueInfoType) => {
+  const seenLeagueIds = new Set<string>();
+  const uniqueLeagues = league.previousLeagues.filter((previousLeague) => {
+    if (
+      !previousLeague?.leagueId ||
+      previousLeague.leagueId === league.leagueId ||
+      seenLeagueIds.has(previousLeague.leagueId)
+    ) {
+      return false;
+    }
+
+    seenLeagueIds.add(previousLeague.leagueId);
+    return true;
+  });
+
+  if (uniqueLeagues.length !== league.previousLeagues.length) {
+    replacePreviousLeagues(league, uniqueLeagues);
+  }
+};
+
 const fetchLeagueData = async (leagueId: string): Promise<LeagueInfoType> => {
   try {
     return await getData(leagueId);
@@ -80,13 +103,19 @@ const fetchLeagueData = async (leagueId: string): Promise<LeagueInfoType> => {
 };
 
 const checkPreviousLeagues = async (
+  rootLeague: LeagueInfoType,
   leagueId: string,
-  store: LeagueStore,
   previousLeagues: Ref<string[]>,
   loadingYear: Ref<string>
 ): Promise<void> => {
+  dedupePreviousLeagues(rootLeague);
+
   // Early return if league is invalid or already processed
-  if (leagueId === "0" || previousLeagues.value.includes(leagueId)) {
+  if (
+    leagueId === "0" ||
+    previousLeagues.value.includes(leagueId) ||
+    rootLeague.previousLeagues.some((league) => league.leagueId === leagueId)
+  ) {
     return;
   }
 
@@ -95,14 +124,15 @@ const checkPreviousLeagues = async (
     loadingYear.value = leagueData.season || "";
 
     // Update store and tracking arrays
-    store.leagueInfo[store.currentLeagueIndex].previousLeagues.push(leagueData);
+    rootLeague.previousLeagues.push(leagueData);
+    dedupePreviousLeagues(rootLeague);
     previousLeagues.value.push(leagueId);
 
     // Recursively fetch previous league if it exists
     if (leagueData.previousLeagueId) {
       await checkPreviousLeagues(
+        rootLeague,
         leagueData.previousLeagueId,
-        store,
         previousLeagues,
         loadingYear
       );
@@ -116,21 +146,53 @@ const checkPreviousLeagues = async (
 };
 
 const getPreviousLeagues = async (
-  store: LeagueStore,
+  rootLeague: LeagueInfoType,
   previousLeagues: Ref<string[]>,
   loadingYear: Ref<string>
 ): Promise<void> => {
-  const previousLeagueId =
-    store.leagueInfo[store.currentLeagueIndex].previousLeagueId;
+  dedupePreviousLeagues(rootLeague);
+
+  const previousLeagueId = rootLeague.previousLeagueId;
 
   if (previousLeagueId) {
     await checkPreviousLeagues(
+      rootLeague,
       previousLeagueId,
-      store,
       previousLeagues,
       loadingYear
     );
   }
+};
+
+const ensurePreviousLeaguesLoaded = async (league: LeagueInfoType) => {
+  dedupePreviousLeagues(league);
+
+  if (league.previousLeagues.length > 0 || !league.previousLeagueId) {
+    return;
+  }
+
+  const existingLoad = previousLeagueLoads.get(league.leagueId);
+  if (existingLoad) {
+    await existingLoad;
+    return;
+  }
+
+  const loadPromise = (async () => {
+    isLoading.value = true;
+    previousLeagues.value = league.previousLeagues.map(
+      (previousLeague) => previousLeague.leagueId
+    );
+
+    try {
+      await getPreviousLeagues(league, previousLeagues, loadingYear);
+    } finally {
+      previousLeagueLoads.delete(league.leagueId);
+      isLoading.value = false;
+    }
+  })();
+
+  previousLeagueLoads.set(league.leagueId, loadPromise);
+  await loadPromise;
 };
 
 const currentLeague = computed(() => {
@@ -176,13 +238,9 @@ const addNewLeague = async (season: string) => {
 };
 
 onMounted(async () => {
-  if (
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].previousLeagues.length == 0
-  ) {
-    isLoading.value = true;
-    await getPreviousLeagues(store, previousLeagues, loadingYear);
-    isLoading.value = false;
+  const league = store.leagueInfo[store.currentLeagueIndex];
+  if (league) {
+    await ensurePreviousLeaguesLoaded(league);
   }
 
   emitReady();
@@ -191,13 +249,9 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
-    if (
-      store.leagueInfo[store.currentLeagueIndex] &&
-      store.leagueInfo[store.currentLeagueIndex].previousLeagues.length == 0
-    ) {
-      isLoading.value = true;
-      await getPreviousLeagues(store, previousLeagues, loadingYear);
-      isLoading.value = false;
+    const league = store.leagueInfo[store.currentLeagueIndex];
+    if (league) {
+      await ensurePreviousLeaguesLoaded(league);
     }
   }
 );
