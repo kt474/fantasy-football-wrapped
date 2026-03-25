@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { defineAsyncComponent, onMounted, ref } from "vue";
 
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "../api/fakeLeague";
 import Input from "@/components/ui/input/Input.vue";
-import Table from "../components/standings/Table.vue";
 import { useStore } from "../store/store";
 import { getData, inputLeague } from "../api/api";
 import { getLeague } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
 import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
+
+const Table = defineAsyncComponent(
+  () => import("../components/standings/Table.vue")
+);
 
 const route = useRoute();
 const store = useStore();

@@ -20,6 +20,21 @@ Current features:
 
 ## Contributing
 
+### Project Structure
+
+```text
+src/
+  api/          API clients and data transforms
+  components/   Feature and shared UI components
+  composables/  Reusable view logic
+  lib/          App utilities, auth helpers, and integrations
+  store/        Pinia stores
+  types/        Shared TypeScript types
+  views/        Route-level pages
+
+test/           Vitest coverage
+```
+
 ### Getting started
 
 Fork this repository and then clone the fork. To run the project locally, you'll need Node.js and npm installed.
