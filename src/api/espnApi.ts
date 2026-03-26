@@ -10,6 +10,8 @@ import {
   getPlayerIdsByNameTeamMap,
   type PlayerNameTeamLookup,
 } from "@/api/api";
+import { getStats } from "./sleeperApi";
+import { calculateDraftRank } from "./helper";
 
 const ESPN_BASE_URL = "https://lm-api-reads.fantasy.espn.com";
 
@@ -99,6 +101,12 @@ const getPlayerLookupKey = ({ name, team }: PlayerNameTeamLookup): string =>
 interface EspnPlayerLookup extends PlayerNameTeamLookup {
   espnId: number | string;
   position: string;
+}
+
+interface DraftPickLookupResult {
+  firstName: string;
+  lastName: string;
+  lookup: EspnPlayerLookup | null;
 }
 
 const safeJson = async (response: Response) => {
@@ -541,7 +549,9 @@ const getRosterPositions = (lineupSlotCounts: Record<string, number> = {}) => {
 const getDraftPicks = async (
   draft: Record<string, unknown> | undefined,
   teams: Array<Record<string, unknown>> = [],
-  playerLookups: EspnPlayerLookup[] = []
+  playerLookups: EspnPlayerLookup[] = [],
+  season: string,
+  scoringType: number
 ) => {
   const picks = Array.isArray(draft?.picks)
     ? (draft?.picks as Array<Record<string, unknown>>)
@@ -555,7 +565,7 @@ const getDraftPicks = async (
       playerLookup,
     ])
   );
-  const draftPlayerLookups = picks.map((pick) => {
+  const draftPlayerLookups: DraftPickLookupResult[] = picks.map((pick) => {
     const player = (pick.player as Record<string, unknown> | undefined) ?? {};
     const espnPlayerId = String(player.id ?? pick.playerId ?? "");
     const lookupFromIndex = playerLookupByEspnId.get(espnPlayerId);
@@ -563,9 +573,11 @@ const getDraftPicks = async (
       lookupFromIndex?.name ?? String(player.fullName ?? "").trim();
     const [firstName = "", ...lastNameParts] = fullName.split(" ");
     const lastName = lastNameParts.join(" ");
+    const fallbackPosition = getPosition(
+      Number(player.defaultPositionId ?? player.position ?? 0)
+    );
 
     return {
-      position: String(lookupFromIndex?.position ?? "UNKNOWN"),
       firstName: String(player.firstName ?? firstName),
       lastName: String(player.lastName ?? lastName),
       lookup:
@@ -574,6 +586,7 @@ const getDraftPicks = async (
           ? {
               name: fullName,
               team: getTeam(Number(player.proTeamId ?? player.proTeam)),
+              position: fallbackPosition,
               espnId: espnPlayerId,
             }
           : null),
@@ -585,38 +598,73 @@ const getDraftPicks = async (
     )
   );
   let sleeperPlayerIdIndex = 0;
+  const playerStatsCache = new Map<
+    string,
+    Promise<Awaited<ReturnType<typeof getStats>> | null>
+  >();
 
-  return picks.map((pick, pickIndex) => {
-    const player = (pick.player as Record<string, unknown> | undefined) ?? {};
-    const ownerId = String(pick.memberId ?? pick.bidderId ?? "");
-    const team = teamById.get(Number(pick.teamId ?? 0));
-    const draftPlayerLookup = draftPlayerLookups[pickIndex];
+  return Promise.all(
+    picks.map(async (pick, pickIndex) => {
+      const player = (pick.player as Record<string, unknown> | undefined) ?? {};
+      const ownerId = String(pick.memberId ?? pick.bidderId ?? "");
+      const team = teamById.get(Number(pick.teamId ?? 0));
+      const draftPlayerLookup = draftPlayerLookups[pickIndex];
+      const position = draftPlayerLookup.lookup?.position ?? "UNKNOWN";
 
-    const sleeperPlayerId = draftPlayerLookup?.lookup
-      ? (sleeperPlayerIds[sleeperPlayerIdIndex++] ?? null)
-      : null;
-
-    return {
-      firstName: draftPlayerLookup?.firstName ?? String(player.firstName ?? ""),
-      lastName: draftPlayerLookup?.lastName ?? String(player.lastName ?? ""),
-      amount:
+      const sleeperPlayerId = draftPlayerLookup?.lookup
+        ? (sleeperPlayerIds[sleeperPlayerIdIndex++] ?? null)
+        : null;
+      const pickAmount =
         pick.bidAmount != null
           ? Number(pick.bidAmount)
-          : Number(pick.price ?? 0),
-      playerId: sleeperPlayerId ?? String(player.id ?? pick.playerId ?? ""),
-      position: draftPlayerLookup.position,
-      pickNumber: Number(pick.overallPickNumber ?? pick.pickNumber ?? 0),
-      draftSlot: Number(pick.roundPickNumber ?? 0),
-      team:
-        draftPlayerLookup?.lookup?.team ??
-        getTeam(Number(player.proTeamId ?? player.proTeam)),
-      round: Number(pick.roundId ?? pick.roundNumber ?? 0),
-      rosterId: Number(team?.id ?? pick.teamId ?? 0),
-      userId: ownerId,
-      rank: 0,
-      pickRank: "0.0",
-    } satisfies DraftPick;
-  });
+          : Number(pick.price ?? 0);
+      // const isAuctionPick = pick.bidAmount != null || pick.price != null;
+      const overallPickNumber = Number(
+        pick.overallPickNumber ?? pick.pickNumber ?? 0
+      );
+      const round = Number(pick.roundId ?? pick.roundNumber ?? 0);
+      const playerStatsPromise =
+        sleeperPlayerId == null
+          ? Promise.resolve(null)
+          : (playerStatsCache.get(sleeperPlayerId) ??
+            getStats(sleeperPlayerId, season, scoringType).catch((error) => {
+              console.error("Error fetching ESPN draft player stats:", error);
+              return null;
+            }));
+
+      if (sleeperPlayerId != null) {
+        playerStatsCache.set(sleeperPlayerId, playerStatsPromise);
+      }
+
+      const stats = await playerStatsPromise;
+      const draftRank = calculateDraftRank(
+        overallPickNumber,
+        stats?.rank ?? 0,
+        round,
+        position,
+        stats?.ppg ?? 0
+      );
+
+      return {
+        firstName:
+          draftPlayerLookup?.firstName ?? String(player.firstName ?? ""),
+        lastName: draftPlayerLookup?.lastName ?? String(player.lastName ?? ""),
+        amount: pickAmount,
+        playerId: sleeperPlayerId ?? String(player.id ?? pick.playerId ?? ""),
+        position,
+        pickNumber: overallPickNumber,
+        draftSlot: Number(pick.roundPickNumber ?? 0),
+        team:
+          draftPlayerLookup?.lookup?.team ??
+          getTeam(Number(player.proTeamId ?? player.proTeam)),
+        round,
+        rosterId: Number(team?.id ?? pick.teamId ?? 0),
+        userId: ownerId,
+        rank: stats?.rank ?? 0,
+        pickRank: draftRank,
+      } satisfies DraftPick;
+    })
+  );
 };
 
 const getLeagueWinner = (teams: Array<Record<string, unknown>> = []) => {
@@ -827,7 +875,7 @@ export const getLeagueInfoLike = async (
           name: String(entry.playerPoolEntry.player.fullName ?? ""),
           team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
           position: getPosition(
-            Number(entry.playerPoolEntry.player.proTeamId.defaultPositionId)
+            Number(entry.playerPoolEntry.player.defaultPositionId)
           ),
           espnId: entry.playerPoolEntry.player.id,
         }))
@@ -907,7 +955,9 @@ export const getLeagueInfoLike = async (
         (draftData?.draftDetail as Record<string, unknown> | undefined) ??
           draftData,
         teams,
-        allPlayerLookups
+        allPlayerLookups,
+        season,
+        getScoringType(settings.scoringSettings.scoringItems)
       ),
       waiverType: acquisitionSettings.isUsingAcquisitionBudget ? 2 : 0,
       sport: "nfl",
