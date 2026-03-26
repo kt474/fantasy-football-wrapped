@@ -5,7 +5,11 @@ import type {
   RosterType,
   UserType,
 } from "@/types/types";
-import { getPlayerIdLookupMap, type PlayerNameTeamLookup } from "@/api/api";
+import {
+  getPlayerIdLookupMap,
+  getPlayerIdsByNameTeamMap,
+  type PlayerNameTeamLookup,
+} from "@/api/api";
 
 const ESPN_BASE_URL = "https://lm-api-reads.fantasy.espn.com";
 
@@ -71,12 +75,31 @@ const TEAM_MAP: Record<number, string> = {
   34: "HOU",
 };
 
+const POSITION_MAP: Record<number, string> = {
+  0: "QB",
+  1: "QB",
+  2: "RB",
+  3: "WR",
+  4: "TE",
+  5: "K",
+  16: "DEF",
+};
+
 const getTeam = (posId: number) => {
   return TEAM_MAP[posId] || "UNKNOWN";
 };
 
+const getPosition = (posId: number) => {
+  return POSITION_MAP[posId] || "UNKNOWN";
+};
+
 const getPlayerLookupKey = ({ name, team }: PlayerNameTeamLookup): string =>
   `${name.trim().toLowerCase()}::${team.trim().toUpperCase()}`;
+
+interface EspnPlayerLookup extends PlayerNameTeamLookup {
+  espnId: number | string;
+  position: string;
+}
 
 const safeJson = async (response: Response) => {
   if (!response.ok) {
@@ -515,9 +538,10 @@ const getRosterPositions = (lineupSlotCounts: Record<string, number> = {}) => {
     .filter((slot) => slot !== "BENCH" && slot !== "IR");
 };
 
-const getDraftPicks = (
+const getDraftPicks = async (
   draft: Record<string, unknown> | undefined,
-  teams: Array<Record<string, unknown>> = []
+  teams: Array<Record<string, unknown>> = [],
+  playerLookups: EspnPlayerLookup[] = []
 ) => {
   const picks = Array.isArray(draft?.picks)
     ? (draft?.picks as Array<Record<string, unknown>>)
@@ -525,24 +549,67 @@ const getDraftPicks = (
   const teamById = new Map(
     teams.map((team) => [Number(team.id ?? 0), team] as const)
   );
+  const playerLookupByEspnId = new Map(
+    playerLookups.map((playerLookup) => [
+      String(playerLookup.espnId ?? ""),
+      playerLookup,
+    ])
+  );
+  const draftPlayerLookups = picks.map((pick) => {
+    const player = (pick.player as Record<string, unknown> | undefined) ?? {};
+    const espnPlayerId = String(player.id ?? pick.playerId ?? "");
+    const lookupFromIndex = playerLookupByEspnId.get(espnPlayerId);
+    const fullName =
+      lookupFromIndex?.name ?? String(player.fullName ?? "").trim();
+    const [firstName = "", ...lastNameParts] = fullName.split(" ");
+    const lastName = lastNameParts.join(" ");
 
-  return picks.map((pick) => {
+    return {
+      position: String(lookupFromIndex?.position ?? "UNKNOWN"),
+      firstName: String(player.firstName ?? firstName),
+      lastName: String(player.lastName ?? lastName),
+      lookup:
+        lookupFromIndex ??
+        (fullName
+          ? {
+              name: fullName,
+              team: getTeam(Number(player.proTeamId ?? player.proTeam)),
+              espnId: espnPlayerId,
+            }
+          : null),
+    };
+  });
+  const sleeperPlayerIds = await getPlayerIdsByNameTeamMap(
+    draftPlayerLookups.flatMap((pick) =>
+      pick.lookup ? [{ name: pick.lookup.name, team: pick.lookup.team }] : []
+    )
+  );
+  let sleeperPlayerIdIndex = 0;
+
+  return picks.map((pick, pickIndex) => {
     const player = (pick.player as Record<string, unknown> | undefined) ?? {};
     const ownerId = String(pick.memberId ?? pick.bidderId ?? "");
     const team = teamById.get(Number(pick.teamId ?? 0));
+    const draftPlayerLookup = draftPlayerLookups[pickIndex];
+
+    const sleeperPlayerId = draftPlayerLookup?.lookup
+      ? (sleeperPlayerIds[sleeperPlayerIdIndex++] ?? null)
+      : null;
 
     return {
-      firstName: String(player.firstName ?? ""),
-      lastName: String(player.lastName ?? ""),
+      firstName: draftPlayerLookup?.firstName ?? String(player.firstName ?? ""),
+      lastName: draftPlayerLookup?.lastName ?? String(player.lastName ?? ""),
       amount:
         pick.bidAmount != null
           ? Number(pick.bidAmount)
           : Number(pick.price ?? 0),
-      playerId: String(player.id ?? pick.playerId ?? ""),
-      position: String(player.defaultPositionId ?? player.position ?? ""),
+      playerId: sleeperPlayerId ?? String(player.id ?? pick.playerId ?? ""),
+      position: draftPlayerLookup.position,
       pickNumber: Number(pick.overallPickNumber ?? pick.pickNumber ?? 0),
       draftSlot: Number(pick.roundPickNumber ?? 0),
-      team: String(player.proTeam ?? ""),
+      team:
+        draftPlayerLookup?.lookup?.team ??
+        getTeam(Number(player.proTeamId ?? player.proTeam)),
       round: Number(pick.roundId ?? pick.roundNumber ?? 0),
       rosterId: Number(team?.id ?? pick.teamId ?? 0),
       userId: ownerId,
@@ -753,11 +820,16 @@ export const getLeagueInfoLike = async (
       (rosterSettings.lineupSlotCounts as Record<string, number> | undefined) ??
         {}
     );
-    const allPlayerLookups: PlayerNameTeamLookup[] = [
+
+    const allPlayerLookups: EspnPlayerLookup[] = [
       ...teams.flatMap((team) =>
         getRosterEntries(team).map((entry: any) => ({
           name: String(entry.playerPoolEntry.player.fullName ?? ""),
           team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
+          position: getPosition(
+            Number(entry.playerPoolEntry.player.proTeamId.defaultPositionId)
+          ),
+          espnId: entry.playerPoolEntry.player.id,
         }))
       ),
       ...schedule.flatMap((weekEntries) =>
@@ -771,10 +843,15 @@ export const getLeagueInfoLike = async (
           return entries.map((entry: any) => ({
             name: String(entry.playerPoolEntry.player.fullName ?? ""),
             team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
+            position: getPosition(
+              Number(entry.playerPoolEntry.player.defaultPositionId)
+            ),
+            espnId: entry.playerPoolEntry.player.id,
           }));
         })
       ),
     ];
+
     const playerLookupMap = await getPlayerIdLookupMap(allPlayerLookups);
 
     const excludedIds = new Set(["NightlyLeagueUpdateTaskProcessor", "kona"]);
@@ -787,8 +864,6 @@ export const getLeagueInfoLike = async (
       acc[id] = (acc[id] || 0) + 1;
       return acc;
     }, {});
-
-    console.log(settings);
 
     return {
       platform: "espn",
@@ -828,10 +903,11 @@ export const getLeagueInfoLike = async (
       playoffTeams: Number(scheduleSettings.playoffTeamCount ?? 0),
       playoffType: 0,
       draftId: String(draftData?.id ?? draftData?.draftDetail?.id ?? ""),
-      draftPicks: getDraftPicks(
+      draftPicks: await getDraftPicks(
         (draftData?.draftDetail as Record<string, unknown> | undefined) ??
           draftData,
-        teams
+        teams,
+        allPlayerLookups
       ),
       waiverType: acquisitionSettings.isUsingAcquisitionBudget ? 2 : 0,
       sport: "nfl",
