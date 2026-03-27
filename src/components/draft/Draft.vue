@@ -132,6 +132,7 @@ onMounted(async () => {
         store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"] ??
         [];
     } else {
+      // get draft order from just slicing the draft picks array.
       const rosterPickOrder = data.value
         .slice(0, 10)
         .map((pick) => pick.rosterId);
@@ -142,14 +143,12 @@ onMounted(async () => {
           r.id,
         ])
       );
-
       const userMap = new Map(
         store.leagueInfo[store.currentLeagueIndex].users.map((u) => [u.id, u])
       );
-
-      const orderedUsers = rosterPickOrder.map((rosterId) => {
+      const orderedUsers = rosterPickOrder.flatMap((rosterId) => {
         const userId = rosterToUser.get(rosterId);
-        return userMap.get(userId ?? "");
+        return userId && userMap.has(userId) ? [getTeamName(userId)] : [];
       });
       draftOrder.value = orderedUsers;
     }
