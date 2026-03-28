@@ -403,9 +403,10 @@ export const getDraftProjections = async (
       response,
       "Draft projections"
     );
+    // espn league defenses still have espn player id
     return {
-      adp: playerInfo.stats?.[adpName],
-      projectedPoints: playerInfo.stats?.[ptsName],
+      adp: playerInfo?.stats?.[adpName],
+      projectedPoints: playerInfo?.stats?.[ptsName],
     };
   } catch (e) {
     console.error(e);
