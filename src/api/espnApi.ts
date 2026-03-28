@@ -70,7 +70,7 @@ const TEAM_MAP: Record<number, string> = {
   25: "SF",
   26: "SEA",
   27: "TB",
-  28: "WSH",
+  28: "WAS",
   29: "CAR",
   30: "JAX",
   33: "BAL",
@@ -88,7 +88,7 @@ const POSITION_MAP: Record<number, string> = {
 };
 
 const getTeam = (posId: number) => {
-  return TEAM_MAP[posId] || "UNKNOWN";
+  return TEAM_MAP[posId] || "FA";
 };
 
 const getPosition = (posId: number) => {
@@ -644,7 +644,6 @@ const getDraftPicks = async (
         position,
         stats?.ppg ?? 0
       );
-
       return {
         firstName:
           draftPlayerLookup?.firstName ?? String(player.firstName ?? ""),
