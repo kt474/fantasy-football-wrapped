@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   getData,
+  getPlayerIdsByNameTeamMap,
   getPlayersByIdsMap,
   generatePremiumReport,
 } from "../src/api/api.ts";
@@ -229,6 +230,32 @@ describe("Sleeper API data transforms", () => {
       first_name: "A",
       last_name: "B",
     });
+  });
+
+  test("returns player ids by requested name and team in order", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      mockFetchResponse(200, {
+        players: [
+          { name: "Patrick Mahomes", team: "KC", player_id: "4046" },
+          { name: "Josh Allen", team: "BUF", player_id: "4984" },
+          { name: "Unknown Player", team: "FA", player_id: null },
+        ],
+      })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const playerIdsMap = await getPlayerIdsByNameTeamMap([
+      { name: "Patrick Mahomes", team: "KC" },
+      { name: "Josh Allen", team: "BUF" },
+      { name: "Unknown Player", team: "FA" },
+    ]);
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock.mock.calls[0][0]).toContain("name=Patrick+Mahomes");
+    expect(fetchMock.mock.calls[0][0]).toContain("team=KC");
+    expect(fetchMock.mock.calls[0][0]).toContain("name=Josh+Allen");
+    expect(fetchMock.mock.calls[0][0]).toContain("team=BUF");
+    expect(playerIdsMap).toEqual(["4046", "4984", null]);
   });
 
   test("getDraftPicks handles missing metadata and avoids duplicate stats fetches", async () => {

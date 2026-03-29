@@ -35,6 +35,7 @@ import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
 import { toPng } from "html-to-image";
 import { Copy, Download } from "lucide-vue-next";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -1333,6 +1334,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                       alt="User avatar"
                       class="w-8 h-8 rounded-full"
                       :src="user.avatarImg"
+                      @error="handleImageError"
                     />
                     <svg
                       v-else

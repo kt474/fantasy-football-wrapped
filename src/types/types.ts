@@ -1,6 +1,8 @@
 import type { Bracket, DraftPick, DraftGrades, WeeklyWaiver } from "./apiTypes";
+import type { Player } from "./apiTypes";
 
 export type LeagueInfoType = {
+  platform?: string;
   name: string;
   regularSeasonLength: number;
   medianScoring: number;
@@ -59,16 +61,19 @@ export type RosterType = {
   recordByWeek: string;
   players?: string[];
   projections?: { projection: number; position: string }[];
+  playerNames?: { name: string; position: string }[];
 };
 
 export type PointsType = {
   rosterId: number;
   points: number[];
   matchups?: number[];
-  starters: string[][];
+  starters: (string | null)[][];
   starterPoints: number[][];
-  benchPlayers: string[][];
+  starterNames?: any[][];
+  benchPlayers: (string | null)[][];
   benchPoints: number[][];
+  benchNames?: any[][];
 };
 
 export interface WaiverMove {
@@ -144,6 +149,8 @@ export type TableDataType = {
   players: string[];
   starters: string[][];
   starterPoints: number[][];
+  starterNames?: Player[][];
+  benchNames?: Player[][];
   benchPlayers: string[][];
   benchPoints: number[][];
 };

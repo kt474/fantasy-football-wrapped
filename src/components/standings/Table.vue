@@ -24,6 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import Narratives from "../league_narratives/Narratives.vue";
 
 const PowerRankingData = defineAsyncComponent(
@@ -106,6 +107,8 @@ const TradeLab = defineAsyncComponent(
   () => import("../trade_lab/TradeLab.vue")
 );
 
+const EspnTest = defineAsyncComponent(() => import("../espn/EspnTest.vue"));
+
 const tableOrder = ref("wins");
 const props = defineProps<{
   users: UserType[];
@@ -128,6 +131,7 @@ const tabOptions = [
   "League History",
   "Manager Profiles",
   "Wrapped",
+  "ESPN",
 ];
 const showStandingsTab = computed(() => {
   return (
@@ -291,6 +295,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
   }
   return tableDataItem.name ? tableDataItem.name : `Ghost Roster`;
 };
+
 </script>
 <template>
   <div :class="['min-w-0', store.currentTab === 'Home' ? '' : 'mx-4']">
@@ -492,6 +497,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       v-if="item.avatarImg"
                       class="w-8 h-8 rounded-full"
                       :src="item.avatarImg"
+                      @error="handleImageError"
                     />
                     <svg
                       v-else
@@ -719,6 +725,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
         <p>Come back after the season is complete!</p>
       </div>
       <FakeWrapped v-else />
+    </div>
+    <div v-if="store.currentTab === 'ESPN'">
+      <EspnTest />
     </div>
     <div v-if="store.currentTab === 'Home'">
       <Intro>

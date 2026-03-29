@@ -153,11 +153,19 @@ const formatData = async () => {
     const starterPoints = user.starterPoints[weekIndex];
     const maxIndex = getMaxIndex(starterPoints);
 
-    const bestStarter = {
-      name: playerLookupMap.get(String(user.starters[weekIndex][maxIndex]))
-        ?.name,
-      points: starterPoints[maxIndex],
-    };
+    let bestStarter = {};
+    if (currentLeague?.platform !== "espn") {
+      bestStarter = {
+        name: playerLookupMap.get(String(user.starters[weekIndex][maxIndex]))
+          ?.name,
+        points: starterPoints[maxIndex],
+      };
+    } else {
+      bestStarter = {
+        name: String(user.starterNames?.[weekIndex][maxIndex]),
+        points: starterPoints[maxIndex],
+      };
+    }
 
     return {
       name: store.showUsernames ? user.username : user.name,

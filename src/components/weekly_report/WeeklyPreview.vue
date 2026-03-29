@@ -9,6 +9,7 @@ import { getWinProbability } from "../../api/helper.ts";
 import { fakeWeeklyPreview } from "../../api/fakeLeague.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const props = defineProps<{
@@ -512,6 +513,7 @@ watch([() => props.currentWeek, () => store.currentLeagueId], () =>
 watch([() => store.darkMode, () => store.currentLeagueId], () =>
   updateChartColor()
 );
+
 </script>
 <template>
   <div
@@ -534,6 +536,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 alt="User avatar"
                 class="w-8 h-8 -mt-2 rounded-full"
                 :src="matchup[0].avatarImg"
+                @error="handleImageError"
               />
               <svg
                 v-else
@@ -684,6 +687,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
                 alt="User avatar"
                 class="w-8 h-8 -mt-2 rounded-full"
                 :src="matchup[1].avatarImg"
+                @error="handleImageError"
               />
               <svg
                 v-else
