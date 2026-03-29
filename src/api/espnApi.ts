@@ -92,7 +92,7 @@ const getTeam = (posId: number) => {
 };
 
 const getPosition = (posId: number) => {
-  return POSITION_MAP[posId] || "UNKNOWN";
+  return POSITION_MAP[posId] || "NA";
 };
 
 const getPlayerLookupKey = ({ name, team }: PlayerNameTeamLookup): string =>
@@ -609,7 +609,7 @@ const getDraftPicks = async (
       const ownerId = String(pick.memberId ?? pick.bidderId ?? "");
       const team = teamById.get(Number(pick.teamId ?? 0));
       const draftPlayerLookup = draftPlayerLookups[pickIndex];
-      const position = draftPlayerLookup.lookup?.position ?? "UNKNOWN";
+      const position = draftPlayerLookup.lookup?.position ?? "NA";
 
       const sleeperPlayerId = draftPlayerLookup?.lookup
         ? (sleeperPlayerIds[sleeperPlayerIdIndex++] ?? null)
