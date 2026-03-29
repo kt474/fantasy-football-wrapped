@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { TableDataType, LeagueInfoType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
-import { computed, ref, watch, onMounted, nextTick, handleError } from "vue";
+import { computed, ref, watch, onMounted, nextTick } from "vue";
 import { useStore } from "../../store/store";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
@@ -35,6 +35,7 @@ import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
 import { toPng } from "html-to-image";
 import { Copy, Download } from "lucide-vue-next";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -941,14 +942,6 @@ const downloadReportImage = async () => {
   } finally {
     isGeneratingImage.value = false;
   }
-};
-
-const FALLBACK =
-  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  if (img.src === FALLBACK) return;
-  img.src = FALLBACK;
 };
 
 watch(

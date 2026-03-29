@@ -24,6 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import Narratives from "../league_narratives/Narratives.vue";
 
 const PowerRankingData = defineAsyncComponent(
@@ -295,13 +296,6 @@ const getTeamName = (tableDataItem: TableDataType) => {
   return tableDataItem.name ? tableDataItem.name : `Ghost Roster`;
 };
 
-const FALLBACK =
-  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  if (img.src === FALLBACK) return;
-  img.src = FALLBACK;
-};
 </script>
 <template>
   <div :class="['min-w-0', store.currentTab === 'Home' ? '' : 'mx-4']">

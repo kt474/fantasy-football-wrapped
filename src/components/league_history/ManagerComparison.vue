@@ -9,6 +9,7 @@ import {
   SelectItem,
   SelectValue,
 } from "../ui/select";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const manager1 = ref("");
@@ -356,6 +357,7 @@ const chartOptions = ref({
   },
 });
 </script>
+
 <template>
   <Card v-if="manager1 && manager2" class="w-full p-4 md:p-6">
     <h5 class="-mt-1.5 mb-4 text-2xl font-bold sm:text-3xl">
@@ -373,6 +375,7 @@ const chartOptions = ref({
                   v-if="currentManager1.avatarImg"
                   class="w-8 h-8 rounded-full"
                   :src="currentManager1.avatarImg"
+                  @error="handleImageError"
                 />
                 <svg
                   v-else
@@ -409,6 +412,7 @@ const chartOptions = ref({
                   v-if="currentManager2.avatarImg"
                   class="w-8 h-8 rounded-full"
                   :src="currentManager2.avatarImg"
+                  @error="handleImageError"
                 />
                 <svg
                   v-else

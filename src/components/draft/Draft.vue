@@ -18,6 +18,7 @@ import {
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const data = ref<DraftPick[]>([]);
@@ -322,13 +323,6 @@ const getValueColor = (value: number) => {
   return `bg-red-400 dark:bg-red-600`;
 };
 
-const FALLBACK =
-  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  if (img.src === FALLBACK) return;
-  img.src = FALLBACK;
-};
 </script>
 <template>
   <Card class="w-full p-4 md:p-6">

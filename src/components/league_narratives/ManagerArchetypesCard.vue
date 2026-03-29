@@ -10,6 +10,7 @@ import Separator from "../ui/separator/Separator.vue";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -76,14 +77,6 @@ const generateButtonLabel = computed(() => {
   if (isLoading.value) return "Generating...";
   return "Generate profiles";
 });
-
-const FALLBACK =
-  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  if (img.src === FALLBACK) return;
-  img.src = FALLBACK;
-};
 
 watch(
   storedManagerProfiles,

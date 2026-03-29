@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { RosterType, UserType } from "../../types/types";
 import { useStore } from "../../store/store";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const props = defineProps<{
@@ -22,13 +23,6 @@ const worstManagerUser = computed<UserType | null>(() => {
   return props.users.find((user) => user.id === manager.id) ?? null;
 });
 
-const FALLBACK =
-  "https://g.espncdn.com/lm-static/ffl/images/default_logos/1.svg";
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  if (img.src === FALLBACK) return;
-  img.src = FALLBACK;
-};
 </script>
 <template>
   <div>

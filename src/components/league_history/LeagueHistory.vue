@@ -20,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const props = defineProps<{
@@ -263,7 +264,7 @@ const dataAllYears = computed(() => {
       store.leagueInfo[store.currentLeagueIndex].status == "complete"
         ? store.leagueInfo[store.currentLeagueIndex].leagueWinner
           ? Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
-          : store.leagueInfo[store.currentLeagueIndex].legacyWinner ?? null
+          : (store.leagueInfo[store.currentLeagueIndex].legacyWinner ?? null)
         : null;
 
     return {
@@ -460,6 +461,7 @@ const worstManager = computed(() => {
       ).toFixed(1)
     : null;
 });
+
 </script>
 <template>
   <div class="my-4">
@@ -630,6 +632,7 @@ const worstManager = computed(() => {
                     v-if="user.avatarImg"
                     class="w-8 h-8 rounded-full"
                     :src="user.avatarImg"
+                    @error="handleImageError"
                   />
                   <svg
                     v-else
