@@ -938,17 +938,21 @@ export const getLeagueInfoLike = async (
       .flat()
       .map((waiver) => {
         const typedWaiver = waiver as EspnWaiverTransaction;
-        if (typedWaiver.items?.[0].type === "ADD") {
+        if (
+          typedWaiver.items?.[0].type === "ADD" &&
+          (typedWaiver.type === "WAIVER" || typedWaiver.type === "FREEAGENT")
+        ) {
           const sleeperPlayerId =
             sleeperPlayerIdByEspnId.get(
               String(typedWaiver.items[0].playerId ?? "")
             ) ?? null;
+          const type = typedWaiver.type === "WAIVER" ? "waiver" : "free_agent";
           return {
             adds: sleeperPlayerId
               ? { [sleeperPlayerId]: typedWaiver.teamId }
               : {},
             status: typedWaiver.status === "EXECUTED" ? "complete" : "",
-            type: typedWaiver.type,
+            type: type,
             roster_ids: [typedWaiver.teamId],
             week: typedWaiver.scoringPeriodId,
             settings: { waiver_bid: typedWaiver.bidAmount },
