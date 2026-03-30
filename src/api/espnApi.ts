@@ -109,6 +109,36 @@ interface DraftPickLookupResult {
   lookup: EspnPlayerLookup | null;
 }
 
+interface EspnWaiverItem extends Record<string, unknown> {
+  playerId?: number | string;
+  playerName?: string;
+  team?: string;
+  sleeperPlayerId?: string | null;
+}
+
+interface EspnWaiverTransaction extends Record<string, unknown> {
+  items?: EspnWaiverItem[];
+}
+
+const getSleeperPlayerIdByEspnIdMap = (
+  allPlayerLookups: EspnPlayerLookup[],
+  playerLookupMap: Map<string, string>
+) => {
+  const sleeperPlayerIdByEspnId = new Map<string, string>();
+
+  allPlayerLookups.forEach((playerLookup) => {
+    const sleeperPlayerId = playerLookupMap.get(
+      getPlayerLookupKey(playerLookup)
+    );
+
+    if (sleeperPlayerId) {
+      sleeperPlayerIdByEspnId.set(String(playerLookup.espnId), sleeperPlayerId);
+    }
+  });
+
+  return sleeperPlayerIdByEspnId;
+};
+
 const safeJson = async (response: Response) => {
   if (!response.ok) {
     throw new Error(`ESPN request failed with status ${response.status}`);
@@ -816,7 +846,6 @@ export const getLeagueInfoLike = async (
     for (let i = 1; i <= lastScoredWeek; i++) {
       const scheduleData = await getPlayerStats(season, leagueId, i);
       const waiverData = await getWaivers(season, leagueId, i);
-
       const filteredWaivers = waiverData.transactions.filter(
         (transaction: any) =>
           transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
@@ -900,17 +929,49 @@ export const getLeagueInfoLike = async (
     ];
 
     const playerLookupMap = await getPlayerIdLookupMap(allPlayerLookups);
+    const sleeperPlayerIdByEspnId = getSleeperPlayerIdByEspnIdMap(
+      allPlayerLookups,
+      playerLookupMap
+    );
+    // TODO cleanup this logic
+    const enrichedWaivers = waivers
+      .flat()
+      .map((waiver) => {
+        const typedWaiver = waiver as EspnWaiverTransaction;
+        if (typedWaiver.items?.[0].type === "ADD") {
+          const sleeperPlayerId =
+            sleeperPlayerIdByEspnId.get(
+              String(typedWaiver.items[0].playerId ?? "")
+            ) ?? null;
+          return {
+            adds: sleeperPlayerId
+              ? { [sleeperPlayerId]: typedWaiver.teamId }
+              : {},
+            status: typedWaiver.status === "EXECUTED" ? "complete" : "",
+            type: typedWaiver.type,
+            roster_ids: [typedWaiver.teamId],
+            week: typedWaiver.scoringPeriodId,
+            settings: { waiver_bid: typedWaiver.bidAmount },
+            creator: typedWaiver.memberId,
+            leg: typedWaiver.scoringPeriodId,
+          };
+        }
+      })
+      .filter(Boolean);
 
     const excludedIds = new Set(["NightlyLeagueUpdateTaskProcessor", "kona"]);
 
-    const transactions = waivers.flat().reduce((acc, item) => {
-      const id = item.memberId;
+    const transactions = enrichedWaivers.reduce<Record<string, number>>(
+      (acc, item: any) => {
+        const id = item.creator;
 
-      if (excludedIds.has(id)) return acc; // skip
+        if (excludedIds.has(id)) return acc; // skip
 
-      acc[id] = (acc[id] || 0) + 1;
-      return acc;
-    }, {});
+        acc[id] = (acc[id] || 0) + 1;
+        return acc;
+      },
+      {}
+    );
 
     return {
       platform: "espn",
@@ -937,8 +998,9 @@ export const getLeagueInfoLike = async (
       weeklyPoints: await getWeeklyPointsMap(teams, schedule, playerLookupMap),
       transactions: transactions,
       trades: [],
-      waivers: waivers.flat(),
-      previousLeagues: [],
+      waivers: enrichedWaivers as unknown as LeagueInfoType["waivers"],
+      previousLeagues:
+        (status.previousSeasons as LeagueInfoType[] | undefined) ?? [],
       status: getLeagueStatus(currentWeek, lastScoredWeek, regularSeasonLength),
       currentWeek,
       scoringType: getScoringType(settings.scoringSettings.scoringItems),
