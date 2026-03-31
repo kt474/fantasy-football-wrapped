@@ -4,6 +4,7 @@ import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
 import { useStore } from "../../store/store.ts";
 import { getData, inputLeague } from "../../api/api.ts";
+import { getLeagueInfoLike } from "../../api/espnApi.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
@@ -37,10 +38,86 @@ const previousLeagues = ref<string[]>([]);
 const hasEmittedReady = ref(false);
 const previousLeagueLoads = new Map<string, Promise<void>>();
 
+type PreviousLeagueEntry = LeagueInfoType | string | number;
+
 const emitReady = () => {
   if (hasEmittedReady.value) return;
   hasEmittedReady.value = true;
   emit("ready");
+};
+
+const getLeagueHistoryKey = ({
+  leagueId,
+  season,
+  platform,
+}: {
+  leagueId?: string;
+  season?: string;
+  platform?: string;
+}) => `${platform ?? "unknown"}:${leagueId ?? ""}:${season ?? ""}`;
+
+const getLeagueTableCacheKey = (league: LeagueInfoType) =>
+  `league-history:${getLeagueHistoryKey(league)}`;
+
+const getHistoricalTableData = (league: LeagueInfoType) => {
+  if (!league.leagueId || !league.season) {
+    return [];
+  }
+
+  const cacheKey = getLeagueTableCacheKey(league);
+  const cachedTableData = localStorage.getItem(cacheKey);
+
+  if (cachedTableData) {
+    return JSON.parse(cachedTableData) as TableDataType[];
+  }
+
+  const tableData = createTableData(
+    league.users,
+    league.rosters,
+    league.weeklyPoints,
+    league.medianScoring && league.medianScoring === 1 ? true : false
+  );
+  localStorage.setItem(cacheKey, JSON.stringify(tableData));
+  return tableData;
+};
+
+const isLeagueInfoEntry = (entry: unknown): entry is LeagueInfoType =>
+  typeof entry === "object" &&
+  entry !== null &&
+  "leagueId" in entry &&
+  "season" in entry;
+
+const getPreviousLeagueEntries = (league: LeagueInfoType): PreviousLeagueEntry[] =>
+  league.previousLeagues as unknown as PreviousLeagueEntry[];
+
+const replacePreviousLeagueEntries = (
+  league: LeagueInfoType,
+  leagues: PreviousLeagueEntry[]
+) => {
+  getPreviousLeagueEntries(league).splice(
+    0,
+    getPreviousLeagueEntries(league).length,
+    ...leagues
+  );
+};
+
+const getPreviousSeasonReference = (entry: unknown): string | null => {
+  if (typeof entry === "string" || typeof entry === "number") {
+    const season = String(entry).trim();
+    return season ? season : null;
+  }
+
+  if (
+    typeof entry === "object" &&
+    entry !== null &&
+    "season" in entry &&
+    !("leagueId" in entry)
+  ) {
+    const season = String(entry.season ?? "").trim();
+    return season ? season : null;
+  }
+
+  return null;
 };
 
 interface PointSeasonEntry {
@@ -67,30 +144,33 @@ interface HistoricalManagerRow {
   seasons: string[];
 }
 
-const replacePreviousLeagues = (
-  league: LeagueInfoType,
-  leagues: LeagueInfoType[]
-) => {
-  league.previousLeagues.splice(0, league.previousLeagues.length, ...leagues);
-};
-
 const dedupePreviousLeagues = (league: LeagueInfoType) => {
-  const seenLeagueIds = new Set<string>();
-  const uniqueLeagues = league.previousLeagues.filter((previousLeague) => {
-    if (
-      !previousLeague?.leagueId ||
-      previousLeague.leagueId === league.leagueId ||
-      seenLeagueIds.has(previousLeague.leagueId)
-    ) {
+  const seenEntries = new Set<string>();
+  const uniqueEntries = getPreviousLeagueEntries(league).filter((entry) => {
+    if (isLeagueInfoEntry(entry)) {
+      const leagueKey = getLeagueHistoryKey(entry);
+      if (
+        leagueKey === getLeagueHistoryKey(league) ||
+        seenEntries.has(leagueKey)
+      ) {
+        return false;
+      }
+
+      seenEntries.add(leagueKey);
+      return true;
+    }
+
+    const season = getPreviousSeasonReference(entry);
+    if (!season || season === league.season || seenEntries.has(season)) {
       return false;
     }
 
-    seenLeagueIds.add(previousLeague.leagueId);
+    seenEntries.add(season);
     return true;
   });
 
-  if (uniqueLeagues.length !== league.previousLeagues.length) {
-    replacePreviousLeagues(league, uniqueLeagues);
+  if (uniqueEntries.length !== getPreviousLeagueEntries(league).length) {
+    replacePreviousLeagueEntries(league, uniqueEntries);
   }
 };
 
@@ -110,12 +190,15 @@ const checkPreviousLeagues = async (
   loadingYear: Ref<string>
 ): Promise<void> => {
   dedupePreviousLeagues(rootLeague);
+  const previousLeagueEntries = getPreviousLeagueEntries(rootLeague);
 
   // Early return if league is invalid or already processed
   if (
     leagueId === "0" ||
     previousLeagues.value.includes(leagueId) ||
-    rootLeague.previousLeagues.some((league) => league.leagueId === leagueId)
+    previousLeagueEntries.some(
+      (league) => isLeagueInfoEntry(league) && league.leagueId === leagueId
+    )
   ) {
     return;
   }
@@ -125,7 +208,7 @@ const checkPreviousLeagues = async (
     loadingYear.value = leagueData.season || "";
 
     // Update store and tracking arrays
-    rootLeague.previousLeagues.push(leagueData);
+    previousLeagueEntries.push(leagueData);
     dedupePreviousLeagues(rootLeague);
     previousLeagues.value.push(leagueId);
 
@@ -146,13 +229,67 @@ const checkPreviousLeagues = async (
   }
 };
 
-const getPreviousLeagues = async (
+const loadEspnPreviousLeagues = async (
   rootLeague: LeagueInfoType,
   previousLeagues: Ref<string[]>,
   loadingYear: Ref<string>
 ): Promise<void> => {
   dedupePreviousLeagues(rootLeague);
 
+  const previousLeagueEntries = getPreviousLeagueEntries(rootLeague);
+  const existingLeagues = previousLeagueEntries.filter(isLeagueInfoEntry);
+  const seasonReferences = previousLeagueEntries
+    .map(getPreviousSeasonReference)
+    .filter((season): season is string => Boolean(season))
+    .filter((season) => Number(season) >= 2019)
+    .sort((left, right) => Number(right) - Number(left));
+
+  if (seasonReferences.length === 0) {
+    return;
+  }
+
+  const resolvedLeagues = [...existingLeagues].sort(
+    (left, right) => Number(right.season) - Number(left.season)
+  );
+
+  for (const season of seasonReferences) {
+    if (
+      previousLeagues.value.includes(season) ||
+      resolvedLeagues.some(
+        (league) =>
+          league.season === season && league.leagueId === rootLeague.leagueId
+      )
+    ) {
+      continue;
+    }
+
+    loadingYear.value = season;
+
+    try {
+      const leagueData = await getLeagueInfoLike(season, rootLeague.leagueId);
+      if (leagueData) {
+        resolvedLeagues.push(leagueData);
+      }
+      previousLeagues.value.push(season);
+    } catch (error) {
+      console.error(`Failed to process ESPN league for season ${season}:`, error);
+    }
+  }
+
+  resolvedLeagues.sort(
+    (left, right) => Number(right.season) - Number(left.season)
+  );
+  replacePreviousLeagueEntries(rootLeague, resolvedLeagues);
+  dedupePreviousLeagues(rootLeague);
+  localStorage.setItem("leagueInfo", JSON.stringify(store.leagueInfo));
+};
+
+const getPreviousLeagues = async (
+  rootLeague: LeagueInfoType,
+  previousLeagues: Ref<string[]>,
+  loadingYear: Ref<string>
+): Promise<void> => {
+  dedupePreviousLeagues(rootLeague);
   const previousLeagueId = rootLeague.previousLeagueId;
 
   if (previousLeagueId) {
@@ -162,17 +299,30 @@ const getPreviousLeagues = async (
       previousLeagues,
       loadingYear
     );
+    return;
+  }
+
+  if (rootLeague.platform === "espn") {
+    await loadEspnPreviousLeagues(rootLeague, previousLeagues, loadingYear);
   }
 };
 
 const ensurePreviousLeaguesLoaded = async (league: LeagueInfoType) => {
   dedupePreviousLeagues(league);
+  const previousLeagueEntries = getPreviousLeagueEntries(league);
+  const hasSeasonReferences = previousLeagueEntries.some(
+    (entry) => !isLeagueInfoEntry(entry) && getPreviousSeasonReference(entry)
+  );
 
-  if (league.previousLeagues.length > 0 || !league.previousLeagueId) {
+  if (
+    !hasSeasonReferences &&
+    (previousLeagueEntries.length > 0 || !league.previousLeagueId)
+  ) {
     return;
   }
 
-  const existingLoad = previousLeagueLoads.get(league.leagueId);
+  const loadKey = getLeagueHistoryKey(league);
+  const existingLoad = previousLeagueLoads.get(loadKey);
   if (existingLoad) {
     await existingLoad;
     return;
@@ -180,19 +330,25 @@ const ensurePreviousLeaguesLoaded = async (league: LeagueInfoType) => {
 
   const loadPromise = (async () => {
     isLoading.value = true;
-    previousLeagues.value = league.previousLeagues.map(
-      (previousLeague) => previousLeague.leagueId
-    );
+    previousLeagues.value = previousLeagueEntries
+      .map((previousLeague) =>
+        isLeagueInfoEntry(previousLeague)
+          ? league.platform === "espn"
+            ? previousLeague.season
+            : previousLeague.leagueId
+          : null
+      )
+      .filter((entry): entry is string => Boolean(entry));
 
     try {
       await getPreviousLeagues(league, previousLeagues, loadingYear);
     } finally {
-      previousLeagueLoads.delete(league.leagueId);
+      previousLeagueLoads.delete(loadKey);
       isLoading.value = false;
     }
   })();
 
-  previousLeagueLoads.set(league.leagueId, loadPromise);
+  previousLeagueLoads.set(loadKey, loadPromise);
   await loadPromise;
 };
 
@@ -319,18 +475,7 @@ const dataAllYears = computed(() => {
   ) {
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.forEach(
       (league: LeagueInfoType) => {
-        let tableData;
-        if (localStorage.getItem(league.leagueId)) {
-          tableData = JSON.parse(<string>localStorage.getItem(league.leagueId));
-        } else {
-          tableData = createTableData(
-            league.users,
-            league.rosters,
-            league.weeklyPoints,
-            league.medianScoring && league.medianScoring === 1 ? true : false
-          );
-          localStorage.setItem(league.leagueId, JSON.stringify(tableData));
-        }
+        const tableData = getHistoricalTableData(league);
         tableData.forEach((user: TableDataType) => {
           const resultUser = result.find((ru) => ru.id === user.id);
           if (resultUser) {
