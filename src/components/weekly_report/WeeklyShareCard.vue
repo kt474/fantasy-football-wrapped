@@ -48,9 +48,9 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
 
 <template>
   <div
-    class="box-border flex min-h-[1600px] w-[1320px] flex-col gap-4 bg-background p-8 text-foreground"
+    class="box-border flex min-h-[1920px] w-[1080] flex-col gap-4 bg-card p-8 text-foreground"
   >
-    <div class="p-4 border rounded-xl border-border bg-card">
+    <div class="p-4 border rounded-xl border-border bg-background">
       <div class="flex items-center gap-2.5">
         <img
           height="24"
@@ -71,16 +71,16 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
       </p>
     </div>
 
-    <section class="p-4 border rounded-xl border-border bg-card">
+    <section class="p-4 border rounded-xl border-border bg-background">
       <h3 class="mb-3 text-2xl font-semibold">Summary</h3>
       <div
-        class="max-w-[70ch] text-lg leading-8 text-foreground [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6"
+        class="max-w-[70ch] text-xl leading-8 text-foreground [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6"
         v-html="renderedSummary"
       ></div>
     </section>
 
     <div class="grid flex-1 grid-cols-2 grid-rows-2 gap-4">
-      <section class="p-4 border rounded-xl border-border bg-card">
+      <section class="p-4 border rounded-xl border-border bg-background">
         <h3 class="mb-4 text-xl font-semibold">Points Scored</h3>
         <div v-if="topTeamsForCard.length > 0" class="space-y-2.5">
           <div
@@ -122,7 +122,7 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
         </p>
       </section>
 
-      <section class="p-4 border rounded-xl border-border bg-card">
+      <section class="p-4 border rounded-xl border-border bg-background">
         <h3 class="mb-4 text-xl font-semibold">Top Performers</h3>
         <div v-if="hotPlayersForCard.length > 0" class="space-y-3">
           <div
@@ -160,7 +160,7 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
         </p>
       </section>
 
-      <section class="p-4 border rounded-xl border-border bg-card">
+      <section class="p-4 border rounded-xl border-border bg-background">
         <h3 class="mb-4 text-xl font-semibold">Bottom Performers</h3>
         <div v-if="coldPlayersForCard.length > 0" class="space-y-3">
           <div
@@ -198,7 +198,7 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
         </p>
       </section>
 
-      <section class="p-4 border rounded-xl border-border bg-card">
+      <section class="p-4 border rounded-xl border-border bg-background">
         <h3 class="mb-4 text-xl font-semibold">Top Benchwarmers</h3>
         <div v-if="benchPlayersForCard.length > 0" class="space-y-3">
           <div
