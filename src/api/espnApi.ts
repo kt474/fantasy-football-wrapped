@@ -779,6 +779,17 @@ export const getPlayerStats = async (
   }
 };
 
+export const getPlayoffMatchups = async (season: string, league_id: string) => {
+  try {
+    const response = await fetch(
+      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore`
+    );
+    return safeJson(response);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const getWaivers = async (
   season: string,
   league_id: string,
@@ -808,18 +819,27 @@ export const getLeagueInfoLike = async (
   leagueId: string
 ): Promise<LeagueInfoType | null> => {
   try {
-    const [league, teamData, rosterData, draftData] = await Promise.all([
-      getLeagueData(season, leagueId),
-      getTeamData(season, leagueId),
-      getRosterData(season, leagueId),
-      getDraftData(season, leagueId),
-    ]);
+    const [league, teamData, rosterData, draftData, playoffData] =
+      await Promise.all([
+        getLeagueData(season, leagueId),
+        getTeamData(season, leagueId),
+        getRosterData(season, leagueId),
+        getDraftData(season, leagueId),
+        getPlayoffMatchups(season, leagueId),
+      ]);
 
     const leagueRoot = (league ?? {}) as Record<string, unknown>;
     const settings: any = leagueRoot.settings;
     const scheduleSettings = settings.scheduleSettings;
     const rosterSettings = settings.rosterSettings;
     const acquisitionSettings = settings.acquisitionSettings;
+    // const playoffMatchupPeriodLength =
+    //   scheduleSettings.playoffMatchupPeriodLength;
+    // const numPlayoffTeams = scheduleSettings.playoffTeamCount;
+    const playoffMatchups = playoffData.schedule.filter(
+      (matchup: any) => matchup.playoffTierType !== "NONE"
+    );
+
     const status =
       (leagueRoot.status as Record<string, unknown> | undefined) ?? {};
     const members = Array.isArray(leagueRoot.members)
@@ -990,8 +1010,12 @@ export const getLeagueInfoLike = async (
       lastUpdated: Date.now(),
       previousLeagueId: null, // previous years have the same id, just change the year
       lastScoredWeek,
-      winnersBracket: [],
-      losersBracket: [],
+      winnersBracket: playoffMatchups.filter((matchup: any) =>
+        matchup.playoffTierType.includes("WINNER")
+      ),
+      losersBracket: playoffMatchups.filter((matchup: any) =>
+        matchup.playoffTierType.includes("LOSER")
+      ),
       users: getManagerMap(members, teams),
       rosters: await getRosterMap(
         teams,
