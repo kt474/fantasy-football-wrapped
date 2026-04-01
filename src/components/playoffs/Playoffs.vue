@@ -2,6 +2,7 @@
 import FinalPlacements from "./FinalPlacements.vue";
 import PlacementFlowChart from "./PlacementFlowChart.vue";
 import LeagueSummary from "./LeagueSummary.vue";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import { computed } from "vue";
 import { useStore } from "../../store/store";
 import {
@@ -112,7 +113,9 @@ const matchRosterId = (rosterId: number, placement?: number) => {
 
 const getPointsScored = (rosterId: number, week: number) => {
   if (!store.leagueInfo[store.currentLeagueIndex]) {
-    const pointsArray = fakePoints.find((roster) => roster.rosterId === rosterId);
+    const pointsArray = fakePoints.find(
+      (roster) => roster.rosterId === rosterId
+    );
     return pointsArray?.playoffPoints[week - 1];
   }
   const pointsArray = store.leagueInfo[
@@ -229,6 +232,52 @@ const numberOfLoserRounds = computed(() => {
       <Card class="block w-full p-4 overflow-x-auto shadow lg:w-3/4">
         <p class="text-3xl font-bold">Winner's Bracket</p>
         <div class="flex flex-nowrap">
+          <div v-for="matchup in winnersBracket">
+            <div class="flex">
+              <img
+                v-if="matchRosterId(matchup.away.teamId).avatarImg"
+                alt="User avatar"
+                class="w-8 h-8 rounded-full"
+                :src="matchRosterId(matchup.away.teamId).avatarImg"
+                @error="handleImageError"
+              />
+              <div class="-mt-0.5">
+                <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                  {{
+                    store.showUsernames
+                      ? matchRosterId(matchup.away.teamId).username
+                      : matchRosterId(matchup.away.teamId).name
+                  }}
+                </p>
+                <p class="ml-2 text-xs text-muted-foreground">
+                  ({{ getRecord(matchup.away.teamId) }})
+                </p>
+              </div>
+              <p>{{ matchup.away.totalPoints }}</p>
+            </div>
+            <div class="flex">
+              <img
+                v-if="matchRosterId(matchup.home.teamId).avatarImg"
+                alt="User avatar"
+                class="w-8 h-8 rounded-full"
+                :src="matchRosterId(matchup.home.teamId).avatarImg"
+                @error="handleImageError"
+              />
+              <div class="-mt-0.5">
+                <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                  {{
+                    store.showUsernames
+                      ? matchRosterId(matchup.home.teamId).username
+                      : matchRosterId(matchup.home.teamId).name
+                  }}
+                </p>
+                <p class="ml-2 text-xs text-muted-foreground">
+                  ({{ getRecord(matchup.home.teamId) }})
+                </p>
+              </div>
+              <p>{{ matchup.home.totalPoints }}</p>
+            </div>
+          </div>
           <div v-for="index in numberOfWinnerRounds">
             <p class="mt-2 -mb-2 text-xl font-semibold">Round {{ index }}</p>
             <Separator class="w-full h-px my-6" />
