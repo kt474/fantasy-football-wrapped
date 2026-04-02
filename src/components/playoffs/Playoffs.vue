@@ -232,50 +232,139 @@ const numberOfLoserRounds = computed(() => {
       <Card class="block w-full p-4 overflow-x-auto shadow lg:w-3/4">
         <p class="text-3xl font-bold">Winner's Bracket</p>
         <div class="flex flex-nowrap">
-          <div v-for="matchup in winnersBracket">
-            <div class="flex">
-              <img
-                v-if="matchRosterId(matchup.away.teamId).avatarImg"
-                alt="User avatar"
-                class="w-8 h-8 rounded-full"
-                :src="matchRosterId(matchup.away.teamId).avatarImg"
-                @error="handleImageError"
-              />
-              <div class="-mt-0.5">
-                <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                  {{
-                    store.showUsernames
-                      ? matchRosterId(matchup.away.teamId).username
-                      : matchRosterId(matchup.away.teamId).name
-                  }}
-                </p>
-                <p class="ml-2 text-xs text-muted-foreground">
-                  ({{ getRecord(matchup.away.teamId) }})
-                </p>
-              </div>
-              <p>{{ matchup.away.totalPoints }}</p>
+          <div
+            v-if="
+              store.leagueInfo[store.currentLeagueIndex]?.platform === 'espn'
+            "
+            class="grid grid-flow-col grid-cols-2 grid-rows-2 gap-4"
+          >
+            <div v-for="(matchup, i) in winnersBracket">
+              <p
+                class="text-xl font-semibold"
+                v-if="winnersBracket.length - 2 == i"
+              >
+                Championship
+              </p>
+              <p class="text-xl font-semibold" v-else-if="i == 0">
+                First Round
+              </p>
+              <Card
+                v-if="matchup.playoffTierType !== 'WINNERS_CONSOLATION_LADDER'"
+                class="p-4 my-2 custom-card-width bg-secondary"
+              >
+                <div>
+                  <div class="flex justify-between">
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.away.teamId).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.away.teamId).avatarImg"
+                        @error="handleImageError"
+                      />
+                      <div class="-mt-0.5">
+                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.away.teamId).username
+                              : matchRosterId(matchup.away.teamId).name
+                          }}
+                        </p>
+                        <p class="ml-2 text-xs text-muted-foreground">
+                          ({{ getRecord(matchup.away.teamId) }})
+                        </p>
+                      </div>
+                    </div>
+                    <p class="font-semibold">{{ matchup.away.totalPoints }}</p>
+                  </div>
+                  <div class="flex justify-between">
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.home.teamId).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.home.teamId).avatarImg"
+                        @error="handleImageError"
+                      />
+                      <div class="-mt-0.5">
+                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.home.teamId).username
+                              : matchRosterId(matchup.home.teamId).name
+                          }}
+                        </p>
+                        <p class="ml-2 text-xs text-muted-foreground">
+                          ({{ getRecord(matchup.home.teamId) }})
+                        </p>
+                      </div>
+                    </div>
+                    <p class="font-semibold">{{ matchup.home.totalPoints }}</p>
+                  </div>
+                </div>
+              </Card>
             </div>
-            <div class="flex">
-              <img
-                v-if="matchRosterId(matchup.home.teamId).avatarImg"
-                alt="User avatar"
-                class="w-8 h-8 rounded-full"
-                :src="matchRosterId(matchup.home.teamId).avatarImg"
-                @error="handleImageError"
-              />
-              <div class="-mt-0.5">
-                <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                  {{
-                    store.showUsernames
-                      ? matchRosterId(matchup.home.teamId).username
-                      : matchRosterId(matchup.home.teamId).name
-                  }}
-                </p>
-                <p class="ml-2 text-xs text-muted-foreground">
-                  ({{ getRecord(matchup.home.teamId) }})
-                </p>
-              </div>
-              <p>{{ matchup.home.totalPoints }}</p>
+          </div>
+
+          <div class="p-4">
+            <p class="text-xl font-semibold">Third Place</p>
+
+            <div v-for="matchup in winnersBracket">
+              <Card
+                v-if="matchup.playoffTierType === 'WINNERS_CONSOLATION_LADDER'"
+                class="p-4 my-2 custom-card-width bg-secondary"
+              >
+                <div>
+                  <div class="flex justify-between">
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.away.teamId).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.away.teamId).avatarImg"
+                        @error="handleImageError"
+                      />
+                      <div class="-mt-0.5">
+                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.away.teamId).username
+                              : matchRosterId(matchup.away.teamId).name
+                          }}
+                        </p>
+                        <p class="ml-2 text-xs text-muted-foreground">
+                          ({{ getRecord(matchup.away.teamId) }})
+                        </p>
+                      </div>
+                    </div>
+                    <p class="font-semibold">{{ matchup.away.totalPoints }}</p>
+                  </div>
+                  <div class="flex justify-between">
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.home.teamId).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.home.teamId).avatarImg"
+                        @error="handleImageError"
+                      />
+                      <div class="-mt-0.5">
+                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.home.teamId).username
+                              : matchRosterId(matchup.home.teamId).name
+                          }}
+                        </p>
+                        <p class="ml-2 text-xs text-muted-foreground">
+                          ({{ getRecord(matchup.home.teamId) }})
+                        </p>
+                      </div>
+                    </div>
+                    <p class="font-semibold">{{ matchup.home.totalPoints }}</p>
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
           <div v-for="index in numberOfWinnerRounds">
