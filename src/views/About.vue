@@ -60,7 +60,7 @@ watch(
               >Github</a
             >. To report a bug or request new features, please join our
             <a
-              aria-label="Link to github issues page"
+              aria-label="Discord link"
               class="font-medium text-primary hover:underline"
               href="https://discord.gg/sSVwNhyv7U"
               target="_blank"
