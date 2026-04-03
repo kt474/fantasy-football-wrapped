@@ -17,6 +17,8 @@ export type LeagueInfoType = {
   lastScoredWeek: number;
   winnersBracket: Bracket[];
   losersBracket: Bracket[];
+  espnWinnersBracket: any[];
+  espnLosersBracket: any[];
   users: UserType[];
   rosters: RosterType[];
   weeklyPoints: PointsType[];

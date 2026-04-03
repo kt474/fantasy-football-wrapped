@@ -1010,12 +1010,14 @@ export const getLeagueInfoLike = async (
       lastUpdated: Date.now(),
       previousLeagueId: null, // previous years have the same id, just change the year
       lastScoredWeek,
-      winnersBracket: playoffMatchups.filter((matchup: any) =>
+      espnWinnersBracket: playoffMatchups.filter((matchup: any) =>
         matchup.playoffTierType.includes("WINNER")
       ),
-      losersBracket: playoffMatchups.filter((matchup: any) =>
+      espnLosersBracket: playoffMatchups.filter((matchup: any) =>
         matchup.playoffTierType.includes("LOSER")
       ),
+      winnersBracket: [],
+      losersBracket: [],
       users: getManagerMap(members, teams),
       rosters: await getRosterMap(
         teams,

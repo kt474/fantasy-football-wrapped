@@ -20,6 +20,364 @@ const props = defineProps<{
 }>();
 const store = useStore();
 
+type EspnTeamSide = {
+  teamId?: number;
+  totalPoints?: number;
+  pointsByScoringPeriod?: Record<string, number>;
+};
+
+type EspnMatchup = {
+  id: number;
+  matchupPeriodId: number;
+  playoffTierType: string;
+  winner?: "HOME" | "AWAY" | "UNDECIDED";
+  home?: EspnTeamSide;
+  away?: EspnTeamSide;
+};
+
+type EspnRoundSection = {
+  title: string;
+  matchups: EspnMatchup[];
+};
+
+type EspnRoundDisplay = {
+  round: number;
+  matchupPeriodId: number;
+  title: string;
+  sections: EspnRoundSection[];
+};
+
+const espnWinnersBracket = computed(() => {
+  return (store.leagueInfo[store.currentLeagueIndex]?.espnWinnersBracket ??
+    []) as EspnMatchup[];
+});
+
+const espnLosersBracket = computed(() => {
+  return (store.leagueInfo[store.currentLeagueIndex]?.espnLosersBracket ??
+    []) as EspnMatchup[];
+});
+
+const espnMainBracket = computed(() => {
+  return [...espnWinnersBracket.value]
+    .filter((matchup) => matchup.playoffTierType === "WINNERS_BRACKET")
+    .sort((a, b) => {
+      if (a.matchupPeriodId !== b.matchupPeriodId) {
+        return a.matchupPeriodId - b.matchupPeriodId;
+      }
+      return a.id - b.id;
+    });
+});
+
+const espnConsolationBracket = computed(() => {
+  return [...espnWinnersBracket.value]
+    .filter((matchup) => matchup.playoffTierType === "WINNERS_CONSOLATION_LADDER")
+    .sort((a, b) => {
+      if (a.matchupPeriodId !== b.matchupPeriodId) {
+        return a.matchupPeriodId - b.matchupPeriodId;
+      }
+      return a.id - b.id;
+    });
+});
+
+const getEspnRoundTitle = (
+  matchups: EspnMatchup[],
+  roundIndex: number,
+  totalRounds: number
+) => {
+  const isFinalRound = roundIndex === totalRounds - 1;
+  const isSemiFinalRound = totalRounds >= 2 && roundIndex === totalRounds - 2;
+
+  if (isFinalRound) {
+    return "Championship";
+  }
+  if (isSemiFinalRound && matchups.length === 2) {
+    return "Semifinals";
+  }
+  if (matchups.length === 4) {
+    return "Quarterfinals";
+  }
+  return `Round ${roundIndex + 1}`;
+};
+
+const getEspnMatchupTeamIds = (matchup: EspnMatchup) => {
+  return [matchup.home?.teamId, matchup.away?.teamId].filter(
+    (teamId): teamId is number => teamId != null
+  );
+};
+
+const getEspnLoserId = (matchup: EspnMatchup) => {
+  if (matchup.winner === "HOME") {
+    return matchup.away?.teamId;
+  }
+  if (matchup.winner === "AWAY") {
+    return matchup.home?.teamId;
+  }
+  return undefined;
+};
+
+const getEspnSectionTitle = (
+  matchup: EspnMatchup,
+  previousMainMatchups: EspnMatchup[],
+  previousLadderMatchups: EspnMatchup[]
+) => {
+  const teamIds = getEspnMatchupTeamIds(matchup);
+  const previousMainLosers = new Set(
+    previousMainMatchups
+      .map((previousMatchup) => getEspnLoserId(previousMatchup))
+      .filter((teamId): teamId is number => teamId != null)
+  );
+  const previousLadderWinners = new Set(
+    previousLadderMatchups
+      .map((previousMatchup) => getEspnWinnerId(previousMatchup))
+      .filter((teamId): teamId is number => teamId != null)
+  );
+  const previousLadderLosers = new Set(
+    previousLadderMatchups
+      .map((previousMatchup) => getEspnLoserId(previousMatchup))
+      .filter((teamId): teamId is number => teamId != null)
+  );
+
+  if (
+    teamIds.length === 2 &&
+    teamIds.every((teamId) => previousMainLosers.has(teamId))
+  ) {
+    return previousMainMatchups.length === 2 ? "3rd Place" : "Consolation Ladder";
+  }
+
+  if (
+    teamIds.length === 2 &&
+    teamIds.every((teamId) => previousLadderWinners.has(teamId))
+  ) {
+    return previousLadderMatchups.length === 2 ? "5th Place" : "Consolation Final";
+  }
+
+  if (
+    teamIds.length === 2 &&
+    teamIds.every((teamId) => previousLadderLosers.has(teamId))
+  ) {
+    return previousLadderMatchups.length === 2 ? "7th Place" : "Consolation";
+  }
+
+  return "Consolation Ladder";
+};
+
+const getEspnLoserSectionTitle = (
+  matchup: EspnMatchup,
+  previousMainMatchups: EspnMatchup[],
+  previousLadderMatchups: EspnMatchup[]
+) => {
+  const teamIds = getEspnMatchupTeamIds(matchup);
+  const previousMainWinners = new Set(
+    previousMainMatchups
+      .map((previousMatchup) => getEspnWinnerId(previousMatchup))
+      .filter((teamId): teamId is number => teamId != null)
+  );
+  const previousMainLosers = new Set(
+    previousMainMatchups
+      .map((previousMatchup) => getEspnLoserId(previousMatchup))
+      .filter((teamId): teamId is number => teamId != null)
+  );
+  const previousLadderWinners = new Set(
+    previousLadderMatchups
+      .map((previousMatchup) => getEspnWinnerId(previousMatchup))
+      .filter((teamId): teamId is number => teamId != null)
+  );
+  const previousLadderLosers = new Set(
+    previousLadderMatchups
+      .map((previousMatchup) => getEspnLoserId(previousMatchup))
+      .filter((teamId): teamId is number => teamId != null)
+  );
+
+  if (
+    teamIds.length === 2 &&
+    teamIds.every((teamId) => previousMainLosers.has(teamId))
+  ) {
+    return "Main Bracket Final";
+  }
+
+  if (
+    teamIds.length === 2 &&
+    teamIds.every((teamId) => previousMainWinners.has(teamId))
+  ) {
+    return "Placement Matchup";
+  }
+
+  if (
+    teamIds.length === 2 &&
+    teamIds.every((teamId) => previousLadderWinners.has(teamId))
+  ) {
+    return "Placement Matchup";
+  }
+
+  if (
+    teamIds.length === 2 &&
+    teamIds.every((teamId) => previousLadderLosers.has(teamId))
+  ) {
+    return "Additional Placement";
+  }
+
+  return "Consolation Ladder";
+};
+
+const espnWinnerRounds = computed(() => {
+  const matchupPeriods = [
+    ...new Set(
+      [...espnMainBracket.value, ...espnConsolationBracket.value].map(
+        (matchup) => matchup.matchupPeriodId
+      )
+    ),
+  ].sort((a, b) => a - b);
+
+  return matchupPeriods.map((matchupPeriodId, index) => {
+    const mainMatchups = espnMainBracket.value.filter(
+      (matchup) => matchup.matchupPeriodId === matchupPeriodId
+    );
+    const ladderMatchups = espnConsolationBracket.value.filter(
+      (matchup) => matchup.matchupPeriodId === matchupPeriodId
+    );
+    const previousPeriodId = matchupPeriods[index - 1];
+    const previousMainMatchups =
+      previousPeriodId == null
+        ? []
+        : espnMainBracket.value.filter(
+            (matchup) => matchup.matchupPeriodId === previousPeriodId
+          );
+    const previousLadderMatchups =
+      previousPeriodId == null
+        ? []
+        : espnConsolationBracket.value.filter(
+            (matchup) => matchup.matchupPeriodId === previousPeriodId
+          );
+    const sections: EspnRoundSection[] = [];
+
+    if (mainMatchups.length > 0) {
+      sections.push({
+        title: getEspnRoundTitle(mainMatchups, index, matchupPeriods.length),
+        matchups: mainMatchups,
+      });
+    }
+
+    if (ladderMatchups.length > 0) {
+      const sectionMap = new Map<string, EspnMatchup[]>();
+
+      ladderMatchups.forEach((matchup) => {
+        const title = getEspnSectionTitle(
+          matchup,
+          previousMainMatchups,
+          previousLadderMatchups
+        );
+        const currentMatchups = sectionMap.get(title) ?? [];
+        currentMatchups.push(matchup);
+        sectionMap.set(title, currentMatchups);
+      });
+
+      sectionMap.forEach((matchups, title) => {
+        sections.push({ title, matchups });
+      });
+    }
+
+    return {
+      round: index + 1,
+      matchupPeriodId,
+      title:
+        sections[0]?.title ??
+        `Round ${index + 1}`,
+      sections,
+    } satisfies EspnRoundDisplay;
+  });
+});
+
+const espnLoserRounds = computed(() => {
+  const matchupPeriods = [
+    ...new Set(
+      [...espnLoserMainBracket.value, ...espnLoserConsolationBracket.value].map(
+        (matchup) => matchup.matchupPeriodId
+      )
+    ),
+  ].sort((a, b) => a - b);
+
+  return matchupPeriods.map((matchupPeriodId, index) => {
+    const mainMatchups = espnLoserMainBracket.value.filter(
+      (matchup) => matchup.matchupPeriodId === matchupPeriodId
+    );
+    const ladderMatchups = espnLoserConsolationBracket.value.filter(
+      (matchup) => matchup.matchupPeriodId === matchupPeriodId
+    );
+    const previousPeriodId = matchupPeriods[index - 1];
+    const previousMainMatchups =
+      previousPeriodId == null
+        ? []
+        : espnLoserMainBracket.value.filter(
+            (matchup) => matchup.matchupPeriodId === previousPeriodId
+          );
+    const previousLadderMatchups =
+      previousPeriodId == null
+        ? []
+        : espnLoserConsolationBracket.value.filter(
+            (matchup) => matchup.matchupPeriodId === previousPeriodId
+          );
+    const sections: EspnRoundSection[] = [];
+
+    if (mainMatchups.length > 0) {
+      sections.push({
+        title:
+          index === matchupPeriods.length - 1
+            ? "Main Bracket Final"
+            : `Round ${index + 1}`,
+        matchups: mainMatchups,
+      });
+    }
+
+    if (ladderMatchups.length > 0) {
+      const sectionMap = new Map<string, EspnMatchup[]>();
+
+      ladderMatchups.forEach((matchup) => {
+        const title = getEspnLoserSectionTitle(
+          matchup,
+          previousMainMatchups,
+          previousLadderMatchups
+        );
+        const currentMatchups = sectionMap.get(title) ?? [];
+        currentMatchups.push(matchup);
+        sectionMap.set(title, currentMatchups);
+      });
+
+      sectionMap.forEach((matchups, title) => {
+        sections.push({ title, matchups });
+      });
+    }
+
+    return {
+      round: index + 1,
+      matchupPeriodId,
+      title: sections[0]?.title ?? `Round ${index + 1}`,
+      sections,
+    } satisfies EspnRoundDisplay;
+  });
+});
+
+const espnLoserMainBracket = computed(() => {
+  return [...espnLosersBracket.value]
+    .filter((matchup) => matchup.playoffTierType === "LOSERS_BRACKET")
+    .sort((a, b) => {
+      if (a.matchupPeriodId !== b.matchupPeriodId) {
+        return a.matchupPeriodId - b.matchupPeriodId;
+      }
+      return a.id - b.id;
+    });
+});
+
+const espnLoserConsolationBracket = computed(() => {
+  return [...espnLosersBracket.value]
+    .filter((matchup) => matchup.playoffTierType === "LOSERS_CONSOLATION_LADDER")
+    .sort((a, b) => {
+      if (a.matchupPeriodId !== b.matchupPeriodId) {
+        return a.matchupPeriodId - b.matchupPeriodId;
+      }
+      return a.id - b.id;
+    });
+});
+
 const winnersBracket = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].winnersBracket
@@ -137,6 +495,34 @@ const getRecord = (rosterId: number) => {
   return "0-0";
 };
 
+const getEspnTeamPoints = (
+  team: EspnTeamSide | undefined,
+  matchupPeriodId: number
+) => {
+  if (!team) return 0;
+  return (
+    team.pointsByScoringPeriod?.[String(matchupPeriodId)] ??
+    team.totalPoints ??
+    0
+  );
+};
+
+const getEspnWinnerId = (matchup: EspnMatchup) => {
+  if (matchup.winner === "HOME") {
+    return matchup.home?.teamId;
+  }
+  if (matchup.winner === "AWAY") {
+    return matchup.away?.teamId;
+  }
+  return undefined;
+};
+
+const getEspnLoserHighlightClass = (matchup: EspnMatchup, teamId?: number) => {
+  if (teamId == null) return "";
+  const comparisonTeamId = getEspnWinnerId(matchup);
+  return comparisonTeamId === teamId ? "text-primary" : "";
+};
+
 const finalPlacements = computed(() => {
   if (
     store.leagueInfo.length > 0 &&
@@ -231,142 +617,10 @@ const numberOfLoserRounds = computed(() => {
     <div class="flex flex-wrap my-4 lg:flex-nowrap">
       <Card class="block w-full p-4 overflow-x-auto shadow lg:w-3/4">
         <p class="text-3xl font-bold">Winner's Bracket</p>
-        <div class="flex flex-nowrap">
-          <div
-            v-if="
-              store.leagueInfo[store.currentLeagueIndex]?.platform === 'espn'
-            "
-            class="grid grid-flow-col grid-cols-2 grid-rows-2 gap-4"
-          >
-            <div v-for="(matchup, i) in winnersBracket">
-              <p
-                class="text-xl font-semibold"
-                v-if="winnersBracket.length - 2 == i"
-              >
-                Championship
-              </p>
-              <p class="text-xl font-semibold" v-else-if="i == 0">
-                First Round
-              </p>
-              <Card
-                v-if="matchup.playoffTierType !== 'WINNERS_CONSOLATION_LADDER'"
-                class="p-4 my-2 custom-card-width bg-secondary"
-              >
-                <div>
-                  <div class="flex justify-between">
-                    <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.away.teamId).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.away.teamId).avatarImg"
-                        @error="handleImageError"
-                      />
-                      <div class="-mt-0.5">
-                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                          {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.away.teamId).username
-                              : matchRosterId(matchup.away.teamId).name
-                          }}
-                        </p>
-                        <p class="ml-2 text-xs text-muted-foreground">
-                          ({{ getRecord(matchup.away.teamId) }})
-                        </p>
-                      </div>
-                    </div>
-                    <p class="font-semibold">{{ matchup.away.totalPoints }}</p>
-                  </div>
-                  <div class="flex justify-between">
-                    <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.home.teamId).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.home.teamId).avatarImg"
-                        @error="handleImageError"
-                      />
-                      <div class="-mt-0.5">
-                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                          {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.home.teamId).username
-                              : matchRosterId(matchup.home.teamId).name
-                          }}
-                        </p>
-                        <p class="ml-2 text-xs text-muted-foreground">
-                          ({{ getRecord(matchup.home.teamId) }})
-                        </p>
-                      </div>
-                    </div>
-                    <p class="font-semibold">{{ matchup.home.totalPoints }}</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-
-          <div class="p-4">
-            <p class="text-xl font-semibold">Third Place</p>
-
-            <div v-for="matchup in winnersBracket">
-              <Card
-                v-if="matchup.playoffTierType === 'WINNERS_CONSOLATION_LADDER'"
-                class="p-4 my-2 custom-card-width bg-secondary"
-              >
-                <div>
-                  <div class="flex justify-between">
-                    <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.away.teamId).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.away.teamId).avatarImg"
-                        @error="handleImageError"
-                      />
-                      <div class="-mt-0.5">
-                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                          {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.away.teamId).username
-                              : matchRosterId(matchup.away.teamId).name
-                          }}
-                        </p>
-                        <p class="ml-2 text-xs text-muted-foreground">
-                          ({{ getRecord(matchup.away.teamId) }})
-                        </p>
-                      </div>
-                    </div>
-                    <p class="font-semibold">{{ matchup.away.totalPoints }}</p>
-                  </div>
-                  <div class="flex justify-between">
-                    <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.home.teamId).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.home.teamId).avatarImg"
-                        @error="handleImageError"
-                      />
-                      <div class="-mt-0.5">
-                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
-                          {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.home.teamId).username
-                              : matchRosterId(matchup.home.teamId).name
-                          }}
-                        </p>
-                        <p class="ml-2 text-xs text-muted-foreground">
-                          ({{ getRecord(matchup.home.teamId) }})
-                        </p>
-                      </div>
-                    </div>
-                    <p class="font-semibold">{{ matchup.home.totalPoints }}</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
+        <div
+          v-if="store.leagueInfo[store.currentLeagueIndex]?.platform !== 'espn'"
+          class="flex flex-nowrap"
+        >
           <div v-for="index in numberOfWinnerRounds">
             <p class="mt-2 -mb-2 text-xl font-semibold">Round {{ index }}</p>
             <Separator class="w-full h-px my-6" />
@@ -641,6 +895,135 @@ const numberOfLoserRounds = computed(() => {
             </div>
           </div>
         </div>
+        <div v-else class="flex flex-nowrap">
+          <div v-for="round in espnWinnerRounds" :key="round.matchupPeriodId">
+            <p class="mt-2 -mb-2 text-xl font-semibold">
+              Round {{ round.round }}
+            </p>
+            <p class="text-sm text-muted-foreground">
+              Week {{ round.matchupPeriodId }}
+            </p>
+            <Separator class="w-full h-px my-6" />
+            <div v-for="section in round.sections" :key="section.title" class="mb-6">
+              <p class="mt-2 -mb-1 text-lg font-semibold">
+                {{ section.title }}
+              </p>
+              <div
+                v-for="matchup in section.matchups"
+                :key="matchup.id"
+                class="mb-4"
+              >
+                <Card class="block p-4 my-2 mr-4 custom-card-width bg-secondary">
+                  <div
+                    v-if="
+                      matchup.home?.teamId && matchRosterId(matchup.home.teamId)
+                    "
+                    class="flex justify-between mb-2"
+                  >
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.home.teamId).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.home.teamId).avatarImg"
+                        @error="handleImageError"
+                      />
+                      <svg
+                        v-else
+                        class="w-8 h-8"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                        />
+                      </svg>
+                      <div class="-mt-0.5">
+                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.home.teamId).username
+                              : matchRosterId(matchup.home.teamId).name
+                          }}
+                        </p>
+                        <p class="ml-2 text-xs text-muted-foreground">
+                          ({{ getRecord(matchup.home.teamId) }})
+                        </p>
+                      </div>
+                    </div>
+                    <p
+                      class="mt-0.5 mr-1 font-semibold"
+                      :class="
+                        matchup.home.teamId === getEspnWinnerId(matchup)
+                          ? 'text-primary'
+                          : ''
+                      "
+                    >
+                      {{
+                        getEspnTeamPoints(matchup.home, matchup.matchupPeriodId)
+                      }}
+                    </p>
+                  </div>
+                  <Separator class="h-px my-2" />
+                  <div
+                    v-if="
+                      matchup.away?.teamId && matchRosterId(matchup.away.teamId)
+                    "
+                    class="flex justify-between"
+                  >
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.away.teamId).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.away.teamId).avatarImg"
+                        @error="handleImageError"
+                      />
+                      <svg
+                        v-else
+                        class="w-8 h-8"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                        />
+                      </svg>
+                      <div class="-mt-0.5">
+                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.away.teamId).username
+                              : matchRosterId(matchup.away.teamId).name
+                          }}
+                        </p>
+                        <p class="ml-2 text-xs text-muted-foreground">
+                          ({{ getRecord(matchup.away.teamId) }})
+                        </p>
+                      </div>
+                    </div>
+                    <p
+                      class="mt-0.5 mr-1 font-semibold"
+                      :class="
+                        matchup.away.teamId === getEspnWinnerId(matchup)
+                          ? 'text-primary'
+                          : ''
+                      "
+                    >
+                      {{
+                        getEspnTeamPoints(matchup.away, matchup.matchupPeriodId)
+                      }}
+                    </p>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
       </Card>
       <FinalPlacements
         :class="[finalPlacements.length === 0 ? 'hidden lg:block' : '']"
@@ -651,7 +1034,10 @@ const numberOfLoserRounds = computed(() => {
     <div class="flex flex-wrap lg:flex-nowrap">
       <Card class="block w-full p-4 overflow-x-auto lg:mr-4 lg:w-3/4">
         <p class="text-3xl font-bold">Loser's Bracket</p>
-        <div class="flex flex-nowrap">
+        <div
+          v-if="store.leagueInfo[store.currentLeagueIndex]?.platform !== 'espn'"
+          class="flex flex-nowrap"
+        >
           <div v-for="index in numberOfLoserRounds">
             <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ index }}</p>
             <Separator class="h-px my-6" />
@@ -925,6 +1311,126 @@ const numberOfLoserRounds = computed(() => {
                   </div>
                 </div>
               </Card>
+            </div>
+          </div>
+        </div>
+        <div v-else class="flex flex-nowrap">
+          <div v-for="round in espnLoserRounds" :key="round.matchupPeriodId">
+            <p class="mt-2 -mb-2 text-lg font-semibold">Round {{ round.round }}</p>
+            <p class="text-sm text-muted-foreground">
+              Week {{ round.matchupPeriodId }}
+            </p>
+            <Separator class="h-px my-6" />
+            <div v-for="section in round.sections" :key="section.title" class="mb-6">
+              <div
+                v-for="matchup in section.matchups"
+                :key="matchup.id"
+                class="mb-4"
+              >
+                <Card class="block p-4 my-2 mr-4 custom-card-width bg-secondary">
+                  <div
+                    v-if="
+                      matchup.home?.teamId && matchRosterId(matchup.home.teamId)
+                    "
+                    class="flex justify-between mb-2"
+                  >
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.home.teamId).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.home.teamId).avatarImg"
+                        @error="handleImageError"
+                      />
+                      <svg
+                        v-else
+                        class="w-8 h-8"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                        />
+                      </svg>
+                      <div class="-mt-0.5">
+                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.home.teamId).username
+                              : matchRosterId(matchup.home.teamId).name
+                          }}
+                        </p>
+                        <p class="ml-2 text-xs text-muted-foreground">
+                          ({{ getRecord(matchup.home.teamId) }})
+                        </p>
+                      </div>
+                    </div>
+                    <p
+                      class="mt-0.5 mr-1 font-semibold"
+                      :class="
+                        getEspnLoserHighlightClass(matchup, matchup.home.teamId)
+                      "
+                    >
+                      {{
+                        getEspnTeamPoints(matchup.home, matchup.matchupPeriodId)
+                      }}
+                    </p>
+                  </div>
+                  <Separator class="h-px my-2" />
+                  <div
+                    v-if="
+                      matchup.away?.teamId && matchRosterId(matchup.away.teamId)
+                    "
+                    class="flex justify-between"
+                  >
+                    <div class="flex">
+                      <img
+                        v-if="matchRosterId(matchup.away.teamId).avatarImg"
+                        alt="User avatar"
+                        class="w-8 h-8 rounded-full"
+                        :src="matchRosterId(matchup.away.teamId).avatarImg"
+                        @error="handleImageError"
+                      />
+                      <svg
+                        v-else
+                        class="w-8 h-8"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
+                        />
+                      </svg>
+                      <div class="-mt-0.5">
+                        <p class="mx-2 truncate max-w-20 xl:max-w-32">
+                          {{
+                            store.showUsernames
+                              ? matchRosterId(matchup.away.teamId).username
+                              : matchRosterId(matchup.away.teamId).name
+                          }}
+                        </p>
+                        <p class="ml-2 text-xs text-muted-foreground">
+                          ({{ getRecord(matchup.away.teamId) }})
+                        </p>
+                      </div>
+                    </div>
+                    <p
+                      class="mt-0.5 mr-1 font-semibold"
+                      :class="
+                        getEspnLoserHighlightClass(matchup, matchup.away.teamId)
+                      "
+                    >
+                      {{
+                        getEspnTeamPoints(matchup.away, matchup.matchupPeriodId)
+                      }}
+                    </p>
+                  </div>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
