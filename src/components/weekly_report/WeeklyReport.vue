@@ -1051,8 +1051,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     class="my-2.5 report-content"
                   ></div>
                   <p class="text-xs text-muted-foreground">
-                    Generated using GPT-5.2. Information provided may not always
-                    be accurate.
+                    Generated using GPT-5.4-mini. Information provided may not
+                    always be accurate.
                   </p>
                 </div>
                 <div
@@ -1137,8 +1137,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
                 </div>
                 <div v-else>
                   <p class="max-w-3xl">
-                    Premium weekly reports include deeper analysis, a newer AI
-                    model, customizable commentary styles, and a podcast-style
+                    Premium weekly reports include deeper analysis, more league
+                    context, customizable commentary styles, and a podcast-style
                     audio version. Available with an account and
                     <router-link
                       :to="{ path: '/account', query: $route.query }"
@@ -1176,8 +1176,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   class="mb-3 report-content"
                 ></div>
                 <p class="text-xs text-muted-foreground">
-                  Generated using GPT-5.1. Information provided may not always
-                  be accurate.
+                  Generated using GPT-5.4-mini. Information provided may not
+                  always be accurate.
                 </p>
                 <p class="text-xs text-muted-foreground">
                   If you enjoy these weekly reports please consider
