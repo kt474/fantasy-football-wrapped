@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import LeagueInputForm from "@/components/shared/LeagueInputForm.vue";
 import { useLeagueInput } from "@/composables/useLeagueInput";
 import { useStore } from "@/store/store";
 import Card from "../ui/card/Card.vue";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 const { inputType, seasonYear, leagueIdInput, onSubmit } = useLeagueInput();
 const store = useStore();
 const isDark = computed(() => store.darkMode);
+
+const activeTab = ref("Sleeper");
 </script>
 
 <template>
@@ -82,12 +86,32 @@ const isDark = computed(() => store.darkMode);
                   league ID or username.
                 </p>
               </div>
-              <LeagueInputForm
-                v-model:inputType="inputType"
-                v-model:seasonYear="seasonYear"
-                v-model:leagueIdInput="leagueIdInput"
-                @submit="onSubmit"
-              />
+              <Tabs
+                default-value="Sleeper"
+                v-model:value="activeTab"
+                class="mb-2"
+              >
+                <TabsList>
+                  <TabsTrigger value="Sleeper"> Sleeper </TabsTrigger>
+                  <TabsTrigger value="Espn"> ESPN </TabsTrigger>
+                </TabsList>
+                <TabsContent value="Sleeper">
+                  <LeagueInputForm
+                    v-model:inputType="inputType"
+                    v-model:seasonYear="seasonYear"
+                    v-model:leagueIdInput="leagueIdInput"
+                    @submit="onSubmit"
+                  />
+                </TabsContent>
+                <TabsContent value="Espn">
+                  <LeagueInputForm
+                    v-model:inputType="inputType"
+                    v-model:seasonYear="seasonYear"
+                    v-model:leagueIdInput="leagueIdInput"
+                    @submit="onSubmit"
+                  />
+                </TabsContent>
+              </Tabs>
             </Card>
           </div>
 
