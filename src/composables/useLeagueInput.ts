@@ -3,11 +3,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useStore } from "@/store/store";
 import type { LeagueInfoType } from "@/types/types";
 import type { LeagueOriginal } from "@/types/apiTypes";
-import {
-  getData,
-  inputLeague,
-  inputUsername,
-} from "@/api/api";
+import { getData, inputLeague, inputUsername } from "@/api/api";
 import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
 
 export const SEASON_YEAR_OPTIONS = [
@@ -17,6 +13,8 @@ export const SEASON_YEAR_OPTIONS = [
   "2023",
   "2022",
   "2021",
+  "2020",
+  "2019",
 ];
 
 export const useLeagueInput = () => {
@@ -43,7 +41,10 @@ export const useLeagueInput = () => {
   };
 
   const updateURL = async (leagueID: string) => {
-    await router.replace({ path: "/", query: { ...route.query, leagueId: leagueID } });
+    await router.replace({
+      path: "/",
+      query: { ...route.query, leagueId: leagueID },
+    });
   };
 
   const clearError = () => {

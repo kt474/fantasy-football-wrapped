@@ -92,22 +92,34 @@ const activeTab = ref("Sleeper");
                 class="mb-2"
               >
                 <TabsList>
-                  <TabsTrigger value="Sleeper"> Sleeper </TabsTrigger>
-                  <TabsTrigger value="Espn"> ESPN </TabsTrigger>
+                  <TabsTrigger value="Sleeper">
+                    <div class="flex gap-2 py-1">
+                      <img width="20" src="/sleeperlogo.jpeg" />
+                      <p>Sleeper</p>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="Espn">
+                    <div class="flex gap-2 py-1">
+                      <img width="20" src="/espnlogo.png" />
+                      <p>ESPN</p>
+                    </div>
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="Sleeper">
                   <LeagueInputForm
                     v-model:inputType="inputType"
                     v-model:seasonYear="seasonYear"
                     v-model:leagueIdInput="leagueIdInput"
+                    platform="sleeper"
                     @submit="onSubmit"
                   />
                 </TabsContent>
                 <TabsContent value="Espn">
                   <LeagueInputForm
-                    v-model:inputType="inputType"
+                    inputType="League ID"
                     v-model:seasonYear="seasonYear"
                     v-model:leagueIdInput="leagueIdInput"
+                    platform="espn"
                     @submit="onSubmit"
                   />
                 </TabsContent>

@@ -15,6 +15,7 @@ const props = defineProps<{
   inputType: string;
   seasonYear: string;
   leagueIdInput: string;
+  platform: string;
 }>();
 
 const emit = defineEmits<{
@@ -42,7 +43,7 @@ const leagueIdInputModel = computed({
 
 <template>
   <div class="flex flex-col gap-2 sm:flex-row">
-    <div class="flex flex-row gap-2">
+    <div v-if="props.platform === 'sleeper'" class="flex flex-row gap-2">
       <Select v-model="inputTypeModel">
         <SelectTrigger class="sm:w-32" aria-label="Input type">
           <SelectValue placeholder="League ID" />
@@ -53,6 +54,22 @@ const leagueIdInputModel = computed({
         </SelectContent>
       </Select>
       <Select v-if="inputTypeModel === 'Username'" v-model="seasonYearModel">
+        <SelectTrigger class="sm:w-24" aria-label="Season">
+          <SelectValue placeholder="2025" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="year in SEASON_YEAR_OPTIONS"
+            :key="year"
+            :value="year"
+          >
+            {{ year }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+    <div v-else-if="props.platform === 'espn'" class="flex flex-row gap-2">
+      <Select v-model="seasonYearModel">
         <SelectTrigger class="sm:w-24" aria-label="Season">
           <SelectValue placeholder="2025" />
         </SelectTrigger>
