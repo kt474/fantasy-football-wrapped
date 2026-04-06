@@ -7,7 +7,7 @@ import { useRoute } from "vue-router";
 import Separator from "@/components/ui/separator/Separator.vue";
 
 const route = useRoute();
-const leagueCount = ref(12159); // initial load current unique league count value 3/12/26
+const leagueCount = ref(12304); // initial load current unique league count value 3/30/26
 
 onMounted(async () => {
   const leagueId = route.query.leagueId;
@@ -60,7 +60,7 @@ watch(
               >Github</a
             >. To report a bug or request new features, please join our
             <a
-              aria-label="Link to github issues page"
+              aria-label="Discord link"
               class="font-medium text-primary hover:underline"
               href="https://discord.gg/sSVwNhyv7U"
               target="_blank"
