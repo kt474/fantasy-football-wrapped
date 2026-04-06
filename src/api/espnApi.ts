@@ -814,7 +814,7 @@ const getLeagueFormat = (draftSettings: any): "Redraft" | "Keeper" => {
   return (draftSettings?.keeperCount ?? 0) > 0 ? "Keeper" : "Redraft";
 };
 
-export const getLeagueInfoLike = async (
+export const getEspnLeagueInfo = async (
   season: string,
   leagueId: string
 ): Promise<LeagueInfoType | null> => {

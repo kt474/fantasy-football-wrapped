@@ -1,17 +1,25 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import LeagueInputForm from "@/components/shared/LeagueInputForm.vue";
-import { useLeagueInput } from "@/composables/useLeagueInput";
+import {
+  useLeagueInput,
+  type LeaguePlatform,
+} from "@/composables/useLeagueInput";
 import { useStore } from "@/store/store";
 import Card from "../ui/card/Card.vue";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const { inputType, seasonYear, leagueIdInput, onSubmit } = useLeagueInput();
 const store = useStore();
 const isDark = computed(() => store.darkMode);
 
-const activeTab = ref("Sleeper");
+const activeTab = ref<"Sleeper" | "Espn">("Sleeper");
+const platform = computed<LeaguePlatform>(() =>
+  activeTab.value === "Espn" ? "espn" : "sleeper"
+);
+
+const { inputType, seasonYear, leagueIdInput, onSubmit } =
+  useLeagueInput(platform);
 </script>
 
 <template>
@@ -86,11 +94,7 @@ const activeTab = ref("Sleeper");
                   league ID or username.
                 </p>
               </div>
-              <Tabs
-                default-value="Sleeper"
-                v-model:value="activeTab"
-                class="mb-2"
-              >
+              <Tabs default-value="Sleeper" v-model="activeTab" class="mb-2">
                 <TabsList>
                   <TabsTrigger value="Sleeper">
                     <div class="flex gap-2 py-1">

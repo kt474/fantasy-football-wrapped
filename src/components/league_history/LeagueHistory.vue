@@ -4,7 +4,7 @@ import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
 import { useStore } from "../../store/store.ts";
 import { getData, inputLeague } from "../../api/api.ts";
-import { getLeagueInfoLike } from "../../api/espnApi.ts";
+import { getEspnLeagueInfo } from "../../api/espnApi.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
@@ -87,7 +87,9 @@ const isLeagueInfoEntry = (entry: unknown): entry is LeagueInfoType =>
   "leagueId" in entry &&
   "season" in entry;
 
-const getPreviousLeagueEntries = (league: LeagueInfoType): PreviousLeagueEntry[] =>
+const getPreviousLeagueEntries = (
+  league: LeagueInfoType
+): PreviousLeagueEntry[] =>
   league.previousLeagues as unknown as PreviousLeagueEntry[];
 
 const replacePreviousLeagueEntries = (
@@ -266,13 +268,16 @@ const loadEspnPreviousLeagues = async (
     loadingYear.value = season;
 
     try {
-      const leagueData = await getLeagueInfoLike(season, rootLeague.leagueId);
+      const leagueData = await getEspnLeagueInfo(season, rootLeague.leagueId);
       if (leagueData) {
         resolvedLeagues.push(leagueData);
       }
       previousLeagues.value.push(season);
     } catch (error) {
-      console.error(`Failed to process ESPN league for season ${season}:`, error);
+      console.error(
+        `Failed to process ESPN league for season ${season}:`,
+        error
+      );
     }
   }
 
@@ -606,7 +611,6 @@ const worstManager = computed(() => {
       ).toFixed(1)
     : null;
 });
-
 </script>
 <template>
   <div class="my-4">

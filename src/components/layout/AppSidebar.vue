@@ -152,10 +152,6 @@ const data = {
           title: "Wrapped",
           icon: Gift,
         },
-        {
-          title: "ESPN",
-          icon: Snowflake,
-        },
       ],
     },
   ],
