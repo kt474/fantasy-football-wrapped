@@ -98,13 +98,13 @@ const { inputType, seasonYear, leagueIdInput, onSubmit } =
                 <TabsList>
                   <TabsTrigger value="Sleeper">
                     <div class="flex gap-2 py-1">
-                      <img width="20" src="/sleeperlogo.jpeg" />
+                      <img width="20" src="/sleeperlogo.jpeg" alt="Sleeper logo" />
                       <p>Sleeper</p>
                     </div>
                   </TabsTrigger>
                   <TabsTrigger value="Espn">
                     <div class="flex gap-2 py-1">
-                      <img width="20" src="/espnlogo.png" />
+                      <img width="20" src="/espnlogo.png" alt="ESPN logo" />
                       <p>ESPN</p>
                     </div>
                   </TabsTrigger>
