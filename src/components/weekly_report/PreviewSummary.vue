@@ -3,6 +3,8 @@ import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { generatePreview } from "../../api/api";
 import { TableDataType } from "../../types/types";
+import MarkdownIt from "markdown-it";
+import DOMPurify from "dompurify";
 import Button from "../ui/button/Button.vue";
 
 const preview = ref<string>("");
@@ -14,6 +16,16 @@ const getPreview = async () => {
   preview.value = response.text;
   loading.value = false;
 };
+
+const md = new MarkdownIt({
+  html: false,
+  linkify: true,
+  breaks: true,
+});
+
+const renderedPreview = computed(() => {
+  return DOMPurify.sanitize(md.render(preview.value));
+});
 
 interface PlayerType {
   name: string;
@@ -109,12 +121,12 @@ const promptData = computed(() => {
       Generate
     </Button>
     <div v-if="preview" class="mt-1">
-      <p>{{ preview }}</p>
+      <p v-html="renderedPreview"></p>
       <p
         v-if="preview !== 'Unable to generate preview. Please try again later.'"
         class="mt-1 text-xs text-muted-foreground"
       >
-        Generated using GPT-5-mini. Information provided may not always be
+        Generated using GPT-5.4-mini. Information provided may not always be
         accurate.
       </p>
     </div>

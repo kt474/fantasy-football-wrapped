@@ -841,7 +841,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
     </div>
   </div>
   <div v-else>
-    <p class="mb-96">Loading...</p>
+    <p class="h-screen">Loading...</p>
   </div>
 </template>
 <style scoped></style>
