@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useStore } from "../../store/store";
-import {
-  getPlayerNews,
-  getPlayersByIdsMap,
-} from "../../api/api";
+import { getPlayerNews, getPlayersByIdsMap } from "../../api/api";
 import {
   getStats,
   getSingleWeekProjection,
@@ -15,7 +12,11 @@ import difference from "lodash/difference";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/fakeLeague";
 import max from "lodash/max";
 import min from "lodash/min";
-import { Player, SingleWeekProjection, WeeklyStats } from "../../types/apiTypes";
+import {
+  Player,
+  SingleWeekProjection,
+  WeeklyStats,
+} from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 import {
   Select,
@@ -107,8 +108,9 @@ const currentManager = ref(managers.value[0]);
 
 const currentRoster = computed(() => {
   return (
-    playerNames.value.find((team) => team.id === currentManager.value.rosterId) ??
-    null
+    playerNames.value.find(
+      (team) => team.id === currentManager.value.rosterId
+    ) ?? null
   );
 });
 
@@ -162,14 +164,13 @@ const getRosterRankings = async () => {
   );
 
   function groupByRosterId(arr: Array<WeeklyStats & { rosterId: number }>) {
-    return arr.reduce<Record<number, Array<WeeklyStats & { rosterId: number }>>>(
-      (acc, item) => {
+    return arr.reduce<
+      Record<number, Array<WeeklyStats & { rosterId: number }>>
+    >((acc, item) => {
       if (!acc[item.rosterId]) acc[item.rosterId] = [];
       acc[item.rosterId].push(item);
       return acc;
-      },
-      {}
-    );
+    }, {});
   }
 
   store.addRosterRankings(currentLeague.leagueId, groupByRosterId(filtered));
@@ -223,7 +224,9 @@ const fetchPlayerNames = async () => {
                 stats: {
                   points: stats.points as (number | string)[],
                   ranks: stats.ranks as (number | string)[],
-                  stats: stats.stats as Array<Record<string, number | string | undefined>>,
+                  stats: stats.stats as Array<
+                    Record<string, number | string | undefined>
+                  >,
                 },
               };
             })
@@ -260,10 +263,12 @@ const formatDate = (dateStr: string) => {
 const getValueColor = (value: number | string) => {
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue)) return "";
-  if (numericValue <= 12) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
+  if (numericValue <= 12)
+    return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
   if (numericValue <= 24) return `bg-green-400 dark:bg-green-600 text-gray-50`;
   if (numericValue <= 36) return "bg-yellow-300 dark-bg-yellow-600 text-black";
-  if (numericValue <= 48) return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
+  if (numericValue <= 48)
+    return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
   return `bg-red-400 dark:bg-red-600 text-gray-50`;
 };
 
@@ -611,8 +616,14 @@ watch(
                           >{{
                             player.stats?.stats[index]?.["team_snaps"]
                               ? (
-                                  (Number(player.stats?.stats[index]?.["snaps"] ?? 0) /
-                                    Number(player.stats?.stats[index]?.["team_snaps"] ?? 1)) *
+                                  (Number(
+                                    player.stats?.stats[index]?.["snaps"] ?? 0
+                                  ) /
+                                    Number(
+                                      player.stats?.stats[index]?.[
+                                        "team_snaps"
+                                      ] ?? 1
+                                    )) *
                                   100
                                 ).toFixed(0)
                               : 0
@@ -655,8 +666,14 @@ watch(
                           >{{
                             player.stats?.stats[index]?.["team_snaps"]
                               ? (
-                                  (Number(player.stats?.stats[index]?.["snaps"] ?? 0) /
-                                    Number(player.stats?.stats[index]?.["team_snaps"] ?? 1)) *
+                                  (Number(
+                                    player.stats?.stats[index]?.["snaps"] ?? 0
+                                  ) /
+                                    Number(
+                                      player.stats?.stats[index]?.[
+                                        "team_snaps"
+                                      ] ?? 1
+                                    )) *
                                   100
                                 ).toFixed(0)
                               : 0
@@ -811,7 +828,7 @@ watch(
         </div>
       </div>
     </div>
-    <div v-else class="mb-96">Loading...</div>
+    <div v-else class="h-screen">Loading...</div>
   </Card>
 </template>
 <style scoped>

@@ -64,12 +64,14 @@ const getDraftOrder = async () => {
   const draftOrderData = Object.values(metadata.slot_to_roster_id ?? {}).filter(
     (item) => item != null
   );
-  draftOrder.value = draftOrderData.map((rosterId) => {
-    const rosterObj = currentLeague.rosters.find(
-      (roster) => roster.rosterId === rosterId
-    );
-    return rosterObj ? getTeamName(rosterObj.id) : undefined;
-  }).filter((user): user is DraftOrderUser => Boolean(user));
+  draftOrder.value = draftOrderData
+    .map((rosterId) => {
+      const rosterObj = currentLeague.rosters.find(
+        (roster) => roster.rosterId === rosterId
+      );
+      return rosterObj ? getTeamName(rosterObj.id) : undefined;
+    })
+    .filter((user): user is DraftOrderUser => Boolean(user));
 
   roundReversal.value = metadata.settings?.reversal_round ?? 0;
   draftType.value = metadata.type ?? "snake";
@@ -180,11 +182,11 @@ const getData = async () => {
   if (draftType.value === "snake") {
     const roundGroups = draftPicks.reduce<Record<number, DraftPick[]>>(
       (acc, pick) => {
-      if (!acc[pick.round]) {
-        acc[pick.round] = [];
-      }
-      acc[pick.round].push(pick);
-      return acc;
+        if (!acc[pick.round]) {
+          acc[pick.round] = [];
+        }
+        acc[pick.round].push(pick);
+        return acc;
       },
       {}
     );
@@ -477,7 +479,7 @@ const getValueColor = (value: number) => {
             Picks with a red top border are keepers.
           </p>
         </div>
-        <div v-else role="status" class="max-w-sm mb-32 animate-pulse">
+        <div v-else role="status" class="h-screen max-w-sm animate-pulse">
           <p class="mb-2">Loading draft data...</p>
           <div
             class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"

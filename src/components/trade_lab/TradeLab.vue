@@ -664,7 +664,7 @@ onBeforeUnmount(() => {
       Mobile: tap players to add/remove from each package.
     </p>
 
-    <div v-if="loading" class="py-2 mb-96">
+    <div v-if="loading" class="h-screen py-2">
       Loading players and projections...
     </div>
     <div v-else>
