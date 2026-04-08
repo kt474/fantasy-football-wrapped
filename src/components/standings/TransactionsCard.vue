@@ -4,6 +4,7 @@ import maxBy from "lodash/maxBy";
 import toPairs from "lodash/toPairs";
 import { UserType, RosterType } from "../../types/types";
 import { useStore } from "../../store/store";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 
@@ -38,6 +39,7 @@ const mostTransactionsUser = computed<UserType | null>(() => {
             "
             class="w-6 h-6 rounded-full"
             :src="mostTransactionsUser.avatarImg"
+            @error="handleImageError"
           />
           <svg
             v-else

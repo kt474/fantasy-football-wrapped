@@ -10,6 +10,7 @@ import Separator from "../ui/separator/Separator.vue";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -127,6 +128,7 @@ watch(
             v-if="archetype.avatarImg"
             :src="archetype.avatarImg"
             :alt="`${archetype.displayName} avatar`"
+            @error="handleImageError"
             class="w-10 h-10 rounded-full"
           />
           <div>

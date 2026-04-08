@@ -5,6 +5,7 @@ import {
   generateSummary,
   generateTrends,
   getLeagueCount,
+  getPlayerIdsByNameTeamMap,
   getPlayerNews,
 } from "../src/api/api.ts";
 
@@ -51,6 +52,16 @@ describe("API fallback behavior", () => {
     );
 
     const result = await getPlayerNews([]);
+
+    expect(result).toEqual([]);
+  });
+
+  test("getPlayerIdsByNameTeamMap returns empty list on non-ok response", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockFetchResponse(500, {})));
+
+    const result = await getPlayerIdsByNameTeamMap([
+      { name: "Patrick Mahomes", team: "KC" },
+    ]);
 
     expect(result).toEqual([]);
   });

@@ -18,6 +18,7 @@ import {
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const data = ref<DraftPick[]>([]);
@@ -126,8 +127,32 @@ onMounted(async () => {
     loading.value = false;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
     data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks ?? [];
-    draftOrder.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"] ?? [];
+    // espn draft data is already loaded at initialization
+    if (store.leagueInfo[store.currentLeagueIndex]?.platform !== "espn") {
+      draftOrder.value =
+        store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"] ??
+        [];
+    } else {
+      // get draft order from just slicing the draft picks array.
+      const rosterPickOrder = data.value
+        .slice(0, 10)
+        .map((pick) => pick.rosterId);
+
+      const rosterToUser = new Map(
+        store.leagueInfo[store.currentLeagueIndex].rosters.map((r) => [
+          r.rosterId,
+          r.id,
+        ])
+      );
+      const userMap = new Map(
+        store.leagueInfo[store.currentLeagueIndex].users.map((u) => [u.id, u])
+      );
+      const orderedUsers = rosterPickOrder.flatMap((rosterId) => {
+        const userId = rosterToUser.get(rosterId);
+        return userId && userMap.has(userId) ? [getTeamName(userId)] : [];
+      });
+      draftOrder.value = orderedUsers;
+    }
     roundReversal.value =
       store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
         "roundReversal"
@@ -297,6 +322,7 @@ const getValueColor = (value: number) => {
   if (value >= -2.5) return `bg-rose-400 dark:bg-rose-700`;
   return `bg-red-400 dark:bg-red-600`;
 };
+
 </script>
 <template>
   <Card class="w-full p-4 md:p-6">
@@ -377,6 +403,7 @@ const getValueColor = (value: number) => {
                 v-if="team && team.avatarImg"
                 class="w-8 h-8 rounded-full"
                 :src="team.avatarImg"
+                @error="handleImageError"
               />
               <svg
                 v-else

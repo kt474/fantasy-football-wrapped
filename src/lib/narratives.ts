@@ -142,7 +142,7 @@ const countTransactionsForManager = (
     return (
       transaction.creator === userId ||
       transaction.roster_ids.includes(rosterId) ||
-      transaction.consenter_ids.includes(rosterId)
+      transaction?.consenter_ids?.includes(rosterId)
     );
   }).length;
 };
@@ -246,7 +246,10 @@ const buildSeasonRecords = async (
         return null;
       }
 
-      const draftSummary = getDraftSummaryForManager(season.draftPicks, user.id);
+      const draftSummary = getDraftSummaryForManager(
+        season.draftPicks,
+        user.id
+      );
 
       return {
         userId: user.id,

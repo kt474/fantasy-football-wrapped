@@ -130,6 +130,82 @@ export const getPlayersByIdsMap = async (
   }
 };
 
+export interface PlayerNameTeamLookup {
+  name: string;
+  team: string;
+}
+
+interface PlayerIdLookupResponse {
+  name: string;
+  team?: string;
+  player_id: string | null;
+}
+
+interface PlayerIdLookupListResponse {
+  players: PlayerIdLookupResponse[];
+}
+
+const getPlayerLookupKey = ({ name, team }: PlayerNameTeamLookup): string =>
+  `${name.trim().toLowerCase()}::${team.trim().toUpperCase()}`;
+
+export const getPlayerIdLookupMap = async (
+  players: PlayerNameTeamLookup[]
+): Promise<Map<string, string>> => {
+  if (players.length === 0) {
+    return new Map();
+  }
+
+  const uniquePlayers = Array.from(
+    new Map(players.map((player) => [getPlayerLookupKey(player), player])).values()
+  );
+
+  try {
+    const endpoint = import.meta.env.VITE_PLAYER_ID_LOOKUP;
+    const url = new URL(endpoint);
+
+    uniquePlayers.forEach(({ name, team }) => {
+      url.searchParams.append("name", name);
+      url.searchParams.append("team", team);
+    });
+
+    const response = await fetch(url.toString());
+    assertOk(response, "Player ID lookup request");
+
+    const result = await parseJson<
+      PlayerIdLookupResponse | PlayerIdLookupListResponse
+    >(response, "Player ID lookup");
+    const matches = "players" in result ? result.players : [result];
+    const playerLookupMap = new Map<string, string>();
+
+    uniquePlayers.forEach((player, index) => {
+      const playerId = matches[index]?.player_id;
+
+      if (playerId) {
+        playerLookupMap.set(getPlayerLookupKey(player), playerId);
+      }
+    });
+
+    return playerLookupMap;
+  } catch (error) {
+    console.error("Error fetching player IDs by name/team:", error);
+    return new Map();
+  }
+};
+
+export const getPlayerIdsByNameTeamMap = async (
+  players: PlayerNameTeamLookup[]
+): Promise<(string | null)[]> => {
+  if (players.length === 0) {
+    return [];
+  }
+
+  const playerLookupMap = await getPlayerIdLookupMap(players);
+
+  return players.map(
+    (player) => playerLookupMap.get(getPlayerLookupKey(player)) ?? null
+  );
+};
+
 export const getLeagueCount = async (): Promise<LeagueCountResponse> => {
   try {
     const response = await fetch(import.meta.env.VITE_LEAGUE_COUNT);
