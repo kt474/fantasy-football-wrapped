@@ -861,7 +861,7 @@ onMounted(async () => {
                 Monthly
               </p>
               <p class="mt-2 text-5xl font-medium leading-none">
-                $4
+                $5
                 <span class="-ml-1 text-base font-normal text-muted-foreground">
                   /month
                 </span>
