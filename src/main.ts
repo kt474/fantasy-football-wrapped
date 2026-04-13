@@ -16,52 +16,71 @@ const Terms = () => import("./views/Terms.vue");
 const Account = () => import("./views/Account.vue");
 const NotFound = () => import("./views/404.vue");
 
+const siteUrl = "https://ffwrapped.com";
+const defaultMeta = {
+  title: "Fantasy Football Wrapped",
+  description:
+    "Analyze your fantasy football league with standings, power rankings, playoff odds, weekly reports, roster insights, and league history.",
+};
+
 const routes = [
-  { path: "/", component: Home },
+  {
+    path: "/",
+    component: Home,
+    meta: defaultMeta,
+  },
   {
     path: "/about",
     component: About,
     meta: {
-      title: "About",
-      description: "Site description",
+      title: "About | ffwrapped",
+      description:
+        "Learn about ffwrapped, a tool for analyzing fantasy football leagues.",
     },
   },
   {
     path: "/changelog",
     component: ChangelogPage,
     meta: {
-      title: "Changelog",
-      description: "A log of major updates",
+      title: "Changelog | ffwrapped",
+      description: "See the latest ffwrapped updates, features, and bug fixes",
     },
   },
   {
     path: "/privacy",
     component: PrivacyPolicy,
     meta: {
-      title: "Privacy Policy",
-      description: "Privacy policy.",
+      title: "Privacy Policy | ffwrapped",
+      description:
+        "Read the ffwrapped privacy policy and learn how league, account, and billing data are handled.",
     },
   },
   {
     path: "/terms",
     component: Terms,
     meta: {
-      title: "Terms",
-      description: "Terms of service.",
+      title: "Terms of Service | ffwrapped",
+      description:
+        "Read the ffwrapped terms of service for using the fantasy football league analysis app.",
     },
   },
   {
     path: "/account",
     component: Account,
     meta: {
-      title: "Account",
-      description: "Account page",
+      title: "Account | ffwrapped",
+      description: "Manage your ffwrapped account and subscription settings.",
     },
   },
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
     component: NotFound,
+    meta: {
+      title: "Page Not Found | ffwrapped",
+      description:
+        "The page you are looking for could not be found on ffwrapped.",
+    },
   },
 ];
 
@@ -91,6 +110,31 @@ router.beforeEach(async (to) => {
     return { path: "/" };
   }
   return true;
+});
+
+router.afterEach((to) => {
+  const title = String(to.meta.title ?? defaultMeta.title);
+  const description = String(to.meta.description ?? defaultMeta.description);
+  const canonicalUrl = `${siteUrl}${to.path === "/" ? "/" : to.path}`;
+
+  document.title = title;
+
+  const setMetaContent = (selector: string, content: string) => {
+    document.querySelector(selector)?.setAttribute("content", content);
+  };
+
+  setMetaContent('meta[name="description"]', description);
+  setMetaContent('meta[itemprop="name"]', title);
+  setMetaContent('meta[itemprop="description"]', description);
+  setMetaContent('meta[property="og:title"]', title);
+  setMetaContent('meta[property="og:description"]', description);
+  setMetaContent('meta[property="og:url"]', canonicalUrl);
+  setMetaContent('meta[name="twitter:title"]', title);
+  setMetaContent('meta[name="twitter:description"]', description);
+
+  document
+    .querySelector('link[rel="canonical"]')
+    ?.setAttribute("href", canonicalUrl);
 });
 
 app.component("apexchart", ApexChart);
