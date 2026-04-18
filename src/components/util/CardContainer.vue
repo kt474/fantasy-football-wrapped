@@ -46,7 +46,7 @@ const showAddLeagueButton = computed(() => {
         </Dialog>
         <p
           v-if="route.path === '/'"
-          class="absolute inset-x-0 mr-4 font-medium text-right pointer-events-none sm:mr-0 sm:text-center whitespace-nowrap"
+          class="absolute inset-x-0 font-medium text-right pointer-events-none sm:ml-10 sm:text-center whitespace-nowrap"
         >
           Demo League
         </p>
