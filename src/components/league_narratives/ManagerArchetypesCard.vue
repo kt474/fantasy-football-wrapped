@@ -7,12 +7,10 @@ import { toast } from "vue-sonner";
 import { useStore } from "@/store/store";
 import { LeagueInfoType } from "@/types/types";
 import Separator from "../ui/separator/Separator.vue";
-import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
 
 const store = useStore();
-const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
 const props = defineProps<{
   archetypes: ManagerArchetype[];
@@ -66,10 +64,9 @@ const storedManagerProfiles = computed(
 
 const canGenerateArchetypes = computed(
   () =>
-    authStore.isAuthenticated &&
-    subscriptionStore.isPremium &&
     props.payload.managers.length > 0 &&
-    !isLoading.value
+    !isLoading.value &&
+    Object.keys(blurbsByUserId.value).length == 0
 );
 
 const generateButtonLabel = computed(() => {
@@ -95,22 +92,11 @@ watch(
     <div class="flex flex-wrap justify-between gap-4 sm:flex-nowrap">
       <div>
         <p class="text-3xl font-bold leading-none">Manager Profiles</p>
-        <p class="mt-4 sm:w-2/3 text-muted-foreground">
-          Each manager’s long-term record and historic trends.
-          <span v-if="!subscriptionStore.isPremium">
-            A
-            <router-link
-              :to="{ path: '/account', query: $route.query }"
-              class="font-medium cursor-pointer hover:underline"
-              @click="store.currentTab = ''"
-            >
-              Premium subscription</router-link
-            >
-            unlocks custom profile descriptions that highlight their tendencies,
-            strengths, and league identity.
-          </span>
+        <p class="mt-4 sm:max-w-2xl text-muted-foreground">
+          Long-term records, historic trends, and custom manager profiles for
+          your league. Profiles highlight manager tendencies, strengths, and
+          overall identity.
         </p>
-        <p class="text-muted-foreground"></p>
       </div>
       <Button :disabled="!canGenerateArchetypes" @click="getManagerArchetypes">
         {{ generateButtonLabel }}
@@ -139,9 +125,25 @@ watch(
         <Separator class="mt-2" />
         <p
           v-if="blurbsByUserId[archetype.userId]"
-          class="mt-2 text-sm leading-relaxed text-muted-foreground"
+          class="mt-2 text-sm leading-relaxed"
         >
           {{ blurbsByUserId[archetype.userId] }}
+        </p>
+        <p
+          class="mt-2 text-xs leading-relaxed text-muted-foreground"
+          v-if="
+            !subscriptionStore.isPremium && blurbsByUserId[archetype.userId]
+          "
+        >
+          A
+          <router-link
+            :to="{ path: '/account', query: $route.query }"
+            class="font-medium cursor-pointer hover:underline"
+            @click="store.currentTab = ''"
+          >
+            Premium subscription</router-link
+          >
+          unlocks all manager descriptions.
         </p>
         <p
           class="my-4 text-sm leading-relaxed text-muted-foreground"
@@ -149,7 +151,6 @@ watch(
         >
           Loading manager description...
         </p>
-
         <div
           class="grid gap-3 mt-4 text-sm sm:grid-cols-2 text-muted-foreground"
         >

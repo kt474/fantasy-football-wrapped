@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "4/19/26",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "Users can now generate one manager profile without a premium subscription.",
+        ],
+      },
+    ],
+  },
+  {
     date: "3/21/26",
     content: [
       {

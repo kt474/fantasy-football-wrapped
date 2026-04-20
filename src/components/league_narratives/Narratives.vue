@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store.ts";
+import { useAuthStore } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription.ts";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
 import LeagueHistory from "../league_history/LeagueHistory.vue";
 import { LeagueInfoType, TableDataType } from "@/types/types.ts";
@@ -13,6 +15,8 @@ import type { ManagerBlurbsPayload } from "@/api/api";
 import { getDraftMetadata, getDraftPicks } from "@/api/sleeperApi";
 
 const store = useStore();
+const authStore = useAuthStore();
+const subscriptionStore = useSubscriptionStore();
 
 const props = defineProps<{
   tableData: TableDataType[];
@@ -170,48 +174,56 @@ const relativeRanks = computed(() => {
   };
 });
 
-const managerPayload = computed<ManagerBlurbsPayload>(() => ({
-  league: {
-    leagueId: store.leagueInfo[store.currentLeagueIndex]?.leagueId ?? "",
-    leagueName: store.leagueInfo[store.currentLeagueIndex]?.name ?? "",
-    seasonsAnalyzed: seasons.value.length,
-    totalManagers: narratives.value.managerArchetypes.length,
-  },
-  managers: narratives.value.managerArchetypes.map((manager) => ({
-    userId: manager.userId,
-    name: manager.displayName,
-    seasons: manager.seasons,
-    titles: manager.titles,
-    record:
-      manager.totalTies === 0
-        ? `${manager.totalWins}-${manager.totalLosses}`
-        : `${manager.totalWins}-${manager.totalLosses}-${manager.totalTies}`,
-    winRate: manager.winRate,
-    totalPointsScored: manager.totalPointsFor,
-    totalPointsAgainst: manager.totalPointsAgainst,
-    totalTrades: manager.totalTrades,
-    tradeValueGained: Math.round(manager.tradeValueGained),
-    totalWaivers: manager.totalWaivers,
-    averageEfficiency: manager.averageEfficiency,
-    averageDraftPickRank:
-      manager.averageDraftPickRank === null
-        ? null
-        : Number(manager.averageDraftPickRank.toFixed(2)),
-    playoffAppearances: manager.playoffAppearances,
-    relative: {
-      titlesRank: relativeRanks.value.titles[manager.userId],
-      winRateRank: relativeRanks.value.winRate[manager.userId],
-      pointsScoredRank: relativeRanks.value.pointsFor[manager.userId],
-      pointsAgainstRank: relativeRanks.value.pointsAgainst[manager.userId],
-      tradesRank: relativeRanks.value.trades[manager.userId],
-      waiversRank: relativeRanks.value.waivers[manager.userId],
-      efficiencyRank: relativeRanks.value.efficiency[manager.userId],
-      tradeValueGainedRank:
-        relativeRanks.value.tradeValueGained[manager.userId],
-      draftAbilityRank: relativeRanks.value.draftPickRank[manager.userId],
+const managerPayload = computed<ManagerBlurbsPayload>(() => {
+  const hasPremiumAccess =
+    authStore.isAuthenticated && subscriptionStore.isPremium;
+  const managers = hasPremiumAccess
+    ? narratives.value.managerArchetypes
+    : narratives.value.managerArchetypes.slice(0, 1);
+
+  return {
+    league: {
+      leagueId: store.leagueInfo[store.currentLeagueIndex]?.leagueId ?? "",
+      leagueName: store.leagueInfo[store.currentLeagueIndex]?.name ?? "",
+      seasonsAnalyzed: seasons.value.length,
+      totalManagers: narratives.value.managerArchetypes.length,
     },
-  })),
-}));
+    managers: managers.map((manager) => ({
+      userId: manager.userId,
+      name: manager.displayName,
+      seasons: manager.seasons,
+      titles: manager.titles,
+      record:
+        manager.totalTies === 0
+          ? `${manager.totalWins}-${manager.totalLosses}`
+          : `${manager.totalWins}-${manager.totalLosses}-${manager.totalTies}`,
+      winRate: manager.winRate,
+      totalPointsScored: manager.totalPointsFor,
+      totalPointsAgainst: manager.totalPointsAgainst,
+      totalTrades: manager.totalTrades,
+      tradeValueGained: Math.round(manager.tradeValueGained),
+      totalWaivers: manager.totalWaivers,
+      averageEfficiency: manager.averageEfficiency,
+      averageDraftPickRank:
+        manager.averageDraftPickRank === null
+          ? null
+          : Number(manager.averageDraftPickRank.toFixed(2)),
+      playoffAppearances: manager.playoffAppearances,
+      relative: {
+        titlesRank: relativeRanks.value.titles[manager.userId],
+        winRateRank: relativeRanks.value.winRate[manager.userId],
+        pointsScoredRank: relativeRanks.value.pointsFor[manager.userId],
+        pointsAgainstRank: relativeRanks.value.pointsAgainst[manager.userId],
+        tradesRank: relativeRanks.value.trades[manager.userId],
+        waiversRank: relativeRanks.value.waivers[manager.userId],
+        efficiencyRank: relativeRanks.value.efficiency[manager.userId],
+        tradeValueGainedRank:
+          relativeRanks.value.tradeValueGained[manager.userId],
+        draftAbilityRank: relativeRanks.value.draftPickRank[manager.userId],
+      },
+    })),
+  };
+});
 </script>
 <template>
   <div class="my-4 space-y-4">
