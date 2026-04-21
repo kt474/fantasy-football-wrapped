@@ -2956,3 +2956,29 @@ export const fakeStartSit = [
     ],
   },
 ];
+
+export const fakeManagerProfiles = [
+  {
+    userId: "6",
+    displayName: "Saquondo",
+    avatarImg: "../avatars/avatar6.svg",
+    seasons: 3,
+    titles: 0,
+    totalWins: 27,
+    totalLosses: 15,
+    totalTies: 0,
+    totalPointsFor: 4938,
+    totalPointsAgainst: 5847,
+    totalTrades: 1,
+    tradeValueGained: -9.200000000000003,
+    totalWaivers: 183,
+    averageEfficiency: 0.916,
+    playoffAppearances: 2,
+    averagePointsPerSeason: 1646,
+    averageTradesPerSeason: 0.25,
+    averageWaiversPerSeason: 45.75,
+    winRate: 0.6428,
+    weeklyScoreStdDev: 18.958548818573867,
+    averageDraftPickRank: null,
+  },
+];

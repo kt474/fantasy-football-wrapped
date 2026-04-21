@@ -13,6 +13,7 @@ import {
 } from "@/lib/narratives";
 import type { ManagerBlurbsPayload } from "@/api/api";
 import { getDraftMetadata, getDraftPicks } from "@/api/sleeperApi";
+import { fakeManagerProfiles } from "@/api/fakeLeague.ts";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -240,7 +241,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
     />
     <ManagerArchetypesCard
       v-else-if="store.leagueInfo.length === 0"
-      :archetypes="[]"
+      :archetypes="fakeManagerProfiles"
       :payload="managerPayload"
     />
     <div v-else>Loading all seasons...</div>

@@ -5,16 +5,16 @@ Detailed analysis and insights for Sleeper fantasy football leagues.
 Current features:
 
 - Comprehensive standings and AI generated league news/current trends
-- Power rankings and roster rankings
-- Pre-season and in season projections
-- Expected wins, strength of schedule (measuring luck), schedule analysis
+- Power rankings, roster rankings, and projections
+- Expected wins, strength of schedule (measuring luck), and schedule analysis
 - Roster management stats, trade rankings, and waiver wire moves
-- Playoff projections
+- Playoff odds
 - AI generated weekly reports, summary of matchups and top/bottom performers from each week
 - Weekly matchup previews
 - Start/sit stats with latest player news
 - Draft grades and recap
-- Schedule simulator, trade calculator, and manager profiles
+- Schedule simulator, and trade calculator
+- Manager profiles highlighting tendencies, strengths, and overall identity
 - League history stats
 - Yearly spotify wrapped style presentation
 
