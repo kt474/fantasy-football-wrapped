@@ -65,22 +65,25 @@ const usesMedianScoring = computed(() => {
 });
 
 const weeklyMedians = computed(() => {
-  return Array.from({ length: displayedWeekCount.value }, (_, week) => {
-    const weeklyScores = props.tableData
-      .map((team) => team.points[week])
-      .filter((points): points is number => Number.isFinite(points));
+  if (props.tableData[0].points) {
+    return Array.from({ length: displayedWeekCount.value }, (_, week) => {
+      const weeklyScores = props.tableData
+        .map((team) => team.points[week])
+        .filter((points): points is number => Number.isFinite(points));
 
-    if (weeklyScores.length === 0) return null;
+      if (weeklyScores.length === 0) return null;
 
-    const sortedScores = [...weeklyScores].sort((a, b) => a - b);
-    const midpoint = Math.floor(sortedScores.length / 2);
+      const sortedScores = [...weeklyScores].sort((a, b) => a - b);
+      const midpoint = Math.floor(sortedScores.length / 2);
 
-    if (sortedScores.length % 2 === 0) {
-      return (sortedScores[midpoint - 1] + sortedScores[midpoint]) / 2;
-    }
+      if (sortedScores.length % 2 === 0) {
+        return (sortedScores[midpoint - 1] + sortedScores[midpoint]) / 2;
+      }
 
-    return sortedScores[midpoint];
-  });
+      return sortedScores[midpoint];
+    });
+  }
+  return [];
 });
 
 const teamName = (team: TableDataType) => {
@@ -275,7 +278,7 @@ const simulatedStandings = computed<SimulatedTeamRecord[]>(() => {
       seen.add(opponent);
     }
 
-    if (usesMedianScoring.value) {
+    if (usesMedianScoring.value && weeklyMedians.value.length > 0) {
       const weekMedian = weeklyMedians.value[week];
       if (weekMedian === null) continue;
 
