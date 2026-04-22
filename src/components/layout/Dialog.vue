@@ -65,6 +65,7 @@ const handleSubmit = async () => {
           v-model:inputType="inputType"
           v-model:seasonYear="seasonYear"
           v-model:leagueIdInput="leagueIdInput"
+          platform="sleeper"
           @submit="handleSubmit"
         />
         <p v-if="showErrorMsg" class="text-xs text-destructive">

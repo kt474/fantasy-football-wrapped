@@ -34,6 +34,7 @@ import {
   Dices,
   FlaskConical,
   IdCard,
+  Snowflake,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";

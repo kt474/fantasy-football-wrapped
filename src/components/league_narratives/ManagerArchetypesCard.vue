@@ -9,6 +9,7 @@ import { LeagueInfoType } from "@/types/types";
 import Separator from "../ui/separator/Separator.vue";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import { fakeProfileText } from "@/api/fakeLeague";
 
 const store = useStore();
@@ -114,6 +115,7 @@ watch(
             v-if="archetype.avatarImg"
             :src="archetype.avatarImg"
             :alt="`${archetype.displayName} avatar`"
+            @error="handleImageError"
             class="w-10 h-10 rounded-full"
           />
           <div>

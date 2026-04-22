@@ -24,6 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import Narratives from "../league_narratives/Narratives.vue";
 
 const PowerRankingData = defineAsyncComponent(
@@ -128,6 +129,7 @@ const tabOptions = [
   "League History",
   "Manager Profiles",
   "Wrapped",
+  "ESPN",
 ];
 const showStandingsTab = computed(() => {
   return (
@@ -492,6 +494,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       v-if="item.avatarImg"
                       class="w-8 h-8 rounded-full"
                       :src="item.avatarImg"
+                      @error="handleImageError"
                     />
                     <svg
                       v-else
