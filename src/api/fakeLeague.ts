@@ -2982,3 +2982,6 @@ export const fakeManagerProfiles = [
     averageDraftPickRank: null,
   },
 ];
+
+export const fakeProfileText =
+  "Saquondo has been the league’s model of sustained menace, pairing the best scoring profile with a championship to back it up. The draft room clearly loves this manager, and the league-wide top draft ability ranking shows the foundation of the run is not luck or waiver scraping. They also stay active on waivers and turn that work into real production, even if the trade market has been more decorative than dangerous. The only real knock is that opponents have had chances to hang around, but when you finish first in points and first in hardware, that is a very polished problem to have.";

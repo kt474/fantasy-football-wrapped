@@ -9,6 +9,7 @@ import { LeagueInfoType } from "@/types/types";
 import Separator from "../ui/separator/Separator.vue";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
+import { fakeProfileText } from "@/api/fakeLeague";
 
 const store = useStore();
 const subscriptionStore = useSubscriptionStore();
@@ -150,6 +151,12 @@ watch(
           v-else-if="isLoading"
         >
           Loading manager description...
+        </p>
+        <p
+          v-else-if="store.leagueInfo.length === 0"
+          class="mt-2 text-sm leading-relaxed"
+        >
+          {{ fakeProfileText }}
         </p>
         <div
           class="grid gap-3 mt-4 text-sm sm:grid-cols-2 text-muted-foreground"
