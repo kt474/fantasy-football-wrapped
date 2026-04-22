@@ -1157,8 +1157,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
               </div>
               <div v-else>
                 <p class="max-w-3xl">
-                  Premium weekly reports include deeper analysis, a newer AI
-                  model, customizable commentary styles, and a podcast-style
+                  Premium weekly reports include deeper analysis, more league
+                  context, customizable commentary styles, and a podcast-style
                   audio version. Available with an account and
                   <router-link
                     :to="{ path: '/account', query: $route.query }"

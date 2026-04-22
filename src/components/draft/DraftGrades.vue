@@ -82,12 +82,12 @@ const getProjections = async () => {
 
   const grouped = result.reduce<Record<number, DraftProjectionEntry[]>>(
     (acc, obj) => {
-    const key = obj.draftPick.rosterId;
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(obj);
-    return acc;
+      const key = obj.draftPick.rosterId;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(obj);
+      return acc;
     },
     {}
   );
@@ -102,7 +102,12 @@ const getProjections = async () => {
       }
       picks.push(pick);
     });
-    totalDraftScores.push({ totalScore: sum, picks: picks, zScore: 0, grade: "F" });
+    totalDraftScores.push({
+      totalScore: sum,
+      picks: picks,
+      zScore: 0,
+      grade: "F",
+    });
   });
 
   const meanScore = mean(totalDraftScores.map((user) => user.totalScore));
@@ -306,7 +311,7 @@ watch(
       </div>
     </div>
     <div v-else>
-      <p class="text-muted-foreground mb-96">Loading draft grades...</p>
+      <p class="h-screen text-muted-foreground">Loading draft grades...</p>
     </div>
   </div>
 </template>

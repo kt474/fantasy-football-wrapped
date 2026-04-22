@@ -315,7 +315,7 @@ const handleTeamSelectionChange = (team: "A" | "B", rosterId: number) => {
 };
 
 const updateMobileState = () => {
-  isMobile.value = window.innerWidth < 640;
+  isMobile.value = window.innerWidth < 1280;
 };
 
 const onPlayerDragStart = (playerId: string, fromTeam: "A" | "B") => {
@@ -657,14 +657,14 @@ onBeforeUnmount(() => {
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
       <h5 class="text-3xl font-bold leading-none">Trade Lab (Beta)</h5>
     </div>
-    <p class="mt-4 mb-2 text-muted-foreground">
+    <p v-if="!isMobile" class="mt-4 mb-2 text-muted-foreground">
       Drag players into each team's package to brainstorm offers.
     </p>
-    <p v-if="isMobile" class="mb-2 text-xs text-muted-foreground">
-      Mobile: tap players to add/remove from each package.
+    <p v-if="isMobile" class="mt-4 mb-2 text-muted-foreground">
+      Click/tap players to add or remove from each package.
     </p>
 
-    <div v-if="loading" class="py-2 mb-96">
+    <div v-if="loading" class="h-screen py-2">
       Loading players and projections...
     </div>
     <div v-else>
@@ -762,7 +762,7 @@ onBeforeUnmount(() => {
           <Separator class="h-px my-2" />
 
           <div
-            class="min-h-28 rounded-[0.7rem] border border-dashed border-border p-3"
+            class="min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
             @dragover.prevent
             @drop.prevent="onDropToTradePackage('A')"
           >
@@ -856,7 +856,7 @@ onBeforeUnmount(() => {
                 </DialogContent>
               </Dialog>
             </div>
-            <div class="space-y-1 overflow-y-auto max-h-32">
+            <div class="space-y-1 overflow-y-auto max-h-72">
               <div class="pt-2 mt-2 border-t border-border">
                 <div class="flex flex-wrap items-center gap-1.5 mb-2">
                   <span
@@ -940,7 +940,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div
-            class="mt-3 min-h-28 rounded-[0.7rem] border border-dashed border-border p-3"
+            class="mt-3 min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
             @dragover.prevent
             @drop.prevent="onDropToTradePackage('B')"
           >
@@ -1060,7 +1060,7 @@ onBeforeUnmount(() => {
                 </span>
               </div>
             </div>
-            <div class="space-y-1 overflow-y-auto max-h-32">
+            <div class="space-y-1 overflow-y-auto max-h-72">
               <div
                 v-for="player in teamBOutgoingPlayers"
                 :key="`send-b-${player.player_id}`"

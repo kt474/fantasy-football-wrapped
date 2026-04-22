@@ -506,7 +506,7 @@ const getValueColor = (value: number) => {
             Picks with a red top border are keepers.
           </p>
         </div>
-        <div v-else role="status" class="max-w-sm mb-32 animate-pulse">
+        <div v-else role="status" class="h-screen max-w-sm animate-pulse">
           <p class="mb-2">Loading draft data...</p>
           <div
             class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"

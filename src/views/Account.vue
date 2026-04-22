@@ -790,7 +790,6 @@ onMounted(async () => {
       </div>
       <Card
         v-if="
-          authStore.isAuthenticated &&
           !subscriptionStore.isPremium &&
           !subscriptionStore.loading &&
           !showPasswordRecoveryForm
@@ -798,7 +797,7 @@ onMounted(async () => {
         class="max-w-xl mt-4"
       >
         <CardHeader>
-          <CardTitle>Premium</CardTitle>
+          <CardTitle>Premium subscription</CardTitle>
           <CardDescription>
             Premium tools for deeper insights across every league you manage.
           </CardDescription>
@@ -806,19 +805,21 @@ onMounted(async () => {
         <CardContent class="text-sm">
           <div class="p-4 mb-5 border rounded-xl">
             <p class="mb-3 text-sm font-semibold">
-              Every premium plan includes:
+              Every subscription includes:
             </p>
             <div>
               <div class="flex align-middle">
                 <Check class="w-5 h-5 mr-2 shrink-0" />
-                <p class="text-muted-foreground">
-                  Smarter, customizable, weekly league recaps
+                <p class="text-muted-foreground max-w-80">
+                  Smarter, more detailed, weekly league recaps with customizable
+                  commentary styles
                 </p>
               </div>
               <div class="flex mt-3 align-middle">
                 <Check class="w-5 h-5 mr-2 shrink-0" />
-                <p class="text-muted-foreground">
-                  Manager profiles built around your league
+                <p class="text-muted-foreground max-w-80">
+                  Custom manager profile descriptions highlighting tendencies
+                  and league identity
                 </p>
               </div>
               <div class="flex mt-3 align-middle">
@@ -861,7 +862,7 @@ onMounted(async () => {
                 Monthly
               </p>
               <p class="mt-2 text-5xl font-medium leading-none">
-                $4
+                $5
                 <span class="-ml-1 text-base font-normal text-muted-foreground">
                   /month
                 </span>

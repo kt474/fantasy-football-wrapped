@@ -32,7 +32,7 @@ describe("Sleeper API data transforms", () => {
   test("maps league response into app league shape", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       mockFetchResponse(200, {
-        name: "Sample League",
+        name: "Demo League",
         settings: {
           playoff_week_start: 15,
           last_scored_leg: 17,
@@ -65,7 +65,7 @@ describe("Sleeper API data transforms", () => {
 
     expect(fetchMock).toHaveBeenCalledOnce();
     expect(data).toEqual({
-      name: "Sample League",
+      name: "Demo League",
       regularSeasonLength: 14,
       lastScoredWeek: 17,
       medianScoring: 1,

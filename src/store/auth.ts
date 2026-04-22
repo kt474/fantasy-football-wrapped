@@ -157,9 +157,11 @@ export const useAuthStore = defineStore("auth", () => {
         },
       });
       if (error) throw error;
+      else {
+        await newUserAlert("google");
+      }
     } finally {
       loading.value = false;
-      await newUserAlert("google");
     }
   };
 

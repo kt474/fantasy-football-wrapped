@@ -132,8 +132,8 @@ export const getStats = async (
       response,
       "Player stats"
     );
-    const stats = result.stats ?? null;
-    const playerInfo = result.player;
+    const stats = result?.stats ?? null;
+    const playerInfo = result?.player ?? null;
     if (!stats || !playerInfo) {
       return null;
     }

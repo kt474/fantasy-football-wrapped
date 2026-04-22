@@ -838,14 +838,14 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
       ></apexchart>
     </Card>
     <div v-else>
-      <p class="sm:w-1/2 mb-96">
+      <p class="h-screen sm:w-1/2">
         The Sleeper API returns playoff matchup data on Wednesdays (4 AM EST).
         Please try again at a later time if no matchups are loaded.
       </p>
     </div>
   </div>
   <div v-else>
-    <p class="mb-96">Loading...</p>
+    <p class="h-screen">Loading...</p>
   </div>
 </template>
 <style scoped></style>

@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "4/19/26",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "Users can now generate one manager profile without a premium subscription.",
+        ],
+      },
+    ],
+  },
+  {
     date: "3/21/26",
     content: [
       {
@@ -604,7 +615,7 @@ const data = [
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto sm:ml-8">
     <div class="container mx-auto mt-4">
       <h1 class="mb-2 text-3xl font-semibold">Changelog</h1>
-      <div class="mb-6">
+      <div class="max-w-lg mb-6">
         <p>
           Join our
           <a
@@ -615,7 +626,16 @@ const data = [
             rel="noopener noreferrer"
             >Discord</a
           >
-          for more updates, feature requests, or bug reports.
+          for more updates, feature requests, or bug reports. The entire
+          codebase is also available on
+          <a
+            aria-label="Github link"
+            class="font-medium text-primary hover:underline"
+            href="https://github.com/kt474/fantasy-football-wrapped"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Github</a
+          >.
         </p>
       </div>
       <div v-for="entry in data" class="my-2 ml-1">

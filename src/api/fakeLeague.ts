@@ -2956,3 +2956,32 @@ export const fakeStartSit = [
     ],
   },
 ];
+
+export const fakeManagerProfiles = [
+  {
+    userId: "6",
+    displayName: "Saquondo",
+    avatarImg: "../avatars/avatar6.svg",
+    seasons: 3,
+    titles: 0,
+    totalWins: 27,
+    totalLosses: 15,
+    totalTies: 0,
+    totalPointsFor: 4938,
+    totalPointsAgainst: 5847,
+    totalTrades: 1,
+    tradeValueGained: -9.200000000000003,
+    totalWaivers: 183,
+    averageEfficiency: 0.916,
+    playoffAppearances: 2,
+    averagePointsPerSeason: 1646,
+    averageTradesPerSeason: 0.25,
+    averageWaiversPerSeason: 45.75,
+    winRate: 0.6428,
+    weeklyScoreStdDev: 18.958548818573867,
+    averageDraftPickRank: null,
+  },
+];
+
+export const fakeProfileText =
+  "Saquondo has been the league’s model of sustained menace, pairing the best scoring profile with a championship to back it up. The draft room clearly loves this manager, and the league-wide top draft ability ranking shows the foundation of the run is not luck or waiver scraping. They also stay active on waivers and turn that work into real production, even if the trade market has been more decorative than dangerous. The only real knock is that opponents have had chances to hang around, but when you finish first in points and first in hardware, that is a very polished problem to have.";
