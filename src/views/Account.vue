@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import { Badge } from "@/components/ui/badge";
 import {
   Field,
   FieldDescription,
@@ -831,7 +831,12 @@ onMounted(async () => {
             </div>
           </div>
           <div class="flex flex-col gap-4 sm:flex-row">
-            <div class="relative flex-1 p-5 border rounded-xl bg-muted/40">
+            <div class="relative flex-1 p-5 border pt-7 rounded-xl bg-muted/40">
+              <Badge
+                class="absolute top-0 px-2 -translate-x-1/2 -translate-y-1/2 left-1/2"
+              >
+                Best value
+              </Badge>
               <p
                 class="text-sm font-semibold tracking-[0.12em] uppercase text-muted-foreground"
               >
