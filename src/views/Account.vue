@@ -833,12 +833,12 @@ onMounted(async () => {
           <div class="flex flex-col gap-4 sm:flex-row">
             <div class="relative flex-1 p-5 border pt-7 rounded-xl bg-muted/40">
               <Badge
-                class="absolute top-0 px-2 -translate-x-1/2 -translate-y-1/2 left-1/2"
+                class="absolute top-0 px-2 -translate-x-1/2 -translate-y-1/2 left-1/2 hover:bg-primary"
               >
                 Best value
               </Badge>
               <p
-                class="text-sm font-semibold tracking-[0.12em] uppercase text-muted-foreground"
+                class="text-sm font-semibold tracking-[0.12em] uppercase text-muted-foreground -mt-2"
               >
                 Season Pass
               </p>
