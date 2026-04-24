@@ -3,12 +3,9 @@ import { useRouter, useRoute } from "vue-router";
 import { useStore } from "@/store/store";
 import type { LeagueInfoType } from "@/types/types";
 import type { LeagueOriginal } from "@/types/apiTypes";
-import {
-  getData,
-  inputLeague,
-  inputUsername,
-} from "@/api/api";
+import { getData, inputLeague, inputUsername } from "@/api/api";
 import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
+import { toast } from "vue-sonner";
 
 export const SEASON_YEAR_OPTIONS = [
   "2026",
@@ -43,7 +40,10 @@ export const useLeagueInput = () => {
   };
 
   const updateURL = async (leagueID: string) => {
-    await router.replace({ path: "/", query: { ...route.query, leagueId: leagueID } });
+    await router.replace({
+      path: "/",
+      query: { ...route.query, leagueId: leagueID },
+    });
   };
 
   const clearError = () => {
@@ -69,12 +69,14 @@ export const useLeagueInput = () => {
     if (inputType.value === "Username") {
       if (leagueIdInput.value === "") {
         errorMsg.value = "Please enter a username";
+        toast.error("Please enter a username");
         showErrorMsg.value = true;
         return;
       }
       const user = await getUsername(leagueIdInput.value);
       if (!user?.user_id || !user?.display_name) {
         errorMsg.value = "Invalid username";
+        toast.error("Invalid username");
         showErrorMsg.value = true;
         return;
       }
@@ -95,11 +97,13 @@ export const useLeagueInput = () => {
 
     if (store.leagueInfo.length >= 5) {
       errorMsg.value = "Maximum of 5 leagues allowed";
+      toast.error("Maximum of 5 leagues allowed");
       showErrorMsg.value = true;
       return;
     }
     if (leagueIdInput.value === "") {
       errorMsg.value = "Please enter a league ID";
+      toast.error("Please enter a league ID");
       showErrorMsg.value = true;
       return;
     }
@@ -107,12 +111,15 @@ export const useLeagueInput = () => {
     const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
     if (!checkInput["name"]) {
       errorMsg.value = "Invalid league ID";
+      toast.error("Invalid league ID");
       showErrorMsg.value = true;
     } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
       errorMsg.value = "League already added";
+      toast.error("League already added");
       showErrorMsg.value = true;
     } else if (checkInput["sport"] !== "nfl") {
       errorMsg.value = "Only NFL leagues are supported";
+      toast.error("Only NFL leagues are supported");
       showErrorMsg.value = true;
     } else {
       store.currentTab = "Standings";
@@ -142,6 +149,7 @@ export const useLeagueInput = () => {
       } catch (error) {
         console.error("Failed to load league:", error);
         errorMsg.value = "Unable to load league right now. Please try again.";
+        toast.error("Unable to load league right now. Please try again.");
         showErrorMsg.value = true;
       } finally {
         store.updateLoadingLeague("");

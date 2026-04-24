@@ -5,15 +5,7 @@ import { useLeagueInput } from "@/composables/useLeagueInput";
 import { useStore } from "@/store/store";
 import Card from "../ui/card/Card.vue";
 
-const {
-  inputType,
-  seasonYear,
-  leagueIdInput,
-  showErrorMsg,
-  errorMsg,
-  showHelperMsg,
-  onSubmit,
-} = useLeagueInput();
+const { inputType, seasonYear, leagueIdInput, onSubmit } = useLeagueInput();
 const store = useStore();
 const isDark = computed(() => store.darkMode);
 </script>
@@ -96,15 +88,6 @@ const isDark = computed(() => store.darkMode);
                 v-model:leagueIdInput="leagueIdInput"
                 @submit="onSubmit"
               />
-              <p v-if="showErrorMsg" class="mt-1 text-xs text-destructive">
-                {{ errorMsg }}
-              </p>
-              <p
-                v-if="showHelperMsg"
-                class="mt-1 text-xs text-muted-foreground"
-              >
-                Loading leagues...
-              </p>
             </Card>
           </div>
 
