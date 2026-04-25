@@ -9,7 +9,7 @@ import { useStore } from "../store/store";
 import { getData, inputLeague } from "../api/api";
 import { getLeague } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
 const Table = defineAsyncComponent(
@@ -17,10 +17,12 @@ const Table = defineAsyncComponent(
 );
 
 const route = useRoute();
+const router = useRouter();
 const store = useStore();
 
 const showLoading = ref(false);
 const isInitialLoading = ref(true);
+const cachedGoogleSitelinks = ["1218604624068497408", "1057743221285101568"];
 
 const systemDarkMode = window.matchMedia(
   "(prefers-color-scheme: dark)"
@@ -76,7 +78,11 @@ onMounted(async () => {
       ? route.query.leagueId[0]
       : route.query.leagueId;
     // sometimes on refresh the leagueId in the URL becomes undefined
-    if (leagueId && !store.leagueIds.includes(leagueId)) {
+    if (
+      leagueId &&
+      !store.leagueIds.includes(leagueId) &&
+      !cachedGoogleSitelinks.includes(leagueId)
+    ) {
       const checkInput = await getLeague(leagueId);
       if (checkInput["name"]) {
         store.updateCurrentLeagueId(leagueId);
@@ -100,6 +106,11 @@ onMounted(async () => {
       localStorage.removeItem("currentLeagueId");
       localStorage.removeItem("leagueInfo");
       toast.error("Error fetching data. Please try refreshing the page.");
+      // these leagues are somehow being cached in google sitelinks
+    } else if (leagueId && cachedGoogleSitelinks.includes(leagueId)) {
+      const newQuery = { ...route.query };
+      delete newQuery.leagueId;
+      router.replace({ path: route.path, query: newQuery });
     }
   } catch {
     toast.error("Error fetching data. Please try refreshing the page.");
