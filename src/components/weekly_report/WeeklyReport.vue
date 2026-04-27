@@ -1139,7 +1139,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   <p class="max-w-3xl">
                     Premium weekly reports include deeper analysis, more league
                     context, customizable commentary styles, and a podcast-style
-                    audio version. Available with an account and
+                    audio version. Available with a
                     <router-link
                       :to="{ path: '/account', query: $route.query }"
                       class="font-medium cursor-pointer hover:underline"
@@ -1158,7 +1158,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                 <p class="max-w-3xl">
                   Premium weekly reports include deeper analysis, more league
                   context, customizable commentary styles, and a podcast-style
-                  audio version. Available with an account and
+                  audio version. Available with a
                   <router-link
                     :to="{ path: '/account', query: $route.query }"
                     class="font-medium cursor-pointer hover:underline"
