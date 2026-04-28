@@ -1180,7 +1180,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   always be accurate.
                 </p>
                 <p class="text-xs text-muted-foreground">
-                  If you enjoy these weekly reports please consider
+                  If you enjoy these weekly reports please consider supporting
+                  this project by
                   <a
                     aria-label="buymeacoffee donation page"
                     class="text-primary hover:underline"
@@ -1188,9 +1189,15 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     title="buymeacofee donation page"
                     target="_blank"
                     rel="noopener noreferrer"
-                    >supporting</a
+                    >donating</a
                   >
-                  this project.
+                  or subscribing to the
+                  <router-link
+                    :to="{ path: '/account', query: $route.query }"
+                    class="cursor-pointer text-primary hover:underline"
+                    @click="store.currentTab = ''"
+                    >Premium Tier</router-link
+                  >.
                 </p>
               </div>
               <!-- Fake data for home page -->
