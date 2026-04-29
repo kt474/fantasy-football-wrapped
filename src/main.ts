@@ -20,7 +20,7 @@ const siteUrl = "https://ffwrapped.com";
 const defaultMeta = {
   title: "Fantasy Football Wrapped",
   description:
-    "Analyze your fantasy football league with standings, power rankings, playoff odds, weekly reports, roster insights, and league history.",
+    "Analyze your fantasy football league with power rankings, roster insights, custom weekly reports, playoff odds, and much more.",
 };
 
 const routes = [
