@@ -93,7 +93,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Added a new 'wrapped' tab for the spotify wrapped style end of season recap.",
+          "Added a new 'wrapped' tab for the Spotify Wrapped-style end of season recap.",
         ],
       },
     ],
@@ -115,7 +115,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "The weekly preview section now has AI generated matchup previews for each matchup.",
+          "The weekly preview section now has AI-generated matchup previews for each matchup.",
         ],
       },
     ],
@@ -335,7 +335,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Added a new 'League News' section in the standings tab that shows AI generated league trends and highlights.",
+          "Added a new 'League News' section in the standings tab that shows AI-generated league trends and highlights.",
         ],
       },
     ],
@@ -494,7 +494,7 @@ const data = [
       {
         type: "Update",
         text: [
-          "Updated the prompt and inputs for the AI generated weekly reports. The reports should no longer give incorrect winning teams. ",
+          "Updated the prompt and inputs for the AI-generated weekly reports. The reports should no longer give incorrect winning teams. ",
         ],
       },
     ],
