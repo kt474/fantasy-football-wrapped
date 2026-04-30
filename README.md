@@ -1,8 +1,8 @@
 # Fantasy Football Wrapped
 
-Detailed analysis and insights for Sleeper fantasy football leagues.
+Fantasy football analytics for Sleeper leagues, including power rankings, playoff odds, weekly reports, draft analysis, roster tools, season recaps, and a lot more. An independently built app with nearly 30,000 users.
 
-Current features:
+## Current Features
 
 - Comprehensive standings and AI-generated league news/current trends
 - Power rankings, roster rankings, and projections
@@ -50,11 +50,13 @@ No environment variables are required to run the project locally, though some fe
 
 ### Technologies
 
-It would also be helpful to familiarize yourself with the technologies used in this project:
-
-- Framework: Vue 3 and Typescript
-- UI: Vue Shadcn and Tailwind CSS
+- Frontend: Vue 3, TypeScript, Vite
 - State management: Pinia
+- UI: Tailwind CSS, shadcn-vue
+- Backend integrations: Node.js, Supabase, Stripe, Resend, OpenAI
+- Analytics: PostHog, Umami
+- Testing: Vitest
+- Deployment: Vercel
 
 ### Pull Request Process
 
@@ -72,8 +74,3 @@ It would also be helpful to familiarize yourself with the technologies used in t
 ## Contact
 
 Please report any issues or request new features in the [issues](https://github.com/kt474/fantasy-football-wrapped/issues) tab
-
-## TODO
-
-- ESPN Support
-- Yahoo Support
