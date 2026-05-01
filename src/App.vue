@@ -143,7 +143,8 @@ const setHtmlBackground = () => {
             />
             <CardContainer />
             <Button
-              class="ml-auto hidden transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground sm:inline-flex"
+              asChild
+              class="hidden ml-auto transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground sm:inline-flex"
               variant="ghost"
               size="icon-sm"
             >
