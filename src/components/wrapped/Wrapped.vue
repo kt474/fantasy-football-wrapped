@@ -292,35 +292,33 @@ const totalBids = computed(() => {
         }
       >
     >((acc, obj) => {
-        const user = obj.user as {
-          id?: string;
-          username?: string;
-          name?: string;
-          avatarImg?: string;
+      const user = obj.user as {
+        id?: string;
+        username?: string;
+        name?: string;
+        avatarImg?: string;
+      };
+      const userId = user.id ?? user.username ?? user.name ?? "unknown-user";
+      const status = obj.status;
+
+      if (!acc[userId]) {
+        acc[userId] = {
+          user: {
+            id: user.id,
+            username: user.username ?? "",
+            name: user.name ?? "",
+            avatarImg: user.avatarImg,
+          },
+          sumByStatus: {},
+          totalSpent: 0,
         };
-        const userId = user.id ?? user.username ?? user.name ?? "unknown-user";
-        const status = obj.status;
+      }
+      acc[userId].sumByStatus[status] =
+        (acc[userId].sumByStatus[status] || 0) + (obj.bid ?? 0);
+      acc[userId].totalSpent += obj.bid ?? 0;
 
-        if (!acc[userId]) {
-          acc[userId] = {
-            user: {
-              id: user.id,
-              username: user.username ?? "",
-              name: user.name ?? "",
-              avatarImg: user.avatarImg,
-            },
-            sumByStatus: {},
-            totalSpent: 0,
-          };
-        }
-        acc[userId].sumByStatus[status] =
-          (acc[userId].sumByStatus[status] || 0) + (obj.bid ?? 0);
-        acc[userId].totalSpent += obj.bid ?? 0;
-
-        return acc;
-      },
-      {}
-    );
+      return acc;
+    }, {});
     return {
       highest: maxBy(Object.values(grouped), "totalSpent"),
       lowest: minBy(Object.values(grouped), "totalSpent"),
@@ -589,7 +587,7 @@ const getTeamName = (user: TableDataType) => {
   ) {
     return [
       "The Panic Button Presser",
-      "Poor performing team with many wavier moves",
+      "Poor performing team with many waiver moves",
     ];
   } else if (
     user.regularSeasonRank <= 4 &&

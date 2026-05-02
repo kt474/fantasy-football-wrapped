@@ -223,7 +223,7 @@ const data = [
       {
         type: "Update",
         text: [
-          "The player rankings and wavier moves can now be all viewed at once instead of only selecting a single manager.",
+          "The player rankings and waiver moves can now be all viewed at once instead of only selecting a single manager.",
         ],
       },
     ],

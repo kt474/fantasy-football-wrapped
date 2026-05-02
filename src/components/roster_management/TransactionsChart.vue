@@ -28,7 +28,10 @@ const transactionData = computed(() => {
       });
     });
 
-    const allMoves: TradeAsWaiver[] = [...(currentLeague.waivers || []), ...trades];
+    const allMoves: TradeAsWaiver[] = [
+      ...(currentLeague.waivers || []),
+      ...trades,
+    ];
 
     const groupedMoves = allMoves
       .filter(
@@ -287,7 +290,7 @@ const chartOptions = ref({
       :series="transactionData.series"
     ></apexchart>
     <p class="mt-6 text-xs sm:-mb-4 text-muted-foreground">
-      Transactions are roster changing moves which include: wavier claims, free
+      Transactions are roster changing moves which include: waiver claims, free
       agent additions, and trades.
     </p>
   </Card>

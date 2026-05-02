@@ -180,7 +180,7 @@ const copyReport = () => {
           aria-label="buymeacoffee donation page"
           class="text-primary hover:underline"
           href="https://buymeacoffee.com/kt474"
-          title="buymeacofee donation page"
+          title="buymeacoffee donation page"
           target="_blank"
           rel="noopener noreferrer"
           >supporting</a
