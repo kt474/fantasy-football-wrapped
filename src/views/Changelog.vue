@@ -7,6 +7,17 @@ const data = [
       {
         type: "Update",
         text: [
+          "The AI-generated weekly matchup previews have been combined into one matchup forecast.",
+        ],
+      },
+    ],
+  },
+  {
+    date: "4/19/26",
+    content: [
+      {
+        type: "Update",
+        text: [
           "Users can now generate one manager profile without a premium subscription.",
         ],
       },

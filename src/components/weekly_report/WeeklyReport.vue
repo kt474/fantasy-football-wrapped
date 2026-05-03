@@ -951,7 +951,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
 </script>
 <template>
   <Card class="h-full px-6 pt-4 my-4 custom-width">
-    <Tabs default-value="Report">
+    <Tabs default-value="Report" v-model="activeTab">
       <div class="flex justify-between w-full mb-3">
         <h5 class="mr-4 text-2xl font-bold sm:text-3xl">
           Weekly {{ activeTab }}
@@ -959,8 +959,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
         <div class="flex flex-wrap justify-end">
           <div class="inline-flex pb-1 rounded-lg sm:mr-2" role="tablist">
             <TabsList>
-              <TabsTrigger value="Preview"> Preview </TabsTrigger>
               <TabsTrigger value="Report"> Report </TabsTrigger>
+              <TabsTrigger value="Preview"> Preview </TabsTrigger>
             </TabsList>
           </div>
           <Select v-model="currentWeek">
