@@ -4,6 +4,7 @@ import { useStore } from "../../store/store.ts";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
+import LeagueRivalriesCard from "./LeagueRivalriesCard.vue";
 import LeagueHistory from "../league_history/LeagueHistory.vue";
 import { LeagueInfoType, TableDataType } from "@/types/types.ts";
 import {
@@ -233,12 +234,17 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
       :table-data="props.tableData"
       @ready="isLeagueHistoryReady = true"
     />
-    <ManagerArchetypesCard
-      v-if="isLeagueHistoryReady && areNarrativesReady"
-      :archetypes="narratives.managerArchetypes"
-      :payload="managerPayload"
-      :prepare-payload="prepareManagerPayload"
-    />
+    <template v-if="isLeagueHistoryReady && areNarrativesReady">
+      <ManagerArchetypesCard
+        :archetypes="narratives.managerArchetypes"
+        :payload="managerPayload"
+        :prepare-payload="prepareManagerPayload"
+      />
+      <LeagueRivalriesCard
+        :seasons="seasons"
+        :archetypes="narratives.managerArchetypes"
+      />
+    </template>
     <ManagerArchetypesCard
       v-else-if="store.leagueInfo.length === 0"
       :archetypes="fakeManagerProfiles"
