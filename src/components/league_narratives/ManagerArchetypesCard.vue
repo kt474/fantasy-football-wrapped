@@ -65,9 +65,10 @@ const storedManagerProfiles = computed(
 
 const canGenerateArchetypes = computed(
   () =>
-    props.payload.managers.length > 0 &&
-    !isLoading.value &&
-    Object.keys(blurbsByUserId.value).length == 0
+    (props.payload.managers.length > 0 &&
+      !isLoading.value &&
+      Object.keys(blurbsByUserId.value).length == 0) ||
+    subscriptionStore.isPremium
 );
 
 const generateButtonLabel = computed(() => {
