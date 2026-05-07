@@ -23,7 +23,7 @@ export const useLeagueInput = () => {
 
   const leagueIdInput = ref("");
   const inputType = ref("League ID");
-  const seasonYear = ref("2025");
+  const seasonYear = ref("2026");
   const showErrorMsg = ref(false);
   const errorMsg = ref("");
   const showHelperMsg = ref(false);
