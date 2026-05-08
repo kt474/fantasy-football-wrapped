@@ -88,7 +88,11 @@ const toggleLeague = (id: string) => {
     >
       Welcome {{ store.username }}!
     </h3>
-    <p class="text-lg" :class="{ 'my-2': store.currentLeagueId }">
+    <p
+      v-if="store.leaguesList.length > 0 || store.currentLeagueId"
+      class="text-lg"
+      :class="{ 'my-2': store.currentLeagueId }"
+    >
       Select the leagues you would like to add
     </p>
     <div v-if="!store.currentLeagueId">
