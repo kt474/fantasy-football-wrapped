@@ -142,8 +142,7 @@ const promptData = computed(() => {
         v-if="preview !== 'Unable to generate preview. Please try again later.'"
         class="mt-1 text-xs text-muted-foreground"
       >
-        Generated using GPT-5.4-mini. Information provided may not always be
-        accurate.
+        AI-generated summary. Information provided may not always be accurate.
       </p>
     </div>
     <p v-if="loading">Loading...</p>

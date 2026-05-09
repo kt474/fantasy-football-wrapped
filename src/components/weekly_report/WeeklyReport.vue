@@ -328,6 +328,7 @@ onMounted(async () => {
     store.leagueInfo[store.currentLeagueIndex] &&
     store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
   ) {
+    loading.value = true;
     await fetchPlayerNames();
     const savedText = store.leagueInfo[store.currentLeagueIndex]?.weeklyReport
       ? (store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "")
@@ -338,6 +339,7 @@ onMounted(async () => {
       ? (store.leagueInfo[store.currentLeagueIndex].premiumWeeklyReport ?? "")
       : "";
     rawPremiumWeeklyReport.value = premiumSavedText;
+    loading.value = false;
   }
 });
 
@@ -1051,8 +1053,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     class="my-2.5 report-content"
                   ></div>
                   <p class="text-xs text-muted-foreground">
-                    Generated using GPT-5.4-mini. Information provided may not
-                    always be accurate.
+                    AI-generated report. Information provided may not always be
+                    accurate.
                   </p>
                 </div>
                 <div
@@ -1176,8 +1178,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   class="mb-3 report-content"
                 ></div>
                 <p class="text-xs text-muted-foreground">
-                  Generated using GPT-5.4-mini. Information provided may not
-                  always be accurate.
+                  AI-generated report. Information provided may not always be
+                  accurate.
                 </p>
                 <p class="text-xs text-muted-foreground">
                   If you enjoy these weekly reports please consider supporting

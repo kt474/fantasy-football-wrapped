@@ -171,8 +171,7 @@ const copyReport = () => {
       <div v-html="renderedSummary" class="max-w-5xl my-3 report-content"></div>
 
       <p class="text-xs text-muted-foreground">
-        Generated using GPT-5.4-mini. Information provided may not always be
-        accurate.
+        AI-generated summary. Information provided may not always be accurate.
       </p>
       <p class="mb-4 text-xs text-muted-foreground">
         If you've enjoyed using ffwrapped this season please consider
