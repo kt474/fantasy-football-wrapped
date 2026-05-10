@@ -29,12 +29,17 @@ import {
 import WeeklyPreview from "./WeeklyPreview.vue";
 import WeeklyShareCard from "./WeeklyShareCard.vue";
 import AudioRecap from "./AudioRecap.vue";
+import ShareMomentCard from "@/components/share/ShareMomentCard.vue";
+import ShareMomentExport from "@/components/share/ShareMomentExport.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
 import { toPng } from "html-to-image";
 import { Copy, Download } from "lucide-vue-next";
+import type { ShareMoment } from "@/lib/shareMoments";
+import { formatSharePoints } from "@/lib/shareMoments";
+import { useShareMoment } from "@/composables/useShareMoment";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -66,6 +71,14 @@ interface PerformerEntry {
   player: Player;
   points: number;
   user: string;
+}
+
+interface MatchupMomentRow {
+  winner: TableDataType;
+  loser: TableDataType;
+  winnerPoints: number;
+  loserPoints: number;
+  margin: number;
 }
 
 type PlayoffReportRow = Record<string, unknown> & {
@@ -847,6 +860,10 @@ const copyReport = () => {
 
 const isGeneratingImage = ref(false);
 const shareCardRef = ref<HTMLElement | null>(null);
+const shareMomentExportRef = ref<HTMLElement | null>(null);
+const selectedShareMoment = ref<ShareMoment | null>(null);
+const { isGeneratingShareMoment, downloadMoment, shareMoment, copyMoment } =
+  useShareMoment(shareMomentExportRef);
 
 const getManagerName = (user: TableDataType) => {
   if (store.showUsernames) {
@@ -908,6 +925,169 @@ const exportSummary = computed(() => {
   }
   return sourceText;
 });
+
+const shareMomentUrl = computed(() => {
+  const url = new URL(window.location.origin);
+  const leagueId = store.leagueInfo[store.currentLeagueIndex]?.leagueId;
+  if (leagueId) {
+    url.searchParams.set("leagueId", leagueId);
+  }
+  url.searchParams.set("week", String(currentWeek.value));
+  url.searchParams.set("tab", "Weekly Report");
+  return url.toString();
+});
+
+const matchupMomentRows = computed(() => {
+  const weekIndex = currentWeek.value - 1;
+  const rows: MatchupMomentRow[] = [];
+  numOfMatchups.value.forEach((matchupIndex) => {
+    const teams = sortedTableData.value
+      .filter((user) => user.matchups[weekIndex] === matchupIndex)
+      .sort((a, b) => b.points[weekIndex] - a.points[weekIndex]);
+    if (teams.length < 2) return;
+    const winner = teams[0];
+    const loser = teams[teams.length - 1];
+    const winnerPoints = winner.points[weekIndex] ?? 0;
+    const loserPoints = loser.points[weekIndex] ?? 0;
+    rows.push({
+      winner,
+      loser,
+      winnerPoints,
+      loserPoints,
+      margin: winnerPoints - loserPoints,
+    });
+  });
+  return rows;
+});
+
+const weeklyShareMoments = computed<ShareMoment[]>(() => {
+  const moments: ShareMoment[] = [];
+  const week = currentWeek.value;
+  const leagueName = store.leagueInfo[store.currentLeagueIndex]?.name;
+  const ctaUrl = shareMomentUrl.value;
+  const topTeam = exportTopTeams.value[0];
+
+  if (topTeam) {
+    moments.push({
+      id: `top-scorer-week-${week}-${topTeam.name}`,
+      type: "top_scorer",
+      title: "Top Scorer",
+      headline: `${topTeam.name} ran the week`,
+      subtext: "The scoreboard had a main character, and everyone else was reading subtitles.",
+      statLabel: "Points scored",
+      statValue: formatSharePoints(topTeam.points),
+      leagueName,
+      week,
+      managerName: topTeam.name,
+      accent: "hero",
+      ctaUrl,
+    });
+  }
+
+  const topBench = benchPerformers.value[0];
+  if (topBench) {
+    const playerName = topBench.player.name
+      ? topBench.player.name
+      : `${topBench.player.team} Defense`;
+    moments.push({
+      id: `bench-blunder-week-${week}-${topBench.user}-${playerName}`,
+      type: "bench_blunder",
+      title: "Bench Blunder",
+      headline: `${topBench.user} left ${formatSharePoints(topBench.points)} on the bench`,
+      subtext: `${playerName} had the points. The starting lineup did not have the courage.`,
+      statLabel: playerName,
+      statValue: `${formatSharePoints(topBench.points)} pts`,
+      leagueName,
+      week,
+      managerName: topBench.user,
+      accent: "pain",
+      ctaUrl,
+    });
+  }
+
+  const closestLoss = [...matchupMomentRows.value]
+    .filter((row) => row.margin > 0)
+    .sort((a, b) => a.margin - b.margin)[0];
+  if (closestLoss) {
+    const loserName = getManagerName(closestLoss.loser);
+    const winnerName = getManagerName(closestLoss.winner);
+    moments.push({
+      id: `tough-loss-week-${week}-${loserName}`,
+      type: "tough_loss",
+      title: "Toughest Loss",
+      headline: `${loserName} lost by ${formatSharePoints(closestLoss.margin)}`,
+      subtext: `A brutal little paper cut of a loss to ${winnerName}.`,
+      statLabel: "Final score",
+      statValue: `${formatSharePoints(closestLoss.winnerPoints)}-${formatSharePoints(closestLoss.loserPoints)}`,
+      leagueName,
+      week,
+      managerName: loserName,
+      opponentName: winnerName,
+      accent: "cold",
+      ctaUrl,
+    });
+  }
+
+  const biggestBlowout = [...matchupMomentRows.value]
+    .filter((row) => row.margin > 0)
+    .sort((a, b) => b.margin - a.margin)[0];
+  if (biggestBlowout) {
+    const winnerName = getManagerName(biggestBlowout.winner);
+    const loserName = getManagerName(biggestBlowout.loser);
+    moments.push({
+      id: `biggest-blowout-week-${week}-${winnerName}`,
+      type: "biggest_blowout",
+      title: "Biggest Blowout",
+      headline: `${winnerName} won by ${formatSharePoints(biggestBlowout.margin)}`,
+      subtext: `${loserName} was technically present for this matchup.`,
+      statLabel: "Final score",
+      statValue: `${formatSharePoints(biggestBlowout.winnerPoints)}-${formatSharePoints(biggestBlowout.loserPoints)}`,
+      leagueName,
+      week,
+      managerName: winnerName,
+      opponentName: loserName,
+      accent: "chaos",
+      ctaUrl,
+    });
+  }
+
+  const weeklyMvp = bestPerformers.value[0];
+  if (weeklyMvp) {
+    const playerName = weeklyMvp.player.name
+      ? weeklyMvp.player.name
+      : `${weeklyMvp.player.team} Defense`;
+    moments.push({
+      id: `weekly-mvp-week-${week}-${playerName}`,
+      type: "weekly_mvp",
+      title: "Weekly MVP",
+      headline: `${playerName} carried ${weeklyMvp.user}`,
+      subtext: "Some lineup spots contribute. This one paid rent.",
+      statLabel: "Player points",
+      statValue: `${formatSharePoints(weeklyMvp.points)} pts`,
+      leagueName,
+      week,
+      managerName: weeklyMvp.user,
+      accent: "lucky",
+      ctaUrl,
+    });
+  }
+
+  return moments.slice(0, 5);
+});
+
+const downloadShareMomentCard = async (moment: ShareMoment) => {
+  selectedShareMoment.value = moment;
+  await downloadMoment(moment);
+};
+
+const shareShareMomentCard = async (moment: ShareMoment) => {
+  selectedShareMoment.value = moment;
+  await shareMoment(moment);
+};
+
+const copyShareMomentCard = async (moment: ShareMoment) => {
+  await copyMoment(moment);
+};
 
 const downloadReportImage = async () => {
   if (isGeneratingImage.value) {
@@ -1327,6 +1507,29 @@ watch(() => currentWeek.value, fetchPlayerNames);
         >
           Please come back after week 1!
         </p>
+        <div v-if="weeklyShareMoments.length > 0" class="mb-4">
+          <div class="mb-2 flex items-center justify-between gap-3">
+            <div>
+              <p class="text-xl font-bold">Share Moments</p>
+              <p class="text-sm text-muted-foreground">
+                Weekly cards for the moments your group chat will actually care
+                about.
+              </p>
+            </div>
+          </div>
+          <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <ShareMomentCard
+              v-for="moment in weeklyShareMoments"
+              :key="moment.id"
+              :moment="moment"
+              :loading="isGeneratingShareMoment"
+              @download="downloadShareMomentCard"
+              @share="shareShareMomentCard"
+              @copy="copyShareMomentCard"
+            />
+          </div>
+          <Separator class="h-px mt-4 mb-2.5" />
+        </div>
         <p class="text-xl font-bold">Matchups</p>
         <div class="flex flex-wrap w-full mb-2 overflow-x-hidden">
           <Card
@@ -1568,6 +1771,9 @@ watch(() => currentWeek.value, fetchPlayerNames);
         :bench-players="exportBenchPlayers"
         :summary="exportSummary"
       />
+    </div>
+    <div v-if="selectedShareMoment" ref="shareMomentExportRef">
+      <ShareMomentExport :moment="selectedShareMoment" />
     </div>
   </div>
 </template>
