@@ -148,7 +148,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "In the 'Expected Wins' tab there is now a schedule analysis section. The goal of this component is to show which weeks were especialy lucky/unlucky.",
+          "In the 'Expected Wins' tab there is now a schedule analysis section. The goal of this component is to show which weeks were especially lucky/unlucky.",
         ],
       },
     ],
@@ -335,7 +335,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Added a new strengh of schedule chart in the expected wins tab that shows each team's relative strength of schedule. This value is the average difference between a team’s opponents’ points per game and the league‑wide average points per game.",
+          "Added a new strength of schedule chart in the expected wins tab that shows each team's relative strength of schedule. This value is the average difference between a team’s opponents’ points per game and the league‑wide average points per game.",
         ],
       },
     ],
@@ -483,7 +483,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Added a new draft section where all draft picks along with a draft pick rank are shown in a table. Note that this feature is still a work in progress - the current ranks may be misleading on inaccruate.",
+          "Added a new draft section where all draft picks along with a draft pick rank are shown in a table. Note that this feature is still a work in progress - the current ranks may be misleading or inaccurate.",
         ],
       },
     ],
