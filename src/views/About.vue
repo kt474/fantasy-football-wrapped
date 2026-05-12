@@ -7,7 +7,7 @@ import { useRoute } from "vue-router";
 import Separator from "@/components/ui/separator/Separator.vue";
 
 const route = useRoute();
-const leagueCount = ref(12620); // initial load current unique league count value 5/06/26
+const leagueCount = ref(12724); // initial load current unique league count value 5/12/26
 
 onMounted(async () => {
   const leagueId = route.query.leagueId;
