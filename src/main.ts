@@ -92,6 +92,34 @@ const router = createRouter({
   },
 });
 
+const staleChunkReloadKey = "stale-chunk-reload-attempted";
+const isDynamicImportError = (reason: unknown) => {
+  const message = reason instanceof Error ? reason.message : String(reason);
+
+  return (
+    message.includes("Failed to fetch dynamically imported module") ||
+    message.includes("Importing a module script failed") ||
+    message.includes("error loading dynamically imported module")
+  );
+};
+
+window.addEventListener("unhandledrejection", (event) => {
+  if (!isDynamicImportError(event.reason)) {
+    return;
+  }
+
+  if (sessionStorage.getItem(staleChunkReloadKey)) {
+    return;
+  }
+
+  sessionStorage.setItem(staleChunkReloadKey, "true");
+  window.location.reload();
+});
+
+router.afterEach(() => {
+  sessionStorage.removeItem(staleChunkReloadKey);
+});
+
 const pinia = createPinia();
 const app = createApp(App);
 const ApexChart = defineAsyncComponent(() => import("vue3-apexcharts"));
