@@ -5,6 +5,17 @@ import { useStore } from "../../store/store";
 import { getPlayersByIdsMap } from "../../api/api.ts";
 import { getStats } from "../../api/sleeperApi.ts";
 import { Player } from "../../types/apiTypes.ts";
+import { findTradeCandidates, type TradeFinderGoal } from "@/lib/tradeFinder";
+import {
+  faabValuePerDollar,
+  getDraftPickTradeValue,
+  getFairnessLabel,
+  getFairnessPercent,
+  getPackageTradeValue,
+  type TradeDraftPickAsset,
+  type TradeLabPlayer,
+  type TradeLabRoster,
+} from "@/lib/tradeValues";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { Label } from "../ui/label/index.ts";
@@ -27,23 +38,6 @@ import {
 } from "../ui/select";
 import { Input } from "@/components/ui/input";
 import { X, Plus } from "lucide-vue-next";
-
-type TradeLabPlayer = Player & {
-  projection: number;
-  overallRank: number;
-};
-
-type TradeLabRoster = {
-  id: number;
-  managerName: string;
-  players: TradeLabPlayer[];
-};
-
-type TradeDraftPickAsset = {
-  id: string;
-  season: number;
-  round: number;
-};
 
 const store = useStore();
 const props = defineProps<{
@@ -70,6 +64,10 @@ const draggedPlayer = ref<{ playerId: string; fromTeam: "A" | "B" } | null>(
   null
 );
 const isMobile = ref(false);
+const activeMode = ref<"analyze" | "find">("analyze");
+const selectedFinderTeamId = ref<number | null>(null);
+const finderTargetPosition = ref("Any");
+const finderGoal = ref<TradeFinderGoal>("balanced");
 
 const activeLeague = computed(() => store.leagueInfo[store.currentLeagueIndex]);
 
@@ -141,6 +139,18 @@ const teamA = computed(() =>
 );
 const teamB = computed(() =>
   rosters.value.find((team) => team.id === selectedTeamBId.value)
+);
+
+const finderRecommendations = computed(() =>
+  findTradeCandidates({
+    rosters: rosters.value,
+    sourceRosterId: selectedFinderTeamId.value,
+    rosterPositions: activeLeague.value?.rosterPositions ?? [],
+    targetPosition:
+      finderTargetPosition.value === "Any" ? undefined : finderTargetPosition.value,
+    goal: finderGoal.value,
+    maxResults: 8,
+  })
 );
 
 const teamAOutgoingPlayers = computed(() => {
@@ -270,6 +280,7 @@ const syncTeamSelections = () => {
   if (rosters.value.length < 2) {
     selectedTeamAId.value = rosters.value[0]?.id ?? null;
     selectedTeamBId.value = null;
+    selectedFinderTeamId.value = rosters.value[0]?.id ?? null;
     resetTrade();
     return;
   }
@@ -282,6 +293,9 @@ const syncTeamSelections = () => {
   );
 
   if (!existingA) selectedTeamAId.value = rosters.value[0].id;
+  if (!rosters.value.some((team) => team.id === selectedFinderTeamId.value)) {
+    selectedFinderTeamId.value = selectedTeamAId.value ?? rosters.value[0].id;
+  }
   if (!existingB) {
     selectedTeamBId.value =
       rosters.value.find((team) => team.id !== selectedTeamAId.value)?.id ??
@@ -445,69 +459,6 @@ const overallRankClass = (rank: number) => {
   return waiverPaletteClass(5);
 };
 
-const positionWeights: Record<string, number> = {
-  QB: 0.82,
-  RB: 1.3,
-  WR: 1.16,
-  TE: 1.08,
-  K: 0.35,
-  DEF: 0.45,
-};
-
-const depthMultipliers = [1, 0.64, 0.38, 0.2];
-const faabValuePerDollar = 0.17;
-
-const rankToScore = (rank: number) => {
-  if (!rank || rank <= 0) return 0;
-  return 100 / Math.sqrt(rank + 2);
-};
-
-const getPlayerTradeScore = (player: TradeLabPlayer) => {
-  const posScore = rankToScore(player.projection);
-  const overallScore = rankToScore(player.overallRank);
-  const baseScore = posScore * 0.67 + overallScore * 0.33;
-  const positionWeight = positionWeights[player.position] ?? 1;
-  return baseScore * positionWeight;
-};
-
-const getPackageTradeValue = (players: TradeLabPlayer[]) => {
-  if (players.length === 0) return 0;
-  const sortedScores = players
-    .map((player) => getPlayerTradeScore(player))
-    .sort((a, b) => b - a);
-
-  const total = sortedScores.reduce((sum, score, index) => {
-    const multiplier =
-      depthMultipliers[index] ?? depthMultipliers[depthMultipliers.length - 1];
-    return sum + score * multiplier;
-  }, 0);
-
-  return Number(total.toFixed(2));
-};
-
-const getDraftPickTradeValue = (pick: TradeDraftPickAsset) => {
-  const roundBaseValue =
-    {
-      1: 38,
-      2: 24,
-      3: 14,
-      4: 8,
-      5: 5,
-      6: 3.2,
-      7: 2.2,
-      8: 1.6,
-      9: 1.2,
-      10: 0.9,
-      11: 0.7,
-      12: 0.55,
-    }[pick.round] ?? Math.max(0.4, 7 / (pick.round + 1));
-
-  const seasonGap = Math.max(0, pick.season - draftSeasons.value[0]);
-  const seasonMultiplier = Math.max(0.74, 1 - seasonGap * 0.1);
-
-  return Number((roundBaseValue * seasonMultiplier).toFixed(2));
-};
-
 const teamAPlayerValue = computed(() =>
   getPackageTradeValue(teamAOutgoingPlayers.value)
 );
@@ -518,14 +469,20 @@ const teamBPlayerValue = computed(() =>
 const teamADraftPickValue = computed(() =>
   Number(
     teamAPicks.value
-      .reduce((sum, pick) => sum + getDraftPickTradeValue(pick), 0)
+      .reduce(
+        (sum, pick) => sum + getDraftPickTradeValue(pick, draftSeasons.value[0]),
+        0
+      )
       .toFixed(2)
   )
 );
 const teamBDraftPickValue = computed(() =>
   Number(
     teamBPicks.value
-      .reduce((sum, pick) => sum + getDraftPickTradeValue(pick), 0)
+      .reduce(
+        (sum, pick) => sum + getDraftPickTradeValue(pick, draftSeasons.value[0]),
+        0
+      )
       .toFixed(2)
   )
 );
@@ -556,24 +513,13 @@ const teamBTradeValue = computed(() =>
   )
 );
 
-const tradeDelta = computed(() =>
-  Number((teamATradeValue.value - teamBTradeValue.value).toFixed(2))
+const fairnessPercent = computed(() =>
+  getFairnessPercent(teamATradeValue.value, teamBTradeValue.value)
 );
 
-const fairnessPercent = computed(() => {
-  const maxSide = Math.max(teamATradeValue.value, teamBTradeValue.value, 1);
-  return Number(((Math.abs(tradeDelta.value) / maxSide) * 100).toFixed(1));
-});
-
-const fairnessLabel = computed(() => {
-  if (teamATradeValue.value === 0 && teamBTradeValue.value === 0) {
-    return "No assets selected";
-  }
-  if (fairnessPercent.value <= 10) return "Very fair";
-  if (fairnessPercent.value <= 22) return "Reasonably fair";
-  if (fairnessPercent.value <= 35) return "Slightly uneven";
-  return "Very uneven";
-});
+const fairnessLabel = computed(() =>
+  getFairnessLabel(teamATradeValue.value, teamBTradeValue.value)
+);
 
 const fairnessPillClass = computed(() => {
   if (teamATradeValue.value === 0 && teamBTradeValue.value === 0) {
@@ -584,6 +530,20 @@ const fairnessPillClass = computed(() => {
   if (fairnessPercent.value <= 35) return waiverPaletteClass(4);
   return waiverPaletteClass(5);
 });
+
+const loadRecommendation = (
+  recommendation: (typeof finderRecommendations.value)[number]
+) => {
+  selectedTeamAId.value = selectedFinderTeamId.value;
+  selectedTeamBId.value = recommendation.targetRosterId;
+  teamASends.value = recommendation.sourceSends.map((player) => player.player_id);
+  teamBSends.value = recommendation.targetSends.map((player) => player.player_id);
+  teamAFaab.value = 0;
+  teamBFaab.value = 0;
+  teamAPicks.value = [];
+  teamBPicks.value = [];
+  activeMode.value = "analyze";
+};
 
 watch(
   () => store.currentLeagueId,
@@ -664,11 +624,169 @@ onBeforeUnmount(() => {
       Click/tap players to add or remove from each package.
     </p>
 
+    <div class="flex flex-wrap gap-2 my-4">
+      <Button
+        size="sm"
+        :variant="activeMode === 'analyze' ? 'default' : 'outline'"
+        @click="activeMode = 'analyze'"
+      >
+        Analyze Trade
+      </Button>
+      <Button
+        size="sm"
+        :variant="activeMode === 'find' ? 'default' : 'outline'"
+        @click="activeMode = 'find'"
+      >
+        Find Trades
+      </Button>
+    </div>
+
     <div v-if="loading" class="h-screen py-2">
       Loading players and projections...
     </div>
     <div v-else>
-      <div class="grid gap-3 xl:grid-cols-3">
+      <div v-if="activeMode === 'find'" class="space-y-4">
+        <Card class="px-4 py-3">
+          <div class="flex flex-wrap items-end gap-3">
+            <div>
+              <Label class="block mb-1 text-sm">My Team</Label>
+              <Select
+                :model-value="selectedFinderTeamId"
+                @update:model-value="selectedFinderTeamId = Number($event)"
+              >
+                <SelectTrigger class="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="team in rosters"
+                    :key="`finder-team-${team.id}`"
+                    :value="team.id"
+                  >
+                    {{ team.managerName }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label class="block mb-1 text-sm">Target Position</Label>
+              <Select v-model="finderTargetPosition">
+                <SelectTrigger class="w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Any">Any</SelectItem>
+                  <SelectItem value="QB">QB</SelectItem>
+                  <SelectItem value="RB">RB</SelectItem>
+                  <SelectItem value="WR">WR</SelectItem>
+                  <SelectItem value="TE">TE</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label class="block mb-1 text-sm">Goal</Label>
+              <Select v-model="finderGoal">
+                <SelectTrigger class="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="balanced">Balanced</SelectItem>
+                  <SelectItem value="starters">Improve starters</SelectItem>
+                  <SelectItem value="depth">Add depth</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </Card>
+
+        <div
+          v-if="finderRecommendations.length > 0"
+          class="grid gap-3 xl:grid-cols-2"
+        >
+          <Card
+            v-for="recommendation in finderRecommendations"
+            :key="recommendation.id"
+            class="px-4 py-3"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-sm text-muted-foreground">
+                  {{ recommendation.targetManagerName }}
+                </p>
+                <h6 class="mt-1 text-base font-semibold">
+                  {{ recommendation.headline }}
+                </h6>
+              </div>
+              <span
+                :class="[
+                  'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                  recommendation.fairnessPercent <= 10
+                    ? waiverPaletteClass(1)
+                    : recommendation.fairnessPercent <= 22
+                      ? waiverPaletteClass(2)
+                      : waiverPaletteClass(4),
+                ]"
+              >
+                {{ recommendation.fairnessPercent }}% gap
+              </span>
+            </div>
+            <p class="mt-2 text-sm text-muted-foreground">
+              {{ recommendation.rationale }}
+            </p>
+            <div class="grid gap-3 mt-3 md:grid-cols-2">
+              <div>
+                <p class="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+                  Send
+                </p>
+                <div class="space-y-1">
+                  <p
+                    v-for="player in recommendation.sourceSends"
+                    :key="`source-${recommendation.id}-${player.player_id}`"
+                    class="text-sm"
+                  >
+                    {{ player.name || `${player.team} Defense` }}
+                    <span class="text-xs text-muted-foreground">
+                      {{ player.position }} {{ rankLabel(player.projection) }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p class="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+                  Receive
+                </p>
+                <div class="space-y-1">
+                  <p
+                    v-for="player in recommendation.targetSends"
+                    :key="`target-${recommendation.id}-${player.player_id}`"
+                    class="text-sm"
+                  >
+                    {{ player.name || `${player.team} Defense` }}
+                    <span class="text-xs text-muted-foreground">
+                      {{ player.position }} {{ rankLabel(player.projection) }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between mt-4">
+              <p class="text-xs text-muted-foreground">
+                Values: {{ recommendation.sourceValue }} /
+                {{ recommendation.targetValue }}
+              </p>
+              <Button size="sm" @click="loadRecommendation(recommendation)">
+                Load in Lab
+              </Button>
+            </div>
+          </Card>
+        </div>
+        <Card v-else class="px-4 py-6 text-sm text-muted-foreground">
+          No strong matches found for this setup. Try another target position or
+          switch to a balanced goal.
+        </Card>
+      </div>
+
+      <div v-else class="grid gap-3 xl:grid-cols-3">
         <Card class="px-4 py-3">
           <div class="mb-2">
             <Label class="block mb-1 text-sm">Manager</Label>
