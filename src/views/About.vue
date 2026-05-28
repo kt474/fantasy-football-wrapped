@@ -81,7 +81,16 @@ watch(
               target="_blank"
               rel="noopener noreferrer"
               >Twitter</a
-            >. Any suggestions are welcome!
+            >. Any suggestions are welcome! I also have a
+            <a
+              aria-label="Link to ffwrapped blog"
+              class="font-medium text-primary hover:underline"
+              href="https://blog.ffwrapped.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              >ffwrapped blog</a
+            >
+            where I write about fantasy football statistics and programming.
           </p>
           <p class="text-base leading-relaxed">
             I will always try to keep this site free (and ad free) but as the
