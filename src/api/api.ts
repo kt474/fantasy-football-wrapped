@@ -590,5 +590,7 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     waivers,
     legacyWinner: legacyWinner,
     lastUpdated: new Date().getTime(),
+    espnWinnersBracket: [],
+    espnLosersBracket: [],
   };
 };
