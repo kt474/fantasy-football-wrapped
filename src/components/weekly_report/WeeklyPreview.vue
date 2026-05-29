@@ -520,6 +520,13 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
     v-if="!loading"
     class="flex flex-wrap mb-4 overflow-auto gap-x-4 gap-y-2"
   >
+    <PreviewSummary
+      v-if="
+        currentWeek === store.leagueInfo[store.currentLeagueIndex]?.currentWeek
+      "
+      :matchups="matchups"
+      :playerNames="playerNames"
+    />
     <Card
       v-if="matchups.length > 0"
       v-for="matchup in matchups"
@@ -819,15 +826,6 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
           {{ generateString(cases[matchup[1].id]) }}
         </div>
       </div>
-      <PreviewSummary
-        v-if="
-          currentWeek ===
-          store.leagueInfo[store.currentLeagueIndex]?.currentWeek
-        "
-        :matchup1="matchup[0]"
-        :matchup2="matchup[1]"
-        :playerNames="playerNames"
-      />
       <p class="my-4 mb-8 ml-4 font-semibold sm:mb-0">Recent Performances</p>
       <apexchart
         class="mt-4"

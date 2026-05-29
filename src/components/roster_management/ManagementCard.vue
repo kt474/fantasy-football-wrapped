@@ -41,10 +41,10 @@ const mostPoints = computed(() => {
 const minPoints = computed(() => {
   return minBy(tableData.value, "pointsFor")?.pointsFor;
 });
-const mostPontentialPoints = computed(() => {
+const mostPotentialPoints = computed(() => {
   return maxBy(tableData.value, "potentialPoints")?.potentialPoints;
 });
-const minPontentialPoints = computed(() => {
+const minPotentialPoints = computed(() => {
   return minBy(tableData.value, "potentialPoints")?.potentialPoints;
 });
 const highestEfficiency = computed(() => {
@@ -201,9 +201,9 @@ const listPadding = computed(() => {
               class="py-2 pl-1 pr-3"
               :class="{
                 'text-primary font-semibold':
-                  item.potentialPoints === mostPontentialPoints,
+                  item.potentialPoints === mostPotentialPoints,
                 'text-destructive font-semibold':
-                  item.potentialPoints === minPontentialPoints,
+                  item.potentialPoints === minPotentialPoints,
               }"
             >
               {{ item.potentialPoints }}

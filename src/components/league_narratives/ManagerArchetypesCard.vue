@@ -66,9 +66,10 @@ const storedManagerProfiles = computed(
 
 const canGenerateArchetypes = computed(
   () =>
-    props.payload.managers.length > 0 &&
-    !isLoading.value &&
-    Object.keys(blurbsByUserId.value).length == 0
+    (props.payload.managers.length > 0 &&
+      !isLoading.value &&
+      Object.keys(blurbsByUserId.value).length == 0) ||
+    subscriptionStore.isPremium
 );
 
 const generateButtonLabel = computed(() => {
@@ -95,9 +96,8 @@ watch(
       <div>
         <p class="text-3xl font-bold leading-none">Manager Profiles</p>
         <p class="mt-4 sm:max-w-2xl text-muted-foreground">
-          Long-term records, historic trends, and custom manager profiles for
-          your league. Profiles highlight manager tendencies, strengths, and
-          overall identity.
+          Long-term records, trends, and custom profiles that capture each
+          manager’s tendencies, strengths, and overall identity.
         </p>
       </div>
       <Button :disabled="!canGenerateArchetypes" @click="getManagerArchetypes">

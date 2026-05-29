@@ -6,6 +6,7 @@ import type { LeagueOriginal } from "@/types/apiTypes";
 import { getData, inputLeague, inputUsername } from "@/api/api";
 import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
 import { getEspnLeagueInfo } from "@/api/espnApi";
+import { toast } from "vue-sonner";
 
 export const SEASON_YEAR_OPTIONS = [
   "2026",
@@ -29,7 +30,7 @@ export const useLeagueInput = (
 
   const leagueIdInput = ref("");
   const inputType = ref("League ID");
-  const seasonYear = ref("2025");
+  const seasonYear = ref("2026");
   const showErrorMsg = ref(false);
   const errorMsg = ref("");
   const showHelperMsg = ref(false);
@@ -57,6 +58,12 @@ export const useLeagueInput = (
     showErrorMsg.value = false;
   };
 
+  const showError = (message: string) => {
+    errorMsg.value = message;
+    toast.error(message);
+    showErrorMsg.value = true;
+  };
+
   onMounted(() => {
     const savedInputType = localStorage.getItem("inputType");
     if (savedInputType) {
@@ -76,14 +83,12 @@ export const useLeagueInput = (
     if (currentPlatform === "sleeper") {
       if (inputType.value === "Username") {
         if (leagueIdInput.value === "") {
-          errorMsg.value = "Please enter a username";
-          showErrorMsg.value = true;
+          showError("Please enter a username");
           return;
         }
         const user = await getUsername(leagueIdInput.value);
         if (!user?.user_id || !user?.display_name) {
-          errorMsg.value = "Invalid username";
-          showErrorMsg.value = true;
+          showError("Invalid username");
           return;
         }
         showHelperMsg.value = true;
@@ -102,26 +107,21 @@ export const useLeagueInput = (
       }
 
       if (store.leagueInfo.length >= 5) {
-        errorMsg.value = "Maximum of 5 leagues allowed";
-        showErrorMsg.value = true;
+        showError("Maximum of 5 leagues allowed");
         return;
       }
       if (leagueIdInput.value === "") {
-        errorMsg.value = "Please enter a league ID";
-        showErrorMsg.value = true;
+        showError("Please enter a league ID");
         return;
       }
 
       const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
       if (!checkInput["name"]) {
-        errorMsg.value = "Invalid league ID";
-        showErrorMsg.value = true;
+        showError("Invalid league ID");
       } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
-        errorMsg.value = "League already added";
-        showErrorMsg.value = true;
+        showError("League already added");
       } else if (checkInput["sport"] !== "nfl") {
-        errorMsg.value = "Only NFL leagues are supported";
-        showErrorMsg.value = true;
+        showError("Only NFL leagues are supported");
       } else {
         store.currentTab = "Standings";
         localStorage.setItem("currentTab", "Standings");
@@ -149,8 +149,7 @@ export const useLeagueInput = (
           }
         } catch (error) {
           console.error("Failed to load league:", error);
-          errorMsg.value = "Unable to load league right now. Please try again.";
-          showErrorMsg.value = true;
+          showError("Unable to load league right now. Please try again.");
         } finally {
           store.updateLoadingLeague("");
         }
@@ -161,6 +160,19 @@ export const useLeagueInput = (
     }
 
     if (currentPlatform === "espn") {
+      if (store.leagueInfo.length >= 5) {
+        showError("Maximum of 5 leagues allowed");
+        return;
+      }
+      if (leagueIdInput.value === "") {
+        showError("Please enter a league ID");
+        return;
+      }
+      if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
+        showError("League already added");
+        return;
+      }
+
       try {
         store.currentTab = "Standings";
         localStorage.setItem("currentTab", "Standings");
@@ -180,8 +192,7 @@ export const useLeagueInput = (
         }
       } catch (error) {
         console.error("Failed to load league:", error);
-        errorMsg.value = "Unable to load league right now. Please try again.";
-        showErrorMsg.value = true;
+        showError("Unable to load league right now. Please try again.");
       } finally {
         store.updateLoadingLeague("");
       }

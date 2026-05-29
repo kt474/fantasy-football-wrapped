@@ -516,12 +516,13 @@ watch(
             </div>
           </div>
           <div class="">
-            <span
+            <p
               :class="[move.value ? getValueColor(move.value) : '']"
               class="text-xs px-2.5 py-1 mb-1 rounded-full float-end"
-              >{{ move.value ? move.value : "N/A" }}</span
             >
-            <p class="mt-1 text-xs text-muted-foreground">
+              {{ move.value ? move.value : "N/A" }}
+            </p>
+            <p class="mt-1 mr-1 text-xs text-right text-muted-foreground">
               {{ move.value ? getRatingLabel(move.value) : "" }}
             </p>
           </div>

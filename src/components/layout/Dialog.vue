@@ -16,8 +16,6 @@ const {
   seasonYear,
   leagueIdInput,
   showErrorMsg,
-  errorMsg,
-  showHelperMsg,
   onSubmit,
   clearError,
 } = useLeagueInput();
@@ -68,12 +66,6 @@ const handleSubmit = async () => {
           platform="sleeper"
           @submit="handleSubmit"
         />
-        <p v-if="showErrorMsg" class="text-xs text-destructive">
-          {{ errorMsg }}
-        </p>
-        <p v-if="showHelperMsg" class="text-xs text-muted-foreground">
-          Loading leagues...
-        </p>
       </div>
     </DialogContent>
   </Dialog>

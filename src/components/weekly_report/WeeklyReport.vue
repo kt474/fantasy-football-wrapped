@@ -329,6 +329,7 @@ onMounted(async () => {
     store.leagueInfo[store.currentLeagueIndex] &&
     store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
   ) {
+    loading.value = true;
     await fetchPlayerNames();
     const savedText = store.leagueInfo[store.currentLeagueIndex]?.weeklyReport
       ? (store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "")
@@ -339,6 +340,7 @@ onMounted(async () => {
       ? (store.leagueInfo[store.currentLeagueIndex].premiumWeeklyReport ?? "")
       : "";
     rawPremiumWeeklyReport.value = premiumSavedText;
+    loading.value = false;
   }
 });
 
@@ -952,7 +954,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
 </script>
 <template>
   <Card class="h-full px-6 pt-4 my-4 custom-width">
-    <Tabs default-value="Report">
+    <Tabs default-value="Report" v-model="activeTab">
       <div class="flex justify-between w-full mb-3">
         <h5 class="mr-4 text-2xl font-bold sm:text-3xl">
           Weekly {{ activeTab }}
@@ -960,8 +962,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
         <div class="flex flex-wrap justify-end">
           <div class="inline-flex pb-1 rounded-lg sm:mr-2" role="tablist">
             <TabsList>
-              <TabsTrigger value="Preview"> Preview </TabsTrigger>
               <TabsTrigger value="Report"> Report </TabsTrigger>
+              <TabsTrigger value="Preview"> Preview </TabsTrigger>
             </TabsList>
           </div>
           <Select v-model="currentWeek">
@@ -1052,8 +1054,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
                     class="my-2.5 report-content"
                   ></div>
                   <p class="text-xs text-muted-foreground">
-                    Generated using GPT-5.4-mini. Information provided may not
-                    always be accurate.
+                    AI-generated report. Information provided may not always be
+                    accurate.
                   </p>
                 </div>
                 <div
@@ -1140,7 +1142,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   <p class="max-w-3xl">
                     Premium weekly reports include deeper analysis, more league
                     context, customizable commentary styles, and a podcast-style
-                    audio version. Available with an account and
+                    audio version. Available with a
                     <router-link
                       :to="{ path: '/account', query: $route.query }"
                       class="font-medium cursor-pointer hover:underline"
@@ -1159,7 +1161,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                 <p class="max-w-3xl">
                   Premium weekly reports include deeper analysis, more league
                   context, customizable commentary styles, and a podcast-style
-                  audio version. Available with an account and
+                  audio version. Available with a
                   <router-link
                     :to="{ path: '/account', query: $route.query }"
                     class="font-medium cursor-pointer hover:underline"
@@ -1177,21 +1179,28 @@ watch(() => currentWeek.value, fetchPlayerNames);
                   class="mb-3 report-content"
                 ></div>
                 <p class="text-xs text-muted-foreground">
-                  Generated using GPT-5.4-mini. Information provided may not
-                  always be accurate.
+                  AI-generated report. Information provided may not always be
+                  accurate.
                 </p>
                 <p class="text-xs text-muted-foreground">
-                  If you enjoy these weekly reports please consider
+                  If you enjoy these weekly reports please consider supporting
+                  this project by
                   <a
                     aria-label="buymeacoffee donation page"
                     class="text-primary hover:underline"
                     href="https://buymeacoffee.com/kt474"
-                    title="buymeacofee donation page"
+                    title="buymeacoffee donation page"
                     target="_blank"
                     rel="noopener noreferrer"
-                    >supporting</a
+                    >donating</a
                   >
-                  this project.
+                  or subscribing to the
+                  <router-link
+                    :to="{ path: '/account', query: $route.query }"
+                    class="cursor-pointer text-primary hover:underline"
+                    @click="store.currentTab = ''"
+                    >Premium Tier</router-link
+                  >.
                 </p>
               </div>
               <!-- Fake data for home page -->

@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "5/03/26",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "The AI-generated weekly matchup previews have been combined into one matchup forecast.",
+        ],
+      },
+    ],
+  },
+  {
     date: "4/19/26",
     content: [
       {
@@ -93,7 +104,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Added a new 'wrapped' tab for the spotify wrapped style end of season recap.",
+          "Added a new 'wrapped' tab for the Spotify Wrapped-style end of season recap.",
         ],
       },
     ],
@@ -115,7 +126,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "The weekly preview section now has AI generated matchup previews for each matchup.",
+          "The weekly preview section now has AI-generated matchup previews for each matchup.",
         ],
       },
     ],
@@ -137,7 +148,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "In the 'Expected Wins' tab there is now a schedule analysis section. The goal of this component is to show which weeks were especialy lucky/unlucky.",
+          "In the 'Expected Wins' tab there is now a schedule analysis section. The goal of this component is to show which weeks were especially lucky/unlucky.",
         ],
       },
     ],
@@ -223,7 +234,7 @@ const data = [
       {
         type: "Update",
         text: [
-          "The player rankings and wavier moves can now be all viewed at once instead of only selecting a single manager.",
+          "The player rankings and waiver moves can now be all viewed at once instead of only selecting a single manager.",
         ],
       },
     ],
@@ -324,7 +335,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Added a new strengh of schedule chart in the expected wins tab that shows each team's relative strength of schedule. This value is the average difference between a team’s opponents’ points per game and the league‑wide average points per game.",
+          "Added a new strength of schedule chart in the expected wins tab that shows each team's relative strength of schedule. This value is the average difference between a team’s opponents’ points per game and the league‑wide average points per game.",
         ],
       },
     ],
@@ -335,7 +346,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Added a new 'League News' section in the standings tab that shows AI generated league trends and highlights.",
+          "Added a new 'League News' section in the standings tab that shows AI-generated league trends and highlights.",
         ],
       },
     ],
@@ -472,7 +483,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Added a new draft section where all draft picks along with a draft pick rank are shown in a table. Note that this feature is still a work in progress - the current ranks may be misleading on inaccruate.",
+          "Added a new draft section where all draft picks along with a draft pick rank are shown in a table. Note that this feature is still a work in progress - the current ranks may be misleading or inaccurate.",
         ],
       },
     ],
@@ -494,7 +505,7 @@ const data = [
       {
         type: "Update",
         text: [
-          "Updated the prompt and inputs for the AI generated weekly reports. The reports should no longer give incorrect winning teams. ",
+          "Updated the prompt and inputs for the AI-generated weekly reports. The reports should no longer give incorrect winning teams. ",
         ],
       },
     ],

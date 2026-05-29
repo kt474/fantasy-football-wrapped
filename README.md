@@ -1,22 +1,24 @@
 # Fantasy Football Wrapped
 
-Detailed analysis and insights for Sleeper fantasy football leagues.
+Fantasy Football Wrapped ([ffwrapped](https://ffwrapped.com/)) is a production Vue/TypeScript app used by thousands of fantasy football managers to analyze Sleeper leagues. The app transforms league, roster, matchup, draft, and transaction data into power rankings, playoff odds, AI-generated reports, trade insights, and personalized season recaps.
 
-Current features:
+![ffwrapped homepage](public/homepage.webp)
 
-- Comprehensive standings and AI generated league news/current trends
+## Current Features
+
+- Comprehensive standings and AI-generated league news/current trends
 - Power rankings, roster rankings, and projections
 - Expected wins, strength of schedule (measuring luck), and schedule analysis
 - Roster management stats, trade rankings, and waiver wire moves
 - Playoff odds
-- AI generated weekly reports, summary of matchups and top/bottom performers from each week
+- AI-generated weekly reports, summaries of matchups, and top/bottom performers from each week
 - Weekly matchup previews
 - Start/sit stats with latest player news
 - Draft grades and recap
-- Schedule simulator, and trade calculator
+- Schedule simulator and trade calculator
 - Manager profiles highlighting tendencies, strengths, and overall identity
 - League history stats
-- Yearly spotify wrapped style presentation
+- Yearly Spotify Wrapped-style presentation
 
 ## Contributing
 
@@ -46,15 +48,17 @@ Fork this repository and then clone the fork. To run the project locally, you'll
   npm run dev
 ```
 
-None of the environment variables are required to get the project running locally but some features like the AI generated summaries are hidden behind an API.
+No environment variables are required to run the project locally, though some features such as AI-generated summaries are hidden behind an API.
 
 ### Technologies
 
-It would also be helpful to familiarize yourself with the technologies used in this project:
-
-- Framework: Vue 3 and Typescript
-- UI: Vue Shadcn and Tailwind CSS
-- State managment: Pinia
+- Frontend: Vue 3, TypeScript, Vite
+- State management: Pinia
+- UI: Tailwind CSS, shadcn-vue
+- Backend integrations: Node.js, Supabase, Stripe, Resend, OpenAI
+- Analytics: PostHog, Umami
+- Testing: Vitest
+- Deployment: Vercel
 
 ### Pull Request Process
 
@@ -72,8 +76,3 @@ It would also be helpful to familiarize yourself with the technologies used in t
 ## Contact
 
 Please report any issues or request new features in the [issues](https://github.com/kt474/fantasy-football-wrapped/issues) tab
-
-## TODO
-
-- ESPN Support
-- Yahoo Support

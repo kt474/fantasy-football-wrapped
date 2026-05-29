@@ -99,6 +99,12 @@ export const useStore = defineStore("main", {
         item.playoffProjections = payload;
       }
     },
+    addWeeklyPreview(leagueId: string, payload: string) {
+      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      if (item) {
+        item.weeklyPreview = payload;
+      }
+    },
     addWeeklyReport(leagueId: string, payload: string) {
       const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
       if (item) {
