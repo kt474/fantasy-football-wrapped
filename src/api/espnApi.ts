@@ -139,11 +139,65 @@ const getSleeperPlayerIdByEspnIdMap = (
   return sleeperPlayerIdByEspnId;
 };
 
+export class EspnLeagueError extends Error {
+  constructor(
+    message: string,
+    public readonly code:
+      | "private"
+      | "not_found"
+      | "invalid_response"
+      | "request_failed"
+      | "unknown"
+  ) {
+    super(message);
+    this.name = "EspnLeagueError";
+  }
+}
+
+export const getEspnErrorMessage = (error: unknown) => {
+  if (error instanceof EspnLeagueError) {
+    return error.message;
+  }
+  return "Unable to load ESPN league right now. Please try again.";
+};
+
 const safeJson = async (response: Response) => {
   if (!response.ok) {
-    throw new Error(`ESPN request failed with status ${response.status}`);
+    if (response.status === 401 || response.status === 403) {
+      throw new EspnLeagueError(
+        "This ESPN league appears to be private. Public ESPN leagues are supported right now.",
+        "private"
+      );
+    }
+    if (response.status === 404) {
+      throw new EspnLeagueError(
+        "ESPN league not found. Check the league ID and season.",
+        "not_found"
+      );
+    }
+    throw new EspnLeagueError(
+      `ESPN request failed with status ${response.status}. Please try again later.`,
+      "request_failed"
+    );
   }
   return response.json();
+};
+
+const assertRecord = (
+  value: unknown,
+  message: string
+): Record<string, unknown> => {
+  if (typeof value !== "object" || value === null) {
+    throw new EspnLeagueError(message, "invalid_response");
+  }
+  return value as Record<string, unknown>;
+};
+
+const assertArray = <T = unknown>(value: unknown, message: string): T[] => {
+  if (!Array.isArray(value)) {
+    throw new EspnLeagueError(message, "invalid_response");
+  }
+  return value as T[];
 };
 
 const getTeamRecord = (team: Record<string, unknown>) => {
@@ -721,47 +775,31 @@ const getLeagueStatus = (
 };
 
 export const getLeagueData = async (season: string, league_id: string) => {
-  try {
-    const response = await fetch(
-      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mSettings`
-    );
-    return safeJson(response);
-  } catch (e) {
-    console.error(e);
-  }
+  const response = await fetch(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mSettings`
+  );
+  return safeJson(response);
 };
 
 export const getTeamData = async (season: string, league_id: string) => {
-  try {
-    const response = await fetch(
-      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTeam`
-    );
-    return safeJson(response);
-  } catch (e) {
-    console.error(e);
-  }
+  const response = await fetch(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTeam`
+  );
+  return safeJson(response);
 };
 
 export const getRosterData = async (season: string, league_id: string) => {
-  try {
-    const response = await fetch(
-      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mRoster`
-    );
-    return safeJson(response);
-  } catch (e) {
-    console.error(e);
-  }
+  const response = await fetch(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mRoster`
+  );
+  return safeJson(response);
 };
 
 export const getDraftData = async (season: string, league_id: string) => {
-  try {
-    const response = await fetch(
-      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mDraftDetail`
-    );
-    return safeJson(response);
-  } catch (e) {
-    console.error(e);
-  }
+  const response = await fetch(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mDraftDetail`
+  );
+  return safeJson(response);
 };
 
 export const getPlayerStats = async (
@@ -769,25 +807,17 @@ export const getPlayerStats = async (
   league_id: string,
   week: number
 ) => {
-  try {
-    const response = await fetch(
-      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore&view=mScoreboard&scoringPeriodId=${String(week)}`
-    );
-    return safeJson(response);
-  } catch (e) {
-    console.error(e);
-  }
+  const response = await fetch(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore&view=mScoreboard&scoringPeriodId=${String(week)}`
+  );
+  return safeJson(response);
 };
 
 export const getPlayoffMatchups = async (season: string, league_id: string) => {
-  try {
-    const response = await fetch(
-      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore`
-    );
-    return safeJson(response);
-  } catch (e) {
-    console.error(e);
-  }
+  const response = await fetch(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore`
+  );
+  return safeJson(response);
 };
 
 export const getWaivers = async (
@@ -795,14 +825,10 @@ export const getWaivers = async (
   league_id: string,
   week: number
 ) => {
-  try {
-    const response = await fetch(
-      `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTransactions2&scoringPeriodId=${String(week)}`
-    );
-    return safeJson(response);
-  } catch (e) {
-    console.error(e);
-  }
+  const response = await fetch(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTransactions2&scoringPeriodId=${String(week)}`
+  );
+  return safeJson(response);
 };
 
 const getScoringType = (scoringItems: any[]): number => {
@@ -817,62 +843,93 @@ const getLeagueFormat = (draftSettings: any): "Redraft" | "Keeper" => {
 export const getEspnLeagueInfo = async (
   season: string,
   leagueId: string
-): Promise<LeagueInfoType | null> => {
-  try {
-    const [league, teamData, rosterData, draftData, playoffData] =
-      await Promise.all([
-        getLeagueData(season, leagueId),
-        getTeamData(season, leagueId),
-        getRosterData(season, leagueId),
-        getDraftData(season, leagueId),
-        getPlayoffMatchups(season, leagueId),
-      ]);
+): Promise<LeagueInfoType> => {
+  const [league, teamData, rosterData, draftData, playoffData] =
+    await Promise.all([
+      getLeagueData(season, leagueId),
+      getTeamData(season, leagueId),
+      getRosterData(season, leagueId),
+      getDraftData(season, leagueId),
+      getPlayoffMatchups(season, leagueId),
+    ]);
 
-    const leagueRoot = (league ?? {}) as Record<string, unknown>;
-    const settings: any = leagueRoot.settings;
-    const scheduleSettings = settings.scheduleSettings;
-    const rosterSettings = settings.rosterSettings;
-    const acquisitionSettings = settings.acquisitionSettings;
-    // const playoffMatchupPeriodLength =
-    //   scheduleSettings.playoffMatchupPeriodLength;
-    // const numPlayoffTeams = scheduleSettings.playoffTeamCount;
-    const playoffMatchups = playoffData.schedule.filter(
-      (matchup: any) => matchup.playoffTierType !== "NONE"
-    );
+  const leagueRoot = assertRecord(
+    league,
+    "ESPN returned an invalid league response."
+  );
+  const settings = assertRecord(
+    leagueRoot.settings,
+    "ESPN league settings are missing. Check that the league ID and season are correct."
+  );
+  const scheduleSettings = assertRecord(
+    settings.scheduleSettings,
+    "ESPN schedule settings are missing for this league."
+  );
+  const rosterSettings = assertRecord(
+    settings.rosterSettings,
+    "ESPN roster settings are missing for this league."
+  );
+  const acquisitionSettings = assertRecord(
+    settings.acquisitionSettings,
+    "ESPN acquisition settings are missing for this league."
+  );
+  const scoringSettings = assertRecord(
+    settings.scoringSettings,
+    "ESPN scoring settings are missing for this league."
+  );
+  // const playoffMatchupPeriodLength =
+  //   scheduleSettings.playoffMatchupPeriodLength;
+  // const numPlayoffTeams = scheduleSettings.playoffTeamCount;
+  const playoffMatchups = assertArray<Record<string, unknown>>(
+    assertRecord(playoffData, "ESPN playoff data is missing.").schedule,
+    "ESPN playoff schedule data is missing."
+  ).filter((matchup: any) => matchup.playoffTierType !== "NONE");
 
-    const status =
-      (leagueRoot.status as Record<string, unknown> | undefined) ?? {};
-    const members = Array.isArray(leagueRoot.members)
-      ? (leagueRoot.members as Array<Record<string, unknown>>)
-      : [];
-    const teamDataTeams = Array.isArray(teamData?.teams)
-      ? (teamData.teams as Array<Record<string, unknown>>)
-      : [];
-    const rosterDataTeams = Array.isArray(rosterData?.teams)
-      ? (rosterData.teams as Array<Record<string, unknown>>)
-      : [];
-    const teams = mergeTeams(teamDataTeams, rosterDataTeams);
-    const regularSeasonLength = Number(
-      scheduleSettings.matchupPeriodCount ??
-        scheduleSettings.regularSeasonMatchupPeriodCount ??
-        0
-    );
-    const currentWeek = Number(status.currentMatchupPeriod ?? 0);
-    const finalScoringPeriod = Number(status.finalScoringPeriod ?? 0);
-    const lastScoredWeek = Math.max(finalScoringPeriod, currentWeek - 1, 0);
+  const status =
+    (leagueRoot.status as Record<string, unknown> | undefined) ?? {};
+  const members = Array.isArray(leagueRoot.members)
+    ? (leagueRoot.members as Array<Record<string, unknown>>)
+    : [];
+  const teamDataTeams = Array.isArray(teamData?.teams)
+    ? (teamData.teams as Array<Record<string, unknown>>)
+    : [];
+  const rosterDataTeams = Array.isArray(rosterData?.teams)
+    ? (rosterData.teams as Array<Record<string, unknown>>)
+    : [];
+  const teams = mergeTeams(teamDataTeams, rosterDataTeams);
+  const regularSeasonLength = Number(
+    scheduleSettings.matchupPeriodCount ??
+      scheduleSettings.regularSeasonMatchupPeriodCount ??
+      0
+  );
+  const currentWeek = Number(status.currentMatchupPeriod ?? 0);
+  const finalScoringPeriod = Number(status.finalScoringPeriod ?? 0);
+  const lastScoredWeek = Math.max(finalScoringPeriod, currentWeek - 1, 0);
 
     let schedule = [];
     let waivers = [];
     for (let i = 1; i <= lastScoredWeek; i++) {
-      const scheduleData = await getPlayerStats(season, leagueId, i);
-      const waiverData = await getWaivers(season, leagueId, i);
-      const filteredWaivers = waiverData?.transactions?.filter(
+      const scheduleData = assertRecord(
+        await getPlayerStats(season, leagueId, i),
+        `ESPN weekly scoring data is missing for week ${i}.`
+      );
+      const waiverData = assertRecord(
+        await getWaivers(season, leagueId, i),
+        `ESPN transaction data is missing for week ${i}.`
+      );
+      const filteredWaivers = assertArray<Record<string, unknown>>(
+        waiverData.transactions ?? [],
+        `ESPN transaction data is invalid for week ${i}.`
+      ).filter(
         (transaction: any) =>
           transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
       );
       waivers.push(filteredWaivers);
 
-      const filtered = scheduleData.schedule
+      const filtered = assertArray<Record<string, unknown>>(
+        scheduleData.schedule,
+        `ESPN matchup schedule data is missing for week ${i}.`
+      )
         .filter(
           (matchup: any) =>
             matchup.home?.rosterForCurrentScoringPeriod &&
@@ -1034,7 +1091,12 @@ export const getEspnLeagueInfo = async (
         (status.previousSeasons as LeagueInfoType[] | undefined) ?? [],
       status: getLeagueStatus(currentWeek, lastScoredWeek, regularSeasonLength),
       currentWeek,
-      scoringType: getScoringType(settings.scoringSettings.scoringItems),
+      scoringType: getScoringType(
+        assertArray(
+          scoringSettings.scoringItems ?? [],
+          "ESPN scoring settings are invalid."
+        )
+      ),
       rosterPositions: getRosterPositions(
         (rosterSettings.lineupSlotCounts as
           | Record<string, number>
@@ -1049,13 +1111,14 @@ export const getEspnLeagueInfo = async (
         teams,
         allPlayerLookups,
         season,
-        getScoringType(settings.scoringSettings.scoringItems)
+        getScoringType(
+          assertArray(
+            scoringSettings.scoringItems ?? [],
+            "ESPN scoring settings are invalid."
+          )
+        )
       ),
       waiverType: acquisitionSettings.isUsingAcquisitionBudget ? 2 : 0,
       sport: "nfl",
     };
-  } catch (error) {
-    console.error("Error building ESPN league info:", error);
-    return null;
-  }
 };

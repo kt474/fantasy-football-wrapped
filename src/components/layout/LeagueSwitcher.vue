@@ -32,7 +32,7 @@ import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
 import { getData, inputLeague } from "../../api/api";
-import { getEspnLeagueInfo } from "@/api/espnApi";
+import { getEspnErrorMessage, getEspnLeagueInfo } from "@/api/espnApi";
 import Dialog from "./Dialog.vue";
 
 const router = useRouter();
@@ -144,14 +144,19 @@ const refreshLeague = async () => {
     localStorage.setItem("originalData", JSON.stringify(currentData));
   }
   store.updateLoadingLeague(leagueToRefresh.name);
+  let didRefresh = false;
   if (leagueToRefresh.platform === "espn") {
-    const refreshedLeague = await getEspnLeagueInfo(
-      leagueToRefresh.season,
-      leagueToRefresh.leagueId
-    );
-    if (refreshedLeague) {
+    try {
+      const refreshedLeague = await getEspnLeagueInfo(
+        leagueToRefresh.season,
+        leagueToRefresh.leagueId
+      );
       store.updateLeagueInfo(refreshedLeague);
       store.updateCurrentLeagueId(getLeagueKey(refreshedLeague));
+      didRefresh = true;
+    } catch (error) {
+      toast.error(getEspnErrorMessage(error));
+      store.updateLeagueInfo(leagueToRefresh);
     }
   } else {
     store.updateLeagueInfo(await getData(leagueToRefresh.leagueId));
@@ -162,8 +167,11 @@ const refreshLeague = async () => {
       leagueToRefresh.seasonType,
       leagueToRefresh.season
     );
+    didRefresh = true;
   }
-  toast.success("League data refreshed!");
+  if (didRefresh) {
+    toast.success("League data refreshed!");
+  }
   store.updateLoadingLeague("");
 };
 

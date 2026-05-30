@@ -7,7 +7,7 @@ import { fakePoints, fakeRosters, fakeUsers } from "../api/fakeLeague";
 import Input from "@/components/ui/input/Input.vue";
 import { getLeagueKey, useStore } from "../store/store";
 import { getData, inputLeague } from "../api/api";
-import { getEspnLeagueInfo } from "@/api/espnApi";
+import { getEspnErrorMessage, getEspnLeagueInfo } from "@/api/espnApi";
 import { getLeague } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
@@ -55,12 +55,15 @@ onMounted(async () => {
               }
               store.updateLoadingLeague(league.name);
               if (league.platform === "espn") {
-                const refreshedData = await getEspnLeagueInfo(
-                  league.season,
-                  league.leagueId
-                );
-                if (refreshedData) {
+                try {
+                  const refreshedData = await getEspnLeagueInfo(
+                    league.season,
+                    league.leagueId
+                  );
                   store.updateLeagueInfo(refreshedData);
+                } catch (error) {
+                  toast.error(getEspnErrorMessage(error));
+                  store.updateLeagueInfo(league);
                 }
               } else {
                 const refreshedData = await getData(league.leagueId);
@@ -109,14 +112,14 @@ onMounted(async () => {
           return;
         }
         store.updateLoadingLeague("ESPN League");
-        const league = await getEspnLeagueInfo(season, leagueId);
-        if (league) {
+        try {
+          const league = await getEspnLeagueInfo(season, leagueId);
           store.updateLeagueInfo(league);
           store.updateCurrentLeagueId(getLeagueKey(league));
           store.currentTab = "Standings";
           localStorage.setItem("currentTab", "Standings");
-        } else {
-          toast.error("Invalid ESPN League ID");
+        } catch (error) {
+          toast.error(getEspnErrorMessage(error));
         }
         store.updateLoadingLeague("");
         return;

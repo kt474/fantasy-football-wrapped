@@ -4,7 +4,7 @@ import { getLeagueKey, useStore } from "@/store/store";
 import type { LeagueOriginal } from "@/types/apiTypes";
 import { getData, inputLeague, inputUsername } from "@/api/api";
 import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
-import { getEspnLeagueInfo } from "@/api/espnApi";
+import { getEspnErrorMessage, getEspnLeagueInfo } from "@/api/espnApi";
 import { toast } from "vue-sonner";
 
 export const SEASON_YEAR_OPTIONS = [
@@ -219,7 +219,7 @@ export const useLeagueInput = (
         }
       } catch (error) {
         console.error("Failed to load league:", error);
-        showError("Unable to load league right now. Please try again.");
+        showError(getEspnErrorMessage(error));
       } finally {
         store.updateLoadingLeague("");
       }
