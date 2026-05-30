@@ -1,12 +1,25 @@
 import { getTradeValue } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
 import {
-  Bracket,
   DraftPick,
   WeeklyWaiver,
   WaiverStatus,
   WaiverType,
 } from "../types/apiTypes";
+
+type PlayoffParticipantMatchup = {
+  t1?: number | null;
+  t2?: number | null;
+};
+
+type EspnPlayoffMatchup = {
+  home?: {
+    teamId?: number | string | null;
+  };
+  away?: {
+    teamId?: number | string | null;
+  };
+};
 
 export type HistoricalSeasonInput = {
   season: string;
@@ -18,7 +31,7 @@ export type HistoricalSeasonInput = {
   users: LeagueInfoType["users"];
   trades: LeagueInfoType["trades"];
   waivers: LeagueInfoType["waivers"];
-  playoffs: Bracket[];
+  playoffs: PlayoffParticipantMatchup[];
   draftPicks?: DraftPick[];
 };
 
@@ -153,6 +166,33 @@ const getChampionRosterId = (season: HistoricalSeasonInput) => {
   return Number.isNaN(parsed) ? null : parsed;
 };
 
+const getEspnPlayoffParticipantMatchups = (
+  matchups: unknown[]
+): PlayoffParticipantMatchup[] => {
+  return (matchups as EspnPlayoffMatchup[])
+    .map((matchup) => ({
+      t1: Number(matchup.home?.teamId),
+      t2: Number(matchup.away?.teamId),
+    }))
+    .filter(
+      (matchup) => !Number.isNaN(matchup.t1) || !Number.isNaN(matchup.t2)
+    );
+};
+
+const getPlayoffParticipantMatchups = (
+  season: LeagueInfoType
+): PlayoffParticipantMatchup[] => {
+  if (season.winnersBracket?.length > 0) {
+    return season.winnersBracket;
+  }
+
+  if (season.platform === "espn" && season.espnWinnersBracket.length > 0) {
+    return getEspnPlayoffParticipantMatchups(season.espnWinnersBracket);
+  }
+
+  return [];
+};
+
 const getDraftSummaryForManager = (
   draftPicks: DraftPick[] | undefined,
   userId: string
@@ -266,7 +306,9 @@ const buildSeasonRecords = async (
         managerEfficiency: roster.managerEfficiency,
         weeklyScores: points.points,
         madePlayoffs: season.playoffs.some(
-          (obj) => obj.t1 === roster.rosterId || obj.t2 === roster.rosterId
+          (obj) =>
+            Number(obj.t1) === roster.rosterId ||
+            Number(obj.t2) === roster.rosterId
         ),
         matchupIds: points.matchups ?? [],
         tradeCount: countTransactionsForManager(
@@ -428,7 +470,7 @@ export const normalizeHistoricalSeasons = (
     users: season.users,
     trades: season.trades,
     waivers: season.waivers,
-    playoffs: season.winnersBracket,
+    playoffs: getPlayoffParticipantMatchups(season),
     draftPicks: season.draftPicks,
   }));
 };

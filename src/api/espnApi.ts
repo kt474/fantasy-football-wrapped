@@ -761,6 +761,43 @@ const getLeagueWinner = (teams: Array<Record<string, unknown>> = []) => {
   return winner ? String(winner.id ?? "") : null;
 };
 
+const getEspnMatchupWinnerId = (matchup: Record<string, unknown>) => {
+  const winner = matchup.winner;
+  const home = (matchup.home as Record<string, unknown> | undefined) ?? {};
+  const away = (matchup.away as Record<string, unknown> | undefined) ?? {};
+
+  if (winner === "HOME") {
+    return home.teamId != null ? String(home.teamId) : null;
+  }
+
+  if (winner === "AWAY") {
+    return away.teamId != null ? String(away.teamId) : null;
+  }
+
+  return null;
+};
+
+const getEspnLeagueWinner = (
+  playoffMatchups: Array<Record<string, unknown>>,
+  teams: Array<Record<string, unknown>> = []
+) => {
+  const championshipMatchup = [...playoffMatchups]
+    .filter((matchup) => matchup.playoffTierType === "WINNERS_BRACKET")
+    .sort((a, b) => {
+      const matchupPeriodDiff =
+        Number(b.matchupPeriodId ?? 0) - Number(a.matchupPeriodId ?? 0);
+      if (matchupPeriodDiff !== 0) {
+        return matchupPeriodDiff;
+      }
+      return Number(b.id ?? 0) - Number(a.id ?? 0);
+    })
+    .find((matchup) => getEspnMatchupWinnerId(matchup));
+
+  return championshipMatchup
+    ? getEspnMatchupWinnerId(championshipMatchup)
+    : getLeagueWinner(teams);
+};
+
 const getEspnDraftType = (draftPicks: DraftPick[]) => {
   return draftPicks.some((pick) => Number(pick.amount ?? 0) > 0)
     ? "auction"
@@ -1012,163 +1049,162 @@ export const getEspnLeagueInfo = async (
       });
     schedule.push(filtered);
   }
-    const recordByWeekMap = getRecordByWeekMap(
-      teams,
-      schedule,
-      regularSeasonLength
-    );
-    const potentialPointsMap = getPotentialPointsMap(
-      teams,
-      schedule,
-      (rosterSettings.lineupSlotCounts as Record<string, number> | undefined) ??
-        {}
-    );
+  const recordByWeekMap = getRecordByWeekMap(
+    teams,
+    schedule,
+    regularSeasonLength
+  );
+  const potentialPointsMap = getPotentialPointsMap(
+    teams,
+    schedule,
+    (rosterSettings.lineupSlotCounts as Record<string, number> | undefined) ??
+      {}
+  );
 
-    const allPlayerLookups: EspnPlayerLookup[] = [
-      ...teams.flatMap((team) =>
-        getRosterEntries(team).map((entry: any) => ({
+  const allPlayerLookups: EspnPlayerLookup[] = [
+    ...teams.flatMap((team) =>
+      getRosterEntries(team).map((entry: any) => ({
+        name: String(entry.playerPoolEntry.player.fullName ?? ""),
+        team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
+        position: getPosition(
+          Number(entry.playerPoolEntry.player.defaultPositionId)
+        ),
+        espnId: entry.playerPoolEntry.player.id,
+      }))
+    ),
+    ...schedule.flatMap((weekEntries) =>
+      weekEntries.flatMap((teamWeek: Record<string, unknown>) => {
+        const roster =
+          (teamWeek.roster as Record<string, unknown> | undefined) ?? {};
+        const entries = Array.isArray(roster.entries)
+          ? (roster.entries as Array<Record<string, unknown>>)
+          : [];
+
+        return entries.map((entry: any) => ({
           name: String(entry.playerPoolEntry.player.fullName ?? ""),
           team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
           position: getPosition(
             Number(entry.playerPoolEntry.player.defaultPositionId)
           ),
           espnId: entry.playerPoolEntry.player.id,
-        }))
-      ),
-      ...schedule.flatMap((weekEntries) =>
-        weekEntries.flatMap((teamWeek: Record<string, unknown>) => {
-          const roster =
-            (teamWeek.roster as Record<string, unknown> | undefined) ?? {};
-          const entries = Array.isArray(roster.entries)
-            ? (roster.entries as Array<Record<string, unknown>>)
-            : [];
-
-          return entries.map((entry: any) => ({
-            name: String(entry.playerPoolEntry.player.fullName ?? ""),
-            team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
-            position: getPosition(
-              Number(entry.playerPoolEntry.player.defaultPositionId)
-            ),
-            espnId: entry.playerPoolEntry.player.id,
-          }));
-        })
-      ),
-    ];
-
-    const playerLookupMap = await getPlayerIdLookupMap(allPlayerLookups);
-    const sleeperPlayerIdByEspnId = getSleeperPlayerIdByEspnIdMap(
-      allPlayerLookups,
-      playerLookupMap
-    );
-    // TODO cleanup this logic
-    const enrichedWaivers = waivers
-      .flat()
-      .map((waiver) => {
-        const typedWaiver = waiver as EspnWaiverTransaction;
-        if (
-          typedWaiver &&
-          typedWaiver.items?.[0].type === "ADD" &&
-          (typedWaiver.type === "WAIVER" || typedWaiver.type === "FREEAGENT")
-        ) {
-          const sleeperPlayerId =
-            sleeperPlayerIdByEspnId.get(
-              String(typedWaiver.items[0].playerId ?? "")
-            ) ?? null;
-          const type = typedWaiver.type === "WAIVER" ? "waiver" : "free_agent";
-          return {
-            adds: sleeperPlayerId
-              ? { [sleeperPlayerId]: typedWaiver.teamId }
-              : {},
-            status: typedWaiver.status === "EXECUTED" ? "complete" : "",
-            type: type,
-            roster_ids: [typedWaiver.teamId],
-            week: typedWaiver.scoringPeriodId,
-            settings: { waiver_bid: typedWaiver.bidAmount },
-            creator: typedWaiver.memberId,
-            leg: typedWaiver.scoringPeriodId,
-          };
-        }
+        }));
       })
-      .filter(Boolean);
+    ),
+  ];
 
-    const excludedIds = new Set(["NightlyLeagueUpdateTaskProcessor", "kona"]);
+  const playerLookupMap = await getPlayerIdLookupMap(allPlayerLookups);
+  const sleeperPlayerIdByEspnId = getSleeperPlayerIdByEspnIdMap(
+    allPlayerLookups,
+    playerLookupMap
+  );
+  // TODO cleanup this logic
+  const enrichedWaivers = waivers
+    .flat()
+    .map((waiver) => {
+      const typedWaiver = waiver as EspnWaiverTransaction;
+      if (
+        typedWaiver &&
+        typedWaiver.items?.[0].type === "ADD" &&
+        (typedWaiver.type === "WAIVER" || typedWaiver.type === "FREEAGENT")
+      ) {
+        const sleeperPlayerId =
+          sleeperPlayerIdByEspnId.get(
+            String(typedWaiver.items[0].playerId ?? "")
+          ) ?? null;
+        const type = typedWaiver.type === "WAIVER" ? "waiver" : "free_agent";
+        return {
+          adds: sleeperPlayerId ? { [sleeperPlayerId]: typedWaiver.teamId } : {},
+          status: typedWaiver.status === "EXECUTED" ? "complete" : "",
+          type: type,
+          roster_ids: [typedWaiver.teamId],
+          week: typedWaiver.scoringPeriodId,
+          settings: { waiver_bid: typedWaiver.bidAmount },
+          creator: typedWaiver.memberId,
+          leg: typedWaiver.scoringPeriodId,
+        };
+      }
+    })
+    .filter(Boolean);
 
-    const transactions = enrichedWaivers.reduce<Record<string, number>>(
-      (acc, item: any) => {
-        const id = item.creator;
+  const excludedIds = new Set(["NightlyLeagueUpdateTaskProcessor", "kona"]);
 
-        if (excludedIds.has(id)) return acc; // skip
+  const transactions = enrichedWaivers.reduce<Record<string, number>>(
+    (acc, item: any) => {
+      const id = item.creator;
 
-        acc[id] = (acc[id] || 0) + 1;
-        return acc;
-      },
-      {}
-    );
-    const users = getManagerMap(members, teams);
-    const rosters = await getRosterMap(
-      teams,
-      recordByWeekMap,
-      potentialPointsMap,
-      playerLookupMap
-    );
-    const scoringType = getScoringType(
-      assertArray(
-        scoringSettings.scoringItems ?? [],
-        "ESPN scoring settings are invalid."
-      )
-    );
-    const draftPicks = await getDraftPicks(
-      (draftData?.draftDetail as Record<string, unknown> | undefined) ??
-        draftData,
-      teams,
-      allPlayerLookups,
-      season,
-      scoringType
-    );
+      if (excludedIds.has(id)) return acc; // skip
 
-    return {
-      platform: "espn",
-      name: String(settings.name ?? leagueRoot.name ?? ""),
-      regularSeasonLength,
-      medianScoring: 0, // how do we check for median scoring?
-      totalRosters: Number(settings.size ?? teams.length ?? 0),
-      season,
-      seasonType: getLeagueFormat(settings.draftSettings),
-      leagueId,
-      leagueWinner: getLeagueWinner(teams),
-      lastUpdated: Date.now(),
-      previousLeagueId: null, // previous years have the same id, just change the year
-      lastScoredWeek,
-      espnWinnersBracket: playoffMatchups.filter((matchup: any) =>
-        matchup.playoffTierType.includes("WINNER")
-      ),
-      espnLosersBracket: playoffMatchups.filter((matchup: any) =>
-        matchup.playoffTierType.includes("LOSER")
-      ),
-      winnersBracket: [],
-      losersBracket: [],
-      users,
-      rosters,
-      weeklyPoints: await getWeeklyPointsMap(teams, schedule, playerLookupMap),
-      transactions: transactions,
-      trades: [],
-      waivers: enrichedWaivers as unknown as LeagueInfoType["waivers"],
-      previousLeagues:
-        (status.previousSeasons as LeagueInfoType[] | undefined) ?? [],
-      status: getLeagueStatus(currentWeek, lastScoredWeek, regularSeasonLength),
-      currentWeek,
-      scoringType,
-      rosterPositions: getRosterPositions(
-        (rosterSettings.lineupSlotCounts as
-          | Record<string, number>
-          | undefined) ?? {}
-      ),
-      playoffTeams: Number(scheduleSettings.playoffTeamCount ?? 0),
-      playoffType: 0,
-      draftId: String(draftData?.id ?? draftData?.draftDetail?.id ?? ""),
-      draftPicks,
-      draftMetadata: getEspnDraftMetadata(draftPicks, users, rosters),
-      waiverType: acquisitionSettings.isUsingAcquisitionBudget ? 2 : 0,
-      sport: "nfl",
-    };
+      acc[id] = (acc[id] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
+  const users = getManagerMap(members, teams);
+  const rosters = await getRosterMap(
+    teams,
+    recordByWeekMap,
+    potentialPointsMap,
+    playerLookupMap
+  );
+  const scoringType = getScoringType(
+    assertArray(
+      scoringSettings.scoringItems ?? [],
+      "ESPN scoring settings are invalid."
+    )
+  );
+  const draftPicks = await getDraftPicks(
+    (draftData?.draftDetail as Record<string, unknown> | undefined) ??
+      draftData,
+    teams,
+    allPlayerLookups,
+    season,
+    scoringType
+  );
+  const espnWinnersBracket = playoffMatchups.filter((matchup: any) =>
+    matchup.playoffTierType.includes("WINNER")
+  );
+  const espnLosersBracket = playoffMatchups.filter((matchup: any) =>
+    matchup.playoffTierType.includes("LOSER")
+  );
+
+  return {
+    platform: "espn",
+    name: String(settings.name ?? leagueRoot.name ?? ""),
+    regularSeasonLength,
+    medianScoring: 0, // how do we check for median scoring?
+    totalRosters: Number(settings.size ?? teams.length ?? 0),
+    season,
+    seasonType: getLeagueFormat(settings.draftSettings),
+    leagueId,
+    leagueWinner: getEspnLeagueWinner(espnWinnersBracket, teams),
+    lastUpdated: Date.now(),
+    previousLeagueId: null, // previous years have the same id, just change the year
+    lastScoredWeek,
+    espnWinnersBracket,
+    espnLosersBracket,
+    winnersBracket: [],
+    losersBracket: [],
+    users,
+    rosters,
+    weeklyPoints: await getWeeklyPointsMap(teams, schedule, playerLookupMap),
+    transactions: transactions,
+    trades: [],
+    waivers: enrichedWaivers as unknown as LeagueInfoType["waivers"],
+    previousLeagues:
+      (status.previousSeasons as LeagueInfoType[] | undefined) ?? [],
+    status: getLeagueStatus(currentWeek, lastScoredWeek, regularSeasonLength),
+    currentWeek,
+    scoringType,
+    rosterPositions: getRosterPositions(
+      (rosterSettings.lineupSlotCounts as Record<string, number> | undefined) ??
+        {}
+    ),
+    playoffTeams: Number(scheduleSettings.playoffTeamCount ?? 0),
+    playoffType: 0,
+    draftId: String(draftData?.id ?? draftData?.draftDetail?.id ?? ""),
+    draftPicks,
+    draftMetadata: getEspnDraftMetadata(draftPicks, users, rosters),
+    waiverType: acquisitionSettings.isUsingAcquisitionBudget ? 2 : 0,
+    sport: "nfl",
+  };
 };

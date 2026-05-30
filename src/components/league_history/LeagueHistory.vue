@@ -383,13 +383,15 @@ const addNewLeague = async (season: string) => {
         store.currentTab = "Standings";
         localStorage.setItem("currentTab", "Standings");
         toast.success("League added!");
-        await inputLeague(
-          newLeagueInfo.leagueId,
-          newLeagueInfo.name,
-          newLeagueInfo.totalRosters,
-          newLeagueInfo.seasonType,
-          newLeagueInfo.season
-        );
+        if (newLeagueInfo.platform !== "espn") {
+          await inputLeague(
+            newLeagueInfo.leagueId,
+            newLeagueInfo.name,
+            newLeagueInfo.totalRosters,
+            newLeagueInfo.seasonType,
+            newLeagueInfo.season
+          );
+        }
       } else {
         toast.error("League already exists!");
       }
