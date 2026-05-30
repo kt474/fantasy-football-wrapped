@@ -74,10 +74,26 @@ watch(
         store.currentTab = "Standings";
       }
       if (store.currentLeagueId !== "undefined") {
-        // update league id in url
-        router.replace({
-          query: { ...route.query, leagueId: store.currentLeagueId },
-        });
+        const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+        if (currentLeague?.platform === "espn") {
+          router.replace({
+            query: {
+              ...route.query,
+              espn: null,
+              leagueId: currentLeague.leagueId,
+              season: currentLeague.season,
+            },
+          });
+        } else {
+          router.replace({
+            query: {
+              ...route.query,
+              espn: undefined,
+              leagueId: store.currentLeagueId,
+              season: undefined,
+            },
+          });
+        }
       } else {
         localStorage.removeItem("currentLeagueId");
         localStorage.removeItem("leagueInfo");

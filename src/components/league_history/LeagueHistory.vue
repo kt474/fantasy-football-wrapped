@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, watch, Ref } from "vue";
 import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
-import { useStore } from "../../store/store.ts";
+import { getLeagueKey, useStore } from "../../store/store.ts";
 import { getData, inputLeague } from "../../api/api.ts";
 import { getEspnLeagueInfo } from "../../api/espnApi.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";
@@ -375,11 +375,11 @@ const addNewLeague = async (season: string) => {
     if (newLeagueInfo) {
       if (
         !store.leagueInfo
-          .map((league: LeagueInfoType) => league.leagueId)
-          .includes(newLeagueInfo.leagueId)
+          .map((league: LeagueInfoType) => getLeagueKey(league))
+          .includes(getLeagueKey(newLeagueInfo))
       ) {
         store.updateLeagueInfo(newLeagueInfo);
-        store.updateCurrentLeagueId(newLeagueInfo.leagueId);
+        store.updateCurrentLeagueId(getLeagueKey(newLeagueInfo));
         store.currentTab = "Standings";
         localStorage.setItem("currentTab", "Standings");
         toast.success("League added!");

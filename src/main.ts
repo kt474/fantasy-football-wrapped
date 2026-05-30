@@ -4,7 +4,6 @@ import { createRouter, createWebHistory } from "vue-router";
 import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import App from "./App.vue";
-import posthogPlugin from "./plugins/posthog";
 import { useAuthStore } from "./store/auth";
 import { useSubscriptionStore } from "./store/subscription";
 
@@ -167,6 +166,5 @@ router.afterEach((to) => {
 
 app.component("apexchart", ApexChart);
 app.use(router);
-// app.use(posthogPlugin);
 registerSW({ immediate: true });
 app.mount("#app");

@@ -1,6 +1,6 @@
 import { computed, onMounted, ref, unref, watch, type MaybeRef } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useStore } from "@/store/store";
+import { getLeagueKey, useStore } from "@/store/store";
 import type { LeagueInfoType } from "@/types/types";
 import type { LeagueOriginal } from "@/types/apiTypes";
 import { getData, inputLeague, inputUsername } from "@/api/api";
@@ -46,10 +46,28 @@ export const useLeagueInput = (
     }
   };
 
-  const updateURL = async (leagueID: string) => {
+  const updateURL = async (
+    leagueID: string,
+    currentPlatform: LeaguePlatform = "sleeper"
+  ) => {
+    const query =
+      currentPlatform === "espn"
+        ? {
+            ...route.query,
+            espn: null,
+            leagueId: leagueID,
+            season: seasonYear.value,
+          }
+        : {
+            ...route.query,
+            espn: undefined,
+            leagueId: leagueID,
+            season: undefined,
+          };
+
     await router.replace({
       path: "/",
-      query: { ...route.query, leagueId: leagueID },
+      query,
     });
   };
 
@@ -168,7 +186,15 @@ export const useLeagueInput = (
         showError("Please enter a league ID");
         return;
       }
-      if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
+      if (
+        (leagueIds.value as string[]).includes(
+          getLeagueKey({
+            platform: "espn",
+            leagueId: leagueIdInput.value,
+            season: seasonYear.value,
+          })
+        )
+      ) {
         showError("League already added");
         return;
       }
@@ -179,16 +205,18 @@ export const useLeagueInput = (
         await resetRoute();
         showErrorMsg.value = false;
         store.updateLoadingLeague("ESPN League");
-        store.updateCurrentLeagueId(leagueIdInput.value);
-        store.leagueSubmitted = true;
-        store.updateShowInput(false);
-        await updateURL(leagueIdInput.value);
         const espnLeague = await getEspnLeagueInfo(
           seasonYear.value,
           leagueIdInput.value
         );
         if (espnLeague) {
           store.updateLeagueInfo(espnLeague);
+          store.updateCurrentLeagueId(getLeagueKey(espnLeague));
+          store.leagueSubmitted = true;
+          store.updateShowInput(false);
+          await updateURL(leagueIdInput.value, "espn");
+        } else {
+          showError("Unable to load league right now. Please try again.");
         }
       } catch (error) {
         console.error("Failed to load league:", error);

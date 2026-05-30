@@ -5,8 +5,9 @@ import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
 import { fakePoints, fakeRosters, fakeUsers } from "../api/fakeLeague";
 import Input from "@/components/ui/input/Input.vue";
-import { useStore } from "../store/store";
+import { getLeagueKey, useStore } from "../store/store";
 import { getData, inputLeague } from "../api/api";
+import { getEspnLeagueInfo } from "@/api/espnApi";
 import { getLeague } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
@@ -53,15 +54,25 @@ onMounted(async () => {
                 );
               }
               store.updateLoadingLeague(league.name);
-              const refreshedData = await getData(league.leagueId);
-              store.updateLeagueInfo(refreshedData);
-              await inputLeague(
-                league.leagueId,
-                league.name,
-                league.totalRosters,
-                league.seasonType,
-                league.season
-              );
+              if (league.platform === "espn") {
+                const refreshedData = await getEspnLeagueInfo(
+                  league.season,
+                  league.leagueId
+                );
+                if (refreshedData) {
+                  store.updateLeagueInfo(refreshedData);
+                }
+              } else {
+                const refreshedData = await getData(league.leagueId);
+                store.updateLeagueInfo(refreshedData);
+                await inputLeague(
+                  league.leagueId,
+                  league.name,
+                  league.totalRosters,
+                  league.seasonType,
+                  league.season
+                );
+              }
               showLoading.value = false;
             } else {
               store.updateLeagueInfo(league);
@@ -77,12 +88,40 @@ onMounted(async () => {
     const leagueId = Array.isArray(route.query.leagueId)
       ? route.query.leagueId[0]
       : route.query.leagueId;
+    const season = Array.isArray(route.query.season)
+      ? route.query.season[0]
+      : route.query.season;
+    const isEspnLeague = "espn" in route.query;
+    const routeLeagueKey =
+      isEspnLeague && leagueId && season
+        ? getLeagueKey({ platform: "espn", leagueId, season })
+        : leagueId;
     // sometimes on refresh the leagueId in the URL becomes undefined
     if (
       leagueId &&
-      !store.leagueIds.includes(leagueId) &&
+      routeLeagueKey &&
+      !store.leagueIds.includes(routeLeagueKey) &&
       !cachedGoogleSitelinks.includes(leagueId)
     ) {
+      if (isEspnLeague) {
+        if (!season) {
+          toast.error("Missing ESPN season");
+          return;
+        }
+        store.updateLoadingLeague("ESPN League");
+        const league = await getEspnLeagueInfo(season, leagueId);
+        if (league) {
+          store.updateLeagueInfo(league);
+          store.updateCurrentLeagueId(getLeagueKey(league));
+          store.currentTab = "Standings";
+          localStorage.setItem("currentTab", "Standings");
+        } else {
+          toast.error("Invalid ESPN League ID");
+        }
+        store.updateLoadingLeague("");
+        return;
+      }
+
       const checkInput = await getLeague(leagueId);
       if (checkInput["name"]) {
         store.updateCurrentLeagueId(leagueId);
@@ -111,6 +150,8 @@ onMounted(async () => {
       const newQuery = { ...route.query };
       delete newQuery.leagueId;
       router.replace({ path: route.path, query: newQuery });
+    } else if (routeLeagueKey && store.leagueIds.includes(routeLeagueKey)) {
+      store.updateCurrentLeagueId(routeLeagueKey);
     }
   } catch {
     toast.error("Error fetching data. Please try refreshing the page.");
@@ -161,7 +202,7 @@ const checkSystemTheme = () => {
         <UserLeagueList />
       </div>
 
-      <SkeletonLoading v-else-if="showLoading" />
+      <SkeletonLoading v-else-if="showLoading || store.loadingLeague" />
       <div
         v-else
         :class="store.currentTab === 'Home' ? '' : 'container mx-auto'"

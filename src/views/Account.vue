@@ -3,6 +3,8 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
+import { getLeagueKey } from "@/store/store";
+import type { LeagueInfoType } from "@/types/types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
@@ -475,11 +477,21 @@ const ensureLeagueIdQueryParam = async () => {
   const currentLeagueId = window.localStorage.getItem("currentLeagueId");
   if (!currentLeagueId) return;
 
+  const savedLeagueInfo = window.localStorage.getItem("leagueInfo");
+  const savedLeagues = savedLeagueInfo
+    ? (JSON.parse(savedLeagueInfo) as LeagueInfoType[])
+    : [];
+  const currentLeague = savedLeagues.find(
+    (league) => getLeagueKey(league) === currentLeagueId
+  );
+
   await router.replace({
     path: route.path,
     query: {
       ...route.query,
-      leagueId: currentLeagueId,
+      espn: currentLeague?.platform === "espn" ? null : undefined,
+      leagueId: currentLeague?.leagueId ?? currentLeagueId,
+      season: currentLeague?.platform === "espn" ? currentLeague.season : undefined,
     },
   });
 };

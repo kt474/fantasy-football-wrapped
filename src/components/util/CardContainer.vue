@@ -23,7 +23,7 @@ const hasLeagueIdInUrl = computed(() => {
 const showAddLeagueButton = computed(() => {
   const isHomeTabOnHomeRoute =
     route.path === "/" && store.currentTab === "Home";
-  return !hasLeagueIdInUrl.value && !isHomeTabOnHomeRoute;
+  return !store.loadingLeague && !hasLeagueIdInUrl.value && !isHomeTabOnHomeRoute;
 });
 </script>
 <template>
@@ -45,7 +45,7 @@ const showAddLeagueButton = computed(() => {
           </template>
         </Dialog>
         <p
-          v-if="route.path === '/'"
+          v-if="route.path === '/' && !store.loadingLeague"
           class="absolute inset-x-0 font-medium text-right pointer-events-none sm:ml-10 sm:text-center whitespace-nowrap"
         >
           Demo League
