@@ -218,6 +218,29 @@ const getTeamRecord = (team: Record<string, unknown>) => {
   };
 };
 
+const getEspnTeamName = (team: Record<string, unknown>) => {
+  const location = String(team.location ?? "").trim();
+  const nickname = String(team.nickname ?? "").trim();
+  const fullName = [location, nickname].filter(Boolean).join(" ").trim();
+  return fullName || String(team.name ?? "").trim();
+};
+
+const getEspnTeamOwnerIds = (team: Record<string, unknown>) => {
+  const owners = Array.isArray(team.owners) ? team.owners : [];
+  return [
+    team.primaryOwner,
+    ...owners,
+    team.owner,
+    team.ownerId,
+    team.id,
+  ]
+    .map((owner) => String(owner ?? "").trim())
+    .filter(Boolean);
+};
+
+const getEspnPrimaryOwnerId = (team: Record<string, unknown>) =>
+  getEspnTeamOwnerIds(team)[0] ?? String(team.id ?? "");
+
 const getManagerMap = (
   members: Array<Record<string, unknown>> = [],
   teams: Array<Record<string, unknown>> = []
@@ -225,13 +248,10 @@ const getManagerMap = (
   const teamNameByOwner = new Map<string, string>();
 
   teams.forEach((team) => {
-    const owners = Array.isArray(team.owners) ? team.owners : [];
-    const location = String(team.location ?? "").trim();
-    const nickname = String(team.nickname ?? "").trim();
-    const teamName = [location, nickname].filter(Boolean).join(" ").trim();
+    const teamName = getEspnTeamName(team);
 
-    owners.forEach((owner) => {
-      teamNameByOwner.set(String(owner), teamName || nickname || location);
+    getEspnTeamOwnerIds(team).forEach((ownerId) => {
+      teamNameByOwner.set(ownerId, teamName);
     });
   });
 
@@ -251,18 +271,40 @@ const getManagerMap = (
       username,
     } satisfies UserType;
   });
+  const mappedMemberIds = new Set(mappedMembers.map((member) => member.id));
+  const fallbackTeamUsers = teams.flatMap((team) => {
+    const id = getEspnPrimaryOwnerId(team);
+    if (!id || mappedMemberIds.has(id)) {
+      return [];
+    }
 
-  if (mappedMembers.length > 0) {
-    return mappedMembers;
+    return [
+      {
+        id,
+        avatar: String(team.logo ?? ""),
+        avatarImg: String(team.logo ?? ""),
+        name: getEspnTeamName(team) || `Team ${team.id ?? id}`,
+        username: getEspnTeamName(team) || `Team ${team.id ?? id}`,
+        placement:
+          team.rankCalculatedFinal != null
+            ? Number(team.rankCalculatedFinal)
+            : undefined,
+      } satisfies UserType,
+    ];
+  });
+
+  if (mappedMembers.length > 0 || fallbackTeamUsers.length > 0) {
+    return [...mappedMembers, ...fallbackTeamUsers];
   }
+
   return teams.map(
     (team) =>
       ({
-        id: String(team.primaryOwner ?? team.id ?? ""),
+        id: getEspnPrimaryOwnerId(team),
         avatar: String(team.logo ?? ""),
         avatarImg: String(team.logo ?? ""),
-        name: String(team.name ?? ""),
-        username: String(team.name ?? ""),
+        name: getEspnTeamName(team) || `Team ${team.id ?? ""}`,
+        username: getEspnTeamName(team) || `Team ${team.id ?? ""}`,
         placement:
           team.rankCalculatedFinal != null
             ? Number(team.rankCalculatedFinal)
@@ -495,9 +537,10 @@ const getRosterMap = async (
           (player) => playerLookupMap.get(getPlayerLookupKey(player)) ?? null
         )
         .filter((playerId): playerId is string => Boolean(playerId));
+      const ownerId = getEspnPrimaryOwnerId(team);
 
       return {
-        id: String(team.primaryOwner ?? team.id ?? ""),
+        id: ownerId,
         rosterId: Number(team.id ?? 0),
         pointsFor: record.pointsFor,
         pointsAgainst: record.pointsAgainst,
