@@ -62,17 +62,19 @@ export const useStore = defineStore("main", {
   },
   actions: {
     findLeague(leagueId: string) {
-      const currentLeague = this.leagueInfo.find(
-        (league) => getLeagueKey(league) === this.currentLeagueId
+      const keyedLeague = this.leagueInfo.find(
+        (league) => getLeagueKey(league) === leagueId
       );
-      if (currentLeague?.leagueId === leagueId) {
-        return currentLeague;
+      if (keyedLeague) {
+        return keyedLeague;
       }
 
-      return (
-        this.leagueInfo.find((league) => getLeagueKey(league) === leagueId) ??
-        this.leagueInfo.find((league) => league.leagueId === leagueId)
+      const rawLeagueIdMatches = this.leagueInfo.filter(
+        (league) => league.leagueId === leagueId
       );
+      return rawLeagueIdMatches.length === 1
+        ? rawLeagueIdMatches[0]
+        : undefined;
     },
     updateShowUsernames(payload: boolean) {
       this.showUsernames = payload;
@@ -97,10 +99,16 @@ export const useStore = defineStore("main", {
       }
     },
     addProjectionData(
-      index: number,
+      leagueId: string,
       rosterId: string,
       projectionData: { projection: number; position: string }[]
     ) {
+      const index = this.leagueInfo.findIndex(
+        (league) => getLeagueKey(league) === leagueId
+      );
+      if (index === -1) {
+        return;
+      }
       const updatedLeagueInfo = [...this.leagueInfo];
       updatedLeagueInfo[index] = {
         ...updatedLeagueInfo[index],

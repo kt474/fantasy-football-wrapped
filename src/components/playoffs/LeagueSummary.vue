@@ -3,7 +3,7 @@ import { TableDataType, LeagueInfoType, UserType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import { generateSummary, getPlayersByIdsMap } from "../../api/api.ts";
 import { ref, onMounted, watch, computed } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
@@ -147,7 +147,7 @@ const getSummary = async () => {
     });
     const response = await generateSummary(userData, leagueMetadata);
     rawSummary.value = response.text;
-    store.addYearEndReport(currentLeague.leagueId, rawSummary.value);
+    store.addYearEndReport(getLeagueKey(currentLeague), rawSummary.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])

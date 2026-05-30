@@ -2,7 +2,7 @@
 import { TableDataType, LeagueInfoType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import { computed, ref, watch, onMounted, nextTick } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import {
@@ -261,7 +261,7 @@ const getPremiumReport = async () => {
     premiumLoading.value = false;
     rawPremiumWeeklyReport.value = response.text;
     store.addPremiumWeeklyReport(
-      currentLeague.leagueId,
+      getLeagueKey(currentLeague),
       rawPremiumWeeklyReport.value
     );
     localStorage.setItem(
@@ -303,7 +303,7 @@ const getReport = async () => {
       currentWeek.value
     );
     rawWeeklyReport.value = response.text;
-    store.addWeeklyReport(currentLeague.leagueId, rawWeeklyReport.value);
+    store.addWeeklyReport(getLeagueKey(currentLeague), rawWeeklyReport.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])

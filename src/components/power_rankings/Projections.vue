@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import intersection from "lodash/intersection";
 import { ref, computed, watch, onMounted } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { RosterType, LeagueInfoType } from "../../types/types";
 import { fakeProjectionData } from "../../api/fakeLeague";
 import { getProjections } from "../../api/sleeperApi";
@@ -67,11 +67,7 @@ const getData = async () => {
 
       const projections = await Promise.all(projectionPromises);
       singleRoster.push(...projections);
-      store.addProjectionData(
-        store.currentLeagueIndex,
-        roster.id,
-        singleRoster
-      );
+      store.addProjectionData(getLeagueKey(currentLeague), roster.id, singleRoster);
     })
   );
   localStorage.setItem(

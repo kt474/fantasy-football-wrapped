@@ -4,7 +4,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { getDraftProjections } from "../../api/sleeperApi";
 import { LeagueInfoType } from "../../types/types.ts";
 import { DraftPick, PickObj } from "../../types/apiTypes.ts";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { standardDeviation } from "../../api/helper";
 import { fakeUsers } from "../../api/fakeLeague";
 import { fakeDraftGrades } from "../../api/draft.ts";
@@ -121,7 +121,7 @@ const getProjections = async () => {
   });
 
   projectionData.value = totalDraftScores;
-  store.addDraftGrades(currentLeague.leagueId, projectionData.value);
+  store.addDraftGrades(getLeagueKey(currentLeague), projectionData.value);
   localStorage.setItem(
     "leagueInfo",
     JSON.stringify(store.leagueInfo as LeagueInfoType[])

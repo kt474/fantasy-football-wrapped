@@ -3,7 +3,7 @@ import { ref, onMounted, watch, computed, ComputedRef } from "vue";
 import { LeagueInfoType, WaiverMove } from "../../types/types.ts";
 import { getPlayersByIdsMap } from "../../api/api.ts";
 import { getTradeValue } from "../../api/sleeperApi.ts";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { fakeRosters, fakeUsers, fakeWaiverMoves } from "../../api/fakeLeague";
 import { WeeklyWaiver } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
@@ -89,7 +89,7 @@ const getData = async () => {
     })
   );
 
-  store.addWaiverMoves(currentLeague.leagueId, rawData.value);
+  store.addWaiverMoves(getLeagueKey(currentLeague), rawData.value);
   localStorage.setItem(
     "leagueInfo",
     JSON.stringify(store.leagueInfo as LeagueInfoType[])

@@ -4,7 +4,7 @@ import Card from "../ui/card/Card.vue";
 import { generateManagerArchetype, type ManagerBlurbsPayload } from "@/api/api";
 import type { ManagerArchetype } from "@/lib/narratives";
 import { toast } from "vue-sonner";
-import { useStore } from "@/store/store";
+import { getLeagueKey, useStore } from "@/store/store";
 import { LeagueInfoType } from "@/types/types";
 import Separator from "../ui/separator/Separator.vue";
 import { useSubscriptionStore } from "@/store/subscription.ts";
@@ -42,7 +42,7 @@ const getManagerArchetypes = async () => {
       {} as Record<string, string>
     );
     store.addManagerProfiles(
-      store.leagueInfo[store.currentLeagueIndex].leagueId,
+      getLeagueKey(store.leagueInfo[store.currentLeagueIndex]),
       blurbsByUserId.value
     );
     localStorage.setItem(

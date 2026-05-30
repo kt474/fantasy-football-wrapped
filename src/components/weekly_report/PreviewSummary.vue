@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { generatePreview } from "../../api/api";
 import { TableDataType, LeagueInfoType } from "../../types/types";
 import MarkdownIt from "markdown-it";
@@ -21,7 +21,7 @@ const getPreview = async () => {
     const response = await generatePreview(promptData.value);
     preview.value = response.text;
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-    store.addWeeklyPreview(currentLeague.leagueId, preview.value);
+    store.addWeeklyPreview(getLeagueKey(currentLeague), preview.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])

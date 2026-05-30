@@ -4,7 +4,7 @@ import { generateTrends, getPlayersByIdsMap } from "../../api/api";
 import { getDraftProjections, getDraftPicks } from "../../api/sleeperApi";
 import { TableDataType, LeagueInfoType } from "../../types/types";
 import { Player } from "../../types/apiTypes";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/fakeLeague";
 import { Card, CardTitle, CardHeader } from "../ui/card";
 import MarkdownIt from "markdown-it";
@@ -103,7 +103,7 @@ const getPreseasonData = async () => {
         response = await generateTrends(result, 70, 3, seasonState);
       }
       currentTrends.value = response.bulletPoints;
-      store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+      store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
       localStorage.setItem(
         "leagueInfo",
         JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -112,7 +112,7 @@ const getPreseasonData = async () => {
       currentTrends.value = [
         "Unable to generate league news. Please try again later",
       ];
-      store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+      store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
       localStorage.setItem(
         "leagueInfo",
         JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -193,7 +193,7 @@ const formatData = async () => {
       response = await generateTrends(userData, 70, 3);
     }
     currentTrends.value = response.bulletPoints;
-    store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+    store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -202,7 +202,7 @@ const formatData = async () => {
     currentTrends.value = [
       "Unable to generate league news. Please try again later",
     ];
-    store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+    store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])

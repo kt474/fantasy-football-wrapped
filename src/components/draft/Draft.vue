@@ -3,7 +3,7 @@ import { fakeDraftData } from "../../api/draft.ts";
 import { ref, onMounted, computed, watch } from "vue";
 import { getDraftPicks, getDraftMetadata } from "../../api/sleeperApi";
 import { LeagueInfoType } from "../../types/types.ts";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { fakeUsers } from "../../api/fakeLeague.ts";
 import DraftGrades from "./DraftGrades.vue";
 import { DraftPick } from "../../types/apiTypes.ts";
@@ -78,7 +78,7 @@ const getDraftOrder = async () => {
   draftType.value = metadata.type ?? "snake";
   scoringType.value = metadata.metadata?.scoring_type ?? "";
 
-  store.addDraftMetadata(currentLeague.leagueId, {
+  store.addDraftMetadata(getLeagueKey(currentLeague), {
     order: draftOrder.value,
     roundReversal: roundReversal.value,
     draftType: draftType.value,
@@ -232,7 +232,7 @@ const getData = async () => {
     data.value = draftPicks;
   }
 
-  store.addDraftPicks(currentLeague.leagueId, data.value);
+  store.addDraftPicks(getLeagueKey(currentLeague), data.value);
   localStorage.setItem(
     "leagueInfo",
     JSON.stringify(store.leagueInfo as LeagueInfoType[])

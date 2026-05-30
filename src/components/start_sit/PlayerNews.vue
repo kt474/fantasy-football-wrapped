@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { getPlayerNews, getPlayersByIdsMap } from "../../api/api";
 import {
   getStats,
@@ -173,7 +173,7 @@ const getRosterRankings = async () => {
     }, {});
   }
 
-  store.addRosterRankings(currentLeague.leagueId, groupByRosterId(filtered));
+  store.addRosterRankings(getLeagueKey(currentLeague), groupByRosterId(filtered));
 };
 
 const fetchPlayerNames = async () => {
