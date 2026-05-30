@@ -38,7 +38,7 @@ onMounted(async () => {
       const savedLeagues = JSON.parse(savedLeagueInfo);
       await Promise.all(
         savedLeagues.map(async (league: LeagueInfoType) => {
-          if (!store.leagueIds.includes(league.leagueId)) {
+          if (!store.leagueIds.includes(getLeagueKey(league))) {
             const currentTime = new Date().getTime();
             const diff = currentTime - league.lastUpdated;
             if (diff > 86400000) {
@@ -47,7 +47,7 @@ onMounted(async () => {
               const originalData = localStorage.getItem("originalData");
               if (originalData) {
                 const currentData = JSON.parse(originalData);
-                delete currentData[league.leagueId];
+                delete currentData[getLeagueKey(league)];
                 localStorage.setItem(
                   "originalData",
                   JSON.stringify(currentData)
@@ -176,8 +176,9 @@ const checkSystemTheme = () => {
   <div>
     <SkeletonLoading v-if="isInitialLoading" />
     <div v-else>
+      <SkeletonLoading v-if="showLoading || store.loadingLeague" />
       <div
-        v-if="store.currentLeagueId"
+        v-else-if="store.currentLeagueId"
         :class="store.currentTab === 'Home' ? '' : 'container mx-auto'"
       >
         <Input v-if="store.showInput" class="custom-input-width" />
@@ -201,8 +202,6 @@ const checkSystemTheme = () => {
       <div v-else-if="store.showLeaguesList" class="container mx-auto">
         <UserLeagueList />
       </div>
-
-      <SkeletonLoading v-else-if="showLoading || store.loadingLeague" />
       <div
         v-else
         :class="store.currentTab === 'Home' ? '' : 'container mx-auto'"

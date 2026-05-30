@@ -1,7 +1,6 @@
 import { computed, onMounted, ref, unref, watch, type MaybeRef } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { getLeagueKey, useStore } from "@/store/store";
-import type { LeagueInfoType } from "@/types/types";
 import type { LeagueOriginal } from "@/types/apiTypes";
 import { getData, inputLeague, inputUsername } from "@/api/api";
 import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
@@ -36,7 +35,7 @@ export const useLeagueInput = (
   const showHelperMsg = ref(false);
 
   const leagueIds = computed(() => {
-    return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
+    return store.leagueIds;
   });
 
   const resetRoute = async () => {
