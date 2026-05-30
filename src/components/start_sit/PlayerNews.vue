@@ -122,7 +122,7 @@ const getData = async () => {
       await getRosterRankings();
     }
     const currentPlayers =
-      currentLeague.rosterRankings?.[currentRosterId].map(
+      currentLeague.rosterRankings?.[currentRosterId]?.map(
         (player) => `${player.firstName} ${player.lastName}`
       ) ?? [];
     const playerNews = await getPlayerNews(currentPlayers);

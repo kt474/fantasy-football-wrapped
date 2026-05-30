@@ -866,7 +866,7 @@ export const getEspnLeagueInfo = async (
     for (let i = 1; i <= lastScoredWeek; i++) {
       const scheduleData = await getPlayerStats(season, leagueId, i);
       const waiverData = await getWaivers(season, leagueId, i);
-      const filteredWaivers = waiverData.transactions.filter(
+      const filteredWaivers = waiverData?.transactions?.filter(
         (transaction: any) =>
           transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
       );
@@ -959,6 +959,7 @@ export const getEspnLeagueInfo = async (
       .map((waiver) => {
         const typedWaiver = waiver as EspnWaiverTransaction;
         if (
+          typedWaiver &&
           typedWaiver.items?.[0].type === "ADD" &&
           (typedWaiver.type === "WAIVER" || typedWaiver.type === "FREEAGENT")
         ) {
