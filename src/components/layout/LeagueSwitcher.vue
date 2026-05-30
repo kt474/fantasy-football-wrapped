@@ -69,12 +69,14 @@ const selectLeague = (leagueId: string) => {
   store.updateCurrentLeagueId(leagueId);
 };
 const removeHistoryLeagues = () => {
-  // Regular expression to match keys starting with a digit
   const numberStartRegex = /^[0-9]/;
   const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && numberStartRegex.test(key)) {
+    if (
+      key &&
+      (numberStartRegex.test(key) || key.startsWith("league-history"))
+    ) {
       keysToRemove.push(key);
     }
   }
@@ -82,9 +84,11 @@ const removeHistoryLeagues = () => {
     localStorage.removeItem(key);
   }
 };
+
 const removeLeague = () => {
   if (localStorage.getItem("leagueInfo")) {
     const removedLeagueId = currentLeagueId.value;
+    removeHistoryLeagues();
     if (currentLeague.value.previousLeagues) {
       currentLeague.value.previousLeagues.forEach((league: LeagueInfoType) => {
         localStorage.removeItem(league.leagueId);
@@ -99,7 +103,6 @@ const removeLeague = () => {
     toast.success("League removed!");
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentTab");
-      removeHistoryLeagues();
       store.showUsernames = false;
       store.currentTab = "Home";
       // reset url if there are no leagues
