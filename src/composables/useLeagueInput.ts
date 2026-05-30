@@ -199,8 +199,6 @@ export const useLeagueInput = (
       }
 
       try {
-        store.currentTab = "Standings";
-        localStorage.setItem("currentTab", "Standings");
         await resetRoute();
         showErrorMsg.value = false;
         store.updateLoadingLeague("ESPN League");
@@ -213,6 +211,8 @@ export const useLeagueInput = (
           store.updateCurrentLeagueId(getLeagueKey(espnLeague));
           store.leagueSubmitted = true;
           store.updateShowInput(false);
+          store.currentTab = "Standings";
+          localStorage.setItem("currentTab", "Standings");
           await updateURL(leagueIdInput.value, "espn");
         } else {
           showError("Unable to load league right now. Please try again.");

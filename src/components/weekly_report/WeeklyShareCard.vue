@@ -113,7 +113,7 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
               <span class="font-medium truncate">{{ team.name }}</span>
             </div>
             <span class="ml-4 font-semibold">
-              {{ formatPoints(team.points) }}
+              {{ team.points ? formatPoints(team.points) : "" }}
             </span>
           </div>
         </div>

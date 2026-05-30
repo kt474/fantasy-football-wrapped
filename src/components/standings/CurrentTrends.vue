@@ -22,6 +22,9 @@ const md = new MarkdownIt({
 });
 
 const currentTrends = ref<string[]>([]);
+const preseasonUnavailableTrends = [
+  "League news will appear once draft or scoring data is available.",
+];
 
 const renderedCurrentTrends = computed(() => {
   return currentTrends.value.map((trend) =>
@@ -45,19 +48,34 @@ const getFiveMostRecent = (str: string, n = 5): string => {
 
 const getPreseasonData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (!currentLeague) {
+    return;
+  }
+
+  if (!currentLeague.draftId) {
+    currentTrends.value = preseasonUnavailableTrends;
+    return;
+  }
+
   const seasonState =
     currentLeague?.seasonType === "Dynasty" && currentLeague?.previousLeagueId
       ? "dynasty"
       : "preseason";
 
   let result: Record<string, unknown>[] = [];
-  if (currentLeague) {
+  try {
     const draftPicks = await getDraftPicks(
       currentLeague.draftId,
       currentLeague.season,
       currentLeague.scoringType,
       currentLeague.seasonType
     );
+
+    if (draftPicks.length === 0) {
+      currentTrends.value = preseasonUnavailableTrends;
+      return;
+    }
+
     const first2Rounds = draftPicks.slice(0, 2 * currentLeague.rosters.length);
     const qbs = currentLeague.rosterPositions.reduce(
       (sum, item) => sum + (item === "QB" || item === "SUPER_FLEX" ? 1 : 0),
@@ -91,8 +109,11 @@ const getPreseasonData = async () => {
       };
     });
     result = await Promise.all(promises);
+  } catch {
+    currentTrends.value = preseasonUnavailableTrends;
+    return;
   }
-  if (result) {
+  if (result.length > 0) {
     let response;
     try {
       if (currentLeague && currentLeague.rosters.length <= 8) {

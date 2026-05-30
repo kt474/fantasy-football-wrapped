@@ -125,53 +125,6 @@ const removeLeague = () => {
   }
 };
 
-const mergeLocalLeagueData = (
-  refreshedLeague: LeagueInfoType,
-  previousLeague: LeagueInfoType
-): LeagueInfoType => {
-  const previousRostersById = new Map(
-    previousLeague.rosters.map((roster) => [roster.rosterId, roster])
-  );
-
-  return {
-    ...refreshedLeague,
-    previousLeagues:
-      previousLeague.previousLeagues.length > 0
-        ? previousLeague.previousLeagues
-        : refreshedLeague.previousLeagues,
-    rosters: refreshedLeague.rosters.map((roster) => {
-      const previousRoster = previousRostersById.get(roster.rosterId);
-      if (!previousRoster?.projections || roster.projections) {
-        return roster;
-      }
-
-      return {
-        ...roster,
-        projections: previousRoster.projections,
-      };
-    }),
-    waiverMoves: previousLeague.waiverMoves ?? refreshedLeague.waiverMoves,
-    tradeNames: previousLeague.tradeNames ?? refreshedLeague.tradeNames,
-    playoffProjections:
-      previousLeague.playoffProjections ?? refreshedLeague.playoffProjections,
-    weeklyReport: previousLeague.weeklyReport ?? refreshedLeague.weeklyReport,
-    premiumWeeklyReport:
-      previousLeague.premiumWeeklyReport ?? refreshedLeague.premiumWeeklyReport,
-    weeklyPreview: previousLeague.weeklyPreview ?? refreshedLeague.weeklyPreview,
-    managerProfiles:
-      previousLeague.managerProfiles ?? refreshedLeague.managerProfiles,
-    yearEndReport: previousLeague.yearEndReport ?? refreshedLeague.yearEndReport,
-    currentTrends: previousLeague.currentTrends ?? refreshedLeague.currentTrends,
-    draftPicks: refreshedLeague.draftPicks ?? previousLeague.draftPicks,
-    draftMetadata: refreshedLeague.draftMetadata ?? previousLeague.draftMetadata,
-    draftGrades: previousLeague.draftGrades ?? refreshedLeague.draftGrades,
-    playerRankings:
-      previousLeague.playerRankings ?? refreshedLeague.playerRankings,
-    rosterRankings:
-      previousLeague.rosterRankings ?? refreshedLeague.rosterRankings,
-  };
-};
-
 const refreshLeague = async () => {
   const leagueToRefresh = currentLeague.value;
   if (!leagueToRefresh) {
@@ -198,9 +151,7 @@ const refreshLeague = async () => {
         leagueToRefresh.season,
         leagueToRefresh.leagueId
       );
-      store.updateLeagueInfo(
-        mergeLocalLeagueData(refreshedLeague, leagueToRefresh)
-      );
+      store.updateLeagueInfo(refreshedLeague);
       store.updateCurrentLeagueId(getLeagueKey(refreshedLeague));
       didRefresh = true;
     } catch (error) {
@@ -209,9 +160,7 @@ const refreshLeague = async () => {
     }
   } else {
     const refreshedLeague = await getData(leagueToRefresh.leagueId);
-    store.updateLeagueInfo(
-      mergeLocalLeagueData(refreshedLeague, leagueToRefresh)
-    );
+    store.updateLeagueInfo(refreshedLeague);
     await inputLeague(
       leagueToRefresh.leagueId,
       leagueToRefresh.name,
