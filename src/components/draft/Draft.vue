@@ -115,51 +115,49 @@ const snakeDraftFormat = computed(() => {
   return true;
 });
 
+const getEspnDraftOrderFromPicks = (league: LeagueInfoType) => {
+  const rosterPickOrder = Array.from(
+    new Set((league.draftPicks ?? []).map((pick) => pick.rosterId))
+  ).slice(0, draftSize.value);
+
+  const rosterToUser = new Map(
+    league.rosters.map((roster) => [roster.rosterId, roster.id])
+  );
+  const userMap = new Map(league.users.map((user) => [user.id, user]));
+
+  return rosterPickOrder.flatMap((rosterId) => {
+    const userId = rosterToUser.get(rosterId);
+    return userId && userMap.has(userId) ? [getTeamName(userId)] : [];
+  });
+};
+
+const setLeagueDraftState = (league: LeagueInfoType) => {
+  data.value = league.draftPicks ?? [];
+  draftOrder.value =
+    league.draftMetadata?.order ??
+    (league.platform === "espn" ? getEspnDraftOrderFromPicks(league) : []);
+  roundReversal.value = league.draftMetadata?.roundReversal ?? 0;
+  draftType.value =
+    league.draftMetadata?.draftType ??
+    (league.platform === "espn" &&
+    data.value.some((pick) => Number(pick.amount ?? 0) > 0)
+      ? "auction"
+      : "snake");
+};
+
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].draftPicks
+    !store.leagueInfo[store.currentLeagueIndex].draftPicks &&
+    store.leagueInfo[store.currentLeagueIndex].platform !== "espn"
   ) {
     loading.value = true;
     await getDraftOrder();
     await getData();
     loading.value = false;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
-    data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks ?? [];
-    // espn draft data is already loaded at initialization
-    if (store.leagueInfo[store.currentLeagueIndex]?.platform !== "espn") {
-      draftOrder.value =
-        store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"] ??
-        [];
-    } else {
-      // get draft order from just slicing the draft picks array.
-      const rosterPickOrder = data.value
-        .slice(0, 10)
-        .map((pick) => pick.rosterId);
-
-      const rosterToUser = new Map(
-        store.leagueInfo[store.currentLeagueIndex].rosters.map((r) => [
-          r.rosterId,
-          r.id,
-        ])
-      );
-      const userMap = new Map(
-        store.leagueInfo[store.currentLeagueIndex].users.map((u) => [u.id, u])
-      );
-      const orderedUsers = rosterPickOrder.flatMap((rosterId) => {
-        const userId = rosterToUser.get(rosterId);
-        return userId && userMap.has(userId) ? [getTeamName(userId)] : [];
-      });
-      draftOrder.value = orderedUsers;
-    }
-    roundReversal.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
-        "roundReversal"
-      ] ?? 0;
-    draftType.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"] ??
-      "snake";
+    setLeagueDraftState(store.leagueInfo[store.currentLeagueIndex]);
   } else if (store.leagueInfo.length == 0) {
     data.value = fakeDraftData;
     draftOrder.value = data.value.slice(0, draftSize.value).map((pick) => {
@@ -173,7 +171,8 @@ watch(
   async () => {
     if (
       store.leagueInfo[store.currentLeagueIndex] &&
-      !store.leagueInfo[store.currentLeagueIndex].draftPicks
+      !store.leagueInfo[store.currentLeagueIndex].draftPicks &&
+      store.leagueInfo[store.currentLeagueIndex].platform !== "espn"
     ) {
       data.value = [];
       draftOrder.value = [];
@@ -182,16 +181,9 @@ watch(
       await getData();
       loading.value = false;
     }
-    data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks ?? [];
-    draftOrder.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"] ?? [];
-    roundReversal.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
-        "roundReversal"
-      ] ?? 0;
-    draftType.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"] ??
-      "snake";
+    if (store.leagueInfo[store.currentLeagueIndex]) {
+      setLeagueDraftState(store.leagueInfo[store.currentLeagueIndex]);
+    }
   }
 );
 

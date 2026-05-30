@@ -1,5 +1,6 @@
 import type { DraftPick } from "@/types/apiTypes";
 import type {
+  LeagueDraftMetadata,
   LeagueInfoType,
   PointsType,
   RosterType,
@@ -760,6 +761,47 @@ const getLeagueWinner = (teams: Array<Record<string, unknown>> = []) => {
   return winner ? String(winner.id ?? "") : null;
 };
 
+const getEspnDraftType = (draftPicks: DraftPick[]) => {
+  return draftPicks.some((pick) => Number(pick.amount ?? 0) > 0)
+    ? "auction"
+    : "snake";
+};
+
+const getEspnDraftMetadata = (
+  draftPicks: DraftPick[],
+  users: UserType[],
+  rosters: RosterType[]
+): LeagueDraftMetadata => {
+  const userById = new Map(users.map((user) => [user.id, user]));
+  const userIdByRosterId = new Map(
+    rosters.map((roster) => [roster.rosterId, roster.id] as const)
+  );
+  const orderedRosterIds = Array.from(
+    new Set(draftPicks.map((pick) => pick.rosterId))
+  ).slice(0, rosters.length);
+
+  return {
+    order: orderedRosterIds.flatMap((rosterId) => {
+      const userId = userIdByRosterId.get(rosterId);
+      const user = userId ? userById.get(userId) : undefined;
+      return user
+        ? [
+            {
+              id: user.id,
+              name: user.name,
+              username: user.username,
+              avatar: user.avatar,
+              avatarImg: user.avatarImg ?? "",
+              placement: user.placement ?? 0,
+            },
+          ]
+        : [];
+    }),
+    roundReversal: 0,
+    draftType: getEspnDraftType(draftPicks),
+  };
+};
+
 const getLeagueStatus = (
   currentWeek: number,
   lastScoredWeek: number,
@@ -904,64 +946,72 @@ export const getEspnLeagueInfo = async (
   );
   const currentWeek = Number(status.currentMatchupPeriod ?? 0);
   const finalScoringPeriod = Number(status.finalScoringPeriod ?? 0);
-  const lastScoredWeek = Math.max(finalScoringPeriod, currentWeek - 1, 0);
+  const latestScoringPeriod = Number(status.latestScoringPeriod ?? 0);
+  const lastCompletedWeek = Math.max(latestScoringPeriod, currentWeek - 1, 0);
+  // ESPN's finalScoringPeriod is the scheduled season endpoint, not the last
+  // completed week. Keep it only as an upper bound so we don't fetch future
+  // matchup periods with zero scores.
+  const lastScoredWeek =
+    finalScoringPeriod > 0
+      ? Math.min(lastCompletedWeek, finalScoringPeriod)
+      : lastCompletedWeek;
 
-    let schedule = [];
-    let waivers = [];
-    for (let i = 1; i <= lastScoredWeek; i++) {
-      const scheduleData = assertRecord(
-        await getPlayerStats(season, leagueId, i),
-        `ESPN weekly scoring data is missing for week ${i}.`
-      );
-      const waiverData = assertRecord(
-        await getWaivers(season, leagueId, i),
-        `ESPN transaction data is missing for week ${i}.`
-      );
-      const filteredWaivers = assertArray<Record<string, unknown>>(
-        waiverData.transactions ?? [],
-        `ESPN transaction data is invalid for week ${i}.`
-      ).filter(
-        (transaction: any) =>
-          transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
-      );
-      waivers.push(filteredWaivers);
+  let schedule = [];
+  let waivers = [];
+  for (let i = 1; i <= lastScoredWeek; i++) {
+    const scheduleData = assertRecord(
+      await getPlayerStats(season, leagueId, i),
+      `ESPN weekly scoring data is missing for week ${i}.`
+    );
+    const waiverData = assertRecord(
+      await getWaivers(season, leagueId, i),
+      `ESPN transaction data is missing for week ${i}.`
+    );
+    const filteredWaivers = assertArray<Record<string, unknown>>(
+      waiverData.transactions ?? [],
+      `ESPN transaction data is invalid for week ${i}.`
+    ).filter(
+      (transaction: any) =>
+        transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
+    );
+    waivers.push(filteredWaivers);
 
-      const filtered = assertArray<Record<string, unknown>>(
-        scheduleData.schedule,
-        `ESPN matchup schedule data is missing for week ${i}.`
+    const filtered = assertArray<Record<string, unknown>>(
+      scheduleData.schedule,
+      `ESPN matchup schedule data is missing for week ${i}.`
+    )
+      .filter(
+        (matchup: any) =>
+          matchup.home?.rosterForCurrentScoringPeriod &&
+          matchup.away?.rosterForCurrentScoringPeriod
       )
-        .filter(
-          (matchup: any) =>
-            matchup.home?.rosterForCurrentScoringPeriod &&
-            matchup.away?.rosterForCurrentScoringPeriod
-        )
-        .flatMap((matchup: any, matchupIndex: number) => {
-          const homePoints = Number(matchup.home.totalPoints ?? 0);
-          const awayPoints = Number(matchup.away.totalPoints ?? 0);
+      .flatMap((matchup: any, matchupIndex: number) => {
+        const homePoints = Number(matchup.home.totalPoints ?? 0);
+        const awayPoints = Number(matchup.away.totalPoints ?? 0);
 
-          return [
-            {
-              matchupId: matchupIndex + 1,
-              teamId: matchup.home.teamId,
-              totalPoints: homePoints,
-              result: getWeeklyResult(homePoints, awayPoints),
-              roster:
-                matchup.home.rosterForCurrentScoringPeriod ??
-                matchup.home.rosterForMatchupPeriod,
-            },
-            {
-              matchupId: matchupIndex + 1,
-              teamId: matchup.away.teamId,
-              totalPoints: awayPoints,
-              result: getWeeklyResult(awayPoints, homePoints),
-              roster:
-                matchup.away.rosterForCurrentScoringPeriod ??
-                matchup.away.rosterForMatchupPeriod,
-            },
-          ];
-        });
-      schedule.push(filtered);
-    }
+        return [
+          {
+            matchupId: matchupIndex + 1,
+            teamId: matchup.home.teamId,
+            totalPoints: homePoints,
+            result: getWeeklyResult(homePoints, awayPoints),
+            roster:
+              matchup.home.rosterForCurrentScoringPeriod ??
+              matchup.home.rosterForMatchupPeriod,
+          },
+          {
+            matchupId: matchupIndex + 1,
+            teamId: matchup.away.teamId,
+            totalPoints: awayPoints,
+            result: getWeeklyResult(awayPoints, homePoints),
+            roster:
+              matchup.away.rosterForCurrentScoringPeriod ??
+              matchup.away.rosterForMatchupPeriod,
+          },
+        ];
+      });
+    schedule.push(filtered);
+  }
     const recordByWeekMap = getRecordByWeekMap(
       teams,
       schedule,
@@ -1054,6 +1104,27 @@ export const getEspnLeagueInfo = async (
       },
       {}
     );
+    const users = getManagerMap(members, teams);
+    const rosters = await getRosterMap(
+      teams,
+      recordByWeekMap,
+      potentialPointsMap,
+      playerLookupMap
+    );
+    const scoringType = getScoringType(
+      assertArray(
+        scoringSettings.scoringItems ?? [],
+        "ESPN scoring settings are invalid."
+      )
+    );
+    const draftPicks = await getDraftPicks(
+      (draftData?.draftDetail as Record<string, unknown> | undefined) ??
+        draftData,
+      teams,
+      allPlayerLookups,
+      season,
+      scoringType
+    );
 
     return {
       platform: "espn",
@@ -1076,13 +1147,8 @@ export const getEspnLeagueInfo = async (
       ),
       winnersBracket: [],
       losersBracket: [],
-      users: getManagerMap(members, teams),
-      rosters: await getRosterMap(
-        teams,
-        recordByWeekMap,
-        potentialPointsMap,
-        playerLookupMap
-      ),
+      users,
+      rosters,
       weeklyPoints: await getWeeklyPointsMap(teams, schedule, playerLookupMap),
       transactions: transactions,
       trades: [],
@@ -1091,12 +1157,7 @@ export const getEspnLeagueInfo = async (
         (status.previousSeasons as LeagueInfoType[] | undefined) ?? [],
       status: getLeagueStatus(currentWeek, lastScoredWeek, regularSeasonLength),
       currentWeek,
-      scoringType: getScoringType(
-        assertArray(
-          scoringSettings.scoringItems ?? [],
-          "ESPN scoring settings are invalid."
-        )
-      ),
+      scoringType,
       rosterPositions: getRosterPositions(
         (rosterSettings.lineupSlotCounts as
           | Record<string, number>
@@ -1105,19 +1166,8 @@ export const getEspnLeagueInfo = async (
       playoffTeams: Number(scheduleSettings.playoffTeamCount ?? 0),
       playoffType: 0,
       draftId: String(draftData?.id ?? draftData?.draftDetail?.id ?? ""),
-      draftPicks: await getDraftPicks(
-        (draftData?.draftDetail as Record<string, unknown> | undefined) ??
-          draftData,
-        teams,
-        allPlayerLookups,
-        season,
-        getScoringType(
-          assertArray(
-            scoringSettings.scoringItems ?? [],
-            "ESPN scoring settings are invalid."
-          )
-        )
-      ),
+      draftPicks,
+      draftMetadata: getEspnDraftMetadata(draftPicks, users, rosters),
       waiverType: acquisitionSettings.isUsingAcquisitionBudget ? 2 : 0,
       sport: "nfl",
     };
