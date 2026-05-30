@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
-import { useStore } from "../src/store/store.ts";
+import { getLeagueKey, useStore } from "../src/store/store.ts";
 
 const createStorageMock = () => {
   const storage = new Map();
@@ -109,13 +109,16 @@ describe("main store", () => {
 
   test("addProjectionData updates only the targeted roster", () => {
     const store = useStore();
-    store.updateLeagueInfo(buildLeague("league-1"));
+    const league = buildLeague("league-1");
+    store.updateLeagueInfo(league);
 
-    store.addProjectionData(0, "u2", [{ projection: 22.4, position: "RB" }]);
+    store.addProjectionData(getLeagueKey(league), "u2", [
+      { projection: 22.4, position: "RB" },
+    ]);
 
-    const league = store.leagueInfo[0];
-    const roster1 = league.rosters.find((r) => r.id === "u1");
-    const roster2 = league.rosters.find((r) => r.id === "u2");
+    const updatedLeague = store.leagueInfo[0];
+    const roster1 = updatedLeague.rosters.find((r) => r.id === "u1");
+    const roster2 = updatedLeague.rosters.find((r) => r.id === "u2");
 
     expect(roster1?.projections).toBeUndefined();
     expect(roster2?.projections).toEqual([{ projection: 22.4, position: "RB" }]);

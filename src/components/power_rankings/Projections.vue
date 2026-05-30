@@ -34,7 +34,7 @@ onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
+    !store.leagueInfo[store.currentLeagueIndex].rosters[0]?.projections
   ) {
     loading.value = true;
     await getData();
@@ -43,8 +43,31 @@ onMounted(async () => {
   }
 });
 
+watch(
+  () => store.currentLeagueId,
+  async () => {
+    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    if (!currentLeague) {
+      return;
+    }
+
+    if (!currentLeague.rosters[0]?.projections) {
+      loading.value = true;
+      await getData();
+      updateChartColor();
+      loading.value = false;
+    } else {
+      updateChartColor();
+    }
+  }
+);
+
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (!currentLeague) {
+    return;
+  }
+
   const lastScoredWeek =
     currentLeague.status === "complete"
       ? 0
@@ -240,23 +263,6 @@ const seriesData = computed(() => {
 watch([() => store.darkMode, () => store.showUsernames], () => {
   updateChartColor();
 });
-
-watch(
-  () => store.currentLeagueId,
-  async () => {
-    if (
-      store.leagueInfo.length > 0 &&
-      !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
-    ) {
-      loading.value = true;
-      await getData();
-      updateChartColor();
-      loading.value = false;
-    } else {
-      updateChartColor();
-    }
-  }
-);
 
 const updateChartColor = () => {
   chartOptions.value = {

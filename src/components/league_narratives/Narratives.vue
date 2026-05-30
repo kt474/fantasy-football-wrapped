@@ -35,7 +35,11 @@ const areNarrativesReady = computed(
 );
 
 const hydrateLeagueDraftPicks = async (league: LeagueInfoType) => {
-  if (!league.draftId || league.draftPicks?.length) {
+  if (
+    league.platform === "espn" ||
+    !league.draftId ||
+    league.draftPicks?.length
+  ) {
     return;
   }
 

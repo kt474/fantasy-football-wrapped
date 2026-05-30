@@ -218,7 +218,6 @@ export const useLeagueInput = (
           showError("Unable to load league right now. Please try again.");
         }
       } catch (error) {
-        console.error("Failed to load league:", error);
         showError(getEspnErrorMessage(error));
       } finally {
         store.updateLoadingLeague("");

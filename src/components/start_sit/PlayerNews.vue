@@ -320,7 +320,10 @@ onMounted(async () => {
 
 watch(
   () => [currentManager.value, store.currentLeagueId],
-  async () => {
+  async ([, leagueId], [, previousLeagueId]) => {
+    if (leagueId !== previousLeagueId) {
+      currentManager.value = managers.value[0];
+    }
     loading.value = true;
     await Promise.all([fetchPlayerNames(), getData()]);
     loading.value = false;

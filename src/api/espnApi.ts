@@ -545,8 +545,9 @@ const getRosterMap = async (
         pointsFor: record.pointsFor,
         pointsAgainst: record.pointsAgainst,
         potentialPoints: potentialPoints,
-        managerEfficiency:
-          Math.round((record.pointsFor * 1000) / potentialPoints) / 1000,
+        managerEfficiency: potentialPoints
+          ? Math.round((record.pointsFor * 1000) / potentialPoints) / 1000
+          : 0,
         wins: record.wins,
         losses: record.losses,
         ties: record.ties,
@@ -1027,7 +1028,12 @@ export const getEspnLeagueInfo = async (
   const currentWeek = Number(status.currentMatchupPeriod ?? 0);
   const finalScoringPeriod = Number(status.finalScoringPeriod ?? 0);
   const latestScoringPeriod = Number(status.latestScoringPeriod ?? 0);
-  const lastCompletedWeek = Math.max(latestScoringPeriod, currentWeek - 1, 0);
+  const latestCompletedCandidate =
+    latestScoringPeriod > 0 ? latestScoringPeriod : currentWeek - 1;
+  const lastCompletedWeek =
+    currentWeek > 0
+      ? Math.max(Math.min(latestCompletedCandidate, currentWeek - 1), 0)
+      : 0;
   // ESPN's finalScoringPeriod is the scheduled season endpoint, not the last
   // completed week. Keep it only as an upper bound so we don't fetch future
   // matchup periods with zero scores.

@@ -145,8 +145,8 @@ const refreshLeague = async () => {
   }
   store.updateLoadingLeague(leagueToRefresh.name);
   let didRefresh = false;
-  if (leagueToRefresh.platform === "espn") {
-    try {
+  try {
+    if (leagueToRefresh.platform === "espn") {
       const refreshedLeague = await getEspnLeagueInfo(
         leagueToRefresh.season,
         leagueToRefresh.leagueId
@@ -154,26 +154,32 @@ const refreshLeague = async () => {
       store.updateLeagueInfo(refreshedLeague);
       store.updateCurrentLeagueId(getLeagueKey(refreshedLeague));
       didRefresh = true;
-    } catch (error) {
-      toast.error(getEspnErrorMessage(error));
-      store.updateLeagueInfo(leagueToRefresh);
+    } else {
+      const refreshedLeague = await getData(leagueToRefresh.leagueId);
+      store.updateLeagueInfo(refreshedLeague);
+      await inputLeague(
+        leagueToRefresh.leagueId,
+        leagueToRefresh.name,
+        leagueToRefresh.totalRosters,
+        leagueToRefresh.seasonType,
+        leagueToRefresh.season
+      );
+      didRefresh = true;
     }
-  } else {
-    const refreshedLeague = await getData(leagueToRefresh.leagueId);
-    store.updateLeagueInfo(refreshedLeague);
-    await inputLeague(
-      leagueToRefresh.leagueId,
-      leagueToRefresh.name,
-      leagueToRefresh.totalRosters,
-      leagueToRefresh.seasonType,
-      leagueToRefresh.season
+  } catch (error) {
+    toast.error(
+      leagueToRefresh.platform === "espn"
+        ? getEspnErrorMessage(error)
+        : "Unable to refresh league data right now. Please try again."
     );
-    didRefresh = true;
+    store.updateLeagueInfo(leagueToRefresh);
+    store.updateCurrentLeagueId(getLeagueKey(leagueToRefresh));
+  } finally {
+    store.updateLoadingLeague("");
   }
   if (didRefresh) {
     toast.success("League data refreshed!");
   }
-  store.updateLoadingLeague("");
 };
 
 const isShareSupported = ref(false);

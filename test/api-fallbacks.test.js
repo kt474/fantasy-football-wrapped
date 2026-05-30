@@ -56,14 +56,14 @@ describe("API fallback behavior", () => {
     expect(result).toEqual([]);
   });
 
-  test("getPlayerIdsByNameTeamMap returns empty list on non-ok response", async () => {
+  test("getPlayerIdsByNameTeamMap preserves input order with nulls on non-ok response", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockFetchResponse(500, {})));
 
     const result = await getPlayerIdsByNameTeamMap([
       { name: "Patrick Mahomes", team: "KC" },
     ]);
 
-    expect(result).toEqual([]);
+    expect(result).toEqual([null]);
   });
 
   test("generateSummary returns fallback text on server errors", async () => {
