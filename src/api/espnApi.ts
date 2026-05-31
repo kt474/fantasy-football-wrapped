@@ -949,7 +949,7 @@ const getEspnDraftMetadata = (
   };
 };
 
-const getLeagueStatus = (
+export const getLeagueStatus = (
   currentWeek: number,
   lastScoredWeek: number,
   regularSeasonLength: number
@@ -960,7 +960,7 @@ const getLeagueStatus = (
   if (currentWeek <= regularSeasonLength) {
     return "in_season";
   }
-  return "post_season";
+  return "complete";
 };
 
 export const getLeagueData = async (
