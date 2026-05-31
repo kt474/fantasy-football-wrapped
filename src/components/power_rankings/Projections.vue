@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import intersection from "lodash/intersection";
 import { ref, computed, watch, onMounted } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { RosterType, LeagueInfoType } from "../../types/types";
 import { fakeProjectionData } from "../../api/fakeLeague";
 import { getProjections } from "../../api/sleeperApi";
@@ -34,7 +34,7 @@ onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
+    !store.leagueInfo[store.currentLeagueIndex].rosters[0]?.projections
   ) {
     loading.value = true;
     await getData();
@@ -43,8 +43,31 @@ onMounted(async () => {
   }
 });
 
+watch(
+  () => store.currentLeagueId,
+  async () => {
+    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    if (!currentLeague) {
+      return;
+    }
+
+    if (!currentLeague.rosters[0]?.projections) {
+      loading.value = true;
+      await getData();
+      updateChartColor();
+      loading.value = false;
+    } else {
+      updateChartColor();
+    }
+  }
+);
+
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (!currentLeague) {
+    return;
+  }
+
   const lastScoredWeek =
     currentLeague.status === "complete"
       ? 0
@@ -67,11 +90,7 @@ const getData = async () => {
 
       const projections = await Promise.all(projectionPromises);
       singleRoster.push(...projections);
-      store.addProjectionData(
-        store.currentLeagueIndex,
-        roster.id,
-        singleRoster
-      );
+      store.addProjectionData(getLeagueKey(currentLeague), roster.id, singleRoster);
     })
   );
   localStorage.setItem(
@@ -244,23 +263,6 @@ const seriesData = computed(() => {
 watch([() => store.darkMode, () => store.showUsernames], () => {
   updateChartColor();
 });
-
-watch(
-  () => store.currentLeagueId,
-  async () => {
-    if (
-      store.leagueInfo.length > 0 &&
-      !store.leagueInfo[store.currentLeagueIndex].rosters[0].projections
-    ) {
-      loading.value = true;
-      await getData();
-      updateChartColor();
-      loading.value = false;
-    } else {
-      updateChartColor();
-    }
-  }
-);
 
 const updateChartColor = () => {
   chartOptions.value = {

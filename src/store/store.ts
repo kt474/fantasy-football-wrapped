@@ -13,6 +13,15 @@ import {
 } from "../types/types";
 import { DraftGrades, DraftPick } from "../types/apiTypes";
 
+export const getLeagueKey = ({
+  leagueId,
+  platform,
+  season,
+}: Pick<LeagueInfoType, "leagueId"> &
+  Partial<Pick<LeagueInfoType, "platform" | "season">>) => {
+  return platform === "espn" ? `espn:${leagueId}:${season ?? ""}` : leagueId;
+};
+
 export const useStore = defineStore("main", {
   state: () => ({
     darkMode: false,
@@ -43,14 +52,30 @@ export const useStore = defineStore("main", {
     weeklyPoints: (state) =>
       state.leagueInfo.map((league: LeagueInfoType) => league.weeklyPoints),
     leagueIds: (state) =>
-      state.leagueInfo.map((league: LeagueInfoType) => league.leagueId),
+      state.leagueInfo.map((league: LeagueInfoType) => getLeagueKey(league)),
     currentLeagueIndex: (state) => {
-      return findIndex(state.leagueInfo, {
-        leagueId: state.currentLeagueId,
-      });
+      return findIndex(
+        state.leagueInfo,
+        (league) => getLeagueKey(league) === state.currentLeagueId
+      );
     },
   },
   actions: {
+    findLeague(leagueId: string) {
+      const keyedLeague = this.leagueInfo.find(
+        (league) => getLeagueKey(league) === leagueId
+      );
+      if (keyedLeague) {
+        return keyedLeague;
+      }
+
+      const rawLeagueIdMatches = this.leagueInfo.filter(
+        (league) => league.leagueId === leagueId
+      );
+      return rawLeagueIdMatches.length === 1
+        ? rawLeagueIdMatches[0]
+        : undefined;
+    },
     updateShowUsernames(payload: boolean) {
       this.showUsernames = payload;
     },
@@ -65,7 +90,7 @@ export const useStore = defineStore("main", {
     },
     updateLeagueInfo(payload: LeagueInfoType) {
       const alreadyExists = this.leagueInfo.some(
-        (league) => league.leagueId === payload.leagueId
+        (league) => getLeagueKey(league) === getLeagueKey(payload)
       );
       if (!alreadyExists) {
         this.$patch((state) => {
@@ -74,10 +99,16 @@ export const useStore = defineStore("main", {
       }
     },
     addProjectionData(
-      index: number,
+      leagueId: string,
       rosterId: string,
       projectionData: { projection: number; position: string }[]
     ) {
+      const index = this.leagueInfo.findIndex(
+        (league) => getLeagueKey(league) === leagueId
+      );
+      if (index === -1) {
+        return;
+      }
       const updatedLeagueInfo = [...this.leagueInfo];
       updatedLeagueInfo[index] = {
         ...updatedLeagueInfo[index],
@@ -94,67 +125,67 @@ export const useStore = defineStore("main", {
       this.leagueInfo = updatedLeagueInfo;
     },
     addPlayoffOdds(leagueId: string, payload: PlayoffProjection[]) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.playoffProjections = payload;
       }
     },
     addWeeklyPreview(leagueId: string, payload: string) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.weeklyPreview = payload;
       }
     },
     addWeeklyReport(leagueId: string, payload: string) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.weeklyReport = payload;
       }
     },
     addPremiumWeeklyReport(leagueId: string, payload: string) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.premiumWeeklyReport = payload;
       }
     },
     addManagerProfiles(leagueId: string, payload: Record<string, string>) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.managerProfiles = payload;
       }
     },
     addCurrentTrends(leagueId: string, payload: string[]) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.currentTrends = payload;
       }
     },
     addTradeNames(leagueId: string, payload: TradeNameRow[]) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.tradeNames = payload;
       }
     },
     addWaiverMoves(leagueId: string, payload: WaiverMove[]) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.waiverMoves = payload;
       }
     },
     addDraftPicks(leagueId: string, payload: DraftPick[]) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.draftPicks = payload;
       }
     },
     addDraftMetadata(leagueId: string, payload: LeagueDraftMetadata) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.draftMetadata = payload;
       }
     },
     addDraftGrades(leagueId: string, payload: DraftGrades[]) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.draftGrades = payload;
       }
@@ -163,7 +194,7 @@ export const useStore = defineStore("main", {
       leagueId: string,
       payload: PlayerRankingsType | Record<string, unknown[]>
     ) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.playerRankings = payload as PlayerRankingsType;
       }
@@ -172,13 +203,13 @@ export const useStore = defineStore("main", {
       leagueId: string,
       payload: Record<string, PlayerType[] | unknown[]>
     ) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.rosterRankings = payload as Record<string, PlayerType[]>;
       }
     },
     addYearEndReport(leagueId: string, payload: string) {
-      const item = this.leagueInfo.find((obj) => obj.leagueId === leagueId);
+      const item = this.findLeague(leagueId);
       if (item) {
         item.yearEndReport = payload;
       }

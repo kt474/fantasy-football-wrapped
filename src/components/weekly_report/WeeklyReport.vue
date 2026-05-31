@@ -2,7 +2,7 @@
 import { TableDataType, LeagueInfoType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import { computed, ref, watch, onMounted, nextTick } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import {
@@ -35,6 +35,7 @@ import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
 import { toPng } from "html-to-image";
 import { Copy, Download } from "lucide-vue-next";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -260,7 +261,7 @@ const getPremiumReport = async () => {
     premiumLoading.value = false;
     rawPremiumWeeklyReport.value = response.text;
     store.addPremiumWeeklyReport(
-      currentLeague.leagueId,
+      getLeagueKey(currentLeague),
       rawPremiumWeeklyReport.value
     );
     localStorage.setItem(
@@ -299,10 +300,11 @@ const getReport = async () => {
       reportPrompt.value,
       leagueMetadata,
       currentLeague.leagueId,
-      currentWeek.value
+      currentWeek.value,
+      currentLeague.season
     );
     rawWeeklyReport.value = response.text;
-    store.addWeeklyReport(currentLeague.leagueId, rawWeeklyReport.value);
+    store.addWeeklyReport(getLeagueKey(currentLeague), rawWeeklyReport.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -1342,6 +1344,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
                       alt="User avatar"
                       class="w-8 h-8 rounded-full"
                       :src="user.avatarImg"
+                      @error="handleImageError"
                     />
                     <svg
                       v-else

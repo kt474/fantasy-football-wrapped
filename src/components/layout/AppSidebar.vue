@@ -207,7 +207,11 @@ const data = {
                 </div>
               </SidebarMenuButton>
               <SidebarMenuButton
-                v-else-if="!store.currentLeagueId && !route.query.leagueId"
+                v-else-if="
+                  !store.currentLeagueId &&
+                  !route.query.leagueId &&
+                  !store.loadingLeague
+                "
                 as-child
                 :is-active="
                   store.currentTab === childItem.title && route.path === '/'

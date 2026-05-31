@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import maxBy from "lodash/maxBy";
 import sum from "lodash/sum";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import {
   RosterType,
   LeagueInfoType,
@@ -112,7 +112,7 @@ const getData = async () => {
             const projectionPromises = roster.players.map((player: string) => {
               return getProjections(
                 player,
-                store.leagueInfo[store.currentLeagueIndex].season,
+                currentLeague.season,
                 currentLeague["currentWeek"] ? currentLeague["currentWeek"] : 0,
                 currentLeague["scoringType"]
               );
@@ -121,7 +121,7 @@ const getData = async () => {
             const projections = await Promise.all(projectionPromises);
             singleRoster.push(...projections);
             store.addProjectionData(
-              store.currentLeagueIndex,
+              getLeagueKey(currentLeague),
               roster.id,
               singleRoster
             );
@@ -204,7 +204,9 @@ const getData = async () => {
     }
     playoffOdds.value.sort((a, b) => sum(a.placement) - sum(b.placement));
   }
-  store.addPlayoffOdds(store.currentLeagueId, playoffOdds.value);
+  if (currentLeague) {
+    store.addPlayoffOdds(getLeagueKey(currentLeague), playoffOdds.value);
+  }
   localStorage.setItem(
     "leagueInfo",
     JSON.stringify(store.leagueInfo as LeagueInfoType[])

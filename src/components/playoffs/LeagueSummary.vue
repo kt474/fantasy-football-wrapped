@@ -3,7 +3,7 @@ import { TableDataType, LeagueInfoType, UserType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import { generateSummary, getPlayersByIdsMap } from "../../api/api.ts";
 import { ref, onMounted, watch, computed } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
@@ -82,7 +82,8 @@ const fetchPlayerNames = async () => {
     if (currentLeague) {
       const allPlayerIds = currentLeague.weeklyPoints
         .map((user) => user.starters[user.starters.length - 1] ?? [])
-        .flat();
+        .flat()
+        .filter((id): id is string => id !== null);
 
       let playerLookupMap = new Map<string, Player>();
       if (allPlayerIds.length > 0) {
@@ -90,8 +91,10 @@ const fetchPlayerNames = async () => {
       }
 
       const result = currentLeague.weeklyPoints.map((user) => {
-        const starterIds = user.starters[user.starters.length - 1] ?? [];
-        const starterNames = starterIds?.map((id: string) =>
+        const starterIds = (
+          user.starters[user.starters.length - 1] ?? []
+        ).filter((id): id is string => id !== null);
+        const starterNames = starterIds.map((id) =>
           playerLookupMap.get(id)?.name
             ? playerLookupMap.get(id)?.name
             : playerLookupMap.get(id)?.team
@@ -144,7 +147,7 @@ const getSummary = async () => {
     });
     const response = await generateSummary(userData, leagueMetadata);
     rawSummary.value = response.text;
-    store.addYearEndReport(currentLeague.leagueId, rawSummary.value);
+    store.addYearEndReport(getLeagueKey(currentLeague), rawSummary.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])

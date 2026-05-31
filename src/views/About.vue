@@ -47,6 +47,15 @@ watch(
               rel="noopener noreferrer"
               >Sleeper</a
             >
+            and
+            <a
+              aria-label="Link to espn fantasy website"
+              class="font-medium text-primary hover:underline"
+              href="https://www.espn.com/fantasy/football/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >ESPN</a
+            >
             fantasy football leagues.
           </p>
           <p class="text-base leading-relaxed">

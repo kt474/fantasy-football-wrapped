@@ -4,7 +4,7 @@ import { generateTrends, getPlayersByIdsMap } from "../../api/api";
 import { getDraftProjections, getDraftPicks } from "../../api/sleeperApi";
 import { TableDataType, LeagueInfoType } from "../../types/types";
 import { Player } from "../../types/apiTypes";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/fakeLeague";
 import { Card, CardTitle, CardHeader } from "../ui/card";
 import MarkdownIt from "markdown-it";
@@ -22,6 +22,9 @@ const md = new MarkdownIt({
 });
 
 const currentTrends = ref<string[]>([]);
+const preseasonUnavailableTrends = [
+  "League news will appear once draft or scoring data is available.",
+];
 
 const renderedCurrentTrends = computed(() => {
   return currentTrends.value.map((trend) =>
@@ -45,19 +48,34 @@ const getFiveMostRecent = (str: string, n = 5): string => {
 
 const getPreseasonData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (!currentLeague) {
+    return;
+  }
+
+  if (!currentLeague.draftId) {
+    currentTrends.value = preseasonUnavailableTrends;
+    return;
+  }
+
   const seasonState =
     currentLeague?.seasonType === "Dynasty" && currentLeague?.previousLeagueId
       ? "dynasty"
       : "preseason";
 
   let result: Record<string, unknown>[] = [];
-  if (currentLeague) {
+  try {
     const draftPicks = await getDraftPicks(
       currentLeague.draftId,
       currentLeague.season,
       currentLeague.scoringType,
       currentLeague.seasonType
     );
+
+    if (draftPicks.length === 0) {
+      currentTrends.value = preseasonUnavailableTrends;
+      return;
+    }
+
     const first2Rounds = draftPicks.slice(0, 2 * currentLeague.rosters.length);
     const qbs = currentLeague.rosterPositions.reduce(
       (sum, item) => sum + (item === "QB" || item === "SUPER_FLEX" ? 1 : 0),
@@ -91,8 +109,11 @@ const getPreseasonData = async () => {
       };
     });
     result = await Promise.all(promises);
+  } catch {
+    currentTrends.value = preseasonUnavailableTrends;
+    return;
   }
-  if (result) {
+  if (result.length > 0) {
     let response;
     try {
       if (currentLeague && currentLeague.rosters.length <= 8) {
@@ -103,7 +124,7 @@ const getPreseasonData = async () => {
         response = await generateTrends(result, 70, 3, seasonState);
       }
       currentTrends.value = response.bulletPoints;
-      store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+      store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
       localStorage.setItem(
         "leagueInfo",
         JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -112,7 +133,7 @@ const getPreseasonData = async () => {
       currentTrends.value = [
         "Unable to generate league news. Please try again later",
       ];
-      store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+      store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
       localStorage.setItem(
         "leagueInfo",
         JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -153,11 +174,19 @@ const formatData = async () => {
     const starterPoints = user.starterPoints[weekIndex];
     const maxIndex = getMaxIndex(starterPoints);
 
-    const bestStarter = {
-      name: playerLookupMap.get(String(user.starters[weekIndex][maxIndex]))
-        ?.name,
-      points: starterPoints[maxIndex],
-    };
+    let bestStarter = {};
+    if (currentLeague?.platform !== "espn") {
+      bestStarter = {
+        name: playerLookupMap.get(String(user.starters[weekIndex][maxIndex]))
+          ?.name,
+        points: starterPoints[maxIndex],
+      };
+    } else {
+      bestStarter = {
+        name: String(user.starterNames?.[weekIndex][maxIndex]),
+        points: starterPoints[maxIndex],
+      };
+    }
 
     return {
       name: store.showUsernames ? user.username : user.name,
@@ -185,7 +214,7 @@ const formatData = async () => {
       response = await generateTrends(userData, 70, 3);
     }
     currentTrends.value = response.bulletPoints;
-    store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+    store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -194,7 +223,7 @@ const formatData = async () => {
     currentTrends.value = [
       "Unable to generate league news. Please try again later",
     ];
-    store.addCurrentTrends(currentLeague.leagueId, currentTrends.value);
+    store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])

@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { RosterType, UserType } from "../../types/types";
 import { useStore } from "../../store/store";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const props = defineProps<{
@@ -25,6 +26,7 @@ const bestManagerUser = computed<UserType | null>(() => {
   if (!manager) return null;
   return props.users.find((user) => user.id === manager.id) ?? null;
 });
+
 </script>
 <template>
   <div>
@@ -37,6 +39,7 @@ const bestManagerUser = computed<UserType | null>(() => {
             v-if="bestManager && bestManagerUser && bestManagerUser.avatarImg"
             class="w-6 h-6 rounded-full"
             :src="bestManagerUser.avatarImg"
+            @error="handleImageError"
           />
           <svg
             v-else

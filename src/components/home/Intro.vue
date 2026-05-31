@@ -1,13 +1,32 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import LeagueInputForm from "@/components/shared/LeagueInputForm.vue";
-import { useLeagueInput } from "@/composables/useLeagueInput";
+import {
+  useLeagueInput,
+  type LeaguePlatform,
+} from "@/composables/useLeagueInput";
 import { useStore } from "@/store/store";
 import Card from "../ui/card/Card.vue";
 
-const { inputType, seasonYear, leagueIdInput, onSubmit } = useLeagueInput();
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 const store = useStore();
 const isDark = computed(() => store.darkMode);
+
+const activeTab = ref<"Sleeper" | "Espn">("Sleeper");
+const platform = computed<LeaguePlatform>(() =>
+  activeTab.value === "Espn" ? "espn" : "sleeper"
+);
+
+const {
+  inputType,
+  seasonYear,
+  leagueIdInput,
+  espnPrivate,
+  espnSwid,
+  espnS2,
+  onSubmit,
+} = useLeagueInput(platform);
 </script>
 
 <template>
@@ -71,23 +90,63 @@ const isDark = computed(() => store.darkMode);
               <div class="mb-4 text-left">
                 <p class="text-sm font-semibold">Get started</p>
                 <p class="text-sm text-muted-foreground">
-                  Enter your
-                  <a
-                    class="font-medium text-primary hover:underline"
-                    href="https://sleeper.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >Sleeper</a
-                  >
-                  league ID or username.
+                  Select your platform then enter your league ID or username.
                 </p>
               </div>
-              <LeagueInputForm
-                v-model:inputType="inputType"
-                v-model:seasonYear="seasonYear"
-                v-model:leagueIdInput="leagueIdInput"
-                @submit="onSubmit"
-              />
+              <Tabs default-value="Sleeper" v-model="activeTab" class="mb-2">
+                <TabsList
+                  class="p-1 border rounded-md shadow-sm border-input bg-popover"
+                >
+                  <TabsTrigger
+                    value="Sleeper"
+                    class="hover:bg-muted/50 data-[state=active]:bg-white/90 data-[state=active]:text-foreground data-[state=active]:shadow"
+                  >
+                    <div class="flex items-center gap-2 py-1">
+                      <img
+                        width="20"
+                        src="/sleeperlogo.jpeg"
+                        alt="Sleeper logo"
+                      />
+                      <p>Sleeper</p>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="Espn"
+                    class="hover:bg-muted/50 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow"
+                  >
+                    <div class="flex items-center gap-2 py-1">
+                      <img width="20" src="/espnlogo.png" alt="ESPN logo" />
+                      <p>ESPN</p>
+                      <span
+                        class="rounded border border-primary/30 bg-primary/10 px-1.5 text-[10px] font-semibold uppercase leading-5 text-primary"
+                      >
+                        Beta
+                      </span>
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="Sleeper">
+                  <LeagueInputForm
+                    v-model:inputType="inputType"
+                    v-model:seasonYear="seasonYear"
+                    v-model:leagueIdInput="leagueIdInput"
+                    platform="sleeper"
+                    @submit="onSubmit"
+                  />
+                </TabsContent>
+                <TabsContent value="Espn">
+                  <LeagueInputForm
+                    inputType="League ID"
+                    v-model:seasonYear="seasonYear"
+                    v-model:leagueIdInput="leagueIdInput"
+                    v-model:espnPrivate="espnPrivate"
+                    v-model:espnSwid="espnSwid"
+                    v-model:espnS2="espnS2"
+                    platform="espn"
+                    @submit="onSubmit"
+                  />
+                </TabsContent>
+              </Tabs>
             </Card>
           </div>
 

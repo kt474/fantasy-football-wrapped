@@ -27,11 +27,16 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { LeagueInfoType } from "@/types/types";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
 import { getData, inputLeague } from "../../api/api";
+import {
+  getEspnErrorMessage,
+  getEspnLeagueInfo,
+  getSavedEspnAuth,
+} from "@/api/espnApi";
 import Dialog from "./Dialog.vue";
 
 const router = useRouter();
@@ -69,12 +74,14 @@ const selectLeague = (leagueId: string) => {
   store.updateCurrentLeagueId(leagueId);
 };
 const removeHistoryLeagues = () => {
-  // Regular expression to match keys starting with a digit
   const numberStartRegex = /^[0-9]/;
   const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && numberStartRegex.test(key)) {
+    if (
+      key &&
+      (numberStartRegex.test(key) || key.startsWith("league-history"))
+    ) {
       keysToRemove.push(key);
     }
   }
@@ -82,9 +89,11 @@ const removeHistoryLeagues = () => {
     localStorage.removeItem(key);
   }
 };
+
 const removeLeague = () => {
   if (localStorage.getItem("leagueInfo")) {
     const removedLeagueId = currentLeagueId.value;
+    removeHistoryLeagues();
     if (currentLeague.value.previousLeagues) {
       currentLeague.value.previousLeagues.forEach((league: LeagueInfoType) => {
         localStorage.removeItem(league.leagueId);
@@ -92,14 +101,13 @@ const removeLeague = () => {
     }
     store.$patch((state) => {
       state.leagueInfo = state.leagueInfo.filter(
-        (item) => item.leagueId !== removedLeagueId
+        (item) => getLeagueKey(item) !== removedLeagueId
       );
     });
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
     toast.success("League removed!");
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentTab");
-      removeHistoryLeagues();
       store.showUsernames = false;
       store.currentTab = "Home";
       // reset url if there are no leagues
@@ -122,10 +130,15 @@ const removeLeague = () => {
 };
 
 const refreshLeague = async () => {
+  const leagueToRefresh = currentLeague.value;
+  if (!leagueToRefresh) {
+    return;
+  }
+
   selectLeague(currentLeagueId.value);
   store.$patch((state) => {
     state.leagueInfo = state.leagueInfo.filter(
-      (item) => item.leagueId !== currentLeagueId.value
+      (item) => getLeagueKey(item) !== currentLeagueId.value
     );
   });
   const originalData = localStorage.getItem("originalData");
@@ -134,17 +147,45 @@ const refreshLeague = async () => {
     delete currentData[currentLeagueId.value];
     localStorage.setItem("originalData", JSON.stringify(currentData));
   }
-  store.updateLoadingLeague(currentLeague.value?.name);
-  store.updateLeagueInfo(await getData(currentLeagueId.value));
-  toast.success("League data refreshed!");
-  store.updateLoadingLeague("");
-  await inputLeague(
-    currentLeague.value.leagueId,
-    currentLeague.value.name,
-    currentLeague.value.totalRosters,
-    currentLeague.value.seasonType,
-    currentLeague.value.season
-  );
+  store.updateLoadingLeague(leagueToRefresh.name);
+  let didRefresh = false;
+  try {
+    if (leagueToRefresh.platform === "espn") {
+      const refreshedLeague = await getEspnLeagueInfo(
+        leagueToRefresh.season,
+        leagueToRefresh.leagueId,
+        getSavedEspnAuth(leagueToRefresh.season, leagueToRefresh.leagueId)
+      );
+      store.updateLeagueInfo(refreshedLeague);
+      store.updateCurrentLeagueId(getLeagueKey(refreshedLeague));
+      didRefresh = true;
+    } else {
+      const refreshedLeague = await getData(leagueToRefresh.leagueId);
+      store.updateLeagueInfo(refreshedLeague);
+      await inputLeague(
+        leagueToRefresh.leagueId,
+        leagueToRefresh.name,
+        leagueToRefresh.totalRosters,
+        leagueToRefresh.seasonType,
+        leagueToRefresh.season,
+        leagueToRefresh?.platform ?? ""
+      );
+      didRefresh = true;
+    }
+  } catch (error) {
+    toast.error(
+      leagueToRefresh.platform === "espn"
+        ? getEspnErrorMessage(error)
+        : "Unable to refresh league data right now. Please try again."
+    );
+    store.updateLeagueInfo(leagueToRefresh);
+    store.updateCurrentLeagueId(getLeagueKey(leagueToRefresh));
+  } finally {
+    store.updateLoadingLeague("");
+  }
+  if (didRefresh) {
+    toast.success("League data refreshed!");
+  }
 };
 
 const isShareSupported = ref(false);
@@ -171,7 +212,10 @@ const shareLeague = () => {
     "//" +
     window.location.host +
     window.location.pathname;
-  const updatedURL = `${currentUrl}?leagueId=${currentLeague.value.leagueId}`;
+  const updatedURL =
+    currentLeague.value.platform === "espn"
+      ? `${currentUrl}?espn&leagueId=${currentLeague.value.leagueId}&season=${currentLeague.value.season}`
+      : `${currentUrl}?leagueId=${currentLeague.value.leagueId}`;
   navigator.clipboard.writeText(updatedURL);
   toast.success("Link copied to clipboard!");
 };
@@ -207,8 +251,8 @@ const openAddLeagueDialog = async () => {
           <DropdownMenuContent class="w-60" align="start">
             <DropdownMenuItem
               v-for="league in leagues"
-              :key="league.leagueId"
-              @select="selectLeague(league.leagueId)"
+              :key="getLeagueKey(league)"
+              @select="selectLeague(getLeagueKey(league))"
               class="flex items-start cursor-pointer"
             >
               <div class="flex flex-col">
@@ -228,7 +272,7 @@ const openAddLeagueDialog = async () => {
                 </p>
               </div>
               <Check
-                v-if="league.leagueId === currentLeagueId"
+                v-if="getLeagueKey(league) === currentLeagueId"
                 class="w-4 h-4 mt-2 ml-auto text-primary"
               />
             </DropdownMenuItem>

@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "5/31/26",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "ESPN support is now in the beta phase! Please report any issues.",
+        ],
+      },
+    ],
+  },
+  {
     date: "5/03/26",
     content: [
       {

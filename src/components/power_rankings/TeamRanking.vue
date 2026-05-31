@@ -8,7 +8,7 @@ import {
   PlayerType,
 } from "../../types/types";
 import { getStats } from "../../api/sleeperApi";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
 import { fakeUsers } from "../../api/fakeLeague";
 import Roster from "./Roster.vue";
@@ -58,7 +58,7 @@ const getData = async () => {
   }
 
   allData.value = groupByRosterId(filtered);
-  store.addRosterRankings(currentLeague.leagueId, allData.value);
+  store.addRosterRankings(getLeagueKey(currentLeague), allData.value);
 
   const groupedPositions = groupBy(filtered, "position");
   const sorted = Object.fromEntries(
@@ -75,7 +75,7 @@ const getData = async () => {
   );
   data.value = sorted as Record<string, RankingPlayer[]>;
   store.addPlayerRankings(
-    currentLeague.leagueId,
+    getLeagueKey(currentLeague),
     data.value as unknown as Record<string, PlayerType[]>
   );
   localStorage.setItem(

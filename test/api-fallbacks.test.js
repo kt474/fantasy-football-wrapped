@@ -5,6 +5,7 @@ import {
   generateSummary,
   generateTrends,
   getLeagueCount,
+  getPlayerIdsByNameTeamMap,
   getPlayerNews,
 } from "../src/api/api.ts";
 
@@ -53,6 +54,16 @@ describe("API fallback behavior", () => {
     const result = await getPlayerNews([]);
 
     expect(result).toEqual([]);
+  });
+
+  test("getPlayerIdsByNameTeamMap preserves input order with nulls on non-ok response", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockFetchResponse(500, {})));
+
+    const result = await getPlayerIdsByNameTeamMap([
+      { name: "Patrick Mahomes", team: "KC" },
+    ]);
+
+    expect(result).toEqual([null]);
   });
 
   test("generateSummary returns fallback text on server errors", async () => {

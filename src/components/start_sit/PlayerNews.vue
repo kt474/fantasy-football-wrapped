@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { getPlayerNews, getPlayersByIdsMap } from "../../api/api";
 import {
   getStats,
@@ -122,7 +122,7 @@ const getData = async () => {
       await getRosterRankings();
     }
     const currentPlayers =
-      currentLeague.rosterRankings?.[currentRosterId].map(
+      currentLeague.rosterRankings?.[currentRosterId]?.map(
         (player) => `${player.firstName} ${player.lastName}`
       ) ?? [];
     const playerNews = await getPlayerNews(currentPlayers);
@@ -173,7 +173,7 @@ const getRosterRankings = async () => {
     }, {});
   }
 
-  store.addRosterRankings(currentLeague.leagueId, groupByRosterId(filtered));
+  store.addRosterRankings(getLeagueKey(currentLeague), groupByRosterId(filtered));
 };
 
 const fetchPlayerNames = async () => {
@@ -320,7 +320,10 @@ onMounted(async () => {
 
 watch(
   () => [currentManager.value, store.currentLeagueId],
-  async () => {
+  async ([, leagueId], [, previousLeagueId]) => {
+    if (leagueId !== previousLeagueId) {
+      currentManager.value = managers.value[0];
+    }
     loading.value = true;
     await Promise.all([fetchPlayerNames(), getData()]);
     loading.value = false;

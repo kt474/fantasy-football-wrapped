@@ -1,10 +1,15 @@
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, unref, watch, type MaybeRef } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useStore } from "@/store/store";
-import type { LeagueInfoType } from "@/types/types";
+import { getLeagueKey, useStore } from "@/store/store";
 import type { LeagueOriginal } from "@/types/apiTypes";
 import { getData, inputLeague, inputUsername } from "@/api/api";
 import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
+import {
+  getEspnErrorMessage,
+  getEspnLeagueInfo,
+  saveEspnAuth,
+  type EspnAuth,
+} from "@/api/espnApi";
 import { toast } from "vue-sonner";
 
 export const SEASON_YEAR_OPTIONS = [
@@ -14,9 +19,15 @@ export const SEASON_YEAR_OPTIONS = [
   "2023",
   "2022",
   "2021",
+  "2020",
+  "2019",
 ];
 
-export const useLeagueInput = () => {
+export type LeaguePlatform = "sleeper" | "espn";
+
+export const useLeagueInput = (
+  platform: MaybeRef<LeaguePlatform> = "sleeper"
+) => {
   const store = useStore();
   const router = useRouter();
   const route = useRoute();
@@ -24,12 +35,15 @@ export const useLeagueInput = () => {
   const leagueIdInput = ref("");
   const inputType = ref("League ID");
   const seasonYear = ref("2026");
+  const espnPrivate = ref(false);
+  const espnSwid = ref("");
+  const espnS2 = ref("");
   const showErrorMsg = ref(false);
   const errorMsg = ref("");
   const showHelperMsg = ref(false);
 
   const leagueIds = computed(() => {
-    return store.leagueInfo.map((league: LeagueInfoType) => league.leagueId);
+    return store.leagueIds;
   });
 
   const resetRoute = async () => {
@@ -39,16 +53,40 @@ export const useLeagueInput = () => {
     }
   };
 
-  const updateURL = async (leagueID: string) => {
+  const updateURL = async (
+    leagueID: string,
+    currentPlatform: LeaguePlatform = "sleeper"
+  ) => {
+    const query =
+      currentPlatform === "espn"
+        ? {
+            ...route.query,
+            espn: null,
+            leagueId: leagueID,
+            season: seasonYear.value,
+          }
+        : {
+            ...route.query,
+            espn: undefined,
+            leagueId: leagueID,
+            season: undefined,
+          };
+
     await router.replace({
       path: "/",
-      query: { ...route.query, leagueId: leagueID },
+      query,
     });
   };
 
   const clearError = () => {
     errorMsg.value = "";
     showErrorMsg.value = false;
+  };
+
+  const showError = (message: string) => {
+    errorMsg.value = message;
+    toast.error(message);
+    showErrorMsg.value = true;
   };
 
   onMounted(() => {
@@ -65,103 +103,157 @@ export const useLeagueInput = () => {
 
   const onSubmit = async () => {
     clearError();
+    const currentPlatform = unref(platform);
 
-    if (inputType.value === "Username") {
-      if (leagueIdInput.value === "") {
-        errorMsg.value = "Please enter a username";
-        toast.error("Please enter a username");
-        showErrorMsg.value = true;
-        return;
-      }
-      const user = await getUsername(leagueIdInput.value);
-      if (!user?.user_id || !user?.display_name) {
-        errorMsg.value = "Invalid username";
-        toast.error("Invalid username");
-        showErrorMsg.value = true;
-        return;
-      }
-      showHelperMsg.value = true;
-      const leagues = await getAllLeagues(user.user_id, seasonYear.value);
-      store.username = user.display_name;
-      store.setLeaguesList(leagues);
-      store.updateShowLeaguesList(true);
-      showHelperMsg.value = false;
-      localStorage.setItem("inputType", "League ID");
-      store.updateShowInput(false);
-      inputUsername(user.display_name, seasonYear.value);
-      store.currentTab = "Standings";
-      localStorage.setItem("currentTab", "Standings");
-      await resetRoute();
-      return;
-    }
-
-    if (store.leagueInfo.length >= 5) {
-      errorMsg.value = "Maximum of 5 leagues allowed";
-      toast.error("Maximum of 5 leagues allowed");
-      showErrorMsg.value = true;
-      return;
-    }
-    if (leagueIdInput.value === "") {
-      errorMsg.value = "Please enter a league ID";
-      toast.error("Please enter a league ID");
-      showErrorMsg.value = true;
-      return;
-    }
-
-    const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
-    if (!checkInput["name"]) {
-      errorMsg.value = "Invalid league ID";
-      toast.error("Invalid league ID");
-      showErrorMsg.value = true;
-    } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
-      errorMsg.value = "League already added";
-      toast.error("League already added");
-      showErrorMsg.value = true;
-    } else if (checkInput["sport"] !== "nfl") {
-      errorMsg.value = "Only NFL leagues are supported";
-      toast.error("Only NFL leagues are supported");
-      showErrorMsg.value = true;
-    } else {
-      store.currentTab = "Standings";
-      localStorage.setItem("currentTab", "Standings");
-      await resetRoute();
-      showErrorMsg.value = false;
-      store.updateLoadingLeague(checkInput["name"]);
-      store.updateCurrentLeagueId(leagueIdInput.value);
-      try {
-        const newLeagueInfo = await getData(leagueIdInput.value);
-        store.updateLeagueInfo(newLeagueInfo);
-        store.leagueSubmitted = true;
+    if (currentPlatform === "sleeper") {
+      if (inputType.value === "Username") {
+        if (leagueIdInput.value === "") {
+          showError("Please enter a username");
+          return;
+        }
+        const user = await getUsername(leagueIdInput.value);
+        if (!user?.user_id || !user?.display_name) {
+          showError("Invalid username");
+          return;
+        }
+        showHelperMsg.value = true;
+        const leagues = await getAllLeagues(user.user_id, seasonYear.value);
+        store.username = user.display_name;
+        store.setLeaguesList(leagues);
+        store.updateShowLeaguesList(true);
+        showHelperMsg.value = false;
+        localStorage.setItem("inputType", "League ID");
         store.updateShowInput(false);
-        await updateURL(leagueIdInput.value);
+        inputUsername(user.display_name, seasonYear.value);
+        store.currentTab = "Standings";
+        localStorage.setItem("currentTab", "Standings");
+        await resetRoute();
+        return;
+      }
 
+      if (store.leagueInfo.length >= 5) {
+        showError("Maximum of 5 leagues allowed");
+        return;
+      }
+      if (leagueIdInput.value === "") {
+        showError("Please enter a league ID");
+        return;
+      }
+
+      const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
+      if (!checkInput["name"]) {
+        showError("Invalid league ID");
+      } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
+        showError("League already added");
+      } else if (checkInput["sport"] !== "nfl") {
+        showError("Only NFL leagues are supported");
+      } else {
+        store.currentTab = "Standings";
+        localStorage.setItem("currentTab", "Standings");
+        await resetRoute();
+        showErrorMsg.value = false;
+        store.updateLoadingLeague(checkInput["name"]);
+        store.updateCurrentLeagueId(leagueIdInput.value);
         try {
-          await inputLeague(
-            leagueIdInput.value,
-            newLeagueInfo.name,
-            newLeagueInfo.totalRosters,
-            newLeagueInfo.seasonType,
-            newLeagueInfo.season
-          );
+          const newLeagueInfo = await getData(leagueIdInput.value);
+          store.updateLeagueInfo(newLeagueInfo);
+          store.leagueSubmitted = true;
+          store.updateShowInput(false);
+          await updateURL(leagueIdInput.value);
+
+          try {
+            await inputLeague(
+              leagueIdInput.value,
+              newLeagueInfo.name,
+              newLeagueInfo.totalRosters,
+              newLeagueInfo.seasonType,
+              newLeagueInfo.season,
+              newLeagueInfo?.platform ?? ""
+            );
+          } catch (error) {
+            console.error("Failed to save league metadata:", error);
+          }
         } catch (error) {
-          console.error("Failed to save league metadata:", error);
+          console.error("Failed to load league:", error);
+          showError("Unable to load league right now. Please try again.");
+        } finally {
+          store.updateLoadingLeague("");
+        }
+      }
+
+      leagueIdInput.value = "";
+      return;
+    }
+
+    if (currentPlatform === "espn") {
+      if (store.leagueInfo.length >= 5) {
+        showError("Maximum of 5 leagues allowed");
+        return;
+      }
+      if (leagueIdInput.value === "") {
+        showError("Please enter a league ID");
+        return;
+      }
+      const espnAuth: EspnAuth | undefined = espnPrivate.value
+        ? {
+            swid: espnSwid.value.trim(),
+            espnS2: espnS2.value.trim(),
+          }
+        : undefined;
+      if (espnPrivate.value && (!espnAuth?.swid || !espnAuth.espnS2)) {
+        showError("Please enter both SWID and espn_s2 cookies");
+        return;
+      }
+      if (
+        (leagueIds.value as string[]).includes(
+          getLeagueKey({
+            platform: "espn",
+            leagueId: leagueIdInput.value,
+            season: seasonYear.value,
+          })
+        )
+      ) {
+        showError("League already added");
+        return;
+      }
+
+      try {
+        await resetRoute();
+        showErrorMsg.value = false;
+        store.updateLoadingLeague("ESPN League");
+        const espnLeague = await getEspnLeagueInfo(
+          seasonYear.value,
+          leagueIdInput.value,
+          espnAuth
+        );
+        if (espnLeague) {
+          if (espnAuth) {
+            saveEspnAuth(seasonYear.value, leagueIdInput.value, espnAuth);
+          }
+          store.updateLeagueInfo(espnLeague);
+          store.updateCurrentLeagueId(getLeagueKey(espnLeague));
+          store.leagueSubmitted = true;
+          store.updateShowInput(false);
+          store.currentTab = "Standings";
+          localStorage.setItem("currentTab", "Standings");
+          await updateURL(leagueIdInput.value, "espn");
+        } else {
+          showError("Unable to load league right now. Please try again.");
         }
       } catch (error) {
-        console.error("Failed to load league:", error);
-        errorMsg.value = "Unable to load league right now. Please try again.";
-        toast.error("Unable to load league right now. Please try again.");
-        showErrorMsg.value = true;
+        showError(getEspnErrorMessage(error));
       } finally {
         store.updateLoadingLeague("");
       }
     }
-
-    leagueIdInput.value = "";
   };
 
   return {
     inputType,
     seasonYear,
+    espnPrivate,
+    espnSwid,
+    espnS2,
     leagueIdInput,
     showErrorMsg,
     errorMsg,

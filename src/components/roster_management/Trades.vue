@@ -5,7 +5,7 @@ import { getPlayersByIdsMap } from "../../api/api.ts";
 import { getTradeValue } from "../../api/sleeperApi.ts";
 import { fakeRosters, fakeTrades, fakeUsers } from "../../api/fakeLeague";
 import { roundToOneDecimal } from "../../api/helper";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { Player } from "../../types/apiTypes.ts";
 import { UserType } from "../../types/types.ts";
 import type { TradeNameRow } from "../../types/types.ts";
@@ -187,7 +187,10 @@ const getData = async () => {
       };
     })
   );
-  store.addTradeNames(currentLeague.leagueId, tradeData.value as TradeNameRow[]);
+  store.addTradeNames(
+    getLeagueKey(currentLeague),
+    tradeData.value as TradeNameRow[]
+  );
   localStorage.setItem(
     "leagueInfo",
     JSON.stringify(store.leagueInfo as LeagueInfoType[])

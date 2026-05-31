@@ -3,7 +3,7 @@ import { fakeDraftData } from "../../api/draft.ts";
 import { ref, onMounted, computed, watch } from "vue";
 import { getDraftPicks, getDraftMetadata } from "../../api/sleeperApi";
 import { LeagueInfoType } from "../../types/types.ts";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { fakeUsers } from "../../api/fakeLeague.ts";
 import DraftGrades from "./DraftGrades.vue";
 import { DraftPick } from "../../types/apiTypes.ts";
@@ -18,6 +18,7 @@ import {
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
+import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
 const data = ref<DraftPick[]>([]);
@@ -77,7 +78,7 @@ const getDraftOrder = async () => {
   draftType.value = metadata.type ?? "snake";
   scoringType.value = metadata.metadata?.scoring_type ?? "";
 
-  store.addDraftMetadata(currentLeague.leagueId, {
+  store.addDraftMetadata(getLeagueKey(currentLeague), {
     order: draftOrder.value,
     roundReversal: roundReversal.value,
     draftType: draftType.value,
@@ -114,27 +115,49 @@ const snakeDraftFormat = computed(() => {
   return true;
 });
 
+const getEspnDraftOrderFromPicks = (league: LeagueInfoType) => {
+  const rosterPickOrder = Array.from(
+    new Set((league.draftPicks ?? []).map((pick) => pick.rosterId))
+  ).slice(0, draftSize.value);
+
+  const rosterToUser = new Map(
+    league.rosters.map((roster) => [roster.rosterId, roster.id])
+  );
+  const userMap = new Map(league.users.map((user) => [user.id, user]));
+
+  return rosterPickOrder.flatMap((rosterId) => {
+    const userId = rosterToUser.get(rosterId);
+    return userId && userMap.has(userId) ? [getTeamName(userId)] : [];
+  });
+};
+
+const setLeagueDraftState = (league: LeagueInfoType) => {
+  data.value = league.draftPicks ?? [];
+  draftOrder.value =
+    league.draftMetadata?.order ??
+    (league.platform === "espn" ? getEspnDraftOrderFromPicks(league) : []);
+  roundReversal.value = league.draftMetadata?.roundReversal ?? 0;
+  draftType.value =
+    league.draftMetadata?.draftType ??
+    (league.platform === "espn" &&
+    data.value.some((pick) => Number(pick.amount ?? 0) > 0)
+      ? "auction"
+      : "snake");
+};
+
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].draftPicks
+    !store.leagueInfo[store.currentLeagueIndex].draftPicks &&
+    store.leagueInfo[store.currentLeagueIndex].platform !== "espn"
   ) {
     loading.value = true;
     await getDraftOrder();
     await getData();
     loading.value = false;
   } else if (store.leagueInfo[store.currentLeagueIndex]) {
-    data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks ?? [];
-    draftOrder.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"] ?? [];
-    roundReversal.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
-        "roundReversal"
-      ] ?? 0;
-    draftType.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"] ??
-      "snake";
+    setLeagueDraftState(store.leagueInfo[store.currentLeagueIndex]);
   } else if (store.leagueInfo.length == 0) {
     data.value = fakeDraftData;
     draftOrder.value = data.value.slice(0, draftSize.value).map((pick) => {
@@ -148,7 +171,8 @@ watch(
   async () => {
     if (
       store.leagueInfo[store.currentLeagueIndex] &&
-      !store.leagueInfo[store.currentLeagueIndex].draftPicks
+      !store.leagueInfo[store.currentLeagueIndex].draftPicks &&
+      store.leagueInfo[store.currentLeagueIndex].platform !== "espn"
     ) {
       data.value = [];
       draftOrder.value = [];
@@ -157,16 +181,9 @@ watch(
       await getData();
       loading.value = false;
     }
-    data.value = store.leagueInfo[store.currentLeagueIndex].draftPicks ?? [];
-    draftOrder.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["order"] ?? [];
-    roundReversal.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.[
-        "roundReversal"
-      ] ?? 0;
-    draftType.value =
-      store.leagueInfo[store.currentLeagueIndex].draftMetadata?.["draftType"] ??
-      "snake";
+    if (store.leagueInfo[store.currentLeagueIndex]) {
+      setLeagueDraftState(store.leagueInfo[store.currentLeagueIndex]);
+    }
   }
 );
 
@@ -215,7 +232,7 @@ const getData = async () => {
     data.value = draftPicks;
   }
 
-  store.addDraftPicks(currentLeague.leagueId, data.value);
+  store.addDraftPicks(getLeagueKey(currentLeague), data.value);
   localStorage.setItem(
     "leagueInfo",
     JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -297,6 +314,7 @@ const getValueColor = (value: number) => {
   if (value >= -2.5) return `bg-rose-400 dark:bg-rose-700`;
   return `bg-red-400 dark:bg-red-600`;
 };
+
 </script>
 <template>
   <Card class="w-full p-4 md:p-6">
@@ -377,6 +395,7 @@ const getValueColor = (value: number) => {
                 v-if="team && team.avatarImg"
                 class="w-8 h-8 rounded-full"
                 :src="team.avatarImg"
+                @error="handleImageError"
               />
               <svg
                 v-else
