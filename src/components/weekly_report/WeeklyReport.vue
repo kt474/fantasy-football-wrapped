@@ -300,7 +300,8 @@ const getReport = async () => {
       reportPrompt.value,
       leagueMetadata,
       currentLeague.leagueId,
-      currentWeek.value
+      currentWeek.value,
+      currentLeague.season
     );
     rawWeeklyReport.value = response.text;
     store.addWeeklyReport(getLeagueKey(currentLeague), rawWeeklyReport.value);

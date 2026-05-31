@@ -277,7 +277,8 @@ export const generateReport = async (
   prompt: Record<string, unknown>[],
   metadata: Record<string, unknown>,
   leagueId: string,
-  currentWeek: number
+  currentWeek: number,
+  season: string
 ): Promise<Record<string, string>> => {
   try {
     const response = await fetch(import.meta.env.VITE_WEEKLY_REPORT, {
@@ -292,6 +293,7 @@ export const generateReport = async (
         },
         leagueId: leagueId,
         currentWeek: currentWeek,
+        season: season,
       }),
     });
     assertOk(response, "Weekly report request");
