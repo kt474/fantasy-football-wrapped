@@ -1,6 +1,6 @@
 # Fantasy Football Wrapped
 
-Fantasy Football Wrapped ([ffwrapped](https://ffwrapped.com/)) is a production Vue/TypeScript app used by thousands of fantasy football managers to analyze Sleeper leagues. The app transforms league, roster, matchup, draft, and transaction data into power rankings, playoff odds, AI-generated reports, trade insights, and personalized season recaps.
+Fantasy Football Wrapped ([ffwrapped](https://ffwrapped.com/)) is a production Vue/TypeScript app used by thousands of fantasy football managers to analyze Sleeper and ESPN leagues. The app transforms league, roster, matchup, draft, and transaction data into power rankings, playoff odds, AI-generated reports, trade insights, and personalized season recaps.
 
 ![ffwrapped homepage](public/homepage.webp)
 
