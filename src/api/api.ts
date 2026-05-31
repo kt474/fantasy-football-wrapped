@@ -156,7 +156,9 @@ export const getPlayerIdLookupMap = async (
   }
 
   const uniquePlayers = Array.from(
-    new Map(players.map((player) => [getPlayerLookupKey(player), player])).values()
+    new Map(
+      players.map((player) => [getPlayerLookupKey(player), player])
+    ).values()
   );
 
   try {
@@ -456,7 +458,8 @@ export const inputLeague = async (
   name: string,
   size: number,
   type: string,
-  year: string
+  year: string,
+  platform: string
 ): Promise<void> => {
   try {
     const response = await fetch(import.meta.env.VITE_LEAGUE_URL, {
@@ -471,6 +474,7 @@ export const inputLeague = async (
           size: size,
           type: type,
           year: year,
+          platform: platform,
         },
       }),
     });

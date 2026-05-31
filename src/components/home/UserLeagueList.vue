@@ -55,7 +55,8 @@ const addLeagues = async () => {
           newLeagueInfo.name,
           newLeagueInfo.totalRosters,
           newLeagueInfo.seasonType,
-          newLeagueInfo.season
+          newLeagueInfo.season,
+          newLeagueInfo?.platform ?? ""
         );
       })
     );

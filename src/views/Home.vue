@@ -78,7 +78,8 @@ onMounted(async () => {
                   league.name,
                   league.totalRosters,
                   league.seasonType,
-                  league.season
+                  league.season,
+                  league?.platform ?? ""
                 );
               }
               showLoading.value = false;
@@ -145,7 +146,8 @@ onMounted(async () => {
           league.name,
           league.totalRosters,
           league.seasonType,
-          league.season
+          league.season,
+          league?.platform ?? ""
         );
         store.currentTab = "Standings";
         localStorage.setItem("currentTab", "Standings");

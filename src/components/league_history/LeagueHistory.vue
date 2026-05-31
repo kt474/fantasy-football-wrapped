@@ -4,10 +4,7 @@ import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
 import { getLeagueKey, useStore } from "../../store/store.ts";
 import { getData, inputLeague } from "../../api/api.ts";
-import {
-  getEspnLeagueInfo,
-  getSavedEspnAuth,
-} from "../../api/espnApi.ts";
+import { getEspnLeagueInfo, getSavedEspnAuth } from "../../api/espnApi.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
@@ -396,7 +393,8 @@ const addNewLeague = async (season: string) => {
             newLeagueInfo.name,
             newLeagueInfo.totalRosters,
             newLeagueInfo.seasonType,
-            newLeagueInfo.season
+            newLeagueInfo.season,
+            newLeagueInfo?.platform ?? ""
           );
         }
       } else {
