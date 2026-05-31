@@ -48,7 +48,7 @@ const isDark = computed(() => store.darkMode);
             <p
               class="inline-flex items-center px-3 py-1 text-xs font-semibold border rounded-full border-border/80 bg-background/80 text-muted-foreground backdrop-blur"
             >
-              Powering 12,000+ fantasy leagues
+              Powering 13,000+ fantasy leagues
             </p>
             <h1
               id="intro-home-heading"
