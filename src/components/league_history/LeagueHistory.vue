@@ -4,7 +4,10 @@ import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
 import { getLeagueKey, useStore } from "../../store/store.ts";
 import { getData, inputLeague } from "../../api/api.ts";
-import { getEspnLeagueInfo } from "../../api/espnApi.ts";
+import {
+  getEspnLeagueInfo,
+  getSavedEspnAuth,
+} from "../../api/espnApi.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
@@ -268,7 +271,11 @@ const loadEspnPreviousLeagues = async (
     loadingYear.value = season;
 
     try {
-      const leagueData = await getEspnLeagueInfo(season, rootLeague.leagueId);
+      const leagueData = await getEspnLeagueInfo(
+        season,
+        rootLeague.leagueId,
+        getSavedEspnAuth(rootLeague.season, rootLeague.leagueId)
+      );
       if (leagueData) {
         resolvedLeagues.push(leagueData);
       }

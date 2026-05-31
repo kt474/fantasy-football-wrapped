@@ -16,6 +16,52 @@ import { calculateDraftRank } from "./helper";
 
 const ESPN_BASE_URL = "https://lm-api-reads.fantasy.espn.com";
 
+export type EspnAuth = {
+  swid: string;
+  espnS2: string;
+};
+
+export const getEspnAuthStorageKey = (season: string, leagueId: string) =>
+  `espn-auth:${leagueId}:${season}`;
+
+export const saveEspnAuth = (
+  season: string,
+  leagueId: string,
+  auth: EspnAuth
+) => {
+  localStorage.setItem(
+    getEspnAuthStorageKey(season, leagueId),
+    JSON.stringify(auth)
+  );
+};
+
+export const getSavedEspnAuth = (
+  season: string,
+  leagueId: string
+): EspnAuth | undefined => {
+  const storageKey = getEspnAuthStorageKey(season, leagueId);
+  const saved =
+    localStorage.getItem(storageKey) ?? sessionStorage.getItem(storageKey);
+  if (!saved) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(saved) as Partial<EspnAuth>;
+    if (!parsed.swid || !parsed.espnS2) {
+      return undefined;
+    }
+
+    const auth = { swid: parsed.swid, espnS2: parsed.espnS2 };
+    if (!localStorage.getItem(storageKey)) {
+      saveEspnAuth(season, leagueId, auth);
+    }
+    return auth;
+  } catch {
+    return undefined;
+  }
+};
+
 const LINEUP_SLOT_MAP: Record<number, string> = {
   0: "QB",
   1: "TQB",
@@ -182,6 +228,26 @@ const safeJson = async (response: Response) => {
     );
   }
   return response.json();
+};
+
+const fetchEspnJson = async (url: string, auth?: EspnAuth) => {
+  if (!auth) {
+    return safeJson(await fetch(url));
+  }
+
+  const response = await fetch("/api/espn", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      url,
+      swid: auth.swid,
+      espnS2: auth.espnS2,
+    }),
+  });
+
+  return safeJson(response);
 };
 
 const assertRecord = (
@@ -897,61 +963,83 @@ const getLeagueStatus = (
   return "post_season";
 };
 
-export const getLeagueData = async (season: string, league_id: string) => {
-  const response = await fetch(
-    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mSettings`
+export const getLeagueData = async (
+  season: string,
+  league_id: string,
+  auth?: EspnAuth
+) => {
+  return fetchEspnJson(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mSettings`,
+    auth
   );
-  return safeJson(response);
 };
 
-export const getTeamData = async (season: string, league_id: string) => {
-  const response = await fetch(
-    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTeam`
+export const getTeamData = async (
+  season: string,
+  league_id: string,
+  auth?: EspnAuth
+) => {
+  return fetchEspnJson(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTeam`,
+    auth
   );
-  return safeJson(response);
 };
 
-export const getRosterData = async (season: string, league_id: string) => {
-  const response = await fetch(
-    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mRoster`
+export const getRosterData = async (
+  season: string,
+  league_id: string,
+  auth?: EspnAuth
+) => {
+  return fetchEspnJson(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mRoster`,
+    auth
   );
-  return safeJson(response);
 };
 
-export const getDraftData = async (season: string, league_id: string) => {
-  const response = await fetch(
-    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mDraftDetail`
+export const getDraftData = async (
+  season: string,
+  league_id: string,
+  auth?: EspnAuth
+) => {
+  return fetchEspnJson(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mDraftDetail`,
+    auth
   );
-  return safeJson(response);
 };
 
 export const getPlayerStats = async (
   season: string,
   league_id: string,
-  week: number
+  week: number,
+  auth?: EspnAuth
 ) => {
-  const response = await fetch(
-    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore&view=mScoreboard&scoringPeriodId=${String(week)}`
+  return fetchEspnJson(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore&view=mScoreboard&scoringPeriodId=${String(week)}`,
+    auth
   );
-  return safeJson(response);
 };
 
-export const getPlayoffMatchups = async (season: string, league_id: string) => {
-  const response = await fetch(
-    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore`
+export const getPlayoffMatchups = async (
+  season: string,
+  league_id: string,
+  auth?: EspnAuth
+) => {
+  return fetchEspnJson(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore`,
+    auth
   );
-  return safeJson(response);
 };
 
 export const getWaivers = async (
   season: string,
   league_id: string,
-  week: number
+  week: number,
+  auth?: EspnAuth
 ) => {
-  const response = await fetch(
-    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTransactions2&scoringPeriodId=${String(week)}`
+  return fetchEspnJson(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTransactions2&scoringPeriodId=${String(week)}`,
+    auth
   );
-  return safeJson(response);
 };
 
 const getScoringType = (scoringItems: any[]): number => {
@@ -965,15 +1053,16 @@ const getLeagueFormat = (draftSettings: any): "Redraft" | "Keeper" => {
 
 export const getEspnLeagueInfo = async (
   season: string,
-  leagueId: string
+  leagueId: string,
+  auth?: EspnAuth
 ): Promise<LeagueInfoType> => {
   const [league, teamData, rosterData, draftData, playoffData] =
     await Promise.all([
-      getLeagueData(season, leagueId),
-      getTeamData(season, leagueId),
-      getRosterData(season, leagueId),
-      getDraftData(season, leagueId),
-      getPlayoffMatchups(season, leagueId),
+      getLeagueData(season, leagueId, auth),
+      getTeamData(season, leagueId, auth),
+      getRosterData(season, leagueId, auth),
+      getDraftData(season, leagueId, auth),
+      getPlayoffMatchups(season, leagueId, auth),
     ]);
 
   const leagueRoot = assertRecord(
@@ -1046,11 +1135,11 @@ export const getEspnLeagueInfo = async (
   let waivers = [];
   for (let i = 1; i <= lastScoredWeek; i++) {
     const scheduleData = assertRecord(
-      await getPlayerStats(season, leagueId, i),
+      await getPlayerStats(season, leagueId, i, auth),
       `ESPN weekly scoring data is missing for week ${i}.`
     );
     const waiverData = assertRecord(
-      await getWaivers(season, leagueId, i),
+      await getWaivers(season, leagueId, i, auth),
       `ESPN transaction data is missing for week ${i}.`
     );
     const filteredWaivers = assertArray<Record<string, unknown>>(

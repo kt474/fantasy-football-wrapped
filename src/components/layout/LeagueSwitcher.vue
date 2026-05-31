@@ -32,7 +32,11 @@ import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
 import { getData, inputLeague } from "../../api/api";
-import { getEspnErrorMessage, getEspnLeagueInfo } from "@/api/espnApi";
+import {
+  getEspnErrorMessage,
+  getEspnLeagueInfo,
+  getSavedEspnAuth,
+} from "@/api/espnApi";
 import Dialog from "./Dialog.vue";
 
 const router = useRouter();
@@ -149,7 +153,8 @@ const refreshLeague = async () => {
     if (leagueToRefresh.platform === "espn") {
       const refreshedLeague = await getEspnLeagueInfo(
         leagueToRefresh.season,
-        leagueToRefresh.leagueId
+        leagueToRefresh.leagueId,
+        getSavedEspnAuth(leagueToRefresh.season, leagueToRefresh.leagueId)
       );
       store.updateLeagueInfo(refreshedLeague);
       store.updateCurrentLeagueId(getLeagueKey(refreshedLeague));

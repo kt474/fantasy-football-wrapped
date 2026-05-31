@@ -4,7 +4,12 @@ import { getLeagueKey, useStore } from "@/store/store";
 import type { LeagueOriginal } from "@/types/apiTypes";
 import { getData, inputLeague, inputUsername } from "@/api/api";
 import { getAllLeagues, getLeague, getUsername } from "@/api/sleeperApi";
-import { getEspnErrorMessage, getEspnLeagueInfo } from "@/api/espnApi";
+import {
+  getEspnErrorMessage,
+  getEspnLeagueInfo,
+  saveEspnAuth,
+  type EspnAuth,
+} from "@/api/espnApi";
 import { toast } from "vue-sonner";
 
 export const SEASON_YEAR_OPTIONS = [
@@ -30,6 +35,9 @@ export const useLeagueInput = (
   const leagueIdInput = ref("");
   const inputType = ref("League ID");
   const seasonYear = ref("2026");
+  const espnPrivate = ref(false);
+  const espnSwid = ref("");
+  const espnS2 = ref("");
   const showErrorMsg = ref(false);
   const errorMsg = ref("");
   const showHelperMsg = ref(false);
@@ -185,6 +193,16 @@ export const useLeagueInput = (
         showError("Please enter a league ID");
         return;
       }
+      const espnAuth: EspnAuth | undefined = espnPrivate.value
+        ? {
+            swid: espnSwid.value.trim(),
+            espnS2: espnS2.value.trim(),
+          }
+        : undefined;
+      if (espnPrivate.value && (!espnAuth?.swid || !espnAuth.espnS2)) {
+        showError("Please enter both SWID and espn_s2 cookies");
+        return;
+      }
       if (
         (leagueIds.value as string[]).includes(
           getLeagueKey({
@@ -204,9 +222,13 @@ export const useLeagueInput = (
         store.updateLoadingLeague("ESPN League");
         const espnLeague = await getEspnLeagueInfo(
           seasonYear.value,
-          leagueIdInput.value
+          leagueIdInput.value,
+          espnAuth
         );
         if (espnLeague) {
+          if (espnAuth) {
+            saveEspnAuth(seasonYear.value, leagueIdInput.value, espnAuth);
+          }
           store.updateLeagueInfo(espnLeague);
           store.updateCurrentLeagueId(getLeagueKey(espnLeague));
           store.leagueSubmitted = true;
@@ -228,6 +250,9 @@ export const useLeagueInput = (
   return {
     inputType,
     seasonYear,
+    espnPrivate,
+    espnSwid,
+    espnS2,
     leagueIdInput,
     showErrorMsg,
     errorMsg,

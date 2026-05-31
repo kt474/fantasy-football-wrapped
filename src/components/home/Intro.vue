@@ -18,8 +18,15 @@ const platform = computed<LeaguePlatform>(() =>
   activeTab.value === "Espn" ? "espn" : "sleeper"
 );
 
-const { inputType, seasonYear, leagueIdInput, onSubmit } =
-  useLeagueInput(platform);
+const {
+  inputType,
+  seasonYear,
+  leagueIdInput,
+  espnPrivate,
+  espnSwid,
+  espnS2,
+  onSubmit,
+} = useLeagueInput(platform);
 </script>
 
 <template>
@@ -83,29 +90,38 @@ const { inputType, seasonYear, leagueIdInput, onSubmit } =
               <div class="mb-4 text-left">
                 <p class="text-sm font-semibold">Get started</p>
                 <p class="text-sm text-muted-foreground">
-                  Enter your
-                  <a
-                    class="font-medium text-primary hover:underline"
-                    href="https://sleeper.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >Sleeper</a
-                  >
-                  league ID or username.
+                  Select your platform then enter your league ID or username.
                 </p>
               </div>
               <Tabs default-value="Sleeper" v-model="activeTab" class="mb-2">
-                <TabsList>
-                  <TabsTrigger value="Sleeper">
-                    <div class="flex gap-2 py-1">
-                      <img width="20" src="/sleeperlogo.jpeg" alt="Sleeper logo" />
+                <TabsList
+                  class="p-1 border rounded-md shadow-sm border-input bg-popover"
+                >
+                  <TabsTrigger
+                    value="Sleeper"
+                    class="hover:bg-muted/50 data-[state=active]:bg-white/90 data-[state=active]:text-foreground data-[state=active]:shadow"
+                  >
+                    <div class="flex items-center gap-2 py-1">
+                      <img
+                        width="20"
+                        src="/sleeperlogo.jpeg"
+                        alt="Sleeper logo"
+                      />
                       <p>Sleeper</p>
                     </div>
                   </TabsTrigger>
-                  <TabsTrigger value="Espn">
-                    <div class="flex gap-2 py-1">
+                  <TabsTrigger
+                    value="Espn"
+                    class="hover:bg-muted/50 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow"
+                  >
+                    <div class="flex items-center gap-2 py-1">
                       <img width="20" src="/espnlogo.png" alt="ESPN logo" />
                       <p>ESPN</p>
+                      <span
+                        class="rounded border border-primary/30 bg-primary/10 px-1.5 text-[10px] font-semibold uppercase leading-5 text-primary"
+                      >
+                        Beta
+                      </span>
                     </div>
                   </TabsTrigger>
                 </TabsList>
@@ -123,6 +139,9 @@ const { inputType, seasonYear, leagueIdInput, onSubmit } =
                     inputType="League ID"
                     v-model:seasonYear="seasonYear"
                     v-model:leagueIdInput="leagueIdInput"
+                    v-model:espnPrivate="espnPrivate"
+                    v-model:espnSwid="espnSwid"
+                    v-model:espnS2="espnS2"
                     platform="espn"
                     @submit="onSubmit"
                   />

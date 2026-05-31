@@ -24,6 +24,9 @@ const {
   inputType,
   seasonYear,
   leagueIdInput,
+  espnPrivate,
+  espnSwid,
+  espnS2,
   showErrorMsg,
   onSubmit,
   clearError,
@@ -55,15 +58,7 @@ const handleSubmit = async () => {
         <DialogTitle>Add League</DialogTitle>
         <DialogDescription>
           <p>
-            Enter your
-            <a
-              class="font-medium text-primary hover:underline"
-              href="https://sleeper.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Sleeper</a
-            >
-            league ID or username.
+            Select Sleeper or ESPN, then enter your league details.
           </p>
         </DialogDescription>
       </DialogHeader>
@@ -80,6 +75,11 @@ const handleSubmit = async () => {
               <div class="flex gap-2 py-1">
                 <img width="20" src="/espnlogo.png" alt="ESPN logo" />
                 <p>ESPN</p>
+                <span
+                  class="rounded border border-primary/30 bg-primary/10 px-1.5 text-[10px] font-semibold uppercase leading-5 text-primary"
+                >
+                  Beta
+                </span>
               </div>
             </TabsTrigger>
           </TabsList>
@@ -93,10 +93,17 @@ const handleSubmit = async () => {
             />
           </TabsContent>
           <TabsContent value="Espn">
+            <p class="mb-2 text-xs text-muted-foreground">
+              ESPN support is in beta. Private leagues require SWID and espn_s2
+              cookies.
+            </p>
             <LeagueInputForm
               inputType="League ID"
               v-model:seasonYear="seasonYear"
               v-model:leagueIdInput="leagueIdInput"
+              v-model:espnPrivate="espnPrivate"
+              v-model:espnSwid="espnSwid"
+              v-model:espnS2="espnS2"
               platform="espn"
               @submit="handleSubmit"
             />

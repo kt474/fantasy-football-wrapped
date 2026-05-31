@@ -7,7 +7,11 @@ import { fakePoints, fakeRosters, fakeUsers } from "../api/fakeLeague";
 import Input from "@/components/ui/input/Input.vue";
 import { getLeagueKey, useStore } from "../store/store";
 import { getData, inputLeague } from "../api/api";
-import { getEspnErrorMessage, getEspnLeagueInfo } from "@/api/espnApi";
+import {
+  getEspnErrorMessage,
+  getEspnLeagueInfo,
+  getSavedEspnAuth,
+} from "@/api/espnApi";
 import { getLeague } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
@@ -58,7 +62,8 @@ onMounted(async () => {
                 try {
                   const refreshedData = await getEspnLeagueInfo(
                     league.season,
-                    league.leagueId
+                    league.leagueId,
+                    getSavedEspnAuth(league.season, league.leagueId)
                   );
                   store.updateLeagueInfo(refreshedData);
                 } catch (error) {
@@ -113,7 +118,11 @@ onMounted(async () => {
         }
         store.updateLoadingLeague("ESPN League");
         try {
-          const league = await getEspnLeagueInfo(season, leagueId);
+          const league = await getEspnLeagueInfo(
+            season,
+            leagueId,
+            getSavedEspnAuth(season, leagueId)
+          );
           store.updateLeagueInfo(league);
           store.updateCurrentLeagueId(getLeagueKey(league));
           store.currentTab = "Standings";
