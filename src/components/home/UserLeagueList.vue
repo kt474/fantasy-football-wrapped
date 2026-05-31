@@ -79,6 +79,13 @@ const toggleLeague = (id: string) => {
     checkedLeagues.value.push(id);
   }
 };
+
+const goBack = () => {
+  store.leaguesList = [];
+  store.showLeaguesList = false;
+  store.currentTab = "Home";
+  localStorage.setItem("currentTab", "Home");
+};
 </script>
 <template>
   <div class="w-full px-6" :class="{ 'h-screen': !store.currentLeagueId }">
@@ -160,10 +167,7 @@ const toggleLeague = (id: string) => {
     </p>
     <Button
       class="mr-2"
-      @click="
-        store.leaguesList = [];
-        store.showLeaguesList = false;
-      "
+      @click="goBack"
       aria-label="Button to go back if there are no leagues"
       type="submit"
       variant="secondary"
