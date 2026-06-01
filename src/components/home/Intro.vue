@@ -33,7 +33,7 @@ const {
   <section
     aria-labelledby="intro-home-heading"
     :class="[
-      'relative overflow-hidden text-center h-[calc(100dvh-4rem)] bg-background',
+      'relative overflow-hidden text-center min-h-[calc(100dvh-4rem)] bg-background',
       isDark ? 'intro-dark' : '',
     ]"
   >
@@ -57,7 +57,7 @@ const {
     />
 
     <div
-      class="relative z-10 flex items-center h-full px-4 py-6 sm:px-8 lg:px-12"
+      class="relative z-10 flex min-h-[calc(100dvh-4rem)] items-start px-4 py-6 sm:px-8 lg:items-center lg:px-12"
     >
       <div class="mx-auto max-w-7xl">
         <div
