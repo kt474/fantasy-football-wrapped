@@ -168,7 +168,7 @@ export const useLeagueInput = (
               newLeagueInfo.totalRosters,
               newLeagueInfo.seasonType,
               newLeagueInfo.season,
-              newLeagueInfo?.platform ?? ""
+              "sleeper"
             );
           } catch (error) {
             console.error("Failed to save league metadata:", error);

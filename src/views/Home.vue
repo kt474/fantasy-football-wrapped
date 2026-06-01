@@ -147,7 +147,7 @@ onMounted(async () => {
           league.totalRosters,
           league.seasonType,
           league.season,
-          league?.platform ?? ""
+          "sleeper"
         );
         store.currentTab = "Standings";
         localStorage.setItem("currentTab", "Standings");
