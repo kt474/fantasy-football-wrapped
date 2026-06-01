@@ -63,14 +63,14 @@ const handleSubmit = async () => {
       <div class="space-y-3">
         <Tabs default-value="Sleeper" v-model="activeTab">
           <TabsList
-            class="p-1 border rounded-md shadow-sm border-input bg-popover"
+            class="h-10 p-1 border rounded-md shadow-sm border-input bg-popover"
           >
             <TabsTrigger
               value="Sleeper"
               class="hover:bg-muted/50 data-[state=active]:bg-white/90 data-[state=active]:text-foreground data-[state=active]:shadow"
             >
-              <div class="flex items-center gap-2 py-1">
-                <img width="20" src="/sleeperlogo.jpeg" alt="Sleeper logo" />
+              <div class="flex items-center gap-1.5">
+                <img width="16.5" src="/sleeperlogo.jpeg" alt="Sleeper logo" />
                 <p>Sleeper</p>
               </div>
             </TabsTrigger>
@@ -78,11 +78,11 @@ const handleSubmit = async () => {
               value="Espn"
               class="hover:bg-muted/50 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow"
             >
-              <div class="flex items-center gap-2 py-1">
-                <img width="20" src="/espnlogo.png" alt="ESPN logo" />
+              <div class="flex items-center gap-1.5">
+                <img width="16.5" src="/espnlogo.png" alt="ESPN logo" />
                 <p>ESPN</p>
                 <span
-                  class="rounded border border-primary/30 bg-primary/10 px-1.5 text-[10px] font-semibold uppercase leading-5 text-primary"
+                  class="rounded border border-primary/30 bg-primary/10 px-1 text-[10px] font-semibold uppercase leading-5 text-primary"
                 >
                   Beta
                 </span>
