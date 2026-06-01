@@ -520,6 +520,26 @@ watch(
       v-else-if="
         store.leagueInfo.length > 0 &&
         store.leagueInfo[store.currentLeagueIndex] &&
+        store.leagueInfo[store.currentLeagueIndex].platform == 'espn'
+      "
+    >
+      <p class="text-muted-foreground">
+        ESPN API does not return trades. Join our
+        <a
+          aria-label="Discord link"
+          class="font-medium text-primary hover:underline"
+          href="https://discord.gg/sSVwNhyv7U"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Discord</a
+        >
+        for more information.
+      </p>
+    </div>
+    <div
+      v-else-if="
+        store.leagueInfo.length > 0 &&
+        store.leagueInfo[store.currentLeagueIndex] &&
         store.leagueInfo[store.currentLeagueIndex].trades.length === 0
       "
     >
