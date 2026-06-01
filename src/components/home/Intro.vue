@@ -99,7 +99,7 @@ const {
                 >
                   <TabsTrigger
                     value="Sleeper"
-                    class="hover:bg-muted/50 data-[state=active]:bg-white/90 data-[state=active]:text-foreground data-[state=active]:shadow"
+                    class="hover:bg-muted/50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
                   >
                     <div class="flex items-center gap-1.5">
                       <img
@@ -112,7 +112,7 @@ const {
                   </TabsTrigger>
                   <TabsTrigger
                     value="Espn"
-                    class="hover:bg-muted/50 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow"
+                    class="hover:bg-muted/50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
                   >
                     <div class="flex items-center gap-1.5">
                       <img width="16.5" src="/espnlogo.png" alt="ESPN logo" />

@@ -137,7 +137,7 @@ const espnS2Model = computed({
               value="public"
             />
             <span
-              class="flex items-center justify-center h-full px-3 transition-all rounded-md text-muted-foreground hover:bg-muted/50 peer-checked:bg-white/90 peer-checked:text-foreground peer-checked:shadow"
+              class="flex items-center justify-center h-full px-3 transition-all rounded-md text-muted-foreground hover:bg-muted/50 peer-checked:bg-background peer-checked:text-foreground peer-checked:shadow"
             >
               Public
             </span>
@@ -151,7 +151,7 @@ const espnS2Model = computed({
               value="private"
             />
             <span
-              class="flex items-center justify-center h-full px-3 transition-all rounded-md text-muted-foreground hover:bg-muted/50 peer-checked:bg-white/90 peer-checked:text-foreground peer-checked:shadow"
+              class="flex items-center justify-center h-full px-3 transition-all rounded-md text-muted-foreground hover:bg-muted/50 peer-checked:bg-background peer-checked:text-foreground peer-checked:shadow"
             >
               Private
             </span>
