@@ -79,7 +79,7 @@ onMounted(async () => {
                   league.totalRosters,
                   league.seasonType,
                   league.season,
-                  league?.platform ?? ""
+                  "sleeper"
                 );
               }
               showLoading.value = false;

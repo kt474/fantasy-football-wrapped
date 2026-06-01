@@ -7,6 +7,7 @@ import type {
   UserType,
 } from "@/types/types";
 import {
+  inputLeague,
   getPlayerIdLookupMap,
   getPlayerIdsByNameTeamMap,
   type PlayerNameTeamLookup,
@@ -293,13 +294,7 @@ const getEspnTeamName = (team: Record<string, unknown>) => {
 
 const getEspnTeamOwnerIds = (team: Record<string, unknown>) => {
   const owners = Array.isArray(team.owners) ? team.owners : [];
-  return [
-    team.primaryOwner,
-    ...owners,
-    team.owner,
-    team.ownerId,
-    team.id,
-  ]
+  return [team.primaryOwner, ...owners, team.owner, team.ownerId, team.id]
     .map((owner) => String(owner ?? "").trim())
     .filter(Boolean);
 };
@@ -1251,7 +1246,9 @@ export const getEspnLeagueInfo = async (
           ) ?? null;
         const type = typedWaiver.type === "WAIVER" ? "waiver" : "free_agent";
         return {
-          adds: sleeperPlayerId ? { [sleeperPlayerId]: typedWaiver.teamId } : {},
+          adds: sleeperPlayerId
+            ? { [sleeperPlayerId]: typedWaiver.teamId }
+            : {},
           status: typedWaiver.status === "EXECUTED" ? "complete" : "",
           type: type,
           roster_ids: [typedWaiver.teamId],
@@ -1305,14 +1302,27 @@ export const getEspnLeagueInfo = async (
     matchup.playoffTierType.includes("LOSER")
   );
 
+  const seasonType = getLeagueFormat(settings.draftSettings);
+  const leagueName = String(settings.name ?? leagueRoot.name ?? "");
+  const totalRosters = Number(settings.size ?? teams.length ?? 0);
+
+  await inputLeague(
+    leagueId,
+    leagueName,
+    totalRosters,
+    seasonType,
+    season,
+    "espn"
+  );
+
   return {
     platform: "espn",
-    name: String(settings.name ?? leagueRoot.name ?? ""),
+    name: leagueName,
     regularSeasonLength,
     medianScoring: 0, // how do we check for median scoring?
-    totalRosters: Number(settings.size ?? teams.length ?? 0),
+    totalRosters: totalRosters,
     season,
-    seasonType: getLeagueFormat(settings.draftSettings),
+    seasonType: seasonType,
     leagueId,
     leagueWinner: getEspnLeagueWinner(espnWinnersBracket, teams),
     lastUpdated: Date.now(),

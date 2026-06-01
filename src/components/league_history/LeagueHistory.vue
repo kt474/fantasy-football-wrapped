@@ -394,7 +394,7 @@ const addNewLeague = async (season: string) => {
             newLeagueInfo.totalRosters,
             newLeagueInfo.seasonType,
             newLeagueInfo.season,
-            newLeagueInfo?.platform ?? ""
+            "sleeper"
           );
         }
       } else {

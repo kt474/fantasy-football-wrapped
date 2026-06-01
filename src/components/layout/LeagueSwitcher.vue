@@ -168,7 +168,7 @@ const refreshLeague = async () => {
         leagueToRefresh.totalRosters,
         leagueToRefresh.seasonType,
         leagueToRefresh.season,
-        leagueToRefresh?.platform ?? ""
+        "sleeper"
       );
       didRefresh = true;
     }
