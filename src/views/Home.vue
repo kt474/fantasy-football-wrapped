@@ -16,6 +16,7 @@ import { getLeague } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
 import { toast } from "vue-sonner";
+import { getParsedStorageItem, isBoolean, isRecord } from "@/lib/storage";
 
 const Table = defineAsyncComponent(
   () => import("../components/standings/Table.vue")
@@ -37,9 +38,12 @@ const clicked = ref(systemDarkMode);
 onMounted(async () => {
   try {
     checkSystemTheme();
-    const savedLeagueInfo = localStorage.getItem("leagueInfo");
-    if (savedLeagueInfo) {
-      const savedLeagues = JSON.parse(savedLeagueInfo);
+    const savedLeagues = getParsedStorageItem<LeagueInfoType[]>(
+      "leagueInfo",
+      [],
+      { isValid: Array.isArray }
+    );
+    if (savedLeagues.length > 0) {
       await Promise.all(
         savedLeagues.map(async (league: LeagueInfoType) => {
           if (!store.leagueIds.includes(getLeagueKey(league))) {
@@ -48,9 +52,10 @@ onMounted(async () => {
             if (diff > 86400000) {
               // 1 day
               showLoading.value = true;
-              const originalData = localStorage.getItem("originalData");
-              if (originalData) {
-                const currentData = JSON.parse(originalData);
+              const currentData = getParsedStorageItem<
+                Record<string, unknown>
+              >("originalData", {}, { isValid: isRecord });
+              if (Object.keys(currentData).length > 0) {
                 delete currentData[getLeagueKey(league)];
                 localStorage.setItem(
                   "originalData",
@@ -180,7 +185,9 @@ const checkSystemTheme = () => {
     clicked.value = true;
     store.updateDarkMode(true);
   } else if (savedDarkMode !== null) {
-    clicked.value = JSON.parse(savedDarkMode);
+    clicked.value = getParsedStorageItem("darkMode", systemDarkMode, {
+      isValid: isBoolean,
+    });
     store.updateDarkMode(clicked.value);
   }
 };

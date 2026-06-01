@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
+import { getParsedStorageItem } from "@/lib/storage";
 
 const store = useStore();
 const props = defineProps<{
@@ -65,10 +66,12 @@ const getHistoricalTableData = (league: LeagueInfoType) => {
   }
 
   const cacheKey = getLeagueTableCacheKey(league);
-  const cachedTableData = localStorage.getItem(cacheKey);
+  const cachedTableData = getParsedStorageItem<TableDataType[]>(cacheKey, [], {
+    isValid: Array.isArray,
+  });
 
-  if (cachedTableData) {
-    return JSON.parse(cachedTableData) as TableDataType[];
+  if (cachedTableData.length > 0) {
+    return cachedTableData;
   }
 
   const tableData = createTableData(

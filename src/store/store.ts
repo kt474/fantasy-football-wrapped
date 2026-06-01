@@ -12,6 +12,7 @@ import {
   TradeNameRow,
 } from "../types/types";
 import { DraftGrades, DraftPick } from "../types/apiTypes";
+import { getParsedStorageItem, isBoolean } from "@/lib/storage";
 
 export const getLeagueKey = ({
   leagueId,
@@ -35,10 +36,9 @@ export const useStore = defineStore("main", {
     username: "",
     loadingLeague: "",
     loadingUserLeagues: false,
-    showUsernames: (() => {
-      const value = localStorage.getItem("showUsernames");
-      return value !== null ? (JSON.parse(value) as boolean) : false;
-    })(),
+    showUsernames: getParsedStorageItem("showUsernames", false, {
+      isValid: isBoolean,
+    }),
   }),
   getters: {
     transactions: (state) =>

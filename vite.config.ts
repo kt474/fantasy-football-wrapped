@@ -42,9 +42,10 @@ export default defineConfig(({ mode }) => ({
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.sleeper\.app\/v1/,
-            handler: "CacheFirst",
+            handler: "NetworkFirst",
             options: {
               cacheName: "api-cache",
+              networkTimeoutSeconds: 5,
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24, // 24 hours

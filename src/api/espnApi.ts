@@ -947,14 +947,22 @@ const getEspnDraftMetadata = (
 export const getLeagueStatus = (
   currentWeek: number,
   lastScoredWeek: number,
-  regularSeasonLength: number
+  regularSeasonLength: number,
+  finalScoringPeriod: number = regularSeasonLength
 ) => {
   if (lastScoredWeek === 0 && currentWeek === 0) {
     return "pre_draft";
   }
-  if (currentWeek <= regularSeasonLength) {
+
+  const completionWeek =
+    finalScoringPeriod > regularSeasonLength
+      ? finalScoringPeriod
+      : regularSeasonLength;
+
+  if (lastScoredWeek < completionWeek) {
     return "in_season";
   }
+
   return "complete";
 };
 
@@ -1114,9 +1122,10 @@ export const getEspnLeagueInfo = async (
   const latestScoringPeriod = Number(status.latestScoringPeriod ?? 0);
   const latestCompletedCandidate =
     latestScoringPeriod > 0 ? latestScoringPeriod : currentWeek - 1;
+  // Don't think we want to subtract 1 from currentWeek here
   const lastCompletedWeek =
     currentWeek > 0
-      ? Math.max(Math.min(latestCompletedCandidate, currentWeek - 1), 0)
+      ? Math.max(Math.min(latestCompletedCandidate, currentWeek), 0)
       : 0;
   // ESPN's finalScoringPeriod is the scheduled season endpoint, not the last
   // completed week. Keep it only as an upper bound so we don't fetch future
@@ -1340,7 +1349,12 @@ export const getEspnLeagueInfo = async (
     waivers: enrichedWaivers as unknown as LeagueInfoType["waivers"],
     previousLeagues:
       (status.previousSeasons as LeagueInfoType[] | undefined) ?? [],
-    status: getLeagueStatus(currentWeek, lastScoredWeek, regularSeasonLength),
+    status: getLeagueStatus(
+      currentWeek,
+      lastScoredWeek,
+      regularSeasonLength,
+      finalScoringPeriod
+    ),
     currentWeek,
     scoringType,
     rosterPositions: getRosterPositions(

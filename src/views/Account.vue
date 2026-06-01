@@ -9,6 +9,7 @@ import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
 import { authenticatedFetch } from "@/lib/authFetch";
+import { getParsedStorageItem } from "@/lib/storage";
 import {
   Card,
   CardContent,
@@ -477,10 +478,11 @@ const ensureLeagueIdQueryParam = async () => {
   const currentLeagueId = window.localStorage.getItem("currentLeagueId");
   if (!currentLeagueId) return;
 
-  const savedLeagueInfo = window.localStorage.getItem("leagueInfo");
-  const savedLeagues = savedLeagueInfo
-    ? (JSON.parse(savedLeagueInfo) as LeagueInfoType[])
-    : [];
+  const savedLeagues = getParsedStorageItem<LeagueInfoType[]>(
+    "leagueInfo",
+    [],
+    { isValid: Array.isArray }
+  );
   const currentLeague = savedLeagues.find(
     (league) => getLeagueKey(league) === currentLeagueId
   );

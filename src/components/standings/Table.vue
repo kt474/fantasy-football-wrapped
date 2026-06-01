@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import Narratives from "../league_narratives/Narratives.vue";
+import { getParsedStorageItem, isRecord } from "@/lib/storage";
 
 const PowerRankingData = defineAsyncComponent(
   () => import("../power_rankings/PowerRankingData.vue")
@@ -149,9 +150,10 @@ onMounted(() => {
 });
 
 const originalData = computed(() => {
-  const originalDataStorage = localStorage.getItem("originalData");
-  if (originalDataStorage && store.currentLeagueId) {
-    const savedData: savedData = JSON.parse(originalDataStorage);
+  if (store.currentLeagueId) {
+    const savedData = getParsedStorageItem<savedData>("originalData", {}, {
+      isValid: (value): value is savedData => isRecord(value),
+    });
     if (savedData[store.currentLeagueId]) {
       return savedData[store.currentLeagueId];
     }
@@ -164,11 +166,14 @@ const originalData = computed(() => {
       medianScoring.value
     );
     if (store.currentLeagueId) {
-      let savedData: Record<string, TableDataType[]> = {};
-      const originalDataStorage = localStorage.getItem("originalData");
-      if (originalDataStorage) {
-        savedData = JSON.parse(originalDataStorage);
-      }
+      const savedData = getParsedStorageItem<Record<string, TableDataType[]>>(
+        "originalData",
+        {},
+        {
+          isValid: (value): value is Record<string, TableDataType[]> =>
+            isRecord(value),
+        }
+      );
       savedData[store.currentLeagueId] = combinedPoints;
       localStorage.setItem("originalData", JSON.stringify(savedData));
     }

@@ -38,6 +38,7 @@ import {
   getSavedEspnAuth,
 } from "@/api/espnApi";
 import Dialog from "./Dialog.vue";
+import { getParsedStorageItem, isRecord } from "@/lib/storage";
 
 const router = useRouter();
 const store = useStore();
@@ -118,7 +119,11 @@ const removeLeague = () => {
     }
     const originalData = localStorage.getItem("originalData");
     if (originalData) {
-      const currentData = JSON.parse(originalData);
+      const currentData = getParsedStorageItem<Record<string, unknown>>(
+        "originalData",
+        {},
+        { isValid: isRecord }
+      );
       delete currentData[removedLeagueId];
       if (Object.keys(currentData).length == 0) {
         localStorage.removeItem("originalData");
@@ -143,7 +148,11 @@ const refreshLeague = async () => {
   });
   const originalData = localStorage.getItem("originalData");
   if (originalData) {
-    const currentData = JSON.parse(originalData);
+    const currentData = getParsedStorageItem<Record<string, unknown>>(
+      "originalData",
+      {},
+      { isValid: isRecord }
+    );
     delete currentData[currentLeagueId.value];
     localStorage.setItem("originalData", JSON.stringify(currentData));
   }
