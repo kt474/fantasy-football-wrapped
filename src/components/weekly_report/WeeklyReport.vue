@@ -28,7 +28,8 @@ import {
 } from "../../api/fakeLeague.ts";
 import WeeklyPreview from "./WeeklyPreview.vue";
 import WeeklyShareCard from "./WeeklyShareCard.vue";
-import AudioRecap from "./AudioRecap.vue";
+import PremiumReportPanel from "./PremiumReportPanel.vue";
+import PremiumReportShareCard from "./PremiumReportShareCard.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import MarkdownIt from "markdown-it";
@@ -36,6 +37,10 @@ import DOMPurify from "dompurify";
 import { toPng } from "html-to-image";
 import { Copy, Download } from "lucide-vue-next";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
+import {
+  formatPremiumLeagueReport,
+  parsePremiumLeagueReport,
+} from "@/types/premiumReport";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -130,6 +135,17 @@ const renderedWeeklyReport = computed(() => {
 
 const renderedPremiumWeeklyReport = computed(() => {
   return DOMPurify.sanitize(md.render(rawPremiumWeeklyReport.value));
+});
+
+const structuredPremiumWeeklyReport = computed(() =>
+  parsePremiumLeagueReport(rawPremiumWeeklyReport.value)
+);
+
+const formattedPremiumWeeklyReport = computed(() => {
+  if (structuredPremiumWeeklyReport.value) {
+    return formatPremiumLeagueReport(structuredPremiumWeeklyReport.value);
+  }
+  return rawPremiumWeeklyReport.value;
 });
 
 const weeks = computed(() => {
@@ -259,7 +275,9 @@ const getPremiumReport = async () => {
       premiumCommentaryStyle.value
     );
     premiumLoading.value = false;
-    rawPremiumWeeklyReport.value = response.text;
+    rawPremiumWeeklyReport.value = response.report
+      ? JSON.stringify(response.report)
+      : (response.text ?? "");
     store.addPremiumWeeklyReport(
       getLeagueKey(currentLeague),
       rawPremiumWeeklyReport.value
@@ -842,7 +860,8 @@ const copyReport = () => {
   navigator.clipboard.writeText(
     (tier.value === "Standard"
       ? rawWeeklyReport.value
-      : rawPremiumWeeklyReport.value) + "\n\nCreated with https://ffwrapped.com"
+      : formattedPremiumWeeklyReport.value) +
+      "\n\nCreated with https://ffwrapped.com"
   );
   toast.success("Summary copied to clipboard!");
 };
@@ -903,13 +922,17 @@ const exportBenchPlayers = computed(() => {
 const exportSummary = computed(() => {
   const sourceText =
     tier.value === "Premium" && rawPremiumWeeklyReport.value
-      ? rawPremiumWeeklyReport.value
+      ? formattedPremiumWeeklyReport.value
       : rawWeeklyReport.value;
   if (!sourceText) {
     return "";
   }
   return sourceText;
 });
+
+const isPremiumStructuredExport = computed(
+  () => tier.value === "Premium" && structuredPremiumWeeklyReport.value !== null
+);
 
 const downloadReportImage = async () => {
   if (isGeneratingImage.value) {
@@ -936,7 +959,9 @@ const downloadReportImage = async () => {
     });
     const link = document.createElement("a");
     link.href = dataUrl;
-    link.download = `ffwrapped-week-${currentWeek.value}.png`;
+    link.download = isPremiumStructuredExport.value
+      ? `ffwrapped-week-${currentWeek.value}-league-report.png`
+      : `ffwrapped-week-${currentWeek.value}.png`;
     link.click();
     toast.success("Weekly report image downloaded");
   } catch (error) {
@@ -1003,8 +1028,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
               <div class="flex flex-wrap sm:flex-nowrap">
                 <p class="mb-2 text-xl font-bold">Summary</p>
                 <TabsList class="sm:ml-4">
-                  <TabsTrigger value="Standard"> Standard </TabsTrigger>
-                  <TabsTrigger value="Premium"> Premium </TabsTrigger>
+                  <TabsTrigger value="Standard"> Quick Recap </TabsTrigger>
+                  <TabsTrigger value="Premium"> League Report </TabsTrigger>
                 </TabsList>
               </div>
               <Button
@@ -1021,157 +1046,24 @@ watch(() => currentWeek.value, fetchPlayerNames);
             </div>
             <p v-if="weeks.length === 0">Please come back after week 1!</p>
             <TabsContent value="Premium">
-              <div v-if="store.leagueIds.length !== 0">
-                <div class="flex mb-4">
-                  <div>
-                    <p class="mb-1 text-xs">Commentary Style</p>
-                    <Select v-model="premiumCommentaryStyle">
-                      <SelectTrigger class="w-44">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="roast">Roast (default)</SelectItem>
-                        <SelectItem value="analytical">Analyst</SelectItem>
-                        <SelectItem value="hype">Hype</SelectItem>
-                        <SelectItem value="cutthroat">Cutthroat</SelectItem>
-                        <SelectItem value="neutral">Neutral</SelectItem>
-                        <SelectItem value="newspaper">Newspaper</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button
-                    @click="getPremiumReport"
-                    :disabled="
-                      !authStore.isAuthenticated || !subscriptionStore.isPremium
-                    "
-                    type="button"
-                    class="mt-5 ml-2"
-                    >Generate</Button
-                  >
-                </div>
-                <div v-if="rawPremiumWeeklyReport">
-                  <div
-                    v-html="renderedPremiumWeeklyReport"
-                    class="my-2.5 report-content"
-                  ></div>
-                  <p class="text-xs text-muted-foreground">
-                    AI-generated report. Information provided may not always be
-                    accurate.
-                  </p>
-                </div>
-                <div
-                  v-else-if="
-                    premiumLoading &&
-                    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
-                  "
-                >
-                  <div
-                    role="status"
-                    class="space-y-2.5 animate-pulse max-w-lg mt-2"
-                  >
-                    <p class="">Generating Premium Summary...</p>
-                    <div class="flex items-center w-full">
-                      <div
-                        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[480px]">
-                      <div
-                        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[400px]">
-                      <div
-                        class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[480px]">
-                      <div
-                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[440px]">
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-32"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[360px]">
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                    </div>
-                    <span class="sr-only">Loading...</span>
-                  </div>
-                </div>
-                <div v-else>
-                  <p class="max-w-3xl">
-                    Premium weekly reports include deeper analysis, more league
-                    context, customizable commentary styles, and a podcast-style
-                    audio version. Available with a
-                    <router-link
-                      :to="{ path: '/account', query: $route.query }"
-                      class="font-medium cursor-pointer hover:underline"
-                      @click="store.currentTab = ''"
-                    >
-                      Premium subscription</router-link
-                    >.
-                  </p>
-                </div>
-                <AudioRecap
-                  :recap-text="rawPremiumWeeklyReport"
-                  :file-name="`ffwrapped-week-${currentWeek}-recap.mp3`"
-                />
-              </div>
-              <div v-else>
-                <p class="max-w-3xl">
-                  Premium weekly reports include deeper analysis, more league
-                  context, customizable commentary styles, and a podcast-style
-                  audio version. Available with a
-                  <router-link
-                    :to="{ path: '/account', query: $route.query }"
-                    class="font-medium cursor-pointer hover:underline"
-                    @click="store.currentTab = ''"
-                  >
-                    Premium subscription</router-link
-                  >.
-                </p>
-              </div>
+              <PremiumReportPanel
+                v-model:commentary-style="premiumCommentaryStyle"
+                :has-league="store.leagueIds.length !== 0"
+                :is-authenticated="authStore.isAuthenticated"
+                :is-premium="subscriptionStore.isPremium"
+                :is-loading="premiumLoading"
+                :has-last-scored-week="
+                  Boolean(
+                    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+                  )
+                "
+                :report-html="renderedPremiumWeeklyReport"
+                :structured-report="structuredPremiumWeeklyReport"
+                :raw-report="rawPremiumWeeklyReport"
+                :audio-text="formattedPremiumWeeklyReport"
+                :file-name="`ffwrapped-week-${currentWeek}-recap.mp3`"
+                @generate="getPremiumReport"
+              />
             </TabsContent>
             <TabsContent value="Standard">
               <div v-if="rawWeeklyReport" class="max-w-5xl">
@@ -1562,7 +1454,14 @@ watch(() => currentWeek.value, fetchPlayerNames);
   </Card>
   <div class="fixed top-0 left-[-10000px] pointer-events-none">
     <div ref="shareCardRef">
+      <PremiumReportShareCard
+        v-if="isPremiumStructuredExport && structuredPremiumWeeklyReport"
+        :league-name="store.leagueInfo[store.currentLeagueIndex]?.name"
+        :week="currentWeek"
+        :report="structuredPremiumWeeklyReport"
+      />
       <WeeklyShareCard
+        v-else
         :league-name="store.leagueInfo[store.currentLeagueIndex]?.name"
         :week="currentWeek"
         :top-teams="exportTopTeams"
