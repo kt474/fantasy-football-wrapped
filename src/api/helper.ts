@@ -164,20 +164,29 @@ export const createTableData = (
     );
     const medians: number[] = [];
     for (let i: number = 0; i < zipped.length; i++) {
-      medians.push(Number(getMedian(zipped[i])?.toFixed(2)));
-      for (let j: number = 0; j < zipped[i].length; j++) {
-        const numberOfWins = zipped[i].filter((a) => a < zipped[i][j]).length;
-        const currentTeam = combinedPoints.find((obj) => {
-          return obj.points[i] === zipped[i][j];
-        });
-        if (currentTeam && currentTeam.pointsFor !== 0) {
-          currentTeam.winsAgainstAll += numberOfWins;
-          currentTeam.lossesAgainstAll += zipped[i].length - numberOfWins - 1;
+      const weeklyScores = combinedPoints
+        .map((team) => ({
+          team,
+          score: team.points?.[i],
+        }))
+        .filter(
+          (entry): entry is { team: TableDataType; score: number } =>
+            entry.score !== undefined
+        );
+      const scores = weeklyScores.map((entry) => entry.score);
+      medians.push(Number(getMedian(scores)?.toFixed(2)));
+      weeklyScores.forEach(({ team, score }) => {
+        const numberOfWins = scores.filter(
+          (otherScore) => otherScore < score
+        ).length;
+        if (team.pointsFor !== 0) {
+          team.winsAgainstAll += numberOfWins;
+          team.lossesAgainstAll += scores.length - numberOfWins - 1;
         }
-      }
+      });
     }
     if (combinedPoints) {
-      combinedPoints.forEach((value) => {
+      combinedPoints.forEach((value, teamIndex) => {
         let randomScheduleWins = 0;
         const numOfSimulations = 10000;
         const numberWeeks = medianScoring
@@ -193,9 +202,9 @@ export const createTableData = (
             )
               if (
                 value.points[i] >
-                combinedPoints[getRandomUser(combinedPoints.length, i)].points[
-                  i
-                ]
+                combinedPoints[
+                  getRandomUser(combinedPoints.length, teamIndex)
+                ].points[i]
               ) {
                 randomScheduleWins++;
                 simulationWins[simulations]++;
