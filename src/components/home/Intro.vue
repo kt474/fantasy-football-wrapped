@@ -57,7 +57,7 @@ const {
     />
 
     <div
-      class="relative z-10 flex min-h-[calc(100dvh-4rem)] items-start px-4 py-6 sm:px-8 lg:items-center lg:px-12"
+      class="relative z-10 flex min-h-[calc(100dvh-4rem)] items-start px-4 py-6 sm:px-8 sm:items-center lg:px-12"
     >
       <div class="mx-auto max-w-7xl">
         <div
