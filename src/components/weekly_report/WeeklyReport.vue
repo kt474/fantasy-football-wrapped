@@ -3,8 +3,6 @@ import { TableDataType, LeagueInfoType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import { computed, ref, watch, onMounted, nextTick } from "vue";
 import { getLeagueKey, useStore } from "../../store/store";
-import { useAuthStore } from "@/store/auth";
-import { useSubscriptionStore } from "@/store/subscription.ts";
 import {
   generateReport,
   generatePremiumReport,
@@ -12,7 +10,6 @@ import {
 } from "../../api/api.ts";
 import Card from "../ui/card/Card.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -20,7 +17,6 @@ import {
   SelectItem,
   SelectValue,
 } from "../ui/select";
-import max from "lodash/max";
 import {
   fakeTopPerformers,
   fakeBottomPerformers,
@@ -28,18 +24,26 @@ import {
 } from "../../api/fakeLeague.ts";
 import WeeklyPreview from "./WeeklyPreview.vue";
 import WeeklyShareCard from "./WeeklyShareCard.vue";
-import AudioRecap from "./AudioRecap.vue";
+import WeeklyPerformers from "./WeeklyPerformers.vue";
+import WeeklyReportSummary from "./WeeklyReportSummary.vue";
+import WeeklyMatchups from "./WeeklyMatchups.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
-import MarkdownIt from "markdown-it";
-import DOMPurify from "dompurify";
 import { toPng } from "html-to-image";
-import { Copy, Download } from "lucide-vue-next";
-import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
+import {
+  buildPremiumReportPrompt,
+  buildReportPrompt,
+  getBenchPerformers,
+  getBracketRosterIds,
+  getExportPlayers,
+  getExportTopTeams,
+  getMatchupNumbers,
+  getSeriesData,
+  getSortedTableData,
+  getWeeklyPerformers,
+} from "./weeklyReportTransforms";
 
 const store = useStore();
-const authStore = useAuthStore();
-const subscriptionStore = useSubscriptionStore();
 const props = defineProps<{
   tableData: TableDataType[];
   regularSeasonLength: number;
@@ -56,81 +60,6 @@ const fetchingPlayers = ref(false);
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("roast");
 const rawPremiumWeeklyReport = ref<string>("");
-
-interface PerformerGroup {
-  playerPoints: number[];
-  playerNames: Player[];
-  user: string;
-}
-
-interface PerformerEntry {
-  player: Player;
-  points: number;
-  user: string;
-}
-
-type PlayoffReportRow = Record<string, unknown> & {
-  name: string;
-  matchupNumber: number | null;
-  winner: boolean;
-  playerPoints: number[];
-  playerNames: string[];
-  pointsScored: number;
-  inLosersBracket: boolean;
-  inWinnersBracket: boolean;
-};
-
-type RegularSeasonReportRow = Record<string, unknown> & {
-  name: string;
-  matchupNumber: number | null;
-  playerPoints: number[];
-  pointsScored: number;
-  winner: boolean;
-  playerNames: string[];
-  currentRecord: string;
-  currentRank: number;
-};
-
-type PlayoffPremiumReportRow = Record<string, unknown> & {
-  name: string;
-  matchupNumber: number | null;
-  winner: boolean;
-  starterPlayerPoints: number[];
-  starterPlayerNames: string[];
-  benchPlayerPoints: number[];
-  benchPlayerNames: string[];
-  pointsScored: number;
-  inLosersBracket: boolean;
-  inWinnersBracket: boolean;
-};
-
-type RegularSeasonPremiumReportRow = Record<string, unknown> & {
-  name: string;
-  matchupNumber: number | null;
-  playerPoints: number[];
-  pointsScored: number;
-  winner: boolean;
-  starterPlayerPoints: number[];
-  starterPlayerNames: string[];
-  benchPlayerPoints: number[];
-  benchPlayerNames: string[];
-  currentRecord: string;
-  currentRank: number;
-};
-
-const md = new MarkdownIt({
-  html: false,
-  linkify: true,
-  breaks: true,
-});
-
-const renderedWeeklyReport = computed(() => {
-  return DOMPurify.sanitize(md.render(rawWeeklyReport.value));
-});
-
-const renderedPremiumWeeklyReport = computed(() => {
-  return DOMPurify.sanitize(md.render(rawPremiumWeeklyReport.value));
-});
 
 const weeks = computed(() => {
   if (
@@ -354,25 +283,15 @@ const isPlayoffs = computed(() => {
 });
 
 const losersBracketIDs = computed(() => {
-  const result: number[] = [];
-  store.leagueInfo[store.currentLeagueIndex].losersBracket.forEach(
-    (matchup) => {
-      result.push(matchup.t1);
-      result.push(matchup.t2);
-    }
+  return getBracketRosterIds(
+    store.leagueInfo[store.currentLeagueIndex].losersBracket
   );
-  return result;
 });
 
 const winnersBracketIDs = computed(() => {
-  const result: number[] = [];
-  store.leagueInfo[store.currentLeagueIndex].winnersBracket.forEach(
-    (matchup) => {
-      result.push(matchup.t1);
-      result.push(matchup.t2);
-    }
+  return getBracketRosterIds(
+    store.leagueInfo[store.currentLeagueIndex].winnersBracket
   );
-  return result;
 });
 
 const bestPerformers = computed(() => {
@@ -380,29 +299,13 @@ const bestPerformers = computed(() => {
     playerNames.value.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
-    const result: PerformerGroup[] = [];
-    props.tableData.forEach((user: TableDataType, index: number) => {
-      if (user.matchups[currentWeek.value - 1]) {
-        const week: number = currentWeek.value - 1;
-        result.push({
-          playerPoints: user.starterPoints[week],
-          playerNames: playerNames.value[index],
-          user: store.showUsernames ? user.username : user.name,
-        });
-      }
+    return getWeeklyPerformers({
+      tableData: props.tableData,
+      playerNames: playerNames.value,
+      weekIndex: currentWeek.value - 1,
+      showUsernames: store.showUsernames,
+      sortDirection: "desc",
     });
-    return result
-      .flatMap((group) =>
-        group.playerNames.map(
-          (player, idx: number): PerformerEntry => ({
-            player,
-            points: group.playerPoints[idx] ?? 0,
-            user: group.user,
-          })
-        )
-      )
-      .sort((a, b) => b.points - a.points)
-      .slice(0, 4);
   } else if (store.leagueInfo.length === 0) {
     return fakeTopPerformers;
   }
@@ -414,29 +317,13 @@ const worstPerformers = computed(() => {
     playerNames.value.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
-    const result: PerformerGroup[] = [];
-    props.tableData.forEach((user: TableDataType, index: number) => {
-      if (user.matchups[currentWeek.value - 1]) {
-        const week: number = currentWeek.value - 1;
-        result.push({
-          playerPoints: user.starterPoints[week],
-          playerNames: playerNames.value[index],
-          user: store.showUsernames ? user.username : user.name,
-        });
-      }
+    return getWeeklyPerformers({
+      tableData: props.tableData,
+      playerNames: playerNames.value,
+      weekIndex: currentWeek.value - 1,
+      showUsernames: store.showUsernames,
+      sortDirection: "asc",
     });
-    return result
-      .flatMap((group) =>
-        group.playerNames.map(
-          (player, idx: number): PerformerEntry => ({
-            player,
-            points: group.playerPoints[idx] ?? 0,
-            user: group.user,
-          })
-        )
-      )
-      .sort((a, b) => a.points - b.points)
-      .slice(0, 4);
   } else if (store.leagueInfo.length === 0) {
     return fakeBottomPerformers;
   }
@@ -449,29 +336,12 @@ const benchPerformers = computed(() => {
     benchPlayerNames.value.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
-    const result: PerformerGroup[] = [];
-    props.tableData.forEach((user: TableDataType, index: number) => {
-      if (user.matchups[currentWeek.value - 1]) {
-        const week: number = currentWeek.value - 1;
-        result.push({
-          playerPoints: user.benchPoints[week],
-          playerNames: benchPlayerNames.value[index],
-          user: store.showUsernames ? user.username : user.name,
-        });
-      }
+    return getBenchPerformers({
+      tableData: props.tableData,
+      benchPlayerNames: benchPlayerNames.value,
+      weekIndex: currentWeek.value - 1,
+      showUsernames: store.showUsernames,
     });
-    return result
-      .flatMap((group) =>
-        group.playerNames.map(
-          (player, idx: number): PerformerEntry => ({
-            player,
-            points: group.playerPoints[idx] ?? 0,
-            user: group.user,
-          })
-        )
-      )
-      .sort((a, b) => b.points - a.points)
-      .slice(0, 4);
   } else if (store.leagueInfo.length === 0) {
     return fakeBenchPerformers;
   }
@@ -479,142 +349,50 @@ const benchPerformers = computed(() => {
 });
 
 const reportPrompt = computed(() => {
-  const result: Array<PlayoffReportRow | RegularSeasonReportRow> = [];
-  if (isPlayoffs.value) {
-    props.tableData.forEach((user: TableDataType, index: number) => {
-      if (user.matchups[currentWeek.value - 1]) {
-        const week: number = currentWeek.value - 1;
-        result.push({
-          name: store.showUsernames ? user.username : user.name,
-          matchupNumber: user.matchups[week],
-          winner:
-            getMatchupWinner(user.matchups[week], week) === user.points[week],
-          playerPoints: user.starterPoints[week].slice(0, 7),
-          playerNames: (playerNames.value[index] ?? [])
-            .map((player) =>
-              player.name ? player.name : `${player.team} Defense`
-            )
-            .slice(0, 7),
-          pointsScored: user.points[week],
-          inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
-          inWinnersBracket: winnersBracketIDs.value.includes(user.rosterId),
-        });
-      }
-    });
-  } else {
-    props.tableData.forEach((user: TableDataType, index: number) => {
-      if (user.matchups[currentWeek.value - 1]) {
-        const week: number = currentWeek.value - 1;
-        result.push({
-          name: store.showUsernames ? user.username : user.name,
-          matchupNumber: user.matchups[week],
-          playerPoints: user.starterPoints[week].slice(0, 7),
-          pointsScored: user.points[week],
-          winner:
-            getMatchupWinner(user.matchups[week], week) === user.points[week],
-          playerNames:
-            playerNames.value.length > 0
-              ? playerNames.value[index]
-                  .map((player) =>
-                    player?.name ? player.name : `${player.team} Defense`
-                  )
-                  .slice(0, 7)
-              : [],
-          currentRecord: `${user.wins}-${user.losses}`,
-          currentRank: user.regularSeasonRank,
-        });
-      }
-    });
-  }
-  return result;
+  return buildReportPrompt({
+    tableData: props.tableData,
+    sortedTableData: sortedTableData.value,
+    playerNames: playerNames.value,
+    weekIndex: currentWeek.value - 1,
+    showUsernames: store.showUsernames,
+    isPlayoffs: isPlayoffs.value,
+    losersBracketIds: losersBracketIDs.value,
+    winnersBracketIds: winnersBracketIDs.value,
+  });
 });
 
 const premiumReportPrompt = computed(() => {
-  const result: Array<PlayoffPremiumReportRow | RegularSeasonPremiumReportRow> =
-    [];
-  if (isPlayoffs.value) {
-    props.tableData.forEach((user: TableDataType, index: number) => {
-      if (user.matchups[currentWeek.value - 1]) {
-        const week: number = currentWeek.value - 1;
-        result.push({
-          name: store.showUsernames ? user.username : user.name,
-          matchupNumber: user.matchups[week],
-          winner:
-            getMatchupWinner(user.matchups[week], week) === user.points[week],
-          starterPlayerPoints: user.starterPoints[week],
-          starterPlayerNames: (playerNames.value[index] ?? []).map((player) =>
-            player.name ? player.name : `${player.team} Defense`
-          ),
-          benchPlayerPoints: user.benchPoints[week],
-          benchPlayerNames: (benchPlayerNames.value[index] ?? []).map(
-            (player) => (player.name ? player.name : `${player.team} Defense`)
-          ),
-          pointsScored: user.points[week],
-          inLosersBracket: losersBracketIDs.value.includes(user.rosterId),
-          inWinnersBracket: winnersBracketIDs.value.includes(user.rosterId),
-        });
-      }
-    });
-  } else {
-    props.tableData.forEach((user: TableDataType, index: number) => {
-      if (user.matchups[currentWeek.value - 1]) {
-        const week: number = currentWeek.value - 1;
-        result.push({
-          name: store.showUsernames ? user.username : user.name,
-          matchupNumber: user.matchups[week],
-          playerPoints: user.starterPoints[week].slice(0, 7),
-          pointsScored: user.points[week],
-          winner:
-            getMatchupWinner(user.matchups[week], week) === user.points[week],
-          starterPlayerPoints: user.starterPoints[week],
-          starterPlayerNames: (playerNames.value[index] ?? []).map((player) =>
-            player.name ? player.name : `${player.team} Defense`
-          ),
-          benchPlayerPoints: user.benchPoints[week],
-          benchPlayerNames: (benchPlayerNames.value[index] ?? []).map(
-            (player) => (player.name ? player.name : `${player.team} Defense`)
-          ),
-          currentRecord: `${user.wins}-${user.losses}`,
-          currentRank: user.regularSeasonRank,
-        });
-      }
-    });
-  }
-  return result;
+  return buildPremiumReportPrompt({
+    tableData: props.tableData,
+    sortedTableData: sortedTableData.value,
+    playerNames: playerNames.value,
+    benchPlayerNames: benchPlayerNames.value,
+    weekIndex: currentWeek.value - 1,
+    showUsernames: store.showUsernames,
+    isPlayoffs: isPlayoffs.value,
+    losersBracketIds: losersBracketIDs.value,
+    winnersBracketIds: winnersBracketIDs.value,
+  });
 });
 
 const numOfMatchups = computed(() => {
-  const result: (number | null)[] = [];
-  sortedTableData.value.forEach((user) => {
-    const matchupIndex = user.matchups[currentWeek.value - 1];
-    if (matchupIndex && !result.includes(matchupIndex)) {
-      result.push(user.matchups[currentWeek.value - 1]);
-    }
-  });
-  return result;
+  return getMatchupNumbers(sortedTableData.value, currentWeek.value - 1);
+});
+
+const medianScoring = computed(() => {
+  return Boolean(
+    store.leagueInfo.length > 0 &&
+      store.leagueInfo[store.currentLeagueIndex] &&
+      store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
+  );
 });
 
 const sortedTableData = computed(() => {
-  if (props.tableData[0].points) {
-    return [...props.tableData].sort(
-      (a, b) =>
-        a.points[currentWeek.value - 1] - b.points[currentWeek.value - 1]
-    );
-  }
-  return [];
+  return getSortedTableData(props.tableData, currentWeek.value - 1);
 });
 
 const seriesData = computed(() => {
-  return [
-    {
-      name: "Points",
-      data: sortedTableData.value.map((user) =>
-        user.matchups[currentWeek.value - 1]
-          ? user.points[currentWeek.value - 1]
-          : 0
-      ),
-    },
-  ];
+  return getSeriesData(sortedTableData.value, currentWeek.value - 1);
 });
 
 const chartOptions = ref({
@@ -814,30 +592,6 @@ watch(
   }
 );
 
-const getRecord = (recordString: string, index: number) => {
-  if (
-    store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
-  ) {
-    index = index * 2;
-  }
-  if (recordString) {
-    const numWins = recordString.slice(0, index).split("W").length - 1;
-    const numLosses = recordString.slice(0, index).split("L").length - 1;
-    return `${numWins} - ${numLosses}`;
-  }
-  return "0-0";
-};
-
-const getMatchupWinner = (matchupIndex: number | null, currentWeek: number) => {
-  const opponents = sortedTableData.value.filter(
-    (user) => user.matchups[currentWeek] === matchupIndex
-  );
-  const pointsArray = opponents.map((user) => user.points[currentWeek]);
-  return max(pointsArray);
-};
-
 const copyReport = () => {
   navigator.clipboard.writeText(
     (tier.value === "Standard"
@@ -850,54 +604,24 @@ const copyReport = () => {
 const isGeneratingImage = ref(false);
 const shareCardRef = ref<HTMLElement | null>(null);
 
-const getManagerName = (user: TableDataType) => {
-  if (store.showUsernames) {
-    return user.username ? user.username : "Ghost Roster";
-  }
-  return user.name ? user.name : "Ghost Roster";
-};
-
 const exportTopTeams = computed(() => {
-  const weekIndex = currentWeek.value - 1;
-  return [...sortedTableData.value]
-    .filter((user) => user.matchups[weekIndex] !== null)
-    .sort((a, b) => b.points[weekIndex] - a.points[weekIndex])
-    .slice(0, 6)
-    .map((user) => ({
-      name: getManagerName(user),
-      points: user.points[weekIndex],
-      avatar: user.avatarImg,
-    }));
+  return getExportTopTeams(
+    sortedTableData.value,
+    currentWeek.value - 1,
+    store.showUsernames
+  );
 });
 
 const exportHotPlayers = computed(() => {
-  return bestPerformers.value.slice(0, 4).map((entry) => ({
-    name: entry.player.name ? entry.player.name : `${entry.player.team} DEF`,
-    user: entry.user,
-    points: entry.points,
-    player_id: entry.player.player_id,
-    position: entry.player.position,
-  }));
+  return getExportPlayers(bestPerformers.value);
 });
 
 const exportColdPlayers = computed(() => {
-  return worstPerformers.value.slice(0, 4).map((entry) => ({
-    name: entry.player.name ? entry.player.name : `${entry.player.team} DEF`,
-    user: entry.user,
-    points: entry.points,
-    player_id: entry.player.player_id,
-    position: entry.player.position,
-  }));
+  return getExportPlayers(worstPerformers.value);
 });
 
 const exportBenchPlayers = computed(() => {
-  return benchPerformers.value.slice(0, 4).map((entry) => ({
-    name: entry.player.name ? entry.player.name : `${entry.player.team} DEF`,
-    user: entry.user,
-    points: entry.points,
-    player_id: entry.player.player_id,
-    position: entry.player.position,
-  }));
+  return getExportPlayers(benchPerformers.value);
 });
 
 const exportSummary = computed(() => {
@@ -989,337 +713,29 @@ watch(() => currentWeek.value, fetchPlayerNames);
       </div>
       <Separator class="h-px my-2" />
       <TabsContent value="Report">
-        <Tabs
+        <WeeklyReportSummary
           v-if="
             currentWeek == weeks[0] &&
             (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek ||
               store.leagueInfo.length == 0)
           "
-          v-model="tier"
-          default-value="Standard"
-        >
-          <div>
-            <div class="flex">
-              <div class="flex flex-wrap sm:flex-nowrap">
-                <p class="mb-2 text-xl font-bold">Summary</p>
-                <TabsList class="sm:ml-4">
-                  <TabsTrigger value="Standard"> Standard </TabsTrigger>
-                  <TabsTrigger value="Premium"> Premium </TabsTrigger>
-                </TabsList>
-              </div>
-              <Button
-                @click="downloadReportImage"
-                :disabled="isGeneratingImage"
-                size="sm"
-                class="ml-auto mr-2"
-              >
-                <Download />
-              </Button>
-              <Button @click="copyReport()" variant="outline" size="sm">
-                <Copy class="size-4" />
-              </Button>
-            </div>
-            <p v-if="weeks.length === 0">Please come back after week 1!</p>
-            <TabsContent value="Premium">
-              <div v-if="store.leagueIds.length !== 0">
-                <div class="flex mb-4">
-                  <div>
-                    <p class="mb-1 text-xs">Commentary Style</p>
-                    <Select v-model="premiumCommentaryStyle">
-                      <SelectTrigger class="w-44">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="roast">Roast (default)</SelectItem>
-                        <SelectItem value="analytical">Analyst</SelectItem>
-                        <SelectItem value="hype">Hype</SelectItem>
-                        <SelectItem value="cutthroat">Cutthroat</SelectItem>
-                        <SelectItem value="neutral">Neutral</SelectItem>
-                        <SelectItem value="newspaper">Newspaper</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button
-                    @click="getPremiumReport"
-                    :disabled="
-                      !authStore.isAuthenticated || !subscriptionStore.isPremium
-                    "
-                    type="button"
-                    class="mt-5 ml-2"
-                    >Generate</Button
-                  >
-                </div>
-                <div v-if="rawPremiumWeeklyReport">
-                  <div
-                    v-html="renderedPremiumWeeklyReport"
-                    class="my-2.5 report-content"
-                  ></div>
-                  <p class="text-xs text-muted-foreground">
-                    AI-generated report. Information provided may not always be
-                    accurate.
-                  </p>
-                </div>
-                <div
-                  v-else-if="
-                    premiumLoading &&
-                    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
-                  "
-                >
-                  <div
-                    role="status"
-                    class="space-y-2.5 animate-pulse max-w-lg mt-2"
-                  >
-                    <p class="">Generating Premium Summary...</p>
-                    <div class="flex items-center w-full">
-                      <div
-                        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[480px]">
-                      <div
-                        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[400px]">
-                      <div
-                        class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[480px]">
-                      <div
-                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[440px]">
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-32"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                      ></div>
-                    </div>
-                    <div class="flex items-center w-full max-w-[360px]">
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
-                      ></div>
-                      <div
-                        class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                      ></div>
-                    </div>
-                    <span class="sr-only">Loading...</span>
-                  </div>
-                </div>
-                <div v-else>
-                  <p class="max-w-3xl">
-                    Premium weekly reports include deeper analysis, more league
-                    context, customizable commentary styles, and a podcast-style
-                    audio version. Available with a
-                    <router-link
-                      :to="{ path: '/account', query: $route.query }"
-                      class="font-medium cursor-pointer hover:underline"
-                      @click="store.currentTab = ''"
-                    >
-                      Premium subscription</router-link
-                    >.
-                  </p>
-                </div>
-                <AudioRecap
-                  :recap-text="rawPremiumWeeklyReport"
-                  :file-name="`ffwrapped-week-${currentWeek}-recap.mp3`"
-                />
-              </div>
-              <div v-else>
-                <p class="max-w-3xl">
-                  Premium weekly reports include deeper analysis, more league
-                  context, customizable commentary styles, and a podcast-style
-                  audio version. Available with a
-                  <router-link
-                    :to="{ path: '/account', query: $route.query }"
-                    class="font-medium cursor-pointer hover:underline"
-                    @click="store.currentTab = ''"
-                  >
-                    Premium subscription</router-link
-                  >.
-                </p>
-              </div>
-            </TabsContent>
-            <TabsContent value="Standard">
-              <div v-if="rawWeeklyReport" class="max-w-5xl">
-                <div
-                  v-html="renderedWeeklyReport"
-                  class="mb-3 report-content"
-                ></div>
-                <p class="text-xs text-muted-foreground">
-                  AI-generated report. Information provided may not always be
-                  accurate.
-                </p>
-                <p class="text-xs text-muted-foreground">
-                  If you enjoy these weekly reports please consider supporting
-                  this project by
-                  <a
-                    aria-label="buymeacoffee donation page"
-                    class="text-primary hover:underline"
-                    href="https://buymeacoffee.com/kt474"
-                    title="buymeacoffee donation page"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >donating</a
-                  >
-                  or subscribing to the
-                  <router-link
-                    :to="{ path: '/account', query: $route.query }"
-                    class="cursor-pointer text-primary hover:underline"
-                    @click="store.currentTab = ''"
-                    >Premium Tier</router-link
-                  >.
-                </p>
-              </div>
-              <!-- Fake data for home page -->
-              <div v-else-if="store.leagueIds.length == 0" class="max-w-5xl">
-                <p class="mb-3">
-                  Week 14 was a rollercoaster, and some of you might want to
-                  demand a refund for that ride.
-                  <b>The Princess McBride</b> retains the top spot with a solid
-                  124.48 points, thanks to Josh Allen and Christian McCaffrey
-                  doing their best superhero impressions. Meanwhile,
-                  <b>Dak to the Future</b> looked more like back to the past,
-                  scoring just 76.3 points and proving that even Patrick Mahomes
-                  can’t carry a team of underperformers.
-                </p>
-                <p class="mb-3">
-                  <b>Saquondo </b> narrowly edged out <b>LaPorta Potty </b> in a
-                  high-scoring showdown, 129.62 to 123.26. Deebo Samuel was the
-                  real MVP, putting up numbers like he was playing Madden on
-                  rookie mode. <b>Baby Back Gibbs</b> and
-                  <b>Bijan Mustard</b> had a snooze-fest, with the BBQ Ribs
-                  barely staying awake long enough to win 95 to 82.64. Travis
-                  Kelce's performance was less "Mr. Swift" and more "Mr. Swiftly
-                  Disappointing."
-                </p>
-                <p class="mb-3">
-                  In the battle of the lower ranks, <b>Breece's Puffs</b> barely
-                  squeaked by <b>Lamario Kart </b> 94.82 to 90.44. Tony Pollard
-                  and James Cook did just enough to save the day, proving that
-                  even a broken clock is right twice a day.
-                </p>
-                <p>
-                  Finally, <b>Ja’Marr the Merrier</b> showed
-                  <b>Just the Tua Us</b> who's boss, winning 90.04 to 82.64.
-                  Russell Wilson must have found a new playbook, because he was
-                  cooking, and not just in the kitchen.
-                </p>
-              </div>
-              <div
-                v-else-if="
-                  loading &&
-                  store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
-                "
-              >
-                <div role="status" class="space-y-2.5 animate-pulse max-w-lg">
-                  <p class="">Generating Summary...</p>
-                  <div class="flex items-center w-full">
-                    <div
-                      class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                    ></div>
-                  </div>
-                  <div class="flex items-center w-full max-w-[480px]">
-                    <div
-                      class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                    ></div>
-                  </div>
-                  <div class="flex items-center w-full max-w-[400px]">
-                    <div
-                      class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                    ></div>
-                  </div>
-                  <div class="flex items-center w-full max-w-[480px]">
-                    <div
-                      class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                    ></div>
-                  </div>
-                  <div class="flex items-center w-full max-w-[440px]">
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-32"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                    ></div>
-                  </div>
-                  <div class="flex items-center w-full max-w-[360px]">
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
-                    ></div>
-                    <div
-                      class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                    ></div>
-                  </div>
-                  <span class="sr-only">Loading...</span>
-                </div>
-              </div>
-            </TabsContent>
-            <Separator class="h-px mt-4 mb-2" />
-          </div>
-        </Tabs>
+          v-model:tier="tier"
+          v-model:premium-commentary-style="premiumCommentaryStyle"
+          :weeks-length="weeks.length"
+          :current-week="currentWeek"
+          :has-leagues="store.leagueIds.length !== 0"
+          :has-last-scored-week="
+            Boolean(store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek)
+          "
+          :raw-weekly-report="rawWeeklyReport"
+          :raw-premium-weekly-report="rawPremiumWeeklyReport"
+          :loading="loading"
+          :premium-loading="premiumLoading"
+          :is-generating-image="isGeneratingImage"
+          @download-image="downloadReportImage"
+          @copy-report="copyReport"
+          @generate-premium="getPremiumReport"
+        />
         <p
           v-else-if="
             currentWeek == 1 &&
@@ -1329,212 +745,33 @@ watch(() => currentWeek.value, fetchPlayerNames);
         >
           Please come back after week 1!
         </p>
-        <p class="text-xl font-bold">Matchups</p>
-        <div class="flex flex-wrap w-full mb-2 overflow-x-hidden">
-          <Card
-            v-for="index in numOfMatchups"
-            class="block px-4 py-2.5 my-2 mr-4 w-80 custom-min-width bg-secondary"
-          >
-            <div v-for="user in sortedTableData">
-              <div v-if="user.matchups[currentWeek - 1] == index">
-                <div class="flex justify-between my-2">
-                  <div class="flex">
-                    <img
-                      v-if="user.avatarImg"
-                      alt="User avatar"
-                      class="w-8 h-8 rounded-full"
-                      :src="user.avatarImg"
-                      @error="handleImageError"
-                    />
-                    <svg
-                      v-else
-                      class="w-8 h-8"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                      />
-                    </svg>
-                    <div>
-                      <p class="px-2 -mt-1 truncate max-w-28 xl:max-w-44">
-                        {{
-                          store.showUsernames
-                            ? user.username
-                              ? user.username
-                              : "Ghost Roster"
-                            : user.name
-                              ? user.name
-                              : "Ghost Roster"
-                        }}
-                      </p>
-                      <p class="ml-2 text-xs text-muted-foreground">
-                        ({{ getRecord(user.recordByWeek, currentWeek) }})
-                      </p>
-                    </div>
-                  </div>
-                  <p
-                    class="mt-0.5"
-                    :class="{
-                      'text-primary font-semibold':
-                        user.points[currentWeek - 1] ==
-                        getMatchupWinner(index, currentWeek - 1),
-                    }"
-                  >
-                    {{ user.points[currentWeek - 1] }}
-                  </p>
-                </div>
-                <Separator
-                  v-if="
-                    sortedTableData
-                      .filter((u) => u.matchups[currentWeek - 1] === index)
-                      .indexOf(user) === 0
-                  "
-                  class="h-px my-2"
-                />
-              </div>
-            </div>
-          </Card>
-        </div>
+        <WeeklyMatchups
+          :sorted-table-data="sortedTableData"
+          :matchup-numbers="numOfMatchups"
+          :current-week="currentWeek"
+          :show-usernames="store.showUsernames"
+          :median-scoring="medianScoring"
+        />
         <Separator class="h-px mt-4 mb-2.5" />
 
-        <div>
-          <p class="my-1.5 text-xl font-bold">Top Performers</p>
-          <div v-if="!fetchingPlayers" class="flex flex-wrap">
-            <Card
-              v-for="player in bestPerformers"
-              class="px-4 py-3.5 my-2 mr-4 custom-player-card bg-secondary"
-            >
-              <div v-if="player.player" class="flex justify-between">
-                <div class="flex">
-                  <img
-                    v-if="player.player.position !== 'DEF'"
-                    alt="Player image"
-                    class="w-14 sm:h-auto object-cover mr-2.5"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player.player_id}.jpg`"
-                  />
-                  <img
-                    v-else
-                    alt="Defense image"
-                    class="object-cover w-14 mr-2.5 sm:h-auto"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player.player_id.toLowerCase()}.png`"
-                  />
-                  <div>
-                    <p class="font-semibold truncate w-36">
-                      {{
-                        player.player.name
-                          ? player.player.name
-                          : `${player.player.team} Defense`
-                      }}
-                    </p>
-                    <p class="truncate w-36 text-muted-foreground">
-                      {{ player.user }}
-                    </p>
-                  </div>
-                </div>
-                <p class="mt-2 font-semibold">
-                  {{ player.points }}
-                </p>
-              </div>
-            </Card>
-          </div>
-          <Card
-            v-else
-            class="px-4 py-3.5 my-2 mr-4 h-20 custom-player-card"
-          ></Card>
-        </div>
-        <div>
-          <p class="my-1 text-xl font-bold">Bottom Performers</p>
-          <div v-if="!fetchingPlayers" class="flex flex-wrap">
-            <Card
-              v-for="player in worstPerformers"
-              class="px-4 py-3.5 my-2 mr-4 custom-player-card bg-secondary"
-            >
-              <div v-if="player.player" class="flex justify-between">
-                <div class="flex">
-                  <img
-                    v-if="player.player?.position !== 'DEF'"
-                    alt="Player image"
-                    class="w-14 sm:h-auto object-cover mr-2.5"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player.player_id}.jpg`"
-                  />
-                  <img
-                    v-else
-                    alt="Defense image"
-                    class="object-cover w-14 mr-2.5 sm:h-auto"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player.player_id.toLowerCase()}.png`"
-                  />
-                  <div>
-                    <p class="font-semibold truncate w-36">
-                      {{
-                        player.player.name
-                          ? player.player.name
-                          : `${player.player.team} Defense`
-                      }}
-                    </p>
-                    <p class="truncate w-36 text-muted-foreground">
-                      {{ player.user }}
-                    </p>
-                  </div>
-                </div>
-                <p class="mt-3.5 font-semibold">
-                  {{ player.points }}
-                </p>
-              </div>
-            </Card>
-          </div>
-          <div
-            v-else
-            class="px-4 py-3.5 my-2 mr-4 h-20 custom-player-card"
-          ></div>
-        </div>
-        <div>
-          <p class="my-1 text-xl font-bold">Top Benchwarmers</p>
-          <div v-if="!fetchingPlayers" class="flex flex-wrap">
-            <Card
-              v-for="player in benchPerformers"
-              class="px-4 py-3.5 my-2 mr-4 custom-player-card bg-secondary"
-            >
-              <div v-if="player.player" class="flex justify-between">
-                <div class="flex">
-                  <img
-                    v-if="player.player?.position !== 'DEF'"
-                    alt="Player image"
-                    class="w-14 sm:h-auto object-cover mr-2.5"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player.player_id}.jpg`"
-                  />
-                  <img
-                    v-else
-                    alt="Defense image"
-                    class="object-cover w-14 mr-2.5 sm:h-auto"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player.player_id.toLowerCase()}.png`"
-                  />
-                  <div>
-                    <p class="font-semibold truncate w-36">
-                      {{
-                        player.player.name
-                          ? player.player.name
-                          : `${player.player.team} Defense`
-                      }}
-                    </p>
-                    <p class="truncate w-36 text-muted-foreground">
-                      {{ player.user }}
-                    </p>
-                  </div>
-                </div>
-                <p class="mt-3 font-semibold">
-                  {{ player.points }}
-                </p>
-              </div>
-            </Card>
-          </div>
-          <Card
-            v-else
-            class="px-4 py-3.5 my-2 mr-4 h-20 custom-player-card"
-          ></Card>
-        </div>
+        <WeeklyPerformers
+          title="Top Performers"
+          :performers="bestPerformers"
+          :loading="fetchingPlayers"
+          score-class="mt-2 font-semibold"
+        />
+        <WeeklyPerformers
+          title="Bottom Performers"
+          :performers="worstPerformers"
+          :loading="fetchingPlayers"
+          score-class="mt-3.5 font-semibold"
+        />
+        <WeeklyPerformers
+          title="Top Benchwarmers"
+          :performers="benchPerformers"
+          :loading="fetchingPlayers"
+          score-class="mt-3 font-semibold"
+        />
         <Separator class="h-px mt-4 mb-2" />
         <p class="text-xl font-bold">Points</p>
         <apexchart
@@ -1574,20 +811,3 @@ watch(() => currentWeek.value, fetchPlayerNames);
     </div>
   </div>
 </template>
-<style scoped>
-.custom-min-width {
-  @media (width >= 390px) {
-    min-width: 306px;
-  }
-}
-.custom-player-card {
-  width: 291.5px;
-  @media (width <= 640px) {
-    min-width: 306px;
-  }
-}
-
-:deep(.report-content p + p) {
-  margin-top: 1rem;
-}
-</style>
