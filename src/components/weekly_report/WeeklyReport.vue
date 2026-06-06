@@ -27,6 +27,7 @@ import WeeklyShareCard from "./WeeklyShareCard.vue";
 import WeeklyPerformers from "./WeeklyPerformers.vue";
 import WeeklyReportSummary from "./WeeklyReportSummary.vue";
 import WeeklyMatchups from "./WeeklyMatchups.vue";
+import WeeklyPointsChart from "./WeeklyPointsChart.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import { toPng } from "html-to-image";
@@ -38,7 +39,6 @@ import {
   getExportPlayers,
   getExportTopTeams,
   getMatchupNumbers,
-  getSeriesData,
   getSortedTableData,
   getWeeklyPerformers,
 } from "./weeklyReportTransforms";
@@ -391,185 +391,9 @@ const sortedTableData = computed(() => {
   return getSortedTableData(props.tableData, currentWeek.value - 1);
 });
 
-const seriesData = computed(() => {
-  return getSeriesData(sortedTableData.value, currentWeek.value - 1);
-});
-
-const chartOptions = ref({
-  chart: {
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
-    type: "bar",
-    toolbar: {
-      show: false,
-    },
-    zoom: {
-      enabled: false,
-    },
-    animations: {
-      enabled: false,
-    },
-  },
-  plotOptions: {
-    bar: {
-      columnWidth: "75%",
-    },
-  },
-  colors: ["#22c55e"],
-  dataLabels: {
-    enabled: false,
-  },
-  tooltip: {
-    theme: store.darkMode ? "dark" : "light",
-    y: {
-      show: true,
-      formatter: (x: number) => {
-        if (Number.isInteger(x)) {
-          return `${x}`;
-        }
-        return `${x.toFixed(2)}`;
-      },
-    },
-    marker: {
-      show: false,
-    },
-  },
-  xaxis: {
-    categories: sortedTableData.value.map((user) =>
-      store.showUsernames
-        ? user.username
-          ? user.username
-          : ""
-        : user.name
-          ? user.name
-          : ""
-    ),
-    tickAmount: sortedTableData.value.length - 1,
-    hideOverlappingLabels: false,
-    labels: {
-      formatter: function (str: string) {
-        const n = 17;
-        return str.length > n ? str.slice(0, n - 1) + "..." : str;
-      },
-    },
-    title: {
-      text: "League Manager",
-      offsetY: 3,
-      style: {
-        fontSize: "16px",
-        fontFamily:
-          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
-        fontWeight: 600,
-      },
-    },
-  },
-  yaxis: {
-    labels: {
-      formatter: function (x: number) {
-        return x;
-      },
-    },
-    title: {
-      text: "Points Scored",
-      offsetX: -10,
-      style: {
-        fontSize: "16px",
-        fontFamily:
-          "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
-        fontWeight: 600,
-      },
-    },
-  },
-});
-
-const updateChartColor = () => {
-  chartOptions.value = {
-    ...chartOptions.value,
-    chart: {
-      type: "bar",
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
-      toolbar: {
-        show: false,
-      },
-      zoom: {
-        enabled: false,
-      },
-      animations: {
-        enabled: false,
-      },
-    },
-    tooltip: {
-      theme: store.darkMode ? "dark" : "light",
-      y: {
-        show: true,
-        formatter: (x: number) => {
-          if (Number.isInteger(x)) {
-            return `${x}`;
-          }
-          return `${x.toFixed(2)}`;
-        },
-      },
-      marker: {
-        show: false,
-      },
-    },
-    xaxis: {
-      categories: sortedTableData.value.map((user) =>
-        store.showUsernames
-          ? user.username
-            ? user.username
-            : ""
-          : user.name
-            ? user.name
-            : ""
-      ),
-      tickAmount: sortedTableData.value.length - 1,
-      hideOverlappingLabels: false,
-      labels: {
-        formatter: function (str: string) {
-          const n = 17;
-          return str.length > n ? str.slice(0, n - 1) + "..." : str;
-        },
-      },
-      title: {
-        text: "League Manager",
-        offsetY: 3,
-        style: {
-          fontSize: "16px",
-          fontFamily:
-            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
-          fontWeight: 600,
-        },
-      },
-    },
-    yaxis: {
-      labels: {
-        formatter: function (x: number) {
-          return x;
-        },
-      },
-      title: {
-        text: "Points Scored",
-        offsetX: -10,
-        style: {
-          fontSize: "16px",
-          fontFamily:
-            "ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji",
-          fontWeight: 600,
-        },
-      },
-    },
-  };
-};
-
-watch(
-  [() => store.darkMode, () => store.showUsernames, () => currentWeek.value],
-  () => updateChartColor()
-);
-
 watch(
   () => store.currentLeagueId,
   async () => {
-    updateChartColor();
     currentWeek.value = weeks.value[0];
     if (
       !store.leagueInfo[store.currentLeagueIndex].weeklyReport &&
@@ -773,14 +597,12 @@ watch(() => currentWeek.value, fetchPlayerNames);
           score-class="mt-3 font-semibold"
         />
         <Separator class="h-px mt-4 mb-2" />
-        <p class="text-xl font-bold">Points</p>
-        <apexchart
-          width="100%"
-          height="475"
-          type="bar"
-          :options="chartOptions"
-          :series="seriesData"
-        ></apexchart>
+        <WeeklyPointsChart
+          :sorted-table-data="sortedTableData"
+          :current-week="currentWeek"
+          :dark-mode="store.darkMode"
+          :show-usernames="store.showUsernames"
+        />
       </TabsContent>
       <TabsContent
         value="Preview"
