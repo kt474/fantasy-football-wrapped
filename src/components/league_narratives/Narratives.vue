@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, defineAsyncComponent, ref, watch } from "vue";
 import { useStore } from "../../store/store.ts";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
-import LeagueHistory from "../league_history/LeagueHistory.vue";
 import { LeagueInfoType, TableDataType } from "@/types/types.ts";
 import {
   buildNarrativeBundle,
@@ -18,6 +17,9 @@ import { fakeManagerProfiles } from "@/api/fakeLeague.ts";
 const store = useStore();
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
+const LeagueHistory = defineAsyncComponent(
+  () => import("../league_history/LeagueHistory.vue")
+);
 
 const props = defineProps<{
   tableData: TableDataType[];

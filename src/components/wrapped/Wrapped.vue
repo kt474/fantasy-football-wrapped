@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from "vue";
+import { computed, defineAsyncComponent, ref, onMounted, watch } from "vue";
 import {
   TableDataType,
   LeagueInfoType,
@@ -12,11 +12,13 @@ import WrappedSlide from "./WrappedSlide.vue";
 import Draft from "../draft/Draft.vue";
 import Trades from "../roster_management/Trades.vue";
 import Waivers from "../roster_management/Waivers.vue";
-import LeagueHistory from "../league_history/LeagueHistory.vue";
 import OverallStats from "./OverallStats.vue";
 import WinnerPyramid from "./WinnerPyramid.vue";
 
 const store = useStore();
+const LeagueHistory = defineAsyncComponent(
+  () => import("../league_history/LeagueHistory.vue")
+);
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
