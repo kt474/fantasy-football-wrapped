@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
@@ -9,6 +9,7 @@ import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
 import { authenticatedFetch } from "@/lib/authFetch";
+import { trackEvent } from "@/lib/analytics";
 import { getParsedStorageItem } from "@/lib/storage";
 import {
   Card,
@@ -43,6 +44,7 @@ const recoveryPassword = ref("");
 const recoveryPasswordConfirm = ref("");
 const checkoutLoadingPlan = ref<CheckoutPlan | null>(null);
 const portalLoading = ref(false);
+const trackedAccountPaywallView = ref(false);
 
 type CheckoutPlan = "monthly" | "season_pass";
 
@@ -258,6 +260,7 @@ const signUp = async () => {
     toast.error("Please enter an email and password.");
   } else
     try {
+      trackEvent("Signup Started", { method: "email", source: "account" });
       await authStore.signUpWithPassword(
         signUpEmail.value,
         signUpPassword.value
@@ -266,6 +269,7 @@ const signUp = async () => {
       toast.success("Account created. Enter the code from your email.");
       resetSignUpForm();
     } catch (error: unknown) {
+      trackEvent("Signup Failed", { method: "email", source: "account" });
       toast.error(
         `Unable to create account. ${getErrorMessage(error, "Please try again.")}`
       );
@@ -282,6 +286,7 @@ const verifySignUpOtp = async () => {
       pendingSignUpEmail.value,
       signUpOtpCode.value
     );
+    trackEvent("Signup Completed", { method: "email", source: "account" });
     toast.success("Email verified and signed in.");
     resetSignUpOtpForm();
   } catch (error: unknown) {
@@ -320,8 +325,10 @@ const signOut = async () => {
 
 const signInWithGoogle = async () => {
   try {
+    trackEvent("Signup Started", { method: "google", source: "account" });
     await authStore.signInWithGoogle(`${window.location.origin}/account`);
   } catch (error: unknown) {
+    trackEvent("Signup Failed", { method: "google", source: "account" });
     toast.error(
       `Unable to continue with Google. ${getErrorMessage(
         error,
@@ -385,10 +392,12 @@ const resetPassword = async () => {
 
 const startCheckout = async (plan: CheckoutPlan) => {
   if (!authStore.isAuthenticated) {
+    trackEvent("Checkout Failed", { plan, reason: "signed_out" });
     toast.error("Please sign in before choosing a plan.");
     return;
   }
 
+  trackEvent("Checkout Started", { plan, source: "account" });
   checkoutLoadingPlan.value = plan;
   try {
     const response = await authenticatedFetch(checkoutApiPath, {
@@ -410,9 +419,11 @@ const startCheckout = async (plan: CheckoutPlan) => {
     if (!isSafeRedirectUrl(payload.url)) {
       throw new Error("Blocked unsafe redirect URL");
     }
+    trackEvent("Checkout Redirected", { plan, source: "account" });
     window.location.assign(payload.url);
   } catch (error: unknown) {
     checkoutLoadingPlan.value = null;
+    trackEvent("Checkout Failed", { plan, reason: "request_failed" });
     toast.error(getErrorMessage(error, "Unable to start checkout"));
   }
 };
@@ -424,6 +435,10 @@ const openBillingPortal = async () => {
   }
 
   portalLoading.value = true;
+  trackEvent("Billing Portal Opened", {
+    source: "account",
+    status: subscriptionStore.status,
+  });
   try {
     const response = await authenticatedFetch(portalApiPath, {
       method: "POST",
@@ -446,6 +461,10 @@ const openBillingPortal = async () => {
     window.location.assign(payload.url);
   } catch (error: unknown) {
     portalLoading.value = false;
+    trackEvent("Billing Portal Failed", {
+      source: "account",
+      status: subscriptionStore.status,
+    });
     toast.error(getErrorMessage(error, "Unable to open billing portal"));
   }
 };
@@ -454,9 +473,11 @@ const handleCheckoutQuery = async () => {
   const checkoutState = route.query.checkout;
 
   if (checkoutState === "success") {
+    trackEvent("Checkout Succeeded", { source: "stripe", status: "success" });
     toast.success("Checkout completed. Refreshing subscription status...");
     await subscriptionStore.fetchSubscriptionStatus({ showErrorToast: true });
   } else if (checkoutState === "canceled") {
+    trackEvent("Checkout Canceled", { source: "stripe", status: "canceled" });
     toast.error("Checkout canceled.");
   }
 
@@ -503,6 +524,30 @@ onMounted(async () => {
   subscriptionStore.initialize();
   await handleCheckoutQuery();
 });
+
+watch(
+  () => ({
+    isPremium: subscriptionStore.isPremium,
+    initialized: subscriptionStore.initialized,
+    loading: subscriptionStore.loading,
+    recovery: showPasswordRecoveryForm.value,
+  }),
+  ({ isPremium, initialized, loading, recovery }) => {
+    if (
+      trackedAccountPaywallView.value ||
+      !initialized ||
+      loading ||
+      isPremium ||
+      recovery
+    ) {
+      return;
+    }
+
+    trackedAccountPaywallView.value = true;
+    trackEvent("Paywall Viewed", { source: "account", feature: "premium" });
+  },
+  { immediate: true }
+);
 </script>
 <template>
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto sm:ml-8">
