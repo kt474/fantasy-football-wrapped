@@ -19,6 +19,7 @@ vi.mock("../src/api/sleeperApi.ts", () => ({
 
 import {
   getEspnLeagueInfo,
+  getLastScoredWeek,
   getLeagueData,
   getLeagueStatus,
 } from "../src/api/espnApi.ts";
@@ -457,6 +458,17 @@ describe("ESPN API transforms", () => {
 
   test("normalizes ESPN leagues to complete after the final scoring period", () => {
     expect(getLeagueStatus(18, 17, 14, 17)).toBe("complete");
+  });
+
+  test("uses ESPN latest scoring period to complete leagues with stale final matchup periods", () => {
+    expect(getLastScoredWeek(16, 19, 17)).toBe(17);
+    expect(getLeagueStatus(16, getLastScoredWeek(16, 19, 17), 14, 17)).toBe(
+      "complete"
+    );
+  });
+
+  test("does not count ESPN week 1 as scored before week 1 is complete", () => {
+    expect(getLastScoredWeek(1, 1, 17)).toBe(0);
   });
 
   test("keeps active ESPN seasons in season", () => {

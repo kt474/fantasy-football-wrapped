@@ -966,6 +966,36 @@ export const getLeagueStatus = (
   return "complete";
 };
 
+export const getLastScoredWeek = (
+  currentWeek: number,
+  latestScoringPeriod: number,
+  finalScoringPeriod: number
+) => {
+  if (currentWeek <= 0) {
+    return 0;
+  }
+
+  const latestCompletedCandidate =
+    latestScoringPeriod > currentWeek ? latestScoringPeriod : currentWeek - 1;
+  const completedThroughFinalPeriod =
+    finalScoringPeriod > 0 && latestScoringPeriod > finalScoringPeriod
+      ? finalScoringPeriod
+      : 0;
+
+  const lastCompletedWeek = Math.max(
+    Math.min(latestCompletedCandidate, currentWeek),
+    completedThroughFinalPeriod,
+    0
+  );
+
+  // ESPN's finalScoringPeriod is the scheduled season endpoint, not the last
+  // completed week. Keep it only as an upper bound so we don't fetch future
+  // matchup periods with zero scores.
+  return finalScoringPeriod > 0
+    ? Math.min(lastCompletedWeek, finalScoringPeriod)
+    : lastCompletedWeek;
+};
+
 export const getLeagueData = async (
   season: string,
   league_id: string,
@@ -1120,20 +1150,11 @@ export const getEspnLeagueInfo = async (
   const currentWeek = Number(status.currentMatchupPeriod ?? 0);
   const finalScoringPeriod = Number(status.finalScoringPeriod ?? 0);
   const latestScoringPeriod = Number(status.latestScoringPeriod ?? 0);
-  const latestCompletedCandidate =
-    latestScoringPeriod > 0 ? latestScoringPeriod : currentWeek - 1;
-  // Don't think we want to subtract 1 from currentWeek here
-  const lastCompletedWeek =
-    currentWeek > 0
-      ? Math.max(Math.min(latestCompletedCandidate, currentWeek), 0)
-      : 0;
-  // ESPN's finalScoringPeriod is the scheduled season endpoint, not the last
-  // completed week. Keep it only as an upper bound so we don't fetch future
-  // matchup periods with zero scores.
-  const lastScoredWeek =
-    finalScoringPeriod > 0
-      ? Math.min(lastCompletedWeek, finalScoringPeriod)
-      : lastCompletedWeek;
+  const lastScoredWeek = getLastScoredWeek(
+    currentWeek,
+    latestScoringPeriod,
+    finalScoringPeriod
+  );
 
   let schedule = [];
   let waivers = [];
