@@ -514,7 +514,8 @@ const ensureLeagueIdQueryParam = async () => {
       ...route.query,
       espn: currentLeague?.platform === "espn" ? null : undefined,
       leagueId: currentLeague?.leagueId ?? currentLeagueId,
-      season: currentLeague?.platform === "espn" ? currentLeague.season : undefined,
+      season:
+        currentLeague?.platform === "espn" ? currentLeague.season : undefined,
     },
   });
 };
@@ -902,7 +903,7 @@ watch(
                 Season Pass
               </p>
               <p class="mt-2 text-5xl font-medium leading-none">
-                $15
+                $18
                 <span class="-ml-1 text-base font-normal text-muted-foreground">
                   /season
                 </span>
@@ -926,7 +927,7 @@ watch(
                 Monthly
               </p>
               <p class="mt-2 text-5xl font-medium leading-none">
-                $5
+                $6
                 <span class="-ml-1 text-base font-normal text-muted-foreground">
                   /month
                 </span>
