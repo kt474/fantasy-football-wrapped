@@ -104,7 +104,7 @@ const {
                     <div class="flex items-center gap-1.5">
                       <img
                         width="16.5"
-                        src="/sleeperlogo.jpeg"
+                        src="/sleeperlogo.webp"
                         alt="Sleeper logo"
                       />
                       <p>Sleeper</p>
@@ -115,7 +115,7 @@ const {
                     class="hover:bg-muted/50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
                   >
                     <div class="flex items-center gap-1.5">
-                      <img width="16.5" src="/espnlogo.png" alt="ESPN logo" />
+                      <img width="16.5" src="/espnlogo.webp" alt="ESPN logo" />
                       <p>ESPN</p>
                       <span
                         class="rounded border border-primary/30 bg-primary/10 px-1 text-[10px] font-semibold uppercase leading-5 text-primary"
