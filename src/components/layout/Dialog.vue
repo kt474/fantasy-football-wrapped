@@ -57,7 +57,7 @@ const handleSubmit = async () => {
       <DialogHeader>
         <DialogTitle>Add League</DialogTitle>
         <DialogDescription>
-          <p>Select Sleeper or ESPN, then enter your league details.</p>
+          <p>Select your platform then enter your league ID or username.</p>
         </DialogDescription>
       </DialogHeader>
       <div class="space-y-3">
@@ -70,7 +70,7 @@ const handleSubmit = async () => {
               class="hover:bg-muted/50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
             >
               <div class="flex items-center gap-1.5">
-                <img width="16.5" src="/sleeperlogo.jpeg" alt="Sleeper logo" />
+                <img width="16.5" src="/sleeperlogo.webp" alt="Sleeper logo" />
                 <p>Sleeper</p>
               </div>
             </TabsTrigger>
@@ -79,7 +79,7 @@ const handleSubmit = async () => {
               class="hover:bg-muted/50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
             >
               <div class="flex items-center gap-1.5">
-                <img width="16.5" src="/espnlogo.png" alt="ESPN logo" />
+                <img width="16.5" src="/espnlogo.webp" alt="ESPN logo" />
                 <p>ESPN</p>
                 <span
                   class="rounded border border-primary/30 bg-primary/10 px-1 text-[10px] font-semibold uppercase leading-5 text-primary"
