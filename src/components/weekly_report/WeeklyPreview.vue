@@ -58,6 +58,10 @@ const previewWeek = computed(() => {
   return props.currentWeek > 0 ? props.currentWeek - 1 : 0;
 });
 
+const currentLeague = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex];
+});
+
 const matchups = computed<TableDataType[][]>(() => {
   const groups = props.tableData.reduce(
     (acc: Record<string, TableDataType[]>, obj) => {
@@ -77,6 +81,36 @@ const matchups = computed<TableDataType[][]>(() => {
 });
 const cases = computed(() => {
   return simulateStandings(matchups.value, previewWeek.value);
+});
+
+const hasMatchupForecastData = computed(() => {
+  return matchups.value.some((matchup) => {
+    if (matchup.length < 2) {
+      return false;
+    }
+
+    return matchup.every((team) => {
+      const starters = playerNames.value.find(
+        (row) => row.id === team.rosterId
+      )?.players;
+
+      return Boolean(
+        starters?.some((player) => player.name || player.team)
+      );
+    });
+  });
+});
+
+const shouldShowMatchupForecast = computed(() => {
+  const league = currentLeague.value;
+  const isCompletedEspnLeague =
+    league?.platform === "espn" && league.status === "complete";
+
+  return (
+    props.currentWeek === league?.currentWeek &&
+    !isCompletedEspnLeague &&
+    hasMatchupForecastData.value
+  );
 });
 
 const getRecord = (recordString: string, index: number) => {
@@ -521,9 +555,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
     class="flex flex-wrap mb-4 overflow-auto gap-x-4 gap-y-2"
   >
     <PreviewSummary
-      v-if="
-        currentWeek === store.leagueInfo[store.currentLeagueIndex]?.currentWeek
-      "
+      v-if="shouldShowMatchupForecast"
       :matchups="matchups"
       :playerNames="playerNames"
     />
