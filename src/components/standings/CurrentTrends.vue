@@ -3,7 +3,7 @@ import { ref, onMounted, watch, computed } from "vue";
 import { generateTrends, getPlayersByIdsMap } from "../../api/api";
 import { getDraftProjections, getDraftPicks } from "../../api/sleeperApi";
 import { TableDataType, LeagueInfoType } from "../../types/types";
-import { Player } from "../../types/apiTypes";
+import { DraftPick, Player } from "../../types/apiTypes";
 import { getLeagueKey, useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/fakeLeague";
 import { Card, CardTitle, CardHeader } from "../ui/card";
@@ -52,7 +52,7 @@ const getPreseasonData = async () => {
     return;
   }
 
-  if (!currentLeague.draftId) {
+  if (!currentLeague.draftId && currentLeague.platform !== "espn") {
     currentTrends.value = preseasonUnavailableTrends;
     return;
   }
@@ -64,12 +64,15 @@ const getPreseasonData = async () => {
 
   let result: Record<string, unknown>[] = [];
   try {
-    const draftPicks = await getDraftPicks(
-      currentLeague.draftId,
-      currentLeague.season,
-      currentLeague.scoringType,
-      currentLeague.seasonType
-    );
+    const draftPicks: DraftPick[] =
+      currentLeague.platform === "espn"
+        ? (currentLeague.draftPicks ?? [])
+        : await getDraftPicks(
+            currentLeague.draftId,
+            currentLeague.season,
+            currentLeague.scoringType,
+            currentLeague.seasonType
+          );
 
     if (draftPicks.length === 0) {
       currentTrends.value = preseasonUnavailableTrends;
