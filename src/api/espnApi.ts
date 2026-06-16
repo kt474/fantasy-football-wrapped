@@ -1214,6 +1214,26 @@ const getEspnScheduleFromWeeklyData = (
   return getEspnWeeklySchedule(scheduleData, week);
 };
 
+const hasCompleteEspnWeeklySchedule = (
+  weekEntries: Array<Record<string, unknown>>,
+  teams: Array<Record<string, unknown>>
+) => {
+  const expectedTeamIds = new Set(
+    teams.map((team) => Number(team.id ?? 0)).filter((teamId) => teamId > 0)
+  );
+  const actualTeamIds = new Set(
+    weekEntries
+      .map((teamWeek) => Number(teamWeek.teamId ?? 0))
+      .filter((teamId) => teamId > 0)
+  );
+
+  return (
+    expectedTeamIds.size > 0 &&
+    actualTeamIds.size === expectedTeamIds.size &&
+    Array.from(expectedTeamIds).every((teamId) => actualTeamIds.has(teamId))
+  );
+};
+
 export const getEspnLeagueInfo = async (
   season: string,
   leagueId: string,
@@ -1298,7 +1318,9 @@ export const getEspnLeagueInfo = async (
   );
   const shouldFetchWeeklyScoring =
     lastScoredWeek > 0 &&
-    schedule.some((weekEntries) => weekEntries.length === 0);
+    schedule.some(
+      (weekEntries) => !hasCompleteEspnWeeklySchedule(weekEntries, teams)
+    );
   const weeklyScoringData = shouldFetchWeeklyScoring
     ? await Promise.all(
         completedWeeks.map(async (week) =>

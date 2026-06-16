@@ -812,6 +812,64 @@ describe("ESPN API transforms", () => {
     });
   });
 
+  test("falls back to weekly ESPN scoring when the full scoreboard has partial weekly roster detail", async () => {
+    const fixture = buildEspnFixture();
+    fixture.scoreboardData = {
+      schedule: [
+        {
+          ...fixture.weeklyScoring[0].schedule[0],
+          matchupPeriodId: 1,
+          playoffTierType: "NONE",
+          away: {
+            teamId: 2,
+            totalPoints: 95.2,
+          },
+        },
+        {
+          ...fixture.weeklyScoring[1].schedule[0],
+          matchupPeriodId: 2,
+          playoffTierType: "NONE",
+        },
+        ...fixture.playoffData.schedule,
+      ],
+    };
+    const fetchMock = installEspnFetchMock(fixture);
+    const playerIdMap = new Map([
+      ["alpha runner::ATL", "s-alpha-runner"],
+      ["alpha receiver::BUF", "s-alpha-receiver"],
+      ["alpha bench::ATL", "s-alpha-bench"],
+      ["beta runner::BUF", "s-beta-runner"],
+      ["beta receiver::ATL", "s-beta-receiver"],
+    ]);
+
+    mocks.getPlayerIdLookupMap.mockResolvedValue(playerIdMap);
+    mocks.getPlayerIdsByNameTeamMap.mockImplementation(async (players) =>
+      players.map(
+        ({ name, team }) =>
+          playerIdMap.get(`${name.trim().toLowerCase()}::${team}`) ?? null
+      )
+    );
+    mocks.getStats.mockResolvedValue({
+      rank: 8,
+      ppg: 12,
+    });
+
+    const league = await getEspnLeagueInfo("2025", "12345");
+
+    expect(fetchMock).toHaveBeenCalledTimes(9);
+    expect(league.rosters.map((roster) => roster.recordByWeek)).toEqual([
+      "WW",
+      "LL",
+    ]);
+    expect(league.weeklyPoints[1]).toMatchObject({
+      points: [95.2, 95],
+      starters: [
+        ["s-beta-runner", "s-beta-receiver"],
+        ["s-beta-runner", "s-beta-receiver"],
+      ],
+    });
+  });
+
   test("keeps ESPN weekly data when potential-points inputs are incomplete", async () => {
     const fixture = buildEspnFixture();
     delete fixture.weeklyScoring[0].schedule[0].home
