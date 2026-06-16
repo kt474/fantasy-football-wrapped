@@ -406,6 +406,12 @@ const totalRosters = computed(() => {
     : 10;
 });
 
+const playoffTeams = computed(() => {
+  return store.leagueInfo[store.currentLeagueIndex]
+    ? store.leagueInfo[store.currentLeagueIndex].playoffTeams
+    : 6;
+});
+
 // The logic is different if leagues don't play with the toilet bowl
 // 1 = standard losers bracket, 0 = toilet bowl
 const playoffType = computed(() => {
@@ -523,6 +529,79 @@ const getEspnWinnerId = (matchup: EspnMatchup) => {
   return undefined;
 };
 
+const getEspnFinalMatchups = (matchups: EspnMatchup[]) => {
+  const completedMatchups = matchups.filter((matchup) =>
+    Boolean(getEspnWinnerId(matchup) && getEspnLoserId(matchup))
+  );
+  const finalPeriod = completedMatchups.reduce(
+    (max, matchup) => Math.max(max, matchup.matchupPeriodId),
+    0
+  );
+
+  return completedMatchups
+    .filter((matchup) => matchup.matchupPeriodId === finalPeriod)
+    .sort((a, b) => a.id - b.id);
+};
+
+const getNextOpenPlacement = (usedPlacements: Set<number>) => {
+  for (let placement = 1; placement <= totalRosters.value; placement += 1) {
+    if (!usedPlacements.has(placement)) {
+      return placement;
+    }
+  }
+
+  return totalRosters.value;
+};
+
+const getEspnFinalPlacements = () => {
+  const result: UserType[] = [];
+  const placedRosterIds = new Set<number>();
+  const usedPlacements = new Set<number>();
+
+  const addPlacement = (rosterId: number | undefined, placement: number) => {
+    if (rosterId == null || placedRosterIds.has(rosterId)) {
+      return;
+    }
+
+    result.push(matchRosterId(rosterId, placement));
+    placedRosterIds.add(rosterId);
+    usedPlacements.add(placement);
+  };
+
+  const addMatchupPlacement = (
+    matchup: EspnMatchup,
+    winnerPlacement: number
+  ) => {
+    addPlacement(getEspnWinnerId(matchup), winnerPlacement);
+    addPlacement(getEspnLoserId(matchup), winnerPlacement + 1);
+  };
+
+  getEspnFinalMatchups(espnMainBracket.value).forEach((matchup) => {
+    addMatchupPlacement(matchup, 1);
+  });
+
+  getEspnFinalMatchups(espnConsolationBracket.value).forEach(
+    (matchup, index) => {
+      addMatchupPlacement(matchup, 3 + index * 2);
+    }
+  );
+
+  getEspnFinalMatchups([
+    ...espnLoserMainBracket.value,
+    ...espnLoserConsolationBracket.value,
+  ]).forEach((matchup, index) => {
+    addMatchupPlacement(matchup, playoffTeams.value + 1 + index * 2);
+  });
+
+  props.tableData.forEach((user) => {
+    if (!placedRosterIds.has(user.rosterId)) {
+      addPlacement(user.rosterId, getNextOpenPlacement(usedPlacements));
+    }
+  });
+
+  return result.sort((a, b) => (a.placement ?? 0) - (b.placement ?? 0));
+};
+
 const getEspnLoserHighlightClass = (matchup: EspnMatchup, teamId?: number) => {
   if (teamId == null) return "";
   const comparisonTeamId = getEspnWinnerId(matchup);
@@ -536,6 +615,12 @@ const finalPlacements = computed(() => {
     store.leagueInfo[store.currentLeagueIndex].status != "complete"
   ) {
     return [];
+  }
+  if (
+    store.leagueInfo[store.currentLeagueIndex]?.platform === "espn" &&
+    [...espnWinnersBracket.value, ...espnLosersBracket.value].length > 0
+  ) {
+    return getEspnFinalPlacements();
   }
   let result: UserType[] = [];
   winnersBracket.value.forEach((matchup) => {
