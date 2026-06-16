@@ -743,9 +743,14 @@ const getDraftPicks = async (
   season: string,
   scoringType: number
 ) => {
-  const picks = Array.isArray(draft?.picks)
-    ? (draft?.picks as Array<Record<string, unknown>>)
-    : [];
+  const picks = (
+    Array.isArray(draft?.picks)
+      ? (draft?.picks as Array<Record<string, unknown>>)
+      : []
+  ).filter((pick) => {
+    const player = (pick.player as Record<string, unknown> | undefined) ?? {};
+    return Number(player.id ?? pick.playerId ?? -1) > 0;
+  });
   const teamById = new Map(
     teams.map((team) => [Number(team.id ?? 0), team] as const)
   );
@@ -909,6 +914,17 @@ const getEspnDraftType = (draftPicks: DraftPick[]) => {
     : "snake";
 };
 
+const isEspnDraftComplete = (
+  draft: Record<string, unknown> | undefined,
+  draftPicks: DraftPick[]
+) => {
+  if (draft?.drafted === true) {
+    return true;
+  }
+
+  return draftPicks.length > 0;
+};
+
 const getEspnDraftMetadata = (
   draftPicks: DraftPick[],
   users: UserType[],
@@ -945,12 +961,13 @@ const getEspnDraftMetadata = (
 };
 
 export const getLeagueStatus = (
-  currentWeek: number,
+  _currentWeek: number,
   lastScoredWeek: number,
   regularSeasonLength: number,
-  finalScoringPeriod: number = regularSeasonLength
+  finalScoringPeriod: number = regularSeasonLength,
+  hasDraftPicks = false
 ) => {
-  if (lastScoredWeek === 0 && currentWeek === 0) {
+  if (lastScoredWeek === 0 && !hasDraftPicks) {
     return "pre_draft";
   }
 
@@ -1317,9 +1334,11 @@ export const getEspnLeagueInfo = async (
       "ESPN scoring settings are invalid."
     )
   );
-  const draftPicks = await getDraftPicks(
+  const draftDetail =
     (draftData?.draftDetail as Record<string, unknown> | undefined) ??
-      draftData,
+    draftData;
+  const draftPicks = await getDraftPicks(
+    draftDetail,
     teams,
     allPlayerLookups,
     season,
@@ -1374,7 +1393,8 @@ export const getEspnLeagueInfo = async (
       currentWeek,
       lastScoredWeek,
       regularSeasonLength,
-      finalScoringPeriod
+      finalScoringPeriod,
+      isEspnDraftComplete(draftDetail, draftPicks)
     ),
     currentWeek,
     scoringType,

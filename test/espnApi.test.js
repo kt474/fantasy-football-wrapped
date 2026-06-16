@@ -479,6 +479,14 @@ describe("ESPN API transforms", () => {
     expect(getLeagueStatus(0, 0, 14)).toBe("pre_draft");
   });
 
+  test("detects ESPN pre-draft leagues after ESPN advances to matchup period 1", () => {
+    expect(getLeagueStatus(1, 0, 14, 17, false)).toBe("pre_draft");
+  });
+
+  test("keeps post-draft ESPN preseason leagues eligible for draft news", () => {
+    expect(getLeagueStatus(1, 0, 14, 17, true)).toBe("in_season");
+  });
+
   test("fetches private ESPN league data through the credential proxy", async () => {
     const fetchMock = vi
       .fn()
@@ -724,5 +732,47 @@ describe("ESPN API transforms", () => {
     expect(league.espnWinnersBracket).toHaveLength(1);
     expect(league.espnLosersBracket).toEqual([]);
     expect(league.previousLeagues).toEqual(["2024", "2023"]);
+  });
+
+  test("normalizes ESPN leagues with no scores or picks as pre-draft", async () => {
+    const fixture = buildEspnFixture();
+    fixture.league.status.currentMatchupPeriod = 1;
+    fixture.league.status.latestScoringPeriod = 0;
+    fixture.league.status.finalScoringPeriod = 17;
+    fixture.draftData.draftDetail.drafted = false;
+    fixture.draftData.draftDetail.picks = [
+      {
+        playerId: -1,
+        teamId: 1,
+        overallPickNumber: 1,
+        roundId: 1,
+        roundPickNumber: 1,
+      },
+      {
+        playerId: -1,
+        teamId: 2,
+        overallPickNumber: 2,
+        roundId: 1,
+        roundPickNumber: 2,
+      },
+    ];
+    fixture.weeklyScoring = [];
+    fixture.waivers = [];
+
+    const fetchMock = installEspnFetchMock(fixture);
+    mocks.getPlayerIdLookupMap.mockResolvedValue(new Map());
+    mocks.getPlayerIdsByNameTeamMap.mockResolvedValue([]);
+
+    const league = await getEspnLeagueInfo("2026", "2127");
+
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(league).toMatchObject({
+      platform: "espn",
+      leagueId: "2127",
+      season: "2026",
+      lastScoredWeek: 0,
+      status: "pre_draft",
+      draftPicks: [],
+    });
   });
 });

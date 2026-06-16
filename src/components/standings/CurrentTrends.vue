@@ -7,30 +7,63 @@ import { DraftPick, Player } from "../../types/apiTypes";
 import { getLeagueKey, useStore } from "../../store/store";
 import { fakeHighlights } from "../../api/fakeLeague";
 import { Card, CardTitle, CardHeader } from "../ui/card";
-import MarkdownIt from "markdown-it";
-import DOMPurify from "dompurify";
 
 const store = useStore();
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
-const md = new MarkdownIt({
-  html: false,
-  linkify: true,
-  breaks: true,
-});
-
 const currentTrends = ref<string[]>([]);
+const renderedCurrentTrends = ref<string[]>([]);
 const preseasonUnavailableTrends = [
   "League news will appear once draft or scoring data is available.",
 ];
 
-const renderedCurrentTrends = computed(() => {
-  return currentTrends.value.map((trend) =>
-    DOMPurify.sanitize(md.render(trend))
+const hasRealDraftPick = (draftPicks: DraftPick[] | undefined) =>
+  draftPicks?.some((pick) => Number(pick.playerId) > 0) ?? false;
+
+const isPreDraftLeague = (league: LeagueInfoType | undefined) => {
+  if (!league) {
+    return false;
+  }
+
+  return (
+    league.status === "pre_draft" ||
+    (league.platform === "espn" &&
+      !league.lastScoredWeek &&
+      !hasRealDraftPick(league.draftPicks))
   );
-});
+};
+
+let renderRequestId = 0;
+
+watch(
+  currentTrends,
+  async (trends) => {
+    const requestId = ++renderRequestId;
+
+    if (trends.length === 0) {
+      renderedCurrentTrends.value = [];
+      return;
+    }
+
+    const [{ default: MarkdownIt }, { default: DOMPurify }] =
+      await Promise.all([import("markdown-it"), import("dompurify")]);
+    const md = new MarkdownIt({
+      html: false,
+      linkify: true,
+      breaks: true,
+    });
+    const renderedTrends = trends.map((trend) =>
+      DOMPurify.sanitize(md.render(trend))
+    );
+
+    if (requestId === renderRequestId) {
+      renderedCurrentTrends.value = renderedTrends;
+    }
+  },
+  { immediate: true }
+);
 
 const getCurrentStreak = (str: string): string => {
   const match = str.match(/([WL])\1*$/);
@@ -49,6 +82,11 @@ const getFiveMostRecent = (str: string, n = 5): string => {
 const getPreseasonData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (!currentLeague) {
+    return;
+  }
+
+  if (isPreDraftLeague(currentLeague)) {
+    currentTrends.value = preseasonUnavailableTrends;
     return;
   }
 
@@ -160,6 +198,11 @@ const getMaxIndex = (arr: number[]): number => {
 
 const formatData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (isPreDraftLeague(currentLeague)) {
+    currentTrends.value = preseasonUnavailableTrends;
+    return;
+  }
+
   const weekIndex = currentLeague.lastScoredWeek - 1;
 
   const bestStarters = props.tableData.map((user) => {
@@ -237,6 +280,11 @@ const formatData = async () => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
+    isPreDraftLeague(store.leagueInfo[store.currentLeagueIndex])
+  ) {
+    currentTrends.value = preseasonUnavailableTrends;
+  } else if (
+    store.leagueInfo.length > 0 &&
     !store.leagueInfo[store.currentLeagueIndex]?.currentTrends &&
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
   ) {
@@ -263,6 +311,11 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
+    if (isPreDraftLeague(store.leagueInfo[store.currentLeagueIndex])) {
+      currentTrends.value = preseasonUnavailableTrends;
+      return;
+    }
+
     if (
       store.leagueInfo[store.currentLeagueIndex] &&
       !store.leagueInfo[store.currentLeagueIndex].currentTrends &&

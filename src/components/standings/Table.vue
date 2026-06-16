@@ -109,6 +109,7 @@ const TradeLab = defineAsyncComponent(
 );
 
 const tableOrder = ref("wins");
+const showLeagueNews = ref(false);
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
@@ -146,6 +147,16 @@ onMounted(() => {
   const savedCurrentTab = localStorage.getItem("currentTab");
   if (savedCurrentTab) {
     store.currentTab = savedCurrentTab;
+  }
+
+  const showNews = () => {
+    showLeagueNews.value = true;
+  };
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(showNews, { timeout: 2000 });
+  } else {
+    setTimeout(showNews, 0);
   }
 });
 
@@ -582,7 +593,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       </Card>
       <div class="flex flex-col flex-1 w-full mt-4 xl:w-fit xl:ml-4 xl:mt-0">
         <CurrentTrends
-          v-if="seasonType !== 'Guillotine'"
+          v-if="showLeagueNews && seasonType !== 'Guillotine'"
           :tableData="tableData"
         />
         <Card class="flex-1 px-2 py-4 mt-4 md:w-auto min-w-56 min-h-56">
