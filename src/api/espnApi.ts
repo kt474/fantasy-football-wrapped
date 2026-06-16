@@ -489,57 +489,86 @@ const getPotentialPointsForWeek = (
   lineupSlotCounts: Record<string, number> = {}
 ) => {
   const slotIds = getPotentialLineupSlotIds(lineupSlotCounts);
+  if (slotIds.length === 0 || entries.length === 0) {
+    return null;
+  }
+
   const players = entries
+    .filter((entry) => Number(entry.lineupSlotId ?? 20) !== 21)
     .map((entry) => {
       const playerPoolEntry =
         (entry.playerPoolEntry as Record<string, unknown> | undefined) ?? {};
       const player =
         (playerPoolEntry.player as Record<string, unknown> | undefined) ?? {};
+      const eligibleSlots = Array.isArray(player.eligibleSlots)
+        ? (player.eligibleSlots as unknown[]).map((slot) => Number(slot))
+        : null;
+      const points = getWeeklyEntryPoints(entry);
       return {
-        eligibleSlots: Array.isArray(player.eligibleSlots)
-          ? (player.eligibleSlots as unknown[]).map((slot) => Number(slot))
-          : [],
-        points: getWeeklyEntryPoints(entry),
+        eligibleSlots,
+        points,
       };
     })
-    .filter((player) => player.eligibleSlots.length > 0);
+    .filter((player) => Number.isFinite(player.points));
 
-  const memo = new Map<string, number>();
+  if (
+    players.length === 0 ||
+    players.some(
+      (player) =>
+        !player.eligibleSlots ||
+        player.eligibleSlots.some((slot) => !Number.isFinite(slot))
+    )
+  ) {
+    return null;
+  }
 
-  const dfs = (slotIndex: number, usedMask: number) => {
+  const candidatesBySlot = slotIds.map((slotId) =>
+    players
+      .map((player, playerIndex) => ({ player, playerIndex }))
+      .filter(({ player }) => player.eligibleSlots?.includes(slotId))
+      .sort((a, b) => b.player.points - a.player.points)
+  );
+
+  if (candidatesBySlot.some((candidates) => candidates.length === 0)) {
+    return null;
+  }
+
+  const memo = new Map<string, number | null>();
+
+  const dfs = (slotIndex: number, usedPlayerIndexes: Set<number>) => {
     if (slotIndex >= slotIds.length) {
       return 0;
     }
 
-    const key = `${slotIndex}:${usedMask}`;
-    const cached = memo.get(key);
-    if (cached != null) {
+    const key = `${slotIndex}:${Array.from(usedPlayerIndexes).join(",")}`;
+    if (memo.has(key)) {
+      const cached = memo.get(key);
       return cached;
     }
 
-    let best = 0;
-    const slotId = slotIds[slotIndex];
+    let best: number | null = null;
 
-    players.forEach((player, playerIndex) => {
-      const playerMask = 1 << playerIndex;
-      if ((usedMask & playerMask) !== 0) {
-        return;
-      }
-      if (!player.eligibleSlots.includes(slotId)) {
+    candidatesBySlot[slotIndex].forEach(({ player, playerIndex }) => {
+      if (usedPlayerIndexes.has(playerIndex)) {
         return;
       }
 
-      best = Math.max(
-        best,
-        player.points + dfs(slotIndex + 1, usedMask | playerMask)
-      );
+      usedPlayerIndexes.add(playerIndex);
+      const remainingPoints = dfs(slotIndex + 1, usedPlayerIndexes);
+      usedPlayerIndexes.delete(playerIndex);
+
+      if (remainingPoints == null) {
+        return;
+      }
+
+      best = Math.max(best ?? -Infinity, player.points + remainingPoints);
     });
 
     memo.set(key, best);
     return best;
   };
 
-  return dfs(0, 0);
+  return dfs(0, new Set());
 };
 
 const getPotentialPointsMap = (
@@ -551,10 +580,15 @@ const getPotentialPointsMap = (
   teams.forEach((team) => {
     potentialPointsMap.set(Number(team.id ?? 0), 0);
   });
+  const incompleteTeamIds = new Set<number>();
 
   schedule.forEach((weekEntries) => {
     weekEntries.forEach((teamWeek) => {
       const teamId = Number(teamWeek.teamId ?? 0);
+      if (incompleteTeamIds.has(teamId)) {
+        return;
+      }
+
       const roster =
         (teamWeek.roster as Record<string, unknown> | undefined) ?? {};
       const entries = Array.isArray(roster.entries)
@@ -564,6 +598,11 @@ const getPotentialPointsMap = (
         entries,
         lineupSlotCounts
       );
+      if (weeklyPotential == null) {
+        incompleteTeamIds.add(teamId);
+        return;
+      }
+
       const currentTotal = potentialPointsMap.get(teamId) ?? 0;
 
       potentialPointsMap.set(
@@ -571,6 +610,14 @@ const getPotentialPointsMap = (
         Math.round((currentTotal + weeklyPotential) * 100) / 100
       );
     });
+  });
+
+  incompleteTeamIds.forEach((teamId) => {
+    const team = teams.find((team) => Number(team.id ?? 0) === teamId);
+    if (!team) {
+      return;
+    }
+    potentialPointsMap.set(teamId, getTeamRecord(team).pointsFor);
   });
 
   return potentialPointsMap;
@@ -1071,6 +1118,17 @@ export const getPlayerStats = async (
   );
 };
 
+export const getScoreboardData = async (
+  season: string,
+  league_id: string,
+  auth?: EspnAuth
+) => {
+  return fetchEspnJson(
+    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore&view=mScoreboard`,
+    auth
+  );
+};
+
 export const getPlayoffMatchups = async (
   season: string,
   league_id: string,
@@ -1103,18 +1161,71 @@ const getLeagueFormat = (draftSettings: any): "Redraft" | "Keeper" => {
   return (draftSettings?.keeperCount ?? 0) > 0 ? "Keeper" : "Redraft";
 };
 
+const getEspnWeeklySchedule = (
+  scheduleData: Array<Record<string, unknown>>,
+  week: number
+) => {
+  return scheduleData
+    .filter((matchup: any) => Number(matchup.matchupPeriodId ?? 0) === week)
+    .filter(
+      (matchup: any) =>
+        matchup.home?.rosterForCurrentScoringPeriod &&
+        matchup.away?.rosterForCurrentScoringPeriod
+    )
+    .flatMap((matchup: any, matchupIndex: number) => {
+      const homePoints = Number(matchup.home.totalPoints ?? 0);
+      const awayPoints = Number(matchup.away.totalPoints ?? 0);
+
+      return [
+        {
+          matchupId: matchupIndex + 1,
+          teamId: matchup.home.teamId,
+          totalPoints: homePoints,
+          result: getWeeklyResult(homePoints, awayPoints),
+          roster:
+            matchup.home.rosterForCurrentScoringPeriod ??
+            matchup.home.rosterForMatchupPeriod,
+        },
+        {
+          matchupId: matchupIndex + 1,
+          teamId: matchup.away.teamId,
+          totalPoints: awayPoints,
+          result: getWeeklyResult(awayPoints, homePoints),
+          roster:
+            matchup.away.rosterForCurrentScoringPeriod ??
+            matchup.away.rosterForMatchupPeriod,
+        },
+      ];
+    });
+};
+
+const getEspnScheduleFromWeeklyData = (
+  weeklyData: Array<Record<string, unknown>>,
+  week: number
+) => {
+  const scheduleData = assertArray<Record<string, unknown>>(
+    weeklyData[week - 1]?.schedule,
+    `ESPN matchup schedule data is missing for week ${week}.`
+  ).map((matchup) => ({
+    matchupPeriodId: week,
+    ...matchup,
+  }));
+
+  return getEspnWeeklySchedule(scheduleData, week);
+};
+
 export const getEspnLeagueInfo = async (
   season: string,
   leagueId: string,
   auth?: EspnAuth
 ): Promise<LeagueInfoType> => {
-  const [league, teamData, rosterData, draftData, playoffData] =
+  const [league, teamData, rosterData, draftData, scoreboardData] =
     await Promise.all([
       getLeagueData(season, leagueId, auth),
       getTeamData(season, leagueId, auth),
       getRosterData(season, leagueId, auth),
       getDraftData(season, leagueId, auth),
-      getPlayoffMatchups(season, leagueId, auth),
+      getScoreboardData(season, leagueId, auth),
     ]);
 
   const leagueRoot = assertRecord(
@@ -1144,10 +1255,13 @@ export const getEspnLeagueInfo = async (
   // const playoffMatchupPeriodLength =
   //   scheduleSettings.playoffMatchupPeriodLength;
   // const numPlayoffTeams = scheduleSettings.playoffTeamCount;
-  const playoffMatchups = assertArray<Record<string, unknown>>(
-    assertRecord(playoffData, "ESPN playoff data is missing.").schedule,
-    "ESPN playoff schedule data is missing."
-  ).filter((matchup: any) => matchup.playoffTierType !== "NONE");
+  const scoreboardSchedule = assertArray<Record<string, unknown>>(
+    assertRecord(scoreboardData, "ESPN scoreboard data is missing.").schedule,
+    "ESPN scoreboard schedule data is missing."
+  );
+  const playoffMatchups = scoreboardSchedule.filter(
+    (matchup: any) => matchup.playoffTierType !== "NONE"
+  );
 
   const status =
     (leagueRoot.status as Record<string, unknown> | undefined) ?? {};
@@ -1175,70 +1289,54 @@ export const getEspnLeagueInfo = async (
     finalScoringPeriod
   );
 
-  let schedule = [];
-  let waivers = [];
-  for (let i = 1; i <= lastScoredWeek; i++) {
-    const scheduleData = assertRecord(
-      await getPlayerStats(season, leagueId, i, auth),
-      `ESPN weekly scoring data is missing for week ${i}.`
-    );
-    const waiverData = assertRecord(
-      await getWaivers(season, leagueId, i, auth),
-      `ESPN transaction data is missing for week ${i}.`
-    );
-    const filteredWaivers = assertArray<Record<string, unknown>>(
-      waiverData.transactions ?? [],
-      `ESPN transaction data is invalid for week ${i}.`
-    ).filter(
-      (transaction: any) =>
-        transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
-    );
-    waivers.push(filteredWaivers);
-
-    const filtered = assertArray<Record<string, unknown>>(
-      scheduleData.schedule,
-      `ESPN matchup schedule data is missing for week ${i}.`
-    )
-      .filter(
-        (matchup: any) =>
-          matchup.home?.rosterForCurrentScoringPeriod &&
-          matchup.away?.rosterForCurrentScoringPeriod
+  const completedWeeks = Array.from(
+    { length: lastScoredWeek },
+    (_, index) => index + 1
+  );
+  const schedule = completedWeeks.map((week) =>
+    getEspnWeeklySchedule(scoreboardSchedule, week)
+  );
+  const shouldFetchWeeklyScoring =
+    lastScoredWeek > 0 &&
+    schedule.some((weekEntries) => weekEntries.length === 0);
+  const weeklyScoringData = shouldFetchWeeklyScoring
+    ? await Promise.all(
+        completedWeeks.map(async (week) =>
+          assertRecord(
+            await getPlayerStats(season, leagueId, week, auth),
+            `ESPN weekly scoring data is missing for week ${week}.`
+          )
+        )
       )
-      .flatMap((matchup: any, matchupIndex: number) => {
-        const homePoints = Number(matchup.home.totalPoints ?? 0);
-        const awayPoints = Number(matchup.away.totalPoints ?? 0);
-
-        return [
-          {
-            matchupId: matchupIndex + 1,
-            teamId: matchup.home.teamId,
-            totalPoints: homePoints,
-            result: getWeeklyResult(homePoints, awayPoints),
-            roster:
-              matchup.home.rosterForCurrentScoringPeriod ??
-              matchup.home.rosterForMatchupPeriod,
-          },
-          {
-            matchupId: matchupIndex + 1,
-            teamId: matchup.away.teamId,
-            totalPoints: awayPoints,
-            result: getWeeklyResult(awayPoints, homePoints),
-            roster:
-              matchup.away.rosterForCurrentScoringPeriod ??
-              matchup.away.rosterForMatchupPeriod,
-          },
-        ];
-      });
-    schedule.push(filtered);
-  }
+    : [];
+  const weeklySchedule = shouldFetchWeeklyScoring
+    ? completedWeeks.map((week) =>
+        getEspnScheduleFromWeeklyData(weeklyScoringData, week)
+      )
+    : schedule;
+  const waivers = await Promise.all(
+    completedWeeks.map(async (week) => {
+      const waiverData = assertRecord(
+        await getWaivers(season, leagueId, week, auth),
+        `ESPN transaction data is missing for week ${week}.`
+      );
+      return assertArray<Record<string, unknown>>(
+        waiverData.transactions ?? [],
+        `ESPN transaction data is invalid for week ${week}.`
+      ).filter(
+        (transaction: any) =>
+          transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
+      );
+    })
+  );
   const recordByWeekMap = getRecordByWeekMap(
     teams,
-    schedule,
+    weeklySchedule,
     regularSeasonLength
   );
   const potentialPointsMap = getPotentialPointsMap(
     teams,
-    schedule,
+    weeklySchedule,
     (rosterSettings.lineupSlotCounts as Record<string, number> | undefined) ??
       {}
   );
@@ -1254,7 +1352,7 @@ export const getEspnLeagueInfo = async (
         espnId: entry.playerPoolEntry.player.id,
       }))
     ),
-    ...schedule.flatMap((weekEntries) =>
+    ...weeklySchedule.flatMap((weekEntries) =>
       weekEntries.flatMap((teamWeek: Record<string, unknown>) => {
         const roster =
           (teamWeek.roster as Record<string, unknown> | undefined) ?? {};
@@ -1395,7 +1493,11 @@ export const getEspnLeagueInfo = async (
     losersBracket: [],
     users,
     rosters,
-    weeklyPoints: await getWeeklyPointsMap(teams, schedule, playerLookupMap),
+    weeklyPoints: await getWeeklyPointsMap(
+      teams,
+      weeklySchedule,
+      playerLookupMap
+    ),
     transactions: transactions,
     trades: [],
     waivers: enrichedWaivers as unknown as LeagueInfoType["waivers"],

@@ -394,6 +394,24 @@ const buildEspnFixture = () => {
 };
 
 const installEspnFetchMock = (fixture) => {
+  const fullScoreboardData = fixture.scoreboardData ?? {
+    schedule: [
+      ...fixture.weeklyScoring.flatMap((weekData, weekIndex) =>
+        weekData.schedule.map((matchup, matchupIndex) => ({
+          id: weekIndex * 100 + matchupIndex + 1,
+          matchupPeriodId: weekIndex + 1,
+          playoffTierType: "NONE",
+          winner:
+            Number(matchup.home?.totalPoints ?? 0) >=
+            Number(matchup.away?.totalPoints ?? 0)
+              ? "HOME"
+              : "AWAY",
+          ...matchup,
+        }))
+      ),
+      ...fixture.playoffData.schedule,
+    ],
+  };
   const fetchMock = vi.fn(async (url) => {
     const urlString = String(url);
 
@@ -428,7 +446,7 @@ const installEspnFetchMock = (fixture) => {
       return mockFetchResponse(200, fixture.waivers[1]);
     }
     if (urlString.includes("view=mMatchupScore")) {
-      return mockFetchResponse(200, fixture.playoffData);
+      return mockFetchResponse(200, fullScoreboardData);
     }
 
     throw new Error(`Unhandled ESPN fixture URL: ${urlString}`);
@@ -544,7 +562,7 @@ describe("ESPN API transforms", () => {
 
     const league = await getEspnLeagueInfo("2025", "12345");
 
-    expect(fetchMock).toHaveBeenCalledTimes(9);
+    expect(fetchMock).toHaveBeenCalledTimes(7);
     expect(mocks.inputLeague).toHaveBeenCalledWith(
       "12345",
       "Fixture League",
@@ -734,6 +752,114 @@ describe("ESPN API transforms", () => {
     expect(league.previousLeagues).toEqual(["2024", "2023"]);
   });
 
+  test("falls back to weekly ESPN scoring when the full scoreboard omits roster detail", async () => {
+    const fixture = buildEspnFixture();
+    fixture.scoreboardData = {
+      schedule: [
+        {
+          id: 1,
+          matchupPeriodId: 1,
+          playoffTierType: "NONE",
+          winner: "HOME",
+          home: { teamId: 1, totalPoints: 110.1 },
+          away: { teamId: 2, totalPoints: 95.2 },
+        },
+        {
+          id: 2,
+          matchupPeriodId: 2,
+          playoffTierType: "NONE",
+          winner: "HOME",
+          home: { teamId: 1, totalPoints: 110.3 },
+          away: { teamId: 2, totalPoints: 95 },
+        },
+        ...fixture.playoffData.schedule,
+      ],
+    };
+    const fetchMock = installEspnFetchMock(fixture);
+    const playerIdMap = new Map([
+      ["alpha runner::ATL", "s-alpha-runner"],
+      ["alpha receiver::BUF", "s-alpha-receiver"],
+      ["alpha bench::ATL", "s-alpha-bench"],
+      ["beta runner::BUF", "s-beta-runner"],
+      ["beta receiver::ATL", "s-beta-receiver"],
+    ]);
+
+    mocks.getPlayerIdLookupMap.mockResolvedValue(playerIdMap);
+    mocks.getPlayerIdsByNameTeamMap.mockImplementation(async (players) =>
+      players.map(
+        ({ name, team }) =>
+          playerIdMap.get(`${name.trim().toLowerCase()}::${team}`) ?? null
+      )
+    );
+    mocks.getStats.mockResolvedValue({
+      rank: 8,
+      ppg: 12,
+    });
+
+    const league = await getEspnLeagueInfo("2025", "12345");
+
+    expect(fetchMock).toHaveBeenCalledTimes(9);
+    expect(league.rosters.map((roster) => roster.recordByWeek)).toEqual([
+      "WW",
+      "LL",
+    ]);
+    expect(league.weeklyPoints[0]).toMatchObject({
+      points: [110.1, 110.3],
+      starters: [
+        ["s-alpha-runner", "s-alpha-receiver"],
+        ["s-alpha-runner", "s-alpha-receiver"],
+      ],
+    });
+  });
+
+  test("keeps ESPN weekly data when potential-points inputs are incomplete", async () => {
+    const fixture = buildEspnFixture();
+    delete fixture.weeklyScoring[0].schedule[0].home
+      .rosterForCurrentScoringPeriod.entries[0].playerPoolEntry.player
+      .eligibleSlots;
+    const fetchMock = installEspnFetchMock(fixture);
+    const playerIdMap = new Map([
+      ["alpha runner::ATL", "s-alpha-runner"],
+      ["alpha receiver::BUF", "s-alpha-receiver"],
+      ["alpha bench::ATL", "s-alpha-bench"],
+      ["beta runner::BUF", "s-beta-runner"],
+      ["beta receiver::ATL", "s-beta-receiver"],
+    ]);
+
+    mocks.getPlayerIdLookupMap.mockResolvedValue(playerIdMap);
+    mocks.getPlayerIdsByNameTeamMap.mockImplementation(async (players) =>
+      players.map(
+        ({ name, team }) =>
+          playerIdMap.get(`${name.trim().toLowerCase()}::${team}`) ?? null
+      )
+    );
+    mocks.getStats.mockResolvedValue({
+      rank: 8,
+      ppg: 12,
+    });
+
+    const league = await getEspnLeagueInfo("2025", "12345");
+
+    expect(fetchMock).toHaveBeenCalledTimes(7);
+    expect(league.rosters[0]).toMatchObject({
+      pointsFor: 220.4,
+      potentialPoints: 220.4,
+      managerEfficiency: 1,
+      recordByWeek: "WW",
+    });
+    expect(league.rosters[1]).toMatchObject({
+      potentialPoints: 58,
+      recordByWeek: "LL",
+    });
+    expect(league.weeklyPoints[0]).toMatchObject({
+      points: [110.1, 110.3],
+      starters: [
+        ["s-alpha-runner", "s-alpha-receiver"],
+        ["s-alpha-runner", "s-alpha-receiver"],
+      ],
+    });
+  });
+
   test("normalizes ESPN leagues with no scores or picks as pre-draft", async () => {
     const fixture = buildEspnFixture();
     fixture.league.status.currentMatchupPeriod = 1;
@@ -800,7 +926,7 @@ describe("ESPN API transforms", () => {
 
     const league = await getEspnLeagueInfo("2025", "12345");
 
-    expect(fetchMock).toHaveBeenCalledTimes(9);
+    expect(fetchMock).toHaveBeenCalledTimes(7);
     expect(league.draftPicks?.map((pick) => pick.userId)).toEqual([
       "owner-1",
       "owner-2",
@@ -838,7 +964,7 @@ describe("ESPN API transforms", () => {
 
     const league = await getEspnLeagueInfo("2025", "12345");
 
-    expect(fetchMock).toHaveBeenCalledTimes(7);
+    expect(fetchMock).toHaveBeenCalledTimes(6);
     expect(league.status).toBe("in_season");
     expect(league.leagueWinner).toBeNull();
   });
