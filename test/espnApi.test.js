@@ -775,4 +775,71 @@ describe("ESPN API transforms", () => {
       draftPicks: [],
     });
   });
+
+  test("maps ESPN draft pick owners from team ids when member ids are missing", async () => {
+    const fixture = buildEspnFixture();
+    delete fixture.draftData.draftDetail.picks[0].memberId;
+    delete fixture.draftData.draftDetail.picks[1].memberId;
+    const fetchMock = installEspnFetchMock(fixture);
+    const playerIdMap = new Map([
+      ["alpha runner::ATL", "s-alpha-runner"],
+      ["beta runner::BUF", "s-beta-runner"],
+    ]);
+
+    mocks.getPlayerIdLookupMap.mockResolvedValue(playerIdMap);
+    mocks.getPlayerIdsByNameTeamMap.mockImplementation(async (players) =>
+      players.map(
+        ({ name, team }) =>
+          playerIdMap.get(`${name.trim().toLowerCase()}::${team}`) ?? null
+      )
+    );
+    mocks.getStats.mockResolvedValue({
+      rank: 8,
+      ppg: 12,
+    });
+
+    const league = await getEspnLeagueInfo("2025", "12345");
+
+    expect(fetchMock).toHaveBeenCalledTimes(9);
+    expect(league.draftPicks?.map((pick) => pick.userId)).toEqual([
+      "owner-1",
+      "owner-2",
+    ]);
+  });
+
+  test("does not assign an ESPN league winner before the season is complete", async () => {
+    const fixture = buildEspnFixture();
+    fixture.league.status.currentMatchupPeriod = 2;
+    fixture.league.status.latestScoringPeriod = 1;
+    fixture.league.status.finalScoringPeriod = 17;
+    fixture.league.settings.scheduleSettings.matchupPeriodCount = 15;
+    fixture.weeklyScoring = [fixture.weeklyScoring[0]];
+    fixture.waivers = [fixture.waivers[0]];
+    const fetchMock = installEspnFetchMock(fixture);
+    const playerIdMap = new Map([
+      ["alpha runner::ATL", "s-alpha-runner"],
+      ["alpha receiver::BUF", "s-alpha-receiver"],
+      ["alpha bench::ATL", "s-alpha-bench"],
+      ["beta runner::BUF", "s-beta-runner"],
+      ["beta receiver::ATL", "s-beta-receiver"],
+    ]);
+
+    mocks.getPlayerIdLookupMap.mockResolvedValue(playerIdMap);
+    mocks.getPlayerIdsByNameTeamMap.mockImplementation(async (players) =>
+      players.map(
+        ({ name, team }) =>
+          playerIdMap.get(`${name.trim().toLowerCase()}::${team}`) ?? null
+      )
+    );
+    mocks.getStats.mockResolvedValue({
+      rank: 8,
+      ppg: 12,
+    });
+
+    const league = await getEspnLeagueInfo("2025", "12345");
+
+    expect(fetchMock).toHaveBeenCalledTimes(7);
+    expect(league.status).toBe("in_season");
+    expect(league.leagueWinner).toBeNull();
+  });
 });

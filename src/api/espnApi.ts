@@ -801,8 +801,10 @@ const getDraftPicks = async (
   return Promise.all(
     picks.map(async (pick, pickIndex) => {
       const player = (pick.player as Record<string, unknown> | undefined) ?? {};
-      const ownerId = String(pick.memberId ?? pick.bidderId ?? "");
       const team = teamById.get(Number(pick.teamId ?? 0));
+      const ownerId = String(
+        pick.memberId ?? pick.bidderId ?? getEspnPrimaryOwnerId(team ?? {})
+      );
       const draftPlayerLookup = draftPlayerLookups[pickIndex];
       const position = draftPlayerLookup.lookup?.position ?? "NA";
 
@@ -1354,6 +1356,13 @@ export const getEspnLeagueInfo = async (
   const seasonType = getLeagueFormat(settings.draftSettings);
   const leagueName = String(settings.name ?? leagueRoot.name ?? "");
   const totalRosters = Number(settings.size ?? teams.length ?? 0);
+  const leagueStatus = getLeagueStatus(
+    currentWeek,
+    lastScoredWeek,
+    regularSeasonLength,
+    finalScoringPeriod,
+    isEspnDraftComplete(draftDetail, draftPicks)
+  );
 
   await inputLeague(
     leagueId,
@@ -1373,7 +1382,10 @@ export const getEspnLeagueInfo = async (
     season,
     seasonType: seasonType,
     leagueId,
-    leagueWinner: getEspnLeagueWinner(espnWinnersBracket, teams),
+    leagueWinner:
+      leagueStatus === "complete"
+        ? getEspnLeagueWinner(espnWinnersBracket, teams)
+        : null,
     lastUpdated: Date.now(),
     previousLeagueId: null, // previous years have the same id, just change the year
     lastScoredWeek,
@@ -1389,13 +1401,7 @@ export const getEspnLeagueInfo = async (
     waivers: enrichedWaivers as unknown as LeagueInfoType["waivers"],
     previousLeagues:
       (status.previousSeasons as LeagueInfoType[] | undefined) ?? [],
-    status: getLeagueStatus(
-      currentWeek,
-      lastScoredWeek,
-      regularSeasonLength,
-      finalScoringPeriod,
-      isEspnDraftComplete(draftDetail, draftPicks)
-    ),
+    status: leagueStatus,
     currentWeek,
     scoringType,
     rosterPositions: getRosterPositions(
