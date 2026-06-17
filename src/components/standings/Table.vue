@@ -642,6 +642,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       class="my-4"
     />
     <div v-if="store.currentTab === 'Power Rankings'">
+      <Projections class="mt-4" />
       <PowerRankingData
         v-if="store.currentLeagueId"
         :tableData="tableData"
@@ -656,7 +657,6 @@ const getTeamName = (tableDataItem: TableDataType) => {
         :totalRosters="10"
         class="mt-4"
       />
-      <Projections class="mt-4" />
       <TeamRanking
         v-if="seasonType !== 'Guillotine'"
         :tableData="tableData"
