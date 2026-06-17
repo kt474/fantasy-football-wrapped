@@ -136,6 +136,15 @@ const powerRankings = computed(() => {
   return result;
 });
 
+const hasPowerRankingSeries = computed(() =>
+  powerRankings.value.some((series) => series.data && series.data.length > 0)
+);
+
+const chartKey = computed(
+  () =>
+    `${store.currentLeagueId || "demo"}:${store.currentTab}:${powerRankings.value.length}:${props.regularSeasonLength}`
+);
+
 const chartTextColor = computed(() => {
   return store.darkMode ? "#ffffff" : "#111827";
 });
@@ -146,7 +155,6 @@ const updateChartColor = () => {
     chart: {
       width: "98%",
       foreColor: store.darkMode ? "#ffffff" : "#111827",
-      id: "power-ranking",
       toolbar: {
         show: false,
       },
@@ -206,7 +214,6 @@ const chartOptions = ref({
   chart: {
     width: "97%",
     foreColor: chartTextColor.value,
-    id: "power-ranking",
     toolbar: {
       show: false,
     },
@@ -309,6 +316,8 @@ const chartOptions = ref({
         </div>
       </div>
       <apexchart
+        v-if="hasPowerRankingSeries"
+        :key="chartKey"
         width="98%"
         height="475"
         type="line"

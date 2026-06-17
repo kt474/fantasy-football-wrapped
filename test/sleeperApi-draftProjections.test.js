@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { getDraftProjections } from "../src/api/sleeperApi.ts";
+import { getDraftProjections, getProjections } from "../src/api/sleeperApi.ts";
 
 const mockFetchResponse = (status, data, overrides = {}) =>
   Promise.resolve({
@@ -10,6 +10,7 @@ const mockFetchResponse = (status, data, overrides = {}) =>
   });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -93,5 +94,21 @@ describe("getDraftProjections", () => {
     const result = await getDraftProjections("p1", "2025", 1, "Redraft");
 
     expect(result).toEqual({ adp: null, projectedPoints: null });
+  });
+});
+
+describe("getProjections", () => {
+  test("returns an empty projection when the Sleeper projection request hangs", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+
+    const resultPromise = getProjections("p1", "2025", 1, 1);
+    await vi.advanceTimersByTimeAsync(8000);
+
+    await expect(resultPromise).resolves.toEqual({
+      projection: 0,
+      position: "",
+    });
   });
 });

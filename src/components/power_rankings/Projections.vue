@@ -65,9 +65,12 @@ onMounted(async () => {
     !hasProjectionData(store.leagueInfo[store.currentLeagueIndex])
   ) {
     loading.value = true;
-    await getData();
-    updateChartColor();
-    loading.value = false;
+    try {
+      await getData();
+      updateChartColor();
+    } finally {
+      loading.value = false;
+    }
   }
 });
 
@@ -81,9 +84,12 @@ watch(
 
     if (!hasProjectionData(currentLeague)) {
       loading.value = true;
-      await getData();
-      updateChartColor();
-      loading.value = false;
+      try {
+        await getData();
+        updateChartColor();
+      } finally {
+        loading.value = false;
+      }
     } else {
       updateChartColor();
     }
@@ -297,6 +303,15 @@ const seriesData = computed(() => {
   ];
 });
 
+const hasProjectionSeries = computed(() =>
+  seriesData.value.some((series) => series.data.length > 0)
+);
+
+const chartKey = computed(
+  () =>
+    `${store.currentLeagueId || "demo"}:${formattedData.value.length}:${seriesData.value.map((series) => series.data.length).join(",")}`
+);
+
 watch([() => store.darkMode, () => store.showUsernames], () => {
   updateChartColor();
 });
@@ -431,6 +446,8 @@ const chartOptions = ref({
           </div>
         </div>
         <apexchart
+          v-if="hasProjectionSeries"
+          :key="chartKey"
           type="bar"
           height="350"
           :options="chartOptions"

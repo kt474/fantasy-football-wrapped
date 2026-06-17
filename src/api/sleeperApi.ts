@@ -37,6 +37,24 @@ const parseJson = async <T>(
   }
 };
 
+const fetchWithTimeout = async (
+  input: RequestInfo | URL,
+  timeoutMs: number
+): Promise<Response> => {
+  const controller = new AbortController();
+
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+      reject(new Error(`Request timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    fetch(input, { signal: controller.signal })
+      .then(resolve, reject)
+      .finally(() => clearTimeout(timeoutId));
+  });
+};
+
 const mapWithConcurrency = async <T, R>(
   items: T[],
   concurrency: number,
@@ -85,6 +103,8 @@ type SleeperWeekProjectionMap = Record<
     is_away_team?: boolean;
   }
 >;
+
+const PROJECTION_FETCH_TIMEOUT_MS = 8000;
 
 type SleeperLeagueResponse = {
   name?: string;
@@ -323,8 +343,9 @@ export const getWeeklyProjections = async (
 ): Promise<number> => {
   let allWeeks: SleeperWeekProjectionMap = {};
   try {
-    const response = await fetch(
-      `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`
+    const response = await fetchWithTimeout(
+      `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`,
+      PROJECTION_FETCH_TIMEOUT_MS
     );
     assertOk(response, "Weekly projections request");
     allWeeks = await parseJson<SleeperWeekProjectionMap>(
@@ -424,8 +445,9 @@ export const getProjections = async (
   scoringType: number
 ) => {
   try {
-    const response = await fetch(
-      `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
+    const response = await fetchWithTimeout(
+      `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`,
+      PROJECTION_FETCH_TIMEOUT_MS
     );
     assertOk(response, "Player projection request");
     const playerInfo = await parseJson<SleeperPlayerStatsResponse>(
