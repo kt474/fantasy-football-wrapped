@@ -26,7 +26,9 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Input } from "@/components/ui/input";
-import { X, Plus } from "lucide-vue-next";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowRightLeft, Plus, Search, X } from "lucide-vue-next";
 
 type TradeLabPlayer = Player & {
   projection: number;
@@ -43,6 +45,28 @@ type TradeDraftPickAsset = {
   id: string;
   season: number;
   round: number;
+};
+
+type TradeDatabaseAsset = {
+  name: string;
+  position?: string;
+  team?: string;
+  playerId?: string;
+  value: number;
+  assetType?: "player" | "pick" | "faab";
+};
+
+type TradeDatabaseRecord = {
+  id: string;
+  season: number;
+  week: number;
+  leagueFormat: string;
+  scoring: string;
+  rosterSize: number;
+  sideA: TradeDatabaseAsset[];
+  sideB: TradeDatabaseAsset[];
+  acceptedBy: number;
+  createdAt: string;
 };
 
 const store = useStore();
@@ -70,6 +94,180 @@ const draggedPlayer = ref<{ playerId: string; fromTeam: "A" | "B" } | null>(
   null
 );
 const isMobile = ref(false);
+const tradeSearch = ref("");
+const selectedPositionFilter = ref("All");
+const selectedFormatFilter = ref("All");
+
+const mockTradeDatabase: TradeDatabaseRecord[] = [
+  {
+    id: "mock-001",
+    season: 2025,
+    week: 4,
+    leagueFormat: "12 team redraft",
+    scoring: "Half PPR",
+    rosterSize: 15,
+    acceptedBy: 9,
+    createdAt: "2025-10-02",
+    sideA: [
+      {
+        name: "Ja'Marr Chase",
+        position: "WR",
+        team: "CIN",
+        playerId: "7564",
+        value: 91,
+      },
+    ],
+    sideB: [
+      {
+        name: "Breece Hall",
+        position: "RB",
+        team: "NYJ",
+        playerId: "8155",
+        value: 72,
+      },
+      {
+        name: "2026 2nd",
+        value: 18,
+        assetType: "pick",
+      },
+    ],
+  },
+  {
+    id: "mock-002",
+    season: 2025,
+    week: 6,
+    leagueFormat: "10 team keeper",
+    scoring: "PPR",
+    rosterSize: 16,
+    acceptedBy: 14,
+    createdAt: "2025-10-16",
+    sideA: [
+      {
+        name: "Jahmyr Gibbs",
+        position: "RB",
+        team: "DET",
+        playerId: "9221",
+        value: 86,
+      },
+      {
+        name: "Tucker Kraft",
+        position: "TE",
+        team: "GB",
+        playerId: "9484",
+        value: 18,
+      },
+    ],
+    sideB: [
+      {
+        name: "Amon-Ra St. Brown",
+        position: "WR",
+        team: "DET",
+        playerId: "7547",
+        value: 82,
+      },
+      { name: "$18 FAAB", value: 5, assetType: "faab" },
+    ],
+  },
+  {
+    id: "mock-003",
+    season: 2025,
+    week: 8,
+    leagueFormat: "12 team dynasty",
+    scoring: "Superflex PPR",
+    rosterSize: 26,
+    acceptedBy: 7,
+    createdAt: "2025-10-30",
+    sideA: [
+      { name: "C.J. Stroud", position: "QB", team: "HOU", value: 73 },
+    ],
+    sideB: [
+      { name: "Drake Maye", position: "QB", team: "NE", value: 62 },
+      { name: "2026 1st", value: 38, assetType: "pick" },
+    ],
+  },
+  {
+    id: "mock-004",
+    season: 2025,
+    week: 9,
+    leagueFormat: "14 team redraft",
+    scoring: "Standard",
+    rosterSize: 14,
+    acceptedBy: 11,
+    createdAt: "2025-11-06",
+    sideA: [
+      {
+        name: "Derrick Henry",
+        position: "RB",
+        team: "BAL",
+        playerId: "3198",
+        value: 59,
+      },
+    ],
+    sideB: [
+      {
+        name: "DK Metcalf",
+        position: "WR",
+        team: "PIT",
+        playerId: "5846",
+        value: 44,
+      },
+      { name: "Jordan Addison", position: "WR", team: "MIN", value: 24 },
+    ],
+  },
+  {
+    id: "mock-005",
+    season: 2025,
+    week: 11,
+    leagueFormat: "12 team redraft",
+    scoring: "Half PPR",
+    rosterSize: 15,
+    acceptedBy: 19,
+    createdAt: "2025-11-20",
+    sideA: [
+      {
+        name: "Brock Bowers",
+        position: "TE",
+        team: "LV",
+        playerId: "11604",
+        value: 68,
+      },
+    ],
+    sideB: [
+      { name: "Kenneth Walker III", position: "RB", team: "SEA", value: 47 },
+      { name: "Chris Olave", position: "WR", team: "NO", value: 32 },
+    ],
+  },
+  {
+    id: "mock-006",
+    season: 2025,
+    week: 12,
+    leagueFormat: "10 team redraft",
+    scoring: "PPR",
+    rosterSize: 15,
+    acceptedBy: 12,
+    createdAt: "2025-11-27",
+    sideA: [
+      {
+        name: "Josh Allen",
+        position: "QB",
+        team: "BUF",
+        playerId: "4984",
+        value: 54,
+      },
+      { name: "Jaylen Warren", position: "RB", team: "PIT", value: 28 },
+    ],
+    sideB: [
+      {
+        name: "Lamar Jackson",
+        position: "QB",
+        team: "BAL",
+        playerId: "4881",
+        value: 56,
+      },
+      { name: "Zay Flowers", position: "WR", team: "BAL", value: 29 },
+    ],
+  },
+];
 
 const activeLeague = computed(() => store.leagueInfo[store.currentLeagueIndex]);
 
@@ -585,6 +783,79 @@ const fairnessPillClass = computed(() => {
   return waiverPaletteClass(5);
 });
 
+const tradeDatabasePositionOptions = computed(() => {
+  const positions = new Set<string>();
+  mockTradeDatabase.forEach((trade) => {
+    [...trade.sideA, ...trade.sideB].forEach((asset) => {
+      if (asset.position) positions.add(asset.position);
+    });
+  });
+  return ["All", ...Array.from(positions).sort()];
+});
+
+const tradeDatabaseFormatOptions = computed(() => [
+  "All",
+  ...Array.from(new Set(mockTradeDatabase.map((trade) => trade.leagueFormat))),
+]);
+
+const getAssetNames = (trade: TradeDatabaseRecord) => {
+  return [...trade.sideA, ...trade.sideB]
+    .map((asset) => `${asset.name} ${asset.position ?? ""} ${asset.team ?? ""}`)
+    .join(" ")
+    .toLowerCase();
+};
+
+const getSideValue = (assets: TradeDatabaseAsset[]) =>
+  assets.reduce((sum, asset) => sum + asset.value, 0);
+
+const getTradeValueGap = (trade: TradeDatabaseRecord) => {
+  const sideAValue = getSideValue(trade.sideA);
+  const sideBValue = getSideValue(trade.sideB);
+  const largerSide = Math.max(sideAValue, sideBValue, 1);
+  return Math.round((Math.abs(sideAValue - sideBValue) / largerSide) * 100);
+};
+
+const getTradeFitLabel = (gap: number) => {
+  if (gap <= 8) return "Even market";
+  if (gap <= 18) return "Slight premium";
+  return "Aggressive price";
+};
+
+const getAssetInitials = (asset: TradeDatabaseAsset) => {
+  if (asset.assetType === "pick") return "PK";
+  if (asset.assetType === "faab") return "$";
+  return asset.name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+};
+
+const formatShortDate = (date: string) =>
+  new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+  }).format(new Date(`${date}T00:00:00`));
+
+const filteredTradeDatabase = computed(() => {
+  const query = tradeSearch.value.trim().toLowerCase();
+  return mockTradeDatabase.filter((trade) => {
+    const matchesQuery = !query || getAssetNames(trade).includes(query);
+    const matchesPosition =
+      selectedPositionFilter.value === "All" ||
+      [...trade.sideA, ...trade.sideB].some(
+        (asset) => asset.position === selectedPositionFilter.value
+      );
+    const matchesFormat =
+      selectedFormatFilter.value === "All" ||
+      trade.leagueFormat === selectedFormatFilter.value;
+
+    return matchesQuery && matchesPosition && matchesFormat;
+  });
+});
+
 watch(
   () => store.currentLeagueId,
   () => {
@@ -657,17 +928,199 @@ onBeforeUnmount(() => {
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
       <h5 class="text-3xl font-bold leading-none">Trade Lab (Beta)</h5>
     </div>
-    <p v-if="!isMobile" class="mt-4 mb-2 text-muted-foreground">
-      Drag players into each team's package to brainstorm offers.
-    </p>
-    <p v-if="isMobile" class="mt-4 mb-2 text-muted-foreground">
-      Click/tap players to add or remove from each package.
-    </p>
+    <Tabs default-value="database" class="w-full">
+      <TabsList class="mb-4 grid w-full max-w-md grid-cols-2">
+        <TabsTrigger value="database">Trade Database</TabsTrigger>
+        <TabsTrigger value="builder">Builder</TabsTrigger>
+      </TabsList>
 
-    <div v-if="loading" class="h-screen py-2">
-      Loading players and projections...
-    </div>
-    <div v-else>
+      <TabsContent value="database">
+        <div class="space-y-4">
+          <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_10rem_13rem]">
+            <div>
+              <Label for="trade-search" class="text-xs">Search</Label>
+              <div class="relative mt-1">
+                <Search
+                  class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  id="trade-search"
+                  v-model="tradeSearch"
+                  class="pl-9"
+                  placeholder="Search players or picks"
+                />
+              </div>
+            </div>
+            <div>
+              <Label class="text-xs">Position</Label>
+              <Select v-model="selectedPositionFilter">
+                <SelectTrigger class="mt-1 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="position in tradeDatabasePositionOptions"
+                    :key="`position-${position}`"
+                    :value="position"
+                  >
+                    {{ position }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label class="text-xs">League type</Label>
+              <Select v-model="selectedFormatFilter">
+                <SelectTrigger class="mt-1 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="format in tradeDatabaseFormatOptions"
+                    :key="`format-${format}`"
+                    :value="format"
+                  >
+                    {{ format }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-muted-foreground">
+              {{ filteredTradeDatabase.length }} trades
+            </p>
+          </div>
+
+          <div class="grid gap-3">
+            <Card
+              v-for="trade in filteredTradeDatabase"
+              :key="trade.id"
+              class="p-4"
+            >
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <Badge variant="outline">
+                  Week {{ trade.week }}, {{ trade.season }}
+                </Badge>
+                <Badge variant="secondary">{{ trade.scoring }}</Badge>
+                <span class="text-muted-foreground">
+                  {{ trade.leagueFormat }} | {{ formatShortDate(trade.createdAt) }}
+                </span>
+              </div>
+
+              <div class="mt-4 grid gap-3 md:grid-cols-[1fr_auto_1fr]">
+                <div class="space-y-2">
+                  <p class="text-sm font-semibold">Side A receives</p>
+                  <div
+                    v-for="asset in trade.sideA"
+                    :key="`${trade.id}-a-${asset.name}`"
+                    class="flex items-center justify-between rounded-lg border border-border px-3 py-2"
+                  >
+                    <div class="flex min-w-0 items-center gap-2">
+                      <img
+                        v-if="asset.playerId"
+                        class="size-9 rounded-full object-cover"
+                        :src="`https://sleepercdn.com/content/nfl/players/thumb/${asset.playerId}.jpg`"
+                        :alt="`${asset.name} headshot`"
+                      />
+                      <div
+                        v-else
+                        class="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground"
+                      >
+                        {{ getAssetInitials(asset) }}
+                      </div>
+                      <div class="min-w-0">
+                        <p class="truncate text-sm font-medium">
+                          {{ asset.name }}
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                          {{
+                            asset.position
+                              ? `${asset.position} - ${asset.team}`
+                              : asset.assetType
+                          }}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="outline">{{ asset.value }}</Badge>
+                  </div>
+                </div>
+
+                <div class="hidden items-center justify-center md:flex">
+                  <ArrowRightLeft class="size-5 text-muted-foreground" />
+                </div>
+
+                <div class="space-y-2">
+                  <p class="text-sm font-semibold">Side B receives</p>
+                  <div
+                    v-for="asset in trade.sideB"
+                    :key="`${trade.id}-b-${asset.name}`"
+                    class="flex items-center justify-between rounded-lg border border-border px-3 py-2"
+                  >
+                    <div class="flex min-w-0 items-center gap-2">
+                      <img
+                        v-if="asset.playerId"
+                        class="size-9 rounded-full object-cover"
+                        :src="`https://sleepercdn.com/content/nfl/players/thumb/${asset.playerId}.jpg`"
+                        :alt="`${asset.name} headshot`"
+                      />
+                      <div
+                        v-else
+                        class="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground"
+                      >
+                        {{ getAssetInitials(asset) }}
+                      </div>
+                      <div class="min-w-0">
+                        <p class="truncate text-sm font-medium">
+                          {{ asset.name }}
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                          {{
+                            asset.position
+                              ? `${asset.position} - ${asset.team}`
+                              : asset.assetType
+                          }}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="outline">{{ asset.value }}</Badge>
+                  </div>
+                </div>
+              </div>
+
+              <p class="mt-3 text-xs text-muted-foreground">
+                {{ getTradeFitLabel(getTradeValueGap(trade)) }} |
+                {{ getTradeValueGap(trade) }}% value gap |
+                {{ trade.acceptedBy }} similar accepts
+              </p>
+            </Card>
+
+            <Card
+              v-if="filteredTradeDatabase.length === 0"
+              class="p-8 text-center"
+            >
+              <p class="font-semibold">No matching trades</p>
+              <p class="mt-1 text-sm text-muted-foreground">
+                Try a broader search or clear one of the filters.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="builder">
+        <p v-if="!isMobile" class="mt-4 mb-2 text-muted-foreground">
+          Drag players into each team's package to brainstorm offers.
+        </p>
+        <p v-if="isMobile" class="mt-4 mb-2 text-muted-foreground">
+          Click/tap players to add or remove from each package.
+        </p>
+
+        <div v-if="loading" class="h-screen py-2">
+          Loading players and projections...
+        </div>
+        <div v-else>
       <div class="grid gap-3 xl:grid-cols-3">
         <Card class="px-4 py-3">
           <div class="mb-2">
@@ -1241,6 +1694,8 @@ onBeforeUnmount(() => {
           </div>
         </Card>
       </div>
-    </div>
+        </div>
+      </TabsContent>
+    </Tabs>
   </Card>
 </template>
