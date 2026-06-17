@@ -752,6 +752,48 @@ describe("ESPN API transforms", () => {
     expect(league.previousLeagues).toEqual(["2024", "2023"]);
   });
 
+  test("falls back to weekly ESPN rosters when current roster entries are empty", async () => {
+    const fixture = buildEspnFixture();
+    fixture.rosterData.teams = fixture.rosterData.teams.map((team) => ({
+      ...team,
+      roster: { entries: [] },
+    }));
+    const playerIdMap = new Map([
+      ["alpha runner::ATL", "s-alpha-runner"],
+      ["alpha receiver::BUF", "s-alpha-receiver"],
+      ["beta runner::BUF", "s-beta-runner"],
+      ["beta receiver::ATL", "s-beta-receiver"],
+    ]);
+
+    installEspnFetchMock(fixture);
+    mocks.getPlayerIdLookupMap.mockResolvedValue(playerIdMap);
+    mocks.getPlayerIdsByNameTeamMap.mockImplementation(async (players) =>
+      players.map(
+        ({ name, team }) =>
+          playerIdMap.get(`${name.trim().toLowerCase()}::${team}`) ?? null
+      )
+    );
+    mocks.getStats.mockResolvedValue({
+      rank: 8,
+      ppg: 12,
+      points: 144,
+      overallRank: 24,
+      firstName: "Mock",
+      lastName: "Player",
+      position: "RB",
+      team: "ATL",
+      id: "mock",
+      gp: 12,
+    });
+
+    const league = await getEspnLeagueInfo("2025", "12345");
+
+    expect(league.rosters.map((roster) => roster.players)).toEqual([
+      ["s-alpha-runner", "s-alpha-receiver"],
+      ["s-beta-runner", "s-beta-receiver"],
+    ]);
+  });
+
   test("falls back to weekly ESPN scoring when the full scoreboard omits roster detail", async () => {
     const fixture = buildEspnFixture();
     fixture.scoreboardData = {

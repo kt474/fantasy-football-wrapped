@@ -413,6 +413,28 @@ const getRosterEntries = (team: Record<string, unknown>) => {
     : [];
 };
 
+const getLatestWeeklyRosterEntries = (
+  teamId: number,
+  schedule: Array<Array<Record<string, unknown>>> = []
+) => {
+  for (let weekIndex = schedule.length - 1; weekIndex >= 0; weekIndex -= 1) {
+    const teamWeek = schedule[weekIndex].find(
+      (weekEntry) => Number(weekEntry.teamId ?? 0) === teamId
+    );
+    const roster =
+      (teamWeek?.roster as Record<string, unknown> | undefined) ?? {};
+    const entries = Array.isArray(roster.entries)
+      ? (roster.entries as Array<Record<string, unknown>>)
+      : [];
+
+    if (entries.length > 0) {
+      return entries;
+    }
+  }
+
+  return [];
+};
+
 const getWeeklyEntryPoints = (entry: Record<string, unknown>) => {
   const playerPoolEntry =
     (entry.playerPoolEntry as Record<string, unknown> | undefined) ?? {};
@@ -627,15 +649,21 @@ const getRosterMap = async (
   teams: Array<Record<string, unknown>> = [],
   recordByWeekMap: Map<number, string> = new Map(),
   potentialPointsMap: Map<number, number> = new Map(),
-  playerLookupMap: Map<string, string> = new Map()
+  playerLookupMap: Map<string, string> = new Map(),
+  schedule: Array<Array<Record<string, unknown>>> = []
 ) => {
   return Promise.all(
     teams.map(async (team) => {
       const record = getTeamRecord(team);
+      const teamId = Number(team.id ?? 0);
       const rosterEntries = getRosterEntries(team);
+      const playerSourceEntries =
+        rosterEntries.length > 0
+          ? rosterEntries
+          : getLatestWeeklyRosterEntries(teamId, schedule);
       const potentialPoints = potentialPointsMap.get(Number(team.id ?? 0)) ?? 0;
 
-      const playerNames = rosterEntries.map((entry: any) => ({
+      const playerNames = playerSourceEntries.map((entry: any) => ({
         name: String(entry.playerPoolEntry.player.fullName ?? ""),
         team: getTeam(Number(entry.playerPoolEntry.player.proTeamId)),
       }));
@@ -1448,7 +1476,8 @@ export const getEspnLeagueInfo = async (
     teams,
     recordByWeekMap,
     potentialPointsMap,
-    playerLookupMap
+    playerLookupMap,
+    weeklySchedule
   );
   const scoringType = getScoringType(
     assertArray(
