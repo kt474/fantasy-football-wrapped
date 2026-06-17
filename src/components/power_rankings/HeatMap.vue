@@ -91,7 +91,7 @@ const seriesData = computed(() => {
 });
 
 const hasHeatMapSeries = computed(() =>
-  seriesData.value.some((series) => series.data.some((point) => point.y > 0))
+  seriesData.value.some((series) => series.data.length > 0)
 );
 
 const chartKey = computed(

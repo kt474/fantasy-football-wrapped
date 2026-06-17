@@ -43,10 +43,7 @@ const mapWithConcurrency = async <T, R>(
 
 const hasProjectionData = (league: LeagueInfoType) =>
   league.rosters.every(
-    (roster) =>
-      roster.projections?.some(
-        (projection) => projection.position && projection.projection > 0
-      )
+    (roster) => roster.projections && roster.projections.length > 0
   );
 
 const categories = computed(() => {
@@ -307,9 +304,7 @@ const seriesData = computed(() => {
 });
 
 const hasProjectionSeries = computed(() =>
-  seriesData.value.some((series) =>
-    series.data.some((projection) => projection > 0)
-  )
+  seriesData.value.some((series) => series.data.length > 0)
 );
 
 const chartKey = computed(
