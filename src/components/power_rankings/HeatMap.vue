@@ -90,15 +90,6 @@ const seriesData = computed(() => {
   return result.reverse(); // heat map chart inputs backwards
 });
 
-const hasHeatMapSeries = computed(() =>
-  seriesData.value.some((series) => series.data.length > 0)
-);
-
-const chartKey = computed(
-  () =>
-    `${store.currentLeagueId || "demo"}:${props.formattedData.length}:${seriesData.value.map((series) => series.data.length).join(",")}`
-);
-
 const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
@@ -255,8 +246,6 @@ const chartOptions = ref({
       </div>
     </div>
     <apexchart
-      v-if="hasHeatMapSeries"
-      :key="chartKey"
       type="heatmap"
       height="350"
       :options="chartOptions"

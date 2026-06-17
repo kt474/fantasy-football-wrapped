@@ -21,16 +21,7 @@ const props = defineProps<{
   totalRosters: number;
 }>();
 
-const includePreseasonRank = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  return currentLeague?.platform !== "espn";
-});
-
 const preseasonRank = computed(() => {
-  if (!includePreseasonRank.value) {
-    return [];
-  }
-
   type Position = "QB" | "WR" | "TE" | "RB";
   const positions: Position[] = ["QB", "WR", "TE", "RB"];
   type Top2Sums = Record<Position, number>;
@@ -90,9 +81,8 @@ const preseasonRank = computed(() => {
 
 const powerRankings = computed(() => {
   if (
-    includePreseasonRank.value &&
-    (!preseasonRank.value.length ||
-      preseasonRank.value.length !== props.totalRosters)
+    !preseasonRank.value.length ||
+    preseasonRank.value.length !== props.totalRosters
   ) {
     return [];
   }
@@ -120,12 +110,11 @@ const powerRankings = computed(() => {
         }
       });
     }
-    if (includePreseasonRank.value) {
-      const preseasonScore = preseasonRank.value.find(
-        (user) => user.rosterId === value.rosterId
-      )?.preseasonScore;
-      ratingArr.unshift(preseasonScore || 0);
-    }
+    // preseason rank
+    const preseasonScore = preseasonRank.value.find(
+      (user) => user.rosterId === value.rosterId
+    )?.preseasonScore;
+    ratingArr.unshift(preseasonScore || 0);
     ratingsContainer.push(ratingArr);
     result.push({
       name: store.showUsernames ? value.username : value.name,
@@ -147,27 +136,8 @@ const powerRankings = computed(() => {
   return result;
 });
 
-const hasPowerRankingSeries = computed(() =>
-  powerRankings.value.some((series) => series.data && series.data.length > 0)
-);
-
-const chartKey = computed(
-  () =>
-    `${store.currentLeagueId || "demo"}:${store.currentTab}:${powerRankings.value.length}:${props.regularSeasonLength}:${includePreseasonRank.value}`
-);
-
 const chartTextColor = computed(() => {
   return store.darkMode ? "#ffffff" : "#111827";
-});
-
-const xAxisCategories = computed(() => {
-  const weekCategories = Array(props.regularSeasonLength)
-    .fill(0)
-    .map((_, i) => i + 1);
-
-  return includePreseasonRank.value
-    ? ["Preseason", ...weekCategories]
-    : weekCategories;
 });
 
 const updateChartColor = () => {
@@ -181,9 +151,6 @@ const updateChartColor = () => {
       },
       zoom: {
         enabled: false,
-      },
-      animations: {
-        speed: 1200,
       },
     },
     tooltip: {
@@ -200,10 +167,6 @@ const updateChartColor = () => {
       hover: {
         size: 7,
       },
-    },
-    xaxis: {
-      ...chartOptions.value.xaxis,
-      categories: xAxisCategories.value,
     },
     yaxis: {
       reversed: true,
@@ -245,9 +208,6 @@ const chartOptions = ref({
     zoom: {
       enabled: false,
     },
-    animations: {
-      speed: 1200,
-    },
   },
   colors: [
     "#ef4444",
@@ -264,7 +224,12 @@ const chartOptions = ref({
     "#f43f5e",
   ],
   xaxis: {
-    categories: xAxisCategories.value,
+    categories: [
+      "Preseason",
+      ...Array(props.regularSeasonLength)
+        .fill(0)
+        .map((_, i) => i + 1),
+    ],
     labels: {
       hideOverlappingLabels: false,
     },
@@ -324,7 +289,6 @@ const chartOptions = ref({
       v-if="store.currentTab === 'Power Rankings'"
       :power-rankings="powerRankings"
       :regular-season-length="props.regularSeasonLength"
-      :include-preseason="includePreseasonRank"
       class="w-full mb-4 md:w-1/3 md:mr-4 md:mb-0"
     />
     <Card
@@ -337,8 +301,6 @@ const chartOptions = ref({
         </div>
       </div>
       <apexchart
-        v-if="hasPowerRankingSeries"
-        :key="chartKey"
         width="98%"
         height="475"
         type="line"

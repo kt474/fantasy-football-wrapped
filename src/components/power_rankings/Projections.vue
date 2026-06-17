@@ -303,15 +303,6 @@ const seriesData = computed(() => {
   ];
 });
 
-const hasProjectionSeries = computed(() =>
-  seriesData.value.some((series) => series.data.length > 0)
-);
-
-const chartKey = computed(
-  () =>
-    `${store.currentLeagueId || "demo"}:${formattedData.value.length}:${seriesData.value.map((series) => series.data.length).join(",")}`
-);
-
 watch([() => store.darkMode, () => store.showUsernames], () => {
   updateChartColor();
 });
@@ -446,8 +437,6 @@ const chartOptions = ref({
           </div>
         </div>
         <apexchart
-          v-if="hasProjectionSeries"
-          :key="chartKey"
           type="bar"
           height="350"
           :options="chartOptions"
