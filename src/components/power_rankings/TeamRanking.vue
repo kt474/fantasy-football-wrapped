@@ -27,6 +27,11 @@ const allData = ref<Record<string, WeeklyEntry[]>>({});
 const loading = ref(false);
 const tab = ref("QB");
 
+const hasPlayerRankingData = (league: LeagueInfoType) =>
+  Boolean(
+    league.playerRankings && Object.keys(league.playerRankings).length > 0
+  );
+
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   const rosterPlayers = props.tableData.flatMap((user) =>
@@ -107,7 +112,7 @@ onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].playerRankings
+    !hasPlayerRankingData(store.leagueInfo[store.currentLeagueIndex])
   ) {
     loading.value = true;
     data.value = {};
@@ -128,7 +133,7 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
-    if (!store.leagueInfo[store.currentLeagueIndex].playerRankings) {
+    if (!hasPlayerRankingData(store.leagueInfo[store.currentLeagueIndex])) {
       data.value = {};
       allData.value = {};
       loading.value = true;

@@ -21,6 +21,11 @@ const props = defineProps<{
   propsTableData: TableDataType[];
 }>();
 
+const hasProjectionData = (league: LeagueInfoType) =>
+  league.rosters.every(
+    (roster) => roster.projections && roster.projections.length > 0
+  );
+
 onMounted(async () => {
   showData.value = showPlayoffOdds.value;
   if (
@@ -103,7 +108,7 @@ const getData = async () => {
     } else {
       if (
         store.leagueInfo.length > 0 &&
-        !store.leagueInfo[store.currentLeagueIndex]?.rosters[0]?.projections
+        !hasProjectionData(store.leagueInfo[store.currentLeagueIndex])
       ) {
         await Promise.all(
           currentLeague.rosters.map(async (roster) => {

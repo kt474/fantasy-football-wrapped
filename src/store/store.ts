@@ -89,14 +89,19 @@ export const useStore = defineStore("main", {
       this.darkMode = payload;
     },
     updateLeagueInfo(payload: LeagueInfoType) {
-      const alreadyExists = this.leagueInfo.some(
+      const existingIndex = this.leagueInfo.findIndex(
         (league) => getLeagueKey(league) === getLeagueKey(payload)
       );
-      if (!alreadyExists) {
+      if (existingIndex === -1) {
         this.$patch((state) => {
           state.leagueInfo.push(payload);
         });
+        return;
       }
+
+      this.$patch((state) => {
+        state.leagueInfo[existingIndex] = payload;
+      });
     },
     addProjectionData(
       leagueId: string,

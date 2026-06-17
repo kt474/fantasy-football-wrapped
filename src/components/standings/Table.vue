@@ -139,8 +139,15 @@ const showStandingsTab = computed(() => {
   );
 });
 
+type SavedTableData =
+  | TableDataType[]
+  | {
+      lastUpdated?: number;
+      data?: TableDataType[];
+    };
+
 interface savedData {
-  [key: string]: TableDataType[];
+  [key: string]: SavedTableData;
 }
 
 onMounted(() => {
@@ -161,12 +168,21 @@ onMounted(() => {
 });
 
 const originalData = computed(() => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (store.currentLeagueId) {
     const savedData = getParsedStorageItem<savedData>("originalData", {}, {
       isValid: (value): value is savedData => isRecord(value),
     });
-    if (savedData[store.currentLeagueId]) {
-      return savedData[store.currentLeagueId];
+    const savedLeagueData = savedData[store.currentLeagueId];
+    if (Array.isArray(savedLeagueData)) {
+      if (currentLeague?.platform !== "espn") {
+        return savedLeagueData;
+      }
+    } else if (
+      savedLeagueData?.data &&
+      savedLeagueData.lastUpdated === currentLeague?.lastUpdated
+    ) {
+      return savedLeagueData.data;
     }
   }
   if (props.users && props.points) {
@@ -177,15 +193,17 @@ const originalData = computed(() => {
       medianScoring.value
     );
     if (store.currentLeagueId) {
-      const savedData = getParsedStorageItem<Record<string, TableDataType[]>>(
+      const savedData = getParsedStorageItem<savedData>(
         "originalData",
         {},
         {
-          isValid: (value): value is Record<string, TableDataType[]> =>
-            isRecord(value),
+          isValid: (value): value is savedData => isRecord(value),
         }
       );
-      savedData[store.currentLeagueId] = combinedPoints;
+      savedData[store.currentLeagueId] = {
+        lastUpdated: currentLeague?.lastUpdated,
+        data: combinedPoints,
+      };
       localStorage.setItem("originalData", JSON.stringify(savedData));
     }
     return combinedPoints;

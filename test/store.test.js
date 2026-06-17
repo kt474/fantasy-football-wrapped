@@ -96,7 +96,7 @@ afterEach(() => {
 });
 
 describe("main store", () => {
-  test("updateLeagueInfo does not add duplicate league ids", () => {
+  test("updateLeagueInfo replaces duplicate league ids", () => {
     const store = useStore();
     const league = buildLeague("league-1");
 
@@ -104,7 +104,7 @@ describe("main store", () => {
     store.updateLeagueInfo({ ...league, name: "Duplicate Name" });
 
     expect(store.leagueInfo).toHaveLength(1);
-    expect(store.leagueInfo[0].name).toBe("League");
+    expect(store.leagueInfo[0].name).toBe("Duplicate Name");
   });
 
   test("addProjectionData updates only the targeted roster", () => {

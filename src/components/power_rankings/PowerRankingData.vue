@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import max from "lodash/max";
 import mean from "lodash/mean";
 import min from "lodash/min";
 import zip from "lodash/zip";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import { getPowerRanking, winsOnWeek } from "../../api/helper";
 import {
+  LeagueInfoType,
   RosterType,
   TableDataType,
   PowerRankingEntry,
 } from "../../types/types";
+import { getProjections } from "../../api/sleeperApi";
 import PowerRankingCard from "./PowerRankingCard.vue";
 import Card from "../ui/card/Card.vue";
 const store = useStore();
@@ -20,6 +22,55 @@ const props = defineProps<{
   regularSeasonLength: number;
   totalRosters: number;
 }>();
+
+const hasProjectionData = (league: LeagueInfoType) =>
+  league.rosters.every(
+    (roster) => roster.projections && roster.projections.length > 0
+  );
+
+const loadProjectionData = async () => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (!currentLeague || hasProjectionData(currentLeague)) {
+    return;
+  }
+
+  const lastScoredWeek =
+    currentLeague.status === "complete" ? 0 : currentLeague.lastScoredWeek || 0;
+
+  await Promise.all(
+    currentLeague.rosters.map(async (roster: RosterType) => {
+      if (!roster.players) {
+        return;
+      }
+
+      const projections = await Promise.all(
+        roster.players.map((player: string) =>
+          getProjections(
+            player,
+            currentLeague.season,
+            lastScoredWeek,
+            currentLeague.scoringType
+          )
+        )
+      );
+
+      store.addProjectionData(
+        getLeagueKey(currentLeague),
+        roster.id,
+        projections
+      );
+    })
+  );
+
+  localStorage.setItem(
+    "leagueInfo",
+    JSON.stringify(store.leagueInfo as LeagueInfoType[])
+  );
+};
+
+onMounted(() => {
+  void loadProjectionData();
+});
 
 const preseasonRank = computed(() => {
   type Position = "QB" | "WR" | "TE" | "RB";
@@ -153,6 +204,9 @@ const updateChartColor = () => {
       zoom: {
         enabled: false,
       },
+      animations: {
+        speed: 1200,
+      },
     },
     tooltip: {
       theme: store.darkMode ? "dark" : "light",
@@ -195,6 +249,7 @@ watch(
     () => store.currentLeagueId,
   ],
   () => {
+    void loadProjectionData();
     updateChartColor();
   }
 );
@@ -209,6 +264,9 @@ const chartOptions = ref({
     },
     zoom: {
       enabled: false,
+    },
+    animations: {
+      speed: 1200,
     },
   },
   colors: [

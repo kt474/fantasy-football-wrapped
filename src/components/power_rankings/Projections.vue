@@ -18,6 +18,11 @@ type FormattedProjectionRoster = {
   total: number;
 };
 
+const hasProjectionData = (league: LeagueInfoType) =>
+  league.rosters.every(
+    (roster) => roster.projections && roster.projections.length > 0
+  );
+
 const categories = computed(() => {
   return formattedData.value.map((user) =>
     store.showUsernames
@@ -34,7 +39,7 @@ onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].rosters[0]?.projections
+    !hasProjectionData(store.leagueInfo[store.currentLeagueIndex])
   ) {
     loading.value = true;
     await getData();
@@ -51,7 +56,7 @@ watch(
       return;
     }
 
-    if (!currentLeague.rosters[0]?.projections) {
+    if (!hasProjectionData(currentLeague)) {
       loading.value = true;
       await getData();
       updateChartColor();
