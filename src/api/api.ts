@@ -148,6 +148,21 @@ interface PlayerIdLookupListResponse {
 const getPlayerLookupKey = ({ name, team }: PlayerNameTeamLookup): string =>
   `${name.trim().toLowerCase()}::${team.trim().toUpperCase()}`;
 
+export const resolvePlayerIdLookupEndpoint = (
+  lookupEndpoint?: string,
+  backendBaseUrl?: string
+) => {
+  if (lookupEndpoint?.trim()) {
+    return lookupEndpoint;
+  }
+
+  if (backendBaseUrl?.trim()) {
+    return new URL("/api/getPlayerId", backendBaseUrl).toString();
+  }
+
+  return "";
+};
+
 export const getPlayerIdLookupMap = async (
   players: PlayerNameTeamLookup[]
 ): Promise<Map<string, string>> => {
@@ -162,7 +177,13 @@ export const getPlayerIdLookupMap = async (
   );
 
   try {
-    const endpoint = import.meta.env.VITE_PLAYER_ID_LOOKUP;
+    const endpoint = resolvePlayerIdLookupEndpoint(
+      import.meta.env.VITE_PLAYER_ID_LOOKUP,
+      import.meta.env.VITE_BACKEND_URL
+    );
+    if (!endpoint) {
+      throw new Error("Player ID lookup endpoint is not configured");
+    }
     const url = new URL(endpoint);
 
     uniquePlayers.forEach(({ name, team }) => {

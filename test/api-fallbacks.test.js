@@ -7,6 +7,7 @@ import {
   getLeagueCount,
   getPlayerIdsByNameTeamMap,
   getPlayerNews,
+  resolvePlayerIdLookupEndpoint,
 } from "../src/api/api.ts";
 
 const mockFetchResponse = (status, data, overrides = {}) =>
@@ -23,6 +24,21 @@ afterEach(() => {
 });
 
 describe("API fallback behavior", () => {
+  test("uses the dedicated player ID lookup endpoint when configured", () => {
+    expect(
+      resolvePlayerIdLookupEndpoint(
+        "https://lookup.example/api/player-id",
+        "https://backend.example"
+      )
+    ).toBe("https://lookup.example/api/player-id");
+  });
+
+  test("derives the player ID lookup endpoint from the backend URL", () => {
+    expect(
+      resolvePlayerIdLookupEndpoint(undefined, "https://backend.example")
+    ).toBe("https://backend.example/api/getPlayerId");
+  });
+
   test("getLeagueCount falls back to zero on fetch error", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
 

@@ -35,6 +35,11 @@ const systemDarkMode = window.matchMedia(
 ).matches;
 const clicked = ref(systemDarkMode);
 
+const hasMissingEspnPlayerIds = (league: LeagueInfoType) =>
+  league.platform === "espn" &&
+  league.rosters.length > 0 &&
+  league.rosters.every((roster) => !roster.players?.length);
+
 onMounted(async () => {
   try {
     checkSystemTheme();
@@ -49,7 +54,7 @@ onMounted(async () => {
           if (!store.leagueIds.includes(getLeagueKey(league))) {
             const currentTime = new Date().getTime();
             const diff = currentTime - league.lastUpdated;
-            if (diff > 86400000) {
+            if (diff > 86400000 || hasMissingEspnPlayerIds(league)) {
               // 1 day
               showLoading.value = true;
               const currentData = getParsedStorageItem<
