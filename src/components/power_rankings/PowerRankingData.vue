@@ -21,12 +21,6 @@ const props = defineProps<{
   totalRosters: number;
 }>();
 
-const hasUsableProjectionData = (rosters: RosterType[]) =>
-  rosters.every(
-    (roster) =>
-      roster.projections?.some((projection) => projection.projection > 0)
-  );
-
 const preseasonRank = computed(() => {
   type Position = "QB" | "WR" | "TE" | "RB";
   const positions: Position[] = ["QB", "WR", "TE", "RB"];
@@ -34,12 +28,15 @@ const preseasonRank = computed(() => {
 
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague?.rosters) {
-    if (!hasUsableProjectionData(currentLeague.rosters)) {
-      return [];
-    }
-
     const results = currentLeague.rosters.map((roster: RosterType) => {
       const projections = roster.projections ?? [];
+      // const hasAllPositions = ["QB", "WR", "TE", "RB"].every((pos) =>
+      //   projections.some((p) => p.position === pos && p.projection > 0)
+      // );
+
+      // if (!hasAllPositions) {
+      //   return null; // Not ready yet
+      // }
       const sumTop2: Top2Sums = positions.reduce<Top2Sums>(
         (acc, pos) => {
           const filtered = projections.filter((item) => item.position === pos);
