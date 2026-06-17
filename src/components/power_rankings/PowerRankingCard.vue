@@ -16,6 +16,7 @@ const store = useStore();
 const props = defineProps<{
   powerRankings: PowerRankingEntry[];
   regularSeasonLength: number;
+  includePreseason?: boolean;
 }>();
 
 const rankingValues = computed(() => {
@@ -27,13 +28,16 @@ const rankingValues = computed(() => {
 const weeks = computed(() => {
   if (props.powerRankings.length > 0) {
     const recordLength = props.powerRankings[0].data
-      ? props.powerRankings[0].data.length + 1
+      ? props.powerRankings[0].data.length
       : 0;
-    const weeksList = [...Array(props.regularSeasonLength + 1).keys()]
+    const weekCount = props.includePreseason
+      ? props.regularSeasonLength + 1
+      : props.regularSeasonLength;
+    const weeksList = [...Array(weekCount + 1).keys()]
       .slice(1)
       .reverse();
     return recordLength < weeksList.length
-      ? [...Array(recordLength).keys()].slice(1).reverse()
+      ? [...Array(recordLength + 1).keys()].slice(1).reverse()
       : weeksList;
   }
   return [];
@@ -71,7 +75,13 @@ const listPadding = computed(() => {
         </SelectTrigger>
         <SelectContent>
           <SelectItem v-for="week in weeks" :key="week" :value="week">
-            {{ week === 1 ? "Preseason" : `Week ${week - 1}` }}
+            {{
+              includePreseason
+                ? week === 1
+                  ? "Preseason"
+                  : `Week ${week - 1}`
+                : `Week ${week}`
+            }}
           </SelectItem>
         </SelectContent>
       </Select>
