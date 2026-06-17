@@ -18,6 +18,29 @@ type FormattedProjectionRoster = {
   total: number;
 };
 
+const mapWithConcurrency = async <T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>
+): Promise<R[]> => {
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+
+  const worker = async () => {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, () => worker())
+  );
+
+  return results;
+};
+
 const hasProjectionData = (league: LeagueInfoType) =>
   league.rosters.every(
     (roster) => roster.projections && roster.projections.length > 0
@@ -80,23 +103,32 @@ const getData = async () => {
         ? currentLeague.lastScoredWeek
         : 0;
 
-  await Promise.all(
-    currentLeague.rosters.map(async (roster: RosterType) => {
+  await mapWithConcurrency(
+    currentLeague.rosters,
+    2,
+    async (roster: RosterType) => {
       const singleRoster: ProjectionByPosition[] = [];
       if (!roster.players) return [];
-      const projectionPromises = roster.players.map((player: string) => {
-        return getProjections(
-          player,
-          currentLeague.season,
-          lastScoredWeek,
-          currentLeague.scoringType
-        );
-      });
 
-      const projections = await Promise.all(projectionPromises);
+      const projections = await mapWithConcurrency(
+        roster.players,
+        4,
+        (player: string) =>
+          getProjections(
+            player,
+            currentLeague.season,
+            lastScoredWeek,
+            currentLeague.scoringType
+          )
+      );
+
       singleRoster.push(...projections);
-      store.addProjectionData(getLeagueKey(currentLeague), roster.id, singleRoster);
-    })
+      store.addProjectionData(
+        getLeagueKey(currentLeague),
+        roster.id,
+        singleRoster
+      );
+    }
   );
   localStorage.setItem(
     "leagueInfo",
