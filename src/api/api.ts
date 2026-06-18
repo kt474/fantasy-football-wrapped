@@ -8,7 +8,7 @@ import {
   NewLeagueInfoType,
   Player,
 } from "../types/apiTypes";
-import { LeagueInfoType } from "../types/types";
+import { LeagueInfoType, PremiumReport } from "../types/types";
 import { authenticatedFetch } from "@/lib/authFetch";
 import {
   getAvatar,
@@ -331,7 +331,7 @@ export const generatePremiumReport = async (
   prompt: Record<string, unknown>[],
   metadata: Record<string, unknown>,
   style: string
-): Promise<Record<string, string>> => {
+): Promise<{ report?: PremiumReport; text?: string }> => {
   try {
     const response = await authenticatedFetch(
       import.meta.env.VITE_PREMIUM_WEEKLY_REPORT,
@@ -353,7 +353,10 @@ export const generatePremiumReport = async (
       throw new Error("Please sign in to use premium reports.");
     }
     assertOk(response, "Premium report request");
-    return await parseJson<Record<string, string>>(response, "Premium report");
+    return await parseJson<{ report: PremiumReport }>(
+      response,
+      "Premium report"
+    );
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Unable to generate report.";

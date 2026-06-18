@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { TableDataType, LeagueInfoType } from "../../types/types.ts";
+import {
+  TableDataType,
+  LeagueInfoType,
+  PremiumReport,
+} from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import { computed, ref, watch, onMounted, nextTick } from "vue";
 import { getLeagueKey, useStore } from "../../store/store";
@@ -59,7 +63,54 @@ const fetchingPlayers = ref(false);
 
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("roast");
-const rawPremiumWeeklyReport = ref<string>("");
+const premiumWeeklyReport = ref<PremiumReport | null>(null);
+
+const isPremiumReport = (value: unknown): value is PremiumReport => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const report = value as Partial<PremiumReport>;
+  return Boolean(
+    report.frontPage &&
+      Array.isArray(report.matchupReports) &&
+      report.teamOfTheWeek &&
+      report.managersBlotter
+  );
+};
+
+const premiumReportText = computed(() => {
+  const report = premiumWeeklyReport.value;
+  if (!report) {
+    return "";
+  }
+
+  const matchups = report.matchupReports
+    .map(
+      (matchup) =>
+        `Matchup ${matchup.matchupNumber} (${matchup.bracket} bracket)\n${matchup.headline}\n${matchup.recap}`
+    )
+    .join("\n\n");
+  const blotter = report.managersBlotter.entries
+    .map(
+      (entry) =>
+        `${entry.teamName} — ${entry.headline}\n${entry.analysis}`
+    )
+    .join("\n\n");
+
+  return [
+    report.frontPage.headline,
+    report.frontPage.subheadline,
+    report.frontPage.lead,
+    matchups,
+    `Team of the Week: ${report.teamOfTheWeek.teamName} (${report.teamOfTheWeek.pointsScored} points)`,
+    report.teamOfTheWeek.headline,
+    report.teamOfTheWeek.analysis,
+    "Manager Blunders",
+    blotter,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+});
 
 const weeks = computed(() => {
   if (
@@ -156,7 +207,7 @@ const fetchPlayerNames = async () => {
 
 const getPremiumReport = async () => {
   if (store.leagueIds.length > 0) {
-    rawPremiumWeeklyReport.value = "";
+    premiumWeeklyReport.value = null;
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     let leagueMetadata: Record<string, string | number>;
     if (isPlayoffs.value) {
@@ -187,11 +238,16 @@ const getPremiumReport = async () => {
       leagueMetadata,
       premiumCommentaryStyle.value
     );
+    if (!response.report) {
+      toast.error(response.text ?? "Unable to generate premium report.");
+      premiumLoading.value = false;
+      return;
+    }
     premiumLoading.value = false;
-    rawPremiumWeeklyReport.value = response.text;
+    premiumWeeklyReport.value = response.report;
     store.addPremiumWeeklyReport(
       getLeagueKey(currentLeague),
-      rawPremiumWeeklyReport.value
+      premiumWeeklyReport.value
     );
     localStorage.setItem(
       "leagueInfo",
@@ -265,11 +321,11 @@ onMounted(async () => {
       ? (store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "")
       : "";
     rawWeeklyReport.value = savedText;
-    const premiumSavedText = store.leagueInfo[store.currentLeagueIndex]
-      .premiumWeeklyReport
-      ? (store.leagueInfo[store.currentLeagueIndex].premiumWeeklyReport ?? "")
-      : "";
-    rawPremiumWeeklyReport.value = premiumSavedText;
+    const savedPremiumReport =
+      store.leagueInfo[store.currentLeagueIndex].premiumWeeklyReport;
+    premiumWeeklyReport.value = isPremiumReport(savedPremiumReport)
+      ? savedPremiumReport
+      : null;
     loading.value = false;
   }
 });
@@ -382,8 +438,8 @@ const numOfMatchups = computed(() => {
 const medianScoring = computed(() => {
   return Boolean(
     store.leagueInfo.length > 0 &&
-      store.leagueInfo[store.currentLeagueIndex] &&
-      store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
+    store.leagueInfo[store.currentLeagueIndex] &&
+    store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
   );
 });
 
@@ -413,6 +469,11 @@ watch(
     }
     rawWeeklyReport.value =
       store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "";
+    const savedPremiumReport =
+      store.leagueInfo[store.currentLeagueIndex].premiumWeeklyReport;
+    premiumWeeklyReport.value = isPremiumReport(savedPremiumReport)
+      ? savedPremiumReport
+      : null;
   }
 );
 
@@ -420,7 +481,7 @@ const copyReport = () => {
   navigator.clipboard.writeText(
     (tier.value === "Standard"
       ? rawWeeklyReport.value
-      : rawPremiumWeeklyReport.value) + "\n\nCreated with https://ffwrapped.com"
+      : premiumReportText.value) + "\n\nCreated with https://ffwrapped.com"
   );
   toast.success("Summary copied to clipboard!");
 };
@@ -450,8 +511,8 @@ const exportBenchPlayers = computed(() => {
 
 const exportSummary = computed(() => {
   const sourceText =
-    tier.value === "Premium" && rawPremiumWeeklyReport.value
-      ? rawPremiumWeeklyReport.value
+    tier.value === "Premium" && premiumReportText.value
+      ? premiumReportText.value
       : rawWeeklyReport.value;
   if (!sourceText) {
     return "";
@@ -552,7 +613,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
             Boolean(store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek)
           "
           :raw-weekly-report="rawWeeklyReport"
-          :raw-premium-weekly-report="rawPremiumWeeklyReport"
+          :premium-weekly-report="premiumWeeklyReport"
           :loading="loading"
           :premium-loading="premiumLoading"
           :is-generating-image="isGeneratingImage"

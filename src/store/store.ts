@@ -8,6 +8,7 @@ import {
   WaiverMove,
   PlayerRankingsType,
   PlayerType,
+  PremiumReport,
   UserLeagueListItem,
   TradeNameRow,
 } from "../types/types";
@@ -147,7 +148,7 @@ export const useStore = defineStore("main", {
         item.weeklyReport = payload;
       }
     },
-    addPremiumWeeklyReport(leagueId: string, payload: string) {
+    addPremiumWeeklyReport(leagueId: string, payload: PremiumReport) {
       const item = this.findLeague(leagueId);
       if (item) {
         item.premiumWeeklyReport = payload;

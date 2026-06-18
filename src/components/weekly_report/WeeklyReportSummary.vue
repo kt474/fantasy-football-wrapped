@@ -8,6 +8,13 @@ import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { useStore } from "@/store/store";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -17,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Separator from "../ui/separator/Separator.vue";
-import AudioRecap from "./AudioRecap.vue";
+import type { PremiumReport } from "@/types/types";
 
 const props = defineProps<{
   tier: string;
@@ -27,7 +34,7 @@ const props = defineProps<{
   hasLeagues: boolean;
   hasLastScoredWeek: boolean;
   rawWeeklyReport: string;
-  rawPremiumWeeklyReport: string;
+  premiumWeeklyReport: PremiumReport | null;
   loading: boolean;
   premiumLoading: boolean;
   isGeneratingImage: boolean;
@@ -54,10 +61,6 @@ const md = new MarkdownIt({
 
 const renderedWeeklyReport = computed(() =>
   DOMPurify.sanitize(md.render(props.rawWeeklyReport))
-);
-
-const renderedPremiumWeeklyReport = computed(() =>
-  DOMPurify.sanitize(md.render(props.rawPremiumWeeklyReport))
 );
 
 const canGeneratePremium = computed(
@@ -119,17 +122,132 @@ const canGeneratePremium = computed(
             </div>
             <Button
               @click="emit('generate-premium')"
-              :disabled="!canGeneratePremium"
+              :disabled="!canGeneratePremium || premiumLoading"
               type="button"
               class="mt-5 ml-2"
               >Generate</Button
             >
           </div>
-          <div v-if="rawPremiumWeeklyReport">
-            <div
-              v-html="renderedPremiumWeeklyReport"
-              class="my-2.5 report-content"
-            ></div>
+          <div v-if="premiumWeeklyReport" class="my-5 space-y-4">
+            <header class="max-w-5xl">
+              <h2
+                class="max-w-4xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl text-pretty"
+              >
+                {{ premiumWeeklyReport.frontPage.headline }}
+              </h2>
+              <p class="max-w-3xl mt-2 text-lg text-muted-foreground">
+                {{ premiumWeeklyReport.frontPage.subheadline }}
+              </p>
+              <p class="max-w-4xl mt-5 text-base leading-7">
+                {{ premiumWeeklyReport.frontPage.lead }}
+              </p>
+            </header>
+
+            <Separator />
+
+            <section class="space-y-3">
+              <div class="flex items-start gap-3">
+                <div>
+                  <h3 class="text-lg font-semibold">Matchup Reports</h3>
+                  <p class="text-sm text-muted-foreground">
+                    This week's head-to-head action.
+                  </p>
+                </div>
+              </div>
+              <div class="grid gap-4 lg:grid-cols-2">
+                <Card
+                  v-for="matchup in premiumWeeklyReport.matchupReports"
+                  :key="`${matchup.bracket}-${matchup.matchupNumber}`"
+                  class="shadow-sm"
+                >
+                  <CardHeader class="pb-3">
+                    <CardTitle class="text-base leading-snug">
+                      {{ matchup.headline }}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p class="text-base leading-7 text-foreground/90">
+                      {{ matchup.recap }}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+
+            <section class="space-y-3">
+              <div class="flex items-start gap-3">
+                <div>
+                  <h3 class="text-lg font-semibold">Team of the Week</h3>
+                  <p class="text-sm text-muted-foreground">
+                    The week's top-scoring lineup.
+                  </p>
+                </div>
+              </div>
+              <Card class="shadow-sm">
+                <CardHeader>
+                  <div
+                    class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+                  >
+                    <div class="space-y-1.5">
+                      <CardTitle class="text-xl">
+                        {{ premiumWeeklyReport.teamOfTheWeek.teamName }}
+                      </CardTitle>
+                      <CardDescription class="text-base">
+                        {{ premiumWeeklyReport.teamOfTheWeek.headline }}
+                      </CardDescription>
+                    </div>
+                    <div class="shrink-0 sm:text-right">
+                      <p class="text-2xl font-bold tabular-nums">
+                        {{ premiumWeeklyReport.teamOfTheWeek.pointsScored }}
+                      </p>
+                      <p
+                        class="text-xs font-medium tracking-wide uppercase text-muted-foreground"
+                      >
+                        Points
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p class="text-base leading-7 text-foreground/90">
+                    {{ premiumWeeklyReport.teamOfTheWeek.analysis }}
+                  </p>
+                </CardContent>
+              </Card>
+            </section>
+
+            <section class="space-y-3">
+              <div class="flex items-start gap-3">
+                <div>
+                  <h3 class="text-lg font-semibold">Manager Blunders</h3>
+                  <p class="text-sm text-muted-foreground">
+                    The lineup decisions that shaped the week.
+                  </p>
+                </div>
+              </div>
+              <div class="grid gap-4 lg:grid-cols-2">
+                <Card
+                  v-for="entry in premiumWeeklyReport.managersBlotter.entries"
+                  :key="`${entry.teamName}-${entry.category}`"
+                  class="shadow-sm"
+                >
+                  <CardHeader>
+                    <CardTitle class="text-xl">
+                      {{ entry.teamName }}
+                    </CardTitle>
+                    <CardDescription class="text-base">
+                      {{ entry.headline }}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p class="text-base leading-7 text-foreground/90">
+                      {{ entry.analysis }}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+
             <p class="text-xs text-muted-foreground">
               AI-generated report. Information provided may not always be
               accurate.
@@ -210,8 +328,7 @@ const canGeneratePremium = computed(
           <div v-else>
             <p class="max-w-3xl">
               Premium weekly reports include deeper analysis, more league
-              context, customizable commentary styles, and a podcast-style audio
-              version. Available with a
+              context, and customizable commentary styles. Available with a
               <router-link
                 :to="{ path: '/account', query: route.query }"
                 class="font-medium cursor-pointer hover:underline"
@@ -221,16 +338,11 @@ const canGeneratePremium = computed(
               >.
             </p>
           </div>
-          <AudioRecap
-            :recap-text="rawPremiumWeeklyReport"
-            :file-name="`ffwrapped-week-${currentWeek}-recap.mp3`"
-          />
         </div>
         <div v-else>
           <p class="max-w-3xl">
             Premium weekly reports include deeper analysis, more league context,
-            customizable commentary styles, and a podcast-style audio version.
-            Available with a
+            and customizable commentary styles. Available with a
             <router-link
               :to="{ path: '/account', query: route.query }"
               class="font-medium cursor-pointer hover:underline"
@@ -286,8 +398,8 @@ const canGeneratePremium = computed(
             MVP, putting up numbers like he was playing Madden on rookie mode.
             <b>Baby Back Gibbs</b> and <b>Bijan Mustard</b> had a snooze-fest,
             with the BBQ Ribs barely staying awake long enough to win 95 to
-            82.64. Travis Kelce's performance was less "Mr. Swift" and more
-            "Mr. Swiftly Disappointing."
+            82.64. Travis Kelce's performance was less "Mr. Swift" and more "Mr.
+            Swiftly Disappointing."
           </p>
           <p class="mb-3">
             In the battle of the lower ranks, <b>Breece's Puffs</b> barely

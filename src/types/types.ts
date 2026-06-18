@@ -35,7 +35,7 @@ export type LeagueInfoType = {
   playoffTeams: number;
   playoffProjections?: PlayoffProjection[];
   weeklyReport?: string;
-  premiumWeeklyReport?: string;
+  premiumWeeklyReport?: PremiumReport | string;
   weeklyPreview?: string;
   managerProfiles?: Record<string, string>;
   yearEndReport?: string;
@@ -49,6 +49,39 @@ export type LeagueInfoType = {
   rosterRankings?: Record<string, PlayerType[]>;
   waiverType: number;
   sport: string;
+};
+
+export type PremiumReport = {
+  frontPage: {
+    headline: string;
+    subheadline: string;
+    lead: string;
+  };
+  matchupReports: Array<{
+    matchupNumber: number;
+    bracket: "winners" | "losers";
+    headline: string;
+    recap: string;
+  }>;
+  teamOfTheWeek: {
+    teamName: string;
+    pointsScored: number;
+    headline: string;
+    analysis: string;
+  };
+  managersBlotter: {
+    headline: string;
+    entries: Array<{
+      teamName: string;
+      category:
+        | "bench_burn"
+        | "starter_disaster"
+        | "defensive_meltdown"
+        | "weekly_low";
+      headline: string;
+      analysis: string;
+    }>;
+  };
 };
 
 export type RosterType = {

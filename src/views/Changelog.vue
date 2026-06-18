@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "6/18/26",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "The premium weekly reports are now much more detailed and displayed in a journalist/newspaper layout with different sections.",
+        ],
+      },
+    ],
+  },
+  {
     date: "5/31/26",
     content: [
       {
