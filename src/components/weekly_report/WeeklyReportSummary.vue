@@ -327,8 +327,10 @@ const canGeneratePremium = computed(
           </div>
           <div v-else>
             <p class="max-w-3xl">
-              Premium weekly reports include deeper analysis, more league
-              context, and customizable commentary styles. Available with a
+              Premium weekly reports provide deeper analysis with
+              journalist/newsletter style coverage, including a front-page
+              story, individual matchup reports, manager highlights/lowlights,
+              and customizable commentary tones. Available with a
               <router-link
                 :to="{ path: '/account', query: route.query }"
                 class="font-medium cursor-pointer hover:underline"
@@ -341,8 +343,10 @@ const canGeneratePremium = computed(
         </div>
         <div v-else>
           <p class="max-w-3xl">
-            Premium weekly reports include deeper analysis, more league context,
-            and customizable commentary styles. Available with a
+            Premium weekly reports provide deeper analysis with
+            journalist/newsletter coverage, including a front-page story,
+            individual matchup reports, manager highlights/lowlights, and
+            customizable commentary tones. Available with a
             <router-link
               :to="{ path: '/account', query: route.query }"
               class="font-medium cursor-pointer hover:underline"
