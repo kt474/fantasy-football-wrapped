@@ -8,13 +8,6 @@ import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { useStore } from "@/store/store";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -24,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Separator from "../ui/separator/Separator.vue";
+import PremiumReportContent from "./PremiumReportContent.vue";
 import type { PremiumReport } from "@/types/types";
 
 const props = defineProps<{
@@ -66,6 +60,43 @@ const renderedWeeklyReport = computed(() =>
 const canGeneratePremium = computed(
   () => authStore.isAuthenticated && subscriptionStore.isPremium
 );
+
+const premiumReportPreview: PremiumReport = {
+  frontPage: {
+    headline: "Fourth-Quarter Chaos Turns the League Upside Down",
+    subheadline:
+      "A statement win, a brutal bench decision, and one matchup nobody saw coming.",
+    lead: "Week 8 delivered the kind of fantasy football drama that makes the group chat impossible to mute. The favorites survived, the standings tightened, and one manager left enough points on the bench to haunt the rest of the season.",
+  },
+  matchupReports: [
+    {
+      matchupNumber: 1,
+      bracket: "winners",
+      headline: "Sunday Night Rally Steals the Week",
+      recap:
+        "Gridiron Royalty erased a 22-point deficit behind a huge primetime performance, turning a comfortable lead into the week's most painful loss.",
+    },
+  ],
+  teamOfTheWeek: {
+    teamName: "Gridiron Royalty",
+    pointsScored: 156.42,
+    headline: "The lineup that could not miss",
+    analysis:
+      "Every starter contributed, three players cleared 25 points, and the league's highest score was never seriously threatened.",
+  },
+  managersBlotter: {
+    headline: "Manager Blunders",
+    entries: [
+      {
+        teamName: "Fourth and Regret",
+        category: "bench_burn",
+        headline: "The winning points watched from the bench",
+        analysis:
+          "A 31-point receiver sat behind a struggling starter, turning what should have been a comfortable win into a narrow loss.",
+      },
+    ],
+  },
+};
 </script>
 
 <template>
@@ -128,126 +159,8 @@ const canGeneratePremium = computed(
               >Generate</Button
             >
           </div>
-          <div v-if="premiumWeeklyReport" class="my-5 space-y-4">
-            <header class="max-w-5xl">
-              <h2
-                class="max-w-4xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl text-pretty"
-              >
-                {{ premiumWeeklyReport.frontPage.headline }}
-              </h2>
-              <p class="max-w-3xl mt-2 text-lg text-muted-foreground">
-                {{ premiumWeeklyReport.frontPage.subheadline }}
-              </p>
-              <p class="max-w-4xl mt-5 text-base leading-7">
-                {{ premiumWeeklyReport.frontPage.lead }}
-              </p>
-            </header>
-
-            <Separator />
-
-            <section class="space-y-3">
-              <div class="flex items-start gap-3">
-                <div>
-                  <h3 class="text-lg font-semibold">Matchup Reports</h3>
-                  <p class="text-sm text-muted-foreground">
-                    This week's head-to-head action.
-                  </p>
-                </div>
-              </div>
-              <div class="grid gap-4 lg:grid-cols-2">
-                <Card
-                  v-for="matchup in premiumWeeklyReport.matchupReports"
-                  :key="`${matchup.bracket}-${matchup.matchupNumber}`"
-                  class="shadow-sm"
-                >
-                  <CardHeader class="pb-3">
-                    <CardTitle class="text-base leading-snug">
-                      {{ matchup.headline }}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p class="text-base leading-7 text-foreground/90">
-                      {{ matchup.recap }}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </section>
-
-            <section class="space-y-3">
-              <div class="flex items-start gap-3">
-                <div>
-                  <h3 class="text-lg font-semibold">Team of the Week</h3>
-                  <p class="text-sm text-muted-foreground">
-                    The week's top-scoring lineup.
-                  </p>
-                </div>
-              </div>
-              <Card class="shadow-sm">
-                <CardHeader>
-                  <div
-                    class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
-                  >
-                    <div class="space-y-1.5">
-                      <CardTitle class="text-xl">
-                        {{ premiumWeeklyReport.teamOfTheWeek.teamName }}
-                      </CardTitle>
-                      <CardDescription class="text-base">
-                        {{ premiumWeeklyReport.teamOfTheWeek.headline }}
-                      </CardDescription>
-                    </div>
-                    <div class="shrink-0 sm:text-right">
-                      <p class="text-2xl font-bold tabular-nums">
-                        {{ premiumWeeklyReport.teamOfTheWeek.pointsScored }}
-                      </p>
-                      <p
-                        class="text-xs font-medium tracking-wide uppercase text-muted-foreground"
-                      >
-                        Points
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p class="text-base leading-7 text-foreground/90">
-                    {{ premiumWeeklyReport.teamOfTheWeek.analysis }}
-                  </p>
-                </CardContent>
-              </Card>
-            </section>
-
-            <section class="space-y-3">
-              <div class="flex items-start gap-3">
-                <div>
-                  <h3 class="text-lg font-semibold">Manager Blunders</h3>
-                  <p class="text-sm text-muted-foreground">
-                    The lineup decisions that shaped the week.
-                  </p>
-                </div>
-              </div>
-              <div class="grid gap-4 lg:grid-cols-2">
-                <Card
-                  v-for="entry in premiumWeeklyReport.managersBlotter.entries"
-                  :key="`${entry.teamName}-${entry.category}`"
-                  class="shadow-sm"
-                >
-                  <CardHeader>
-                    <CardTitle class="text-xl">
-                      {{ entry.teamName }}
-                    </CardTitle>
-                    <CardDescription class="text-base">
-                      {{ entry.headline }}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p class="text-base leading-7 text-foreground/90">
-                      {{ entry.analysis }}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </section>
-
+          <div v-if="premiumWeeklyReport" class="my-5">
+            <PremiumReportContent :report="premiumWeeklyReport" />
             <p class="text-xs text-muted-foreground">
               AI-generated report. Information provided may not always be
               accurate.
@@ -325,36 +238,71 @@ const canGeneratePremium = computed(
               <span class="sr-only">Loading...</span>
             </div>
           </div>
-          <div v-else>
+          <p v-else-if="canGeneratePremium" class="max-w-3xl">
+            Choose a commentary style and generate your premium weekly report.
+          </p>
+          <div v-else class="max-w-4xl">
             <p class="max-w-3xl">
               Premium weekly reports provide deeper analysis with
               journalist/newsletter style coverage, including a front-page
               story, individual matchup reports, manager highlights/lowlights,
-              and customizable commentary tones. Available with a
-              <router-link
-                :to="{ path: '/account', query: route.query }"
-                class="font-medium cursor-pointer hover:underline"
-                @click="store.currentTab = ''"
-              >
-                Premium subscription</router-link
-              >.
+              and customizable commentary tones.
             </p>
+            <p
+              class="mt-5 mb-2 text-xs font-medium tracking-wide uppercase text-muted-foreground"
+            >
+              Sample premium report
+            </p>
+            <div
+              class="relative max-h-[400px] overflow-hidden rounded-xl border p-4 sm:p-6"
+            >
+              <PremiumReportContent :report="premiumReportPreview" />
+              <div
+                class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background via-background/95 to-transparent"
+              ></div>
+              <div class="absolute inset-x-0 z-10 flex justify-center bottom-6">
+                <Button as-child>
+                  <router-link
+                    :to="{ path: '/account', query: route.query }"
+                    @click="store.currentTab = ''"
+                  >
+                    Unlock Premium Reports
+                  </router-link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-        <div v-else>
+        <div v-else class="max-w-4xl">
           <p class="max-w-3xl">
             Premium weekly reports provide deeper analysis with
             journalist/newsletter coverage, including a front-page story,
             individual matchup reports, manager highlights/lowlights, and
-            customizable commentary tones. Available with a
-            <router-link
-              :to="{ path: '/account', query: route.query }"
-              class="font-medium cursor-pointer hover:underline"
-              @click="store.currentTab = ''"
-            >
-              Premium subscription</router-link
-            >.
+            customizable commentary tones.
           </p>
+          <p
+            class="mt-5 mb-2 text-xs font-medium tracking-wide uppercase text-muted-foreground"
+          >
+            Sample premium report
+          </p>
+          <div
+            class="relative max-h-[400px] overflow-hidden rounded-xl border p-4 sm:p-6"
+          >
+            <PremiumReportContent :report="premiumReportPreview" />
+            <div
+              class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background via-background/95 to-transparent"
+            ></div>
+            <div class="absolute inset-x-0 z-10 flex justify-center bottom-6">
+              <Button as-child>
+                <router-link
+                  :to="{ path: '/account', query: route.query }"
+                  @click="store.currentTab = ''"
+                >
+                  Unlock Premium Reports
+                </router-link>
+              </Button>
+            </div>
+          </div>
         </div>
       </TabsContent>
       <TabsContent value="Standard">
