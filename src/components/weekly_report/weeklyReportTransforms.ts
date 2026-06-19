@@ -18,33 +18,31 @@ export interface PerformerEntry {
   user: string;
 }
 
-export type PlayoffReportRow = Record<string, unknown> & {
-  name: string;
-  matchupNumber: number | null;
-  winner: boolean;
-  playerPoints: number[];
-  playerNames: string[];
-  pointsScored: number;
-  inLosersBracket: boolean;
-  inWinnersBracket: boolean;
-};
-
-export type RegularSeasonReportRow = Record<string, unknown> & {
-  name: string;
-  matchupNumber: number | null;
-  playerPoints: number[];
-  pointsScored: number;
-  winner: boolean;
-  playerNames: string[];
-  currentRecord: string;
-  currentRank: number;
-};
-
-export type PremiumReportPlayer = {
+export type ReportPlayer = {
   name: string;
   team: string;
   points: number;
 };
+
+export type ReportTeam = {
+  name: string;
+  result: "win" | "loss" | "tie";
+  pointsScored: number;
+  weeklyScoreRank: number;
+  starters: ReportPlayer[];
+  bench: ReportPlayer[];
+};
+
+export type RegularSeasonReportTeam = ReportTeam & {
+  recordAfterWeek: string;
+  rankAfterWeek: number;
+};
+
+export type PlayoffReportTeam = ReportTeam & {
+  bracket: "winners" | "losers" | "unknown";
+};
+
+export type PremiumReportPlayer = ReportPlayer;
 
 type PremiumLineupPlayer = PremiumReportPlayer & {
   position: string;
@@ -103,6 +101,11 @@ type EspnPlayoffMatchup = {
 
 export type PremiumReportMatchup = Record<string, unknown> & {
   teams: Array<RegularSeasonPremiumReportTeam | PlayoffPremiumReportTeam>;
+  playoffContext?: PlayoffMatchupContext;
+};
+
+export type ReportMatchup = Record<string, unknown> & {
+  teams: Array<RegularSeasonReportTeam | PlayoffReportTeam>;
   playoffContext?: PlayoffMatchupContext;
 };
 
@@ -320,6 +323,51 @@ const stripLineupMetadata = ({
   team,
   points,
 });
+
+const buildReportPlayers = (
+  players: WeeklyReportPlayer[],
+  points: number[],
+  limit?: number
+) =>
+  players.slice(0, limit).map(
+    (player, index): ReportPlayer => ({
+      name: getPlayerLabel(player),
+      team: player.team,
+      points: points[index] ?? 0,
+    })
+  );
+
+const getWeeklyScoreRanks = (
+  tableData: TableDataType[],
+  weekIndex: number
+) =>
+  [...tableData]
+    .filter((user) => user.matchups[weekIndex] !== null)
+    .sort((a, b) => b.points[weekIndex] - a.points[weekIndex])
+    .reduce((rankMap, user, index) => {
+      rankMap.set(user.rosterId, index + 1);
+      return rankMap;
+    }, new Map<number, number>());
+
+const getTeamResult = (
+  tableData: TableDataType[],
+  matchupNumber: number | null,
+  weekIndex: number,
+  pointsScored: number
+): ReportTeam["result"] => {
+  const matchupScores = tableData
+    .filter((team) => team.matchups[weekIndex] === matchupNumber)
+    .map((team) => team.points[weekIndex]);
+  if (matchupScores.length === 1) {
+    return "win";
+  }
+  const highestScore = Math.max(...matchupScores);
+  const lowestScore = Math.min(...matchupScores);
+  if (highestScore === lowestScore) {
+    return "tie";
+  }
+  return pointsScored === highestScore ? "win" : "loss";
+};
 
 export const getRecordForWeek = (
   recordString: string,
@@ -558,59 +606,118 @@ export const getBenchPerformers = ({
 
 export const buildReportPrompt = ({
   tableData,
-  sortedTableData,
   playerNames,
+  benchPlayerNames,
   weekIndex,
   showUsernames,
   isPlayoffs,
-  losersBracketIds,
-  winnersBracketIds,
+  losersBracket = [],
+  winnersBracket = [],
+  espnLosersBracket = [],
+  espnWinnersBracket = [],
+  medianScoring = false,
 }: {
   tableData: TableDataType[];
-  sortedTableData: TableDataType[];
   playerNames: WeeklyReportPlayer[][];
+  benchPlayerNames: WeeklyReportPlayer[][];
   weekIndex: number;
   showUsernames: boolean;
   isPlayoffs: boolean;
-  losersBracketIds: number[];
-  winnersBracketIds: number[];
+  losersBracket?: Bracket[];
+  winnersBracket?: Bracket[];
+  espnLosersBracket?: EspnPlayoffMatchup[];
+  espnWinnersBracket?: EspnPlayoffMatchup[];
+  medianScoring?: boolean;
 }) => {
-  const result: Array<PlayoffReportRow | RegularSeasonReportRow> = [];
+  const result: ReportMatchup[] = [];
+  const weeklyScoreRanks = getWeeklyScoreRanks(tableData, weekIndex);
+  const ranksAfterWeek = getStandingsForWeek(
+    tableData,
+    weekIndex + 1,
+    medianScoring
+  );
+  const teamsByMatchup = new Map<
+    number | null,
+    Array<RegularSeasonReportTeam | PlayoffReportTeam>
+  >();
+
   tableData.forEach((user, index) => {
     if (!user.matchups[weekIndex]) {
       return;
     }
     const matchupNumber = user.matchups[weekIndex];
-    const winner =
-      getMatchupWinner(sortedTableData, matchupNumber, weekIndex) ===
-      user.points[weekIndex];
-    const starterNames = (playerNames[index] ?? []).map(getPlayerLabel);
+    const baseTeam: ReportTeam = {
+      name: getManagerName(user, showUsernames),
+      result: getTeamResult(
+        tableData,
+        matchupNumber,
+        weekIndex,
+        user.points[weekIndex]
+      ),
+      pointsScored: user.points[weekIndex],
+      weeklyScoreRank: weeklyScoreRanks.get(user.rosterId) ?? 0,
+      starters: buildReportPlayers(
+        playerNames[index] ?? [],
+        user.starterPoints[weekIndex] ?? [],
+        7
+      ),
+      bench: buildReportPlayers(
+        benchPlayerNames[index] ?? [],
+        user.benchPoints[weekIndex] ?? []
+      ),
+    };
+    const matchupTeams = teamsByMatchup.get(matchupNumber) ?? [];
 
     if (isPlayoffs) {
-      result.push({
-        name: getManagerName(user, showUsernames),
-        matchupNumber,
-        winner,
-        playerPoints: user.starterPoints[weekIndex].slice(0, 7),
-        playerNames: starterNames.slice(0, 7),
-        pointsScored: user.points[weekIndex],
-        inLosersBracket: losersBracketIds.includes(user.rosterId),
-        inWinnersBracket: winnersBracketIds.includes(user.rosterId),
+      matchupTeams.push({
+        ...baseTeam,
+        bracket: "unknown",
       });
+      teamsByMatchup.set(matchupNumber, matchupTeams);
       return;
     }
 
-    result.push({
-      name: getManagerName(user, showUsernames),
-      matchupNumber,
-      playerPoints: user.starterPoints[weekIndex].slice(0, 7),
-      pointsScored: user.points[weekIndex],
-      winner,
-      playerNames: starterNames.slice(0, 7),
-      currentRecord: `${user.wins}-${user.losses}`,
-      currentRank: user.regularSeasonRank,
+    matchupTeams.push({
+      ...baseTeam,
+      recordAfterWeek: formatRecord(
+        getRecordCountsForWeek(
+          user.recordByWeek,
+          weekIndex + 1,
+          medianScoring
+        )
+      ),
+      rankAfterWeek: ranksAfterWeek.get(user.rosterId) ?? 0,
     });
+    teamsByMatchup.set(matchupNumber, matchupTeams);
   });
+
+  teamsByMatchup.forEach((teams, matchupNumber) => {
+    const matchup: ReportMatchup = {
+      teams: [...teams].sort((a, b) => b.pointsScored - a.pointsScored),
+    };
+    if (isPlayoffs) {
+      const rosterIds = tableData
+        .filter((user) => user.matchups[weekIndex] === matchupNumber)
+        .map((user) => user.rosterId);
+      matchup.playoffContext = getPlayoffMatchupContext(
+        rosterIds,
+        winnersBracket,
+        losersBracket,
+        espnWinnersBracket,
+        espnLosersBracket,
+        (rosterId) => {
+          const user = tableData.find((team) => team.rosterId === rosterId);
+          return user ? getManagerName(user, showUsernames) : null;
+        }
+      );
+      matchup.teams = matchup.teams.map((team) => ({
+        ...team,
+        bracket: matchup.playoffContext?.bracket ?? "unknown",
+      }));
+    }
+    result.push(matchup);
+  });
+
   return result;
 };
 
@@ -646,13 +753,7 @@ export const buildPremiumReportPrompt = ({
   medianScoring?: boolean;
 }) => {
   const result: PremiumReportMatchup[] = [];
-  const weeklyScoreRanks = [...tableData]
-    .filter((user) => user.matchups[weekIndex] !== null)
-    .sort((a, b) => b.points[weekIndex] - a.points[weekIndex])
-    .reduce((rankMap, user, index) => {
-      rankMap.set(user.rosterId, index + 1);
-      return rankMap;
-    }, new Map<number, number>());
+  const weeklyScoreRanks = getWeeklyScoreRanks(tableData, weekIndex);
   const ranksBeforeWeek = getStandingsForWeek(
     tableData,
     weekIndex,
@@ -673,17 +774,12 @@ export const buildPremiumReportPrompt = ({
       return;
     }
     const matchupNumber = user.matchups[weekIndex];
-    const matchupScores = tableData
-      .filter((team) => team.matchups[weekIndex] === matchupNumber)
-      .map((team) => team.points[weekIndex]);
-    const highestScore = Math.max(...matchupScores);
-    const lowestScore = Math.min(...matchupScores);
-    const result =
-      highestScore === lowestScore
-        ? "tie"
-        : user.points[weekIndex] === highestScore
-          ? "win"
-          : "loss";
+    const result = getTeamResult(
+      tableData,
+      matchupNumber,
+      weekIndex,
+      user.points[weekIndex]
+    );
     const lineupSlots =
       rosterPositions.length > 0
         ? rosterPositions

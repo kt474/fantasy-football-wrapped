@@ -120,51 +120,94 @@ describe("weekly report transforms", () => {
   });
 
   test("builds regular season report prompts", () => {
-    const sorted = getSortedTableData(tableData, 0);
-
     expect(
       buildReportPrompt({
         tableData,
-        sortedTableData: sorted,
         playerNames,
+        benchPlayerNames,
         weekIndex: 0,
         showUsernames: true,
         isPlayoffs: false,
-        losersBracketIds: [],
-        winnersBracketIds: [],
       })
     ).toEqual([
       {
-        name: "alpha",
-        matchupNumber: 7,
-        playerPoints: [20, 12],
-        pointsScored: 101,
-        winner: true,
-        playerNames: ["Alpha WR", "Bills"],
-        currentRecord: "1-0",
-        currentRank: 1,
+        teams: [
+          {
+            name: "alpha",
+            result: "win",
+            pointsScored: 101,
+            weeklyScoreRank: 1,
+            starters: [
+              { name: "Alpha WR", team: "BUF", points: 20 },
+              { name: "Bills", team: "BUF", points: 12 },
+            ],
+            bench: [{ name: "Alpha Bench", team: "DAL", points: 14 }],
+            recordAfterWeek: "1-0",
+            rankAfterWeek: 1,
+          },
+          {
+            name: "beta",
+            result: "loss",
+            pointsScored: 89,
+            weeklyScoreRank: 2,
+            starters: [
+              { name: "Beta WR", team: "BUF", points: 18 },
+              { name: "Beta RB", team: "MIA", points: 4 },
+            ],
+            bench: [{ name: "Beta Bench", team: "SF", points: 30 }],
+            recordAfterWeek: "1-0",
+            rankAfterWeek: 2,
+          },
+        ],
       },
       {
-        name: "beta",
-        matchupNumber: 7,
-        playerPoints: [18, 4],
-        pointsScored: 89,
-        winner: false,
-        playerNames: ["Beta WR", "Beta RB"],
-        currentRecord: "0-1",
-        currentRank: 2,
-      },
-      {
-        name: "gamma",
-        matchupNumber: 8,
-        playerPoints: [11, 9],
-        pointsScored: 76,
-        winner: true,
-        playerNames: ["Gamma WR", "Gamma TE"],
-        currentRecord: "0-1",
-        currentRank: 3,
+        teams: [
+          {
+            name: "gamma",
+            result: "win",
+            pointsScored: 76,
+            weeklyScoreRank: 3,
+            starters: [
+              { name: "Gamma WR", team: "BUF", points: 11 },
+              { name: "Gamma TE", team: "NYJ", points: 9 },
+            ],
+            bench: [{ name: "Gamma Bench", team: "KC", points: 5 }],
+            recordAfterWeek: "1-0",
+            rankAfterWeek: 3,
+          },
+        ],
       },
     ]);
+  });
+
+  test("adds authoritative playoff context to standard report matchups", () => {
+    const result = buildReportPrompt({
+      tableData,
+      playerNames,
+      benchPlayerNames,
+      weekIndex: 0,
+      showUsernames: false,
+      isPlayoffs: true,
+      winnersBracket: [
+        { t1: 1, t2: 2, w: 1, l: 2, r: 3, p: 1, m: 6 },
+      ],
+    });
+
+    expect(result[0].playoffContext).toEqual({
+      bracket: "winners",
+      round: 3,
+      placement: 1,
+      isChampionship: true,
+      leagueChampion: "Alpha Team",
+    });
+    expect(result[0].teams).toMatchObject([
+      { name: "Alpha Team", result: "win", bracket: "winners" },
+      { name: "Beta Team", result: "loss", bracket: "winners" },
+    ]);
+    expect(result[0].teams[0].bench).toEqual([
+      { name: "Alpha Bench", team: "DAL", points: 14 },
+    ]);
+    expect(result[0].teams[0]).not.toHaveProperty("lineupEfficiency");
   });
 
   test("builds playoff premium report prompts with bracket membership", () => {

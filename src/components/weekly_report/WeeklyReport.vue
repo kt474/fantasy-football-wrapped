@@ -407,13 +407,20 @@ const benchPerformers = computed(() => {
 const reportPrompt = computed(() => {
   return buildReportPrompt({
     tableData: props.tableData,
-    sortedTableData: sortedTableData.value,
     playerNames: playerNames.value,
+    benchPlayerNames: benchPlayerNames.value,
     weekIndex: currentWeek.value - 1,
     showUsernames: store.showUsernames,
     isPlayoffs: isPlayoffs.value,
-    losersBracketIds: losersBracketIDs.value,
-    winnersBracketIds: winnersBracketIDs.value,
+    losersBracket:
+      store.leagueInfo[store.currentLeagueIndex]?.losersBracket ?? [],
+    winnersBracket:
+      store.leagueInfo[store.currentLeagueIndex]?.winnersBracket ?? [],
+    espnLosersBracket:
+      store.leagueInfo[store.currentLeagueIndex]?.espnLosersBracket ?? [],
+    espnWinnersBracket:
+      store.leagueInfo[store.currentLeagueIndex]?.espnWinnersBracket ?? [],
+    medianScoring: medianScoring.value,
   });
 });
 
