@@ -25,7 +25,7 @@ defineProps<{
       <p class="max-w-3xl mt-2 text-lg text-muted-foreground">
         {{ report.frontPage.subheadline }}
       </p>
-      <p class="max-w-4xl mt-5 text-base leading-7">
+      <p class="max-w-4xl mt-5 text-base leading-normal">
         {{ report.frontPage.lead }}
       </p>
     </header>
@@ -51,7 +51,7 @@ defineProps<{
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p class="text-base leading-7 text-foreground/90">
+            <p class="text-base leading-normal text-foreground/90">
               {{ matchup.recap }}
             </p>
           </CardContent>
@@ -67,11 +67,11 @@ defineProps<{
         </p>
       </div>
       <Card class="shadow-sm">
-        <CardHeader>
+        <CardHeader class="p-4 pb-3">
           <div
             class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
           >
-            <div class="space-y-1.5">
+            <div class="space-y-0.5">
               <CardTitle class="text-xl">
                 {{ report.teamOfTheWeek.teamName }}
               </CardTitle>
@@ -91,8 +91,8 @@ defineProps<{
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <p class="text-base leading-7 text-foreground/90">
+        <CardContent class="p-4 pt-0">
+          <p class="text-base leading-normal text-foreground/90">
             {{ report.teamOfTheWeek.analysis }}
           </p>
         </CardContent>
@@ -112,7 +112,7 @@ defineProps<{
           :key="`${entry.teamName}-${entry.category}`"
           class="shadow-sm"
         >
-          <CardHeader>
+          <CardHeader class="gap-y-0.5 p-4 pb-3">
             <CardTitle class="text-xl">
               {{ entry.teamName }}
             </CardTitle>
@@ -120,8 +120,8 @@ defineProps<{
               {{ entry.headline }}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p class="text-base leading-7 text-foreground/90">
+          <CardContent class="p-4 pt-0">
+            <p class="text-base leading-normal text-foreground/90">
               {{ entry.analysis }}
             </p>
           </CardContent>

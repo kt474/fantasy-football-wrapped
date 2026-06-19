@@ -107,7 +107,7 @@ describe("weekly report transforms", () => {
   ];
   const benchPlayerNames = [
     [player("Alpha Bench", "b1", "DAL", "RB")],
-    [player("Beta Bench", "b2", "SF", "QB")],
+    [player("Beta Bench", "b2", "SF", "RB")],
     [player("Gamma Bench", "b3", "KC", "WR")],
   ];
 
@@ -168,58 +168,132 @@ describe("weekly report transforms", () => {
   });
 
   test("builds playoff premium report prompts with bracket membership", () => {
-    const sorted = getSortedTableData(tableData, 0);
+    const result = buildPremiumReportPrompt({
+      tableData,
+      playerNames,
+      benchPlayerNames,
+      weekIndex: 0,
+      showUsernames: false,
+      isPlayoffs: true,
+      losersBracketIds: [3],
+      winnersBracketIds: [1, 2],
+      winnersBracket: [
+        { t1: 1, t2: 2, w: 1, l: 2, r: 3, p: 1, m: 6 },
+      ],
+    });
 
-    expect(
-      buildPremiumReportPrompt({
-        tableData,
-        sortedTableData: sorted,
-        playerNames,
-        benchPlayerNames,
-        weekIndex: 0,
-        showUsernames: false,
-        isPlayoffs: true,
-        losersBracketIds: [3],
-        winnersBracketIds: [1, 2],
-      })
-    ).toEqual([
-      {
-        name: "Alpha Team",
-        matchupNumber: 7,
-        winner: true,
-        starterPlayerPoints: [20, 12],
-        starterPlayerNames: ["Alpha WR", "Bills"],
-        benchPlayerPoints: [14],
-        benchPlayerNames: ["Alpha Bench"],
-        pointsScored: 101,
-        inLosersBracket: false,
-        inWinnersBracket: true,
-      },
-      {
-        name: "Beta Team",
-        matchupNumber: 7,
-        winner: false,
-        starterPlayerPoints: [18, 4],
-        starterPlayerNames: ["Beta WR", "Beta RB"],
-        benchPlayerPoints: [30],
-        benchPlayerNames: ["Beta Bench"],
-        pointsScored: 89,
-        inLosersBracket: false,
-        inWinnersBracket: true,
-      },
-      {
-        name: "Gamma Team",
-        matchupNumber: 8,
-        winner: true,
-        starterPlayerPoints: [11, 9],
-        starterPlayerNames: ["Gamma WR", "Gamma TE"],
-        benchPlayerPoints: [5],
-        benchPlayerNames: ["Gamma Bench"],
-        pointsScored: 76,
-        inLosersBracket: true,
-        inWinnersBracket: false,
-      },
+    expect(result).toHaveLength(2);
+    expect(result[0]).not.toHaveProperty("matchupNumber");
+    expect(result[0]).not.toHaveProperty("margin");
+    expect(result[0]).not.toHaveProperty("combinedPoints");
+    expect(result[0].playoffContext).toEqual({
+      bracket: "winners",
+      round: 3,
+      placement: 1,
+      isChampionship: true,
+      leagueChampion: "Alpha Team",
+    });
+    expect(result[0].teams.map((team) => team.name)).toEqual([
+      "Alpha Team",
+      "Beta Team",
     ]);
+    expect(result[0].teams[0]).toMatchObject({
+      result: "win",
+      bracket: "winners",
+      weeklyScoreRank: 1,
+      lineupEfficiency: 1,
+      pointsLeftOnBench: 0,
+      starters: [
+        {
+          name: "Alpha WR",
+          team: "BUF",
+          points: 20,
+        },
+        {
+          name: "Bills",
+          team: "BUF",
+          points: 12,
+        },
+      ],
+    });
+    expect(result[0].teams[0]).not.toHaveProperty("currentStreak");
+    expect(result[0].teams[1]).toMatchObject({
+      result: "loss",
+      bracket: "winners",
+      optimalPoints: 48,
+      pointsLeftOnBench: 26,
+      bestBenchSwap: {
+        benched: { name: "Beta Bench", points: 30 },
+        started: { name: "Beta RB", points: 4 },
+        pointsLost: 26,
+      },
+    });
+    expect(result[1].teams[0]).toMatchObject({
+      name: "Gamma Team",
+      bracket: "unknown",
+    });
+    expect(result[1].playoffContext).toEqual({
+      bracket: "unknown",
+      round: null,
+      placement: null,
+      isChampionship: false,
+      leagueChampion: null,
+    });
+  });
+
+  test("adds standings history to regular season premium matchups", () => {
+    const result = buildPremiumReportPrompt({
+      tableData,
+      playerNames,
+      benchPlayerNames,
+      weekIndex: 0,
+      showUsernames: true,
+      isPlayoffs: false,
+      losersBracketIds: [],
+      winnersBracketIds: [],
+    });
+
+    expect(result[0].teams[0]).toMatchObject({
+      name: "alpha",
+      recordBeforeWeek: "0-0",
+      recordAfterWeek: "1-0",
+      rankBeforeWeek: 1,
+      rankAfterWeek: 1,
+      rankChange: 0,
+      seasonAverageThroughWeek: 101,
+      currentStreak: "W1",
+    });
+  });
+
+  test("identifies an ESPN championship and its league winner", () => {
+    const result = buildPremiumReportPrompt({
+      tableData,
+      playerNames,
+      benchPlayerNames,
+      weekIndex: 0,
+      showUsernames: false,
+      isPlayoffs: true,
+      losersBracketIds: [],
+      winnersBracketIds: [],
+      espnWinnersBracket: [
+        {
+          id: 91,
+          matchupPeriodId: 2,
+          playoffTierType: "WINNERS_BRACKET",
+          winner: "HOME",
+          home: { teamId: 1 },
+          away: { teamId: 2 },
+        },
+      ],
+    });
+
+    expect(result[0].playoffContext).toEqual({
+      bracket: "winners",
+      round: 1,
+      placement: 1,
+      isChampionship: true,
+      leagueChampion: "Alpha Team",
+    });
   });
 
   test("ranks starter and bench performers", () => {

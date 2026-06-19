@@ -420,7 +420,6 @@ const reportPrompt = computed(() => {
 const premiumReportPrompt = computed(() => {
   return buildPremiumReportPrompt({
     tableData: props.tableData,
-    sortedTableData: sortedTableData.value,
     playerNames: playerNames.value,
     benchPlayerNames: benchPlayerNames.value,
     weekIndex: currentWeek.value - 1,
@@ -428,6 +427,17 @@ const premiumReportPrompt = computed(() => {
     isPlayoffs: isPlayoffs.value,
     losersBracketIds: losersBracketIDs.value,
     winnersBracketIds: winnersBracketIDs.value,
+    losersBracket:
+      store.leagueInfo[store.currentLeagueIndex]?.losersBracket ?? [],
+    winnersBracket:
+      store.leagueInfo[store.currentLeagueIndex]?.winnersBracket ?? [],
+    espnLosersBracket:
+      store.leagueInfo[store.currentLeagueIndex]?.espnLosersBracket ?? [],
+    espnWinnersBracket:
+      store.leagueInfo[store.currentLeagueIndex]?.espnWinnersBracket ?? [],
+    rosterPositions:
+      store.leagueInfo[store.currentLeagueIndex]?.rosterPositions ?? [],
+    medianScoring: medianScoring.value,
   });
 });
 

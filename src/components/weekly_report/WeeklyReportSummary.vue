@@ -161,7 +161,7 @@ const premiumReportPreview: PremiumReport = {
           </div>
           <div v-if="premiumWeeklyReport" class="my-5">
             <PremiumReportContent :report="premiumWeeklyReport" />
-            <p class="text-xs text-muted-foreground">
+            <p class="mt-4 text-xs text-muted-foreground">
               AI-generated report. Information provided may not always be
               accurate.
             </p>
