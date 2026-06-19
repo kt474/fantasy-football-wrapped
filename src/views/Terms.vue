@@ -38,6 +38,12 @@
         described at checkout and ends automatically without renewal unless
         otherwise stated.
 
+        <p class="my-3 text-xl font-semibold">Fair Use of Paid Features</p>
+        Paid plans are intended for personal use in leagues you participate in.
+        Please do not abuse paid access by generating premium reports for
+        unrelated leagues, sharing or reselling access, or using the Service to
+        provide reports to others at scale.
+
         <p class="my-3 text-xl font-semibold">Cancellation and Refunds</p>
         Recurring subscriptions may be canceled at any time through the billing
         portal and remain active through the end of the then-current billing
@@ -102,7 +108,7 @@
           class="font-medium text-primary hover:underline"
           >kevin@ffwrapped.com</a
         >. <br /><br />
-        Last updated: March 11, 2026.
+        Last updated: June 19, 2026.
       </div>
     </div>
   </div>
