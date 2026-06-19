@@ -871,10 +871,9 @@ watch(
               <div class="flex align-middle">
                 <Check class="w-5 h-5 mr-2 shrink-0" />
                 <p class="text-muted-foreground max-w-80">
-                  Smarter, more detailed, journalist/newsletter style weekly
-                  league recaps with customizable commentary tones, front-page
-                  coverage, individual matchup reports, and team
-                  highlights/lowlights.
+                  Smarter, more detailed, newsletter style weekly league recaps
+                  with customizable commentary tones, front-page coverage,
+                  individual matchup reports, and team highlights/lowlights
                 </p>
               </div>
               <div class="flex mt-3 align-middle">

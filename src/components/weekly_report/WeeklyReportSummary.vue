@@ -142,12 +142,10 @@ const premiumReportPreview: PremiumReport = {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="roast">Roast (default)</SelectItem>
-                  <SelectItem value="analytical">Analyst</SelectItem>
-                  <SelectItem value="hype">Hype</SelectItem>
-                  <SelectItem value="cutthroat">Cutthroat</SelectItem>
+                  <SelectItem value="roast">Roast</SelectItem>
                   <SelectItem value="neutral">Neutral</SelectItem>
                   <SelectItem value="newspaper">Newspaper</SelectItem>
+                  <SelectItem value="cutthroat">Cutthroat</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -243,10 +241,10 @@ const premiumReportPreview: PremiumReport = {
           </p>
           <div v-else class="max-w-4xl">
             <p class="max-w-3xl">
-              Premium weekly reports provide deeper analysis with
-              journalist/newsletter style coverage, including a front-page
-              story, individual matchup reports, manager highlights/lowlights,
-              and customizable commentary tones.
+              Premium weekly reports provide deeper analysis with newsletter
+              style coverage, including a front-page story, individual matchup
+              reports, manager highlights/lowlights, and customizable commentary
+              tones.
             </p>
             <p
               class="mt-5 mb-2 text-xs font-medium tracking-wide uppercase text-muted-foreground"
@@ -275,10 +273,9 @@ const premiumReportPreview: PremiumReport = {
         </div>
         <div v-else class="max-w-4xl">
           <p class="max-w-3xl">
-            Premium weekly reports provide deeper analysis with
-            journalist/newsletter coverage, including a front-page story,
-            individual matchup reports, manager highlights/lowlights, and
-            customizable commentary tones.
+            Premium weekly reports provide deeper analysis with newsletter
+            coverage, including a front-page story, individual matchup reports,
+            manager highlights/lowlights, and customizable commentary tones.
           </p>
           <p
             class="mt-5 mb-2 text-xs font-medium tracking-wide uppercase text-muted-foreground"
