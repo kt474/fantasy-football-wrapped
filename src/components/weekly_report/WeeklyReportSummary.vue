@@ -262,10 +262,9 @@ const premiumReportPreview: PremiumReport = {
           </p>
           <div v-else class="max-w-4xl">
             <p class="max-w-3xl">
-              Premium weekly reports provide deeper analysis with newsletter
-              style coverage, including a front-page story, individual matchup
-              reports, manager highlights/lowlights, and customizable commentary
-              tones.
+              Premium weekly reports turn each week into a shareable league
+              newsletter with headline stories, matchup recaps, manager
+              highlights, and your choice of commentary style.
             </p>
             <p
               class="mt-5 mb-2 text-xs font-medium tracking-wide uppercase text-muted-foreground"
@@ -294,9 +293,9 @@ const premiumReportPreview: PremiumReport = {
         </div>
         <div v-else class="max-w-4xl">
           <p class="max-w-3xl">
-            Premium weekly reports provide deeper analysis with newsletter
-            coverage, including a front-page story, individual matchup reports,
-            manager highlights/lowlights, and customizable commentary tones.
+            Premium weekly reports turn each week into a shareable league
+            newsletter with headline stories, matchup recaps, manager
+            highlights, and your choice of commentary style.
           </p>
           <p
             class="mt-5 mb-2 text-xs font-medium tracking-wide uppercase text-muted-foreground"
