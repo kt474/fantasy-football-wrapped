@@ -63,6 +63,10 @@ const canGeneratePremium = computed(
   () => authStore.isAuthenticated && subscriptionStore.isPremium
 );
 
+const showShareButton = computed(
+  () => props.tier === "Premium" && Boolean(props.premiumWeeklyReport)
+);
+
 const premiumReportPreview: PremiumReport = {
   frontPage: {
     headline: "Fourth-Quarter Chaos Turns the League Upside Down",
@@ -117,20 +121,11 @@ const premiumReportPreview: PremiumReport = {
           </TabsList>
         </div>
         <Button
-          @click="emit('download-image')"
-          :disabled="isGeneratingImage"
-          size="sm"
-          class="ml-auto mr-2"
-        >
-          <Download />
-        </Button>
-        <Button
-          v-if="tier === 'Premium' && premiumWeeklyReport"
+          v-if="showShareButton"
           @click="emit('share-report')"
           :disabled="isSharingReport"
-          variant="outline"
           size="sm"
-          class="mr-2"
+          class="ml-auto mr-2"
         >
           <LoaderCircle
             v-if="isSharingReport"
@@ -138,6 +133,15 @@ const premiumReportPreview: PremiumReport = {
           />
           <Share2 v-else class="mr-2 size-4" />
           Share
+        </Button>
+        <Button
+          @click="emit('download-image')"
+          :disabled="isGeneratingImage"
+          variant="outline"
+          size="sm"
+          :class="['mr-2', { 'ml-auto': !showShareButton }]"
+        >
+          <Download />
         </Button>
         <Button @click="emit('copy-report')" variant="outline" size="sm">
           <Copy class="size-4" />
