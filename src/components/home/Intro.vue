@@ -59,11 +59,13 @@ const {
     <div
       class="relative z-10 flex min-h-[calc(100dvh-4rem)] items-start px-4 py-6 sm:px-8 sm:items-center lg:px-12"
     >
-      <div class="mx-auto max-w-7xl">
+      <div class="w-full mx-auto max-w-7xl">
         <div
-          class="grid items-center gap-8 lg:grid-cols-2 lg:gap-10 lg:-translate-y-2"
+          class="grid items-center gap-8 min-[1240px]:grid-cols-2 min-[1240px]:gap-10 min-[1240px]:-translate-y-2"
         >
-          <div class="text-left animate-rise">
+          <div
+            class="w-full max-w-2xl mx-auto text-left animate-rise min-[1240px]:mx-0"
+          >
             <p
               class="inline-flex items-center px-3 py-1 text-xs font-semibold border rounded-full border-border/80 bg-background/80 text-muted-foreground backdrop-blur"
             >
@@ -152,7 +154,7 @@ const {
 
           <div
             aria-hidden="true"
-            class="relative hidden h-[480px] overflow-hidden lg:block"
+            class="relative hidden h-[480px] overflow-hidden min-[1240px]:block"
           >
             <div
               class="absolute inset-0 z-20 pointer-events-none showcase-fade"
