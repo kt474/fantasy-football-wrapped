@@ -1,4 +1,4 @@
-import type { Player } from "@/types/apiTypes";
+import type { Player, WeeklyWaiver } from "@/types/apiTypes";
 import type { Bracket } from "@/types/apiTypes";
 import type { TableDataType } from "@/types/types";
 
@@ -55,6 +55,14 @@ export type PremiumLineupDecision = {
   pointsLost: number;
 };
 
+export type PremiumWaiverMove = {
+  playerName: string;
+  acquisitionType: "waiver" | "free_agent";
+  faabBid?: number;
+  startedThisWeek: boolean;
+  pointsScored: number | null;
+};
+
 export type PremiumReportTeam = {
   name: string;
   result: "win" | "loss" | "tie";
@@ -67,6 +75,7 @@ export type PremiumReportTeam = {
   lineupEfficiency: number;
   bestBenchSwap: PremiumLineupDecision | null;
   seasonAverageThroughWeek: number;
+  waiverMoves?: PremiumWaiverMove[];
 };
 
 export type RegularSeasonPremiumReportTeam = PremiumReportTeam & {
@@ -117,6 +126,81 @@ export const getManagerName = (user: TableDataType, showUsernames: boolean) => {
     return user.username ? user.username : "Ghost Roster";
   }
   return user.name ? user.name : "Ghost Roster";
+};
+
+const getWaiverPlayerName = (
+  playerId: string,
+  playerLookup: Map<string, Player>
+) => {
+  const player = playerLookup.get(playerId);
+  if (!player) {
+    return playerId;
+  }
+  return player.name || (player.team ? `${player.team} Defense` : playerId);
+};
+
+export const buildWeeklyWaiverContext = ({
+  waivers,
+  tableData,
+  playerLookup,
+  weekIndex,
+}: {
+  waivers: WeeklyWaiver[];
+  tableData: TableDataType[];
+  playerLookup: Map<string, Player>;
+  weekIndex: number;
+}): Record<number, PremiumWaiverMove[]> => {
+  const movesByRoster: Record<number, PremiumWaiverMove[]> = {};
+
+  waivers
+    .filter(
+      (transaction) =>
+        transaction.status === "complete" &&
+        transaction.leg === weekIndex + 1 &&
+        (transaction.type === "waiver" ||
+          transaction.type === "free_agent") &&
+        transaction.adds
+    )
+    .forEach((transaction) => {
+      Object.entries(transaction.adds ?? {}).forEach(
+        ([playerId, rosterId]) => {
+          const team = tableData.find((entry) => entry.rosterId === rosterId);
+          if (!team) {
+            return;
+          }
+
+          const starterIndex =
+            team.starters[weekIndex]?.indexOf(playerId) ?? -1;
+          const benchIndex =
+            team.benchPlayers[weekIndex]?.indexOf(playerId) ?? -1;
+          const pointsScored =
+            starterIndex >= 0
+              ? (team.starterPoints[weekIndex]?.[starterIndex] ?? null)
+              : benchIndex >= 0
+                ? (team.benchPoints[weekIndex]?.[benchIndex] ?? null)
+                : null;
+          const move: PremiumWaiverMove = {
+            playerName: getWaiverPlayerName(playerId, playerLookup),
+            acquisitionType:
+              transaction.type === "waiver" ? "waiver" : "free_agent",
+            startedThisWeek: starterIndex >= 0,
+            pointsScored,
+          };
+
+          if (
+            transaction.type === "waiver" &&
+            transaction.settings?.waiver_bid != null
+          ) {
+            move.faabBid = transaction.settings.waiver_bid;
+          }
+
+          movesByRoster[rosterId] ??= [];
+          movesByRoster[rosterId].push(move);
+        }
+      );
+    });
+
+  return movesByRoster;
 };
 
 const roundPoints = (points: number) => Math.round(points * 100) / 100;
@@ -736,6 +820,7 @@ export const buildPremiumReportPrompt = ({
   espnWinnersBracket = [],
   rosterPositions = [],
   medianScoring = false,
+  waiverMovesByRoster = {},
 }: {
   tableData: TableDataType[];
   playerNames: WeeklyReportPlayer[][];
@@ -751,6 +836,7 @@ export const buildPremiumReportPrompt = ({
   espnWinnersBracket?: EspnPlayoffMatchup[];
   rosterPositions?: string[];
   medianScoring?: boolean;
+  waiverMovesByRoster?: Record<number, PremiumWaiverMove[]>;
 }) => {
   const result: PremiumReportMatchup[] = [];
   const weeklyScoreRanks = getWeeklyScoreRanks(tableData, weekIndex);
@@ -824,6 +910,10 @@ export const buildPremiumReportPrompt = ({
         getPointsThroughWeek(user, weekIndex + 1) / (weekIndex + 1)
       ),
     };
+    const weeklyWaiverMoves = waiverMovesByRoster[user.rosterId];
+    if (weeklyWaiverMoves?.length) {
+      baseTeam.waiverMoves = weeklyWaiverMoves;
+    }
 
     if (isPlayoffs) {
       const bracket = winnersBracketIds.includes(user.rosterId)

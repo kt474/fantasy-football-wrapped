@@ -101,8 +101,25 @@ watch(() => route.params.token, loadReport);
 
     <article v-else-if="sharedReport">
       <header class="pb-5 border-b mb-7">
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 mb-2 text-xl font-semibold tracking-tight"
+          aria-label="Go to ffwrapped home"
+        >
+          <img
+            height="24"
+            width="24"
+            src="../assets/football-helmet.webp"
+            class="h-6"
+            alt="ffwrapped logo"
+          />
+          <!-- Icon credit to https://www.flaticon.com/free-icons/american-football -->
+          <p class="custom-font mt-1.5">
+            <span class="text-primary">ff</span>wrapped
+          </p>
+        </a>
         <div
-          class="flex flex-col gap-2 mt-2 sm:flex-row sm:items-end sm:justify-between"
+          class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
             <h1 class="text-2xl font-bold sm:text-3xl">
@@ -138,3 +155,12 @@ watch(() => route.params.token, loadReport);
     </article>
   </div>
 </template>
+<style scoped>
+.custom-font {
+  font-family: "Josefin Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 1.6rem;
+}
+</style>

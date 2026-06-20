@@ -39,6 +39,7 @@ import { toPng } from "html-to-image";
 import {
   buildPremiumReportPrompt,
   buildReportPrompt,
+  buildWeeklyWaiverContext,
   getBenchPerformers,
   getBracketRosterIds,
   getExportPlayers,
@@ -57,6 +58,7 @@ const props = defineProps<{
 const rawWeeklyReport = ref<string>("");
 const playerNames = ref<Player[][]>([]);
 const benchPlayerNames = ref<Player[][]>([]);
+const weeklyPlayerLookup = ref<Map<string, Player>>(new Map());
 const loading = ref(false);
 const tier = ref("Standard");
 const premiumLoading = ref(false);
@@ -174,15 +176,38 @@ const fetchPlayerNames = async () => {
     weeks.value.length > 0
   ) {
     fetchingPlayers.value = true;
-    const allPlayerIds = props.tableData
-      .map((user) => [user.starters[currentWeek.value - 1]])
-      .flat();
-    let playerLookupMap = new Map<string, Player>();
-    if (allPlayerIds.length > 0) {
-      playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
-    }
+    const weekIndex = currentWeek.value - 1;
+    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const waiverPlayerIds = currentLeague.waivers
+      .filter(
+        (transaction) =>
+          transaction.status === "complete" &&
+          transaction.leg === currentWeek.value &&
+          (transaction.type === "waiver" ||
+            transaction.type === "free_agent")
+      )
+      .flatMap((transaction) => Object.keys(transaction.adds ?? {}));
+    const allPlayerIds = [
+      ...props.tableData.flatMap((user) =>
+        (user.starters[weekIndex] ?? []).filter(
+          (id): id is string => id !== null
+        )
+      ),
+      ...props.tableData.flatMap((user) =>
+        (user.benchPlayers[weekIndex] ?? []).filter(
+          (id): id is string => id !== null
+        )
+      ),
+      ...waiverPlayerIds,
+    ];
+    const uniquePlayerIds = [...new Set(allPlayerIds)];
+    const playerLookupMap =
+      uniquePlayerIds.length > 0
+        ? await getPlayersByIdsMap(uniquePlayerIds)
+        : new Map<string, Player>();
+    weeklyPlayerLookup.value = playerLookupMap;
     const result = props.tableData.map((user) => {
-      const starterIds = user.starters[currentWeek.value - 1];
+      const starterIds = user.starters[weekIndex];
       const starterNames = starterIds
         ?.map((id: string) => playerLookupMap.get(id))
         .filter((player) => player !== undefined);
@@ -190,17 +215,10 @@ const fetchPlayerNames = async () => {
     });
     playerNames.value = result;
 
-    const benchPlayerIds = props.tableData
-      .map((user) => [user.benchPlayers[currentWeek.value - 1]])
-      .flat();
-    let benchPlayerLookupMap = new Map<string, Player>();
-    if (benchPlayerIds.length > 0) {
-      benchPlayerLookupMap = await getPlayersByIdsMap(benchPlayerIds);
-    }
     const benchResult: Player[][] = props.tableData.map((user) => {
-      const benchIds = user.benchPlayers[currentWeek.value - 1] ?? [];
+      const benchIds = user.benchPlayers[weekIndex] ?? [];
       return benchIds
-        .map((id: string) => benchPlayerLookupMap.get(id))
+        .map((id: string) => playerLookupMap.get(id))
         .filter((player): player is Player => player !== undefined);
     });
     benchPlayerNames.value = benchResult;
@@ -430,6 +448,14 @@ const reportPrompt = computed(() => {
 });
 
 const premiumReportPrompt = computed(() => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const waiverMovesByRoster = buildWeeklyWaiverContext({
+    waivers: currentLeague?.waivers ?? [],
+    tableData: props.tableData,
+    playerLookup: weeklyPlayerLookup.value,
+    weekIndex: currentWeek.value - 1,
+  });
+
   return buildPremiumReportPrompt({
     tableData: props.tableData,
     playerNames: playerNames.value,
@@ -448,8 +474,9 @@ const premiumReportPrompt = computed(() => {
     espnWinnersBracket:
       store.leagueInfo[store.currentLeagueIndex]?.espnWinnersBracket ?? [],
     rosterPositions:
-      store.leagueInfo[store.currentLeagueIndex]?.rosterPositions ?? [],
+      currentLeague?.rosterPositions ?? [],
     medianScoring: medianScoring.value,
+    waiverMovesByRoster,
   });
 });
 

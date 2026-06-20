@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   buildPremiumReportPrompt,
   buildReportPrompt,
+  buildWeeklyWaiverContext,
   getBenchPerformers,
   getBracketRosterIds,
   getExportPlayers,
@@ -306,6 +307,86 @@ describe("weekly report transforms", () => {
       seasonAverageThroughWeek: 101,
       currentStreak: "W1",
     });
+  });
+
+  test("adds completed weekly waiver impact to premium report teams", () => {
+    const waiverContext = buildWeeklyWaiverContext({
+      waivers: [
+        {
+          status: "complete",
+          type: "waiver",
+          leg: 1,
+          adds: { p1: 1 },
+          drops: { d1: 1 },
+          settings: { waiver_bid: 18 },
+        },
+        {
+          status: "complete",
+          type: "free_agent",
+          leg: 1,
+          adds: { b2: 2 },
+          drops: null,
+          settings: null,
+        },
+        {
+          status: "failed",
+          type: "waiver",
+          leg: 1,
+          adds: { p4: 3 },
+          drops: null,
+          settings: { waiver_bid: 25 },
+        },
+        {
+          status: "complete",
+          type: "waiver",
+          leg: 2,
+          adds: { p5: 3 },
+          drops: null,
+          settings: { waiver_bid: 5 },
+        },
+      ],
+      tableData: tableData.map((entry, index) => ({
+        ...entry,
+        starters: [[playerNames[index][0].player_id]],
+        benchPlayers: [[benchPlayerNames[index][0].player_id]],
+      })),
+      playerLookup: new Map([
+        ["p1", player("Alpha WR", "p1")],
+        ["b2", player("Beta Bench", "b2", "SF", "RB")],
+      ]),
+      weekIndex: 0,
+    });
+
+    const result = buildPremiumReportPrompt({
+      tableData,
+      playerNames,
+      benchPlayerNames,
+      weekIndex: 0,
+      showUsernames: false,
+      isPlayoffs: false,
+      losersBracketIds: [],
+      winnersBracketIds: [],
+      waiverMovesByRoster: waiverContext,
+    });
+
+    expect(result[0].teams[0].waiverMoves).toEqual([
+      {
+        playerName: "Alpha WR",
+        acquisitionType: "waiver",
+        faabBid: 18,
+        startedThisWeek: true,
+        pointsScored: 20,
+      },
+    ]);
+    expect(result[0].teams[1].waiverMoves).toEqual([
+      {
+        playerName: "Beta Bench",
+        acquisitionType: "free_agent",
+        startedThisWeek: false,
+        pointsScored: 30,
+      },
+    ]);
+    expect(result[1].teams[0]).not.toHaveProperty("waiverMoves");
   });
 
   test("identifies an ESPN championship and its league winner", () => {
