@@ -11,6 +11,7 @@ import {
   generateReport,
   generatePremiumReport,
   getPlayersByIdsMap,
+  sharePremiumReport,
 } from "../../api/api.ts";
 import Card from "../ui/card/Card.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -59,6 +60,8 @@ const benchPlayerNames = ref<Player[][]>([]);
 const loading = ref(false);
 const tier = ref("Standard");
 const premiumLoading = ref(false);
+const isSharingReport = ref(false);
+const sharedReportUrl = ref("");
 const fetchingPlayers = ref(false);
 
 const activeTab = ref("Report");
@@ -208,6 +211,7 @@ const fetchPlayerNames = async () => {
 const getPremiumReport = async () => {
   if (store.leagueIds.length > 0) {
     premiumWeeklyReport.value = null;
+    sharedReportUrl.value = "";
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     let leagueMetadata: Record<string, string | number>;
     if (isPlayoffs.value) {
@@ -245,6 +249,7 @@ const getPremiumReport = async () => {
     }
     premiumLoading.value = false;
     premiumWeeklyReport.value = response.report;
+    sharedReportUrl.value = "";
     store.addPremiumWeeklyReport(
       getLeagueKey(currentLeague),
       premiumWeeklyReport.value
@@ -503,6 +508,48 @@ const copyReport = () => {
   toast.success("Summary copied to clipboard!");
 };
 
+const shareReport = async () => {
+  if (!premiumWeeklyReport.value || isSharingReport.value) {
+    return;
+  }
+
+  isSharingReport.value = true;
+  try {
+    if (!sharedReportUrl.value) {
+      const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+      const response = await sharePremiumReport({
+        leagueName: currentLeague.name,
+        season: currentLeague.season,
+        week: currentWeek.value,
+        report: premiumWeeklyReport.value,
+      });
+      sharedReportUrl.value = response.url;
+    }
+
+    const shareData = {
+      title: `${store.leagueInfo[store.currentLeagueIndex].name} Week ${currentWeek.value} Report`,
+      text: "Check out this ffwrapped premium weekly report.",
+      url: sharedReportUrl.value,
+    };
+
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+
+    await navigator.clipboard.writeText(sharedReportUrl.value);
+    toast.success("Share link copied to clipboard!");
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return;
+    }
+    console.error("Unable to share premium report:", error);
+    toast.error("Unable to create the share link. Please try again.");
+  } finally {
+    isSharingReport.value = false;
+  }
+};
+
 const isGeneratingImage = ref(false);
 const shareCardRef = ref<HTMLElement | null>(null);
 
@@ -634,8 +681,10 @@ watch(() => currentWeek.value, fetchPlayerNames);
           :loading="loading"
           :premium-loading="premiumLoading"
           :is-generating-image="isGeneratingImage"
+          :is-sharing-report="isSharingReport"
           @download-image="downloadReportImage"
           @copy-report="copyReport"
+          @share-report="shareReport"
           @generate-premium="getPremiumReport"
         />
         <p

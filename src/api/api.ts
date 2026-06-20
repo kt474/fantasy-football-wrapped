@@ -82,6 +82,70 @@ export interface ManagerBlurbsResponse {
   }[];
 }
 
+export type SharedReportResponse = {
+  leagueName: string;
+  season: string;
+  week: number;
+  report: PremiumReport;
+  createdAt: string;
+};
+
+export type ShareReportPayload = {
+  leagueName: string;
+  season: string;
+  week: number;
+  report: PremiumReport;
+};
+
+const getBackendApiUrl = (path: string) => {
+  const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
+    /\/$/,
+    ""
+  );
+  return `${backendBaseUrl}${path}`;
+};
+
+export const sharePremiumReport = async (
+  payload: ShareReportPayload
+): Promise<{ token: string; url: string }> => {
+  const response = await authenticatedFetch(
+    getBackendApiUrl("/api/shareReport"),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  assertOk(response, "Share report request");
+  return await parseJson<{ token: string; url: string }>(
+    response,
+    "Share report"
+  );
+};
+
+export const getSharedReport = async (
+  token: string
+): Promise<SharedReportResponse | null> => {
+  const origin =
+    typeof window === "undefined" ? "http://localhost" : window.location.origin;
+  const endpoint = new URL(
+    getBackendApiUrl("/api/getSharedReport"),
+    origin
+  );
+  endpoint.searchParams.set("token", token);
+
+  const response = await fetch(endpoint);
+  if (response.status === 404) {
+    return null;
+  }
+
+  assertOk(response, "Shared report request");
+  return await parseJson<SharedReportResponse>(response, "Shared report");
+};
+
 export const getPlayerNews = async (
   playerNames: string[]
 ): Promise<Record<string, unknown>[]> => {

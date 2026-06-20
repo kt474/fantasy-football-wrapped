@@ -3,7 +3,7 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
-import { Copy, Download } from "lucide-vue-next";
+import { Copy, Download, LoaderCircle, Share2 } from "lucide-vue-next";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { useStore } from "@/store/store";
@@ -32,6 +32,7 @@ const props = defineProps<{
   loading: boolean;
   premiumLoading: boolean;
   isGeneratingImage: boolean;
+  isSharingReport: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -39,6 +40,7 @@ const emit = defineEmits<{
   "update:premiumCommentaryStyle": [value: string];
   "download-image": [];
   "copy-report": [];
+  "share-report": [];
   "generate-premium": [];
 }>();
 
@@ -121,6 +123,21 @@ const premiumReportPreview: PremiumReport = {
           class="ml-auto mr-2"
         >
           <Download />
+        </Button>
+        <Button
+          v-if="tier === 'Premium' && premiumWeeklyReport"
+          @click="emit('share-report')"
+          :disabled="isSharingReport"
+          variant="outline"
+          size="sm"
+          class="mr-2"
+        >
+          <LoaderCircle
+            v-if="isSharingReport"
+            class="mr-2 size-4 animate-spin"
+          />
+          <Share2 v-else class="mr-2 size-4" />
+          Share
         </Button>
         <Button @click="emit('copy-report')" variant="outline" size="sm">
           <Copy class="size-4" />

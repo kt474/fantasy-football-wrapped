@@ -14,6 +14,7 @@ const ChangelogPage = () => import("./views/Changelog.vue");
 const PrivacyPolicy = () => import("./views/PrivacyPolicy.vue");
 const Terms = () => import("./views/Terms.vue");
 const Account = () => import("./views/Account.vue");
+const SharedReport = () => import("./views/SharedReport.vue");
 const NotFound = () => import("./views/404.vue");
 
 const siteUrl = "https://ffwrapped.com";
@@ -70,6 +71,15 @@ const routes = [
     meta: {
       title: "Account | ffwrapped",
       description: "Manage your ffwrapped account and subscription settings.",
+    },
+  },
+  {
+    path: "/report/:token",
+    component: SharedReport,
+    meta: {
+      title: "Shared Weekly Report | ffwrapped",
+      description: "View a shared ffwrapped premium weekly report.",
+      standalone: true,
     },
   },
   {

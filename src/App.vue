@@ -145,7 +145,8 @@ const setHtmlBackground = () => {
 
 <template>
   <div>
-    <div>
+    <RouterView v-if="route.meta.standalone" />
+    <div v-else>
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset class="flex flex-col h-screen">
