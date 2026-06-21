@@ -224,14 +224,14 @@ const leagueTypeLabel = (type: string | null) => {
 
 <template>
   <div
-    class="space-y-5"
+    class="space-y-2"
     :class="{
       'min-h-[calc(100vh-14rem)]':
         !selectedPlayer || (loadingTrades && trades.length === 0),
     }"
   >
     <div class="max-w-3xl">
-      <p class="mt-4 mb-2 text-muted-foreground">
+      <p class="mt-4 text-muted-foreground">
         Search any player to see real, anonymized trades from ffwrapped leagues.
       </p>
     </div>

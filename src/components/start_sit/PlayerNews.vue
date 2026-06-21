@@ -106,6 +106,13 @@ const starterSize = computed(() => {
   return 9;
 });
 
+const rosterHeading = computed(() => {
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (currentLeague?.status === "complete") return "Roster";
+
+  return `Week ${currentLeague?.currentWeek || 1} Roster`;
+});
+
 const currentManager = ref(managers.value[0]);
 
 const getPlayerDirectory = async (leagueKey: string, playerIds: string[]) => {
@@ -349,15 +356,7 @@ watch(
       </Select>
     </div>
     <Separator class="h-px mt-1 mb-3 mr-4" />
-    <h2 class="mb-4 text-2xl font-bold">
-      Week
-      {{
-        store.leagueInfo[store.currentLeagueIndex]?.currentWeek
-          ? store.leagueInfo[store.currentLeagueIndex]?.currentWeek
-          : 1
-      }}
-      Roster
-    </h2>
+    <h2 class="mb-4 text-2xl font-bold">{{ rosterHeading }}</h2>
     <div v-if="!loading" class="flex flex-wrap justify-between xl:flex-nowrap">
       <div v-if="currentRoster" class="w-full max-w-3xl">
         <div v-for="(player, index) in currentRoster.players" class="">
