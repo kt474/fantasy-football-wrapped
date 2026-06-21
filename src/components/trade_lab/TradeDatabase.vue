@@ -232,8 +232,7 @@ const leagueTypeLabel = (type: string | null) => {
   >
     <div class="max-w-3xl">
       <p class="mt-4 mb-2 text-muted-foreground">
-        Real trades from ffwrapped leagues. Search a player to see anonymized
-        trades involving them.
+        Search any player to see real, anonymized trades from ffwrapped leagues.
       </p>
     </div>
 
@@ -307,7 +306,7 @@ const leagueTypeLabel = (type: string | null) => {
             <p
               class="mb-3 text-xs font-semibold uppercase text-muted-foreground"
             >
-              Example package
+              Example trade
             </p>
             <div class="grid grid-cols-[1fr_auto_1fr] items-start gap-4">
               <div class="space-y-3">
