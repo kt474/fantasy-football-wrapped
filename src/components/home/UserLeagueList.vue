@@ -3,20 +3,15 @@ import { ref, computed, onMounted } from "vue";
 import { useStore } from "../../store/store";
 import { getData, inputLeague } from "../../api/api";
 import { seasonType } from "../../types/apiTypes";
-import { useRouter } from "vue-router";
 import { Button } from "../ui/button";
 import Card from "../ui/card/Card.vue";
 import Checkbox from "../ui/checkbox/Checkbox.vue";
 import { toast } from "vue-sonner";
+import { loadUserLeagues } from "./userLeagueLoader";
 
-const router = useRouter();
 const checkedLeagues = ref<string[]>([]);
 const duplicateLeagueError = ref(false);
 const store = useStore();
-
-const updateURL = (leagueID: string) => {
-  router.replace({ query: { leagueId: leagueID } });
-};
 
 const showError = computed(() => {
   return checkedLeagues.value.length > 5 ? true : false;
@@ -36,34 +31,61 @@ const addLeagues = async () => {
   }
   if (checkedLeagues.value.length >= 1) {
     store.updateLoadingUserLeagues(true);
-    await Promise.all(
-      checkedLeagues.value.map(async (league) => {
-        store.updateCurrentLeagueId(league);
-        store.updateShowLeaguesList(false);
-
-        const addedLeague = store.leaguesList.find(
-          (value) => value.league_id == league
-        );
-        store.updateLoadingLeague(addedLeague?.name ?? "");
-
-        const newLeagueInfo = await getData(league);
-        store.updateLeagueInfo(newLeagueInfo);
-        updateURL(league);
-
-        await inputLeague(
-          league,
-          newLeagueInfo.name,
-          newLeagueInfo.totalRosters,
-          newLeagueInfo.seasonType,
-          newLeagueInfo.season,
-          "sleeper"
-        );
-      })
+    store.updateLoadingLeague(
+      checkedLeagues.value.length === 1
+        ? "Selected league"
+        : `${checkedLeagues.value.length} selected leagues`
     );
-    store.updateLoadingUserLeagues(false);
-    store.setLeaguesList([]);
-    store.updateLoadingLeague("");
-    toast.success("League added!");
+
+    try {
+      const { loaded, failed } = await loadUserLeagues(
+        checkedLeagues.value,
+        getData
+      );
+
+      loaded.forEach(({ league }) => store.updateLeagueInfo(league));
+
+      await Promise.all(
+        loaded.map(({ leagueId, league }) =>
+          inputLeague(
+            leagueId,
+            league.name,
+            league.totalRosters,
+            league.seasonType,
+            league.season,
+            "sleeper"
+          )
+        )
+      );
+
+      const firstLoadedLeague = loaded[0];
+      if (firstLoadedLeague) {
+        store.updateCurrentLeagueId(firstLoadedLeague.leagueId);
+        store.updateShowLeaguesList(false);
+        store.setLeaguesList([]);
+        toast.success(
+          loaded.length === 1
+            ? "League added!"
+            : `${loaded.length} leagues added!`
+        );
+      }
+
+      if (failed.length > 0) {
+        toast.error(
+          failed.length === checkedLeagues.value.length
+            ? "Unable to add the selected leagues. Please try again."
+            : `${failed.length} selected ${
+                failed.length === 1 ? "league" : "leagues"
+          } could not be added.`
+        );
+      }
+    } catch (error) {
+      console.error("Unable to finish adding selected leagues:", error);
+      toast.error("Unable to finish adding the selected leagues.");
+    } finally {
+      store.updateLoadingUserLeagues(false);
+      store.updateLoadingLeague("");
+    }
   }
 };
 onMounted(() => {

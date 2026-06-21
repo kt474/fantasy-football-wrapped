@@ -10,6 +10,7 @@ import {
 } from "../types/apiTypes";
 import { LeagueInfoType, PremiumReport } from "../types/types";
 import { authenticatedFetch } from "@/lib/authFetch";
+import { mapWithConcurrency } from "@/lib/async";
 import {
   getAvatar,
   getCurrentLeagueState,
@@ -661,6 +662,24 @@ export const newUserAlert = async (email: string): Promise<void> => {
   }
 };
 
+export const getLeagueDataWeekCount = ({
+  status,
+  currentWeek,
+  lastScoredWeek,
+}: {
+  status: string;
+  currentWeek: number;
+  lastScoredWeek: number;
+}) => {
+  if (status === "in_season" || status === "post_season") {
+    return Math.max(currentWeek, lastScoredWeek, 0);
+  }
+  if (status === "complete") {
+    return Math.max(lastScoredWeek, 0);
+  }
+  return Math.max(lastScoredWeek, 1);
+};
+
 export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
   const [leagueInfo, rosters, winnersBracket, losersBracket] =
     await Promise.all([
@@ -679,7 +698,6 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     currentWeek: 0,
   };
 
-  let numberOfWeeks: number = 0;
   let currentWeek: number = 0;
   let legacyWinner: number | null = 0;
 
@@ -689,10 +707,8 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
   ) {
     const leagueState = await getCurrentLeagueState();
     currentWeek = leagueState.week;
-    numberOfWeeks = currentWeek;
     newLeagueInfo.currentWeek = currentWeek;
   } else {
-    numberOfWeeks = newLeagueInfo.regularSeasonLength;
     winnersBracket?.forEach((matchup) => {
       if (matchup.p === 1) {
         legacyWinner = matchup.w;
@@ -700,23 +716,25 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     });
   }
 
+  const weekCount = getLeagueDataWeekCount({
+    status: newLeagueInfo.status,
+    currentWeek,
+    lastScoredWeek: newLeagueInfo.lastScoredWeek,
+  });
+  const weeks = Array.from({ length: weekCount }, (_, index) => index + 1);
+
   const [weeklyPoints, users, weeklyTransactionResults] = await Promise.all([
-    getWeeklyPoints(
-      leagueId,
-      currentWeek !== 0 ? currentWeek : newLeagueInfo.lastScoredWeek
-    ),
+    getWeeklyPoints(leagueId, weekCount),
     getUsers(leagueId),
-    Promise.all(
-      Array.from({ length: numberOfWeeks + 1 }, async (_, i) => {
-        const weeklyTransaction = await getTransactions(leagueId, i + 1);
-        const waiverMoves = getWaiverMoves(weeklyTransaction);
-        return {
-          totals: getTotalTransactions(weeklyTransaction),
-          trades: waiverMoves["trades"],
-          waivers: waiverMoves["waivers"],
-        };
-      })
-    ),
+    mapWithConcurrency(weeks, 4, async (week) => {
+      const weeklyTransaction = await getTransactions(leagueId, week);
+      const waiverMoves = getWaiverMoves(weeklyTransaction);
+      return {
+        totals: getTotalTransactions(weeklyTransaction),
+        trades: waiverMoves["trades"],
+        waivers: waiverMoves["waivers"],
+      };
+    }),
   ]);
 
   const [processedUsers] = await Promise.all([

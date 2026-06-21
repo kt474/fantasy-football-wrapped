@@ -4,6 +4,7 @@ import {
   getPlayerIdsByNameTeamMap,
   getPlayersByIdsMap,
   generatePremiumReport,
+  getLeagueDataWeekCount,
 } from "../src/api/api.ts";
 import {
   getAvatar,
@@ -29,6 +30,23 @@ afterEach(() => {
 });
 
 describe("Sleeper API data transforms", () => {
+  test("uses scored weeks without requesting an extra transaction week", () => {
+    expect(
+      getLeagueDataWeekCount({
+        status: "complete",
+        currentWeek: 0,
+        lastScoredWeek: 17,
+      })
+    ).toBe(17);
+    expect(
+      getLeagueDataWeekCount({
+        status: "in_season",
+        currentWeek: 8,
+        lastScoredWeek: 7,
+      })
+    ).toBe(8);
+  });
+
   test("maps league response into app league shape", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       mockFetchResponse(200, {
@@ -507,23 +525,6 @@ describe("Sleeper API data transforms", () => {
         ]);
       }
 
-      if (rawUrl.endsWith("/league/league-1/transactions/2")) {
-        return mockFetchResponse(200, [
-          {
-            creator: "u1",
-            status: "complete",
-            adds: { p5: 1 },
-            type: "trade",
-          },
-          {
-            creator: "u2",
-            status: "complete",
-            adds: null,
-            type: "waiver",
-          },
-        ]);
-      }
-
       return mockFetchResponse(404, {});
     });
 
@@ -534,9 +535,9 @@ describe("Sleeper API data transforms", () => {
     expect(leagueData.users[0].avatarImg).toBe(
       "https://sleepercdn.com/avatars/thumbs/avatar1"
     );
-    expect(leagueData.transactions).toEqual({ u1: 2 });
-    expect(leagueData.trades).toHaveLength(1);
-    expect(leagueData.waivers).toHaveLength(3);
+    expect(leagueData.transactions).toEqual({ u1: 1 });
+    expect(leagueData.trades).toHaveLength(0);
+    expect(leagueData.waivers).toHaveLength(2);
     expect(leagueData.weeklyPoints).toHaveLength(2);
     expect(leagueData.legacyWinner).toBe(1);
   });

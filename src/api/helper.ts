@@ -15,6 +15,7 @@ import {
   PointsType,
   TableDataType,
 } from "../types/types";
+import { mapWithConcurrency } from "@/lib/async";
 import { WeeklyWaiver } from "../types/apiTypes";
 
 type MatchupPointRow = {
@@ -362,11 +363,13 @@ export const getWeeklyPoints = async (
   regularSeasonLength: number,
   startWeek: number = 0
 ) => {
-  const promises = [];
-  for (let i = startWeek; i < regularSeasonLength; i++) {
-    promises.push(getMatchup(i + 1, leagueId));
-  }
-  const allMatchups = await Promise.all(promises);
+  const weeks = Array.from(
+    { length: Math.max(0, regularSeasonLength - startWeek) },
+    (_, index) => startWeek + index + 1
+  );
+  const allMatchups = await mapWithConcurrency(weeks, 4, (week) =>
+    getMatchup(week, leagueId)
+  );
   const validMatchups = flatten(allMatchups).filter(
     (matchup): matchup is MatchupPointRow =>
       Boolean(matchup) && typeof matchup.rosterId === "number"

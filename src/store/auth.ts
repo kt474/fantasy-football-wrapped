@@ -100,9 +100,9 @@ export const useAuthStore = defineStore("auth", () => {
         password,
       });
       if (error) throw error;
+      await newUserAlert(email);
     } finally {
       loading.value = false;
-      await newUserAlert(email);
     }
   };
 
@@ -157,9 +157,6 @@ export const useAuthStore = defineStore("auth", () => {
         },
       });
       if (error) throw error;
-      else {
-        await newUserAlert("google");
-      }
     } finally {
       loading.value = false;
     }

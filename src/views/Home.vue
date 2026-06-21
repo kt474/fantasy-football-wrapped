@@ -17,6 +17,7 @@ import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 import { getParsedStorageItem, isBoolean, isRecord } from "@/lib/storage";
+import { mapWithConcurrency } from "@/lib/async";
 
 const Table = defineAsyncComponent(
   () => import("../components/standings/Table.vue")
@@ -49,25 +50,37 @@ onMounted(async () => {
       { isValid: Array.isArray }
     );
     if (savedLeagues.length > 0) {
-      await Promise.all(
-        savedLeagues.map(async (league: LeagueInfoType) => {
-          if (!store.leagueIds.includes(getLeagueKey(league))) {
+      showLoading.value = true;
+      store.updateLoadingLeague("saved leagues");
+
+      const leaguesToHydrate = savedLeagues.filter(
+        (league) => !store.leagueIds.includes(getLeagueKey(league))
+      );
+      const staleLeagueKeys = leaguesToHydrate
+        .filter((league) => {
+          const age = Date.now() - league.lastUpdated;
+          return age > 86400000 || hasMissingEspnPlayerIds(league);
+        })
+        .map(getLeagueKey);
+      if (staleLeagueKeys.length > 0) {
+        const currentData = getParsedStorageItem<Record<string, unknown>>(
+          "originalData",
+          {},
+          { isValid: isRecord }
+        );
+        staleLeagueKeys.forEach((leagueKey) => delete currentData[leagueKey]);
+        localStorage.setItem("originalData", JSON.stringify(currentData));
+      }
+
+      try {
+        await mapWithConcurrency(
+          leaguesToHydrate,
+          2,
+          async (league: LeagueInfoType) => {
             const currentTime = new Date().getTime();
             const diff = currentTime - league.lastUpdated;
             if (diff > 86400000 || hasMissingEspnPlayerIds(league)) {
               // 1 day
-              showLoading.value = true;
-              const currentData = getParsedStorageItem<
-                Record<string, unknown>
-              >("originalData", {}, { isValid: isRecord });
-              if (Object.keys(currentData).length > 0) {
-                delete currentData[getLeagueKey(league)];
-                localStorage.setItem(
-                  "originalData",
-                  JSON.stringify(currentData)
-                );
-              }
-              store.updateLoadingLeague(league.name);
               if (league.platform === "espn") {
                 try {
                   const refreshedData = await getEspnLeagueInfo(
@@ -81,28 +94,40 @@ onMounted(async () => {
                   store.updateLeagueInfo(league);
                 }
               } else {
-                const refreshedData = await getData(league.leagueId);
-                store.updateLeagueInfo(refreshedData);
-                await inputLeague(
-                  league.leagueId,
-                  league.name,
-                  league.totalRosters,
-                  league.seasonType,
-                  league.season,
-                  "sleeper"
-                );
+                try {
+                  const refreshedData = await getData(league.leagueId);
+                  store.updateLeagueInfo(refreshedData);
+                  await inputLeague(
+                    league.leagueId,
+                    league.name,
+                    league.totalRosters,
+                    league.seasonType,
+                    league.season,
+                    "sleeper"
+                  );
+                } catch (error) {
+                  console.error(
+                    `Unable to refresh saved league ${league.leagueId}:`,
+                    error
+                  );
+                  toast.error(
+                    `Unable to refresh ${league.name}. Showing saved data.`
+                  );
+                  store.updateLeagueInfo(league);
+                }
               }
-              showLoading.value = false;
             } else {
               store.updateLeagueInfo(league);
             }
           }
-        })
-      );
-      store.updateCurrentLeagueId(
-        localStorage.getItem("currentLeagueId") ?? ""
-      );
-      store.updateLoadingLeague("");
+        );
+        store.updateCurrentLeagueId(
+          localStorage.getItem("currentLeagueId") ?? ""
+        );
+      } finally {
+        store.updateLoadingLeague("");
+        showLoading.value = false;
+      }
     }
     const leagueId = Array.isArray(route.query.leagueId)
       ? route.query.leagueId[0]

@@ -3,20 +3,14 @@ import { ref, computed, onMounted, watch } from "vue";
 import { getLeagueKey, useStore } from "../../store/store";
 import { getPlayerNews, getPlayersByIdsMap } from "../../api/api";
 import {
-  getStats,
   getSingleWeekProjection,
   getSingleWeekStats,
 } from "../../api/sleeperApi";
 import { TableDataType } from "../../types/types";
-import difference from "lodash/difference";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/fakeLeague";
 import max from "lodash/max";
 import min from "lodash/min";
-import {
-  Player,
-  SingleWeekProjection,
-  WeeklyStats,
-} from "../../types/apiTypes";
+import { Player, SingleWeekProjection } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 import {
   Select,
@@ -28,6 +22,11 @@ import {
 import Separator from "../ui/separator/Separator.vue";
 import Button from "../ui/button/Button.vue";
 import Label from "../ui/label/Label.vue";
+import {
+  getOrderedRosterPlayerIds,
+  START_SIT_CONCURRENCY,
+} from "./startSitLoader";
+import { mapWithConcurrency } from "@/lib/async";
 
 type NewsPost = {
   author: {
@@ -68,10 +67,13 @@ type StartSitRoster = {
 };
 
 const data = ref<NewsPost[]>([]);
-const playerNames = ref<StartSitRoster[]>([]);
+const currentRoster = ref<StartSitRoster | null>(null);
 const loading = ref<boolean>(false);
 const expanded = ref<Record<string, boolean>>({});
 const store = useStore();
+const playerDirectoryCache = new Map<string, Player>();
+const playerDataCache = new Map<string, Promise<StartSitPlayer>>();
+let loadRequestId = 0;
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
@@ -106,146 +108,140 @@ const starterSize = computed(() => {
 
 const currentManager = ref(managers.value[0]);
 
-const currentRoster = computed(() => {
-  return (
-    playerNames.value.find(
-      (team) => team.id === currentManager.value.rosterId
-    ) ?? null
+const getPlayerDirectory = async (leagueKey: string, playerIds: string[]) => {
+  const missingPlayerIds = playerIds.filter(
+    (playerId) => !playerDirectoryCache.has(`${leagueKey}:${playerId}`)
   );
-});
 
-const getData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  if (currentLeague) {
-    const currentRosterId = currentManager.value.rosterId;
-    if (!currentLeague.rosterRankings) {
-      await getRosterRankings();
+  if (missingPlayerIds.length > 0) {
+    const players = await getPlayersByIdsMap(missingPlayerIds);
+    players.forEach((player, playerId) => {
+      playerDirectoryCache.set(`${leagueKey}:${playerId}`, player);
+    });
+  }
+
+  return new Map(
+    playerIds.flatMap((playerId) => {
+      const player = playerDirectoryCache.get(`${leagueKey}:${playerId}`);
+      return player ? [[playerId, player] as const] : [];
+    })
+  );
+};
+
+const loadPlayer = (
+  playerId: string,
+  player: Player | undefined,
+  leagueKey: string,
+  season: string,
+  week: number,
+  scoringType: number
+) => {
+  const cacheKey = [
+    leagueKey,
+    season,
+    week,
+    scoringType,
+    playerId,
+  ].join(":");
+  const cachedPlayer = playerDataCache.get(cacheKey);
+  if (cachedPlayer) {
+    return cachedPlayer;
+  }
+
+  const playerPromise = Promise.all([
+    getSingleWeekProjection(playerId, season, week, scoringType),
+    getSingleWeekStats(playerId, season, Math.max(0, week - 1), scoringType),
+  ]).then(([projection, stats]) => ({
+    name: player?.name,
+    player_id: player?.player_id ?? playerId,
+    position: player?.position,
+    team: player?.team,
+    projection,
+    stats: {
+      points: stats.points as (number | string)[],
+      ranks: stats.ranks as (number | string)[],
+      stats: stats.stats as Array<
+        Record<string, number | string | undefined>
+      >,
+    },
+  }));
+
+  playerDataCache.set(cacheKey, playerPromise);
+  return playerPromise;
+};
+
+const loadSelectedRoster = async () => {
+  const requestId = ++loadRequestId;
+  loading.value = true;
+
+  try {
+    if (store.leagueIds.length === 0) {
+      currentRoster.value =
+        (fakeStartSit as StartSitRoster[]).find(
+          (roster) => roster.id === currentManager.value?.rosterId
+        ) ?? null;
+      data.value = fakePosts;
+      return;
     }
-    const currentPlayers =
-      currentLeague.rosterRankings?.[currentRosterId]?.map(
-        (player) => `${player.firstName} ${player.lastName}`
-      ) ?? [];
-    const playerNews = await getPlayerNews(currentPlayers);
+
+    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const selectedManager = currentManager.value;
+    if (!currentLeague || !selectedManager) {
+      currentRoster.value = null;
+      data.value = [];
+      return;
+    }
+
+    const selectedTeam = props.tableData.find(
+      (team) => team.rosterId === selectedManager.rosterId
+    );
+    if (!selectedTeam) {
+      currentRoster.value = null;
+      data.value = [];
+      return;
+    }
+
+    const week =
+      currentLeague.currentWeek || currentLeague.lastScoredWeek || 1;
+    const leagueKey = getLeagueKey(currentLeague);
+    const playerIds = getOrderedRosterPlayerIds(
+      selectedTeam.players,
+      selectedTeam.starters,
+      week
+    );
+    const playerLookupMap = await getPlayerDirectory(leagueKey, playerIds);
+    const players = await mapWithConcurrency(
+      playerIds,
+      START_SIT_CONCURRENCY,
+      (playerId) =>
+        loadPlayer(
+          playerId,
+          playerLookupMap.get(playerId),
+          leagueKey,
+          currentLeague.season,
+          week,
+          currentLeague.scoringType
+        )
+    );
+    const playerNews = await getPlayerNews(
+      players.flatMap((player) => (player.name ? [player.name] : []))
+    );
+
+    if (requestId !== loadRequestId) {
+      return;
+    }
+
+    currentRoster.value = {
+      id: selectedManager.rosterId,
+      players,
+    };
     data.value = playerNews
       .map((post) => post.post as NewsPost)
       .filter(Boolean);
-  } else if (store.leagueInfo.length === 0) {
-    data.value = fakePosts;
-  }
-};
-
-// this is only really used to get player names
-const getRosterRankings = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  const rosterPlayers = props.tableData.flatMap((user) =>
-    user.players.map((player) => ({
-      rosterId: user.rosterId,
-      player,
-    }))
-  );
-
-  const allPlayers = await Promise.all(
-    rosterPlayers.map(({ player }) =>
-      getStats(player, currentLeague.season, currentLeague.scoringType)
-    )
-  );
-
-  const allPlayersWithRoster = allPlayers.map((stats, idx) =>
-    stats
-      ? ({
-          ...stats,
-          rosterId: rosterPlayers[idx].rosterId,
-        } as WeeklyStats & { rosterId: number })
-      : null
-  );
-
-  const filtered = allPlayersWithRoster.filter(
-    (item): item is WeeklyStats & { rosterId: number } => item !== null
-  );
-
-  function groupByRosterId(arr: Array<WeeklyStats & { rosterId: number }>) {
-    return arr.reduce<
-      Record<number, Array<WeeklyStats & { rosterId: number }>>
-    >((acc, item) => {
-      if (!acc[item.rosterId]) acc[item.rosterId] = [];
-      acc[item.rosterId].push(item);
-      return acc;
-    }, {});
-  }
-
-  store.addRosterRankings(getLeagueKey(currentLeague), groupByRosterId(filtered));
-};
-
-const fetchPlayerNames = async () => {
-  if (store.leagueIds.length > 0) {
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-    const allPlayerIds = props.tableData.map((user) => user.players).flat();
-    let playerLookupMap = new Map<string, Player>();
-    if (allPlayerIds.length > 0) {
-      playerLookupMap = await getPlayersByIdsMap(allPlayerIds);
+  } finally {
+    if (requestId === loadRequestId) {
+      loading.value = false;
     }
-
-    // Map over tableData and resolve all player projections
-    const result = await Promise.all(
-      props.tableData.map(async (user) => {
-        const week = currentLeague.currentWeek
-          ? currentLeague.currentWeek
-          : currentLeague.lastScoredWeek;
-
-        const starterIds = user?.starters
-          ? [
-              ...(user?.starters[week - 1] ?? []),
-              ...difference(user.players, user.starters[week - 1]),
-            ]
-          : [];
-        // For each starter, fetch player and projection
-        if (starterIds) {
-          const starterNames = await Promise.all(
-            starterIds.map(async (id: string) => {
-              const player = playerLookupMap.get(id);
-              const projection = await getSingleWeekProjection(
-                id,
-                currentLeague.season,
-                week,
-                currentLeague.scoringType
-              );
-              const stats = await getSingleWeekStats(
-                id,
-                currentLeague.season,
-                week - 1,
-                currentLeague.scoringType
-              );
-              return {
-                name: player?.name,
-                player_id: player?.player_id ?? id,
-                position: player?.position,
-                team: player?.team,
-                projection,
-                stats: {
-                  points: stats.points as (number | string)[],
-                  ranks: stats.ranks as (number | string)[],
-                  stats: stats.stats as Array<
-                    Record<string, number | string | undefined>
-                  >,
-                },
-              };
-            })
-          );
-          return {
-            id: user.rosterId,
-            players: starterNames,
-          };
-        } else {
-          return {
-            id: user.rosterId,
-            players: [],
-          };
-        }
-      })
-    );
-    playerNames.value = result;
-  } else {
-    playerNames.value = fakeStartSit as StartSitRoster[];
   }
 };
 
@@ -313,20 +309,22 @@ function getMin(arr: Array<number | string | undefined>) {
 }
 
 onMounted(async () => {
-  loading.value = true;
-  await Promise.all([fetchPlayerNames(), getData()]);
-  loading.value = false;
+  await loadSelectedRoster();
 });
 
 watch(
-  () => [currentManager.value, store.currentLeagueId],
+  () => [currentManager.value?.rosterId, store.currentLeagueId],
   async ([, leagueId], [, previousLeagueId]) => {
     if (leagueId !== previousLeagueId) {
-      currentManager.value = managers.value[0];
+      const nextManager = managers.value[0];
+      const managerChanged =
+        nextManager?.rosterId !== currentManager.value?.rosterId;
+      currentManager.value = nextManager;
+      if (managerChanged) {
+        return;
+      }
     }
-    loading.value = true;
-    await Promise.all([fetchPlayerNames(), getData()]);
-    loading.value = false;
+    await loadSelectedRoster();
   }
 );
 </script>
