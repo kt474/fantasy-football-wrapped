@@ -105,6 +105,71 @@ type SleeperWeekProjectionMap = Record<
 >;
 
 const PROJECTION_FETCH_TIMEOUT_MS = 8000;
+let searchablePlayersCache: SearchableSleeperPlayer[] | null = null;
+
+export type SearchableSleeperPlayer = {
+  player_id: string;
+  name: string;
+  position: string;
+  team: string;
+};
+
+type SleeperPlayerDirectoryEntry = {
+  player_id?: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  position?: string;
+  team?: string | null;
+  active?: boolean;
+  fantasy_positions?: string[] | null;
+};
+
+export const getSearchablePlayers = async (): Promise<
+  SearchableSleeperPlayer[]
+> => {
+  if (searchablePlayersCache) {
+    return searchablePlayersCache;
+  }
+
+  const response = await fetch("https://api.sleeper.app/v1/players/nfl");
+  assertOk(response, "Sleeper player directory request");
+  const directory = await parseJson<Record<string, SleeperPlayerDirectoryEntry>>(
+    response,
+    "Sleeper player directory"
+  );
+  const fantasyPositions = new Set(["QB", "RB", "WR", "TE", "K", "DEF"]);
+
+  searchablePlayersCache = Object.entries(directory)
+    .map(([id, player]) => {
+      const position =
+        player.position ?? player.fantasy_positions?.[0] ?? "";
+      const name =
+        (player.full_name ??
+          [player.first_name, player.last_name].filter(Boolean).join(" ")) ||
+        (position === "DEF" && player.team
+          ? `${player.team} Defense`
+          : "");
+
+      return {
+        player_id: player.player_id ?? id,
+        name,
+        position,
+        team: player.team ?? "FA",
+        active: player.active !== false,
+      };
+    })
+    .filter(
+      (player) =>
+        player.active &&
+        player.name &&
+        fantasyPositions.has(player.position)
+    )
+    .map(({ active: _active, ...player }) => player)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return searchablePlayersCache;
+};
 
 type SleeperLeagueResponse = {
   name?: string;

@@ -27,6 +27,8 @@ import {
 } from "../ui/select";
 import { Input } from "@/components/ui/input";
 import { X, Plus } from "lucide-vue-next";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TradeDatabase from "./TradeDatabase.vue";
 
 type TradeLabPlayer = Player & {
   projection: number;
@@ -70,6 +72,7 @@ const draggedPlayer = ref<{ playerId: string; fromTeam: "A" | "B" } | null>(
   null
 );
 const isMobile = ref(false);
+const activeMode = ref("builder");
 
 const activeLeague = computed(() => store.leagueInfo[store.currentLeagueIndex]);
 
@@ -654,417 +657,556 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <Card class="w-full h-full p-4 mt-4 md:p-6">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
       <h5 class="text-3xl font-bold leading-none">Trade Lab (Beta)</h5>
+      <Tabs v-model="activeMode">
+        <TabsList>
+          <TabsTrigger value="builder">Builder</TabsTrigger>
+          <TabsTrigger value="database">Database</TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
-    <p v-if="!isMobile" class="mt-4 mb-2 text-muted-foreground">
-      Drag players into each team's package to brainstorm offers.
-    </p>
-    <p v-if="isMobile" class="mt-4 mb-2 text-muted-foreground">
-      Click/tap players to add or remove from each package.
-    </p>
-
-    <div v-if="loading" class="h-screen py-2">
-      Loading players and projections...
-    </div>
+    <TradeDatabase v-if="activeMode === 'database'" class="mt-5" />
     <div v-else>
-      <div class="grid gap-3 xl:grid-cols-3">
-        <Card class="px-4 py-3">
-          <div class="mb-2">
-            <Label class="block mb-1 text-sm">Manager</Label>
-            <Select
-              :model-value="selectedTeamAId"
-              @update:model-value="
-                handleTeamSelectionChange('A', Number($event))
-              "
-            >
-              <SelectTrigger class="w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="team in rosters"
-                  :key="team.id"
-                  :value="team.id"
-                  :disabled="team.id === selectedTeamBId"
-                >
-                  {{ team.managerName }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
-            <button
-              v-for="player in teamA?.players || []"
-              :key="`A-${player.player_id}`"
-              :draggable="!isMobile"
-              @dragstart="onPlayerDragStart(player.player_id, 'A')"
-              @click="onPlayerCardTap('A', player.player_id)"
-              type="button"
-              class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
-              :class="{
-                'bg-primary/10 border-primary': isIncluded(
-                  'A',
-                  player.player_id
-                ),
-                'hover:border-primary': !isIncluded('A', player.player_id),
-              }"
-            >
-              <div class="flex w-full">
-                <img
-                  v-if="player.position !== 'DEF'"
-                  class="object-cover rounded-full w-14"
-                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
-                  alt="Player avatar"
-                />
-                <img
-                  v-else
-                  class="w-10 h-10 mx-2 rounded-full"
-                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
-                  alt="Team avatar"
-                />
-                <div class="ml-2">
-                  <p class="font-medium">
-                    {{ player.name || `${player.team} Defense` }}
-                  </p>
-                  <p class="text-xs text-muted-foreground">
-                    {{ player.position }} - {{ player.team }}
-                  </p>
-                </div>
-                <div class="flex flex-col items-end gap-1 ml-auto">
-                  <span
-                    :class="[
-                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
-                      posRankClass(player.projection),
-                    ]"
-                  >
-                    POS {{ rankLabel(player.projection) }}
-                  </span>
-                  <span
-                    :class="[
-                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
-                      overallRankClass(player.overallRank),
-                    ]"
-                  >
-                    OVR {{ rankLabel(player.overallRank) }}
-                  </span>
-                </div>
-              </div>
-            </button>
-          </div>
-        </Card>
+      <p v-if="!isMobile" class="mt-4 mb-2 text-muted-foreground">
+        Drag players into each team's package to brainstorm offers.
+      </p>
+      <p v-if="isMobile" class="mt-4 mb-2 text-muted-foreground">
+        Click/tap players to add or remove from each package.
+      </p>
 
-        <Card class="p-3">
-          <p class="mb-1 text-sm font-semibold">Trade Package</p>
-          <p class="text-sm text-muted-foreground">
-            Drop players from each roster into its matching side.
-          </p>
-          <Separator class="h-px my-2" />
-
-          <div
-            class="min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
-            @dragover.prevent
-            @drop.prevent="onDropToTradePackage('A')"
-          >
-            <div class="flex justify-between gap-3">
-              <p class="text-sm font-semibold">
-                {{ teamA?.managerName }}
-              </p>
-              <Dialog>
-                <DialogTrigger as-child>
-                  <Button
-                    variant="secondary"
-                    size="xs"
-                    class="-mt-1"
-                    @click="openAssetsModal('A')"
+      <div v-if="loading" class="h-screen py-2">
+        Loading players and projections...
+      </div>
+      <div v-else>
+        <div class="grid gap-3 xl:grid-cols-3">
+          <Card class="px-4 py-3">
+            <div class="mb-2">
+              <Label class="block mb-1 text-sm">Manager</Label>
+              <Select
+                :model-value="selectedTeamAId"
+                @update:model-value="
+                  handleTeamSelectionChange('A', Number($event))
+                "
+              >
+                <SelectTrigger class="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="team in rosters"
+                    :key="team.id"
+                    :value="team.id"
+                    :disabled="team.id === selectedTeamBId"
                   >
-                    <Plus class="size-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle> Add Assets </DialogTitle>
-                    <DialogDescription>
-                      Add FAAB or draft picks.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div class="flex flex-wrap sm:flex-nowrap">
-                    <div class="mr-4">
-                      <Label for="faab" class="text-xs">FAAB</Label>
-                      <div class="flex gap-2 mt-0.5">
-                        <Input
-                          class="w-20"
-                          id="faab"
-                          type="number"
-                          min="0"
-                          v-model="teamAFaabInputModel"
-                        />
-                        <DialogClose as-child>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            @click="addFaabToPackage('A')"
-                          >
-                            Add
-                          </Button>
-                        </DialogClose>
+                    {{ team.managerName }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
+              <button
+                v-for="player in teamA?.players || []"
+                :key="`A-${player.player_id}`"
+                :draggable="!isMobile"
+                @dragstart="onPlayerDragStart(player.player_id, 'A')"
+                @click="onPlayerCardTap('A', player.player_id)"
+                type="button"
+                class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
+                :class="{
+                  'bg-primary/10 border-primary': isIncluded(
+                    'A',
+                    player.player_id
+                  ),
+                  'hover:border-primary': !isIncluded('A', player.player_id),
+                }"
+              >
+                <div class="flex w-full">
+                  <img
+                    v-if="player.position !== 'DEF'"
+                    class="object-cover rounded-full w-14"
+                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                    alt="Player avatar"
+                  />
+                  <img
+                    v-else
+                    class="w-10 h-10 mx-2 rounded-full"
+                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                    alt="Team avatar"
+                  />
+                  <div class="ml-2">
+                    <p class="font-medium">
+                      {{ player.name || `${player.team} Defense` }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                      {{ player.position }} - {{ player.team }}
+                    </p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1 ml-auto">
+                    <span
+                      :class="[
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        posRankClass(player.projection),
+                      ]"
+                    >
+                      POS {{ rankLabel(player.projection) }}
+                    </span>
+                    <span
+                      :class="[
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        overallRankClass(player.overallRank),
+                      ]"
+                    >
+                      OVR {{ rankLabel(player.overallRank) }}
+                    </span>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </Card>
+
+          <Card class="p-3">
+            <p class="mb-1 text-sm font-semibold">Trade Package</p>
+            <p class="text-sm text-muted-foreground">
+              Drop players from each roster into its matching side.
+            </p>
+            <Separator class="h-px my-2" />
+
+            <div
+              class="min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
+              @dragover.prevent
+              @drop.prevent="onDropToTradePackage('A')"
+            >
+              <div class="flex justify-between gap-3">
+                <p class="text-sm font-semibold">
+                  {{ teamA?.managerName }}
+                </p>
+                <Dialog>
+                  <DialogTrigger as-child>
+                    <Button
+                      variant="secondary"
+                      size="xs"
+                      class="-mt-1"
+                      @click="openAssetsModal('A')"
+                    >
+                      <Plus class="size-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle> Add Assets </DialogTitle>
+                      <DialogDescription>
+                        Add FAAB or draft picks.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div class="flex flex-wrap sm:flex-nowrap">
+                      <div class="mr-4">
+                        <Label for="faab" class="text-xs">FAAB</Label>
+                        <div class="flex gap-2 mt-0.5">
+                          <Input
+                            class="w-20"
+                            id="faab"
+                            type="number"
+                            min="0"
+                            v-model="teamAFaabInputModel"
+                          />
+                          <DialogClose as-child>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              @click="addFaabToPackage('A')"
+                            >
+                              Add
+                            </Button>
+                          </DialogClose>
+                        </div>
+                      </div>
+                      <div class="">
+                        <Label class="text-xs">Draft Pick</Label>
+                        <div class="flex gap-2 mt-0.5">
+                          <Select v-model="pendingAPickSeasonModel">
+                            <SelectTrigger class="w-24 text-xs">
+                              <SelectValue placeholder="Season" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem
+                                v-for="season in draftSeasons"
+                                :key="`modal-a-season-${season}`"
+                                :value="String(season)"
+                              >
+                                {{ season }}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Select v-model="pendingAPickRoundModel">
+                            <SelectTrigger class="w-24 text-xs">
+                              <SelectValue placeholder="Round" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem
+                                v-for="round in draftRounds"
+                                :key="`modal-a-round-${round}`"
+                                :value="String(round)"
+                              >
+                                Round {{ round }}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <DialogClose as-child>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              @click="addDraftPickToPackage('A')"
+                            >
+                              Add
+                            </Button>
+                          </DialogClose>
+                        </div>
                       </div>
                     </div>
-                    <div class="">
-                      <Label class="text-xs">Draft Pick</Label>
-                      <div class="flex gap-2 mt-0.5">
-                        <Select v-model="pendingAPickSeasonModel">
-                          <SelectTrigger class="w-24 text-xs">
-                            <SelectValue placeholder="Season" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem
-                              v-for="season in draftSeasons"
-                              :key="`modal-a-season-${season}`"
-                              :value="String(season)"
-                            >
-                              {{ season }}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Select v-model="pendingAPickRoundModel">
-                          <SelectTrigger class="w-24 text-xs">
-                            <SelectValue placeholder="Round" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem
-                              v-for="round in draftRounds"
-                              :key="`modal-a-round-${round}`"
-                              :value="String(round)"
-                            >
-                              Round {{ round }}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <DialogClose as-child>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            @click="addDraftPickToPackage('A')"
-                          >
-                            Add
-                          </Button>
-                        </DialogClose>
-                      </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <div class="space-y-1 overflow-y-auto max-h-72">
+                <div class="pt-2 mt-2 border-t border-border">
+                  <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                    <span
+                      v-if="teamAFaab > 0"
+                      class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
+                    >
+                      ${{ teamAFaab }} FAAB
+                      <button type="button" @click="clearFaab('A')">
+                        <X class="size-3 text-muted-foreground" />
+                      </button>
+                    </span>
+                    <span
+                      v-for="pick in teamAPicks"
+                      :key="`a-pill-${pick.id}`"
+                      class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
+                    >
+                      {{ pick.season }} R{{ pick.round }}
+                      <button
+                        type="button"
+                        @click="removeDraftPickFromPackage('A', pick.id)"
+                      >
+                        <X class="size-3 text-muted-foreground" />
+                      </button>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  v-for="player in teamAOutgoingPlayers"
+                  :key="`send-a-${player.player_id}`"
+                  class="flex items-center justify-between rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+                >
+                  <div class="flex w-full">
+                    <img
+                      v-if="player.position !== 'DEF'"
+                      class="object-cover rounded-full w-14"
+                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                      alt="Player avatar"
+                    />
+                    <img
+                      v-else
+                      class="w-10 h-10 mx-2 rounded-full"
+                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                      alt="Team avatar"
+                    />
+                    <div class="ml-2">
+                      <p class="font-medium">
+                        {{ player.name || `${player.team} Defense` }}
+                      </p>
+                      <p class="text-xs text-muted-foreground">
+                        {{ player.position }} - {{ player.team }}
+                      </p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1 ml-auto mr-4">
+                      <span
+                        :class="[
+                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                          posRankClass(player.projection),
+                        ]"
+                      >
+                        POS {{ rankLabel(player.projection) }}
+                      </span>
+                      <span
+                        :class="[
+                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                          overallRankClass(player.overallRank),
+                        ]"
+                      >
+                        OVR {{ rankLabel(player.overallRank) }}
+                      </span>
                     </div>
                   </div>
-                </DialogContent>
-              </Dialog>
+                  <button
+                    type="button"
+                    class="text-xs underline text-muted-foreground"
+                    @click="removeFromPackage('A', player.player_id)"
+                  >
+                    <X class="size-4" />
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="space-y-1 overflow-y-auto max-h-72">
+
+            <div
+              class="mt-3 min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
+              @dragover.prevent
+              @drop.prevent="onDropToTradePackage('B')"
+            >
+              <div class="flex justify-between gap-3">
+                <p class="mb-2 text-sm font-semibold">
+                  {{ teamB?.managerName }}
+                </p>
+                <Dialog>
+                  <DialogTrigger as-child>
+                    <Button
+                      variant="secondary"
+                      size="xs"
+                      class="-mt-0.5"
+                      @click="openAssetsModal('B')"
+                    >
+                      <Plus class="size-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle> Add Assets </DialogTitle>
+                      <DialogDescription>
+                        Add FAAB or draft picks.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div class="flex flex-wrap sm:flex-nowrap">
+                      <div class="mr-4">
+                        <Label for="faab-b" class="text-xs">FAAB</Label>
+                        <div class="flex gap-2 mt-0.5">
+                          <Input
+                            class="w-20"
+                            id="faab-b"
+                            type="number"
+                            min="0"
+                            v-model="teamBFaabInputModel"
+                          />
+                          <DialogClose as-child>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              @click="addFaabToPackage('B')"
+                            >
+                              Add
+                            </Button>
+                          </DialogClose>
+                        </div>
+                      </div>
+                      <div class="">
+                        <Label class="text-xs">Draft Pick</Label>
+                        <div class="flex gap-2 mt-0.5">
+                          <Select v-model="pendingBPickSeasonModel">
+                            <SelectTrigger class="w-24 text-xs">
+                              <SelectValue placeholder="Season" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem
+                                v-for="season in draftSeasons"
+                                :key="`modal-b-season-${season}`"
+                                :value="String(season)"
+                              >
+                                {{ season }}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Select v-model="pendingBPickRoundModel">
+                            <SelectTrigger class="w-24 text-xs">
+                              <SelectValue placeholder="Round" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem
+                                v-for="round in draftRounds"
+                                :key="`modal-b-round-${round}`"
+                                :value="String(round)"
+                              >
+                                Round {{ round }}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <DialogClose as-child>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              @click="addDraftPickToPackage('B')"
+                            >
+                              Add
+                            </Button>
+                          </DialogClose>
+                        </div>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div class="pt-2 mt-2 border-t border-border">
                 <div class="flex flex-wrap items-center gap-1.5 mb-2">
                   <span
-                    v-if="teamAFaab > 0"
+                    v-if="teamBFaab > 0"
                     class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
                   >
-                    ${{ teamAFaab }} FAAB
-                    <button type="button" @click="clearFaab('A')">
+                    ${{ teamBFaab }} FAAB
+                    <button type="button" @click="clearFaab('B')">
                       <X class="size-3 text-muted-foreground" />
                     </button>
                   </span>
                   <span
-                    v-for="pick in teamAPicks"
-                    :key="`a-pill-${pick.id}`"
+                    v-for="pick in teamBPicks"
+                    :key="`b-pill-${pick.id}`"
                     class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
                   >
                     {{ pick.season }} R{{ pick.round }}
                     <button
                       type="button"
-                      @click="removeDraftPickFromPackage('A', pick.id)"
+                      @click="removeDraftPickFromPackage('B', pick.id)"
                     >
                       <X class="size-3 text-muted-foreground" />
                     </button>
                   </span>
                 </div>
               </div>
-              <div
-                v-for="player in teamAOutgoingPlayers"
-                :key="`send-a-${player.player_id}`"
-                class="flex items-center justify-between rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
-              >
-                <div class="flex w-full">
-                  <img
-                    v-if="player.position !== 'DEF'"
-                    class="object-cover rounded-full w-14"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
-                    alt="Player avatar"
-                  />
-                  <img
-                    v-else
-                    class="w-10 h-10 mx-2 rounded-full"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
-                    alt="Team avatar"
-                  />
-                  <div class="ml-2">
-                    <p class="font-medium">
-                      {{ player.name || `${player.team} Defense` }}
-                    </p>
-                    <p class="text-xs text-muted-foreground">
-                      {{ player.position }} - {{ player.team }}
-                    </p>
-                  </div>
-                  <div class="flex flex-col items-end gap-1 ml-auto mr-4">
-                    <span
-                      :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
-                        posRankClass(player.projection),
-                      ]"
-                    >
-                      POS {{ rankLabel(player.projection) }}
-                    </span>
-                    <span
-                      :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
-                        overallRankClass(player.overallRank),
-                      ]"
-                    >
-                      OVR {{ rankLabel(player.overallRank) }}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="text-xs underline text-muted-foreground"
-                  @click="removeFromPackage('A', player.player_id)"
+              <div class="space-y-1 overflow-y-auto max-h-72">
+                <div
+                  v-for="player in teamBOutgoingPlayers"
+                  :key="`send-b-${player.player_id}`"
+                  class="flex items-center justify-between rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
                 >
-                  <X class="size-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="mt-3 min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
-            @dragover.prevent
-            @drop.prevent="onDropToTradePackage('B')"
-          >
-            <div class="flex justify-between gap-3">
-              <p class="mb-2 text-sm font-semibold">
-                {{ teamB?.managerName }}
-              </p>
-              <Dialog>
-                <DialogTrigger as-child>
-                  <Button
-                    variant="secondary"
-                    size="xs"
-                    class="-mt-0.5"
-                    @click="openAssetsModal('B')"
-                  >
-                    <Plus class="size-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle> Add Assets </DialogTitle>
-                    <DialogDescription>
-                      Add FAAB or draft picks.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div class="flex flex-wrap sm:flex-nowrap">
-                    <div class="mr-4">
-                      <Label for="faab-b" class="text-xs">FAAB</Label>
-                      <div class="flex gap-2 mt-0.5">
-                        <Input
-                          class="w-20"
-                          id="faab-b"
-                          type="number"
-                          min="0"
-                          v-model="teamBFaabInputModel"
-                        />
-                        <DialogClose as-child>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            @click="addFaabToPackage('B')"
-                          >
-                            Add
-                          </Button>
-                        </DialogClose>
-                      </div>
+                  <div class="flex w-full">
+                    <img
+                      v-if="player.position !== 'DEF'"
+                      class="object-cover rounded-full w-14"
+                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                      alt="Player avatar"
+                    />
+                    <img
+                      v-else
+                      class="w-10 h-10 mx-2 rounded-full"
+                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                      alt="Team avatar"
+                    />
+                    <div class="ml-2">
+                      <p class="font-medium">
+                        {{ player.name || `${player.team} Defense` }}
+                      </p>
+                      <p class="text-xs text-muted-foreground">
+                        {{ player.position }} - {{ player.team }}
+                      </p>
                     </div>
-                    <div class="">
-                      <Label class="text-xs">Draft Pick</Label>
-                      <div class="flex gap-2 mt-0.5">
-                        <Select v-model="pendingBPickSeasonModel">
-                          <SelectTrigger class="w-24 text-xs">
-                            <SelectValue placeholder="Season" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem
-                              v-for="season in draftSeasons"
-                              :key="`modal-b-season-${season}`"
-                              :value="String(season)"
-                            >
-                              {{ season }}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Select v-model="pendingBPickRoundModel">
-                          <SelectTrigger class="w-24 text-xs">
-                            <SelectValue placeholder="Round" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem
-                              v-for="round in draftRounds"
-                              :key="`modal-b-round-${round}`"
-                              :value="String(round)"
-                            >
-                              Round {{ round }}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <DialogClose as-child>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            @click="addDraftPickToPackage('B')"
-                          >
-                            Add
-                          </Button>
-                        </DialogClose>
-                      </div>
+                    <div class="flex flex-col items-end gap-1 ml-auto mr-4">
+                      <span
+                        :class="[
+                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                          posRankClass(player.projection),
+                        ]"
+                      >
+                        POS {{ rankLabel(player.projection) }}
+                      </span>
+                      <span
+                        :class="[
+                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                          overallRankClass(player.overallRank),
+                        ]"
+                      >
+                        OVR {{ rankLabel(player.overallRank) }}
+                      </span>
                     </div>
                   </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <div class="pt-2 mt-2 border-t border-border">
-              <div class="flex flex-wrap items-center gap-1.5 mb-2">
-                <span
-                  v-if="teamBFaab > 0"
-                  class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
-                >
-                  ${{ teamBFaab }} FAAB
-                  <button type="button" @click="clearFaab('B')">
-                    <X class="size-3 text-muted-foreground" />
-                  </button>
-                </span>
-                <span
-                  v-for="pick in teamBPicks"
-                  :key="`b-pill-${pick.id}`"
-                  class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
-                >
-                  {{ pick.season }} R{{ pick.round }}
                   <button
                     type="button"
-                    @click="removeDraftPickFromPackage('B', pick.id)"
+                    class="text-xs underline text-muted-foreground"
+                    @click="removeFromPackage('B', player.player_id)"
                   >
-                    <X class="size-3 text-muted-foreground" />
+                    <X class="size-4" />
                   </button>
-                </span>
+                </div>
               </div>
             </div>
-            <div class="space-y-1 overflow-y-auto max-h-72">
-              <div
-                v-for="player in teamBOutgoingPlayers"
-                :key="`send-b-${player.player_id}`"
-                class="flex items-center justify-between rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+            <Separator class="h-px my-3" />
+            <div class="p-1">
+              <p class="mb-2 text-sm font-semibold">Trade Value Estimate</p>
+              <div class="flex items-center justify-between mb-1.5 text-sm">
+                <span>{{ teamA?.managerName }}</span>
+                <span class="font-semibold">{{ teamATradeValue }}</span>
+              </div>
+              <div class="mb-2 text-xs text-muted-foreground">
+                Players: {{ teamAPlayerValue }} | Picks:
+                {{ teamADraftPickValue }} | FAAB: {{ teamAFaabValue }}
+              </div>
+              <div class="flex items-center justify-between mb-2.5 text-sm">
+                <span>{{ teamB?.managerName }}</span>
+                <span class="font-semibold">{{ teamBTradeValue }}</span>
+              </div>
+              <div class="mb-2 text-xs text-muted-foreground">
+                Players: {{ teamBPlayerValue }} | Picks:
+                {{ teamBDraftPickValue }} | FAAB: {{ teamBFaabValue }}
+              </div>
+              <div class="flex items-center justify-between">
+                <span
+                  :class="[
+                    'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                    fairnessPillClass,
+                  ]"
+                >
+                  {{ fairnessLabel }}
+                </span>
+                <span class="text-xs text-muted-foreground">
+                  gap: {{ fairnessPercent }}%
+                </span>
+              </div>
+              <Separator class="h-px mt-3" />
+              <p class="mt-4 text-xs text-muted-foreground">
+                Formula combines player rank strength, position scarcity, and
+                depth discounts.
+              </p>
+            </div>
+          </Card>
+
+          <Card class="px-4 py-3">
+            <div class="mb-2">
+              <Label class="block mb-1 text-sm">Manager</Label>
+              <Select
+                :model-value="selectedTeamBId"
+                @update:model-value="
+                  handleTeamSelectionChange('B', Number($event))
+                "
+              >
+                <SelectTrigger class="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="team in rosters"
+                    :key="team.id"
+                    :value="team.id"
+                    :disabled="team.id === selectedTeamAId"
+                  >
+                    {{ team.managerName }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
+              <button
+                v-for="player in teamB?.players || []"
+                :key="`B-${player.player_id}`"
+                :draggable="!isMobile"
+                @dragstart="onPlayerDragStart(player.player_id, 'B')"
+                @click="onPlayerCardTap('B', player.player_id)"
+                type="button"
+                class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
+                :class="{
+                  'bg-primary/10 border-primary': isIncluded(
+                    'B',
+                    player.player_id
+                  ),
+                  'hover:border-primary': !isIncluded('B', player.player_id),
+                }"
               >
                 <div class="flex w-full">
                   <img
@@ -1087,7 +1229,7 @@ onBeforeUnmount(() => {
                       {{ player.position }} - {{ player.team }}
                     </p>
                   </div>
-                  <div class="flex flex-col items-end gap-1 ml-auto mr-4">
+                  <div class="flex flex-col items-end gap-1 ml-auto">
                     <span
                       :class="[
                         'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
@@ -1106,140 +1248,10 @@ onBeforeUnmount(() => {
                     </span>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  class="text-xs underline text-muted-foreground"
-                  @click="removeFromPackage('B', player.player_id)"
-                >
-                  <X class="size-4" />
-                </button>
-              </div>
+              </button>
             </div>
-          </div>
-          <Separator class="h-px my-3" />
-          <div class="p-1">
-            <p class="mb-2 text-sm font-semibold">Trade Value Estimate</p>
-            <div class="flex items-center justify-between mb-1.5 text-sm">
-              <span>{{ teamA?.managerName }}</span>
-              <span class="font-semibold">{{ teamATradeValue }}</span>
-            </div>
-            <div class="mb-2 text-xs text-muted-foreground">
-              Players: {{ teamAPlayerValue }} | Picks:
-              {{ teamADraftPickValue }} | FAAB: {{ teamAFaabValue }}
-            </div>
-            <div class="flex items-center justify-between mb-2.5 text-sm">
-              <span>{{ teamB?.managerName }}</span>
-              <span class="font-semibold">{{ teamBTradeValue }}</span>
-            </div>
-            <div class="mb-2 text-xs text-muted-foreground">
-              Players: {{ teamBPlayerValue }} | Picks:
-              {{ teamBDraftPickValue }} | FAAB: {{ teamBFaabValue }}
-            </div>
-            <div class="flex items-center justify-between">
-              <span
-                :class="[
-                  'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
-                  fairnessPillClass,
-                ]"
-              >
-                {{ fairnessLabel }}
-              </span>
-              <span class="text-xs text-muted-foreground">
-                gap: {{ fairnessPercent }}%
-              </span>
-            </div>
-            <Separator class="h-px mt-3" />
-            <p class="mt-4 text-xs text-muted-foreground">
-              Formula combines player rank strength, position scarcity, and
-              depth discounts.
-            </p>
-          </div>
-        </Card>
-
-        <Card class="px-4 py-3">
-          <div class="mb-2">
-            <Label class="block mb-1 text-sm">Manager</Label>
-            <Select
-              :model-value="selectedTeamBId"
-              @update:model-value="
-                handleTeamSelectionChange('B', Number($event))
-              "
-            >
-              <SelectTrigger class="w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="team in rosters"
-                  :key="team.id"
-                  :value="team.id"
-                  :disabled="team.id === selectedTeamAId"
-                >
-                  {{ team.managerName }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
-            <button
-              v-for="player in teamB?.players || []"
-              :key="`B-${player.player_id}`"
-              :draggable="!isMobile"
-              @dragstart="onPlayerDragStart(player.player_id, 'B')"
-              @click="onPlayerCardTap('B', player.player_id)"
-              type="button"
-              class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
-              :class="{
-                'bg-primary/10 border-primary': isIncluded(
-                  'B',
-                  player.player_id
-                ),
-                'hover:border-primary': !isIncluded('B', player.player_id),
-              }"
-            >
-              <div class="flex w-full">
-                <img
-                  v-if="player.position !== 'DEF'"
-                  class="object-cover rounded-full w-14"
-                  :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
-                  alt="Player avatar"
-                />
-                <img
-                  v-else
-                  class="w-10 h-10 mx-2 rounded-full"
-                  :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
-                  alt="Team avatar"
-                />
-                <div class="ml-2">
-                  <p class="font-medium">
-                    {{ player.name || `${player.team} Defense` }}
-                  </p>
-                  <p class="text-xs text-muted-foreground">
-                    {{ player.position }} - {{ player.team }}
-                  </p>
-                </div>
-                <div class="flex flex-col items-end gap-1 ml-auto">
-                  <span
-                    :class="[
-                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
-                      posRankClass(player.projection),
-                    ]"
-                  >
-                    POS {{ rankLabel(player.projection) }}
-                  </span>
-                  <span
-                    :class="[
-                      'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
-                      overallRankClass(player.overallRank),
-                    ]"
-                  >
-                    OVR {{ rankLabel(player.overallRank) }}
-                  </span>
-                </div>
-              </div>
-            </button>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   </Card>

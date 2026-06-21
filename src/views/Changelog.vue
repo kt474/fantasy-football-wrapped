@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "6/21/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "There is now a trade database in the trade lab tab. All trades from ffwrapped leagues will be searchable.",
+        ],
+      },
+    ],
+  },
+  {
     date: "6/18/26",
     content: [
       {
