@@ -267,6 +267,11 @@ const buildEspnFixture = () => {
         scheduleSettings: {
           matchupPeriodCount: 2,
           playoffTeamCount: 2,
+          matchupPeriods: {
+            1: [1],
+            2: [2],
+            3: [3],
+          },
         },
         rosterSettings: {
           lineupSlotCounts: {
@@ -621,6 +626,7 @@ describe("ESPN API transforms", () => {
       scoringType: 0.5,
       rosterPositions: ["RB", "WR"],
       playoffTeams: 2,
+      espnPlayoffMatchupPeriods: [[3]],
       playoffType: 0,
       draftId: "draft-123",
       waiverType: 2,

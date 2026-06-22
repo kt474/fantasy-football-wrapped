@@ -33,6 +33,7 @@ export type LeagueInfoType = {
   scoringType: number;
   rosterPositions: string[];
   playoffTeams: number;
+  espnPlayoffMatchupPeriods?: number[][];
   playoffProjections?: PlayoffProjection[];
   weeklyReport?: string;
   premiumWeeklyReport?: PremiumReport | string;

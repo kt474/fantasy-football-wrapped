@@ -45,6 +45,7 @@ import {
   getExportPlayers,
   getExportTopTeams,
   getMatchupNumbers,
+  getPlayoffRoundMetadata,
   getSortedTableData,
   getWeeklyPerformers,
 } from "./weeklyReportTransforms";
@@ -233,17 +234,16 @@ const getPremiumReport = async () => {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     let leagueMetadata: Record<string, string | number>;
     if (isPlayoffs.value) {
-      const roundNames: { [key: number]: string } = {
-        1: "Quarterfinal round",
-        2: "Semifinal round",
-        3: "Final Championship round",
-        4: "Final Championship round",
-      };
+      const playoffRound = getPlayoffRoundMetadata({
+        currentWeek: currentWeek.value,
+        regularSeasonLength: currentLeague.regularSeasonLength,
+        playoffTeams: currentLeague.playoffTeams,
+        espnPlayoffMatchupPeriods: currentLeague.espnPlayoffMatchupPeriods,
+      });
       leagueMetadata = {
-        playoffRound:
-          roundNames[currentWeek.value - currentLeague.regularSeasonLength],
+        playoffRound: playoffRound.playoffRound,
       };
-      if (currentWeek.value - currentLeague.regularSeasonLength > 2) {
+      if (playoffRound.championshipMatchup) {
         leagueMetadata["ChampionshipMatchup"] = 1;
       }
     } else {
@@ -284,17 +284,16 @@ const getReport = async () => {
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     let leagueMetadata: Record<string, string | number>;
     if (isPlayoffs.value) {
-      const roundNames: { [key: number]: string } = {
-        1: "Quarterfinal round",
-        2: "Semifinal round",
-        3: "Final Championship round",
-        4: "Final Championship round",
-      };
+      const playoffRound = getPlayoffRoundMetadata({
+        currentWeek: currentWeek.value,
+        regularSeasonLength: currentLeague.regularSeasonLength,
+        playoffTeams: currentLeague.playoffTeams,
+        espnPlayoffMatchupPeriods: currentLeague.espnPlayoffMatchupPeriods,
+      });
       leagueMetadata = {
-        playoffRound:
-          roundNames[currentWeek.value - currentLeague.regularSeasonLength],
+        playoffRound: playoffRound.playoffRound,
       };
-      if (currentWeek.value - currentLeague.regularSeasonLength > 2) {
+      if (playoffRound.championshipMatchup) {
         leagueMetadata["ChampionshipMatchup"] = 1;
       }
     } else {

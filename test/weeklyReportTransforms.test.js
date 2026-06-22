@@ -9,6 +9,7 @@ import {
   getExportTopTeams,
   getMatchupNumbers,
   getMatchupWinner,
+  getPlayoffRoundMetadata,
   getRecordForWeek,
   getSortedTableData,
   getWeeklyPerformers,
@@ -64,6 +65,49 @@ const team = ({
 });
 
 describe("weekly report transforms", () => {
+  test("uses ESPN matchup periods to identify semifinal and final rounds", () => {
+    const playoffSettings = {
+      regularSeasonLength: 15,
+      playoffTeams: 4,
+      espnPlayoffMatchupPeriods: [[16], [17]],
+    };
+
+    expect(
+      getPlayoffRoundMetadata({ ...playoffSettings, currentWeek: 16 })
+    ).toEqual({
+      playoffRound: "Semifinal round",
+      championshipMatchup: false,
+    });
+    expect(
+      getPlayoffRoundMetadata({ ...playoffSettings, currentWeek: 17 })
+    ).toEqual({
+      playoffRound: "Final Championship round",
+      championshipMatchup: true,
+    });
+  });
+
+  test("keeps multi-week ESPN playoff matchups in the same round", () => {
+    const playoffSettings = {
+      regularSeasonLength: 14,
+      playoffTeams: 4,
+      espnPlayoffMatchupPeriods: [
+        [15, 16],
+        [17, 18],
+      ],
+    };
+
+    expect(
+      getPlayoffRoundMetadata({ ...playoffSettings, currentWeek: 16 })
+        .playoffRound
+    ).toBe("Semifinal round");
+    expect(
+      getPlayoffRoundMetadata({ ...playoffSettings, currentWeek: 17 })
+    ).toEqual({
+      playoffRound: "Final Championship round",
+      championshipMatchup: true,
+    });
+  });
+
   const tableData = [
     team({
       rosterId: 1,

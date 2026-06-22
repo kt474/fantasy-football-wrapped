@@ -118,6 +118,55 @@ export type ReportMatchup = Record<string, unknown> & {
   playoffContext?: PlayoffMatchupContext;
 };
 
+export const getPlayoffRoundMetadata = ({
+  currentWeek,
+  regularSeasonLength,
+  playoffTeams,
+  espnPlayoffMatchupPeriods = [],
+}: {
+  currentWeek: number;
+  regularSeasonLength: number;
+  playoffTeams: number;
+  espnPlayoffMatchupPeriods?: number[][];
+}) => {
+  const espnRoundIndex = espnPlayoffMatchupPeriods.findIndex((periods) =>
+    periods.includes(currentWeek)
+  );
+  const totalRounds =
+    espnRoundIndex >= 0
+      ? espnPlayoffMatchupPeriods.length
+      : Math.max(1, Math.ceil(Math.log2(Math.max(playoffTeams, 2))));
+  const roundIndex =
+    espnRoundIndex >= 0
+      ? espnRoundIndex
+      : Math.max(0, currentWeek - regularSeasonLength - 1);
+  const roundsRemaining = Math.max(1, totalRounds - roundIndex);
+
+  if (roundsRemaining === 1) {
+    return {
+      playoffRound: "Final Championship round",
+      championshipMatchup: true,
+    };
+  }
+  if (roundsRemaining === 2) {
+    return {
+      playoffRound: "Semifinal round",
+      championshipMatchup: false,
+    };
+  }
+  if (roundsRemaining === 3) {
+    return {
+      playoffRound: "Quarterfinal round",
+      championshipMatchup: false,
+    };
+  }
+
+  return {
+    playoffRound: `Playoff round ${roundIndex + 1}`,
+    championshipMatchup: false,
+  };
+};
+
 export const getPlayerLabel = (player: WeeklyReportPlayer) =>
   player.name ? player.name : `${player.team} Defense`;
 

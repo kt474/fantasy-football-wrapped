@@ -1334,6 +1334,25 @@ export const getEspnLeagueInfo = async (
       scheduleSettings.regularSeasonMatchupPeriodCount ??
       0
   );
+  const matchupPeriods =
+    (scheduleSettings.matchupPeriods as
+      | Record<string, unknown>
+      | undefined) ?? {};
+  const espnPlayoffMatchupPeriods = Object.entries(matchupPeriods)
+    .map(([matchupPeriod, scoringPeriods]) => ({
+      matchupPeriod: Number(matchupPeriod),
+      scoringPeriods: Array.isArray(scoringPeriods)
+        ? scoringPeriods
+            .map((period) => Number(period))
+            .filter((period) => Number.isFinite(period))
+        : [],
+    }))
+    .filter(
+      ({ matchupPeriod, scoringPeriods }) =>
+        matchupPeriod > regularSeasonLength && scoringPeriods.length > 0
+    )
+    .sort((a, b) => a.matchupPeriod - b.matchupPeriod)
+    .map(({ scoringPeriods }) => scoringPeriods);
   const currentWeek = Number(status.currentMatchupPeriod ?? 0);
   const finalScoringPeriod = Number(status.finalScoringPeriod ?? 0);
   const latestScoringPeriod = Number(status.latestScoringPeriod ?? 0);
@@ -1568,6 +1587,7 @@ export const getEspnLeagueInfo = async (
         {}
     ),
     playoffTeams: Number(scheduleSettings.playoffTeamCount ?? 0),
+    espnPlayoffMatchupPeriods,
     playoffType: 0,
     draftId: String(draftData?.id ?? draftData?.draftDetail?.id ?? ""),
     draftPicks,

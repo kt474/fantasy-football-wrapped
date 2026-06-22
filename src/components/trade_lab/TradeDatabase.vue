@@ -470,7 +470,7 @@ const leagueTypeLabel = (type: string | null) => {
       </CardContent>
     </Card>
 
-    <div v-if="trades.length" class="grid gap-4 lg:grid-cols-2">
+    <div v-if="trades.length" class="grid gap-4 pt-2 lg:grid-cols-2">
       <Card v-for="trade in trades" :key="trade.tradeId">
         <CardHeader class="pb-3">
           <div class="flex items-start justify-between gap-3">
