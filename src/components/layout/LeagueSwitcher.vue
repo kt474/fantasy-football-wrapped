@@ -36,6 +36,7 @@ import {
   getEspnErrorMessage,
   getEspnLeagueInfo,
   getSavedEspnAuth,
+  removeSavedEspnAuth,
 } from "@/api/espnApi";
 import Dialog from "./Dialog.vue";
 import { getParsedStorageItem, isRecord } from "@/lib/storage";
@@ -94,9 +95,13 @@ const removeHistoryLeagues = () => {
 const removeLeague = () => {
   if (localStorage.getItem("leagueInfo")) {
     const removedLeagueId = currentLeagueId.value;
+    const removedLeague = currentLeague.value;
     removeHistoryLeagues();
-    if (currentLeague.value.previousLeagues) {
-      currentLeague.value.previousLeagues.forEach((league: LeagueInfoType) => {
+    if (removedLeague.platform === "espn") {
+      removeSavedEspnAuth(removedLeague.season, removedLeague.leagueId);
+    }
+    if (removedLeague.previousLeagues) {
+      removedLeague.previousLeagues.forEach((league: LeagueInfoType) => {
         localStorage.removeItem(league.leagueId);
       });
     }

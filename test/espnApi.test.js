@@ -18,10 +18,12 @@ vi.mock("../src/api/sleeperApi.ts", () => ({
 }));
 
 import {
+  getEspnAuthStorageKey,
   getEspnLeagueInfo,
   getLastScoredWeek,
   getLeagueData,
   getLeagueStatus,
+  removeSavedEspnAuth,
 } from "../src/api/espnApi.ts";
 
 const mockFetchResponse = (status, data) =>
@@ -30,6 +32,36 @@ const mockFetchResponse = (status, data) =>
     ok: status >= 200 && status < 300,
     json: async () => data,
   });
+
+const createStorageMock = () => {
+  const storage = new Map();
+  return {
+    getItem: vi.fn((key) => storage.get(key) ?? null),
+    setItem: vi.fn((key, value) => storage.set(key, String(value))),
+    removeItem: vi.fn((key) => storage.delete(key)),
+  };
+};
+
+describe("ESPN credential storage", () => {
+  test("removes saved credentials from local and session storage", () => {
+    vi.stubGlobal("localStorage", createStorageMock());
+    vi.stubGlobal("sessionStorage", createStorageMock());
+    const key = getEspnAuthStorageKey("2026", "12345");
+    localStorage.setItem(
+      key,
+      JSON.stringify({ swid: "{abc}", espnS2: "secret" })
+    );
+    sessionStorage.setItem(
+      key,
+      JSON.stringify({ swid: "{abc}", espnS2: "secret" })
+    );
+
+    removeSavedEspnAuth("2026", "12345");
+
+    expect(localStorage.getItem(key)).toBeNull();
+    expect(sessionStorage.getItem(key)).toBeNull();
+  });
+});
 
 const buildEspnFixture = () => {
   const members = [

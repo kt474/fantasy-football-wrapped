@@ -36,6 +36,12 @@ export const saveEspnAuth = (
   );
 };
 
+export const removeSavedEspnAuth = (season: string, leagueId: string) => {
+  const storageKey = getEspnAuthStorageKey(season, leagueId);
+  localStorage.removeItem(storageKey);
+  sessionStorage.removeItem(storageKey);
+};
+
 export const getSavedEspnAuth = (
   season: string,
   leagueId: string
