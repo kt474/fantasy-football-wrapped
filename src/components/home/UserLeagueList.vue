@@ -8,6 +8,7 @@ import Card from "../ui/card/Card.vue";
 import Checkbox from "../ui/checkbox/Checkbox.vue";
 import { toast } from "vue-sonner";
 import { loadUserLeagues } from "./userLeagueLoader";
+import { trackEvent } from "@/lib/analytics";
 
 const checkedLeagues = ref<string[]>([]);
 const duplicateLeagueError = ref(false);
@@ -25,8 +26,13 @@ const leagueCountError = computed(() => {
 });
 
 const addLeagues = async () => {
+  const source = store.currentLeagueId ? "add_league" : "home";
   if (checkedLeagues.value.some((league) => store.leagueIds.includes(league))) {
     duplicateLeagueError.value = true;
+    trackEvent("League Add Failed", {
+      platform: "sleeper",
+      reason: "duplicate",
+    });
     return;
   }
   if (checkedLeagues.value.length >= 1) {
@@ -63,6 +69,12 @@ const addLeagues = async () => {
         store.updateCurrentLeagueId(firstLoadedLeague.leagueId);
         store.updateShowLeaguesList(false);
         store.setLeaguesList([]);
+        loaded.forEach(() =>
+          trackEvent("League Added", {
+            platform: "sleeper",
+            source,
+          })
+        );
         toast.success(
           loaded.length === 1
             ? "League added!"
@@ -71,6 +83,12 @@ const addLeagues = async () => {
       }
 
       if (failed.length > 0) {
+        failed.forEach(() =>
+          trackEvent("League Add Failed", {
+            platform: "sleeper",
+            reason: "api_error",
+          })
+        );
         toast.error(
           failed.length === checkedLeagues.value.length
             ? "Unable to add the selected leagues. Please try again."
@@ -81,6 +99,10 @@ const addLeagues = async () => {
       }
     } catch (error) {
       console.error("Unable to finish adding selected leagues:", error);
+      trackEvent("League Add Failed", {
+        platform: "sleeper",
+        reason: "api_error",
+      });
       toast.error("Unable to finish adding the selected leagues.");
     } finally {
       store.updateLoadingUserLeagues(false);

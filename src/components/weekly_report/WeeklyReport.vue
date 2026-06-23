@@ -36,6 +36,7 @@ import WeeklyPointsChart from "./WeeklyPointsChart.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import { toPng } from "html-to-image";
+import { trackEvent } from "@/lib/analytics";
 import {
   buildPremiumReportPrompt,
   buildReportPrompt,
@@ -70,6 +71,9 @@ const fetchingPlayers = ref(false);
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("roast");
 const premiumWeeklyReport = ref<PremiumReport | null>(null);
+
+const getAnalyticsPlatform = (league: LeagueInfoType) =>
+  league.platform ?? "sleeper";
 
 const isPremiumReport = (value: unknown): value is PremiumReport => {
   if (!value || typeof value !== "object") {
@@ -268,6 +272,10 @@ const getPremiumReport = async () => {
     premiumLoading.value = false;
     premiumWeeklyReport.value = response.report;
     sharedReportUrl.value = "";
+    trackEvent("Weekly Report Generated", {
+      tier: "premium",
+      platform: getAnalyticsPlatform(currentLeague),
+    });
     store.addPremiumWeeklyReport(
       getLeagueKey(currentLeague),
       premiumWeeklyReport.value
@@ -311,6 +319,10 @@ const getReport = async () => {
       currentLeague.season
     );
     rawWeeklyReport.value = response.text;
+    trackEvent("Weekly Report Generated", {
+      tier: "standard",
+      platform: getAnalyticsPlatform(currentLeague),
+    });
     store.addWeeklyReport(getLeagueKey(currentLeague), rawWeeklyReport.value);
     localStorage.setItem(
       "leagueInfo",
@@ -560,10 +572,18 @@ const shareReport = async () => {
 
     if (navigator.share) {
       await navigator.share(shareData);
+      trackEvent("Weekly Report Shared", {
+        method: "native",
+        tier: "premium",
+      });
       return;
     }
 
     await navigator.clipboard.writeText(sharedReportUrl.value);
+    trackEvent("Weekly Report Shared", {
+      method: "clipboard",
+      tier: "premium",
+    });
     toast.success("Share link copied to clipboard!");
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
@@ -637,6 +657,10 @@ const downloadReportImage = async () => {
     link.href = dataUrl;
     link.download = `ffwrapped-week-${currentWeek.value}.png`;
     link.click();
+    trackEvent("Weekly Report Shared", {
+      method: "image_download",
+      tier: tier.value.toLowerCase(),
+    });
     toast.success("Weekly report image downloaded");
   } catch (error) {
     console.error(error);

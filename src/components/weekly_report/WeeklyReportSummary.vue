@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
@@ -19,6 +19,7 @@ import {
 import Separator from "../ui/separator/Separator.vue";
 import PremiumReportContent from "./PremiumReportContent.vue";
 import type { PremiumReport } from "@/types/types";
+import { trackEvent } from "@/lib/analytics";
 
 const props = defineProps<{
   tier: string;
@@ -65,6 +66,27 @@ const canGeneratePremium = computed(
 
 const showShareButton = computed(
   () => props.tier === "Premium" && Boolean(props.premiumWeeklyReport)
+);
+
+const trackedPremiumPaywallView = ref(false);
+const shouldTrackPremiumPaywallView = computed(
+  () => props.tier === "Premium" && !canGeneratePremium.value
+);
+
+watch(
+  shouldTrackPremiumPaywallView,
+  (shouldTrack) => {
+    if (!shouldTrack || trackedPremiumPaywallView.value) {
+      return;
+    }
+
+    trackedPremiumPaywallView.value = true;
+    trackEvent("Paywall Viewed", {
+      feature: "premium_report",
+      source: "weekly_report",
+    });
+  },
+  { immediate: true }
 );
 
 const premiumReportPreview: PremiumReport = {

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStore } from "@/store/store";
+import { trackEvent } from "@/lib/analytics";
 
 const route = useRoute();
 const router = useRouter();
@@ -21,6 +22,42 @@ const toggleDarkMode = () => {
   const nextDarkMode = !store.darkMode;
   store.updateDarkMode(nextDarkMode);
   localStorage.setItem("darkMode", String(nextDarkMode));
+};
+
+const getEntrySource = () => {
+  if (typeof document === "undefined") return "unknown";
+  if (!document.referrer) return "direct";
+
+  try {
+    const referrerHost = new URL(document.referrer).hostname;
+    if (referrerHost.includes("google") || referrerHost.includes("bing")) {
+      return "search";
+    }
+    if (
+      referrerHost.includes("twitter") ||
+      referrerHost.includes("x.com") ||
+      referrerHost.includes("facebook") ||
+      referrerHost.includes("reddit") ||
+      referrerHost.includes("discord")
+    ) {
+      return "social";
+    }
+    return "referral";
+  } catch {
+    return "unknown";
+  }
+};
+
+const isReturningUser = () => {
+  if (typeof localStorage === "undefined") return false;
+  return Boolean(localStorage.getItem("leagueInfo"));
+};
+
+const trackSharedReportCta = (cta: string) => {
+  trackEvent("Shared Report CTA Clicked", {
+    cta,
+    entry: getEntrySource(),
+  });
 };
 
 const loadReport = async () => {
@@ -43,6 +80,10 @@ const loadReport = async () => {
       return;
     }
     sharedReport.value = result;
+    trackEvent("Shared Report Viewed", {
+      entry: getEntrySource(),
+      returning: isReturningUser(),
+    });
   } catch (error) {
     console.error("Unable to load shared report:", error);
     errorMessage.value =
@@ -60,7 +101,7 @@ watch(() => route.params.token, loadReport);
   <div class="container w-11/12 max-w-5xl py-8 mx-auto sm:py-12">
     <div class="flex items-center justify-between mb-6">
       <Button as-child class="shadow-sm">
-        <a href="/">
+        <a href="/" @click="trackSharedReportCta('explore')">
           <ArrowLeft class="mr-2 size-4" />
           Explore ffwrapped
         </a>
@@ -95,7 +136,15 @@ watch(() => route.params.token, loadReport);
       <CardContent class="p-8 text-center">
         <h1 class="text-2xl font-bold">Report unavailable</h1>
         <p class="mt-3 text-muted-foreground">{{ errorMessage }}</p>
-        <Button class="mt-6" @click="router.push('/')">Return home</Button>
+        <Button
+          class="mt-6"
+          @click="
+            trackSharedReportCta('explore');
+            router.push('/');
+          "
+        >
+          Return home
+        </Button>
       </CardContent>
     </Card>
 
@@ -105,6 +154,7 @@ watch(() => route.params.token, loadReport);
           href="/"
           class="inline-flex items-center gap-2 mb-2 text-xl font-semibold tracking-tight"
           aria-label="Go to ffwrapped home"
+          @click="trackSharedReportCta('explore')"
         >
           <img
             height="24"
@@ -148,7 +198,11 @@ watch(() => route.params.token, loadReport);
       <footer class="pt-6 mt-8 text-sm border-t text-muted-foreground">
         AI-generated report. Information provided may not always be accurate.
         Created with
-        <a class="font-medium text-primary hover:underline" href="/">
+        <a
+          class="font-medium text-primary hover:underline"
+          href="/"
+          @click="trackSharedReportCta('explore')"
+        >
           ffwrapped.com
         </a>
       </footer>

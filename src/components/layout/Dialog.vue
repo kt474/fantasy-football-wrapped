@@ -30,7 +30,7 @@ const {
   showErrorMsg,
   onSubmit,
   clearError,
-} = useLeagueInput(platform);
+} = useLeagueInput(platform, "add_league");
 
 const slots = useSlots();
 const open = defineModel<boolean>("open", { default: false });

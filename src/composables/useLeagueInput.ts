@@ -11,6 +11,7 @@ import {
   type EspnAuth,
 } from "@/api/espnApi";
 import { toast } from "vue-sonner";
+import { trackEvent } from "@/lib/analytics";
 
 export const SEASON_YEAR_OPTIONS = [
   "2026",
@@ -24,9 +25,11 @@ export const SEASON_YEAR_OPTIONS = [
 ];
 
 export type LeaguePlatform = "sleeper" | "espn";
+type LeagueInputSource = "home" | "add_league";
 
 export const useLeagueInput = (
-  platform: MaybeRef<LeaguePlatform> = "sleeper"
+  platform: MaybeRef<LeaguePlatform> = "sleeper",
+  source: LeagueInputSource = "home"
 ) => {
   const store = useStore();
   const router = useRouter();
@@ -89,6 +92,16 @@ export const useLeagueInput = (
     showErrorMsg.value = true;
   };
 
+  const trackLeagueAddFailed = (
+    currentPlatform: LeaguePlatform,
+    reason: string
+  ) => {
+    trackEvent("League Add Failed", {
+      platform: currentPlatform,
+      reason,
+    });
+  };
+
   onMounted(() => {
     const savedInputType = localStorage.getItem("inputType");
     if (savedInputType) {
@@ -109,11 +122,13 @@ export const useLeagueInput = (
       if (inputType.value === "Username") {
         if (leagueIdInput.value === "") {
           showError("Please enter a username");
+          trackLeagueAddFailed(currentPlatform, "invalid");
           return;
         }
         const user = await getUsername(leagueIdInput.value);
         if (!user?.user_id || !user?.display_name) {
           showError("Invalid username");
+          trackLeagueAddFailed(currentPlatform, "invalid");
           return;
         }
         showHelperMsg.value = true;
@@ -133,20 +148,25 @@ export const useLeagueInput = (
 
       if (store.leagueInfo.length >= 5) {
         showError("Maximum of 5 leagues allowed");
+        trackLeagueAddFailed(currentPlatform, "max_leagues");
         return;
       }
       if (leagueIdInput.value === "") {
         showError("Please enter a league ID");
+        trackLeagueAddFailed(currentPlatform, "invalid");
         return;
       }
 
       const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
       if (!checkInput["name"]) {
         showError("Invalid league ID");
+        trackLeagueAddFailed(currentPlatform, "invalid");
       } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
         showError("League already added");
+        trackLeagueAddFailed(currentPlatform, "duplicate");
       } else if (checkInput["sport"] !== "nfl") {
         showError("Only NFL leagues are supported");
+        trackLeagueAddFailed(currentPlatform, "invalid");
       } else {
         store.currentTab = "Standings";
         localStorage.setItem("currentTab", "Standings");
@@ -160,6 +180,10 @@ export const useLeagueInput = (
           store.leagueSubmitted = true;
           store.updateShowInput(false);
           await updateURL(leagueIdInput.value);
+          trackEvent("League Added", {
+            platform: currentPlatform,
+            source,
+          });
 
           try {
             await inputLeague(
@@ -176,6 +200,7 @@ export const useLeagueInput = (
         } catch (error) {
           console.error("Failed to load league:", error);
           showError("Unable to load league right now. Please try again.");
+          trackLeagueAddFailed(currentPlatform, "api_error");
         } finally {
           store.updateLoadingLeague("");
         }
@@ -188,10 +213,12 @@ export const useLeagueInput = (
     if (currentPlatform === "espn") {
       if (store.leagueInfo.length >= 5) {
         showError("Maximum of 5 leagues allowed");
+        trackLeagueAddFailed(currentPlatform, "max_leagues");
         return;
       }
       if (leagueIdInput.value === "") {
         showError("Please enter a league ID");
+        trackLeagueAddFailed(currentPlatform, "invalid");
         return;
       }
       const espnAuth: EspnAuth | undefined = espnPrivate.value
@@ -202,6 +229,7 @@ export const useLeagueInput = (
         : undefined;
       if (espnPrivate.value && (!espnAuth?.swid || !espnAuth.espnS2)) {
         showError("Please enter both SWID and espn_s2 cookies");
+        trackLeagueAddFailed(currentPlatform, "espn_auth");
         return;
       }
       if (
@@ -214,6 +242,7 @@ export const useLeagueInput = (
         )
       ) {
         showError("League already added");
+        trackLeagueAddFailed(currentPlatform, "duplicate");
         return;
       }
 
@@ -237,11 +266,17 @@ export const useLeagueInput = (
           store.currentTab = "Standings";
           localStorage.setItem("currentTab", "Standings");
           await updateURL(leagueIdInput.value, "espn");
+          trackEvent("League Added", {
+            platform: currentPlatform,
+            source,
+          });
         } else {
           showError("Unable to load league right now. Please try again.");
+          trackLeagueAddFailed(currentPlatform, "api_error");
         }
       } catch (error) {
         showError(getEspnErrorMessage(error));
+        trackLeagueAddFailed(currentPlatform, "espn_auth");
       } finally {
         store.updateLoadingLeague("");
       }

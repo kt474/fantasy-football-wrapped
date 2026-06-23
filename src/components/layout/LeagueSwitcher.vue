@@ -40,6 +40,7 @@ import {
 } from "@/api/espnApi";
 import Dialog from "./Dialog.vue";
 import { getParsedStorageItem, isRecord } from "@/lib/storage";
+import { trackEvent } from "@/lib/analytics";
 
 const router = useRouter();
 const store = useStore();
@@ -215,6 +216,10 @@ const sharePopup = async () => {
       text: "ffwrapped",
       url: window.location.href,
     });
+    trackEvent("League Shared", {
+      method: "native",
+      platform: currentLeague.value.platform ?? "sleeper",
+    });
   } catch (error) {
     console.error("Sharing failed:", error);
   }
@@ -231,6 +236,10 @@ const shareLeague = () => {
       ? `${currentUrl}?espn&leagueId=${currentLeague.value.leagueId}&season=${currentLeague.value.season}`
       : `${currentUrl}?leagueId=${currentLeague.value.leagueId}`;
   navigator.clipboard.writeText(updatedURL);
+  trackEvent("League Shared", {
+    method: "clipboard",
+    platform: currentLeague.value.platform ?? "sleeper",
+  });
   toast.success("Link copied to clipboard!");
 };
 
