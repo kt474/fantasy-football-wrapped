@@ -2,20 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://ffwrapped.com/</loc>
+    <lastmod>2026-06-23</lastmod>
   </url>
   <url>
     <loc>https://ffwrapped.com/about</loc>
+    <lastmod>2026-06-19</lastmod>
   </url>
   <url>
     <loc>https://ffwrapped.com/changelog</loc>
+    <lastmod>2026-06-21</lastmod>
   </url>
   <url>
     <loc>https://ffwrapped.com/privacy</loc>
+    <lastmod>2026-06-19</lastmod>
   </url>
   <url>
     <loc>https://ffwrapped.com/terms</loc>
-  </url>
-  <url>
-    <loc>https://ffwrapped.com/account</loc>
+    <lastmod>2026-06-19</lastmod>
   </url>
 </urlset>

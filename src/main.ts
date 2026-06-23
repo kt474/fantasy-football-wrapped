@@ -71,6 +71,7 @@ const routes = [
     meta: {
       title: "Account | ffwrapped",
       description: "Manage your ffwrapped account and subscription settings.",
+      robots: "noindex, follow",
     },
   },
   {
@@ -79,6 +80,7 @@ const routes = [
     meta: {
       title: "Shared Weekly Report | ffwrapped",
       description: "View a shared ffwrapped premium weekly report.",
+      robots: "noindex, nofollow",
       standalone: true,
     },
   },
@@ -90,6 +92,7 @@ const routes = [
       title: "Page Not Found | ffwrapped",
       description:
         "The page you are looking for could not be found on ffwrapped.",
+      robots: "noindex, follow",
     },
   },
 ];
@@ -153,6 +156,7 @@ router.beforeEach(async (to) => {
 router.afterEach((to) => {
   const title = String(to.meta.title ?? defaultMeta.title);
   const description = String(to.meta.description ?? defaultMeta.description);
+  const robots = String(to.meta.robots ?? "index, follow");
   const canonicalUrl = `${siteUrl}${to.path === "/" ? "/" : to.path}`;
 
   document.title = title;
@@ -169,6 +173,16 @@ router.afterEach((to) => {
   setMetaContent('meta[property="og:url"]', canonicalUrl);
   setMetaContent('meta[name="twitter:title"]', title);
   setMetaContent('meta[name="twitter:description"]', description);
+
+  let robotsMeta = document.querySelector<HTMLMetaElement>(
+    'meta[name="robots"]'
+  );
+  if (!robotsMeta) {
+    robotsMeta = document.createElement("meta");
+    robotsMeta.name = "robots";
+    document.head.appendChild(robotsMeta);
+  }
+  robotsMeta.content = robots;
 
   document
     .querySelector('link[rel="canonical"]')
