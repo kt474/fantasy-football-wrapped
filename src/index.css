@@ -85,5 +85,17 @@
   }
   body {
     @apply bg-background text-foreground;
+    min-width: 320px;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"] {
+    touch-action: manipulation;
   }
 }

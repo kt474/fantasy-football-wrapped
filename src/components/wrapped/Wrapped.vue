@@ -829,7 +829,7 @@ watch(
       v-if="!loading"
       ref="slideshow"
       @scroll="onScroll"
-      class="w-full h-screen overflow-y-scroll font-sans text-white rounded-lg z-1 snap-y snap-mandatory bg-zinc-900 scroll-smooth"
+      class="z-1 h-[calc(100dvh-4rem)] w-full snap-y snap-mandatory overflow-y-scroll rounded-lg bg-zinc-900 font-sans text-white scroll-smooth"
     >
       <!-- Intro Slide -->
       <WrappedSlide bg-color="bg-gradient-to-r from-green-950 to-gray-900">

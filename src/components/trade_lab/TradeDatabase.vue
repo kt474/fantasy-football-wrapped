@@ -334,7 +334,9 @@ const leagueTypeLabel = (type: string | null) => {
                 </div>
                 <p class="text-xs font-medium">2027 2nd-round pick</p>
               </div>
-              <ArrowLeftRight class="w-3 h-3 mt-2 sm:w-5 sm:h-5 text-primary" />
+              <ArrowLeftRight
+                class="w-4 h-4 mx-2 mt-2 sm:w-5 sm:h-5 text-primary"
+              />
               <div class="space-y-3">
                 <div class="flex items-center justify-end gap-2">
                   <div class="text-right">

@@ -149,7 +149,7 @@ const setHtmlBackground = () => {
     <div v-else>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset class="flex flex-col h-screen">
+        <SidebarInset class="flex h-svh flex-col">
           <header class="flex items-center h-16 gap-2 px-4 border-b shrink-0">
             <SidebarTrigger
               class="-ml-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"

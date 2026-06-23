@@ -27,28 +27,33 @@ const showAddLeagueButton = computed(() => {
 });
 </script>
 <template>
-  <div class="flex flex-1 min-w-0">
-    <div class="flex w-full overflow-auto no-scrollbar">
+  <div class="flex min-w-0 flex-1">
+    <div class="flex w-full min-w-0 overflow-auto no-scrollbar">
       <LeagueSwitcher
         v-if="hasLeagueIdInUrl && route.path === '/'"
         :leagues="leagues"
       />
       <div
-        class="relative flex items-center w-full"
+        class="flex w-full min-w-0 items-center gap-2"
         v-else-if="showAddLeagueButton"
       >
         <Dialog>
           <template #trigger>
-            <Button type="button" size="sm" class="text-sm font-medium ml-1.5">
+            <Button
+              type="button"
+              size="sm"
+              class="ml-1.5 shrink-0 text-sm font-medium"
+            >
               Add League
             </Button>
           </template>
         </Dialog>
         <p
           v-if="route.path === '/' && !store.loadingLeague"
-          class="absolute inset-x-0 font-medium text-right pointer-events-none sm:ml-10 sm:text-center whitespace-nowrap"
+          class="ml-auto truncate text-right text-sm font-medium pointer-events-none sm:mr-auto sm:text-base"
         >
-          Demo League
+          <span class="sm:hidden">Demo</span>
+          <span class="hidden sm:inline">Demo League</span>
         </p>
       </div>
     </div>

@@ -47,7 +47,7 @@ onUnmounted(() => {
 <template>
   <div
     ref="slideRef"
-    class="relative flex flex-col w-full h-screen p-6 overflow-hidden snap-start shrink-0"
+    class="relative flex h-full w-full shrink-0 snap-start flex-col overflow-hidden p-6"
     :class="[
       props.bgColor,
       props.alignment === 'center' ? 'items-center text-center' : '',

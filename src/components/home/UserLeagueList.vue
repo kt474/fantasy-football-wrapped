@@ -103,6 +103,13 @@ const toggleLeague = (id: string) => {
   }
 };
 
+const handleLeagueKeydown = (event: KeyboardEvent, id: string) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    toggleLeague(id);
+  }
+};
+
 const goBack = () => {
   store.leaguesList = [];
   store.showLeaguesList = false;
@@ -148,16 +155,21 @@ const goBack = () => {
       <li
         v-for="league in store.leaguesList"
         :key="league.league_id"
-        class="w-64 mb-2 mr-2"
+        class="w-full mb-2 sm:mr-2 sm:w-64"
       >
         <Card
-          class="p-4 transition-colors border-2 cursor-pointer"
+          class="p-4 transition-colors border-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           :class="
             checkedLeagues.includes(league.league_id)
               ? 'border-primary bg-primary/5'
               : 'border-border hover:bg-muted/50'
           "
+          role="checkbox"
+          tabindex="0"
+          :aria-checked="checkedLeagues.includes(league.league_id)"
+          :aria-label="`Select ${league.name}`"
           @click="toggleLeague(league.league_id)"
+          @keydown="handleLeagueKeydown($event, league.league_id)"
         >
           <div class="flex items-start justify-between">
             <div>
