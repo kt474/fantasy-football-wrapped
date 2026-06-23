@@ -28,15 +28,16 @@ const preseasonRank = computed(() => {
 
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague?.rosters) {
-    const results = currentLeague.rosters.map((roster: RosterType) => {
-      const projections = roster.projections ?? [];
-      // const hasAllPositions = ["QB", "WR", "TE", "RB"].every((pos) =>
-      //   projections.some((p) => p.position === pos && p.projection > 0)
-      // );
+    const projectionsAreLoaded = currentLeague.rosters.every(
+      (roster) => roster.projections && roster.projections.length > 0
+    );
 
-      // if (!hasAllPositions) {
-      //   return null; // Not ready yet
-      // }
+    if (!projectionsAreLoaded) {
+      return [];
+    }
+
+    const results = currentLeague.rosters.map((roster: RosterType) => {
+      const projections = roster.projections!;
       const sumTop2: Top2Sums = positions.reduce<Top2Sums>(
         (acc, pos) => {
           const filtered = projections.filter((item) => item.position === pos);
@@ -58,9 +59,7 @@ const preseasonRank = computed(() => {
         preseasonScore: totalSum / 10,
       };
     });
-    if (results.every((r) => r !== null)) {
-      return results;
-    }
+    return results;
   } else if (store.leagueInfo.length === 0) {
     // Fake data for homepage
     return [
