@@ -69,10 +69,10 @@ const showShareButton = computed(
 
 const premiumReportPreview: PremiumReport = {
   frontPage: {
-    headline: "Fourth-Quarter Chaos Turns the League Upside Down",
+    headline: "One Comeback, Two Blunders, and a New League Villain",
     subheadline:
-      "A statement win, a brutal bench decision, and one matchup nobody saw coming.",
-    lead: "Week 8 delivered the kind of fantasy football drama that makes the group chat impossible to mute. The favorites survived, the standings tightened, and one manager left enough points on the bench to haunt the rest of the season.",
+      "Bijan Mustard steals Sunday night while Dak to the Future leaves 31 winning points on the bench.",
+    lead: "Week 8 had everything: a 22-point Sunday night comeback, a league-best lineup firing on every cylinder, and 31 winning points stranded on the bench. Here’s who earned the glory, who deserves the group-chat heat, and how one chaotic week changed the race for the playoffs.",
   },
   matchupReports: [
     {
