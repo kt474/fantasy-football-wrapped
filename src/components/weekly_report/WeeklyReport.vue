@@ -82,9 +82,9 @@ const isPremiumReport = (value: unknown): value is PremiumReport => {
   const report = value as Partial<PremiumReport>;
   return Boolean(
     report.frontPage &&
-      Array.isArray(report.matchupReports) &&
-      report.teamOfTheWeek &&
-      report.managersBlotter
+    Array.isArray(report.matchupReports) &&
+    report.teamOfTheWeek &&
+    report.managersBlotter
   );
 };
 
@@ -101,10 +101,7 @@ const premiumReportText = computed(() => {
     )
     .join("\n\n");
   const blotter = report.managersBlotter.entries
-    .map(
-      (entry) =>
-        `${entry.teamName} — ${entry.headline}\n${entry.analysis}`
-    )
+    .map((entry) => `${entry.teamName} — ${entry.headline}\n${entry.analysis}`)
     .join("\n\n");
 
   return [
@@ -188,8 +185,7 @@ const fetchPlayerNames = async () => {
         (transaction) =>
           transaction.status === "complete" &&
           transaction.leg === currentWeek.value &&
-          (transaction.type === "waiver" ||
-            transaction.type === "free_agent")
+          (transaction.type === "waiver" || transaction.type === "free_agent")
       )
       .flatMap((transaction) => Object.keys(transaction.adds ?? {}));
     const allPlayerIds = [
@@ -484,8 +480,7 @@ const premiumReportPrompt = computed(() => {
       store.leagueInfo[store.currentLeagueIndex]?.espnLosersBracket ?? [],
     espnWinnersBracket:
       store.leagueInfo[store.currentLeagueIndex]?.espnWinnersBracket ?? [],
-    rosterPositions:
-      currentLeague?.rosterPositions ?? [],
+    rosterPositions: currentLeague?.rosterPositions ?? [],
     medianScoring: medianScoring.value,
     waiverMovesByRoster,
   });
@@ -630,7 +625,28 @@ const exportSummary = computed(() => {
   return sourceText;
 });
 
-const downloadReportImage = async () => {
+const getReportImageFilename = () => `ffwrapped-week-${currentWeek.value}.png`;
+
+const downloadReportImageFile = (dataUrl: string) => {
+  const link = document.createElement("a");
+  link.href = dataUrl;
+  link.download = getReportImageFilename();
+  link.click();
+  trackEvent("Weekly Report Shared", {
+    method: "image_download",
+    tier: tier.value.toLowerCase(),
+  });
+  toast.success("Weekly report image downloaded");
+};
+
+const dataUrlToFile = async (dataUrl: string) => {
+  const blob = await (await fetch(dataUrl)).blob();
+  return new File([blob], getReportImageFilename(), {
+    type: "image/png",
+  });
+};
+
+const shareOrDownloadReportImage = async () => {
   if (isGeneratingImage.value) {
     return;
   }
@@ -653,16 +669,26 @@ const downloadReportImage = async () => {
       canvasWidth: exportWidth * 2,
       canvasHeight: exportHeight * 2,
     });
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = `ffwrapped-week-${currentWeek.value}.png`;
-    link.click();
-    trackEvent("Weekly Report Shared", {
-      method: "image_download",
-      tier: tier.value.toLowerCase(),
-    });
-    toast.success("Weekly report image downloaded");
+
+    const file = await dataUrlToFile(dataUrl);
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({
+        title: `Week ${currentWeek.value} ffwrapped Report`,
+        text: "https://ffwrapped.com",
+        files: [file],
+      });
+      trackEvent("Weekly Report Shared", {
+        method: "image_share",
+        tier: tier.value.toLowerCase(),
+      });
+      return;
+    }
+
+    downloadReportImageFile(dataUrl);
   } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return;
+    }
     console.error(error);
     toast.error("Unable to generate image");
   } finally {
@@ -732,7 +758,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
           :premium-loading="premiumLoading"
           :is-generating-image="isGeneratingImage"
           :is-sharing-report="isSharingReport"
-          @download-image="downloadReportImage"
+          @download-image="shareOrDownloadReportImage"
           @copy-report="copyReport"
           @share-report="shareReport"
           @generate-premium="getPremiumReport"
