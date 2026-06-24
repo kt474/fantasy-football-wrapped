@@ -60,6 +60,11 @@ const trackSharedReportCta = (cta: string) => {
   });
 };
 
+const goToHome = (cta = "explore") => {
+  trackSharedReportCta(cta);
+  router.push("/");
+};
+
 const loadReport = async () => {
   const token = String(route.params.token ?? "").trim();
   sharedReport.value = null;
@@ -103,7 +108,7 @@ watch(() => route.params.token, loadReport);
       <Button as-child class="shadow-sm">
         <a href="/" @click="trackSharedReportCta('explore')">
           <ArrowLeft class="mr-2 size-4" />
-          Explore ffwrapped
+          Try ffwrapped
         </a>
       </Button>
       <Button
@@ -136,15 +141,7 @@ watch(() => route.params.token, loadReport);
       <CardContent class="p-8 text-center">
         <h1 class="text-2xl font-bold">Report unavailable</h1>
         <p class="mt-3 text-muted-foreground">{{ errorMessage }}</p>
-        <Button
-          class="mt-6"
-          @click="
-            trackSharedReportCta('explore');
-            router.push('/');
-          "
-        >
-          Return home
-        </Button>
+        <Button class="mt-6" @click="goToHome('explore')"> Return home </Button>
       </CardContent>
     </Card>
 
@@ -194,6 +191,32 @@ watch(() => route.params.token, loadReport);
       </header>
 
       <PremiumReportContent :report="sharedReport.report" />
+      <section
+        class="p-5 mt-4 mb-8 border rounded-lg bg-card text-card-foreground sm:p-6"
+        aria-label="Try ffwrapped"
+      >
+        <div
+          class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+        >
+          <div>
+            <h2 class="mt-2 text-2xl font-bold tracking-tight">
+              Want weekly reports for a different league?
+            </h2>
+            <p
+              class="max-w-2xl mt-2 text-sm text-muted-foreground sm:text-base"
+            >
+              Generate weekly reports, power rankings, playoff odds, and roster
+              insights for your own fantasy league. Join 13,000+ fantasy leagues
+              using ffwrapped.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <Button @click="goToHome('analyze_league')">
+              Analyze Your League
+            </Button>
+          </div>
+        </div>
+      </section>
 
       <footer class="pt-6 mt-8 text-sm border-t text-muted-foreground">
         AI-generated report. Information provided may not always be accurate.
