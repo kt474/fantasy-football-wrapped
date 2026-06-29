@@ -13,6 +13,7 @@ import {
 import type { ManagerBlurbsPayload } from "@/api/api";
 import { getDraftMetadata, getDraftPicks } from "@/api/sleeperApi";
 import { fakeManagerProfiles } from "@/api/fakeLeague.ts";
+import ManagerComparison from "../league_history/ManagerComparison.vue";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -32,6 +33,31 @@ const narratives = ref<NarrativeBundle>({
   managerArchetypes: [],
 });
 const isLeagueHistoryReady = ref(false);
+
+type PointSeasonEntry = {
+  season: string;
+  points: number[];
+};
+
+type HistoricalManagerRow = {
+  id: string;
+  name: string;
+  username: string;
+  avatarImg?: string;
+  matchups: (number | null)[];
+  pointsArr: number[];
+  leagueWinner: (number | null)[];
+  rosterId: number;
+  pointSeason: PointSeasonEntry[];
+  wins: number;
+  losses: number;
+  points: number;
+  randomScheduleWins: number;
+  managerEfficiency: number;
+  seasons: string[];
+};
+
+const historicalManagerRows = ref<HistoricalManagerRow[]>([]);
 const areNarrativesReady = computed(
   () => narratives.value.managerArchetypes.length > 0
 );
@@ -238,6 +264,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
       v-show="false"
       :table-data="props.tableData"
       @ready="isLeagueHistoryReady = true"
+      @history-data="historicalManagerRows = $event"
     />
     <ManagerArchetypesCard
       v-if="isLeagueHistoryReady && areNarrativesReady"
@@ -251,5 +278,9 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
       :payload="managerPayload"
     />
     <div v-else>Loading all seasons...</div>
+    <ManagerComparison
+      v-if="isLeagueHistoryReady && historicalManagerRows.length > 1"
+      :table-data="historicalManagerRows"
+    />
   </div>
 </template>

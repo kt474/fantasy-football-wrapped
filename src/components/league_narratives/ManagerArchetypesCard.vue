@@ -14,6 +14,7 @@ import { fakeProfileText } from "@/api/fakeLeague";
 
 const store = useStore();
 const subscriptionStore = useSubscriptionStore();
+
 const props = defineProps<{
   archetypes: ManagerArchetype[];
   payload: ManagerBlurbsPayload;
@@ -22,6 +23,7 @@ const props = defineProps<{
 
 const isLoading = ref(false);
 const blurbsByUserId = ref<Record<string, string>>({});
+const showAllProfiles = ref(false);
 
 const getManagerArchetypes = async () => {
   if (!props.payload.managers.length) {
@@ -77,6 +79,16 @@ const generateButtonLabel = computed(() => {
   return "Generate profiles";
 });
 
+const visibleArchetypes = computed(() =>
+  showAllProfiles.value ? props.archetypes : props.archetypes.slice(0, 6)
+);
+
+const hasHiddenProfiles = computed(() => props.archetypes.length > 6);
+
+const toggleProfiles = () => {
+  showAllProfiles.value = !showAllProfiles.value;
+};
+
 watch(
   storedManagerProfiles,
   (profiles) => {
@@ -92,21 +104,21 @@ watch(
 
 <template>
   <Card class="p-4 md:p-6">
-    <div class="flex flex-wrap justify-between gap-4 sm:flex-nowrap">
-      <div>
+    <div>
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <p class="text-3xl font-bold leading-none">Manager Profiles</p>
-        <p class="mt-4 sm:max-w-2xl text-muted-foreground">
-          Long-term records, trends, and custom profiles that capture each
-          manager’s tendencies, strengths, and overall identity.
-        </p>
+        <Button :disabled="!canGenerateArchetypes" @click="getManagerArchetypes">
+          {{ generateButtonLabel }}
+        </Button>
       </div>
-      <Button :disabled="!canGenerateArchetypes" @click="getManagerArchetypes">
-        {{ generateButtonLabel }}
-      </Button>
+      <p class="mt-4 sm:max-w-2xl text-muted-foreground">
+        Long-term records, trends, and custom profiles that capture each
+        manager’s tendencies, strengths, and overall identity.
+      </p>
     </div>
     <div class="grid gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3">
       <div
-        v-for="archetype in archetypes"
+        v-for="archetype in visibleArchetypes"
         :key="archetype.userId"
         class="p-4 border rounded-lg"
       >
@@ -228,6 +240,55 @@ watch(
           </div>
         </div>
       </div>
+    </div>
+    <div v-if="hasHiddenProfiles" class="flex justify-center mt-4">
+      <Button
+        @click="toggleProfiles"
+        aria-label="Button to show all manager profiles"
+        class="flex"
+      >
+        <svg
+          v-if="showAllProfiles"
+          class="w-5 h-5 mr-1.5"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m5 15 7-7 7 7"
+          />
+        </svg>
+        <svg
+          v-else
+          class="w-5 h-5 mr-1.5"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m19 9-7 7-7-7"
+          />
+        </svg>
+        {{
+          showAllProfiles
+            ? "Show Fewer Profiles"
+            : `Show All Profiles (${props.archetypes.length})`
+        }}
+      </Button>
     </div>
   </Card>
 </template>

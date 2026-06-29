@@ -10,7 +10,6 @@ import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
 import MostPoints from "./MostPoints.vue";
 import FewestPoints from "./FewestPoints.vue";
-import ManagerComparison from "./ManagerComparison.vue";
 import CloseMatchups from "./CloseMatchups.vue";
 import Card from "../ui/card/Card.vue";
 import { toast } from "vue-sonner";
@@ -30,6 +29,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
   (event: "ready"): void;
+  (event: "historyData", tableData: HistoricalManagerRow[]): void;
 }>();
 
 const isLoading = ref(false);
@@ -621,6 +621,14 @@ const worstManager = computed(() => {
       ).toFixed(1)
     : null;
 });
+
+watch(
+  dataAllYears,
+  (tableData) => {
+    emit("historyData", tableData);
+  },
+  { immediate: true }
+);
 </script>
 <template>
   <div class="my-4">
@@ -995,11 +1003,6 @@ const worstManager = computed(() => {
       </TooltipProvider>
     </Card>
     <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
-    <ManagerComparison
-      v-if="!isLoading"
-      :tableData="dataAllYears"
-      class="mt-4"
-    />
     <div v-if="!isLoading" class="flex flex-wrap mt-4 md:flex-nowrap">
       <MostPoints :tableData="dataAllYears" />
       <FewestPoints
