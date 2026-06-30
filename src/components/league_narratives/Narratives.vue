@@ -281,6 +281,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
     <ManagerComparison
       v-if="isLeagueHistoryReady && historicalManagerRows.length > 1"
       :table-data="historicalManagerRows"
+      :manager-archetypes="narratives.managerArchetypes"
     />
   </div>
 </template>

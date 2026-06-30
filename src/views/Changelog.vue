@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "6/29/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "The manager comparisons have been moved to the manager profile tab. There are now also AI generated manager rivalry stories.",
+        ],
+      },
+    ],
+  },
+  {
     date: "6/21/26",
     content: [
       {

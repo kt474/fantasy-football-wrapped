@@ -83,6 +83,42 @@ export interface ManagerBlurbsResponse {
   }[];
 }
 
+export interface ManagerComparisonPayload {
+  managers: {
+    displayName: string;
+    seasons: string[];
+    championships: number;
+    record: {
+      wins: number;
+      losses: number;
+    };
+    scoring: {
+      totalPoints: number;
+      pointsPerGame: number;
+      recentScoresBySeason: {
+        season: string;
+        points: number[];
+      }[];
+    };
+    lineupEfficiency: {
+      averageManagerEfficiency: number;
+    };
+    managementStyle: {
+      totalTrades: number | null;
+      tradeValueGained: number | null;
+      totalWaivers: number | null;
+      averageDraftPickRank: number | null;
+      playoffAppearances: number | null;
+      weeklyScoreStdDev: number | null;
+    };
+  }[];
+  headToHead: Record<string, string>;
+}
+
+export interface ManagerComparisonResponse {
+  text: string;
+}
+
 export type SharedReportResponse = {
   leagueName: string;
   season: string;
@@ -562,6 +598,46 @@ export const generateManagerArchetype = async (
     }
     throw new Error(
       "Unable to generate manager profiles right now. Please try again later."
+    );
+  }
+};
+
+export const generateManagerComparison = async (
+  leagueId: string,
+  payload: ManagerComparisonPayload
+): Promise<ManagerComparisonResponse> => {
+  try {
+    const response = await authenticatedFetch(
+      import.meta.env.VITE_MANAGER_COMPARISON,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          leagueId,
+          data: payload,
+        }),
+      }
+    );
+    if (response.status === 401) {
+      throw new Error("Please sign in to generate manager comparison");
+    }
+    assertOk(response, "Manager comparison request");
+    return await parseJson<ManagerComparisonResponse>(
+      response,
+      "Manager Comparison"
+    );
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to generate manager comparison.";
+    if (message.includes("Please sign in")) {
+      throw new Error("Please sign in to generate manager comparison.");
+    }
+    throw new Error(
+      "Unable to generate manager comparison right now. Please try again later."
     );
   }
 };

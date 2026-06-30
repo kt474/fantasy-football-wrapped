@@ -10,10 +10,26 @@ import {
   SelectValue,
 } from "../ui/select";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
+import type { ManagerArchetype } from "@/lib/narratives";
+import {
+  generateManagerComparison,
+  type ManagerComparisonPayload,
+} from "@/api/api";
+import { Button } from "@/components/ui/button";
+import { useSubscriptionStore } from "@/store/subscription";
+import MarkdownIt from "markdown-it";
+import DOMPurify from "dompurify";
 
 const store = useStore();
+const subscriptionStore = useSubscriptionStore();
 const manager1 = ref("");
 const manager2 = ref("");
+const isGeneratingReport = ref(false);
+const generatedReport = ref("");
+const generationError = ref("");
+const md = new MarkdownIt({
+  breaks: true,
+});
 
 type PointSeasonEntry = {
   season: string;
@@ -58,6 +74,7 @@ const emptyManager: ComparisonManager = {
 
 const props = defineProps<{
   tableData: ComparisonManager[];
+  managerArchetypes?: ManagerArchetype[];
 }>();
 
 const managers = computed(() => {
@@ -176,6 +193,136 @@ const manager2Champs = computed(() => {
   );
 });
 
+const getDisplayName = (manager: ComparisonManager) =>
+  store.showUsernames ? manager.username : manager.name;
+
+const getChampionships = (manager: ComparisonManager) =>
+  manager.leagueWinner.filter(
+    (item: number | null) => item === manager.rosterId
+  ).length;
+
+const getPointsPerGame = (manager: ComparisonManager) =>
+  manager.wins + manager.losses > 0
+    ? manager.points / (manager.wins + manager.losses)
+    : 0;
+
+const getAverageEfficiency = (manager: ComparisonManager) =>
+  manager.seasons.length > 0
+    ? manager.managerEfficiency / manager.seasons.length
+    : 0;
+
+const getManagerArchetype = (manager: ComparisonManager) =>
+  props.managerArchetypes?.find(
+    (archetype) =>
+      archetype.userId === manager.id ||
+      archetype.displayName.trim() === manager.name.trim() ||
+      archetype.displayName.trim() === manager.username.trim()
+  );
+
+const manager1Archetype = computed(() =>
+  getManagerArchetype(currentManager1.value)
+);
+
+const manager2Archetype = computed(() =>
+  getManagerArchetype(currentManager2.value)
+);
+
+const getManagerPayload = (
+  manager: ComparisonManager,
+  archetype?: ManagerArchetype
+) => ({
+  displayName: getDisplayName(manager),
+  seasons: manager.seasons,
+  championships: getChampionships(manager),
+  record: {
+    wins: manager.wins,
+    losses: manager.losses,
+  },
+  scoring: {
+    totalPoints: manager.points,
+    pointsPerGame: Number(getPointsPerGame(manager).toFixed(2)),
+    recentScoresBySeason: manager.pointSeason,
+  },
+  lineupEfficiency: {
+    averageManagerEfficiency: Number(getAverageEfficiency(manager).toFixed(4)),
+  },
+  managementStyle: {
+    totalTrades: archetype?.totalTrades ?? null,
+    tradeValueGained: archetype?.tradeValueGained ?? null,
+    totalWaivers: archetype?.totalWaivers ?? null,
+    averageDraftPickRank: archetype?.averageDraftPickRank ?? null,
+    playoffAppearances: archetype?.playoffAppearances ?? null,
+    weeklyScoreStdDev: archetype?.weeklyScoreStdDev ?? null,
+  },
+});
+
+const currentLeagueId = computed(
+  () =>
+    store.leagueInfo[store.currentLeagueIndex]?.leagueId ??
+    store.currentLeagueId
+);
+
+const aiComparisonPayload = computed<ManagerComparisonPayload>(() => ({
+  managers: [
+    getManagerPayload(currentManager1.value, manager1Archetype.value),
+    getManagerPayload(currentManager2.value, manager2Archetype.value),
+  ],
+  headToHead: {
+    [getDisplayName(currentManager1.value)]: matchupRecord.value,
+    [getDisplayName(currentManager2.value)]: matchupRecord2.value,
+  },
+}));
+
+const lockedReportPreview = computed(() => {
+  const managerOne = getDisplayName(currentManager1.value) || "Manager A";
+  const managerTwo = getDisplayName(currentManager2.value) || "Manager B";
+
+  return `**${managerOne}** and **${managerTwo}** have the kind of rivalry that makes the standings feel personal. One manager owns the cleaner long-term resume, but the other keeps hanging around with enough weekly spike scores and matchup weirdness to make every head-to-head feel unstable. The real story is not just who has more wins. It is whether consistency, roster aggression, and late-season timing have actually translated into bragging rights when these two are staring at each other across the schedule.`;
+});
+
+const visibleReport = computed(() =>
+  subscriptionStore.isPremium
+    ? generatedReport.value
+    : lockedReportPreview.value
+);
+
+const renderedReport = computed(() =>
+  DOMPurify.sanitize(md.render(visibleReport.value))
+);
+
+const generateAiReport = async () => {
+  if (!subscriptionStore.isPremium) {
+    return;
+  }
+
+  if (!currentLeagueId.value) {
+    generationError.value = "League ID is required to generate a report.";
+    return;
+  }
+
+  if (!import.meta.env.VITE_MANAGER_COMPARISON) {
+    generationError.value = "Missing VITE_MANAGER_COMPARISON configuration.";
+    return;
+  }
+
+  try {
+    isGeneratingReport.value = true;
+    generationError.value = "";
+    const result = await generateManagerComparison(
+      currentLeagueId.value,
+      aiComparisonPayload.value
+    );
+    generatedReport.value = result.text;
+  } catch (error) {
+    generationError.value =
+      error instanceof Error
+        ? error.message
+        : "Unable to generate manager comparison.";
+  } finally {
+    isGeneratingReport.value = false;
+  }
+};
+
 const seriesData = computed(() => {
   return [
     {
@@ -213,6 +360,11 @@ watch(
   },
   { immediate: true }
 );
+
+watch([manager1, manager2], () => {
+  generatedReport.value = "";
+  generationError.value = "";
+});
 
 watch([() => store.currentLeagueId, () => store.darkMode], () =>
   updateChartColor()
@@ -710,5 +862,57 @@ const chartOptions = ref({
       :options="chartOptions"
       :series="seriesData"
     ></apexchart>
+    <div class="p-4 mt-4 border-t">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p class="font-semibold">Rivalry Report</p>
+        </div>
+        <Button
+          v-if="subscriptionStore.isPremium"
+          :disabled="isGeneratingReport"
+          @click="generateAiReport"
+        >
+          {{ isGeneratingReport ? "Generating..." : "Generate report" }}
+        </Button>
+      </div>
+      <div v-if="subscriptionStore.isPremium">
+        <p v-if="generationError" class="mt-3 text-sm text-destructive">
+          {{ generationError }}
+        </p>
+        <div
+          v-if="generatedReport"
+          v-html="renderedReport"
+          class="mt-3 text-sm leading-relaxed"
+        ></div>
+        <p v-else-if="!generationError" class="mt-3 text-muted-foreground">
+          Generate a comparison using the selected managers' performance
+          throughout every season.
+        </p>
+      </div>
+      <div v-else class="max-w-4xl mt-3">
+        <p class="max-w-3xl text-sm text-muted-foreground">
+          Premium rivalry reports turn the manager comparison into a short story
+          about the selected managers' history, style, and bragging rights.
+        </p>
+        <div
+          class="relative p-4 mt-3 overflow-hidden border max-h-48 rounded-xl sm:p-5"
+        >
+          <div v-html="renderedReport" class="text-sm leading-relaxed"></div>
+          <div
+            class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/95 to-transparent"
+          ></div>
+          <div class="absolute inset-x-0 z-10 flex justify-center bottom-5">
+            <Button class="mt-4" as-child>
+              <router-link
+                :to="{ path: '/account', query: $route.query }"
+                @click="store.currentTab = ''"
+              >
+                Unlock Rivalry Reports
+              </router-link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   </Card>
 </template>

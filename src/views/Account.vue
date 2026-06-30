@@ -887,6 +887,13 @@ watch(
               <div class="flex mt-3 align-middle">
                 <Check class="w-5 h-5 mr-2 shrink-0" />
                 <p class="text-muted-foreground max-w-96">
+                  Rivalry reports that turn manager comparisons into
+                  personalized league stories
+                </p>
+              </div>
+              <div class="flex mt-3 align-middle">
+                <Check class="w-5 h-5 mr-2 shrink-0" />
+                <p class="text-muted-foreground max-w-96">
                   Access to all premium features across every league you manage,
                   including all future premium features
                 </p>
