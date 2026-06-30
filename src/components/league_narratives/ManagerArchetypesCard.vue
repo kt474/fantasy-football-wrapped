@@ -144,22 +144,21 @@ watch(
         >
           {{ blurbsByUserId[archetype.userId] }}
         </p>
-        <p
-          class="mt-2 text-xs leading-relaxed text-muted-foreground"
+        <div
           v-if="
             !subscriptionStore.isPremium && blurbsByUserId[archetype.userId]
           "
+          class="flex justify-center mt-3"
         >
-          A
-          <router-link
-            :to="{ path: '/account', query: $route.query }"
-            class="font-medium cursor-pointer hover:underline"
-            @click="store.currentTab = ''"
-          >
-            Premium subscription</router-link
-          >
-          unlocks all manager descriptions.
-        </p>
+          <Button size="sm" as-child>
+            <router-link
+              :to="{ path: '/account', query: $route.query }"
+              @click="store.currentTab = ''"
+            >
+              Unlock All Manager Profiles
+            </router-link>
+          </Button>
+        </div>
         <p
           class="my-4 text-sm leading-relaxed text-muted-foreground"
           v-else-if="isLoading"

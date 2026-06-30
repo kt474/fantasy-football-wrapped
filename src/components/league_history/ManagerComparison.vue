@@ -852,7 +852,7 @@ const chartOptions = ref({
         </tbody>
       </table>
     </div>
-    <p class="mt-4 mb-8 ml-3 font-semibold sm:ml-6 sm:mb-0">
+    <p class="mt-4 mb-8 ml-3 text-lg font-semibold sm:ml-6 sm:mb-0">
       Recent Performances
     </p>
     <apexchart
@@ -865,7 +865,7 @@ const chartOptions = ref({
     <div class="p-4 mt-4 border-t">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p class="font-semibold">Rivalry Report</p>
+          <p class="text-lg font-semibold">Rivalry Report</p>
         </div>
         <Button
           v-if="subscriptionStore.isPremium"
@@ -890,14 +890,14 @@ const chartOptions = ref({
         </p>
       </div>
       <div v-else class="max-w-4xl mt-3">
-        <p class="max-w-3xl text-sm text-muted-foreground">
+        <p class="max-w-3xl text-muted-foreground">
           Premium rivalry reports turn the manager comparison into a short story
           about the selected managers' history, style, and bragging rights.
         </p>
         <div
           class="relative p-4 mt-3 overflow-hidden border max-h-48 rounded-xl sm:p-5"
         >
-          <div v-html="renderedReport" class="text-sm leading-relaxed"></div>
+          <div v-html="renderedReport" class="leading-relaxed"></div>
           <div
             class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/95 to-transparent"
           ></div>
