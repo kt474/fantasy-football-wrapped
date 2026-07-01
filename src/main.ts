@@ -1,4 +1,4 @@
-import { createApp, defineAsyncComponent } from "vue";
+import { createApp, defineAsyncComponent, watch } from "vue";
 import { createPinia } from "pinia";
 import { createRouter, createWebHistory } from "vue-router";
 import { registerSW } from "virtual:pwa-register";
@@ -7,6 +7,12 @@ import App from "./App.vue";
 import posthogPlugin from "./plugins/posthog";
 import { useAuthStore } from "./store/auth";
 import { useSubscriptionStore } from "./store/subscription";
+import {
+  identifyUser,
+  resetAnalytics,
+  setUserProperties,
+  trackPageView,
+} from "./lib/analytics";
 
 const Home = () => import("./views/Home.vue");
 const About = () => import("./views/About.vue");
@@ -138,6 +144,7 @@ const app = createApp(App);
 const ApexChart = defineAsyncComponent(() => import("vue3-apexcharts"));
 
 app.use(pinia);
+app.use(posthogPlugin);
 const authStore = useAuthStore(pinia);
 authStore.initialize();
 const subscriptionStore = useSubscriptionStore(pinia);
@@ -187,10 +194,46 @@ router.afterEach((to) => {
   document
     .querySelector('link[rel="canonical"]')
     ?.setAttribute("href", canonicalUrl);
+
+  trackPageView(to.fullPath, title);
 });
+
+watch(
+  () => authStore.user,
+  (user) => {
+    if (!user) {
+      resetAnalytics();
+      return;
+    }
+
+    identifyUser(user.id, {
+      email: user.email ?? "",
+      created_at: user.created_at,
+    });
+  },
+  { immediate: true }
+);
+
+watch(
+  () => [
+    authStore.isAuthenticated,
+    subscriptionStore.isPremium,
+    subscriptionStore.status,
+    subscriptionStore.planType,
+  ],
+  ([isAuthenticated, isPremium, status, planType]) => {
+    if (!isAuthenticated) return;
+
+    setUserProperties({
+      is_premium: Boolean(isPremium),
+      subscription_status: String(status),
+      plan_type: String(planType ?? "none"),
+    });
+  },
+  { immediate: true }
+);
 
 app.component("apexchart", ApexChart);
 app.use(router);
-app.use(posthogPlugin);
 registerSW({ immediate: true });
 app.mount("#app");

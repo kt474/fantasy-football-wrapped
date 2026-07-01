@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_ANON_KEY?: string;
   readonly VITE_BACKEND_URL?: string;
   readonly VITE_PLAYER_ID_LOOKUP?: string;
+  readonly VITE_POSTHOG_KEY?: string;
   readonly VITE_PREMIUM_WEEKLY_REPORT: string;
   readonly VITE_MANAGER_COMPARISON: string;
 }
