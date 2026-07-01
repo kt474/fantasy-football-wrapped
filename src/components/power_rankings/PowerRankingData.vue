@@ -85,14 +85,18 @@ const hasCompletePreseasonRankings = computed(() => {
   );
 });
 
+const chartIncludesPreseasonRankings = ref(
+  hasCompletePreseasonRankings.value
+);
+
 const chartCategories = computed(() => {
   const weeks = Array(props.regularSeasonLength)
     .fill(0)
     .map((_, i) => i + 1);
-  return hasCompletePreseasonRankings.value ? ["Preseason", ...weeks] : weeks;
+  return chartIncludesPreseasonRankings.value ? ["Preseason", ...weeks] : weeks;
 });
 
-const powerRankings = computed(() => {
+const buildPowerRankings = (includePreseasonRankings: boolean) => {
   const result: PowerRankingEntry[] = [];
   const ratingsContainer: number[][] = [];
   props.tableData.forEach((value: TableDataType) => {
@@ -117,7 +121,7 @@ const powerRankings = computed(() => {
         }
       });
     }
-    if (hasCompletePreseasonRankings.value) {
+    if (includePreseasonRankings) {
       const preseasonScore = preseasonRank.value.find(
         (user) => user.rosterId === value.rosterId
       )?.preseasonScore;
@@ -142,7 +146,19 @@ const powerRankings = computed(() => {
     user["data"] = data;
   });
   return result;
-});
+};
+
+const weeklyPowerRankings = computed(() => buildPowerRankings(false));
+
+const powerRankings = computed(() =>
+  buildPowerRankings(hasCompletePreseasonRankings.value)
+);
+
+const chartPowerRankings = computed(() =>
+  chartIncludesPreseasonRankings.value
+    ? powerRankings.value
+    : weeklyPowerRankings.value
+);
 
 const chartTextColor = computed(() => {
   return store.darkMode ? "#ffffff" : "#111827";
@@ -204,10 +220,17 @@ watch(
     () => store.darkMode,
     () => store.showUsernames,
     () => store.currentLeagueId,
-    chartCategories,
+    chartIncludesPreseasonRankings,
   ],
   () => {
     updateChartColor();
+  }
+);
+
+watch(
+  hasCompletePreseasonRankings,
+  (isComplete) => {
+    chartIncludesPreseasonRankings.value = isComplete;
   }
 );
 
@@ -314,7 +337,7 @@ const chartOptions = ref({
         height="475"
         type="line"
         :options="chartOptions"
-        :series="powerRankings"
+        :series="chartPowerRankings"
       ></apexchart>
       <p class="mt-4 text-xs sm:-mb-4 footer-font text-muted-foreground">
         Ranking formula:
