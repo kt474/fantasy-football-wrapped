@@ -6,6 +6,7 @@ import {
   type LeaguePlatform,
 } from "@/composables/useLeagueInput";
 import { useStore } from "@/store/store";
+import IntroSections from "@/components/home/IntroSections.vue";
 import Card from "../ui/card/Card.vue";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -84,10 +85,10 @@ const {
               league insights in one place
             </h1>
 
-            <p class="max-w-lg mt-5 text-lg text-muted-foreground lg:text-xl">
+            <h2 class="max-w-lg mt-5 text-lg text-muted-foreground lg:text-xl">
               Analyze your league with power rankings, roster insights, custom
               weekly reports, playoff odds, and much more.
-            </p>
+            </h2>
             <Card class="p-4 mt-8 rounded-md">
               <div class="mb-4 text-left">
                 <p class="text-sm font-semibold">Get started</p>
@@ -173,6 +174,8 @@ const {
         </div>
       </div>
     </div>
+
+    <IntroSections />
   </section>
 </template>
 
@@ -180,29 +183,44 @@ const {
 .saas-bg {
   background-image:
     radial-gradient(
-      circle at 20% 12%,
+      circle at 20% 10%,
       rgba(14, 165, 233, 0.08),
-      transparent 35%
+      transparent 32rem
     ),
     radial-gradient(
-      circle at 82% 20%,
-      rgba(59, 130, 246, 0.09),
-      transparent 38%
+      circle at 82% 16%,
+      rgba(59, 130, 246, 0.08),
+      transparent 34rem
     ),
-    linear-gradient(to bottom, rgba(248, 250, 252, 0.8), rgba(248, 250, 252, 1));
+    radial-gradient(
+      circle at 72% 64%,
+      rgba(14, 165, 233, 0.035),
+      transparent 28rem
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(248, 250, 252, 0.86) 0%,
+      rgba(248, 250, 252, 0.96) 48%,
+      rgba(248, 250, 252, 1) 100%
+    );
 }
 
 .saas-bg-dark {
   background-image:
     radial-gradient(
-      circle at 20% 12%,
+      circle at 20% 10%,
       rgba(14, 165, 233, 0.025),
-      transparent 35%
+      transparent 32rem
     ),
     radial-gradient(
-      circle at 82% 20%,
+      circle at 82% 16%,
       rgba(59, 130, 246, 0.03),
-      transparent 38%
+      transparent 34rem
+    ),
+    radial-gradient(
+      circle at 72% 64%,
+      rgba(14, 165, 233, 0.012),
+      transparent 28rem
     ),
     linear-gradient(to bottom, hsl(222.2 20% 4.9%), hsl(222.2 20% 4.9%));
 }
