@@ -19,36 +19,77 @@ const props = defineProps<{
   hasPreseasonRankings: boolean;
 }>();
 
+const currentRatingIndex = ref("0");
+
 const rankingValues = computed(() => {
+  const ratingIndex = Number(currentRatingIndex.value);
   return [...props.powerRankings].sort((a, b) => {
-    return b.ratings[currentWeek.value - 1] - a.ratings[currentWeek.value - 1];
+    return b.ratings[ratingIndex] - a.ratings[ratingIndex];
   });
 });
 
-const weeks = computed(() => {
-  if (props.powerRankings.length > 0) {
-    const recordLength = props.powerRankings[0].data
-      ? props.powerRankings[0].data.length + 1
-      : 0;
-    const weeksList = [...Array(props.regularSeasonLength + 1).keys()]
-      .slice(1)
-      .reverse();
-    return recordLength < weeksList.length
-      ? [...Array(recordLength).keys()].slice(1).reverse()
-      : weeksList;
+const weekOptions = computed(() => {
+  if (!props.powerRankings.length) {
+    return [];
   }
-  return [];
+
+  const ratingCount =
+    props.powerRankings[0].data?.length ?? props.powerRankings[0].ratings.length;
+  const regularSeasonWeekCount = props.hasPreseasonRankings
+    ? ratingCount - 1
+    : ratingCount;
+  const weekCount = Math.min(regularSeasonWeekCount, props.regularSeasonLength);
+  const options = Array.from({ length: weekCount }, (_, index) => {
+    const week = index + 1;
+    return {
+      value: String(props.hasPreseasonRankings ? index + 1 : index),
+      label: `Week ${week}`,
+    };
+  }).reverse();
+
+  if (props.hasPreseasonRankings) {
+    options.push({ value: "0", label: "Preseason" });
+  }
+
+  return options;
 });
-const currentWeek = ref(weeks.value[0]);
+
+const selectedRating = computed(() => Number(currentRatingIndex.value));
+
+const syncSelectedWeek = () => {
+  if (!weekOptions.value.length) {
+    currentRatingIndex.value = "0";
+    return;
+  }
+
+  const currentOption = weekOptions.value.find(
+    (option) => option.value === currentRatingIndex.value
+  );
+  if (!currentOption) {
+    currentRatingIndex.value = weekOptions.value[0].value;
+  }
+};
+
+watch(
+  weekOptions,
+  () => {
+    syncSelectedWeek();
+  },
+  { immediate: true }
+);
 
 watch(
   () => [props.regularSeasonLength, props.powerRankings],
-  () => (currentWeek.value = weeks.value[0])
+  () => {
+    currentRatingIndex.value = weekOptions.value[0]?.value ?? "0";
+  }
 );
 
 watch(
   () => store.currentLeagueId,
-  () => (currentWeek.value = weeks.value[0])
+  () => {
+    currentRatingIndex.value = weekOptions.value[0]?.value ?? "0";
+  }
 );
 
 const listPadding = computed(() => {
@@ -66,17 +107,17 @@ const listPadding = computed(() => {
       <h5 class="w-20 text-xl font-bold leading-none text-pretty">
         Ranking score
       </h5>
-      <Select v-model="currentWeek">
+      <Select v-model="currentRatingIndex">
         <SelectTrigger class="w-28">
           <SelectValue placeholder="Select Week" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem v-for="week in weeks" :key="week" :value="week">
-            {{
-              props.hasPreseasonRankings && week === 1
-                ? "Preseason"
-                : `Week ${props.hasPreseasonRankings ? week - 1 : week}`
-            }}
+          <SelectItem
+            v-for="option in weekOptions"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.label }}
           </SelectItem>
         </SelectContent>
       </Select>
@@ -92,7 +133,7 @@ const listPadding = computed(() => {
               </p>
             </div>
             <div class="inline-flex items-center text-sm font-normal">
-              {{ user.ratings[currentWeek - 1] }}
+              {{ user.ratings[selectedRating] }}
             </div>
           </div>
         </li>
