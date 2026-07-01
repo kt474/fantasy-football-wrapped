@@ -30,6 +30,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: "ready"): void;
   (event: "historyData", tableData: HistoricalManagerRow[]): void;
+  (event: "loadingYear", year: string): void;
 }>();
 
 const isLoading = ref(false);
@@ -621,6 +622,14 @@ const worstManager = computed(() => {
       ).toFixed(1)
     : null;
 });
+
+watch(
+  loadingYear,
+  (year) => {
+    emit("loadingYear", year);
+  },
+  { immediate: true }
+);
 
 watch(
   dataAllYears,

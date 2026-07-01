@@ -206,6 +206,9 @@ const getPointsPerGame = (manager: ComparisonManager) =>
     ? manager.points / (manager.wins + manager.losses)
     : 0;
 
+const formatPoints = (points: number) =>
+  String(Number(points.toFixed(2)));
+
 const getAverageEfficiency = (manager: ComparisonManager) =>
   manager.seasons.length > 0
     ? manager.managerEfficiency / manager.seasons.length
@@ -239,7 +242,7 @@ const getManagerPayload = (
     losses: manager.losses,
   },
   scoring: {
-    totalPoints: manager.points,
+    totalPoints: Number(manager.points.toFixed(2)),
     pointsPerGame: Number(getPointsPerGame(manager).toFixed(2)),
     recentScoresBySeason: manager.pointSeason,
   },
@@ -683,7 +686,7 @@ const chartOptions = ref({
                   currentManager1.points > currentManager2.points,
               }"
             >
-              <p class="text-center">{{ currentManager1.points }}</p>
+              <p class="text-center">{{ formatPoints(currentManager1.points) }}</p>
             </td>
             <td
               class="px-3 py-4 sm:px-6"
@@ -692,7 +695,7 @@ const chartOptions = ref({
                   currentManager1.points < currentManager2.points,
               }"
             >
-              <p class="text-center">{{ currentManager2.points }}</p>
+              <p class="text-center">{{ formatPoints(currentManager2.points) }}</p>
             </td>
           </tr>
           <tr class="border-b">
