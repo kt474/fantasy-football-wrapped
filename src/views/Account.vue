@@ -197,17 +197,10 @@ const accountSummaryContainerClass = computed(() => {
   return "max-w-2xl";
 });
 
-const canStartTrial = computed(() => {
-  const status = subscriptionStore.status.toLowerCase();
-  if (subscriptionStore.planType === "monthly") return false;
-  if (status !== "none") return false;
-  return true;
-});
-
 const getCheckoutButtonText = (plan: CheckoutPlan) => {
   if (checkoutLoadingPlan.value === plan) return "Redirecting...";
   if (plan === "season_pass") return "Buy season pass";
-  return canStartTrial.value ? "Start 7-day free trial" : "Subscribe monthly";
+  return "Subscribe monthly";
 };
 
 const showPasswordRecoveryForm = computed(() => {
@@ -943,11 +936,7 @@ watch(
                 </span>
               </p>
               <p class="mt-3 min-h-[2.5rem] text-muted-foreground">
-                {{
-                  canStartTrial
-                    ? "7-day free trial, then billed monthly. Cancel anytime."
-                    : "Billed monthly. Cancel anytime."
-                }}
+                Billed monthly. Cancel anytime.
               </p>
               <Button
                 class="w-full mt-8"

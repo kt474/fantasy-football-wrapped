@@ -21,22 +21,18 @@
         features. Some features are free and some are available only with a paid
         plan.
 
-        <p class="my-3 text-xl font-semibold">
-          Paid Plans, Billing, and Trial
-        </p>
+        <p class="my-3 text-xl font-semibold">Paid Plans and Billing</p>
         Paid features are billed through Stripe. We may offer recurring
         subscription plans, one-time seasonal passes, or both. By purchasing a
         paid plan, you authorize the charges shown at checkout for the plan you
         selected. For recurring plans, you authorize recurring charges at the
         billing interval shown at checkout until canceled. Prices, billing
-        intervals, access periods, and any trial terms are shown at checkout
-        and on the account page.
+        intervals, and access periods are shown at checkout and on the account
+        page.
         <br /><br />
-        If a free trial is offered on a recurring plan, you will be charged
-        when the trial ends unless you cancel before renewal. If a seasonal
-        pass or other one-time plan is offered, access lasts for the period
-        described at checkout and ends automatically without renewal unless
-        otherwise stated.
+        If a seasonal pass or other one-time plan is offered, access lasts for
+        the period described at checkout and ends automatically without renewal
+        unless otherwise stated.
 
         <p class="my-3 text-xl font-semibold">Fair Use of Paid Features</p>
         Paid plans are intended for personal use in leagues you participate in.
