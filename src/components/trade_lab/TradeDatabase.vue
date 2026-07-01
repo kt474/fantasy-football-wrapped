@@ -179,6 +179,29 @@ const hasActiveFilters = computed(
     selectedWeek.value !== "all"
 );
 
+const playerImageUrl = (playerId: string) =>
+  `https://sleepercdn.com/content/nfl/players/thumb/${playerId}.jpg`;
+
+const defenseImageUrl = (playerId: string) =>
+  `https://sleepercdn.com/images/team_logos/nfl/${playerId.toLowerCase()}.png`;
+
+const searchablePlayerImageUrl = (player: SearchableSleeperPlayer) =>
+  player.position === "DEF"
+    ? defenseImageUrl(player.player_id)
+    : playerImageUrl(player.player_id);
+
+const isDefenseAsset = (asset: TradeDatabaseAsset) => {
+  if (asset.type !== "player" || !asset.playerId) return false;
+  return playerLookup.value.get(asset.playerId)?.position === "DEF";
+};
+
+const assetImageUrl = (asset: TradeDatabaseAsset) => {
+  if (asset.type !== "player" || !asset.playerId) return "";
+  return isDefenseAsset(asset)
+    ? defenseImageUrl(asset.playerId)
+    : playerImageUrl(asset.playerId);
+};
+
 const assetLabel = (asset: TradeDatabaseAsset) => {
   if (asset.type === "player") {
     const player = asset.playerId
@@ -265,15 +288,11 @@ const leagueTypeLabel = (type: string | null) => {
             @pointerdown.prevent="selectPlayer(player)"
           >
             <img
-              v-if="player.position !== 'DEF'"
-              class="object-cover w-10 h-10 rounded-full bg-muted"
-              :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
-              alt=""
-            />
-            <img
-              v-else
-              class="object-contain w-10 h-10 p-1 rounded-full bg-muted"
-              :src="`https://sleepercdn.com/images/team_logos/nfl/${player.team.toLowerCase()}.png`"
+              class="w-10 h-10 rounded-full bg-muted"
+              :class="
+                player.position === 'DEF' ? 'object-contain p-1' : 'object-cover'
+              "
+              :src="searchablePlayerImageUrl(player)"
               alt=""
             />
             <span>
@@ -374,15 +393,13 @@ const leagueTypeLabel = (type: string | null) => {
     >
       <div class="flex items-center gap-3 md:mr-auto md:min-w-52">
         <img
-          v-if="selectedPlayer.position !== 'DEF'"
-          class="object-cover w-12 h-12 rounded-full bg-muted"
-          :src="`https://sleepercdn.com/content/nfl/players/thumb/${selectedPlayer.player_id}.jpg`"
-          alt=""
-        />
-        <img
-          v-else
-          class="object-contain w-12 h-12 p-1 rounded-full bg-muted"
-          :src="`https://sleepercdn.com/images/team_logos/nfl/${selectedPlayer.team.toLowerCase()}.png`"
+          class="w-12 h-12 rounded-full bg-muted"
+          :class="
+            selectedPlayer.position === 'DEF'
+              ? 'object-contain p-1'
+              : 'object-cover'
+          "
+          :src="searchablePlayerImageUrl(selectedPlayer)"
           alt=""
         />
         <div>
@@ -512,8 +529,13 @@ const leagueTypeLabel = (type: string | null) => {
                 >
                   <img
                     v-if="asset.type === 'player' && asset.playerId"
-                    class="object-cover w-8 h-8 rounded-full bg-muted"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${asset.playerId}.jpg`"
+                    class="w-8 h-8 rounded-full bg-muted"
+                    :class="
+                      isDefenseAsset(asset)
+                        ? 'object-contain p-1'
+                        : 'object-cover'
+                    "
+                    :src="assetImageUrl(asset)"
                     alt=""
                   />
                   <ArrowRight
@@ -546,11 +568,7 @@ const leagueTypeLabel = (type: string | null) => {
     </div>
 
     <div v-if="hasMore" class="flex justify-center">
-      <Button
-        variant="outline"
-        :disabled="loadingTrades"
-        @click="fetchTrades(true)"
-      >
+      <Button class="mt-2" :disabled="loadingTrades" @click="fetchTrades(true)">
         {{ loadingTrades ? "Loading…" : "Load more trades" }}
       </Button>
     </div>

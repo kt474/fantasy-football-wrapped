@@ -78,13 +78,21 @@ const preseasonRank = computed(() => {
   return [];
 });
 
+const hasCompletePreseasonRankings = computed(() => {
+  return (
+    preseasonRank.value.length > 0 &&
+    preseasonRank.value.length === props.totalRosters
+  );
+});
+
+const chartCategories = computed(() => {
+  const weeks = Array(props.regularSeasonLength)
+    .fill(0)
+    .map((_, i) => i + 1);
+  return hasCompletePreseasonRankings.value ? ["Preseason", ...weeks] : weeks;
+});
+
 const powerRankings = computed(() => {
-  if (
-    !preseasonRank.value.length ||
-    preseasonRank.value.length !== props.totalRosters
-  ) {
-    return [];
-  }
   const result: PowerRankingEntry[] = [];
   const ratingsContainer: number[][] = [];
   props.tableData.forEach((value: TableDataType) => {
@@ -109,11 +117,12 @@ const powerRankings = computed(() => {
         }
       });
     }
-    // preseason rank
-    const preseasonScore = preseasonRank.value.find(
-      (user) => user.rosterId === value.rosterId
-    )?.preseasonScore;
-    ratingArr.unshift(preseasonScore || 0);
+    if (hasCompletePreseasonRankings.value) {
+      const preseasonScore = preseasonRank.value.find(
+        (user) => user.rosterId === value.rosterId
+      )?.preseasonScore;
+      ratingArr.unshift(preseasonScore || 0);
+    }
     ratingsContainer.push(ratingArr);
     result.push({
       name: store.showUsernames ? value.username : value.name,
@@ -151,6 +160,10 @@ const updateChartColor = () => {
       zoom: {
         enabled: false,
       },
+    },
+    xaxis: {
+      ...chartOptions.value.xaxis,
+      categories: chartCategories.value,
     },
     tooltip: {
       theme: store.darkMode ? "dark" : "light",
@@ -191,6 +204,7 @@ watch(
     () => store.darkMode,
     () => store.showUsernames,
     () => store.currentLeagueId,
+    chartCategories,
   ],
   () => {
     updateChartColor();
@@ -223,12 +237,7 @@ const chartOptions = ref({
     "#f43f5e",
   ],
   xaxis: {
-    categories: [
-      "Preseason",
-      ...Array(props.regularSeasonLength)
-        .fill(0)
-        .map((_, i) => i + 1),
-    ],
+    categories: chartCategories.value,
     labels: {
       hideOverlappingLabels: false,
     },
@@ -288,6 +297,7 @@ const chartOptions = ref({
       v-if="store.currentTab === 'Power Rankings'"
       :power-rankings="powerRankings"
       :regular-season-length="props.regularSeasonLength"
+      :has-preseason-rankings="hasCompletePreseasonRankings"
       class="w-full mb-4 md:w-1/3 md:mr-4 md:mb-0"
     />
     <Card

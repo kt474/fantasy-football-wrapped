@@ -852,17 +852,7 @@ const chartOptions = ref({
         </tbody>
       </table>
     </div>
-    <p class="mt-4 mb-8 ml-3 text-lg font-semibold sm:ml-6 sm:mb-0">
-      Recent Performances
-    </p>
-    <apexchart
-      class="mt-4"
-      type="line"
-      height="350"
-      :options="chartOptions"
-      :series="seriesData"
-    ></apexchart>
-    <div class="p-4 mt-4 border-t">
+    <div class="p-4 mt-4 border-b">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p class="text-lg font-semibold">Rivalry Report</p>
@@ -899,7 +889,7 @@ const chartOptions = ref({
         >
           <div v-html="renderedReport" class="leading-relaxed"></div>
           <div
-            class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/95 to-transparent"
+            class="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-background via-background/95 to-transparent"
           ></div>
           <div class="absolute inset-x-0 z-10 flex justify-center bottom-5">
             <Button class="mt-4" as-child>
@@ -914,5 +904,15 @@ const chartOptions = ref({
         </div>
       </div>
     </div>
+    <p class="mt-4 mb-8 ml-3 text-lg font-semibold sm:ml-6 sm:mb-0">
+      Recent Performances
+    </p>
+    <apexchart
+      class="mt-4"
+      type="line"
+      height="350"
+      :options="chartOptions"
+      :series="seriesData"
+    ></apexchart>
   </Card>
 </template>

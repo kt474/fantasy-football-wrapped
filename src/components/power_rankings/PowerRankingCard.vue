@@ -16,6 +16,7 @@ const store = useStore();
 const props = defineProps<{
   powerRankings: PowerRankingEntry[];
   regularSeasonLength: number;
+  hasPreseasonRankings: boolean;
 }>();
 
 const rankingValues = computed(() => {
@@ -71,7 +72,11 @@ const listPadding = computed(() => {
         </SelectTrigger>
         <SelectContent>
           <SelectItem v-for="week in weeks" :key="week" :value="week">
-            {{ week === 1 ? "Preseason" : `Week ${week - 1}` }}
+            {{
+              props.hasPreseasonRankings && week === 1
+                ? "Preseason"
+                : `Week ${props.hasPreseasonRankings ? week - 1 : week}`
+            }}
           </SelectItem>
         </SelectContent>
       </Select>
