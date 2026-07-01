@@ -61,6 +61,13 @@ const historicalManagerRows = ref<HistoricalManagerRow[]>([]);
 const areNarrativesReady = computed(
   () => narratives.value.managerArchetypes.length > 0
 );
+const hasCompletedSeasonData = computed(() => seasons.value.length > 0);
+const showNoCompletedSeasonData = computed(
+  () =>
+    store.leagueInfo.length > 0 &&
+    isLeagueHistoryReady.value &&
+    !hasCompletedSeasonData.value
+);
 
 const hydrateLeagueDraftPicks = async (league: LeagueInfoType) => {
   if (
@@ -277,6 +284,13 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
       :archetypes="fakeManagerProfiles"
       :payload="managerPayload"
     />
+    <div
+      v-else-if="showNoCompletedSeasonData"
+      class="p-4 border rounded-lg md:p-6"
+    >
+      <p class="text-3xl font-bold">Manager Profiles</p>
+      <p class="mt-2 text-muted-foreground">Please come back after week 1!</p>
+    </div>
     <div v-else>Loading all seasons...</div>
     <ManagerComparison
       v-if="isLeagueHistoryReady && historicalManagerRows.length > 1"
