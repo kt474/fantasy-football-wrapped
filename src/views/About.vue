@@ -37,26 +37,9 @@ watch(
       <div class="max-w-4xl text-base leading-relaxed">
         <div class="space-y-4">
           <p class="text-base leading-relaxed">
-            Welcome to ffwrapped, a platform designed to provide insightful data
-            and charts for your
-            <a
-              aria-label="Link to sleeper website"
-              class="font-medium text-primary hover:underline"
-              href="https://sleeper.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Sleeper</a
-            >
-            and
-            <a
-              aria-label="Link to espn fantasy website"
-              class="font-medium text-primary hover:underline"
-              href="https://www.espn.com/fantasy/football/"
-              target="_blank"
-              rel="noopener noreferrer"
-              >ESPN</a
-            >
-            fantasy football leagues.
+            Hi! I’m Kevin, and I built ffwrapped to make fantasy football
+            leagues more fun to follow, with stats, charts, recaps, and awards
+            that bring each season’s story to life.
           </p>
           <p class="text-base leading-relaxed">
             The source code can be found on
@@ -103,10 +86,10 @@ watch(
           </p>
           <p class="text-base leading-relaxed">
             I will always try to keep this site free (and ad free) but as the
-            userbase grows, the hosting and weekly AI recap costs also grow, so
-            if you find value in ffwrapped, any donations are greatly
-            appreciated. If you’d like to support ffwrapped beyond donations,
-            consider subscribing to the
+            userbase grows, the hosting and AI feature costs also grow, so if
+            you find value in ffwrapped, any donations are greatly appreciated.
+            If you’d like to support ffwrapped beyond donations, consider
+            subscribing to the
             <router-link
               :to="{ path: '/account', query: $route.query }"
               class="font-medium cursor-pointer text-primary hover:underline"
