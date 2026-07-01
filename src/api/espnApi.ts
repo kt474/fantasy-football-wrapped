@@ -219,7 +219,7 @@ const safeJson = async (response: Response) => {
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
       throw new EspnLeagueError(
-        "This ESPN league appears to be private. Public ESPN leagues are supported right now.",
+        "This ESPN league appears to be private. Please enter your ESPN SWID and espn_2 credentials.",
         "private"
       );
     }
@@ -1335,9 +1335,8 @@ export const getEspnLeagueInfo = async (
       0
   );
   const matchupPeriods =
-    (scheduleSettings.matchupPeriods as
-      | Record<string, unknown>
-      | undefined) ?? {};
+    (scheduleSettings.matchupPeriods as Record<string, unknown> | undefined) ??
+    {};
   const espnPlayoffMatchupPeriods = Object.entries(matchupPeriods)
     .map(([matchupPeriod, scoringPeriods]) => ({
       matchupPeriod: Number(matchupPeriod),
