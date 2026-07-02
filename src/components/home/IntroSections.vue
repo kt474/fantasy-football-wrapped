@@ -164,12 +164,12 @@ const toolSummaries: ToolSummary[] = [
         aria-labelledby="intro-testimonials-heading"
         class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center"
       >
-        <div class="max-w-xl">
+        <div class="max-w-xl mx-auto">
           <h2
             id="intro-testimonials-heading"
             class="text-3xl font-bold leading-tight tracking-tight md:text-4xl"
           >
-            Fantasy football analysis your league will actually talk about
+            Analysis your league will actually talk about
           </h2>
           <p class="mt-4 leading-7 sm:text-lg text-muted-foreground">
             Turn matchups, manager trends, rivalries, and league history into
@@ -265,9 +265,8 @@ const toolSummaries: ToolSummary[] = [
           <p
             class="max-w-2xl mx-auto mt-4 leading-7 sm:text-lg text-muted-foreground"
           >
-            Start with the sample league or enter your own to see the rankings,
-            recaps, odds, and storylines ffwrapped can generate from real
-            fantasy data.
+            Start with the sample league or enter your own to see the insights
+            and storylines ffwrapped can generate from real fantasy data.
           </p>
         </div>
 

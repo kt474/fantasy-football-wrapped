@@ -286,7 +286,9 @@ const premiumReportPreview: PremiumReport = {
             <p class="max-w-3xl">
               Premium weekly reports turn each week into a shareable league
               newsletter with headline stories, matchup recaps, manager
-              highlights, and your choice of commentary style.
+              highlights, and your choice of commentary style. They're longer,
+              more detailed, packed with richer league context, and aware of
+              past matchups and rivalries.
             </p>
             <p
               class="mt-5 mb-2 text-xs font-medium tracking-wide uppercase text-muted-foreground"
@@ -317,7 +319,9 @@ const premiumReportPreview: PremiumReport = {
           <p class="max-w-3xl">
             Premium weekly reports turn each week into a shareable league
             newsletter with headline stories, matchup recaps, manager
-            highlights, and your choice of commentary style.
+            highlights, and your choice of commentary style. They're longer,
+            more detailed, packed with richer league context, and aware of past
+            matchups and rivalries.
           </p>
           <p
             class="mt-5 mb-2 text-xs font-medium tracking-wide uppercase text-muted-foreground"
