@@ -25,7 +25,9 @@ defineProps<{
       <p class="max-w-3xl mt-2 text-lg text-muted-foreground">
         {{ report.frontPage.subheadline }}
       </p>
-      <p class="max-w-4xl mt-5 text-base leading-normal">
+      <p
+        class="max-w-3xl mt-5 text-base leading-7 text-foreground/90 dark:text-foreground/85"
+      >
         {{ report.frontPage.lead }}
       </p>
     </header>
@@ -51,7 +53,7 @@ defineProps<{
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p class="text-base leading-normal text-foreground/90">
+            <p class="text-base leading-7 text-foreground/90 dark:text-foreground/85">
               {{ matchup.recap }}
             </p>
           </CardContent>
@@ -92,7 +94,7 @@ defineProps<{
           </div>
         </CardHeader>
         <CardContent class="p-4 pt-0">
-          <p class="text-base leading-normal text-foreground/90">
+          <p class="text-base leading-7 text-foreground/90 dark:text-foreground/85">
             {{ report.teamOfTheWeek.analysis }}
           </p>
         </CardContent>
@@ -121,7 +123,7 @@ defineProps<{
             </CardDescription>
           </CardHeader>
           <CardContent class="p-4 pt-0">
-            <p class="text-base leading-normal text-foreground/90">
+            <p class="text-base leading-7 text-foreground/90 dark:text-foreground/85">
               {{ entry.analysis }}
             </p>
           </CardContent>

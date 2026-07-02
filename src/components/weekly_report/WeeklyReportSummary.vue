@@ -350,29 +350,22 @@ const premiumReportPreview: PremiumReport = {
       </TabsContent>
       <TabsContent value="Standard">
         <div v-if="rawWeeklyReport" class="max-w-5xl">
-          <div v-html="renderedWeeklyReport" class="mb-3 report-content"></div>
+          <div
+            v-html="renderedWeeklyReport"
+            class="mb-3 leading-7 text-foreground/90 dark:text-foreground/85 report-content"
+          ></div>
           <p class="text-xs text-muted-foreground">
             AI-generated report. Information provided may not always be
             accurate.
           </p>
           <p class="text-xs text-muted-foreground">
-            If you enjoy these weekly reports please consider supporting this
-            project by
-            <a
-              aria-label="buymeacoffee donation page"
-              class="text-primary hover:underline"
-              href="https://buymeacoffee.com/kt474"
-              title="buymeacoffee donation page"
-              target="_blank"
-              rel="noopener noreferrer"
-              >donating</a
-            >
-            or subscribing to the
+            Smarter, more detailed, newsletter style weekly recaps with
+            customizable tones and deeper league context are available with a
             <router-link
               :to="{ path: '/account', query: route.query }"
               class="cursor-pointer text-primary hover:underline"
               @click="store.currentTab = ''"
-              >Premium Tier</router-link
+              >Premium Subscription</router-link
             >.
           </p>
         </div>

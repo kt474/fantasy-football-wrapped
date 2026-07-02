@@ -171,7 +171,10 @@ const copyReport = () => {
     </div>
     <Separator class="mt-3 mb-2" />
     <div v-if="renderedSummary">
-      <div v-html="renderedSummary" class="max-w-5xl my-3 report-content"></div>
+      <div
+        v-html="renderedSummary"
+        class="max-w-5xl my-3 leading-7 text-foreground/90 dark:text-foreground/85 report-content"
+      ></div>
 
       <p class="text-xs text-muted-foreground">
         AI-generated summary. Information provided may not always be accurate.
