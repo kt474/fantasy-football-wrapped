@@ -8,12 +8,14 @@ import { getEspnLeagueInfo, getSavedEspnAuth } from "../../api/espnApi.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";
 import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
+import AllTimeRecords from "./AllTimeRecords.vue";
 import MostPoints from "./MostPoints.vue";
 import FewestPoints from "./FewestPoints.vue";
 import CloseMatchups from "./CloseMatchups.vue";
 import SeasonFinishHistory from "./SeasonFinishHistory.vue";
 import Card from "../ui/card/Card.vue";
 import { toast } from "vue-sonner";
+import { hasLeagueSeasonData } from "@/lib/leagueHistory";
 
 import {
   Tooltip,
@@ -151,10 +153,30 @@ interface HistoricalManagerRow {
   seasons: string[];
 }
 
+interface HistoricalSeasonRow {
+  name: string;
+  username: string;
+  id: string;
+  rosterId: number;
+  season: string;
+  wins: number;
+  losses: number;
+  ties: number;
+  pointsFor: number;
+  points: number[];
+  matchups: (number | null)[];
+  recordByWeek: string;
+  avatarImg?: string;
+}
+
 const dedupePreviousLeagues = (league: LeagueInfoType) => {
   const seenEntries = new Set<string>();
   const uniqueEntries = getPreviousLeagueEntries(league).filter((entry) => {
     if (isLeagueInfoEntry(entry)) {
+      if (!hasLeagueSeasonData(entry)) {
+        return false;
+      }
+
       const leagueKey = getLeagueHistoryKey(entry);
       if (
         leagueKey === getLeagueHistoryKey(league) ||
@@ -178,7 +200,10 @@ const dedupePreviousLeagues = (league: LeagueInfoType) => {
 
   if (uniqueEntries.length !== getPreviousLeagueEntries(league).length) {
     replacePreviousLeagueEntries(league, uniqueEntries);
+    return true;
   }
+
+  return false;
 };
 
 const fetchLeagueData = async (leagueId: string): Promise<LeagueInfoType> => {
@@ -213,10 +238,13 @@ const checkPreviousLeagues = async (
   try {
     const leagueData = await fetchLeagueData(leagueId);
     loadingYear.value = leagueData.season || "";
+    const isValidSeason = hasLeagueSeasonData(leagueData);
 
-    // Update store and tracking arrays
-    previousLeagueEntries.push(leagueData);
-    dedupePreviousLeagues(rootLeague);
+    if (isValidSeason) {
+      // Update store and tracking arrays
+      previousLeagueEntries.push(leagueData);
+      dedupePreviousLeagues(rootLeague);
+    }
     previousLeagues.value.push(leagueId);
 
     // Recursively fetch previous league if it exists
@@ -278,7 +306,7 @@ const loadEspnPreviousLeagues = async (
         rootLeague.leagueId,
         getSavedEspnAuth(rootLeague.season, rootLeague.leagueId)
       );
-      if (leagueData) {
+      if (leagueData && hasLeagueSeasonData(leagueData)) {
         resolvedLeagues.push(leagueData);
       }
       previousLeagues.value.push(season);
@@ -322,7 +350,11 @@ const getPreviousLeagues = async (
 };
 
 const ensurePreviousLeaguesLoaded = async (league: LeagueInfoType) => {
-  dedupePreviousLeagues(league);
+  const prunedPreviousLeagues = dedupePreviousLeagues(league);
+  if (prunedPreviousLeagues) {
+    localStorage.setItem("leagueInfo", JSON.stringify(store.leagueInfo));
+  }
+
   const previousLeagueEntries = getPreviousLeagueEntries(league);
   const hasSeasonReferences = previousLeagueEntries.some(
     (entry) => !isLeagueInfoEntry(entry) && getPreviousSeasonReference(entry)
@@ -493,6 +525,8 @@ const dataAllYears = computed(() => {
     store.leagueInfo[store.currentLeagueIndex].previousLeagues.forEach(
       (league: LeagueInfoType) => {
         const tableData = getHistoricalTableData(league);
+        if (!hasLeagueSeasonData(league, tableData)) return;
+
         tableData.forEach((user: TableDataType) => {
           const resultUser = result.find((ru) => ru.id === user.id);
           if (resultUser) {
@@ -541,6 +575,45 @@ const dataAllYears = computed(() => {
     });
   }
   return result;
+});
+
+const mapSeasonRows = (
+  tableData: TableDataType[],
+  season: string
+): HistoricalSeasonRow[] =>
+  tableData.map((user) => ({
+    name: user.name,
+    username: user.username,
+    id: user.id,
+    rosterId: user.rosterId,
+    season,
+    wins: user.wins,
+    losses: user.losses,
+    ties: user.ties,
+    pointsFor: user.pointsFor,
+    points: user.points ? [...user.points] : [],
+    matchups: user.matchups ? [...user.matchups] : [],
+    recordByWeek: user.recordByWeek ?? "",
+    avatarImg: user.avatarImg,
+  }));
+
+const seasonRows = computed(() => {
+  const league = store.leagueInfo[store.currentLeagueIndex];
+
+  if (!league) {
+    return mapSeasonRows(props.tableData, "2024");
+  }
+
+  const rows = mapSeasonRows(props.tableData, league.season);
+
+  league.previousLeagues.filter(isLeagueInfoEntry).forEach((previousLeague) => {
+    const tableData = getHistoricalTableData(previousLeague);
+    if (!hasLeagueSeasonData(previousLeague, tableData)) return;
+
+    rows.push(...mapSeasonRows(tableData, previousLeague.season));
+  });
+
+  return rows;
 });
 
 const tableDataAllYears = computed(() => {
@@ -1014,6 +1087,7 @@ watch(
     </Card>
     <SeasonFinishHistory v-if="!isLoading" :tableData="props.tableData" />
     <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
+    <AllTimeRecords v-if="!isLoading" :seasonRows="seasonRows" />
     <div v-if="!isLoading" class="flex flex-wrap mt-4 md:flex-nowrap">
       <MostPoints :tableData="dataAllYears" />
       <FewestPoints

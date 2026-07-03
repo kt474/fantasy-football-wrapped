@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { computed } from "vue";
 import { useStore } from "../../store/store";
+import { Badge } from "../ui/badge";
 import Card from "../ui/card/Card.vue";
+import CardContent from "../ui/card/CardContent.vue";
+import CardHeader from "../ui/card/CardHeader.vue";
+import CardTitle from "../ui/card/CardTitle.vue";
 
 const store = useStore();
 
@@ -29,22 +33,33 @@ interface MatchupDifference {
   matchupIndex: number;
 }
 
+interface MatchupSection {
+  title: string;
+  matchups: MatchupDifference[];
+}
+
+interface MatchupTeamDisplay {
+  team: MatchupHistoryRow;
+  score: number;
+  isWinner: boolean;
+}
+
 const props = defineProps<{
   tableData: MatchupHistoryRow[];
 }>();
-const closestMatchups = ref<MatchupDifference[]>([]);
-const farthestMatchups = ref<MatchupDifference[]>([]);
 
-onMounted(() => {
-  getMatchups();
-});
+const displayName = (team: MatchupHistoryRow) =>
+  store.showUsernames
+    ? team.username || "Ghost Roster"
+    : team.name || "Ghost Roster";
 
-watch(
-  () => store.currentLeagueId,
-  () => getMatchups()
-);
+const formatPoints = (value: number) =>
+  value.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 
-const getMatchups = () => {
+const matchupRecords = computed(() => {
   const matchupDifferences: MatchupDifference[] = [];
 
   props.tableData.forEach((teamA) => {
@@ -64,20 +79,20 @@ const getMatchups = () => {
         if (
           typeof scoreA === "number" &&
           typeof scoreB === "number" &&
-          !isNaN(scoreA) &&
-          !isNaN(scoreB) &&
+          !Number.isNaN(scoreA) &&
+          !Number.isNaN(scoreB) &&
           scoreA !== 0 &&
           scoreB !== 0
         ) {
           const difference = Math.abs(scoreA - scoreB);
           matchupDifferences.push({
-            teamA: teamA,
-            teamB: teamB,
-            scoreA: scoreA,
-            scoreB: scoreB,
-            difference: difference,
-            matchupId: matchupId,
-            matchupIndex: matchupIndex,
+            teamA,
+            teamB,
+            scoreA,
+            scoreB,
+            difference,
+            matchupId,
+            matchupIndex,
           });
         }
       }
@@ -98,7 +113,7 @@ const getMatchups = () => {
       `teamB-idx-${matchup.matchupIndex}`;
 
     const sortedTeamIds = [teamAId, teamBId].sort();
-    const id = `${sortedTeamIds[0]}-${sortedTeamIds[1]}-${matchup.matchupId}`;
+    const id = `${sortedTeamIds[0]}-${sortedTeamIds[1]}-${matchup.matchupId}-${matchup.matchupIndex}`;
 
     if (!processedMatchups.has(id)) {
       uniqueMatchups.push(matchup);
@@ -106,158 +121,131 @@ const getMatchups = () => {
     }
   });
 
-  uniqueMatchups.sort((a, b) => a.difference - b.difference);
-  closestMatchups.value = uniqueMatchups.slice(0, 5);
-
-  uniqueMatchups.sort((a, b) => b.difference - a.difference);
-  farthestMatchups.value = uniqueMatchups.slice(0, 5);
-};
+  return uniqueMatchups;
+});
 
 const getWeek = (seasonsData: PointSeasonEntry[], index: number) => {
-  // We need to work with years in ascending order,
-  // so let's sort a copy of the array.
   const sortedSeasons = [...seasonsData];
 
   let cumulativeWeekCount = -1;
 
   for (const seasonObj of sortedSeasons) {
     const numWeeksInSeason = seasonObj.points.length;
-
-    // Check if the target week falls within the current season
     if (
       index > cumulativeWeekCount &&
       index <= cumulativeWeekCount + numWeeksInSeason
     ) {
-      // Calculate the 0-based index within this season's points array
       const weekIndex = index - cumulativeWeekCount;
-      return `${seasonObj.season} Week ${weekIndex}`;
+      return `${seasonObj.season} / Week ${weekIndex}`;
     }
 
     cumulativeWeekCount += numWeeksInSeason;
   }
 
-  // If we reach here, the targetWeekNumber is out of range
   return "Week N/A";
 };
+
+const getMatchupTeams = (matchup: MatchupDifference): MatchupTeamDisplay[] => [
+  {
+    team: matchup.teamA,
+    score: matchup.scoreA,
+    isWinner: matchup.scoreA > matchup.scoreB,
+  },
+  {
+    team: matchup.teamB,
+    score: matchup.scoreB,
+    isWinner: matchup.scoreB > matchup.scoreA,
+  },
+];
+
+const matchupSections = computed<MatchupSection[]>(() => [
+  {
+    title: "Closest Matchups",
+
+    matchups: [...matchupRecords.value]
+      .sort((a, b) => a.difference - b.difference)
+      .slice(0, 4),
+  },
+  {
+    title: "Biggest Blowouts",
+
+    matchups: [...matchupRecords.value]
+      .sort((a, b) => b.difference - a.difference)
+      .slice(0, 4),
+  },
+]);
 </script>
 
 <template>
-  <div class="flex flex-wrap justify-start mt-4 md:flex-nowrap">
-    <Card class="w-full px-6 py-4 mr-0 md:mr-4">
-      <h5 class="mb-4 text-2xl font-bold sm:text-3xl">Closest Matchups</h5>
-      <Card v-for="matchup in closestMatchups" class="p-4 mb-4 bg-secondary">
-        <div class="">
-          <p class="mb-2 font-medium">
-            {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
-          </p>
-
-          <div class="flex justify-between mt-1 mr-1">
-            <div class="mb-2 mr-4 text-center">
-              <p class="text-2xl font-semibold">
-                {{ matchup.difference.toFixed(2) }}
-              </p>
-              <p class="text-muted-foreground">
-                <span class="hidden sm:inline">Point</span
-                ><span class="inline sm:hidden">Pt.</span> Diff
-              </p>
-            </div>
-            <div class="w-4/5">
-              <div class="flex justify-between mb-2">
-                <p>
-                  {{
-                    store.showUsernames
-                      ? matchup.teamA.username
-                      : matchup.teamA.name
-                  }}
-                </p>
-                <p
-                  class="font-semibold"
-                  :class="{
-                    'text-primary': matchup.scoreA > matchup.scoreB,
-                  }"
-                >
-                  {{ matchup.scoreA }}
-                </p>
-              </div>
-              <div class="flex justify-between">
-                <p>
-                  {{
-                    store.showUsernames
-                      ? matchup.teamB.username
-                      : matchup.teamB.name
-                  }}
-                </p>
-                <p
-                  class="font-semibold text"
-                  :class="{
-                    'text-primary': matchup.scoreB > matchup.scoreA,
-                  }"
-                >
-                  {{ matchup.scoreB }}
-                </p>
-              </div>
-            </div>
+  <Card v-if="matchupRecords.length" class="mt-4 overflow-hidden">
+    <CardHeader class="p-4 border-b sm:p-6 bg-muted/30">
+      <CardTitle class="text-2xl sm:text-3xl">Matchup Margins</CardTitle>
+    </CardHeader>
+    <CardContent class="p-4 sm:p-6">
+      <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <section
+          v-for="section in matchupSections"
+          :key="section.title"
+          class="space-y-3"
+        >
+          <div>
+            <h4 class="text-lg font-semibold tracking-tight">
+              {{ section.title }}
+            </h4>
           </div>
-        </div>
-      </Card>
-    </Card>
-    <Card class="w-full px-6 py-4 mt-4 md:mt-0">
-      <h5 class="mb-4 text-2xl font-bold sm:text-3xl">Biggest Blowouts</h5>
-      <Card v-for="matchup in farthestMatchups" class="p-4 mb-4 bg-secondary">
-        <div class="">
-          <p class="mb-2 font-medium">
-            {{ getWeek(matchup.teamA.pointSeason, matchup.matchupIndex) }}
-          </p>
 
-          <div class="flex justify-between mt-1 mr-1">
-            <div class="mb-2 mr-4 text-center">
-              <p class="text-2xl font-semibold">
-                {{ matchup.difference.toFixed(2) }}
-              </p>
-              <p class="text-muted-foreground">
-                <span class="hidden sm:inline">Point</span
-                ><span class="inline sm:hidden">Pt.</span> Diff
-              </p>
-            </div>
-            <div class="w-4/5">
-              <div class="flex justify-between mb-2">
-                <p>
-                  {{
-                    store.showUsernames
-                      ? matchup.teamA.username
-                      : matchup.teamA.name
-                  }}
-                </p>
-                <p
-                  class="font-semibold"
-                  :class="{
-                    'text-primary': matchup.scoreA > matchup.scoreB,
-                  }"
-                >
-                  {{ matchup.scoreA }}
-                </p>
-              </div>
-              <div class="flex justify-between">
-                <p>
-                  {{
-                    store.showUsernames
-                      ? matchup.teamB.username
-                      : matchup.teamB.name
-                  }}
-                </p>
-                <p
-                  class="font-semibold text"
-                  :class="{
-                    'text-primary': matchup.scoreB > matchup.scoreA,
-                  }"
-                >
-                  {{ matchup.scoreB }}
-                </p>
-              </div>
-            </div>
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Card
+              v-for="matchup in section.matchups"
+              :key="`${section.title}-${matchup.matchupId}-${matchup.matchupIndex}`"
+              class="flex flex-col h-40 shadow-sm border-border/70 bg-card"
+            >
+              <CardHeader class="p-4 pb-1">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-2xl font-bold tracking-tight tabular-nums">
+                      {{ formatPoints(matchup.difference) }}
+                    </p>
+                    <p class="text-xs font-medium text-muted-foreground">
+                      Margin
+                    </p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    class="text-xs leading-snug text-right whitespace-normal max-w-28"
+                  >
+                    {{
+                      getWeek(matchup.teamA.pointSeason, matchup.matchupIndex)
+                    }}
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              <CardContent class="flex flex-col flex-1 p-4 pt-2">
+                <div class="space-y-1.5">
+                  <div
+                    v-for="team in getMatchupTeams(matchup)"
+                    :key="team.team.id || team.team.name"
+                    class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 rounded-md bg-muted/40 px-3 py-1.5"
+                  >
+                    <p
+                      class="min-w-0 text-sm font-medium leading-snug break-words"
+                    >
+                      {{ displayName(team.team) }}
+                    </p>
+                    <p
+                      class="text-sm font-semibold leading-snug text-right tabular-nums"
+                      :class="{ 'text-primary': team.isWinner }"
+                    >
+                      {{ formatPoints(team.score) }}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
-      </Card>
-    </Card>
-  </div>
+        </section>
+      </div>
+    </CardContent>
+  </Card>
 </template>

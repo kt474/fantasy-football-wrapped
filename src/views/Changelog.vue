@@ -7,7 +7,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "There is new table in the league history tab that shows final placements across all seasons for every manager.",
+          "There is new table in the league history tab that shows final placements across all seasons for every manager. There are also new all time records and awards.",
         ],
       },
     ],

@@ -4,6 +4,7 @@ import { createTableData } from "@/api/helper";
 import { useStore } from "@/store/store";
 import type { LeagueInfoType, TableDataType } from "@/types/types";
 import Card from "../ui/card/Card.vue";
+import { hasLeagueSeasonData } from "@/lib/leagueHistory";
 import { formatOrdinal, getFinalPlacements } from "@/lib/seasonFinish";
 
 type SeasonFinishRow = {
@@ -86,6 +87,13 @@ const seasonHistory = computed(() => {
   return seasons.value
     .map((league) => {
       const tableData = getSeasonTableData(league);
+      const isCurrentSeason =
+        league.leagueId === currentLeague.value?.leagueId &&
+        league.season === currentLeague.value?.season;
+      if (!isCurrentSeason && !hasLeagueSeasonData(league, tableData)) {
+        return null;
+      }
+
       const finalPlacements = getFinalPlacements(league, tableData);
       const finalPlacementByRosterId = new Map(
         finalPlacements.map((placement) => [
@@ -129,6 +137,7 @@ const seasonHistory = computed(() => {
         rows,
       };
     })
+    .filter((season) => season !== null)
     .filter((season) => season.rows.length > 0);
 });
 
@@ -263,7 +272,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
     <p
       class="w-full pt-2 text-lg font-semibold text-center rounded-t-lg bg-secondary"
     >
-      Season Finish Matrix
+      Final Placements
     </p>
     <div class="relative w-full overflow-x-auto">
       <div class="w-full overflow-x-auto">
@@ -285,7 +294,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
                 scope="col"
                 class="sticky left-0 z-20 px-4 py-3 uppercase bg-secondary sm:px-6"
               >
-                Manager
+                Team Name
               </th>
               <th
                 v-for="(season, index) in seasonHistory"
@@ -295,7 +304,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
               >
                 <button
                   type="button"
-                  class="inline-flex w-full items-center justify-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                  class="inline-flex w-full items-center justify-center gap-1.5 transition-colors hover:text-foreground"
                   :aria-sort="getSortLabel(`season:${index}`)"
                   @click="updateSort(`season:${index}`)"
                 >
@@ -311,7 +320,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
               <th scope="col" class="px-2 py-3 bg-muted/45">
                 <button
                   type="button"
-                  class="inline-flex w-full items-center justify-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                  class="inline-flex w-full items-center justify-center gap-1.5 transition-colors hover:text-foreground"
                   :aria-sort="getSortLabel('average')"
                   @click="updateSort('average')"
                 >
@@ -335,7 +344,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
               <td
                 v-for="(cell, index) in row.cells"
                 :key="`${row.managerKey}-${seasonHistory[index]?.season}`"
-                class="w-24 bg-background px-2 py-3.5 text-center"
+                class="w-24 px-2 py-2 text-center bg-background"
                 :class="getPlacementClass(cell)"
               >
                 <template v-if="cell">
