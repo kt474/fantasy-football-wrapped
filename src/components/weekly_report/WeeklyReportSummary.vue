@@ -360,12 +360,12 @@ const premiumReportPreview: PremiumReport = {
           </p>
           <p class="text-xs text-muted-foreground">
             Smarter, more detailed, newsletter style weekly recaps with
-            customizable tones and deeper league context are available with a
+            customizable tones and deeper league context are available in the
             <router-link
               :to="{ path: '/account', query: route.query }"
               class="cursor-pointer text-primary hover:underline"
               @click="store.currentTab = ''"
-              >Premium Subscription</router-link
+              >Premium tier</router-link
             >.
           </p>
         </div>

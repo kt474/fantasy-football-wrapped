@@ -97,7 +97,7 @@ const subscriptionStatusLabel = computed(() => {
   const status = subscriptionStore.status.toLowerCase();
   if (status === "none") return "Not Subscribed";
   if (status === "season_pass") return "Season Pass Active";
-  if (status === "active") return "Premium Subscriber";
+  if (status === "active") return "Premium Tier Active";
   return status
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -182,7 +182,7 @@ const subscriptionTimelineNote = computed(() => {
     return `Your free trial ends on ${trialTimelineLabel.value}.`;
   }
   if (subscriptionStore.status.toLowerCase() === "season_pass") {
-    return `Your premium tier season pass is active through ${seasonPassTimelineLabel.value}.`;
+    return `Your Season Pass includes Premium tier access through ${seasonPassTimelineLabel.value}.`;
   }
   if (subscriptionStore.cancelDate) {
     return `Your subscription remains active until ${cancelTimelineLabel.value}.`;
@@ -783,9 +783,7 @@ watch(
         <Card>
           <CardHeader>
             <CardTitle>Account Summary</CardTitle>
-            <CardDescription>
-              Your profile and subscription details
-            </CardDescription>
+            <CardDescription> Your profile and plan details </CardDescription>
           </CardHeader>
           <CardContent class="space-y-4">
             <div class="flex flex-wrap items-start gap-4">
@@ -850,16 +848,14 @@ watch(
         class="max-w-xl mt-4"
       >
         <CardHeader>
-          <CardTitle>Premium subscription</CardTitle>
+          <CardTitle>Unlock Premium</CardTitle>
           <CardDescription>
             Premium tools for deeper insights across every league you manage.
           </CardDescription>
         </CardHeader>
         <CardContent class="text-sm">
           <div class="p-4 mb-5 border rounded-xl">
-            <p class="mb-3 text-sm font-semibold">
-              Every subscription includes:
-            </p>
+            <p class="mb-3 text-sm font-semibold">Every paid plan includes:</p>
             <div>
               <div class="flex align-middle">
                 <Check class="w-5 h-5 mr-2 shrink-0" />
@@ -893,7 +889,9 @@ watch(
             </div>
           </div>
           <div class="flex flex-col gap-4 sm:flex-row">
-            <div class="relative flex-1 p-5 border pt-7 rounded-xl bg-muted/40">
+            <div
+              class="relative flex flex-col flex-1 p-5 border pt-7 rounded-xl bg-muted/40"
+            >
               <Badge
                 class="absolute top-0 px-2 -translate-x-1/2 -translate-y-1/2 left-1/2 hover:bg-primary"
               >
@@ -910,19 +908,20 @@ watch(
                   /season
                 </span>
               </p>
-              <p class="mt-3 min-h-[2.5rem] text-muted-foreground">
-                One payment for premium access through Feb 15, 2027.
+              <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
+                One payment for Premium tier access through Feb 15, 2027. Does
+                not renew.
               </p>
 
               <Button
-                class="w-full mt-8"
+                class="w-full mt-auto"
                 :disabled="checkoutLoadingPlan !== null"
                 @click="startCheckout('season_pass')"
               >
                 {{ getCheckoutButtonText("season_pass") }}
               </Button>
             </div>
-            <div class="flex-1 p-5 border rounded-xl">
+            <div class="flex flex-col flex-1 p-5 border rounded-xl">
               <p
                 class="text-sm font-semibold tracking-[0.12em] uppercase text-muted-foreground"
               >
@@ -934,11 +933,11 @@ watch(
                   /month
                 </span>
               </p>
-              <p class="mt-3 min-h-[2.5rem] text-muted-foreground">
-                Billed monthly. Cancel anytime.
+              <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
+                Same Premium tier access, billed monthly. Cancel anytime.
               </p>
               <Button
-                class="w-full mt-8"
+                class="w-full mt-auto"
                 :disabled="checkoutLoadingPlan !== null"
                 variant="outline"
                 @click="startCheckout('monthly')"

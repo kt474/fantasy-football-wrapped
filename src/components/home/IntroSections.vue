@@ -290,10 +290,10 @@ const toolSummaries: ToolSummary[] = [
                 New premium features for leagues that want more
               </h3>
               <p class="mt-4 text-sm leading-6 text-muted-foreground">
-                A Premium subscription includes smarter newsletter-style weekly
-                recaps with customizable tones and deeper league context, plus
-                custom manager profiles and rivalry reports. Everything else
-                from the past three seasons, plus plenty more, is still free.
+                The Premium tier includes smarter newsletter-style weekly recaps
+                with customizable tones and deeper league context, plus custom
+                manager profiles and rivalry reports. Everything else from the
+                past three seasons, plus plenty more, is still free.
               </p>
             </div>
           </div>

@@ -88,11 +88,12 @@ watch(
             The core ffwrapped experience will always be free and ad free. As
             the userbase grows, hosting and AI feature costs grow too, so
             donations are always greatly appreciated. I also offer an optional
+            paid
             <router-link
               :to="{ path: '/account', query: $route.query }"
               class="font-medium cursor-pointer text-primary hover:underline"
             >
-              Premium subscription </router-link
+              Premium tier </router-link
             >with deeper league and manager insights, and I’ll keep pricing as
             affordable as possible. My goal is to make fantasy football more
             fun, insightful, and engaging for every league, and every bit of
