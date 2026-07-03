@@ -478,15 +478,11 @@ const recordCards = computed<AllTimeRecordCard[]>(() => {
                 :key="`${record.title}-${team.name}-${team.score}`"
                 class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 rounded-md bg-muted/40 px-2 py-1"
               >
-                <p
-                  class="min-w-0 text-xs font-medium leading-snug break-words"
-                  :class="{ 'font-semibold text-foreground': team.isFeatured }"
-                >
+                <p class="min-w-0 text-xs font-medium leading-snug break-words">
                   {{ team.name }}
                 </p>
                 <p
                   class="text-xs font-semibold leading-snug text-right tabular-nums"
-                  :class="{ 'text-primary': team.isFeatured }"
                 >
                   {{ team.score }}
                 </p>

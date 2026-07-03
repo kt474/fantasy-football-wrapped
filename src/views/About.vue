@@ -85,18 +85,18 @@ watch(
             where I write about fantasy football statistics and programming.
           </p>
           <p class="text-base leading-relaxed">
-            I will always try to keep this site free (and ad free) but as the
-            userbase grows, the hosting and AI feature costs also grow, so if
-            you find value in ffwrapped, any donations are greatly appreciated.
-            If you’d like to support ffwrapped beyond donations, consider
-            subscribing to the
+            The core ffwrapped experience will always be free and ad free. As
+            the userbase grows, hosting and AI feature costs grow too, so
+            donations are always greatly appreciated. I also offer an optional
             <router-link
               :to="{ path: '/account', query: $route.query }"
               class="font-medium cursor-pointer text-primary hover:underline"
             >
-              Premium tier</router-link
-            >. Your support helps keep the platform running and improving for
-            everyone.
+              Premium subscription </router-link
+            >with deeper league and manager insights, and I’ll keep pricing as
+            affordable as possible. My goal is to make fantasy football more
+            fun, insightful, and engaging for every league, and every bit of
+            support helps keep ffwrapped running and improving.
           </p>
           <div class="flex flex-wrap justify-evenly sm:flex-nowrap">
             <a
