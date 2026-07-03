@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/03/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "There is new table in the league history tab that shows final placements across all seasons for every manager.",
+        ],
+      },
+    ],
+  },
+  {
     date: "6/29/26",
     content: [
       {

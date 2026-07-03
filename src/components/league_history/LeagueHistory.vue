@@ -11,6 +11,7 @@ import AllMatchups from "./AllMatchups.vue";
 import MostPoints from "./MostPoints.vue";
 import FewestPoints from "./FewestPoints.vue";
 import CloseMatchups from "./CloseMatchups.vue";
+import SeasonFinishHistory from "./SeasonFinishHistory.vue";
 import Card from "../ui/card/Card.vue";
 import { toast } from "vue-sonner";
 
@@ -1011,6 +1012,7 @@ watch(
         </table>
       </TooltipProvider>
     </Card>
+    <SeasonFinishHistory v-if="!isLoading" :tableData="props.tableData" />
     <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
     <div v-if="!isLoading" class="flex flex-wrap mt-4 md:flex-nowrap">
       <MostPoints :tableData="dataAllYears" />
