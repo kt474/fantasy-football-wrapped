@@ -284,6 +284,19 @@ const toolSummaries: ToolSummary[] = [
               {{ tool.description }}
             </p>
           </div>
+          <div class="premium-cell">
+            <div class="max-w-3xl">
+              <h3 class="mt-2 text-2xl font-semibold tracking-tight">
+                New premium features for leagues that want more
+              </h3>
+              <p class="mt-4 text-sm leading-6 text-muted-foreground">
+                A Premium subscription adds smarter newsletter-style weekly
+                recaps with customizable tones and deeper league context, plus
+                custom manager profiles and rivalry reports. Everything else
+                from the past three seasons, plus plenty more, is still free.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -337,6 +350,11 @@ const toolSummaries: ToolSummary[] = [
   border-bottom: 1px solid hsl(var(--border) / 0.8);
 }
 
+.premium-cell {
+  grid-column: 1 / -1;
+  padding: 2rem;
+}
+
 @media (min-width: 640px) {
   .tool-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -347,7 +365,7 @@ const toolSummaries: ToolSummary[] = [
   }
 
   .tool-cell:nth-last-child(2) {
-    border-bottom: 0;
+    border-bottom: 1px solid hsl(var(--border) / 0.8);
   }
 }
 
@@ -365,7 +383,7 @@ const toolSummaries: ToolSummary[] = [
   }
 
   .tool-cell:nth-child(n + 4) {
-    border-bottom: 0;
+    border-bottom: 1px solid hsl(var(--border) / 0.8);
   }
 }
 
