@@ -154,13 +154,12 @@ watch(() => route.params.token, loadReport);
           @click="trackSharedReportCta('explore')"
         >
           <img
-            height="24"
-            width="24"
-            src="../assets/football-helmet.webp"
-            class="h-6"
+            height="32"
+            width="32"
+            src="../assets/logo.webp"
+            class="-mx-1"
             alt="ffwrapped logo"
           />
-          <!-- Icon credit to https://www.flaticon.com/free-icons/american-football -->
           <p class="custom-font mt-1.5">
             <span class="text-primary">ff</span>wrapped
           </p>

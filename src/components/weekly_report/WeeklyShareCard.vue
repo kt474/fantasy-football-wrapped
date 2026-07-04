@@ -53,10 +53,10 @@ const benchPlayersForCard = computed(() => props.benchPlayers.slice(0, 4));
     <div class="p-4 border rounded-xl border-border bg-background">
       <div class="flex items-center gap-2.5">
         <img
-          height="24"
-          width="24"
-          src="../../assets/football-helmet.webp"
-          class="h-6"
+          height="32"
+          width="32"
+          src="../../assets/logo.webp"
+          class="-mx-1"
           alt="ffwrapped logo"
         />
         <span class="text-2xl font-semibold tracking-tight">

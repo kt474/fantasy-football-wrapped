@@ -55,14 +55,4 @@ describe("auth store signup alerts", () => {
     expect(mocks.newUserAlert).not.toHaveBeenCalled();
     expect(store.loading).toBe(false);
   });
-
-  test("does not alert when starting Google OAuth", async () => {
-    mocks.signInWithOAuth.mockResolvedValue({ error: null });
-    const store = useAuthStore();
-
-    await store.signInWithGoogle("https://ffwrapped.com/account");
-
-    expect(mocks.newUserAlert).not.toHaveBeenCalled();
-    expect(store.loading).toBe(false);
-  });
 });

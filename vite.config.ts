@@ -20,19 +20,19 @@ export default defineConfig(({ mode }) => ({
         display: "standalone",
         icons: [
           {
-            src: "192.png",
+            src: "192.webp",
             sizes: "192x192",
-            type: "image/png",
+            type: "image/webp",
           },
           {
-            src: "512.png",
+            src: "512.webp",
             sizes: "512x512",
-            type: "image/png",
+            type: "image/webp",
           },
           {
-            src: "512.png",
+            src: "512.webp",
             sizes: "512x512",
-            type: "image/png",
+            type: "image/webp",
             purpose: "any maskable",
           },
         ],

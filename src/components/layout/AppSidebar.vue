@@ -164,13 +164,12 @@ const data = {
         <SidebarMenuItem>
           <div class="flex items-center ml-2 mt-1.5">
             <img
-              height="24"
-              width="24"
-              src="../../assets/football-helmet.webp"
-              class="h-6"
+              height="32"
+              width="32"
+              src="../../assets/logo.webp"
+              class="-mx-1"
               alt="ffwrapped logo"
             />
-            <!-- Icon credit to https://www.flaticon.com/free-icons/american-football -->
             <span
               class="self-center -mb-1.5 ml-2.5 custom-font whitespace-nowrap"
               ><span class="text-primary">ff</span>wrapped</span

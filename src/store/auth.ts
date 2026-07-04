@@ -158,6 +158,7 @@ export const useAuthStore = defineStore("auth", () => {
       });
       if (error) throw error;
       await newUserAlert("google");
+      // I know this will have false positives, it's good to have alerts anyway
     } finally {
       loading.value = false;
     }
