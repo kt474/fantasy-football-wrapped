@@ -9,7 +9,7 @@ import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
 import { authenticatedFetch } from "@/lib/authFetch";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
 import { getParsedStorageItem } from "@/lib/storage";
 import {
   Card,
@@ -203,6 +203,21 @@ const getCheckoutButtonText = (plan: CheckoutPlan) => {
   return "Subscribe monthly";
 };
 
+const getPlanAnalytics = (plan: CheckoutPlan) =>
+  plan === "season_pass"
+    ? {
+        plan,
+        billing_interval: "season",
+        price_usd: 18,
+        best_value: true,
+      }
+    : {
+        plan,
+        billing_interval: "monthly",
+        price_usd: 6,
+        best_value: false,
+      };
+
 const showPasswordRecoveryForm = computed(() => {
   const mode = Array.isArray(route.query.mode)
     ? route.query.mode[0]
@@ -384,13 +399,28 @@ const resetPassword = async () => {
 };
 
 const startCheckout = async (plan: CheckoutPlan) => {
+  trackPremiumFunnelEvent("plan_selected", {
+    source: "account",
+    authenticated: authStore.isAuthenticated,
+    ...getPlanAnalytics(plan),
+  });
+
   if (!authStore.isAuthenticated) {
     trackEvent("Checkout Failed", { plan, reason: "signed_out" });
+    trackPremiumFunnelEvent("checkout_blocked", {
+      source: "account",
+      reason: "signed_out",
+      ...getPlanAnalytics(plan),
+    });
     toast.error("Please sign in before choosing a plan.");
     return;
   }
 
   trackEvent("Checkout Started", { plan, source: "account" });
+  trackPremiumFunnelEvent("checkout_started", {
+    source: "account",
+    ...getPlanAnalytics(plan),
+  });
   checkoutLoadingPlan.value = plan;
   try {
     const response = await authenticatedFetch(checkoutApiPath, {
@@ -417,6 +447,11 @@ const startCheckout = async (plan: CheckoutPlan) => {
   } catch (error: unknown) {
     checkoutLoadingPlan.value = null;
     trackEvent("Checkout Failed", { plan, reason: "request_failed" });
+    trackPremiumFunnelEvent("checkout_failed", {
+      source: "account",
+      reason: "request_failed",
+      ...getPlanAnalytics(plan),
+    });
     toast.error(getErrorMessage(error, "Unable to start checkout"));
   }
 };
@@ -467,10 +502,18 @@ const handleCheckoutQuery = async () => {
 
   if (checkoutState === "success") {
     trackEvent("Checkout Succeeded", { source: "stripe", status: "success" });
+    trackPremiumFunnelEvent("checkout_succeeded", {
+      source: "stripe",
+      status: "success",
+    });
     toast.success("Checkout completed. Refreshing subscription status...");
     await subscriptionStore.fetchSubscriptionStatus({ showErrorToast: true });
   } else if (checkoutState === "canceled") {
     trackEvent("Checkout Canceled", { source: "stripe", status: "canceled" });
+    trackPremiumFunnelEvent("checkout_canceled", {
+      source: "stripe",
+      status: "canceled",
+    });
     toast.error("Checkout canceled.");
   }
 
@@ -539,6 +582,12 @@ watch(
 
     trackedAccountPaywallView.value = true;
     trackEvent("Paywall Viewed", { source: "account", feature: "premium" });
+    trackPremiumFunnelEvent("paywall_viewed", {
+      source: "account",
+      feature: "premium",
+      authenticated: authStore.isAuthenticated,
+      is_premium: isPremium,
+    });
   },
   { immediate: true }
 );

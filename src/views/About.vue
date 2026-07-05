@@ -5,6 +5,7 @@ import { useStore } from "@/store/store";
 import Switch from "@/components/ui/switch/Switch.vue";
 import { useRoute } from "vue-router";
 import Separator from "@/components/ui/separator/Separator.vue";
+import { trackPremiumFunnelEvent } from "@/lib/analytics";
 
 const route = useRoute();
 const leagueCount = ref(13382); // initial load current unique league count value 7/1/26
@@ -91,6 +92,13 @@ watch(
             <router-link
               :to="{ path: '/account', query: $route.query }"
               class="font-medium cursor-pointer text-primary hover:underline"
+              @click="
+                trackPremiumFunnelEvent('premium_cta_clicked', {
+                  cta: 'about_premium_tier',
+                  source: 'about',
+                  feature: 'premium',
+                })
+              "
             >
               Premium tier
             </router-link>

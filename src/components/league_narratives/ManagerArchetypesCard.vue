@@ -11,6 +11,7 @@ import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import { fakeProfileText } from "@/api/fakeLeague";
+import { trackPremiumFunnelEvent } from "@/lib/analytics";
 
 const store = useStore();
 const subscriptionStore = useSubscriptionStore();
@@ -153,7 +154,14 @@ watch(
           <Button size="sm" as-child>
             <router-link
               :to="{ path: '/account', query: $route.query }"
-              @click="store.currentTab = ''"
+              @click="
+                trackPremiumFunnelEvent('premium_cta_clicked', {
+                  cta: 'unlock_all_manager_profiles',
+                  feature: 'manager_profiles',
+                  source: 'manager_profiles',
+                });
+                store.currentTab = '';
+              "
             >
               Unlock All Manager Profiles
             </router-link>

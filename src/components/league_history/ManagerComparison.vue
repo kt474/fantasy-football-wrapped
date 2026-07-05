@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { useSubscriptionStore } from "@/store/subscription";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
+import { trackPremiumFunnelEvent } from "@/lib/analytics";
 
 const store = useStore();
 const subscriptionStore = useSubscriptionStore();
@@ -898,7 +899,14 @@ const chartOptions = ref({
             <Button class="mt-4" as-child>
               <router-link
                 :to="{ path: '/account', query: $route.query }"
-                @click="store.currentTab = ''"
+                @click="
+                  trackPremiumFunnelEvent('premium_cta_clicked', {
+                    cta: 'unlock_rivalry_reports',
+                    feature: 'rivalry_report',
+                    source: 'manager_comparison',
+                  });
+                  store.currentTab = '';
+                "
               >
                 Unlock Rivalry Reports
               </router-link>

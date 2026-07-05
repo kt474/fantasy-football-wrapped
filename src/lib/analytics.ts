@@ -1,7 +1,7 @@
 import posthog from "posthog-js";
 
 type AnalyticsValue = string | number | boolean;
-type AnalyticsProperties = Record<string, AnalyticsValue>;
+type AnalyticsProperties = Record<string, AnalyticsValue | undefined>;
 
 const hasPostHogKey = Boolean(import.meta.env.VITE_POSTHOG_KEY);
 
@@ -11,7 +11,18 @@ export const trackEvent = (
 ) => {
   if (!hasPostHogKey) return;
 
-  posthog.capture(eventName, properties);
+  posthog.capture(eventName, compactProperties(properties));
+};
+
+export const trackPremiumFunnelEvent = (
+  step: string,
+  properties: AnalyticsProperties = {}
+) => {
+  trackEvent("Premium Funnel Step", {
+    step,
+    path: typeof window === "undefined" ? undefined : window.location.pathname,
+    ...properties,
+  });
 };
 
 export const trackPageView = (path: string, title?: string) => {
@@ -36,7 +47,7 @@ export const identifyUser = (
 export const setUserProperties = (properties: AnalyticsProperties) => {
   if (!hasPostHogKey) return;
 
-  posthog.setPersonProperties(properties);
+  posthog.setPersonProperties(compactProperties(properties));
 };
 
 export const resetAnalytics = () => {
@@ -44,3 +55,8 @@ export const resetAnalytics = () => {
 
   posthog.reset();
 };
+
+const compactProperties = (properties: AnalyticsProperties) =>
+  Object.fromEntries(
+    Object.entries(properties).filter(([, value]) => value !== undefined)
+  ) as Record<string, AnalyticsValue>;

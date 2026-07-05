@@ -19,7 +19,7 @@ import {
 import Separator from "../ui/separator/Separator.vue";
 import PremiumReportContent from "./PremiumReportContent.vue";
 import type { PremiumReport } from "@/types/types";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
 
 const props = defineProps<{
   tier: string;
@@ -85,6 +85,13 @@ watch(
       feature: "premium_report",
       source: "weekly_report",
     });
+    trackPremiumFunnelEvent("paywall_viewed", {
+      feature: "premium_report",
+      source: "weekly_report",
+      has_league: props.hasLeagues,
+      authenticated: authStore.isAuthenticated,
+      is_premium: subscriptionStore.isPremium,
+    });
   },
   { immediate: true }
 );
@@ -125,13 +132,41 @@ const premiumReportPreview: PremiumReport = {
     ],
   },
 };
+
+const updateTier = (value: string) => {
+  emit("update:tier", value);
+  if (value === "Premium") {
+    trackPremiumFunnelEvent("premium_tab_selected", {
+      feature: "premium_report",
+      source: "weekly_report",
+      has_league: props.hasLeagues,
+      authenticated: authStore.isAuthenticated,
+      is_premium: subscriptionStore.isPremium,
+    });
+  }
+};
+
+const handleGeneratePremium = () => {
+  emit("generate-premium");
+};
+
+const trackPremiumCtaClick = (cta: string) => {
+  trackPremiumFunnelEvent("premium_cta_clicked", {
+    cta,
+    feature: "premium_report",
+    source: "weekly_report",
+    has_league: props.hasLeagues,
+    authenticated: authStore.isAuthenticated,
+  });
+  store.currentTab = "";
+};
 </script>
 
 <template>
   <Tabs
     :model-value="tier"
     default-value="Standard"
-    @update:model-value="emit('update:tier', String($event))"
+    @update:model-value="updateTier(String($event))"
   >
     <div>
       <div class="flex">
@@ -193,7 +228,7 @@ const premiumReportPreview: PremiumReport = {
               </Select>
             </div>
             <Button
-              @click="emit('generate-premium')"
+              @click="handleGeneratePremium"
               :disabled="!canGeneratePremium || premiumLoading"
               type="button"
               class="mt-5 ml-2"
@@ -306,7 +341,7 @@ const premiumReportPreview: PremiumReport = {
                 <Button as-child>
                   <router-link
                     :to="{ path: '/account', query: route.query }"
-                    @click="store.currentTab = ''"
+                    @click="trackPremiumCtaClick('unlock_premium_reports')"
                   >
                     Unlock Premium Reports
                   </router-link>
@@ -339,7 +374,7 @@ const premiumReportPreview: PremiumReport = {
               <Button as-child>
                 <router-link
                   :to="{ path: '/account', query: route.query }"
-                  @click="store.currentTab = ''"
+                  @click="trackPremiumCtaClick('unlock_premium_reports')"
                 >
                   Unlock Premium Reports
                 </router-link>
@@ -364,7 +399,7 @@ const premiumReportPreview: PremiumReport = {
             <router-link
               :to="{ path: '/account', query: route.query }"
               class="cursor-pointer text-primary hover:underline"
-              @click="store.currentTab = ''"
+              @click="trackPremiumCtaClick('standard_report_inline_link')"
               >Premium tier</router-link
             >.
           </p>
