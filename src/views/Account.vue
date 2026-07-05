@@ -8,6 +8,7 @@ import type { LeagueInfoType } from "@/types/types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
+import Checkbox from "@/components/ui/checkbox/Checkbox.vue";
 import { authenticatedFetch } from "@/lib/authFetch";
 import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
 import { getParsedStorageItem } from "@/lib/storage";
@@ -38,12 +39,16 @@ const signInEmail = ref("");
 const signInPassword = ref("");
 const signUpEmail = ref("");
 const signUpPassword = ref("");
+const signUpWeeklyReportEmailsEnabled = ref(false);
 const signUpOtpCode = ref("");
 const pendingSignUpEmail = ref("");
 const recoveryPassword = ref("");
 const recoveryPasswordConfirm = ref("");
 const checkoutLoadingPlan = ref<CheckoutPlan | null>(null);
 const portalLoading = ref(false);
+const notificationPreferencesLoading = ref(false);
+const notificationPreferencesSaving = ref(false);
+const weeklyReportEmailsEnabled = ref(false);
 const trackedAccountPaywallView = ref(false);
 
 type CheckoutPlan = "monthly" | "season_pass";
@@ -234,6 +239,7 @@ const resetSignInForm = () => {
 const resetSignUpForm = () => {
   signUpEmail.value = "";
   signUpPassword.value = "";
+  signUpWeeklyReportEmailsEnabled.value = false;
 };
 
 const resetSignUpOtpForm = () => {
@@ -271,7 +277,8 @@ const signUp = async () => {
       trackEvent("Signup Started", { method: "email", source: "account" });
       await authStore.signUpWithPassword(
         signUpEmail.value,
-        signUpPassword.value
+        signUpPassword.value,
+        signUpWeeklyReportEmailsEnabled.value
       );
       pendingSignUpEmail.value = signUpEmail.value;
       toast.success("Account created. Enter the code from your email.");
@@ -395,6 +402,34 @@ const resetPassword = async () => {
         "Please try again."
       )}`
     );
+  }
+};
+
+const saveWeeklyReportEmailPreference = async (
+  checked: boolean | "indeterminate"
+) => {
+  const enabled = checked === true;
+  const previousValue = weeklyReportEmailsEnabled.value;
+  weeklyReportEmailsEnabled.value = enabled;
+  notificationPreferencesSaving.value = true;
+
+  try {
+    await authStore.updateWeeklyReportEmailsPreference(enabled);
+    toast.success(
+      enabled
+        ? "Weekly report emails enabled."
+        : "Weekly report emails disabled."
+    );
+  } catch (error: unknown) {
+    weeklyReportEmailsEnabled.value = previousValue;
+    toast.error(
+      `Unable to update email preference. ${getErrorMessage(
+        error,
+        "Please try again."
+      )}`
+    );
+  } finally {
+    notificationPreferencesSaving.value = false;
   }
 };
 
@@ -591,6 +626,30 @@ watch(
   },
   { immediate: true }
 );
+
+watch(
+  () => authStore.weeklyReportEmailsEnabled,
+  (enabled) => {
+    weeklyReportEmailsEnabled.value = enabled;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => authStore.isAuthenticated,
+  async (isAuthenticated) => {
+    if (!isAuthenticated) return;
+    notificationPreferencesLoading.value = true;
+    try {
+      await authStore.fetchWeeklyReportEmailsPreference();
+    } catch (error) {
+      console.error("Unable to load notification preferences:", error);
+    } finally {
+      notificationPreferencesLoading.value = false;
+    }
+  },
+  { immediate: true }
+);
 </script>
 <template>
   <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto sm:ml-8">
@@ -702,6 +761,24 @@ watch(
                   autocomplete="new-password"
                 />
               </Field>
+              <div class="flex items-start w-full gap-3">
+                <Checkbox
+                  id="weekly-report-email-signup"
+                  :model-value="signUpWeeklyReportEmailsEnabled"
+                  class="flex-none w-4 h-4"
+                  @update:model-value="
+                    signUpWeeklyReportEmailsEnabled = $event === true
+                  "
+                />
+                <div class="min-w-0">
+                  <label
+                    for="weekly-report-email-signup"
+                    class="block text-sm font-medium leading-none"
+                  >
+                    Email me weekly report reminders
+                  </label>
+                </div>
+              </div>
               <FieldGroup>
                 <Field>
                   <Button @click="signUp"> Create Account </Button>
@@ -854,13 +931,41 @@ watch(
                 {{ subscriptionStatusLabel }}
               </span>
             </div>
-            <Separator />
             <p
               v-if="subscriptionTimelineNote"
               class="text-sm text-muted-foreground"
             >
               {{ subscriptionTimelineNote }}
             </p>
+            <Separator />
+            <div class="space-y-3">
+              <div>
+                <p class="text-sm font-medium">Email notifications</p>
+              </div>
+              <div class="flex items-start w-full gap-3">
+                <Checkbox
+                  id="weekly-report-email-setting"
+                  :model-value="weeklyReportEmailsEnabled"
+                  :disabled="
+                    notificationPreferencesLoading ||
+                    notificationPreferencesSaving
+                  "
+                  class="flex-none w-4 h-4 mt-1"
+                  @update:model-value="saveWeeklyReportEmailPreference"
+                />
+                <div class="min-w-0 space-y-1">
+                  <label
+                    for="weekly-report-email-setting"
+                    class="block text-sm font-medium leading-none"
+                  >
+                    Weekly report emails
+                  </label>
+                  <p class="text-sm text-muted-foreground">
+                    Send me an email when my weekly league report is ready.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <div class="flex flex-wrap gap-2 pt-1">
               <Button

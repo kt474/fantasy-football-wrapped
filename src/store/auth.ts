@@ -3,6 +3,19 @@ import { defineStore } from "pinia";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 import { newUserAlert } from "@/api/api";
+import { authenticatedFetch } from "@/lib/authFetch";
+
+export const WEEKLY_REPORT_EMAILS_METADATA_KEY = "weekly_report_emails_enabled";
+
+type NotificationPreferencesResponse = {
+  weekly_report_emails_enabled?: boolean;
+};
+
+const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
+  /\/$/,
+  ""
+);
+const notificationPreferencesApiPath = `${backendBaseUrl}/api/userPref`;
 
 export const useAuthStore = defineStore("auth", () => {
   const session = ref<Session | null>(null);
@@ -11,11 +24,15 @@ export const useAuthStore = defineStore("auth", () => {
   const initialized = ref(false);
   const initializing = ref(false);
   const isPasswordRecovery = ref(false);
+  const weeklyReportEmailsPreference = ref(false);
 
   let unsubscribeAuthChange: (() => void) | null = null;
 
   const isAuthenticated = computed(() => Boolean(session.value?.access_token));
   const isConfigured = computed(() => isSupabaseConfigured());
+  const weeklyReportEmailsEnabled = computed(() => {
+    return weeklyReportEmailsPreference.value;
+  });
 
   const initialize = async () => {
     if (initialized.value || initializing.value) return;
@@ -88,7 +105,11 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
-  const signUpWithPassword = async (email: string, password: string) => {
+  const signUpWithPassword = async (
+    email: string,
+    password: string,
+    shouldEmailWeeklyReports = false
+  ) => {
     if (!isSupabaseConfigured()) {
       throw new Error("Supabase auth is not configured.");
     }
@@ -98,6 +119,13 @@ export const useAuthStore = defineStore("auth", () => {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            [WEEKLY_REPORT_EMAILS_METADATA_KEY]: shouldEmailWeeklyReports,
+            weekly_report_emails_opted_at: new Date().toISOString(),
+            weekly_report_emails_source: "signup",
+          },
+        },
       });
       if (error) throw error;
       await newUserAlert(email);
@@ -195,6 +223,45 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
+  const updateWeeklyReportEmailsPreference = async (enabled: boolean) => {
+    loading.value = true;
+    try {
+      const response = await authenticatedFetch(
+        notificationPreferencesApiPath,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            [WEEKLY_REPORT_EMAILS_METADATA_KEY]: enabled,
+          }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Unable to update notification preferences.");
+      }
+      const payload =
+        (await response.json()) as NotificationPreferencesResponse;
+      weeklyReportEmailsPreference.value =
+        payload.weekly_report_emails_enabled ?? enabled;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const fetchWeeklyReportEmailsPreference = async () => {
+    if (!isAuthenticated.value) return;
+
+    const response = await authenticatedFetch(notificationPreferencesApiPath);
+    if (!response.ok) {
+      throw new Error("Unable to load notification preferences.");
+    }
+    const payload = (await response.json()) as NotificationPreferencesResponse;
+    weeklyReportEmailsPreference.value =
+      payload.weekly_report_emails_enabled ?? false;
+  };
+
   const clearPasswordRecovery = () => {
     isPasswordRecovery.value = false;
   };
@@ -226,6 +293,7 @@ export const useAuthStore = defineStore("auth", () => {
     isPasswordRecovery,
     isAuthenticated,
     isConfigured,
+    weeklyReportEmailsEnabled,
     initialize,
     signInWithPassword,
     signUpWithPassword,
@@ -234,6 +302,8 @@ export const useAuthStore = defineStore("auth", () => {
     signInWithGoogle,
     sendPasswordResetEmail,
     updatePassword,
+    updateWeeklyReportEmailsPreference,
+    fetchWeeklyReportEmailsPreference,
     clearPasswordRecovery,
     signOut,
     dispose,
