@@ -3,6 +3,7 @@ import { renderToString } from "@vue/server-renderer";
 import { describe, expect, test } from "vitest";
 import WeeklyMatchups from "../src/components/weekly_report/WeeklyMatchups.vue";
 import WeeklyPointsChart from "../src/components/weekly_report/WeeklyPointsChart.vue";
+import WeeklyShareCard from "../src/components/weekly_report/WeeklyShareCard.vue";
 
 const team = ({
   rosterId,
@@ -56,6 +57,108 @@ const renderComponent = (component, props, globalComponents = {}) => {
 };
 
 describe("weekly report components", () => {
+  const shareCardProps = {
+    leagueName: "Test League",
+    week: 7,
+    topTeams: [
+      { name: "Alpha Team", points: 141.2, avatar: "" },
+      { name: "Beta Team", points: 132.4, avatar: "" },
+      { name: "Gamma Team", points: 125.8, avatar: "" },
+    ],
+    hotPlayers: [
+      {
+        name: "Derrick Henry",
+        user: "Alpha Team",
+        points: 34.5,
+        position: "RB",
+        player_id: "3198",
+      },
+      {
+        name: "Justin Jefferson",
+        user: "Beta Team",
+        points: 28.1,
+        position: "WR",
+        player_id: "6794",
+      },
+    ],
+    coldPlayers: [
+      {
+        name: "Cold Starter",
+        user: "Gamma Team",
+        points: 1.2,
+        position: "WR",
+        player_id: "1",
+      },
+      {
+        name: "Quiet Flex",
+        user: "Beta Team",
+        points: 2.4,
+        position: "RB",
+        player_id: "2",
+      },
+    ],
+    benchPlayers: [
+      {
+        name: "Bench Star",
+        user: "Gamma Team",
+        points: 27.7,
+        position: "WR",
+        player_id: "3",
+      },
+      {
+        name: "Bench Flex",
+        user: "Alpha Team",
+        points: 21.3,
+        position: "RB",
+        player_id: "4",
+      },
+      {
+        name: "Bench Tight End",
+        user: "Beta Team",
+        points: 18.9,
+        position: "TE",
+        player_id: "5",
+      },
+    ],
+  };
+
+  test("WeeklyShareCard renders standard reports from the generated summary", async () => {
+    const html = await renderComponent(WeeklyShareCard, {
+      ...shareCardProps,
+      tier: "Standard",
+      summary:
+        "Sentence one. Sentence two. Sentence three. Sentence four. Sentence five. Sentence six.",
+    });
+
+    expect(html).toContain("Test League");
+    expect(html).toContain("Sentence one.");
+    expect(html).toContain("Sentence five.");
+    expect(html).not.toContain("Sentence six.");
+    expect(html).toContain("Highest scoring players");
+    expect(html).toContain("Lowest scoring players");
+    expect(html).toContain("Top benchwarmers");
+    expect(html).toContain("View the full report at ffwrapped.com");
+  });
+
+  test("WeeklyShareCard renders premium reports from front page fields", async () => {
+    const html = await renderComponent(WeeklyShareCard, {
+      ...shareCardProps,
+      tier: "Premium",
+      summary: "Flattened premium report text should not drive the card.",
+      premiumFrontPage: {
+        headline: "Premium Front Page Headline",
+        subheadline: "Premium front page subheadline",
+        lead: "Premium lead paragraph from the structured report.",
+      },
+    });
+
+    expect(html).toContain("Premium Front Page Headline");
+    expect(html).toContain("Premium front page subheadline");
+    expect(html).toContain("Premium lead paragraph from the structured report.");
+    expect(html).not.toContain("Flattened premium report text");
+    expect(html).toContain("Premium weekly report");
+  });
+
   test("WeeklyMatchups renders manager names, median records, and winner highlight", async () => {
     const html = await renderComponent(WeeklyMatchups, {
       sortedTableData: [

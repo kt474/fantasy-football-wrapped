@@ -68,6 +68,18 @@ const showShareButton = computed(
   () => props.tier === "Premium" && Boolean(props.premiumWeeklyReport)
 );
 
+const canUseCurrentReport = computed(() =>
+  props.tier === "Premium"
+    ? Boolean(props.premiumWeeklyReport)
+    : Boolean(props.rawWeeklyReport)
+);
+
+const imageActionDisabled = computed(
+  () => props.isGeneratingImage || !canUseCurrentReport.value
+);
+
+const copyActionDisabled = computed(() => !canUseCurrentReport.value);
+
 const trackedPremiumPaywallView = ref(false);
 const shouldTrackPremiumPaywallView = computed(
   () => props.tier === "Premium" && !canGeneratePremium.value
@@ -193,14 +205,23 @@ const trackPremiumCtaClick = (cta: string) => {
         </Button>
         <Button
           @click="emit('download-image')"
-          :disabled="isGeneratingImage"
+          :disabled="imageActionDisabled"
           variant="outline"
           size="sm"
           :class="['mr-2', { 'ml-auto': !showShareButton }]"
+          aria-label="Share recap image"
+          title="Share recap image"
         >
           <Download />
         </Button>
-        <Button @click="emit('copy-report')" variant="outline" size="sm">
+        <Button
+          @click="emit('copy-report')"
+          :disabled="copyActionDisabled"
+          variant="outline"
+          size="sm"
+          aria-label="Copy full report"
+          title="Copy full report"
+        >
           <Copy class="size-4" />
         </Button>
       </div>

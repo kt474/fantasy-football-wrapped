@@ -533,12 +533,17 @@ watch(
 );
 
 const copyReport = () => {
+  const reportText =
+    tier.value === "Standard" ? rawWeeklyReport.value : premiumReportText.value;
+  if (!reportText) {
+    toast.error("Generate a report before copying.");
+    return;
+  }
+
   navigator.clipboard.writeText(
-    (tier.value === "Standard"
-      ? rawWeeklyReport.value
-      : premiumReportText.value) + "\n\nCreated with https://ffwrapped.com"
+    reportText + "\n\nCreated with https://ffwrapped.com"
   );
-  toast.success("Summary copied to clipboard!");
+  toast.success("Full report copied to clipboard");
 };
 
 const shareReport = async () => {
@@ -616,14 +621,16 @@ const exportBenchPlayers = computed(() => {
 
 const exportSummary = computed(() => {
   const sourceText =
-    tier.value === "Premium" && premiumReportText.value
-      ? premiumReportText.value
-      : rawWeeklyReport.value;
+    tier.value === "Premium" ? premiumReportText.value : rawWeeklyReport.value;
   if (!sourceText) {
     return "";
   }
   return sourceText;
 });
+
+const exportPremiumFrontPage = computed(() =>
+  tier.value === "Premium" ? premiumWeeklyReport.value?.frontPage : undefined
+);
 
 const getReportImageFilename = () => `ffwrapped-week-${currentWeek.value}.png`;
 
@@ -652,6 +659,10 @@ const shareOrDownloadReportImage = async () => {
   }
   if (!shareCardRef.value || exportTopTeams.value.length === 0) {
     toast.error("No weekly data available yet");
+    return;
+  }
+  if (tier.value === "Premium" && !premiumWeeklyReport.value) {
+    toast.error("Generate a premium report before sharing the image.");
     return;
   }
 
@@ -832,6 +843,8 @@ watch(() => currentWeek.value, fetchPlayerNames);
         :cold-players="exportColdPlayers"
         :bench-players="exportBenchPlayers"
         :summary="exportSummary"
+        :tier="tier"
+        :premium-front-page="exportPremiumFrontPage"
       />
     </div>
   </div>
