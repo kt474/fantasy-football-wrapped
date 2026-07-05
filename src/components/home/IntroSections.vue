@@ -287,11 +287,18 @@ const toolSummaries: ToolSummary[] = [
           <div class="premium-cell">
             <div class="max-w-3xl">
               <h3 class="mt-2 text-2xl font-semibold tracking-tight">
-                New premium features for leagues that want more
+                Premium features for leagues that want more
               </h3>
               <p class="mt-4 text-sm leading-6 text-muted-foreground">
-                The Premium tier includes smarter newsletter-style weekly recaps
-                with customizable tones and deeper league context, plus custom
+                The optional
+                <router-link
+                  :to="{ path: '/account', query: $route.query }"
+                  class="font-medium text-primary hover:underline"
+                >
+                  Premium tier
+                </router-link>
+                includes smarter newsletter-style weekly recaps with
+                customizable tones and deeper league context, plus custom
                 manager profiles and rivalry reports. Everything else from the
                 past three seasons, plus plenty more, is still free.
               </p>
