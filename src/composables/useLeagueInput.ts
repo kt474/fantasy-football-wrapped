@@ -146,8 +146,8 @@ export const useLeagueInput = (
         return;
       }
 
-      if (store.leagueInfo.length >= 5) {
-        showError("Maximum of 5 leagues allowed");
+      if (store.leagueInfo.length >= 10) {
+        showError("Maximum of 10 leagues allowed");
         trackLeagueAddFailed(currentPlatform, "max_leagues");
         return;
       }
@@ -211,8 +211,8 @@ export const useLeagueInput = (
     }
 
     if (currentPlatform === "espn") {
-      if (store.leagueInfo.length >= 5) {
-        showError("Maximum of 5 leagues allowed");
+      if (store.leagueInfo.length >= 10) {
+        showError("Maximum of 10 leagues allowed");
         trackLeagueAddFailed(currentPlatform, "max_leagues");
         return;
       }

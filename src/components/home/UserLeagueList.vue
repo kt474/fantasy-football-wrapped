@@ -15,11 +15,11 @@ const duplicateLeagueError = ref(false);
 const store = useStore();
 
 const showError = computed(() => {
-  return checkedLeagues.value.length > 5 ? true : false;
+  return checkedLeagues.value.length > 10;
 });
 
 const leagueCountError = computed(() => {
-  return checkedLeagues.value.length + store.leagueInfo.length > 5 &&
+  return checkedLeagues.value.length + store.leagueInfo.length > 10 &&
     store.leagueInfo.length > 0
     ? true
     : false;
@@ -214,13 +214,13 @@ const goBack = () => {
       </li>
     </ul>
     <p v-if="showError" class="mt-2 text-destructive">
-      A maximum of 5 leagues can be added at a time
+      A maximum of 10 leagues can be added at a time
     </p>
     <p v-if="duplicateLeagueError" class="-mt-1 text-destructive">
       A selected league already exists
     </p>
     <p v-if="leagueCountError" class="-mt-1 text-destructive">
-      A maximum of 5 leagues can be active. Please remove a league first.
+      A maximum of 10 leagues can be active. Please remove a league first.
     </p>
     <Button
       class="mr-2"
