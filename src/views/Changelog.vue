@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/06/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "The start/sit tab now has a player adjustment/comparison to show player replacement options.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/03/26",
     content: [
       {

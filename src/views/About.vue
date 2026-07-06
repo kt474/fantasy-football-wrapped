@@ -8,7 +8,7 @@ import Separator from "@/components/ui/separator/Separator.vue";
 import { trackPremiumFunnelEvent } from "@/lib/analytics";
 
 const route = useRoute();
-const leagueCount = ref(13382); // initial load current unique league count value 7/1/26
+const leagueCount = ref(13416); // initial load current unique league count value 7/6/26
 
 onMounted(async () => {
   const leagueId = route.query.leagueId;
