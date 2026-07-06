@@ -176,6 +176,9 @@ const updateChartColor = () => {
       zoom: {
         enabled: false,
       },
+      animations: {
+        enabled: false,
+      },
     },
     xaxis: {
       ...chartOptions.value.xaxis,
@@ -236,12 +239,15 @@ watch(
 
 const chartOptions = ref({
   chart: {
-    width: "97%",
+    width: "98%",
     foreColor: chartTextColor.value,
     toolbar: {
       show: false,
     },
     zoom: {
+      enabled: false,
+    },
+    animations: {
       enabled: false,
     },
   },
