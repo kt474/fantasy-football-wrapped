@@ -4,7 +4,7 @@ import { TableDataType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 import { useStore } from "../../store/store";
 import { Button } from "../ui/button";
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
   Select,
   SelectContent,
@@ -31,8 +31,12 @@ const props = defineProps<{
 const store = useStore();
 const simulatedOpponents = ref<(number | null)[][]>([]);
 const selectedWeekValue = ref("week-1");
+const selectedSwapTeamAValue = ref("0");
+const selectedSwapTeamBValue = ref("1");
+const selectedVolatilityTeamValue = ref("0");
+const activeScenarioValue = ref("swap");
+const activeDetailValue = ref("standings");
 const monteCarloRuns = ref(1000);
-const selectedDistributionTeamValue = ref("0");
 const monteCarloDistributions = ref<number[][]>([]);
 const monteCarloSummaryByTeam = ref<
   Record<
@@ -47,25 +51,42 @@ const monteCarloSummaryByTeam = ref<
   >
 >({});
 const monteCarloRunCount = ref(0);
+const scenarioLabel = ref("Original schedule");
 
 const dataWeekCount = computed(() => {
   return Math.max(...props.tableData.map((team) => team.points.length), 0);
-});
-
-const displayedWeekCount = computed(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
-  if (league?.regularSeasonLength) {
-    return league.regularSeasonLength;
-  }
-  return dataWeekCount.value;
 });
 
 const usesMedianScoring = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]?.medianScoring === 1;
 });
 
+const recordWeekCount = computed(() => {
+  const resultCount = Math.max(
+    ...props.tableData.map((team) => team.recordByWeek?.length ?? 0),
+    0
+  );
+  return usesMedianScoring.value ? Math.floor(resultCount / 2) : resultCount;
+});
+
+const displayedWeekCount = computed(() => {
+  const league = store.leagueInfo[store.currentLeagueIndex];
+  const regularSeasonLength =
+    league?.regularSeasonLength || dataWeekCount.value;
+  const lastScoredWeek = league?.lastScoredWeek || 0;
+  const completedWeeks =
+    recordWeekCount.value ||
+    (lastScoredWeek > 0 ? lastScoredWeek : dataWeekCount.value);
+
+  if (regularSeasonLength > 0 && completedWeeks > 0) {
+    return Math.min(regularSeasonLength, completedWeeks);
+  }
+
+  return regularSeasonLength;
+});
+
 const weeklyMedians = computed(() => {
-  if (props.tableData[0].points) {
+  if (props.tableData[0]?.points) {
     return Array.from({ length: displayedWeekCount.value }, (_, week) => {
       const weeklyScores = props.tableData
         .map((team) => team.points[week])
@@ -93,12 +114,35 @@ const teamName = (team: TableDataType) => {
   return team.name || "Ghost Roster";
 };
 
+const getWeekPoints = (teamIndex: number, week: number) => {
+  const points = props.tableData[teamIndex]?.points[week];
+  return Number.isFinite(points) ? points : 0;
+};
+
+const recordPoints = (wins: number, ties = 0) => wins + ties * 0.5;
+
+const compareTeamRecords = (
+  a: Pick<SimulatedTeamRecord, "wins" | "ties" | "pointsFor">,
+  b: Pick<SimulatedTeamRecord, "wins" | "ties" | "pointsFor">
+) => {
+  const recordDifference =
+    recordPoints(b.wins, b.ties) - recordPoints(a.wins, a.ties);
+  if (recordDifference !== 0) return recordDifference;
+  return b.pointsFor - a.pointsFor;
+};
+
+const isValidMatchupNumber = (
+  matchupNumber: number | null | undefined
+): matchupNumber is number => {
+  return Number.isFinite(matchupNumber) && Number(matchupNumber) > 0;
+};
+
 const createOpponentMatrix = (tableData: TableDataType[]) => {
   const weeks = displayedWeekCount.value;
   const matrix: (number | null)[][] = tableData.map((team) =>
     Array.from({ length: weeks }, (_, week) => {
       const matchupNumber = team.matchups ? team.matchups[week] : null;
-      if (matchupNumber === null || matchupNumber === undefined) return null;
+      if (!isValidMatchupNumber(matchupNumber)) return null;
       return null;
     })
   );
@@ -107,7 +151,7 @@ const createOpponentMatrix = (tableData: TableDataType[]) => {
     const matchupMap = new Map<number, number[]>();
     tableData.forEach((team, teamIndex) => {
       const matchupNumber = team.matchups ? team.matchups[week] : null;
-      if (matchupNumber === null || matchupNumber === undefined) return;
+      if (!isValidMatchupNumber(matchupNumber)) return;
       const teams = matchupMap.get(matchupNumber) || [];
       teams.push(teamIndex);
       matchupMap.set(matchupNumber, teams);
@@ -134,6 +178,7 @@ const resetSimulation = () => {
   simulatedOpponents.value = originalOpponents.value.map((teamWeeks) => [
     ...teamWeeks,
   ]);
+  scenarioLabel.value = "Original schedule";
 };
 
 watch(
@@ -164,12 +209,35 @@ watch(
   () => props.tableData.length,
   (count) => {
     if (count <= 0) {
-      selectedDistributionTeamValue.value = "0";
+      selectedSwapTeamAValue.value = "0";
+      selectedSwapTeamBValue.value = "1";
+      selectedVolatilityTeamValue.value = "0";
       return;
     }
-    const teamIndex = Number(selectedDistributionTeamValue.value);
-    if (!Number.isFinite(teamIndex) || teamIndex < 0 || teamIndex > count - 1) {
-      selectedDistributionTeamValue.value = "0";
+    const teamAIndex = Number(selectedSwapTeamAValue.value);
+    const teamBIndex = Number(selectedSwapTeamBValue.value);
+    const volatilityTeamIndex = Number(selectedVolatilityTeamValue.value);
+    if (
+      !Number.isFinite(teamAIndex) ||
+      teamAIndex < 0 ||
+      teamAIndex > count - 1
+    ) {
+      selectedSwapTeamAValue.value = "0";
+    }
+    if (
+      !Number.isFinite(teamBIndex) ||
+      teamBIndex < 0 ||
+      teamBIndex > count - 1 ||
+      teamBIndex === Number(selectedSwapTeamAValue.value)
+    ) {
+      selectedSwapTeamBValue.value = String(Math.min(1, count - 1));
+    }
+    if (
+      !Number.isFinite(volatilityTeamIndex) ||
+      volatilityTeamIndex < 0 ||
+      volatilityTeamIndex > count - 1
+    ) {
+      selectedVolatilityTeamValue.value = "0";
     }
   },
   { immediate: true }
@@ -187,14 +255,14 @@ const matchupsByWeek = computed(() => {
     }[] = [];
     const seen = new Set<number>();
 
-    props.tableData.forEach((team, teamIndex) => {
+    props.tableData.forEach((_, teamIndex) => {
       if (seen.has(teamIndex)) return;
       const opponent = simulatedOpponents.value[teamIndex]?.[week];
       if (opponent === null || opponent === undefined) return;
       if (seen.has(opponent)) return;
 
-      const pointsA = team.points[week] ?? 0;
-      const pointsB = props.tableData[opponent]?.points[week] ?? 0;
+      const pointsA = getWeekPoints(teamIndex, week);
+      const pointsB = getWeekPoints(opponent, week);
       const winner =
         pointsA === pointsB ? null : pointsA > pointsB ? teamIndex : opponent;
       const changed = originalOpponents.value[teamIndex]?.[week] !== opponent;
@@ -249,9 +317,7 @@ const simulatedStandings = computed<SimulatedTeamRecord[]>(() => {
     const seen = new Set<number>();
     for (let teamIndex = 0; teamIndex < props.tableData.length; teamIndex++) {
       const opponent = simulatedOpponents.value[teamIndex]?.[week];
-      const teamPoints = props.tableData[teamIndex]?.points
-        ? props.tableData[teamIndex]?.points[week]
-        : 0;
+      const teamPoints = getWeekPoints(teamIndex, week);
       records[teamIndex].pointsFor += teamPoints;
 
       if (opponent === null || opponent === undefined || seen.has(teamIndex)) {
@@ -259,7 +325,7 @@ const simulatedStandings = computed<SimulatedTeamRecord[]>(() => {
       }
       if (seen.has(opponent)) continue;
 
-      const opponentPoints = props.tableData[opponent]?.points[week] ?? 0;
+      const opponentPoints = getWeekPoints(opponent, week);
       records[teamIndex].pointsAgainst += opponentPoints;
       records[opponent].pointsAgainst += teamPoints;
 
@@ -283,7 +349,7 @@ const simulatedStandings = computed<SimulatedTeamRecord[]>(() => {
       if (weekMedian === null) continue;
 
       for (let teamIndex = 0; teamIndex < props.tableData.length; teamIndex++) {
-        const teamPoints = props.tableData[teamIndex]?.points[week] ?? 0;
+        const teamPoints = getWeekPoints(teamIndex, week);
         if (teamPoints > weekMedian) {
           records[teamIndex].wins += 1;
         } else if (teamPoints < weekMedian) {
@@ -296,16 +362,16 @@ const simulatedStandings = computed<SimulatedTeamRecord[]>(() => {
   }
 
   records.forEach((record) => {
+    const actualRecordPoints = recordPoints(
+      props.tableData[record.index].wins,
+      props.tableData[record.index].ties ?? 0
+    );
     record.winDelta = Number(
-      (record.wins - props.tableData[record.index].wins).toFixed(1)
+      (recordPoints(record.wins, record.ties) - actualRecordPoints).toFixed(1)
     );
   });
 
-  return records.sort((a, b) => {
-    if (a.wins !== b.wins) return b.wins - a.wins;
-    if (a.ties !== b.ties) return b.ties - a.ties;
-    return b.pointsFor - a.pointsFor;
-  });
+  return records.sort(compareTeamRecords);
 });
 
 const actualStandings = computed<SimulatedTeamRecord[]>(() => {
@@ -320,11 +386,7 @@ const actualStandings = computed<SimulatedTeamRecord[]>(() => {
       pointsAgainst: team.pointsAgainst,
       winDelta: 0,
     }))
-    .sort((a, b) => {
-      if (a.wins !== b.wins) return b.wins - a.wins;
-      if (a.ties !== b.ties) return b.ties - a.ties;
-      return b.pointsFor - a.pointsFor;
-    });
+    .sort(compareTeamRecords);
 });
 
 const seedAndPlayoffByTeam = computed(() => {
@@ -371,121 +433,218 @@ const standingsWithSeedDelta = computed(() => {
   }));
 });
 
-const distributionTeamOptions = computed(() => {
+const teamOptions = computed(() => {
   return props.tableData.map((team, index) => ({
     value: String(index),
     label: teamName(team),
   }));
 });
 
-const selectedDistributionTeamIndex = computed(() => {
-  const index = Number(selectedDistributionTeamValue.value);
+const weekOptions = computed(() => {
+  return Array.from({ length: displayedWeekCount.value }, (_, index) => ({
+    value: `week-${index + 1}`,
+    label: `Week ${index + 1}`,
+  }));
+});
+
+const selectedSwapTeamAIndex = computed(() => {
+  const index = Number(selectedSwapTeamAValue.value);
   if (!Number.isFinite(index)) return 0;
   return Math.min(Math.max(index, 0), Math.max(props.tableData.length - 1, 0));
 });
 
-const monteCarloTeamSummaryRows = computed(() => {
-  return props.tableData
-    .map((team, index) => {
-      const summary = monteCarloSummaryByTeam.value[index] || {
-        mode: 0,
-        average: 0,
-        p10: 0,
-        p50: 0,
-        p90: 0,
-      };
-      return {
-        index,
-        name: teamName(team),
-        ...summary,
-      };
-    })
-    .sort((a, b) => b.average - a.average);
+const selectedSwapTeamBIndex = computed(() => {
+  const index = Number(selectedSwapTeamBValue.value);
+  if (!Number.isFinite(index)) return Math.min(1, props.tableData.length - 1);
+  return Math.min(Math.max(index, 0), Math.max(props.tableData.length - 1, 0));
 });
 
-const selectedDistributionSeries = computed(() => {
-  const values =
-    monteCarloDistributions.value[selectedDistributionTeamIndex.value] || [];
-  const runCount = Math.max(monteCarloRunCount.value, 1);
-  const maxWins = displayedWeekCount.value;
-  const frequencies = new Map<number, number>();
+const selectedVolatilityTeamIndex = computed(() => {
+  const index = Number(selectedVolatilityTeamValue.value);
+  if (!Number.isFinite(index)) return 0;
+  return Math.min(Math.max(index, 0), Math.max(props.tableData.length - 1, 0));
+});
 
-  for (let wins = 0; wins <= maxWins; wins += 1) {
-    frequencies.set(wins, 0);
+const playoffCutoff = computed(() => {
+  const playoffTeams =
+    store.leagueInfo[store.currentLeagueIndex]?.playoffTeams || 0;
+  if (playoffTeams > 0) {
+    return Math.min(playoffTeams, props.tableData.length);
   }
+  return Math.ceil(props.tableData.length / 2);
+});
 
-  values.forEach((value) => {
-    const key = Math.min(maxWins, Math.max(0, Math.round(value)));
-    frequencies.set(key, (frequencies.get(key) || 0) + 1);
+const scenarioImpactRows = computed(() => {
+  return standingsWithSeedDelta.value.map((team) => {
+    const actualMadePlayoffs = team.actualSeed <= playoffCutoff.value;
+    const simulatedMadePlayoffs = team.simulatedSeed <= playoffCutoff.value;
+    return {
+      ...team,
+      actualMadePlayoffs,
+      simulatedMadePlayoffs,
+      playoffChange:
+        actualMadePlayoffs === simulatedMadePlayoffs
+          ? "same"
+          : simulatedMadePlayoffs
+            ? "in"
+            : "out",
+    };
   });
-
-  const xValues = Array.from(frequencies.keys()).sort((a, b) => a - b);
-
-  return {
-    categories: xValues.map((value) => String(value)),
-    series: [
-      {
-        name: "Likelihood",
-        data: xValues.map((value) =>
-          Number((((frequencies.get(value) || 0) / runCount) * 100).toFixed(2))
-        ),
-      },
-    ],
-  };
 });
 
-const distributionChartOptions = computed(() => {
-  return {
-    chart: {
-      type: "area",
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
-      toolbar: { show: false },
-      zoom: { enabled: false },
-      animations: { enabled: false },
-    },
-    stroke: {
-      curve: "smooth",
-      width: 2,
-    },
-    fill: {
-      type: "gradient",
-      gradient: {
-        shadeIntensity: 0.2,
-        opacityFrom: 0.45,
-        opacityTo: 0.05,
-      },
-    },
-    colors: ["#2563eb"],
-    dataLabels: { enabled: false },
-    xaxis: {
-      categories: selectedDistributionSeries.value.categories,
-      title: {
-        text: "Wins",
-      },
-    },
-    yaxis: {
-      title: {
-        text: "Likelihood (%)",
-      },
-      min: 0,
-    },
-    tooltip: {
-      theme: store.darkMode ? "dark" : "light",
-      y: {
-        formatter: (value: number) => `${value.toFixed(2)}%`,
-      },
-    },
-  };
+const playoffMovementRows = computed(() => {
+  return scenarioImpactRows.value.filter(
+    (team) => team.playoffChange !== "same"
+  );
 });
 
-const randomizeEntireSchedule = () => {
-  const totalWeeks = displayedWeekCount.value;
+type ScenarioImpactRow = (typeof scenarioImpactRows.value)[number];
+
+const biggestSeedRise = computed<ScenarioImpactRow | undefined>(() => {
+  const [first, ...rest] = scenarioImpactRows.value;
+  if (!first) return undefined;
+  return rest.reduce(
+    (best, team) => (team.seedDelta > best.seedDelta ? team : best),
+    first
+  );
+});
+
+const biggestSeedFall = computed<ScenarioImpactRow | undefined>(() => {
+  const [first, ...rest] = scenarioImpactRows.value;
+  if (!first) return undefined;
+  return rest.reduce(
+    (worst, team) => (team.seedDelta < worst.seedDelta ? team : worst),
+    first
+  );
+});
+
+const biggestRecordSwing = computed<ScenarioImpactRow | undefined>(() => {
+  const [first, ...rest] = scenarioImpactRows.value;
+  if (!first) return undefined;
+  return rest.reduce(
+    (biggest, team) =>
+      Math.abs(team.winDelta) > Math.abs(biggest.winDelta) ? team : biggest,
+    first
+  );
+});
+
+const impactScore = (team: ScenarioImpactRow) => {
+  return team.winDelta * 10 + team.seedDelta;
+};
+
+const helpedMostTeam = computed<ScenarioImpactRow | undefined>(() => {
+  const [first, ...rest] = scenarioImpactRows.value;
+  if (!first) return undefined;
+  return rest.reduce(
+    (best, team) => (impactScore(team) > impactScore(best) ? team : best),
+    first
+  );
+});
+
+const hurtMostTeam = computed<ScenarioImpactRow | undefined>(() => {
+  const [first, ...rest] = scenarioImpactRows.value;
+  if (!first) return undefined;
+  return rest.reduce(
+    (worst, team) => (impactScore(team) < impactScore(worst) ? team : worst),
+    first
+  );
+});
+
+const impactTeamDetail = (team: ScenarioImpactRow | undefined) => {
+  if (!team) return "No movement";
+  const seedPart =
+    team.seedDelta === 0
+      ? "same seed"
+      : team.seedDelta > 0
+        ? `up ${team.seedDelta} seed${team.seedDelta === 1 ? "" : "s"}`
+        : `down ${Math.abs(team.seedDelta)} seed${
+            Math.abs(team.seedDelta) === 1 ? "" : "s"
+          }`;
+  return `${winDeltaText(team.winDelta)} wins, ${seedPart}`;
+};
+
+const scenarioCards = computed(() => {
+  const rise = biggestSeedRise.value;
+  const fall = biggestSeedFall.value;
+  const swing = biggestRecordSwing.value;
+  const biggestSeedMove =
+    Math.abs(rise?.seedDelta ?? 0) >= Math.abs(fall?.seedDelta ?? 0)
+      ? rise
+      : fall;
+
+  return [
+    {
+      label: "Playoff Line",
+      value: String(playoffMovementRows.value.length),
+      detail:
+        playoffMovementRows.value.length === 1
+          ? "team changes status"
+          : "teams change status",
+      tone:
+        playoffMovementRows.value.length > 0
+          ? "text-primary"
+          : "text-muted-foreground",
+    },
+    {
+      label: "Biggest Seed Move",
+      value: biggestSeedMove ? seedDeltaText(biggestSeedMove.seedDelta) : "0",
+      detail:
+        biggestSeedMove && biggestSeedMove.seedDelta !== 0
+          ? biggestSeedMove.name
+          : "No seed change",
+      tone:
+        biggestSeedMove && biggestSeedMove.seedDelta > 0
+          ? "text-primary"
+          : biggestSeedMove && biggestSeedMove.seedDelta < 0
+            ? "text-destructive"
+            : "text-muted-foreground",
+    },
+    {
+      label: "Record Swing",
+      value:
+        swing && swing.winDelta > 0
+          ? `+${swing.winDelta.toFixed(1)}`
+          : swing
+            ? swing.winDelta.toFixed(1)
+            : "0.0",
+      detail: swing ? swing.name : "No record change",
+      tone:
+        swing && swing.winDelta > 0
+          ? "text-primary"
+          : swing && swing.winDelta < 0
+            ? "text-destructive"
+            : "text-muted-foreground",
+    },
+  ];
+});
+
+const cloneSimulatedOpponents = () => {
+  const source =
+    simulatedOpponents.value.length > 0
+      ? simulatedOpponents.value
+      : originalOpponents.value;
+  return source.map((teamWeeks) => [...teamWeeks]);
+};
+
+const applyScenario = (nextOpponents: (number | null)[][], label: string) => {
+  simulatedOpponents.value = nextOpponents;
+  scenarioLabel.value = label;
+};
+
+const selectedWeekNumber = computed(() => {
+  const weekNumber = Number(selectedWeekValue.value.replace("week-", ""));
+  if (!Number.isFinite(weekNumber)) return 1;
+  return Math.min(
+    Math.max(weekNumber, 1),
+    Math.max(displayedWeekCount.value, 1)
+  );
+});
+
+const shuffleWeeks = (weekIndexes: number[], label: string) => {
   const teamIndexes = props.tableData.map((_, index) => index);
-  const nextOpponents = originalOpponents.value.map((teamWeeks) => [
-    ...teamWeeks,
-  ]);
+  const nextOpponents = cloneSimulatedOpponents();
 
-  for (let week = 0; week < totalWeeks; week++) {
+  weekIndexes.forEach((week) => {
     const originalByes = teamIndexes.filter(
       (index) => originalOpponents.value[index]?.[week] === null
     );
@@ -509,10 +668,186 @@ const randomizeEntireSchedule = () => {
       nextOpponents[teamA][week] = teamB;
       nextOpponents[teamB][week] = teamA;
     }
+  });
+
+  applyScenario(nextOpponents, label);
+};
+
+const shuffleSelectedWeek = () => {
+  shuffleWeeks(
+    [selectedWeekNumber.value - 1],
+    `Shuffled Week ${selectedWeekNumber.value}`
+  );
+};
+
+const swapSelectedTeamSchedules = () => {
+  const teamA = selectedSwapTeamAIndex.value;
+  const teamB = selectedSwapTeamBIndex.value;
+  if (teamA === teamB || props.tableData.length < 2) return;
+
+  const nextOpponents = cloneSimulatedOpponents();
+
+  for (let week = 0; week < displayedWeekCount.value; week++) {
+    const opponentA = nextOpponents[teamA]?.[week] ?? null;
+    const opponentB = nextOpponents[teamB]?.[week] ?? null;
+
+    if (opponentA === teamB || opponentB === teamA) continue;
+
+    if (opponentA !== null) nextOpponents[opponentA][week] = null;
+    if (opponentB !== null) nextOpponents[opponentB][week] = null;
+
+    nextOpponents[teamA][week] = opponentB;
+    if (opponentB !== null) nextOpponents[opponentB][week] = teamA;
+
+    nextOpponents[teamB][week] = opponentA;
+    if (opponentA !== null) nextOpponents[opponentA][week] = teamB;
   }
 
-  simulatedOpponents.value = nextOpponents;
+  applyScenario(
+    nextOpponents,
+    `${teamName(props.tableData[teamA])} swapped schedules with ${teamName(
+      props.tableData[teamB]
+    )}`
+  );
 };
+
+const randomizeEntireSchedule = () => {
+  const weeks = Array.from(
+    { length: displayedWeekCount.value },
+    (_, index) => index
+  );
+  shuffleWeeks(weeks, "Randomized full schedule");
+};
+
+const resetScenario = () => {
+  resetSimulation();
+};
+
+const seedText = (seed: number) => {
+  if (!Number.isFinite(seed)) return "-";
+  return `#${seed}`;
+};
+
+const playoffStatusText = (change: string) => {
+  if (change === "in") return "Made playoffs";
+  if (change === "out") return "Missed playoffs";
+  return "No change";
+};
+
+const playoffStatusClass = (change: string) => {
+  if (change === "in") return "text-primary";
+  if (change === "out") return "text-destructive";
+  return "text-muted-foreground";
+};
+
+const seedDeltaText = (seedDelta: number) => {
+  if (seedDelta > 0) return `+${seedDelta}`;
+  return String(seedDelta);
+};
+
+const winDeltaText = (winDelta: number) => {
+  if (winDelta > 0) return `+${winDelta.toFixed(1)}`;
+  return winDelta.toFixed(1);
+};
+
+const monteCarloTeamSummaryRows = computed(() => {
+  return props.tableData
+    .map((team, index) => {
+      const summary = monteCarloSummaryByTeam.value[index] || {
+        mode: 0,
+        average: 0,
+        p10: 0,
+        p50: 0,
+        p90: 0,
+      };
+      return {
+        index,
+        name: teamName(team),
+        actualWins: recordPoints(team.wins, team.ties ?? 0),
+        ...summary,
+        range: summary.p90 - summary.p10,
+      };
+    })
+    .sort((a, b) => b.range - a.range);
+});
+
+const selectedVolatilitySeries = computed(() => {
+  const values =
+    monteCarloDistributions.value[selectedVolatilityTeamIndex.value] || [];
+  const runCount = Math.max(monteCarloRunCount.value, 1);
+  const maxWins = usesMedianScoring.value
+    ? displayedWeekCount.value * 2
+    : displayedWeekCount.value;
+  const frequencies = new Map<number, number>();
+
+  for (let wins = 0; wins <= maxWins; wins += 1) {
+    frequencies.set(wins, 0);
+  }
+
+  values.forEach((value) => {
+    // Keep the chart readable by grouping half-win outcomes into whole-win buckets.
+    const key = Math.min(maxWins, Math.max(0, Math.round(value)));
+    frequencies.set(key, (frequencies.get(key) || 0) + 1);
+  });
+
+  const xValues = Array.from(frequencies.keys()).sort((a, b) => a - b);
+
+  return {
+    categories: xValues.map((value) => String(value)),
+    series: [
+      {
+        name: "Schedule outcomes",
+        data: xValues.map((value) =>
+          Number((((frequencies.get(value) || 0) / runCount) * 100).toFixed(2))
+        ),
+      },
+    ],
+  };
+});
+
+const volatilityChartOptions = computed(() => {
+  return {
+    chart: {
+      type: "area",
+      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      animations: { enabled: false },
+    },
+    stroke: {
+      curve: "smooth",
+      width: 2,
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shadeIntensity: 0.2,
+        opacityFrom: 0.45,
+        opacityTo: 0.05,
+      },
+    },
+    colors: ["#2563eb"],
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories: selectedVolatilitySeries.value.categories,
+      title: {
+        text: "Wins",
+      },
+    },
+    yaxis: {
+      title: {
+        text: "Share of simulations (%)",
+      },
+      min: 0,
+    },
+    tooltip: {
+      theme: store.darkMode ? "dark" : "light",
+      y: {
+        formatter: (value: number) => `${value.toFixed(2)}%`,
+      },
+    },
+  };
+});
 
 function percentile(sorted: number[], p: number) {
   if (sorted.length === 0) return 0;
@@ -576,6 +911,22 @@ function runMonteCarloDistribution() {
           ties[teamB] += 1;
         }
       }
+
+      if (usesMedianScoring.value) {
+        const weekMedian = weeklyMedians.value[week];
+        if (weekMedian === null) continue;
+
+        for (let teamIndex = 0; teamIndex < teamCount; teamIndex++) {
+          const teamPoints = props.tableData[teamIndex]?.points[week] ?? 0;
+          if (teamPoints > weekMedian) {
+            wins[teamIndex] += 1;
+          } else if (teamPoints < weekMedian) {
+            wins[teamIndex] += 0;
+          } else {
+            ties[teamIndex] += 1;
+          }
+        }
+      }
     }
 
     for (let index = 0; index < teamCount; index++) {
@@ -632,207 +983,376 @@ function runMonteCarloDistribution() {
 </script>
 
 <template>
-  <Card class="w-full h-full p-4 mt-4 md:p-6">
-    <p class="text-3xl font-bold leading-none">Schedule Simulator (Beta)</p>
-    <p class="mt-4 text-muted-foreground">
-      Analyze the impact of weekly matchup scheduling on the final standings.
-    </p>
-
-    <div class="flex flex-wrap items-center gap-2 mt-4">
-      <Button @click="randomizeEntireSchedule">Randomize Schedules</Button>
+  <Card class="w-full p-4 mt-4 shadow-sm md:p-6">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <p class="text-3xl font-bold leading-none">Schedule Simulator</p>
+        <p class="mt-4 text-muted-foreground">
+          Test alternate matchups and see how the standings change.
+        </p>
+      </div>
+      <Button variant="outline" @click="resetScenario">Reset</Button>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 mt-2 lg:grid-cols-2">
-      <Card class="px-4 py-3">
-        <div class="flex items-center justify-between gap-2">
-          <h3 class="text-lg font-semibold">Matchups</h3>
+    <div
+      class="grid grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(360px,0.9fr)_1.1fr]"
+    >
+      <div class="p-4 border rounded-md shadow-sm">
+        <div>
+          <h3 class="text-lg font-semibold">Scenario Builder</h3>
         </div>
 
-        <div class="mt-2 overflow-x-auto">
-          <Tabs v-model="selectedWeekValue" class="w-full">
-            <TabsList class="inline-flex h-9 w-max">
-              <TabsTrigger
-                v-for="weekData in matchupsByWeek"
-                :key="weekData.value"
-                :value="weekData.value"
-                class="px-3"
+        <Tabs v-model="activeScenarioValue" class="mt-3">
+          <TabsList class="inline-flex flex-wrap h-auto">
+            <TabsTrigger value="swap">Swap Schedules</TabsTrigger>
+            <TabsTrigger value="week">Shuffle Week</TabsTrigger>
+            <TabsTrigger value="all">Random Season</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="swap" class="mt-3">
+            <div
+              class="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
+            >
+              <div>
+                <p class="mb-1 text-sm font-medium">First team</p>
+                <Select v-model="selectedSwapTeamAValue">
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Select team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="team in teamOptions"
+                      :key="`swap-a-${team.value}`"
+                      :value="team.value"
+                    >
+                      {{ team.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <p class="mb-1 text-sm font-medium">Second team</p>
+                <Select v-model="selectedSwapTeamBValue">
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Select team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="team in teamOptions"
+                      :key="`swap-b-${team.value}`"
+                      :value="team.value"
+                    >
+                      {{ team.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                class="mt-1 lg:mt-0"
+                :disabled="selectedSwapTeamAIndex === selectedSwapTeamBIndex"
+                @click="swapSelectedTeamSchedules"
               >
-                W{{ weekData.week }}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+                Apply Swap
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="week" class="mt-3">
+            <div class="flex flex-wrap items-end gap-3">
+              <div class="min-w-40">
+                <p class="mb-1 text-sm font-medium">Week to shuffle</p>
+                <Select v-model="selectedWeekValue">
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Select week" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="week in weekOptions"
+                      :key="week.value"
+                      :value="week.value"
+                    >
+                      {{ week.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button @click="shuffleSelectedWeek">
+                Shuffle Week {{ selectedWeekNumber }}
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="all" class="mt-3">
+            <div class="flex flex-wrap items-center gap-3">
+              <Button @click="randomizeEntireSchedule">
+                Randomize Full Schedule
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <div class="p-4 border rounded-md shadow-sm">
+        <div>
+          <h3 class="text-lg font-semibold">Scenario Impact</h3>
         </div>
 
-        <div
-          v-if="selectedWeekMatchups.length === 0"
-          class="mt-3 text-sm text-muted-foreground"
-        >
-          No matchups found for this view.
-        </div>
-
-        <div v-else class="mt-3 space-y-2">
+        <div class="grid grid-cols-1 gap-2 mt-3 sm:grid-cols-3">
           <div
-            v-for="matchup in selectedWeekMatchups"
-            :key="`matchup-${selectedWeekData.week}-${matchup.teamA}-${matchup.teamB}`"
-            class="p-2 border rounded-md"
-            :class="matchup.changed ? 'bg-secondary' : ''"
+            v-for="card in scenarioCards"
+            :key="card.label"
+            class="p-3 border rounded-md"
           >
-            <p class="text-sm">
-              <span
-                class="font-medium"
-                :class="matchup.winner === matchup.teamA ? 'text-primary' : ''"
-              >
-                {{ teamName(tableData[matchup.teamA]) }}
-              </span>
-              <span class="mx-1 text-muted-foreground"
-                >({{ matchup.pointsA.toFixed(2) }})</span
-              >
-              vs
-              <span
-                class="ml-1 font-medium"
-                :class="matchup.winner === matchup.teamB ? 'text-primary' : ''"
-              >
-                {{ teamName(tableData[matchup.teamB]) }}
-              </span>
-              <span class="mx-1 text-muted-foreground"
-                >({{ matchup.pointsB.toFixed(2) }})</span
-              >
-              <span
-                v-if="matchup.winner === null"
-                class="ml-2 text-xs text-muted-foreground"
-              >
-                Tie
-              </span>
+            <p class="text-xs uppercase text-muted-foreground">
+              {{ card.label }}
+            </p>
+            <p class="text-2xl font-semibold" :class="card.tone">
+              {{ card.value }}
+            </p>
+            <p class="text-sm truncate text-muted-foreground">
+              {{ card.detail }}
             </p>
           </div>
         </div>
-      </Card>
 
-      <Card class="px-4 py-3">
-        <h3 class="text-lg font-semibold">Simulated Standings</h3>
-        <div class="mt-2 overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="text-xs uppercase text-muted-foreground">
-              <tr>
-                <th class="pb-2 text-left min-w-32">Team</th>
-                <th class="w-20 pb-2 text-left min-w-20">Actual Record</th>
-                <th class="w-16 pb-2 text-left min-w-16">Sim Record</th>
-                <th class="w-16 pb-2 text-left min-w-16">Wins Delta</th>
-                <th class="w-20 pb-2 text-left min-w-20">Playoff Delta</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="team in standingsWithSeedDelta"
-                :key="`sim-${team.index}`"
-                class="border-t"
-              >
-                <td class="py-2 pr-2">{{ team.name }}</td>
-                <td class="py-2 pr-2">
-                  {{ team.actualWins }}-{{ team.actualLosses
-                  }}<span v-if="team.actualTies">-{{ team.actualTies }}</span>
-                </td>
-                <td class="py-2 pr-2">
-                  {{ team.wins }}-{{ team.losses
-                  }}<span v-if="team.ties">-{{ team.ties }}</span>
-                </td>
-                <td
-                  class="py-2 pr-2"
-                  :class="
-                    team.winDelta > 0
-                      ? 'text-primary'
-                      : team.winDelta < 0
-                        ? 'text-destructive'
-                        : 'text-muted-foreground'
-                  "
-                >
-                  {{ team.winDelta > 0 ? "+" : ""
-                  }}{{ team.winDelta.toFixed(1) }}
-                </td>
-                <td
-                  class="py-2 pr-2"
-                  :class="
-                    team.seedDelta > 0
-                      ? 'text-primary'
-                      : team.seedDelta < 0
-                        ? 'text-destructive'
-                        : 'text-muted-foreground'
-                  "
-                >
-                  {{ team.seedDelta > 0 ? "+" : "" }}{{ team.seedDelta }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2">
+          <div class="p-2 border rounded-md">
+            <p class="text-xs uppercase text-muted-foreground">Helped Most</p>
+            <p class="text-sm font-medium">
+              {{ helpedMostTeam?.name || "No movement" }}
+            </p>
+            <p class="text-xs text-muted-foreground">
+              {{ impactTeamDetail(helpedMostTeam) }}
+            </p>
+          </div>
+          <div class="p-2 border rounded-md">
+            <p class="text-xs uppercase text-muted-foreground">Hurt Most</p>
+            <p class="text-sm font-medium">
+              {{ hurtMostTeam?.name || "No movement" }}
+            </p>
+            <p class="text-xs text-muted-foreground">
+              {{ impactTeamDetail(hurtMostTeam) }}
+            </p>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
 
-    <Card class="px-4 py-3 mt-4">
-      <div class="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h3 class="text-lg font-semibold">Record Likelihood</h3>
-          <p class="text-sm text-muted-foreground">
-            Distribution of likely win totals from simulating 1000 randomized
-            schedules.
-          </p>
-        </div>
-        <div class="flex flex-wrap items-end gap-2">
-          <div class="flex flex-col">
-            <Select v-model="selectedDistributionTeamValue">
+    <div class="p-4 mt-4 border rounded-md shadow-sm">
+      <h3 class="text-lg font-semibold">Simulation Results</h3>
+
+      <Tabs v-model="activeDetailValue" class="mt-3">
+        <TabsList class="inline-flex flex-wrap h-auto">
+          <TabsTrigger value="standings">Standings</TabsTrigger>
+          <TabsTrigger value="matchups">Matchups</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="standings" class="mt-3">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead
+                class="sticky top-0 text-xs uppercase bg-card text-muted-foreground"
+              >
+                <tr>
+                  <th class="pb-2 text-left min-w-32">Team</th>
+                  <th class="pb-2 text-left min-w-20">Actual</th>
+                  <th class="pb-2 text-left min-w-20">Simulated</th>
+                  <th class="pb-2 text-left min-w-20">Seed</th>
+                  <th class="pb-2 text-left min-w-24">Playoff Status</th>
+                  <th class="pb-2 text-left min-w-20">Record Delta</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="team in scenarioImpactRows"
+                  :key="`standings-${team.index}`"
+                  class="border-t h-9"
+                >
+                  <td class="py-1.5 pr-2">{{ team.name }}</td>
+                  <td class="py-1.5 pr-2">
+                    {{ team.actualWins }}-{{ team.actualLosses
+                    }}<span v-if="team.actualTies">-{{ team.actualTies }}</span>
+                    <span class="ml-1 text-muted-foreground">
+                      ({{ seedText(team.actualSeed) }})
+                    </span>
+                  </td>
+                  <td class="py-1.5 pr-2">
+                    {{ team.wins }}-{{ team.losses
+                    }}<span v-if="team.ties">-{{ team.ties }}</span>
+                    <span class="ml-1 text-muted-foreground">
+                      ({{ seedText(team.simulatedSeed) }})
+                    </span>
+                  </td>
+                  <td
+                    class="py-1.5 pr-2"
+                    :class="
+                      team.seedDelta > 0
+                        ? 'text-primary'
+                        : team.seedDelta < 0
+                          ? 'text-destructive'
+                          : 'text-muted-foreground'
+                    "
+                  >
+                    {{ seedDeltaText(team.seedDelta) }}
+                  </td>
+                  <td
+                    class="py-1.5 pr-2 font-medium"
+                    :class="playoffStatusClass(team.playoffChange)"
+                  >
+                    {{ playoffStatusText(team.playoffChange) }}
+                  </td>
+                  <td
+                    class="py-1.5 pr-2"
+                    :class="
+                      team.winDelta > 0
+                        ? 'text-primary'
+                        : team.winDelta < 0
+                          ? 'text-destructive'
+                          : 'text-muted-foreground'
+                    "
+                  >
+                    {{ winDeltaText(team.winDelta) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="matchups" class="mt-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <p class="text-sm text-muted-foreground">
+              Changed matchups are highlighted.
+            </p>
+            <Select v-model="selectedWeekValue">
               <SelectTrigger class="w-44">
-                <SelectValue placeholder="Select team" />
+                <SelectValue placeholder="Select week" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem
-                  v-for="team in distributionTeamOptions"
-                  :key="team.value"
-                  :value="team.value"
+                  v-for="week in weekOptions"
+                  :key="`detail-${week.value}`"
+                  :value="week.value"
                 >
-                  {{ team.label }}
+                  {{ week.label }}
                 </SelectItem>
               </SelectContent>
             </Select>
           </div>
-        </div>
-      </div>
-      <apexchart
-        type="area"
-        width="100%"
-        height="320"
-        :options="distributionChartOptions"
-        :series="selectedDistributionSeries.series"
-        class="mt-2"
-      ></apexchart>
 
-      <div class="mt-4 overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="text-xs uppercase text-muted-foreground">
-            <tr>
-              <th class="pb-2 text-left min-w-32">Team</th>
-              <th class="pb-2 text-left min-w-20">Most Likely</th>
-              <th class="pb-2 text-left min-w-16">Avg</th>
-              <th class="pb-2 text-left min-w-20">P10</th>
-              <th class="pb-2 text-left min-w-20">P50</th>
-              <th class="pb-2 text-left min-w-20">P90</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="team in monteCarloTeamSummaryRows"
-              :key="`mc-summary-${team.index}`"
-              class="border-t"
+          <div
+            v-if="selectedWeekMatchups.length === 0"
+            class="mt-3 text-sm text-muted-foreground"
+          >
+            No matchups found for this view.
+          </div>
+
+          <div v-else class="grid grid-cols-1 gap-2 mt-3 md:grid-cols-2">
+            <div
+              v-for="matchup in selectedWeekMatchups"
+              :key="`matchup-${selectedWeekData.week}-${matchup.teamA}-${matchup.teamB}`"
+              class="px-2 py-1.5 border rounded-md"
+              :class="matchup.changed ? 'bg-secondary' : ''"
             >
-              <td class="py-2 pr-2">{{ team.name }}</td>
-              <td class="py-2 pr-2">{{ team.mode.toFixed(1) }}</td>
-              <td class="py-2 pr-2">{{ team.average.toFixed(2) }}</td>
-              <td class="py-2 pr-2">{{ team.p10.toFixed(1) }}</td>
-              <td class="py-2 pr-2">{{ team.p50.toFixed(1) }}</td>
-              <td class="py-2 pr-2">{{ team.p90.toFixed(1) }}</td>
-            </tr>
-          </tbody>
-        </table>
+              <p class="text-sm">
+                <span
+                  class="font-medium"
+                  :class="
+                    matchup.winner === matchup.teamA ? 'text-primary' : ''
+                  "
+                >
+                  {{ teamName(tableData[matchup.teamA]) }}
+                </span>
+                <span class="mx-1 text-muted-foreground"
+                  >({{ matchup.pointsA.toFixed(2) }})</span
+                >
+                vs
+                <span
+                  class="ml-1 font-medium"
+                  :class="
+                    matchup.winner === matchup.teamB ? 'text-primary' : ''
+                  "
+                >
+                  {{ teamName(tableData[matchup.teamB]) }}
+                </span>
+                <span class="mx-1 text-muted-foreground"
+                  >({{ matchup.pointsB.toFixed(2) }})</span
+                >
+                <span
+                  v-if="matchup.winner === null"
+                  class="ml-2 text-xs text-muted-foreground"
+                >
+                  Tie
+                </span>
+              </p>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  </Card>
+
+  <Card class="w-full p-4 my-4 md:p-6">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h3 class="text-3xl font-bold">Random Schedule Outcomes</h3>
+        <p class="mt-2 text-muted-foreground">
+          Distribution of likely win totals from simulating 1000 randomized
+          schedules.
+        </p>
       </div>
-    </Card>
+      <Select v-model="selectedVolatilityTeamValue">
+        <SelectTrigger class="w-44">
+          <SelectValue placeholder="Select team" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="team in teamOptions"
+            :key="`volatility-${team.value}`"
+            :value="team.value"
+          >
+            {{ team.label }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    <apexchart
+      type="area"
+      width="100%"
+      height="320"
+      :options="volatilityChartOptions"
+      :series="selectedVolatilitySeries.series"
+      class="mt-2"
+    ></apexchart>
+
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs uppercase text-muted-foreground">
+          <tr>
+            <th class="pb-2 text-left min-w-32">Team</th>
+            <th class="pb-2 text-left min-w-20">Actual</th>
+            <th class="pb-2 text-left min-w-20">Average</th>
+            <th class="pb-2 text-left min-w-20">Most Common</th>
+            <th class="pb-2 text-left min-w-20">P10</th>
+            <th class="pb-2 text-left min-w-20">P90</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="team in monteCarloTeamSummaryRows"
+            :key="`volatility-summary-${team.index}`"
+            class="border-t"
+          >
+            <td class="py-2 pr-2">{{ team.name }}</td>
+            <td class="py-2 pr-2">{{ team.actualWins.toFixed(1) }}</td>
+            <td class="py-2 pr-2">{{ team.average.toFixed(2) }}</td>
+            <td class="py-2 pr-2">{{ team.mode.toFixed(1) }}</td>
+            <td class="py-2 pr-2">{{ team.p10.toFixed(1) }}</td>
+            <td class="py-2 pr-2">{{ team.p90.toFixed(1) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </Card>
 </template>
