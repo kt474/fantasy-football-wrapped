@@ -88,8 +88,8 @@ const CurrentTrends = defineAsyncComponent(() => import("./CurrentTrends.vue"));
 const ScheduleStrength = defineAsyncComponent(
   () => import("../expected_wins/ScheduleStrength.vue")
 );
-const PlayerNews = defineAsyncComponent(
-  () => import("../start_sit/PlayerNews.vue")
+const StartSitDashboard = defineAsyncComponent(
+  () => import("../start_sit/StartSitDashboard.vue")
 );
 const ScheduleAnalysis = defineAsyncComponent(
   () => import("../expected_wins/ScheduleAnalysis.vue")
@@ -726,7 +726,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <Draft class="my-4" />
     </div>
     <div v-if="store.currentTab === 'Start/Sit'">
-      <PlayerNews :tableData="tableData" class="mt-4" />
+      <StartSitDashboard :tableData="tableData" class="mt-4" />
     </div>
     <div v-if="store.currentTab === 'League History'">
       <LeagueHistory :tableData="tableData" />
