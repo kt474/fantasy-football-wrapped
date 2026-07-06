@@ -206,47 +206,43 @@ export const buildWeeklyWaiverContext = ({
       (transaction) =>
         transaction.status === "complete" &&
         transaction.leg === weekIndex + 1 &&
-        (transaction.type === "waiver" ||
-          transaction.type === "free_agent") &&
+        (transaction.type === "waiver" || transaction.type === "free_agent") &&
         transaction.adds
     )
     .forEach((transaction) => {
-      Object.entries(transaction.adds ?? {}).forEach(
-        ([playerId, rosterId]) => {
-          const team = tableData.find((entry) => entry.rosterId === rosterId);
-          if (!team) {
-            return;
-          }
-
-          const starterIndex =
-            team.starters[weekIndex]?.indexOf(playerId) ?? -1;
-          const benchIndex =
-            team.benchPlayers[weekIndex]?.indexOf(playerId) ?? -1;
-          const pointsScored =
-            starterIndex >= 0
-              ? (team.starterPoints[weekIndex]?.[starterIndex] ?? null)
-              : benchIndex >= 0
-                ? (team.benchPoints[weekIndex]?.[benchIndex] ?? null)
-                : null;
-          const move: PremiumWaiverMove = {
-            playerName: getWaiverPlayerName(playerId, playerLookup),
-            acquisitionType:
-              transaction.type === "waiver" ? "waiver" : "free_agent",
-            startedThisWeek: starterIndex >= 0,
-            pointsScored,
-          };
-
-          if (
-            transaction.type === "waiver" &&
-            transaction.settings?.waiver_bid != null
-          ) {
-            move.faabBid = transaction.settings.waiver_bid;
-          }
-
-          movesByRoster[rosterId] ??= [];
-          movesByRoster[rosterId].push(move);
+      Object.entries(transaction.adds ?? {}).forEach(([playerId, rosterId]) => {
+        const team = tableData.find((entry) => entry.rosterId === rosterId);
+        if (!team) {
+          return;
         }
-      );
+
+        const starterIndex = team.starters[weekIndex]?.indexOf(playerId) ?? -1;
+        const benchIndex =
+          team.benchPlayers[weekIndex]?.indexOf(playerId) ?? -1;
+        const pointsScored =
+          starterIndex >= 0
+            ? (team.starterPoints[weekIndex]?.[starterIndex] ?? null)
+            : benchIndex >= 0
+              ? (team.benchPoints[weekIndex]?.[benchIndex] ?? null)
+              : null;
+        const move: PremiumWaiverMove = {
+          playerName: getWaiverPlayerName(playerId, playerLookup),
+          acquisitionType:
+            transaction.type === "waiver" ? "waiver" : "free_agent",
+          startedThisWeek: starterIndex >= 0,
+          pointsScored,
+        };
+
+        if (
+          transaction.type === "waiver" &&
+          transaction.settings?.waiver_bid != null
+        ) {
+          move.faabBid = transaction.settings.waiver_bid;
+        }
+
+        movesByRoster[rosterId] ??= [];
+        movesByRoster[rosterId].push(move);
+      });
     });
 
   return movesByRoster;
@@ -376,10 +372,7 @@ const getOptimalPoints = (
 
     let bestRemainingScore = Number.NEGATIVE_INFINITY;
     players.forEach((player, playerIndex) => {
-      if (
-        !usedPlayers[playerIndex] &&
-        canFillSlot(player, slots[slotIndex])
-      ) {
+      if (!usedPlayers[playerIndex] && canFillSlot(player, slots[slotIndex])) {
         usedPlayers[playerIndex] = true;
         const remainingScore = assignPlayer(slotIndex + 1);
         usedPlayers[playerIndex] = false;
@@ -470,10 +463,7 @@ const buildReportPlayers = (
     })
   );
 
-const getWeeklyScoreRanks = (
-  tableData: TableDataType[],
-  weekIndex: number
-) =>
+const getWeeklyScoreRanks = (tableData: TableDataType[], weekIndex: number) =>
   [...tableData]
     .filter((user) => user.matchups[weekIndex] !== null)
     .sort((a, b) => b.points[weekIndex] - a.points[weekIndex])
@@ -563,7 +553,9 @@ const getPlayoffMatchupContext = (
   const findLatestMatchup = (bracket: Bracket[]) =>
     bracket
       .filter(matchesRosterPair)
-      .sort((a, b) => b.r - a.r || Number(Boolean(b.p)) - Number(Boolean(a.p)))[0];
+      .sort(
+        (a, b) => b.r - a.r || Number(Boolean(b.p)) - Number(Boolean(a.p))
+      )[0];
   const winnersMatchup = findLatestMatchup(winnersBracket);
   if (winnersMatchup) {
     const isChampionship = winnersMatchup.p === 1;
@@ -591,9 +583,10 @@ const getPlayoffMatchupContext = (
   }
 
   const matchesEspnRosterPair = (matchup: EspnPlayoffMatchup) => {
-    const matchupRosterIds = [matchup.home?.teamId, matchup.away?.teamId].filter(
-      (rosterId): rosterId is number => rosterId != null
-    );
+    const matchupRosterIds = [
+      matchup.home?.teamId,
+      matchup.away?.teamId,
+    ].filter((rosterId): rosterId is number => rosterId != null);
     return (
       rosterIds.length === 2 &&
       matchupRosterIds.length === 2 &&
@@ -631,9 +624,7 @@ const getPlayoffMatchupContext = (
       placement: isChampionship ? 1 : null,
       isChampionship,
       leagueChampion:
-        isChampionship && winnerRosterId
-          ? getTeamName(winnerRosterId)
-          : null,
+        isChampionship && winnerRosterId ? getTeamName(winnerRosterId) : null,
     };
   }
 
@@ -663,7 +654,7 @@ export const getWeeklyPerformers = ({
   weekIndex,
   showUsernames,
   sortDirection,
-  limit = 4,
+  limit = 6,
 }: {
   tableData: TableDataType[];
   playerNames: WeeklyReportPlayer[][];
@@ -704,7 +695,7 @@ export const getBenchPerformers = ({
   benchPlayerNames,
   weekIndex,
   showUsernames,
-  limit = 4,
+  limit = 6,
 }: {
   tableData: TableDataType[];
   benchPlayerNames: WeeklyReportPlayer[][];
@@ -813,11 +804,7 @@ export const buildReportPrompt = ({
     matchupTeams.push({
       ...baseTeam,
       recordAfterWeek: formatRecord(
-        getRecordCountsForWeek(
-          user.recordByWeek,
-          weekIndex + 1,
-          medianScoring
-        )
+        getRecordCountsForWeek(user.recordByWeek, weekIndex + 1, medianScoring)
       ),
       rankAfterWeek: ranksAfterWeek.get(user.rosterId) ?? 0,
     });
