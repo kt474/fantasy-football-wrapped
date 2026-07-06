@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { X, Plus } from "lucide-vue-next";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import TradeDatabase from "./TradeDatabase.vue";
 
 type TradeLabPlayer = Player & {
@@ -675,8 +676,82 @@ onBeforeUnmount(() => {
         Click/tap players to add or remove from each package.
       </p>
 
-      <div v-if="loading" class="h-screen py-2">
-        Loading players and projections...
+      <div
+        v-if="loading"
+        class="grid min-h-[31rem] gap-3 py-2 xl:grid-cols-3"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <span class="sr-only">Loading players and projections...</span>
+        <Card
+          v-for="side in ['A', 'B']"
+          :key="`roster-skeleton-${side}`"
+          class="px-4 py-3"
+          :class="{ 'xl:order-3': side === 'B' }"
+        >
+          <div class="mb-3 space-y-2">
+            <Skeleton class="w-16 h-4 bg-muted dark:bg-muted/70" />
+            <Skeleton class="w-44 h-10 bg-muted dark:bg-muted/70" />
+          </div>
+          <div class="grid gap-2 pr-1">
+            <div
+              v-for="index in 7"
+              :key="`player-skeleton-${side}-${index}`"
+              class="flex w-full rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem]"
+            >
+              <Skeleton
+                class="rounded-full size-14 shrink-0 bg-muted dark:bg-muted/70"
+              />
+              <div class="w-full min-w-0 ml-2 space-y-2">
+                <Skeleton class="w-3/5 h-5 bg-muted dark:bg-muted/70" />
+                <Skeleton class="w-24 h-4 bg-muted dark:bg-muted/70" />
+              </div>
+              <div class="space-y-1.5 shrink-0">
+                <Skeleton class="w-16 h-6 bg-muted dark:bg-muted/70" />
+                <Skeleton class="w-16 h-6 bg-muted dark:bg-muted/70" />
+              </div>
+            </div>
+          </div>
+        </Card>
+        <Card class="p-3 xl:order-2">
+          <Skeleton class="w-32 h-5 mb-2 bg-muted dark:bg-muted/70" />
+          <Skeleton class="w-4/5 h-4 mb-3 bg-muted dark:bg-muted/70" />
+          <Separator class="h-px my-2" />
+          <div
+            v-for="side in ['A', 'B']"
+            :key="`package-skeleton-${side}`"
+            class="min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
+            :class="{ 'mt-3': side === 'B' }"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <Skeleton class="w-28 h-5 bg-muted dark:bg-muted/70" />
+              <Skeleton class="w-8 h-8 bg-muted dark:bg-muted/70" />
+            </div>
+            <div class="pt-3 mt-3 space-y-2 border-t border-border">
+              <div class="flex gap-2">
+                <Skeleton class="w-16 h-7 bg-muted dark:bg-muted/70" />
+                <Skeleton class="w-20 h-7 bg-muted dark:bg-muted/70" />
+              </div>
+              <Skeleton class="w-full h-12 bg-muted dark:bg-muted/70" />
+              <Skeleton class="w-4/5 h-12 bg-muted dark:bg-muted/70" />
+            </div>
+          </div>
+          <Separator class="h-px my-3" />
+          <div class="p-1 space-y-3">
+            <Skeleton class="w-40 h-5 bg-muted dark:bg-muted/70" />
+            <div v-for="index in 2" :key="`value-skeleton-${index}`">
+              <div class="flex items-center justify-between mb-2">
+                <Skeleton class="w-28 h-4 bg-muted dark:bg-muted/70" />
+                <Skeleton class="w-10 h-4 bg-muted dark:bg-muted/70" />
+              </div>
+              <Skeleton class="w-3/4 h-3 bg-muted dark:bg-muted/70" />
+            </div>
+            <div class="flex items-center justify-between">
+              <Skeleton class="w-24 h-7 bg-muted dark:bg-muted/70" />
+              <Skeleton class="w-16 h-4 bg-muted dark:bg-muted/70" />
+            </div>
+          </div>
+        </Card>
       </div>
       <div v-else>
         <div class="grid gap-3 xl:grid-cols-3">

@@ -290,7 +290,9 @@ const leagueTypeLabel = (type: string | null) => {
             <img
               class="w-10 h-10 rounded-full bg-muted"
               :class="
-                player.position === 'DEF' ? 'object-contain p-1' : 'object-cover'
+                player.position === 'DEF'
+                  ? 'object-contain p-1'
+                  : 'object-cover'
               "
               :src="searchablePlayerImageUrl(player)"
               alt=""
@@ -476,7 +478,7 @@ const leagueTypeLabel = (type: string | null) => {
     </p>
     <div
       v-if="loadingTrades && trades.length === 0"
-      class="flex min-h-[calc(100vh-25rem)] items-center justify-center py-10 text-sm text-center text-muted-foreground"
+      class="flex min-h-[calc(100vh-25rem)] items-center justify-center py-10 text-center text-muted-foreground"
     >
       Searching the trade database…
     </div>

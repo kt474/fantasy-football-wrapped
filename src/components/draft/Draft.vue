@@ -18,6 +18,7 @@ import {
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
+import { Skeleton } from "@/components/ui/skeleton";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
@@ -498,27 +499,31 @@ const getValueColor = (value: number) => {
             Picks with a red top border are keepers.
           </p>
         </div>
-        <div v-else role="status" class="h-screen max-w-sm animate-pulse">
-          <p class="mb-2">Loading draft data...</p>
+        <div
+          v-else
+          role="status"
+          class="overflow-x-auto"
+          aria-busy="true"
+          aria-live="polite"
+        >
+          <span class="sr-only">Loading draft data...</span>
           <div
-            class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"
-          ></div>
-          <div
-            class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px] mb-2.5"
-          ></div>
-          <div
-            class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"
-          ></div>
-          <div
-            class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[330px] mb-2.5"
-          ></div>
-          <div
-            class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5"
-          ></div>
-          <div
-            class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px]"
-          ></div>
-          <span class="sr-only">Loading...</span>
+            class="grid gap-1 text-sm min-h-96"
+            :style="{
+              'grid-template-columns': `repeat(${draftSize}, minmax(100px, 1fr))`,
+              'min-width': '100px',
+            }"
+          >
+            <div
+              v-for="index in draftSize * 6"
+              :key="`draft-pick-skeleton-${index}`"
+              class="flex h-20 flex-col justify-center gap-2 rounded-md border border-border bg-background p-2.5 shadow"
+            >
+              <Skeleton class="w-4/5 h-4 bg-muted dark:bg-muted/70" />
+              <Skeleton class="w-1/2 h-3 bg-muted dark:bg-muted/70" />
+              <Skeleton class="w-2/3 h-3 bg-muted dark:bg-muted/70" />
+            </div>
+          </div>
         </div>
       </TabsContent>
       <TabsContent value="Grades">
