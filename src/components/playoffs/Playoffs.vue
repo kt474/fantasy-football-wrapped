@@ -734,7 +734,7 @@ const numberOfLoserRounds = computed(() => {
               <!-- championship matchup -->
               <Card
                 v-if="index === matchup.r && matchup.p === 1"
-                class="block p-4 my-2 custom-card-width bg-secondary"
+                class="block p-4 my-2 border shadow-sm custom-card-width bg-card"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -826,7 +826,7 @@ const numberOfLoserRounds = computed(() => {
               </Card>
               <Card
                 v-else-if="index === matchup.r"
-                class="block p-4 my-4 mr-4 custom-card-width bg-secondary"
+                class="block p-4 my-4 mr-4 border shadow-sm custom-card-width bg-card"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -944,7 +944,7 @@ const numberOfLoserRounds = computed(() => {
                 class="mb-4"
               >
                 <Card
-                  class="block p-4 my-2 mr-4 custom-card-width bg-secondary"
+                  class="block p-4 my-2 mr-4 border shadow-sm custom-card-width bg-card"
                 >
                   <div
                     v-if="
@@ -1098,7 +1098,7 @@ const numberOfLoserRounds = computed(() => {
               <!-- last place matchup -->
               <Card
                 v-if="index === matchup.r && matchup.p === 1"
-                class="block p-4 my-2 mr-4 custom-card-width bg-secondary"
+                class="block p-4 my-2 mr-4 border shadow-sm custom-card-width bg-card"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -1192,7 +1192,7 @@ const numberOfLoserRounds = computed(() => {
               </Card>
               <Card
                 v-else-if="index === matchup.r"
-                class="block p-4 my-4 mr-4 custom-card-width bg-secondary"
+                class="block p-4 my-4 mr-4 border shadow-sm custom-card-width bg-card"
               >
                 <div
                   v-if="matchRosterId(matchup.t1)"
@@ -1307,7 +1307,7 @@ const numberOfLoserRounds = computed(() => {
                 class="mb-4"
               >
                 <Card
-                  class="block p-4 my-2 mr-4 custom-card-width bg-secondary"
+                  class="block p-4 my-2 mr-4 border shadow-sm custom-card-width bg-card"
                 >
                   <div
                     v-if="

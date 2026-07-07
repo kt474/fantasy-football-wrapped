@@ -43,7 +43,7 @@ const isMatchupWinner = (
     <Card
       v-for="matchupNumber in matchupNumbers"
       :key="matchupNumber ?? 'unmatched'"
-      class="block px-4 py-2.5 my-2 mr-4 w-80 custom-min-width bg-secondary"
+      class="block px-4 py-2.5 my-2 mr-4 border shadow-sm w-80 custom-min-width bg-card"
     >
       <div
         v-for="(user, userIndex) in usersForMatchup(matchupNumber)"

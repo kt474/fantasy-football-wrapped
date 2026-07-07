@@ -23,7 +23,7 @@ withDefaults(
       <Card
         v-for="performer in performers"
         :key="`${performer.user}-${performer.player.player_id}-${performer.points}`"
-        class="px-4 py-3.5 my-2 mr-4 custom-player-card bg-secondary"
+        class="px-4 py-3.5 my-2 mr-4 border shadow-sm custom-player-card bg-card"
       >
         <div v-if="performer.player" class="flex justify-between">
           <div class="flex">
@@ -54,7 +54,10 @@ withDefaults(
         </div>
       </Card>
     </div>
-    <Card v-else class="px-4 py-3.5 my-2 mr-4 h-20 custom-player-card" />
+    <Card
+      v-else
+      class="px-4 py-3.5 my-2 mr-4 h-20 border shadow-sm custom-player-card bg-card"
+    />
   </div>
 </template>
 
