@@ -18,6 +18,15 @@ export interface PerformerEntry {
   user: string;
 }
 
+export interface WeeklyAward {
+  id: string;
+  title: string;
+  teamName: string;
+  description: string;
+  metricLabel: string;
+  metricValue: string;
+}
+
 export type ReportPlayer = {
   name: string;
   team: string;
@@ -339,6 +348,9 @@ const getEligiblePositions = (slot: string) => {
     "RB/WR": ["RB", "WR"],
     SUPER_FLEX: ["QB", "RB", "WR", "TE"],
     OP: ["QB", "RB", "WR", "TE"],
+    "D/ST": ["DEF"],
+    DST: ["DEF"],
+    DEF: ["DEF"],
   };
   return positionGroups[normalizedSlot] ?? [normalizedSlot];
 };
@@ -726,6 +738,258 @@ export const getBenchPerformers = ({
     )
     .sort((a, b) => b.points - a.points)
     .slice(0, limit);
+};
+
+const formatPoints = (points: number) => roundPoints(points).toFixed(2);
+
+const getTeamLineupProfile = ({
+  tableData,
+  playerNames,
+  benchPlayerNames,
+  weekIndex,
+  showUsernames,
+  rosterPositions = [],
+}: {
+  tableData: TableDataType[];
+  playerNames: WeeklyReportPlayer[][];
+  benchPlayerNames: WeeklyReportPlayer[][];
+  weekIndex: number;
+  showUsernames: boolean;
+  rosterPositions?: string[];
+}) => {
+  const weeklyScoreRanks = getWeeklyScoreRanks(tableData, weekIndex);
+
+  return tableData
+    .map((user, index) => {
+      const matchupNumber = user.matchups[weekIndex];
+      if (matchupNumber == null) {
+        return null;
+      }
+
+      const lineupSlots =
+        rosterPositions.length > 0
+          ? rosterPositions
+          : (playerNames[index] ?? []).map((player) => player.position);
+      const starters = buildPremiumPlayers(
+        playerNames[index] ?? [],
+        user.starterPoints[weekIndex] ?? [],
+        lineupSlots,
+        "STARTER"
+      );
+      const bench = buildPremiumPlayers(
+        benchPlayerNames[index] ?? [],
+        user.benchPoints[weekIndex] ?? [],
+        [],
+        "BN"
+      );
+      const optimalPoints = getOptimalPoints(
+        [...starters, ...bench],
+        lineupSlots
+      );
+      const starterPoints = roundPoints(
+        starters.reduce((total, player) => total + player.points, 0)
+      );
+      const opponentScores = tableData
+        .filter(
+          (team) =>
+            team.rosterId !== user.rosterId &&
+            team.matchups[weekIndex] === matchupNumber
+        )
+        .map((team) => team.points[weekIndex]);
+      const opponentScore =
+        opponentScores.length > 0 ? Math.max(...opponentScores) : null;
+      const result = getTeamResult(
+        tableData,
+        matchupNumber,
+        weekIndex,
+        user.points[weekIndex]
+      );
+      const topStarter = [...starters].sort((a, b) => b.points - a.points)[0];
+
+      return {
+        rosterId: user.rosterId,
+        name: getManagerName(user, showUsernames),
+        pointsScored: user.points[weekIndex],
+        result,
+        opponentScore,
+        weeklyScoreRank: weeklyScoreRanks.get(user.rosterId) ?? 0,
+        teamsOutscored: tableData.filter(
+          (team) =>
+            team.matchups[weekIndex] != null &&
+            team.points[weekIndex] < user.points[weekIndex]
+        ).length,
+        optimalPoints,
+        starterPoints,
+        pointsLeftOnBench: roundPoints(
+          Math.max(0, optimalPoints - starterPoints)
+        ),
+        lineupEfficiency:
+          optimalPoints > 0
+            ? Math.round((starterPoints / optimalPoints) * 1000) / 1000
+            : 0,
+        bestBenchSwap: getBestBenchSwap(starters, bench),
+        topStarter: topStarter
+          ? {
+              name: topStarter.name,
+              points: topStarter.points,
+              pointShare:
+                starterPoints > 0
+                  ? Math.round((topStarter.points / starterPoints) * 1000) /
+                    1000
+                  : 0,
+            }
+          : null,
+      };
+    })
+    .filter((profile): profile is NonNullable<typeof profile> =>
+      Boolean(profile)
+    );
+};
+
+export const getWeeklyAwards = ({
+  tableData,
+  playerNames,
+  benchPlayerNames,
+  weekIndex,
+  showUsernames,
+  rosterPositions = [],
+}: {
+  tableData: TableDataType[];
+  playerNames: WeeklyReportPlayer[][];
+  benchPlayerNames: WeeklyReportPlayer[][];
+  weekIndex: number;
+  showUsernames: boolean;
+  rosterPositions?: string[];
+}): WeeklyAward[] => {
+  const profiles = getTeamLineupProfile({
+    tableData,
+    playerNames,
+    benchPlayerNames,
+    weekIndex,
+    showUsernames,
+    rosterPositions,
+  });
+
+  if (profiles.length === 0) {
+    return [];
+  }
+
+  const awards: WeeklyAward[] = [];
+  const losers = profiles.filter((team) => team.result === "loss");
+  const winners = profiles.filter((team) => team.result === "win");
+  const teamCount = profiles.length;
+
+  const selfInflicted =
+    [...losers]
+      .filter(
+        (team) =>
+          team.opponentScore != null &&
+          team.bestBenchSwap &&
+          team.bestBenchSwap.pointsLost >
+            Math.max(0, team.opponentScore - team.pointsScored)
+      )
+      .sort(
+        (a, b) =>
+          (b.bestBenchSwap?.pointsLost ?? 0) -
+          (a.bestBenchSwap?.pointsLost ?? 0)
+      )[0] ??
+    [...profiles]
+      .filter((team) => team.bestBenchSwap)
+      .sort(
+        (a, b) =>
+          (b.bestBenchSwap?.pointsLost ?? 0) -
+          (a.bestBenchSwap?.pointsLost ?? 0)
+      )[0];
+
+  if (selfInflicted?.bestBenchSwap) {
+    const margin =
+      selfInflicted.opponentScore == null
+        ? null
+        : Math.abs(selfInflicted.opponentScore - selfInflicted.pointsScored);
+    awards.push({
+      id: "self-inflicted-wound",
+      title: "Self-Inflicted Wound",
+      teamName: selfInflicted.name,
+      description:
+        margin != null && selfInflicted.result === "loss"
+          ? `${selfInflicted.bestBenchSwap.benched.name} outscored ${selfInflicted.bestBenchSwap.started.name} by ${formatPoints(selfInflicted.bestBenchSwap.pointsLost)}. ${selfInflicted.name} lost by ${formatPoints(margin)}, so the best bench swap was enough to flip the matchup.`
+          : `${selfInflicted.bestBenchSwap.benched.name} outscored ${selfInflicted.bestBenchSwap.started.name} by ${formatPoints(selfInflicted.bestBenchSwap.pointsLost)}. It was the week's biggest missed lineup swap.`,
+      metricLabel: "Swing",
+      metricValue: `${formatPoints(selfInflicted.bestBenchSwap.pointsLost)} pts`,
+    });
+  }
+
+  const gotAwayWithIt = [...winners]
+    .filter((team) => team.optimalPoints > 0)
+    .sort(
+      (a, b) =>
+        a.lineupEfficiency - b.lineupEfficiency ||
+        b.pointsLeftOnBench - a.pointsLeftOnBench
+    )[0];
+
+  if (gotAwayWithIt) {
+    awards.push({
+      id: "got-away-with-it",
+      title: "Got Away With It",
+      teamName: gotAwayWithIt.name,
+      description: `${gotAwayWithIt.name} won while using only ${Math.round(gotAwayWithIt.lineupEfficiency * 100)}% of their optimal lineup. They left ${formatPoints(gotAwayWithIt.pointsLeftOnBench)} possible points unused, but the matchup still broke their way.`,
+      metricLabel: "Efficiency",
+      metricValue: `${Math.round(gotAwayWithIt.lineupEfficiency * 100)}%`,
+    });
+  }
+
+  const deservedBetter = [...losers].sort(
+    (a, b) =>
+      b.teamsOutscored - a.teamsOutscored ||
+      a.weeklyScoreRank - b.weeklyScoreRank
+  )[0];
+
+  if (deservedBetter) {
+    awards.push({
+      id: "deserved-better",
+      title: "Deserved Better",
+      teamName: deservedBetter.name,
+      description: `${deservedBetter.name} lost despite outscoring ${deservedBetter.teamsOutscored} of ${teamCount - 1} possible opponents. They finished ${deservedBetter.weeklyScoreRank}${getOrdinalSuffix(deservedBetter.weeklyScoreRank)} in weekly scoring and still took the loss.`,
+      metricLabel: "Score rank",
+      metricValue: `#${deservedBetter.weeklyScoreRank}`,
+    });
+  }
+
+  const onePlayerCarry = [...profiles]
+    .filter((team) => team.topStarter && team.starterPoints > 0)
+    .sort(
+      (a, b) =>
+        (b.topStarter?.pointShare ?? 0) - (a.topStarter?.pointShare ?? 0)
+    )[0];
+
+  if (onePlayerCarry?.topStarter) {
+    awards.push({
+      id: "one-player-carry",
+      title: "One-Player Carry",
+      teamName: onePlayerCarry.name,
+      description: `${onePlayerCarry.topStarter.name} supplied ${Math.round(onePlayerCarry.topStarter.pointShare * 100)}% of ${onePlayerCarry.name}'s starting lineup points. That one player accounted for ${formatPoints(onePlayerCarry.topStarter.points)} of their ${formatPoints(onePlayerCarry.starterPoints)} starter points.`,
+      metricLabel: "Carry share",
+      metricValue: `${Math.round(onePlayerCarry.topStarter.pointShare * 100)}%`,
+    });
+  }
+
+  return awards.slice(0, 4);
+};
+
+const getOrdinalSuffix = (rank: number) => {
+  if (rank % 100 >= 11 && rank % 100 <= 13) {
+    return "th";
+  }
+  switch (rank % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
 };
 
 export const buildReportPrompt = ({

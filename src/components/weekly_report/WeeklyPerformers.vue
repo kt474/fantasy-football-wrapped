@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import Card from "../ui/card/Card.vue";
-import {
-  getPlayerLabel,
-  type PerformerEntry,
-} from "./weeklyReportTransforms";
+import { getPlayerLabel, type PerformerEntry } from "./weeklyReportTransforms";
 
 withDefaults(
   defineProps<{
@@ -39,7 +36,7 @@ withDefaults(
             <img
               v-else
               alt="Defense image"
-              class="object-cover w-14 mr-2.5 sm:h-auto"
+              class="object-cover w-12 mr-2.5 sm:h-auto"
               :src="`https://sleepercdn.com/images/team_logos/nfl/${performer.player.player_id.toLowerCase()}.png`"
             />
             <div>

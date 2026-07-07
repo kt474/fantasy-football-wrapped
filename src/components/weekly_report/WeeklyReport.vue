@@ -29,6 +29,7 @@ import {
 } from "../../api/fakeLeague.ts";
 import WeeklyPreview from "./WeeklyPreview.vue";
 import WeeklyShareCard from "./WeeklyShareCard.vue";
+import WeeklyAwards from "./WeeklyAwards.vue";
 import WeeklyPerformers from "./WeeklyPerformers.vue";
 import WeeklyReportSummary from "./WeeklyReportSummary.vue";
 import WeeklyMatchups from "./WeeklyMatchups.vue";
@@ -48,6 +49,7 @@ import {
   getMatchupNumbers,
   getPlayoffRoundMetadata,
   getSortedTableData,
+  getWeeklyAwards,
   getWeeklyPerformers,
 } from "./weeklyReportTransforms";
 
@@ -434,6 +436,25 @@ const benchPerformers = computed(() => {
   return [];
 });
 
+const weeklyAwards = computed(() => {
+  if (
+    playerNames.value.length > 0 &&
+    benchPlayerNames.value.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+  ) {
+    return getWeeklyAwards({
+      tableData: props.tableData,
+      playerNames: playerNames.value,
+      benchPlayerNames: benchPlayerNames.value,
+      weekIndex: currentWeek.value - 1,
+      showUsernames: store.showUsernames,
+      rosterPositions:
+        store.leagueInfo[store.currentLeagueIndex]?.rosterPositions ?? [],
+    });
+  }
+  return [];
+});
+
 const reportPrompt = computed(() => {
   return buildReportPrompt({
     tableData: props.tableData,
@@ -791,6 +812,12 @@ watch(() => currentWeek.value, fetchPlayerNames);
           :median-scoring="medianScoring"
         />
         <Separator class="h-px mt-4 mb-2.5" />
+
+        <WeeklyAwards :awards="weeklyAwards" />
+        <Separator
+          v-if="weeklyAwards.length > 0"
+          class="h-px mt-4 mb-2.5"
+        />
 
         <WeeklyPerformers
           title="Top Performers"

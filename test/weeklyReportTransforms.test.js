@@ -12,6 +12,7 @@ import {
   getPlayoffRoundMetadata,
   getRecordForWeek,
   getSortedTableData,
+  getWeeklyAwards,
   getWeeklyPerformers,
 } from "../src/components/weekly_report/weeklyReportTransforms.ts";
 
@@ -351,6 +352,108 @@ describe("weekly report transforms", () => {
       seasonAverageThroughWeek: 101,
       currentStreak: "W1",
     });
+  });
+
+  test("treats ESPN D/ST roster slots as DEF when calculating optimal points", () => {
+    const result = buildPremiumReportPrompt({
+      tableData: [
+        team({
+          rosterId: 1,
+          name: "Defense Team",
+          username: "defense",
+          points: 18,
+          matchup: 1,
+          starterPoints: [6],
+          benchPoints: [18],
+        }),
+      ],
+      playerNames: [[player("Bills", "BUF", "BUF", "DEF")]],
+      benchPlayerNames: [[player("Cowboys", "DAL", "DAL", "DEF")]],
+      weekIndex: 0,
+      showUsernames: true,
+      isPlayoffs: false,
+      losersBracketIds: [],
+      winnersBracketIds: [],
+      rosterPositions: ["D/ST"],
+    });
+
+    expect(result[0].teams[0]).toMatchObject({
+      optimalPoints: 18,
+      pointsLeftOnBench: 12,
+      lineupEfficiency: 0.333,
+    });
+  });
+
+  test("builds weekly awards from matchup and lineup context", () => {
+    const awardTableData = [
+      team({
+        rosterId: 1,
+        name: "Alpha Team",
+        username: "alpha",
+        points: 100,
+        matchup: 1,
+        starterPoints: [60, 40],
+        benchPoints: [1, 0],
+      }),
+      team({
+        rosterId: 2,
+        name: "Beta Team",
+        username: "beta",
+        points: 92,
+        matchup: 1,
+        starterPoints: [50, 42],
+        benchPoints: [60, 20],
+      }),
+      team({
+        rosterId: 3,
+        name: "Gamma Team",
+        username: "gamma",
+        points: 80,
+        matchup: 2,
+        starterPoints: [50, 30],
+        benchPoints: [70, 30],
+      }),
+      team({
+        rosterId: 4,
+        name: "Delta Team",
+        username: "delta",
+        points: 78,
+        matchup: 2,
+        starterPoints: [70, 8],
+        benchPoints: [1, 0],
+      }),
+    ];
+    const awardPlayerNames = [
+      [player("Alpha WR", "a1", "BUF", "WR"), player("Alpha RB", "a2", "BUF", "RB")],
+      [player("Beta WR", "b1", "BUF", "WR"), player("Beta RB", "b2", "BUF", "RB")],
+      [player("Gamma WR", "g1", "BUF", "WR"), player("Gamma RB", "g2", "BUF", "RB")],
+      [player("Delta WR", "d1", "BUF", "WR"), player("Delta RB", "d2", "BUF", "RB")],
+    ];
+    const awardBenchNames = [
+      [player("Alpha Bench WR", "ab1", "BUF", "WR"), player("Alpha Bench RB", "ab2", "BUF", "RB")],
+      [player("Beta Bench WR", "bb1", "BUF", "WR"), player("Beta Bench RB", "bb2", "BUF", "RB")],
+      [player("Gamma Bench WR", "gb1", "BUF", "WR"), player("Gamma Bench RB", "gb2", "BUF", "RB")],
+      [player("Delta Bench WR", "db1", "BUF", "WR"), player("Delta Bench RB", "db2", "BUF", "RB")],
+    ];
+
+    expect(
+      getWeeklyAwards({
+        tableData: awardTableData,
+        playerNames: awardPlayerNames,
+        benchPlayerNames: awardBenchNames,
+        weekIndex: 0,
+        showUsernames: false,
+        rosterPositions: ["WR", "RB"],
+      }).map((award) => ({
+        id: award.id,
+        teamName: award.teamName,
+      }))
+    ).toEqual([
+      { id: "self-inflicted-wound", teamName: "Beta Team" },
+      { id: "got-away-with-it", teamName: "Gamma Team" },
+      { id: "deserved-better", teamName: "Beta Team" },
+      { id: "one-player-carry", teamName: "Delta Team" },
+    ]);
   });
 
   test("adds completed weekly waiver impact to premium report teams", () => {
