@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
             type: "image/png",
           },
           {
-            src: "512.webp",
+            src: "512.png",
             sizes: "512x512",
             type: "image/png",
           },
