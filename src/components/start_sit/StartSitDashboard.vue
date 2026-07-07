@@ -27,7 +27,9 @@ import Label from "../ui/label/Label.vue";
 import { Skeleton } from "../ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
-  getOrderedRosterPlayerIds,
+  canPlayerFillLineupSlot,
+  getOrderedRosterPlayerEntries,
+  getStartingRosterSlots,
   START_SIT_CONCURRENCY,
 } from "./startSitLoader";
 import PlayerNewsFeed from "./PlayerNewsFeed.vue";
@@ -57,6 +59,7 @@ type StartSitPlayer = {
   name?: string;
   player_id: string;
   position?: string;
+  rosterSlot?: string;
   team?: string;
   projection: SingleWeekProjection;
   stats: {
@@ -98,9 +101,8 @@ const toggle = (id: string) => {
 
 const numberValues = (arr: Array<number | string | undefined>) =>
   arr
-    .filter((item) => item !== undefined && item !== "DNP" && item !== 999)
     .map((item) => Number(item))
-    .filter(Number.isFinite);
+    .filter((item) => Number.isFinite(item) && item !== 999);
 
 const getNumericAverage = (arr: Array<number | string | undefined>) => {
   const numbers = numberValues(arr);
@@ -182,14 +184,33 @@ const canComparePlayers = (
 ) => {
   if (!benchPlayer.position || !starter.position) return false;
 
+  if (starter.rosterSlot) {
+    return canPlayerFillLineupSlot(benchPlayer.position, starter.rosterSlot);
+  }
+
   return benchPlayer.position === starter.position;
 };
+
+const activeStarterCount = computed(() => {
+  if (
+    currentRoster.value?.players.some((player) => Boolean(player.rosterSlot))
+  ) {
+    return currentRoster.value.players.filter(
+      (player) => player.rosterSlot !== "BN"
+    ).length;
+  }
+
+  return starterSize.value;
+});
 
 const startSitRecommendations = computed<StartSitRecommendation[]>(() => {
   if (!currentRoster.value) return [];
 
-  const starters = currentRoster.value.players.slice(0, starterSize.value);
-  const bench = currentRoster.value.players.slice(starterSize.value);
+  const starters = currentRoster.value.players.slice(
+    0,
+    activeStarterCount.value
+  );
+  const bench = currentRoster.value.players.slice(activeStarterCount.value);
   const usedStarterIds = new Set<string>();
   const usedBenchIds = new Set<string>();
 
@@ -263,7 +284,7 @@ const managers = computed(() => {
 const starterSize = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague) {
-    return currentLeague.rosterPositions.filter((str) => str !== "BN").length;
+    return getStartingRosterSlots(currentLeague.rosterPositions).length;
   }
   return 9;
 });
@@ -300,12 +321,20 @@ const getPlayerDirectory = async (leagueKey: string, playerIds: string[]) => {
 const loadPlayer = (
   playerId: string,
   player: Player | undefined,
+  rosterSlot: string,
   leagueKey: string,
   season: string,
   week: number,
   scoringType: number
 ) => {
-  const cacheKey = [leagueKey, season, week, scoringType, playerId].join(":");
+  const cacheKey = [
+    leagueKey,
+    season,
+    week,
+    scoringType,
+    playerId,
+    rosterSlot,
+  ].join(":");
   const cachedPlayer = playerDataCache.get(cacheKey);
   if (cachedPlayer) {
     return cachedPlayer;
@@ -318,6 +347,7 @@ const loadPlayer = (
     name: player?.name,
     player_id: player?.player_id ?? playerId,
     position: player?.position,
+    rosterSlot,
     team: player?.team,
     projection,
     stats: {
@@ -364,19 +394,22 @@ const loadSelectedRoster = async () => {
 
     const week = currentLeague.currentWeek || currentLeague.lastScoredWeek || 1;
     const leagueKey = getLeagueKey(currentLeague);
-    const playerIds = getOrderedRosterPlayerIds(
+    const playerEntries = getOrderedRosterPlayerEntries(
       selectedTeam.players,
       selectedTeam.starters,
-      week
+      week,
+      currentLeague.rosterPositions
     );
+    const playerIds = playerEntries.map((entry) => entry.playerId);
     const playerLookupMap = await getPlayerDirectory(leagueKey, playerIds);
     const players = await mapWithConcurrency(
-      playerIds,
+      playerEntries,
       START_SIT_CONCURRENCY,
-      (playerId) =>
+      (entry) =>
         loadPlayer(
-          playerId,
-          playerLookupMap.get(playerId),
+          entry.playerId,
+          playerLookupMap.get(entry.playerId),
+          entry.rosterSlot,
           leagueKey,
           currentLeague.season,
           week,
@@ -431,9 +464,7 @@ function getAverage(arr: Array<number | string | undefined>) {
 }
 
 function getMax(arr: Array<number | string | undefined>) {
-  const numbers = arr
-    .filter((item) => item && item !== "DNP")
-    .map((item) => Number(item));
+  const numbers = numberValues(arr);
 
   if (numbers.length === 0) {
     return 0;
@@ -617,6 +648,9 @@ watch(
                     <p class="text-xs font-semibold truncate">
                       {{ getPlayerLabel(recommendation.start) }}
                     </p>
+                    <p class="mt-0.5 text-xs truncate text-muted-foreground">
+                      {{ getPlayerMatchupLabel(recommendation.start) }}
+                    </p>
                     <div class="grid grid-cols-2 gap-3 mt-2">
                       <div>
                         <p class="text-xs font-medium text-muted-foreground">
@@ -641,6 +675,9 @@ watch(
                   <div class="min-w-0 px-4 py-3 bg-card">
                     <p class="text-xs font-semibold truncate">
                       {{ getPlayerLabel(recommendation.sit) }}
+                    </p>
+                    <p class="mt-0.5 text-xs truncate text-muted-foreground">
+                      {{ getPlayerMatchupLabel(recommendation.sit) }}
                     </p>
                     <div class="grid grid-cols-2 gap-3 mt-2">
                       <div>
@@ -681,7 +718,7 @@ watch(
               :key="player.player_id"
               class="shadow-sm"
             >
-              <div v-if="index === starterSize" class="w-full mt-5 mb-3">
+              <div v-if="index === activeStarterCount" class="w-full mt-5 mb-3">
                 <p
                   class="text-xs font-semibold tracking-wide uppercase text-muted-foreground"
                 >

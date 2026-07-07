@@ -310,9 +310,10 @@ export const getSingleWeekProjection = async (
     } else if (scoringType === 0.5) {
       scoring = "pts_half_ppr";
     }
-    if (allWeeks[week] && allWeeks[week]["stats"]?.[scoring]) {
+    const projectedPoints = Number(allWeeks[week]?.["stats"]?.[scoring]);
+    if (Number.isFinite(projectedPoints)) {
       return {
-        stats: allWeeks[week]["stats"]?.[scoring] ?? 0,
+        stats: projectedPoints,
         opponent: allWeeks[week]["opponent"] ?? "",
         away: allWeeks[week]["is_away_team"] ?? true,
       };

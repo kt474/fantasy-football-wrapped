@@ -1,15 +1,72 @@
 export const START_SIT_CONCURRENCY = 6;
 
+const NON_STARTING_SLOTS = new Set(["BN", "BENCH", "IR", "TAXI", "RESERVE"]);
+
+export type OrderedRosterPlayerEntry = {
+  playerId: string;
+  rosterSlot: string;
+};
+
+export const getStartingRosterSlots = (rosterPositions: string[] = []) =>
+  rosterPositions.filter(
+    (position) => !NON_STARTING_SLOTS.has(position.toUpperCase())
+  );
+
+export const getEligiblePositionsForSlot = (slot: string) => {
+  const normalizedSlot = slot.toUpperCase();
+  const positionGroups: Record<string, string[]> = {
+    FLEX: ["RB", "WR", "TE"],
+    "RB/WR/TE": ["RB", "WR", "TE"],
+    REC_FLEX: ["WR", "TE"],
+    "WR/TE": ["WR", "TE"],
+    WRRB_FLEX: ["RB", "WR"],
+    "RB/WR": ["RB", "WR"],
+    SUPER_FLEX: ["QB", "RB", "WR", "TE"],
+    OP: ["QB", "RB", "WR", "TE"],
+  };
+
+  return positionGroups[normalizedSlot] ?? [normalizedSlot];
+};
+
+export const canPlayerFillLineupSlot = (
+  playerPosition: string | undefined,
+  slot: string | undefined
+) => {
+  if (!playerPosition || !slot) return false;
+
+  return getEligiblePositionsForSlot(slot).includes(playerPosition.toUpperCase());
+};
+
+export const getOrderedRosterPlayerEntries = (
+  players: string[],
+  starters: string[][] | undefined,
+  week: number,
+  rosterPositions: string[] = []
+): OrderedRosterPlayerEntry[] => {
+  const weekStarters = starters?.[Math.max(0, week - 1)] ?? [];
+  const starterSet = new Set(weekStarters);
+  const starterSlots = getStartingRosterSlots(rosterPositions);
+
+  return [
+    ...weekStarters.map((playerId, index) => ({
+      playerId,
+      rosterSlot: starterSlots[index] ?? "",
+    })),
+    ...players
+      .filter((playerId) => !starterSet.has(playerId))
+      .map((playerId) => ({
+        playerId,
+        rosterSlot: "BN",
+      })),
+  ];
+};
+
 export const getOrderedRosterPlayerIds = (
   players: string[],
   starters: string[][] | undefined,
   week: number
 ) => {
-  const weekStarters = starters?.[Math.max(0, week - 1)] ?? [];
-  const starterSet = new Set(weekStarters);
-
-  return [
-    ...weekStarters,
-    ...players.filter((playerId) => !starterSet.has(playerId)),
-  ];
+  return getOrderedRosterPlayerEntries(players, starters, week).map(
+    (entry) => entry.playerId
+  );
 };

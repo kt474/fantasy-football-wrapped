@@ -1,5 +1,10 @@
 import { describe, expect, test, vi } from "vitest";
-import { getOrderedRosterPlayerIds } from "../src/components/start_sit/startSitLoader.ts";
+import {
+  canPlayerFillLineupSlot,
+  getOrderedRosterPlayerEntries,
+  getOrderedRosterPlayerIds,
+  getStartingRosterSlots,
+} from "../src/components/start_sit/startSitLoader.ts";
 import { mapWithConcurrency } from "../src/lib/async.ts";
 
 describe("Start/Sit loader", () => {
@@ -11,6 +16,36 @@ describe("Start/Sit loader", () => {
         1
       )
     ).toEqual(["starter-1", "starter-2", "bench-1", "bench-2"]);
+  });
+
+  test("keeps lineup slots on ordered starter entries", () => {
+    expect(
+      getOrderedRosterPlayerEntries(
+        ["bench-1", "starter-2", "starter-1", "bench-2"],
+        [["starter-1", "starter-2"]],
+        1,
+        ["QB", "FLEX", "BN", "BN", "IR", "TAXI"]
+      )
+    ).toEqual([
+      { playerId: "starter-1", rosterSlot: "QB" },
+      { playerId: "starter-2", rosterSlot: "FLEX" },
+      { playerId: "bench-1", rosterSlot: "BN" },
+      { playerId: "bench-2", rosterSlot: "BN" },
+    ]);
+  });
+
+  test("excludes non-playable roster slots from starter slots", () => {
+    expect(
+      getStartingRosterSlots(["QB", "RB", "FLEX", "BN", "IR", "TAXI"])
+    ).toEqual(["QB", "RB", "FLEX"]);
+  });
+
+  test("checks player eligibility for flexible lineup slots", () => {
+    expect(canPlayerFillLineupSlot("RB", "FLEX")).toBe(true);
+    expect(canPlayerFillLineupSlot("TE", "WR/TE")).toBe(true);
+    expect(canPlayerFillLineupSlot("QB", "SUPER_FLEX")).toBe(true);
+    expect(canPlayerFillLineupSlot("QB", "FLEX")).toBe(false);
+    expect(canPlayerFillLineupSlot("WR", "RB")).toBe(false);
   });
 
   test("uses the latest available starter week safely", () => {
