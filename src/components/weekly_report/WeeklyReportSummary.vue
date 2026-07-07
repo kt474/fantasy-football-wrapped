@@ -245,6 +245,7 @@ const trackPremiumCtaClick = (cta: string) => {
                   <SelectItem value="neutral">Neutral</SelectItem>
                   <SelectItem value="newspaper">Newspaper</SelectItem>
                   <SelectItem value="cutthroat">Cutthroat</SelectItem>
+                  <SelectItem value="chaos">Chaos Mode</SelectItem>
                 </SelectContent>
               </Select>
             </div>
