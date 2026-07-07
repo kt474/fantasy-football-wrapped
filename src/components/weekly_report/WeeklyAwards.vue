@@ -12,11 +12,11 @@ defineProps<{
     <div>
       <p class="text-xl font-bold">Weekly Awards</p>
     </div>
-    <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       <Card
         v-for="award in awards"
         :key="award.id"
-        class="relative flex flex-col justify-between p-4 overflow-hidden transition-colors border shadow-sm bg-card hover:bg-muted/30"
+        class="relative flex flex-col justify-between p-4 overflow-hidden transition-colors hover:bg-muted/30"
       >
         <div class="space-y-3">
           <div class="flex items-start gap-3">

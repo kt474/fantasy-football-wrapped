@@ -460,7 +460,7 @@ const recordCards = computed<AllTimeRecordCard[]>(() => {
         <Card
           v-for="record in recordCards"
           :key="record.title"
-          class="flex flex-col shadow-sm h-44 border-border/70 bg-card"
+          class="flex flex-col h-44"
         >
           <CardHeader class="h-12 p-4 pb-1 space-y-0">
             <p class="text-sm font-medium leading-snug text-muted-foreground">

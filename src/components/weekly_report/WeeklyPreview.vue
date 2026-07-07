@@ -804,7 +804,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
           </div>
         </div>
       </div>
-      <Card class="px-4 py-8 mx-0 rounded-md sm:mx-2">
+      <Card class="px-4 py-8 mx-0 sm:mx-2">
         <div class="flex justify-between mb-1">
           <span class="text-sm font-medium sm:text-base">{{
             getProjectedWinner(matchup[0], matchup[1])
@@ -962,7 +962,7 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
           <div class="flex w-px h-full bg-muted"></div>
         </div>
       </div>
-      <Card class="px-4 py-8 mx-0 mt-3 rounded-md sm:mx-2">
+      <Card class="px-4 py-8 mx-0 mt-3 sm:mx-2">
         <div class="flex justify-between mb-3">
           <Skeleton class="w-48 h-5 bg-muted dark:bg-muted/70" />
           <Skeleton class="w-12 h-5 bg-muted dark:bg-muted/70" />

@@ -508,7 +508,7 @@ watch(
 );
 </script>
 <template>
-  <Card class="p-4 mb-4 shadow-sm md:p-6">
+  <Card class="p-4 mb-4 md:p-6">
     <Tabs default-value="roster">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
         <p class="text-3xl font-bold leading-none">Start/Sit</p>
@@ -547,7 +547,7 @@ watch(
             <Skeleton class="w-56 h-8 bg-muted dark:bg-muted/70" />
           </div>
           <div class="grid gap-3">
-            <Card v-for="index in 3" :key="index" class="p-4 shadow-sm">
+            <Card v-for="index in 3" :key="index" class="p-4">
               <div class="flex items-start justify-between gap-3">
                 <div class="w-full min-w-0 space-y-2">
                   <Skeleton class="w-3/4 h-5 bg-muted dark:bg-muted/70" />
@@ -572,10 +572,10 @@ watch(
             <Skeleton class="w-32 h-8 bg-muted dark:bg-muted/70" />
           </div>
           <div class="grid gap-3">
-            <div
+            <Card
               v-for="index in 6"
               :key="index"
-              class="overflow-hidden border rounded-lg bg-card"
+              class="overflow-hidden"
             >
               <div class="flex w-full gap-3 p-4">
                 <Skeleton class="w-10 mt-3 bg-muted dark:bg-muted/70 h-7" />
@@ -606,7 +606,7 @@ watch(
                   <Skeleton class="h-8 bg-muted dark:bg-muted/70" />
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
       </div>
@@ -707,7 +707,7 @@ watch(
                 </div>
               </Card>
             </div>
-            <Card v-else class="p-4 shadow-sm">
+            <Card v-else class="p-4">
               <p class="font-medium">No comparable players found.</p>
             </Card>
           </aside>
@@ -729,9 +729,7 @@ watch(
                   Bench
                 </p>
               </div>
-              <div
-                class="mb-3 overflow-hidden border rounded-lg bg-card md:flex-nowrap"
-              >
+              <Card class="mb-3 overflow-hidden md:flex-nowrap">
                 <div class="flex w-full gap-3 p-4">
                   <Badge
                     variant="outline"
@@ -1110,7 +1108,7 @@ watch(
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         </div>

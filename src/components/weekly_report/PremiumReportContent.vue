@@ -68,7 +68,7 @@ defineProps<{
           The week's top-scoring lineup.
         </p>
       </div>
-      <Card class="shadow-sm">
+      <Card>
         <CardHeader class="p-4 pb-3">
           <div
             class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"

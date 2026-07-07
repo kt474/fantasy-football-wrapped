@@ -983,376 +983,393 @@ function runMonteCarloDistribution() {
 </script>
 
 <template>
-  <Card class="w-full p-4 mt-4 shadow-sm md:p-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <p class="text-3xl font-bold leading-none">Schedule Simulator</p>
-        <p class="mt-4 text-muted-foreground">
-          Test alternate matchups and see how the standings change.
-        </p>
-      </div>
-      <Button variant="outline" @click="resetScenario">Reset</Button>
-    </div>
-
-    <div
-      class="grid grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(360px,0.9fr)_1.1fr]"
-    >
-      <div class="p-4 border rounded-md shadow-sm">
+  <div class="w-full space-y-4">
+    <Card class="w-full p-4 space-y-4 md:p-6">
+      <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 class="text-lg font-semibold">Scenario Builder</h3>
+          <p class="text-3xl font-semibold leading-none">Schedule Simulator</p>
+          <p class="mt-4 text-muted-foreground">
+            Test alternate matchups and see how the standings change.
+          </p>
+        </div>
+        <Button variant="outline" @click="resetScenario">Reset</Button>
+      </div>
+
+      <div
+        class="grid grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(360px,0.9fr)_1.1fr]"
+      >
+        <div class="p-4 rounded-md bg-muted/20">
+          <div>
+            <h3 class="text-lg font-semibold">Scenario Builder</h3>
+          </div>
+
+          <Tabs v-model="activeScenarioValue" class="mt-3">
+            <TabsList class="inline-flex flex-wrap h-auto">
+              <TabsTrigger value="swap">Swap Schedules</TabsTrigger>
+              <TabsTrigger value="week">Shuffle Week</TabsTrigger>
+              <TabsTrigger value="all">Random Season</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="swap" class="mt-3">
+              <div
+                class="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
+              >
+                <div>
+                  <p class="mb-1 text-sm">First team</p>
+                  <Select v-model="selectedSwapTeamAValue">
+                    <SelectTrigger class="w-full">
+                      <SelectValue placeholder="Select team" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="team in teamOptions"
+                        :key="`swap-a-${team.value}`"
+                        :value="team.value"
+                      >
+                        {{ team.label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <p class="mb-1 text-sm">Second team</p>
+                  <Select v-model="selectedSwapTeamBValue">
+                    <SelectTrigger class="w-full">
+                      <SelectValue placeholder="Select team" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="team in teamOptions"
+                        :key="`swap-b-${team.value}`"
+                        :value="team.value"
+                      >
+                        {{ team.label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  class="mt-1 lg:mt-0"
+                  :disabled="selectedSwapTeamAIndex === selectedSwapTeamBIndex"
+                  @click="swapSelectedTeamSchedules"
+                >
+                  Apply Swap
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="week" class="mt-3">
+              <div class="flex flex-wrap items-end gap-3">
+                <div class="min-w-40">
+                  <p class="mb-1 text-sm">Week to shuffle</p>
+                  <Select v-model="selectedWeekValue">
+                    <SelectTrigger class="w-full">
+                      <SelectValue placeholder="Select week" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="week in weekOptions"
+                        :key="week.value"
+                        :value="week.value"
+                      >
+                        {{ week.label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button @click="shuffleSelectedWeek">
+                  Shuffle Week {{ selectedWeekNumber }}
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="all" class="mt-3">
+              <div class="flex flex-wrap items-center gap-3">
+                <Button @click="randomizeEntireSchedule">
+                  Randomize Full Schedule
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
-        <Tabs v-model="activeScenarioValue" class="mt-3">
+        <div class="p-4 rounded-md bg-muted/20">
+          <div>
+            <h3 class="text-lg font-semibold">Scenario Impact</h3>
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 mt-4 sm:grid-cols-3">
+            <div
+              v-for="card in scenarioCards"
+              :key="card.label"
+              class="p-3.5 rounded-md bg-background/70"
+            >
+              <p
+                class="text-xs font-semibold tracking-wide uppercase text-muted-foreground"
+              >
+                {{ card.label }}
+              </p>
+              <p
+                class="mt-2 text-2xl font-semibold tabular-nums"
+                :class="card.tone"
+              >
+                {{ card.value }}
+              </p>
+              <p class="mt-1 text-sm truncate text-muted-foreground">
+                {{ card.detail }}
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 mt-3 sm:grid-cols-2">
+            <div class="p-3.5 rounded-md bg-background/70">
+              <p
+                class="text-xs font-semibold tracking-wide uppercase text-muted-foreground"
+              >
+                Biggest Boost
+              </p>
+              <p class="mt-2 text-base font-semibold leading-tight">
+                {{ helpedMostTeam?.name || "No movement" }}
+              </p>
+              <p class="mt-1 text-sm text-muted-foreground">
+                {{ impactTeamDetail(helpedMostTeam) }}
+              </p>
+            </div>
+            <div class="p-3.5 rounded-md bg-background/70">
+              <p
+                class="text-xs font-semibold tracking-wide uppercase text-muted-foreground"
+              >
+                Biggest Drop
+              </p>
+              <p class="mt-2 text-base font-semibold leading-tight">
+                {{ hurtMostTeam?.name || "No movement" }}
+              </p>
+              <p class="mt-1 text-sm text-muted-foreground">
+                {{ impactTeamDetail(hurtMostTeam) }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-md bg-muted/20">
+        <h3 class="text-lg font-semibold">Simulation Results</h3>
+
+        <Tabs v-model="activeDetailValue" class="mt-3">
           <TabsList class="inline-flex flex-wrap h-auto">
-            <TabsTrigger value="swap">Swap Schedules</TabsTrigger>
-            <TabsTrigger value="week">Shuffle Week</TabsTrigger>
-            <TabsTrigger value="all">Random Season</TabsTrigger>
+            <TabsTrigger value="standings">Standings</TabsTrigger>
+            <TabsTrigger value="matchups">Matchups</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="swap" class="mt-3">
+          <TabsContent value="standings" class="mt-3">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead
+                  class="sticky top-0 text-xs uppercase bg-card text-muted-foreground"
+                >
+                  <tr>
+                    <th class="pb-2 text-left min-w-32">Team</th>
+                    <th class="pb-2 text-left min-w-20">Actual</th>
+                    <th class="pb-2 text-left min-w-20">Simulated</th>
+                    <th class="pb-2 text-left min-w-20">Seed</th>
+                    <th class="pb-2 text-left min-w-24">Playoff Status</th>
+                    <th class="pb-2 text-left min-w-20">Record Delta</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="team in scenarioImpactRows"
+                    :key="`standings-${team.index}`"
+                    class="border-t h-9"
+                  >
+                    <td class="py-1.5 pr-2">{{ team.name }}</td>
+                    <td class="py-1.5 pr-2">
+                      {{ team.actualWins }}-{{ team.actualLosses
+                      }}<span v-if="team.actualTies"
+                        >-{{ team.actualTies }}</span
+                      >
+                      <span class="ml-1 text-muted-foreground">
+                        ({{ seedText(team.actualSeed) }})
+                      </span>
+                    </td>
+                    <td class="py-1.5 pr-2">
+                      {{ team.wins }}-{{ team.losses
+                      }}<span v-if="team.ties">-{{ team.ties }}</span>
+                      <span class="ml-1 text-muted-foreground">
+                        ({{ seedText(team.simulatedSeed) }})
+                      </span>
+                    </td>
+                    <td
+                      class="py-1.5 pr-2"
+                      :class="
+                        team.seedDelta > 0
+                          ? 'text-primary'
+                          : team.seedDelta < 0
+                            ? 'text-destructive'
+                            : 'text-muted-foreground'
+                      "
+                    >
+                      {{ seedDeltaText(team.seedDelta) }}
+                    </td>
+                    <td
+                      class="py-1.5 pr-2"
+                      :class="playoffStatusClass(team.playoffChange)"
+                    >
+                      {{ playoffStatusText(team.playoffChange) }}
+                    </td>
+                    <td
+                      class="py-1.5 pr-2"
+                      :class="
+                        team.winDelta > 0
+                          ? 'text-primary'
+                          : team.winDelta < 0
+                            ? 'text-destructive'
+                            : 'text-muted-foreground'
+                      "
+                    >
+                      {{ winDeltaText(team.winDelta) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="matchups" class="mt-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <p class="text-sm text-muted-foreground">
+                Changed matchups are highlighted.
+              </p>
+              <Select v-model="selectedWeekValue">
+                <SelectTrigger class="w-44">
+                  <SelectValue placeholder="Select week" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="week in weekOptions"
+                    :key="`detail-${week.value}`"
+                    :value="week.value"
+                  >
+                    {{ week.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div
-              class="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
+              v-if="selectedWeekMatchups.length === 0"
+              class="mt-3 text-sm text-muted-foreground"
             >
-              <div>
-                <p class="mb-1 text-sm font-medium">First team</p>
-                <Select v-model="selectedSwapTeamAValue">
-                  <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select team" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="team in teamOptions"
-                      :key="`swap-a-${team.value}`"
-                      :value="team.value"
-                    >
-                      {{ team.label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <p class="mb-1 text-sm font-medium">Second team</p>
-                <Select v-model="selectedSwapTeamBValue">
-                  <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select team" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="team in teamOptions"
-                      :key="`swap-b-${team.value}`"
-                      :value="team.value"
-                    >
-                      {{ team.label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                class="mt-1 lg:mt-0"
-                :disabled="selectedSwapTeamAIndex === selectedSwapTeamBIndex"
-                @click="swapSelectedTeamSchedules"
+              No matchups found for this view.
+            </div>
+
+            <div v-else class="grid grid-cols-1 gap-2 mt-3 md:grid-cols-2">
+              <div
+                v-for="matchup in selectedWeekMatchups"
+                :key="`matchup-${selectedWeekData.week}-${matchup.teamA}-${matchup.teamB}`"
+                class="px-2 py-1.5 rounded-md bg-muted/30"
+                :class="matchup.changed ? 'bg-secondary' : ''"
               >
-                Apply Swap
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="week" class="mt-3">
-            <div class="flex flex-wrap items-end gap-3">
-              <div class="min-w-40">
-                <p class="mb-1 text-sm font-medium">Week to shuffle</p>
-                <Select v-model="selectedWeekValue">
-                  <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select week" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="week in weekOptions"
-                      :key="week.value"
-                      :value="week.value"
-                    >
-                      {{ week.label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <p class="text-sm">
+                  <span
+                    class="font-semibold"
+                    :class="
+                      matchup.winner === matchup.teamA ? 'text-primary' : ''
+                    "
+                  >
+                    {{ teamName(tableData[matchup.teamA]) }}
+                  </span>
+                  <span class="mx-1 text-muted-foreground"
+                    >({{ matchup.pointsA.toFixed(2) }})</span
+                  >
+                  vs
+                  <span
+                    class="ml-1 font-semibold"
+                    :class="
+                      matchup.winner === matchup.teamB ? 'text-primary' : ''
+                    "
+                  >
+                    {{ teamName(tableData[matchup.teamB]) }}
+                  </span>
+                  <span class="mx-1 text-muted-foreground"
+                    >({{ matchup.pointsB.toFixed(2) }})</span
+                  >
+                  <span
+                    v-if="matchup.winner === null"
+                    class="ml-2 text-xs text-muted-foreground"
+                  >
+                    Tie
+                  </span>
+                </p>
               </div>
-              <Button @click="shuffleSelectedWeek">
-                Shuffle Week {{ selectedWeekNumber }}
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="all" class="mt-3">
-            <div class="flex flex-wrap items-center gap-3">
-              <Button @click="randomizeEntireSchedule">
-                Randomize Full Schedule
-              </Button>
             </div>
           </TabsContent>
         </Tabs>
       </div>
+    </Card>
 
-      <div class="p-4 border rounded-md shadow-sm">
+    <Card class="w-full p-4 md:p-6">
+      <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 class="text-lg font-semibold">Scenario Impact</h3>
+          <h3 class="text-3xl font-semibold">Random Schedule Outcomes</h3>
+          <p class="mt-2 text-muted-foreground">
+            Distribution of likely win totals from simulating 1000 randomized
+            schedules.
+          </p>
         </div>
-
-        <div class="grid grid-cols-1 gap-2 mt-3 sm:grid-cols-3">
-          <div
-            v-for="card in scenarioCards"
-            :key="card.label"
-            class="p-3 border rounded-md"
-          >
-            <p class="text-xs uppercase text-muted-foreground">
-              {{ card.label }}
-            </p>
-            <p class="text-2xl font-semibold" :class="card.tone">
-              {{ card.value }}
-            </p>
-            <p class="text-sm truncate text-muted-foreground">
-              {{ card.detail }}
-            </p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2">
-          <div class="p-2 border rounded-md">
-            <p class="text-xs uppercase text-muted-foreground">Helped Most</p>
-            <p class="text-sm font-medium">
-              {{ helpedMostTeam?.name || "No movement" }}
-            </p>
-            <p class="text-xs text-muted-foreground">
-              {{ impactTeamDetail(helpedMostTeam) }}
-            </p>
-          </div>
-          <div class="p-2 border rounded-md">
-            <p class="text-xs uppercase text-muted-foreground">Hurt Most</p>
-            <p class="text-sm font-medium">
-              {{ hurtMostTeam?.name || "No movement" }}
-            </p>
-            <p class="text-xs text-muted-foreground">
-              {{ impactTeamDetail(hurtMostTeam) }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="p-4 mt-4 border rounded-md shadow-sm">
-      <h3 class="text-lg font-semibold">Simulation Results</h3>
-
-      <Tabs v-model="activeDetailValue" class="mt-3">
-        <TabsList class="inline-flex flex-wrap h-auto">
-          <TabsTrigger value="standings">Standings</TabsTrigger>
-          <TabsTrigger value="matchups">Matchups</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="standings" class="mt-3">
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead
-                class="sticky top-0 text-xs uppercase bg-card text-muted-foreground"
-              >
-                <tr>
-                  <th class="pb-2 text-left min-w-32">Team</th>
-                  <th class="pb-2 text-left min-w-20">Actual</th>
-                  <th class="pb-2 text-left min-w-20">Simulated</th>
-                  <th class="pb-2 text-left min-w-20">Seed</th>
-                  <th class="pb-2 text-left min-w-24">Playoff Status</th>
-                  <th class="pb-2 text-left min-w-20">Record Delta</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="team in scenarioImpactRows"
-                  :key="`standings-${team.index}`"
-                  class="border-t h-9"
-                >
-                  <td class="py-1.5 pr-2">{{ team.name }}</td>
-                  <td class="py-1.5 pr-2">
-                    {{ team.actualWins }}-{{ team.actualLosses
-                    }}<span v-if="team.actualTies">-{{ team.actualTies }}</span>
-                    <span class="ml-1 text-muted-foreground">
-                      ({{ seedText(team.actualSeed) }})
-                    </span>
-                  </td>
-                  <td class="py-1.5 pr-2">
-                    {{ team.wins }}-{{ team.losses
-                    }}<span v-if="team.ties">-{{ team.ties }}</span>
-                    <span class="ml-1 text-muted-foreground">
-                      ({{ seedText(team.simulatedSeed) }})
-                    </span>
-                  </td>
-                  <td
-                    class="py-1.5 pr-2"
-                    :class="
-                      team.seedDelta > 0
-                        ? 'text-primary'
-                        : team.seedDelta < 0
-                          ? 'text-destructive'
-                          : 'text-muted-foreground'
-                    "
-                  >
-                    {{ seedDeltaText(team.seedDelta) }}
-                  </td>
-                  <td
-                    class="py-1.5 pr-2 font-medium"
-                    :class="playoffStatusClass(team.playoffChange)"
-                  >
-                    {{ playoffStatusText(team.playoffChange) }}
-                  </td>
-                  <td
-                    class="py-1.5 pr-2"
-                    :class="
-                      team.winDelta > 0
-                        ? 'text-primary'
-                        : team.winDelta < 0
-                          ? 'text-destructive'
-                          : 'text-muted-foreground'
-                    "
-                  >
-                    {{ winDeltaText(team.winDelta) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="matchups" class="mt-3">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <p class="text-sm text-muted-foreground">
-              Changed matchups are highlighted.
-            </p>
-            <Select v-model="selectedWeekValue">
-              <SelectTrigger class="w-44">
-                <SelectValue placeholder="Select week" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="week in weekOptions"
-                  :key="`detail-${week.value}`"
-                  :value="week.value"
-                >
-                  {{ week.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div
-            v-if="selectedWeekMatchups.length === 0"
-            class="mt-3 text-sm text-muted-foreground"
-          >
-            No matchups found for this view.
-          </div>
-
-          <div v-else class="grid grid-cols-1 gap-2 mt-3 md:grid-cols-2">
-            <div
-              v-for="matchup in selectedWeekMatchups"
-              :key="`matchup-${selectedWeekData.week}-${matchup.teamA}-${matchup.teamB}`"
-              class="px-2 py-1.5 border rounded-md"
-              :class="matchup.changed ? 'bg-secondary' : ''"
+        <Select v-model="selectedVolatilityTeamValue">
+          <SelectTrigger class="w-44">
+            <SelectValue placeholder="Select team" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="team in teamOptions"
+              :key="`volatility-${team.value}`"
+              :value="team.value"
             >
-              <p class="text-sm">
-                <span
-                  class="font-medium"
-                  :class="
-                    matchup.winner === matchup.teamA ? 'text-primary' : ''
-                  "
-                >
-                  {{ teamName(tableData[matchup.teamA]) }}
-                </span>
-                <span class="mx-1 text-muted-foreground"
-                  >({{ matchup.pointsA.toFixed(2) }})</span
-                >
-                vs
-                <span
-                  class="ml-1 font-medium"
-                  :class="
-                    matchup.winner === matchup.teamB ? 'text-primary' : ''
-                  "
-                >
-                  {{ teamName(tableData[matchup.teamB]) }}
-                </span>
-                <span class="mx-1 text-muted-foreground"
-                  >({{ matchup.pointsB.toFixed(2) }})</span
-                >
-                <span
-                  v-if="matchup.winner === null"
-                  class="ml-2 text-xs text-muted-foreground"
-                >
-                  Tie
-                </span>
-              </p>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  </Card>
-
-  <Card class="w-full p-4 my-4 md:p-6">
-    <div class="flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h3 class="text-3xl font-bold">Random Schedule Outcomes</h3>
-        <p class="mt-2 text-muted-foreground">
-          Distribution of likely win totals from simulating 1000 randomized
-          schedules.
-        </p>
+              {{ team.label }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      <Select v-model="selectedVolatilityTeamValue">
-        <SelectTrigger class="w-44">
-          <SelectValue placeholder="Select team" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem
-            v-for="team in teamOptions"
-            :key="`volatility-${team.value}`"
-            :value="team.value"
-          >
-            {{ team.label }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
 
-    <apexchart
-      type="area"
-      width="100%"
-      height="320"
-      :options="volatilityChartOptions"
-      :series="selectedVolatilitySeries.series"
-      class="mt-2"
-    ></apexchart>
+      <apexchart
+        type="area"
+        width="100%"
+        height="320"
+        :options="volatilityChartOptions"
+        :series="selectedVolatilitySeries.series"
+        class="mt-2"
+      ></apexchart>
 
-    <div class="mt-4 overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead class="text-xs uppercase text-muted-foreground">
-          <tr>
-            <th class="pb-2 text-left min-w-32">Team</th>
-            <th class="pb-2 text-left min-w-20">Actual</th>
-            <th class="pb-2 text-left min-w-20">Average</th>
-            <th class="pb-2 text-left min-w-20">Most Common</th>
-            <th class="pb-2 text-left min-w-20">P10</th>
-            <th class="pb-2 text-left min-w-20">P90</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="team in monteCarloTeamSummaryRows"
-            :key="`volatility-summary-${team.index}`"
-            class="border-t"
-          >
-            <td class="py-2 pr-2">{{ team.name }}</td>
-            <td class="py-2 pr-2">{{ team.actualWins.toFixed(1) }}</td>
-            <td class="py-2 pr-2">{{ team.average.toFixed(2) }}</td>
-            <td class="py-2 pr-2">{{ team.mode.toFixed(1) }}</td>
-            <td class="py-2 pr-2">{{ team.p10.toFixed(1) }}</td>
-            <td class="py-2 pr-2">{{ team.p90.toFixed(1) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </Card>
+      <div class="mt-4 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-muted-foreground">
+            <tr>
+              <th class="pb-2 text-left min-w-32">Team</th>
+              <th class="pb-2 text-left min-w-20">Actual</th>
+              <th class="pb-2 text-left min-w-20">Average</th>
+              <th class="pb-2 text-left min-w-20">Most Common</th>
+              <th class="pb-2 text-left min-w-20">P10</th>
+              <th class="pb-2 text-left min-w-20">P90</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="team in monteCarloTeamSummaryRows"
+              :key="`volatility-summary-${team.index}`"
+              class="border-t"
+            >
+              <td class="py-2 pr-2">{{ team.name }}</td>
+              <td class="py-2 pr-2">{{ team.actualWins.toFixed(1) }}</td>
+              <td class="py-2 pr-2">{{ team.average.toFixed(2) }}</td>
+              <td class="py-2 pr-2">{{ team.mode.toFixed(1) }}</td>
+              <td class="py-2 pr-2">{{ team.p10.toFixed(1) }}</td>
+              <td class="py-2 pr-2">{{ team.p90.toFixed(1) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  </div>
 </template>

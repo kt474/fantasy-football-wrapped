@@ -89,7 +89,7 @@ const {
               Analyze your league with power rankings, roster insights, custom
               weekly reports, playoff odds, and much more.
             </h2>
-            <Card class="p-4 mt-8 rounded-md">
+            <Card class="p-4 mt-8">
               <div class="mb-4 text-left">
                 <p class="text-sm font-semibold">Get started</p>
                 <p class="text-sm text-muted-foreground">

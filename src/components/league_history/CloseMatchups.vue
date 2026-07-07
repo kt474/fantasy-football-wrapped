@@ -198,7 +198,7 @@ const matchupSections = computed<MatchupSection[]>(() => [
             <Card
               v-for="matchup in section.matchups"
               :key="`${section.title}-${matchup.matchupId}-${matchup.matchupIndex}`"
-              class="flex flex-col h-40 shadow-sm border-border/70 bg-card"
+              class="flex flex-col h-40"
             >
               <CardHeader class="p-4 pb-1">
                 <div class="flex items-start justify-between gap-3">
