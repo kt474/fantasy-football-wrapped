@@ -9,6 +9,7 @@ import { getWinProbability } from "../../api/helper.ts";
 import { fakeWeeklyPreview } from "../../api/fakeLeague.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
+import { Skeleton } from "@/components/ui/skeleton";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 
 const store = useStore();
@@ -874,8 +875,110 @@ watch([() => store.darkMode, () => store.currentLeagueId], () =>
       </p>
     </div>
   </div>
-  <div v-else>
-    <p class="h-screen">Loading...</p>
+  <div
+    v-else
+    class="flex flex-wrap mb-4 overflow-auto gap-x-4 gap-y-2"
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+  >
+    <span class="sr-only">Loading weekly preview...</span>
+    <Card class="w-full p-4 mt-2">
+      <Skeleton class="w-48 h-6 mb-4 bg-muted dark:bg-muted/70" />
+      <div class="grid gap-3 md:grid-cols-3">
+        <div
+          v-for="index in 3"
+          :key="`preview-summary-skeleton-${index}`"
+          class="space-y-2"
+        >
+          <Skeleton class="w-24 h-4 bg-muted dark:bg-muted/70" />
+          <Skeleton class="w-full h-8 bg-muted dark:bg-muted/70" />
+        </div>
+      </div>
+    </Card>
+    <Card
+      v-for="matchupIndex in 2"
+      :key="`matchup-preview-skeleton-${matchupIndex}`"
+      class="sm:px-2 px-1 py-2.5 mt-2 w-full xl:w-[calc(50%-.5rem)] overflow-auto"
+    >
+      <div class="flex justify-between">
+        <div class="flex justify-between w-full sm:p-2">
+          <div
+            v-for="side in ['left', 'right']"
+            :key="`matchup-preview-skeleton-${matchupIndex}-${side}`"
+            class="w-60 sm:w-64"
+          >
+            <div
+              class="flex items-center mb-4"
+              :class="{ 'justify-end': side === 'right' }"
+            >
+              <Skeleton
+                v-if="side === 'left'"
+                class="w-8 h-8 -mt-2 rounded-full bg-muted dark:bg-muted/70"
+              />
+              <div
+                class="flex items-start"
+                :class="{ 'flex-row-reverse': side === 'right' }"
+              >
+                <div class="px-2 space-y-2">
+                  <Skeleton class="w-28 h-5 bg-muted dark:bg-muted/70" />
+                  <Skeleton
+                    class="w-16 h-3 bg-muted dark:bg-muted/70"
+                    :class="{ 'ml-auto': side === 'right' }"
+                  />
+                </div>
+                <div class="hidden space-y-1 sm:block">
+                  <Skeleton class="w-14 h-8 bg-muted dark:bg-muted/70" />
+                  <Skeleton class="w-10 h-3 mx-auto bg-muted dark:bg-muted/70" />
+                </div>
+              </div>
+              <Skeleton
+                v-if="side === 'right'"
+                class="w-8 h-8 -mt-2 rounded-full bg-muted dark:bg-muted/70"
+              />
+            </div>
+            <div class="space-y-2">
+              <div
+                v-for="playerIndex in 6"
+                :key="`player-skeleton-${matchupIndex}-${side}-${playerIndex}`"
+                class="flex items-center justify-between rounded-md border border-border px-3 py-2"
+              >
+                <div
+                  class="flex items-center gap-2"
+                  :class="{ 'order-2': side === 'right' }"
+                >
+                  <Skeleton
+                    class="hidden rounded-full size-10 bg-muted dark:bg-muted/70 sm:block"
+                  />
+                  <div class="space-y-2">
+                    <Skeleton class="w-20 h-4 bg-muted dark:bg-muted/70" />
+                    <Skeleton class="w-14 h-3 bg-muted dark:bg-muted/70" />
+                  </div>
+                </div>
+                <Skeleton class="w-8 h-5 bg-muted dark:bg-muted/70" />
+              </div>
+            </div>
+          </div>
+          <div class="flex w-px h-full bg-muted"></div>
+        </div>
+      </div>
+      <Card class="px-4 py-8 mx-0 mt-3 rounded-md sm:mx-2">
+        <div class="flex justify-between mb-3">
+          <Skeleton class="w-48 h-5 bg-muted dark:bg-muted/70" />
+          <Skeleton class="w-12 h-5 bg-muted dark:bg-muted/70" />
+        </div>
+        <Skeleton class="w-full h-2.5 rounded-full bg-muted dark:bg-muted/70" />
+      </Card>
+      <div class="p-4 mx-0 mt-3 space-y-3 rounded sm:mx-2">
+        <div class="flex justify-between gap-4">
+          <Skeleton class="w-40 h-5 bg-muted dark:bg-muted/70" />
+          <Skeleton class="w-40 h-5 bg-muted dark:bg-muted/70" />
+        </div>
+        <Skeleton class="w-3/4 h-4 bg-muted dark:bg-muted/70" />
+      </div>
+      <Skeleton class="w-40 h-5 my-4 ml-4 bg-muted dark:bg-muted/70" />
+      <Skeleton class="w-full h-[350px] mt-4 bg-muted dark:bg-muted/70" />
+    </Card>
   </div>
 </template>
 <style scoped></style>

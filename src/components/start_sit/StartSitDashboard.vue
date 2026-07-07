@@ -619,7 +619,9 @@ watch(
                     </p>
                     <div class="grid grid-cols-2 gap-3 mt-2">
                       <div>
-                        <p class="text-xs font-medium">Proj</p>
+                        <p class="text-xs font-medium text-muted-foreground">
+                          Proj
+                        </p>
                         <p class="font-semibold tabular-nums">
                           {{
                             getProjectionValue(recommendation.start).toFixed(1)
@@ -627,7 +629,9 @@ watch(
                         </p>
                       </div>
                       <div>
-                        <p class="text-xs font-medium">Avg</p>
+                        <p class="text-xs font-medium text-muted-foreground">
+                          Avg
+                        </p>
                         <p class="font-semibold tabular-nums">
                           {{ getAverage(recommendation.start.stats.points) }}
                         </p>
@@ -640,7 +644,9 @@ watch(
                     </p>
                     <div class="grid grid-cols-2 gap-3 mt-2">
                       <div>
-                        <p class="text-xs font-medium">Proj</p>
+                        <p class="text-xs font-medium text-muted-foreground">
+                          Proj
+                        </p>
                         <p class="font-semibold tabular-nums">
                           {{
                             getProjectionValue(recommendation.sit).toFixed(1)
@@ -648,7 +654,9 @@ watch(
                         </p>
                       </div>
                       <div>
-                        <p class="text-xs font-medium">Avg</p>
+                        <p class="text-xs font-medium text-muted-foreground">
+                          Avg
+                        </p>
                         <p class="font-semibold tabular-nums">
                           {{ getAverage(recommendation.sit.stats.points) }}
                         </p>
@@ -742,19 +750,25 @@ watch(
                       Recent
                     </p>
                     <div class="text-center">
-                      <p class="text-xs font-medium">Avg Pts</p>
+                      <p class="text-xs font-medium text-muted-foreground">
+                        Avg Pts
+                      </p>
                       <p class="text-lg font-semibold tabular-nums">
                         {{ getAverage(player.stats.points) }}
                       </p>
                     </div>
                     <div class="text-center">
-                      <p class="text-xs font-medium">High</p>
+                      <p class="text-xs font-medium text-muted-foreground">
+                        High
+                      </p>
                       <p class="text-lg font-semibold tabular-nums">
                         {{ getMax(player.stats.points) }}
                       </p>
                     </div>
                     <div class="text-center">
-                      <p class="text-xs font-medium">Low</p>
+                      <p class="text-xs font-medium text-muted-foreground">
+                        Low
+                      </p>
                       <p class="text-lg font-semibold tabular-nums">
                         {{ getMin(player.stats.points) }}
                       </p>
@@ -765,7 +779,9 @@ watch(
                       "
                       class="text-center"
                     >
-                      <p class="text-xs font-medium">Avg Rank</p>
+                      <p class="text-xs font-medium text-muted-foreground">
+                        Avg Rank
+                      </p>
                       <p
                         v-if="getAverage(player.stats.ranks) !== 0"
                         class="mt-1 inline-flex min-w-10 items-center justify-center rounded-md px-2 py-0.5 text-sm font-semibold tabular-nums"
