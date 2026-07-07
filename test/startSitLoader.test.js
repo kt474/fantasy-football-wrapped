@@ -3,7 +3,9 @@ import {
   canPlayerFillLineupSlot,
   getOrderedRosterPlayerEntries,
   getOrderedRosterPlayerIds,
+  getRecentStartSitWeekLabel,
   getStartingRosterSlots,
+  getStartSitWeek,
 } from "../src/components/start_sit/startSitLoader.ts";
 import { mapWithConcurrency } from "../src/lib/async.ts";
 
@@ -53,6 +55,39 @@ describe("Start/Sit loader", () => {
       "p1",
       "p2",
     ]);
+  });
+
+  test("uses week 1 before the first scored week", () => {
+    expect(getStartSitWeek({ currentWeek: 0, lastScoredWeek: 0 })).toBe(1);
+    expect(getStartSitWeek({ currentWeek: 17, lastScoredWeek: 0 })).toBe(1);
+  });
+
+  test("uses the active week after games have been scored", () => {
+    expect(getStartSitWeek({ currentWeek: 8, lastScoredWeek: 7 })).toBe(8);
+    expect(getStartSitWeek({ currentWeek: 0, lastScoredWeek: 17 })).toBe(17);
+  });
+
+  test("uses the last scored week for completed leagues", () => {
+    expect(
+      getStartSitWeek({
+        currentWeek: 18,
+        lastScoredWeek: 17,
+        status: "complete",
+      })
+    ).toBe(17);
+    expect(
+      getStartSitWeek({
+        currentWeek: 0,
+        lastScoredWeek: 17,
+        status: "complete",
+      })
+    ).toBe(17);
+  });
+
+  test("labels recent weeks from the last scored week", () => {
+    expect(getRecentStartSitWeekLabel({ lastScoredWeek: 7 }, 0)).toBe("Week 7");
+    expect(getRecentStartSitWeekLabel({ lastScoredWeek: 7 }, 6)).toBe("Week 1");
+    expect(getRecentStartSitWeekLabel({ lastScoredWeek: 0 }, 0)).toBe("N/A");
   });
 
   test("never exceeds the configured concurrency", async () => {

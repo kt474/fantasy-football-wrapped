@@ -29,7 +29,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
   canPlayerFillLineupSlot,
   getOrderedRosterPlayerEntries,
+  getRecentStartSitWeekLabel,
   getStartingRosterSlots,
+  getStartSitWeek,
   START_SIT_CONCURRENCY,
 } from "./startSitLoader";
 import PlayerNewsFeed from "./PlayerNewsFeed.vue";
@@ -138,12 +140,7 @@ const getPlayerMatchupLabel = (player: StartSitPlayer) => {
 
 const getRecentWeekLabel = (index: number) => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  const currentWeek =
-    currentLeague && currentLeague.currentWeek > 0
-      ? currentLeague.currentWeek
-      : currentLeague?.lastScoredWeek || 18;
-
-  return `Week ${currentWeek - Number(index) - 1}`;
+  return getRecentStartSitWeekLabel(currentLeague, Number(index));
 };
 
 const RECOMMENDATION_LIMIT = 5;
@@ -297,7 +294,7 @@ const rosterHeading = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
   if (currentLeague?.status === "complete") return "Roster";
 
-  return `Week ${currentLeague?.currentWeek || 1} Roster`;
+  return `Week ${getStartSitWeek(currentLeague)} Roster`;
 });
 
 const currentManager = ref(managers.value[0]);
@@ -396,7 +393,7 @@ const loadSelectedRoster = async () => {
       return;
     }
 
-    const week = currentLeague.currentWeek || currentLeague.lastScoredWeek || 1;
+    const week = getStartSitWeek(currentLeague);
     const leagueKey = getLeagueKey(currentLeague);
     const playerEntries = getOrderedRosterPlayerEntries(
       selectedTeam.players,

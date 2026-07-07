@@ -748,6 +748,9 @@ export const getLeagueDataWeekCount = ({
   lastScoredWeek: number;
 }) => {
   if (status === "in_season" || status === "post_season") {
+    if (lastScoredWeek <= 0) {
+      return 1;
+    }
     return Math.max(currentWeek, lastScoredWeek, 0);
   }
   if (status === "complete") {

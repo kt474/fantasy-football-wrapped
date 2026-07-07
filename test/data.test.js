@@ -47,6 +47,23 @@ describe("Sleeper API data transforms", () => {
     ).toBe(8);
   });
 
+  test("uses week 1 for active leagues before the first scored week", () => {
+    expect(
+      getLeagueDataWeekCount({
+        status: "in_season",
+        currentWeek: 17,
+        lastScoredWeek: 0,
+      })
+    ).toBe(1);
+    expect(
+      getLeagueDataWeekCount({
+        status: "post_season",
+        currentWeek: 18,
+        lastScoredWeek: 0,
+      })
+    ).toBe(1);
+  });
+
   test("maps league response into app league shape", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       mockFetchResponse(200, {

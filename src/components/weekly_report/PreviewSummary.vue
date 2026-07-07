@@ -74,6 +74,13 @@ const getStarters = (id: number) => {
   }
 };
 
+const getPreviewWeek = (league: LeagueInfoType | undefined) => {
+  if (!league) return 1;
+  if (league.lastScoredWeek <= 0) return 1;
+  if (league.status === "complete") return league.lastScoredWeek;
+  return league.currentWeek || league.lastScoredWeek;
+};
+
 const promptData = computed(() => {
   const matchupData = props.matchups.map((matchup: any) => {
     const team1 = {
@@ -97,20 +104,16 @@ const promptData = computed(() => {
     return [team1, team2];
   });
 
-  const currentWeek =
-    store.leagueInfo[store.currentLeagueIndex]?.currentWeek ??
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek;
+  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentWeek = getPreviewWeek(currentLeague);
 
-  const playoffMatchup =
-    currentWeek >
-    store.leagueInfo[store.currentLeagueIndex]?.regularSeasonLength;
+  const playoffMatchup = currentWeek > currentLeague?.regularSeasonLength;
 
   if (playoffMatchup) {
     return {
       leagueMetadata: {
-        regularSeasonLength:
-          store.leagueInfo[store.currentLeagueIndex]?.regularSeasonLength,
-        playoffTeams: store.leagueInfo[store.currentLeagueIndex]?.playoffTeams,
+        regularSeasonLength: currentLeague?.regularSeasonLength,
+        playoffTeams: currentLeague?.playoffTeams,
         currentWeek: currentWeek,
         playoffMatchup: playoffMatchup,
       },
@@ -119,9 +122,8 @@ const promptData = computed(() => {
   }
   return {
     leagueMetadata: {
-      regularSeasonLength:
-        store.leagueInfo[store.currentLeagueIndex]?.regularSeasonLength,
-      playoffTeams: store.leagueInfo[store.currentLeagueIndex]?.playoffTeams,
+      regularSeasonLength: currentLeague?.regularSeasonLength,
+      playoffTeams: currentLeague?.playoffTeams,
       currentWeek: currentWeek,
     },
     matchupData,

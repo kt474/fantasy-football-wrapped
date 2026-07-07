@@ -7,6 +7,12 @@ export type OrderedRosterPlayerEntry = {
   rosterSlot: string;
 };
 
+type StartSitWeekInfo = {
+  currentWeek?: number;
+  lastScoredWeek?: number;
+  status?: string;
+};
+
 export const getStartingRosterSlots = (rosterPositions: string[] = []) =>
   rosterPositions.filter(
     (position) => !NON_STARTING_SLOTS.has(position.toUpperCase())
@@ -34,7 +40,37 @@ export const canPlayerFillLineupSlot = (
 ) => {
   if (!playerPosition || !slot) return false;
 
-  return getEligiblePositionsForSlot(slot).includes(playerPosition.toUpperCase());
+  return getEligiblePositionsForSlot(slot).includes(
+    playerPosition.toUpperCase()
+  );
+};
+
+export const getStartSitWeek = (league?: StartSitWeekInfo | null) => {
+  const lastScoredWeek = Number(league?.lastScoredWeek ?? 0);
+  if (!Number.isFinite(lastScoredWeek) || lastScoredWeek <= 0) {
+    return 1;
+  }
+
+  if (league?.status === "complete") {
+    return lastScoredWeek;
+  }
+
+  const currentWeek = Number(league?.currentWeek ?? 0);
+  if (!Number.isFinite(currentWeek) || currentWeek <= 0) {
+    return lastScoredWeek;
+  }
+
+  return Math.max(currentWeek, lastScoredWeek);
+};
+
+export const getRecentStartSitWeekLabel = (
+  league: StartSitWeekInfo | undefined | null,
+  index: number
+) => {
+  const lastScoredWeek = Number(league?.lastScoredWeek ?? 0);
+  const cardWeek = lastScoredWeek - index;
+
+  return Number.isFinite(cardWeek) && cardWeek > 0 ? `Week ${cardWeek}` : "N/A";
 };
 
 export const getOrderedRosterPlayerEntries = (
