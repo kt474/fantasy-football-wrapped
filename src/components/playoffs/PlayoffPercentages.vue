@@ -415,7 +415,7 @@ const tableData = computed(() => {
     <div
       v-else
       role="status"
-      class="p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700 custom-height"
+      class="p-4 border border-gray-200 rounded shadow-sm animate-pulse md:p-6 dark:border-gray-700 custom-height"
     >
       <p class="flex justify-center -mb-6 text-xl font-semibold">
         Loading projection data...

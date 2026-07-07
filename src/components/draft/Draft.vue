@@ -430,7 +430,7 @@ const getValueColor = (value: number) => {
             <div
               v-if="snakeDraftFormat"
               v-for="pick in sortedData"
-              class="block h-20 p-2.5 rounded-md shadow"
+              class="block h-20 p-2.5 rounded-md shadow-sm"
               :class="[
                 getBgColor(pick.position),
                 pick.keeper ? 'border-destructive border-t-4' : '',
@@ -459,7 +459,7 @@ const getValueColor = (value: number) => {
               <div v-for="pick in data">
                 <div
                   v-if="team.id === pick.userId"
-                  class="block h-20 p-2.5 mb-0.5 text-gray-900 rounded-md shadow dark:shadow-gray-800 dark:text-gray-200"
+                  class="block h-20 p-2.5 mb-0.5 text-gray-900 rounded-md shadow-sm dark:shadow-gray-800 dark:text-gray-200"
                   :class="[
                     getBgColor(pick.position),
                     pick.keeper ? 'border-destructive border-t-4' : '',
@@ -517,7 +517,7 @@ const getValueColor = (value: number) => {
             <div
               v-for="index in draftSize * 6"
               :key="`draft-pick-skeleton-${index}`"
-              class="flex h-20 flex-col justify-center gap-2 rounded-md border border-border bg-background p-2.5 shadow"
+              class="flex h-20 flex-col justify-center gap-2 rounded-md border border-border bg-background p-2.5 shadow-sm"
             >
               <Skeleton class="w-4/5 h-4 bg-muted dark:bg-muted/70" />
               <Skeleton class="w-1/2 h-3 bg-muted dark:bg-muted/70" />

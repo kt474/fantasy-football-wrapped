@@ -330,7 +330,7 @@ const chartOptions = ref({
       class="w-full mb-4 md:w-1/3 md:mr-4 md:mb-0"
     />
     <Card
-      class="w-full p-4 rounded-lg shadow md:p-6 min-w-80"
+      class="w-full p-4 rounded-lg shadow-sm md:p-6 min-w-80"
       :class="{ 'md:w-2/3': store.currentTab === 'Power Rankings' }"
     >
       <div class="flex justify-between">

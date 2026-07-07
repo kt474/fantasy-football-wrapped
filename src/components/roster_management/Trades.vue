@@ -549,7 +549,7 @@ watch(
       <div
         v-for="x in 3"
         role="status"
-        class="max-w-sm p-4 mt-4 mr-4 border border-gray-200 rounded shadow animate-pulse dark:border-gray-700"
+        class="max-w-sm p-4 mt-4 mr-4 border border-gray-200 rounded shadow-sm animate-pulse dark:border-gray-700"
       >
         <div class="flex items-center mb-4">
           <svg
