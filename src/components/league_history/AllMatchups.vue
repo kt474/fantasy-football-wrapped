@@ -83,14 +83,14 @@ const extractRecord = (user: MatchupDataType[], opponent: MatchupTableRow) => {
   <Card>
     <div class="flex justify-between">
       <p
-        class="w-full pt-2 text-lg font-semibold text-center rounded-t-lg bg-secondary"
+        class="w-full pt-2 text-lg font-semibold text-center rounded-t-lg bg-muted/50"
       >
         All Time H2H Matchups
       </p>
     </div>
     <div class="relative w-full overflow-x-auto">
       <table class="w-full text-sm text-left rtl:text-right 0">
-        <thead class="text-xs bg-secondary">
+        <thead class="text-xs bg-muted/50">
           <tr>
             <th scope="col" class="px-4 py-3 uppercase sm:px-6 w-60">
               Team Name

@@ -212,11 +212,15 @@ const getAllManagersSpend = (groupedMoves: WaiverMove[]) => {
 };
 
 const getValueColor = (value: number) => {
-  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
-  if (value <= 25) return `bg-green-400 dark:bg-green-600 text-gray-50`;
-  if (value <= 35) return "bg-yellow-300 dark-bg-yellow-600 text-black";
-  if (value <= 45) return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
-  return `bg-red-400 dark:bg-red-600 text-gray-50`;
+  if (value <= 15)
+    return "bg-emerald-100 text-emerald-900 dark:bg-emerald-700 dark:text-gray-50";
+  if (value <= 25)
+    return "bg-green-100 text-green-900 dark:bg-green-700 dark:text-gray-50";
+  if (value <= 35)
+    return "bg-yellow-100 text-yellow-950 dark:bg-yellow-700 dark:text-gray-50";
+  if (value <= 45)
+    return "bg-orange-100 text-orange-950 dark:bg-orange-700 dark:text-gray-50";
+  return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
 };
 
 const getRatingLabel = (value: number) => {
@@ -323,7 +327,7 @@ watch(
           </div>
           <Card
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="flex p-3 mt-4 mr-4 text-sm bg-secondary"
+            class="flex p-3 mt-4 mr-4 text-sm"
           >
             <div class="mr-4">
               <p class="min-w-32">Budget spent:</p>
@@ -378,7 +382,7 @@ watch(
           </div>
           <Card
             v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
-            class="flex p-3 mt-4 mr-4 text-sm border-2 bg-secondary"
+            class="flex p-3 mt-4 mr-4 text-sm"
           >
             <div class="mr-4">
               <p class="min-w-32">Budget spent:</p>
@@ -432,23 +436,23 @@ watch(
                 Loading waiver moves...
               </p>
               <div
-                class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-2"
+                class="h-2.5 bg-muted rounded-full w-48 mb-2"
               ></div>
             </div>
           </div>
           <div
-            class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-72 mb-4"
+            class="h-2.5 bg-muted rounded-full w-72 mb-4"
           ></div>
           <div
-            class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"
+            class="h-2 bg-muted rounded-full mb-2.5"
           ></div>
           <div
-            class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"
+            class="h-2 bg-muted rounded-full mb-2.5"
           ></div>
           <div
-            class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"
+            class="h-2 bg-muted rounded-full mb-2.5"
           ></div>
-          <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+          <div class="h-2 bg-muted rounded-full"></div>
 
           <span class="sr-only">Loading...</span>
         </div>
@@ -550,71 +554,71 @@ watch(
       <div
         v-else
         role="status"
-        class="ml-2 space-y-4 border-gray-200 divide-y divide-gray-200 max-w-80 animate-pulse dark:divide-gray-700"
+        class="ml-2 space-y-4 border-border divide-y divide-border max-w-80 animate-pulse"
       >
         <div class="flex items-center justify-between">
           <div>
             <div
-              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
             ></div>
             <div
-              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+              class="w-32 h-2 bg-muted rounded-full"
             ></div>
           </div>
           <div
-            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+            class="h-2.5 bg-muted/80 rounded-full w-12"
           ></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div>
             <div
-              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
             ></div>
             <div
-              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+              class="w-32 h-2 bg-muted rounded-full"
             ></div>
           </div>
           <div
-            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+            class="h-2.5 bg-muted/80 rounded-full w-12"
           ></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div>
             <div
-              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
             ></div>
             <div
-              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+              class="w-32 h-2 bg-muted rounded-full"
             ></div>
           </div>
           <div
-            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+            class="h-2.5 bg-muted/80 rounded-full w-12"
           ></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div>
             <div
-              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
             ></div>
             <div
-              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+              class="w-32 h-2 bg-muted rounded-full"
             ></div>
           </div>
           <div
-            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+            class="h-2.5 bg-muted/80 rounded-full w-12"
           ></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div>
             <div
-              class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"
+              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
             ></div>
             <div
-              class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"
+              class="w-32 h-2 bg-muted rounded-full"
             ></div>
           </div>
           <div
-            class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"
+            class="h-2.5 bg-muted/80 rounded-full w-12"
           ></div>
         </div>
         <span class="sr-only">Loading...</span>

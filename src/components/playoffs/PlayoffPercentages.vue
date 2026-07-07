@@ -287,7 +287,6 @@ const tableData = computed(() => {
       store.leagueInfo[store.currentLeagueIndex] &&
       store.leagueInfo[store.currentLeagueIndex].status !== 'complete'
     "
-    class="bg-secondary"
   >
     <div
       class="flex justify-between pb-2"
@@ -336,7 +335,7 @@ const tableData = computed(() => {
     </div>
     <div v-if="!loading" class="relative w-full overflow-x-auto bg-card">
       <table v-if="showData" class="w-full text-sm text-left rtl:text-right">
-        <thead class="text-xs uppercase bg-secondary">
+        <thead class="text-xs uppercase bg-muted/50">
           <tr>
             <th scope="col" class="px-4 py-3 sm:px-6 w-60">Team Name</th>
             <th v-for="i in playoffTeams" scope="col" class="px-2 py-3">
@@ -415,53 +414,53 @@ const tableData = computed(() => {
     <div
       v-else
       role="status"
-      class="p-4 border border-gray-200 rounded shadow-sm animate-pulse md:p-6 dark:border-gray-700 custom-height"
+      class="p-4 border border-border rounded shadow-sm animate-pulse md:p-6 custom-height"
     >
       <p class="flex justify-center -mb-6 text-xl font-semibold">
         Loading projection data...
       </p>
       <div
-        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2.5"
+        class="h-2.5 bg-muted rounded-full w-32 mb-2.5"
       ></div>
       <div
-        class="w-48 h-2 mb-10 bg-gray-200 rounded-full dark:bg-gray-700"
+        class="w-48 h-2 mb-10 bg-muted rounded-full"
       ></div>
       <div class="flex items-baseline mt-36">
         <div
-          class="w-full h-40 bg-gray-200 rounded-t-lg dark:bg-gray-700"
+          class="w-full h-40 bg-muted rounded-t-lg"
         ></div>
         <div
-          class="w-full bg-gray-200 rounded-t-lg h-96 ms-6 dark:bg-gray-700"
+          class="w-full bg-muted rounded-t-lg h-96 ms-6"
         ></div>
         <div
-          class="w-full bg-gray-200 rounded-t-lg h-60 ms-6 dark:bg-gray-700"
+          class="w-full bg-muted rounded-t-lg h-60 ms-6"
         ></div>
         <div
-          class="w-full h-40 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+          class="w-full h-40 bg-muted rounded-t-lg ms-6"
         ></div>
         <div
-          class="w-full h-32 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+          class="w-full h-32 bg-muted rounded-t-lg ms-6"
         ></div>
         <div
-          class="w-full bg-gray-200 rounded-t-lg h-36 ms-6 dark:bg-gray-700"
+          class="w-full bg-muted rounded-t-lg h-36 ms-6"
         ></div>
         <div
-          class="w-full bg-gray-200 rounded-t-lg h-72 ms-6 dark:bg-gray-700"
+          class="w-full bg-muted rounded-t-lg h-72 ms-6"
         ></div>
         <div
-          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+          class="w-full bg-muted rounded-t-lg h-44 ms-6"
         ></div>
         <div
-          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+          class="w-full bg-muted rounded-t-lg h-44 ms-6"
         ></div>
         <div
-          class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+          class="w-full h-64 bg-muted rounded-t-lg ms-6"
         ></div>
         <div
-          class="w-full h-64 bg-gray-200 rounded-t-lg ms-6 dark:bg-gray-700"
+          class="w-full h-64 bg-muted rounded-t-lg ms-6"
         ></div>
         <div
-          class="w-full bg-gray-200 rounded-t-lg h-44 ms-6 dark:bg-gray-700"
+          class="w-full bg-muted rounded-t-lg h-44 ms-6"
         ></div>
       </div>
       <span class="sr-only">Loading...</span>

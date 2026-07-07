@@ -125,7 +125,10 @@ onMounted(async () => {
     allData.value =
       store.leagueInfo[store.currentLeagueIndex].rosterRankings ?? {};
   } else if (store.leagueInfo.length === 0) {
-    data.value = fakePlayerRankings as unknown as Record<string, RankingPlayer[]>;
+    data.value = fakePlayerRankings as unknown as Record<
+      string,
+      RankingPlayer[]
+    >;
     allData.value = fakeRosterData;
   }
 });
@@ -211,7 +214,7 @@ watch(
                       }}
                       {{ player.lastName }}
                     </p>
-                    <div class="px-3 py-1 rounded-lg bg-secondary">
+                    <div class="px-3 py-1 rounded-lg bg-muted/50">
                       <p
                         class="text-sm truncate sm:text-base max-w-16 sm:max-w-52"
                       >
@@ -220,20 +223,20 @@ watch(
                     </div>
                   </div>
                   <div class="flex">
-                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-secondary">
+                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-muted/50">
                       <p>Points:</p>
                       <p class="text-base font-semibold sm:text-lg">
                         {{ player.points ? player.points.toFixed(1) : 0 }}
                       </p>
                     </div>
-                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-secondary">
+                    <div class="w-full px-3 py-1 m-1 rounded-lg bg-muted/50">
                       <p>PPG:</p>
                       <p class="text-base font-semibold sm:text-lg">
                         {{ player.ppg ? player.ppg.toFixed(1) : 0 }}
                       </p>
                     </div>
                     <div
-                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-secondary sm:inline-block"
+                      class="hidden w-full px-3 py-1 m-1 rounded-lg sm:inline-block"
                     >
                       <p>Overall Rank:</p>
                       <p class="text-base font-semibold sm:text-lg">
@@ -241,7 +244,7 @@ watch(
                       </p>
                     </div>
                     <div
-                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-secondary sm:inline-block"
+                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-muted/50 sm:inline-block"
                     >
                       <p>Games Played:</p>
                       <p class="text-base font-semibold sm:text-lg">
@@ -266,22 +269,12 @@ watch(
       class="max-w-80 sm:max-w-sm animate-pulse"
     >
       <p class="mb-2">Loading player data...</p>
-      <div
-        class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"
-      ></div>
-      <div
-        class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px] mb-2.5"
-      ></div>
-      <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-      <div
-        class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[330px] mb-2.5"
-      ></div>
-      <div
-        class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5"
-      ></div>
-      <div
-        class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px]"
-      ></div>
+      <div class="h-2.5 bg-muted rounded-full w-48 mb-4"></div>
+      <div class="h-2 bg-muted rounded-full max-w-[360px] mb-2.5"></div>
+      <div class="h-2 bg-muted rounded-full mb-2.5"></div>
+      <div class="h-2 bg-muted rounded-full max-w-[330px] mb-2.5"></div>
+      <div class="h-2 bg-muted rounded-full max-w-[300px] mb-2.5"></div>
+      <div class="h-2 bg-muted rounded-full max-w-[360px]"></div>
       <span class="sr-only">Loading...</span>
     </div>
   </Card>

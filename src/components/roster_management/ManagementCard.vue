@@ -67,7 +67,7 @@ const listPadding = computed(() => {
   <Card>
     <TooltipProvider>
       <table class="w-full text-sm text-left rtl:text-right">
-        <thead class="text-xs uppercase bg-secondary">
+        <thead class="text-xs uppercase bg-muted/50">
           <tr>
             <th scope="col" class="px-4 py-3 sm:px-6">Team Name</th>
             <th scope="col" class="px-1 py-3">

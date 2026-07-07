@@ -521,7 +521,7 @@ const chartOptions = ref({
     </h5>
     <div class="relative overflow-x-auto rounded-lg">
       <table class="w-full min-w-[648px] text-sm text-left rtl:text-right">
-        <thead class="text-xs uppercase bg-secondary">
+        <thead class="text-xs uppercase bg-muted/50">
           <tr>
             <th scope="col" class="px-4 py-3 sm:px-6">Name</th>
             <th scope="col" class="px-3 py-3 sm:px-6">

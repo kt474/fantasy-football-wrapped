@@ -307,13 +307,18 @@ const getRoundPick = (draftSlot: number, round: number) => {
 };
 
 const getValueColor = (value: number) => {
-  if (value >= 2.5) return `bg-emerald-600 dark:bg-emerald-500 bg-opacity-80`;
-  if (value >= 1.75) return `bg-emerald-500 dark:bg-emerald-600 bg-opacity-80`;
-  if (value >= 0.75) return `bg-emerald-400 dark:bg-emerald-700 bg-opacity-100`;
-  if (value >= 0) return "bg-gray-400 bg-opacity-65";
-  if (value >= -1.75) return `bg-rose-300 dark:bg-rose-800`;
-  if (value >= -2.5) return `bg-rose-400 dark:bg-rose-700`;
-  return `bg-red-400 dark:bg-red-600`;
+  if (value >= 2.5)
+    return "bg-emerald-100 text-emerald-900 dark:bg-emerald-700 dark:text-gray-50";
+  if (value >= 1.75)
+    return "bg-green-100 text-green-900 dark:bg-green-700 dark:text-gray-50";
+  if (value >= 0.75)
+    return "bg-emerald-100 text-emerald-900 dark:bg-emerald-700 dark:text-gray-50";
+  if (value >= 0) return "bg-muted text-muted-foreground";
+  if (value >= -1.75)
+    return "bg-rose-100 text-rose-900 dark:bg-rose-700 dark:text-gray-50";
+  if (value >= -2.5)
+    return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
+  return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
 };
 
 </script>

@@ -52,11 +52,11 @@ const mostPoints = computed(() => {
 </script>
 <template>
   <Card class="relative w-full overflow-x-auto md:max-w-2xl lg:max-w-3xl">
-    <p class="w-full pt-2 text-lg font-semibold text-center bg-secondary">
+    <p class="w-full pt-2 text-lg font-semibold text-center bg-muted/50">
       All Time Weekly High Score
     </p>
     <table class="w-full text-sm text-left rtl:text-right">
-      <thead class="text-xs uppercase bg-secondary">
+      <thead class="text-xs uppercase bg-muted/50">
         <tr>
           <th scope="col" class="px-4 py-6 sm:px-6">Team Name</th>
           <th scope="col" class="px-2 py-3">

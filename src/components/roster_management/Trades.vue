@@ -226,11 +226,15 @@ const getOrdinalSuffix = (number: number) => {
 
 const getValueColor = (value: number | null | undefined) => {
   if (value == null) return "bg-muted text-muted-foreground";
-  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
-  if (value <= 25) return `bg-green-400 dark:bg-green-600 text-gray-50`;
-  if (value <= 35) return "bg-yellow-300 dark-bg-yellow-600 text-black";
-  if (value <= 45) return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
-  return `bg-red-400 dark:bg-red-600 text-gray-50`;
+  if (value <= 15)
+    return "bg-emerald-100 text-emerald-900 dark:bg-emerald-700 dark:text-gray-50";
+  if (value <= 25)
+    return "bg-green-100 text-green-900 dark:bg-green-700 dark:text-gray-50";
+  if (value <= 35)
+    return "bg-yellow-100 text-yellow-950 dark:bg-yellow-700 dark:text-gray-50";
+  if (value <= 45)
+    return "bg-orange-100 text-orange-950 dark:bg-orange-700 dark:text-gray-50";
+  return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
 };
 
 const getRatingLabel = (value: number | null | undefined) => {
@@ -549,7 +553,7 @@ watch(
       <div
         v-for="x in 3"
         role="status"
-        class="max-w-sm p-4 mt-4 mr-4 border border-gray-200 rounded shadow-sm animate-pulse dark:border-gray-700"
+        class="max-w-sm p-4 mt-4 mr-4 border border-border rounded shadow-sm animate-pulse"
       >
         <div class="flex items-center mb-4">
           <svg
@@ -569,19 +573,19 @@ watch(
             </p>
             <div
               v-else
-              class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2"
+              class="h-2.5 bg-muted rounded-full w-32 mb-2"
             ></div>
             <div
-              class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2"
+              class="h-2.5 bg-muted rounded-full w-32 mb-2"
             ></div>
           </div>
         </div>
         <div
-          class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"
+          class="h-2.5 bg-muted rounded-full w-48 mb-4"
         ></div>
-        <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-        <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-        <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+        <div class="h-2 bg-muted rounded-full mb-2.5"></div>
+        <div class="h-2 bg-muted rounded-full mb-2.5"></div>
+        <div class="h-2 bg-muted rounded-full"></div>
 
         <span class="sr-only">Loading...</span>
       </div>

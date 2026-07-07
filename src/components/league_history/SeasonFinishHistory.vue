@@ -270,7 +270,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
 <template>
   <Card v-if="seasonHistory.length > 0" class="relative mt-4 overflow-x-auto">
     <p
-      class="w-full pt-2 text-lg font-semibold text-center rounded-t-lg bg-secondary"
+      class="w-full pt-2 text-lg font-semibold text-center rounded-t-lg bg-muted/50"
     >
       Final Placements
     </p>
@@ -288,11 +288,11 @@ const getPlacementClass = (cell: MatrixCell | null) => {
             />
             <col class="w-20" />
           </colgroup>
-          <thead class="text-xs bg-secondary">
+          <thead class="text-xs bg-muted/50">
             <tr>
               <th
                 scope="col"
-                class="sticky left-0 z-20 px-4 py-3 uppercase bg-secondary sm:px-6"
+                class="sticky left-0 z-20 px-4 py-3 uppercase bg-muted/50 sm:px-6"
               >
                 Team Name
               </th>

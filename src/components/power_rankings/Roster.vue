@@ -73,11 +73,15 @@ const managers = computed(() => {
 const currentManager = ref(managers.value[0] ?? "");
 
 const getValueColor = (value: number) => {
-  if (value <= 15) return `bg-emerald-400 dark:bg-emerald-600 text-gray-50`;
-  if (value <= 25) return `bg-green-400 dark:bg-green-600 text-gray-50`;
-  if (value <= 35) return "bg-yellow-300 dark-bg-yellow-600 text-black";
-  if (value <= 45) return `bg-orange-400 dark:bg-orange-500 text-gray-50`;
-  return `bg-red-400 dark:bg-red-600 text-gray-50`;
+  if (value <= 15)
+    return "bg-emerald-100 text-emerald-900 dark:bg-emerald-700 dark:text-gray-50";
+  if (value <= 25)
+    return "bg-green-100 text-green-900 dark:bg-green-700 dark:text-gray-50";
+  if (value <= 35)
+    return "bg-yellow-100 text-yellow-950 dark:bg-yellow-700 dark:text-gray-50";
+  if (value <= 45)
+    return "bg-orange-100 text-orange-950 dark:bg-orange-700 dark:text-gray-50";
+  return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
 };
 </script>
 <template>
@@ -142,9 +146,9 @@ const getValueColor = (value: number) => {
                   :class="[
                     player.rank
                       ? getValueColor(player.rank)
-                      : 'bg-gray-300 dark:text-black',
+                      : 'bg-muted text-muted-foreground',
                   ]"
-                  class="text-xs px-2.5 py-1 mb-1 rounded-full float-end ml-2"
+                  class="text-sm px-2.5 py-1 mb-1 rounded-full float-end ml-2"
                   >{{ player.rank ? player.rank : "N/A" }}</span
                 >
               </div>
@@ -196,7 +200,7 @@ const getValueColor = (value: number) => {
                     :class="[
                       player.rank
                         ? getValueColor(player.rank)
-                        : 'bg-gray-300 dark:text-black',
+                        : 'bg-muted text-muted-foreground',
                     ]"
                     class="text-xs px-2.5 py-1 mb-1 rounded-full float-end ml-2"
                     >{{ player.rank ? player.rank : "N/A" }}</span

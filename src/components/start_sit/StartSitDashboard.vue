@@ -153,11 +153,15 @@ const formatSignedNumber = (value: number) =>
   `${value >= 0 ? "+" : ""}${value.toFixed(1)}`;
 
 const getBadgePaletteClass = (tier: number) => {
-  if (tier === 1) return "bg-emerald-500 dark:bg-emerald-600 text-gray-50";
-  if (tier === 2) return "bg-green-500 dark:bg-green-600 text-gray-50";
-  if (tier === 3) return "bg-yellow-300 dark:bg-yellow-600 text-black";
-  if (tier === 4) return "bg-orange-400 dark:bg-orange-500 text-gray-50";
-  return "bg-red-400 dark:bg-red-600 text-gray-50";
+  if (tier === 1)
+    return "bg-emerald-100 text-emerald-900 dark:bg-emerald-700 dark:text-gray-50";
+  if (tier === 2)
+    return "bg-green-100 text-green-900 dark:bg-green-700 dark:text-gray-50";
+  if (tier === 3)
+    return "bg-yellow-100 text-yellow-950 dark:bg-yellow-700 dark:text-gray-50";
+  if (tier === 4)
+    return "bg-orange-100 text-orange-950 dark:bg-orange-700 dark:text-gray-50";
+  return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
 };
 
 const getProjectionGapClass = (value: number) => {

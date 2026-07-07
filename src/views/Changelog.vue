@@ -754,7 +754,7 @@ const data = [
             </li>
           </ul>
         </div>
-        <hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
+        <hr class="h-px my-2 bg-muted border-0" />
       </div>
     </div>
   </div>
