@@ -189,6 +189,14 @@ const getNameFromId = (userId: string): string => {
   return store.showUsernames ? userObj.username : userObj.name;
 };
 
+const getNameFromTransactionId = (id: string): string => {
+  const userObj = props.tableData.find(
+    (user) => user.id === id || String(user.rosterId) === id
+  );
+  if (!userObj) return "";
+  return store.showUsernames ? userObj.username : userObj.name;
+};
+
 const getMaxIndex = (arr: number[]): number => {
   return arr.reduce(
     (bestIndex, value, i, src) => (value > src[bestIndex] ? i : bestIndex),
@@ -196,8 +204,328 @@ const getMaxIndex = (arr: number[]): number => {
   );
 };
 
+const roundToOneDecimal = (value: number): number => Math.round(value * 10) / 10;
+
+const getAverage = (values: number[]): number => {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  return roundToOneDecimal(
+    values.reduce((sum, value) => sum + value, 0) / values.length
+  );
+};
+
+const getWeekTotal = (values: number[][], weekIndex: number): number =>
+  roundToOneDecimal(
+    values[weekIndex]?.reduce((sum, value) => sum + Number(value ?? 0), 0) ?? 0
+  );
+
+const getScoringRank = (
+  user: TableDataType,
+  teamsByPoints: TableDataType[]
+): number =>
+  teamsByPoints.findIndex((team) => team.rosterId === user.rosterId) + 1;
+
+const getTeamNote = (
+  user: TableDataType,
+  type: "hot" | "cold" | "unlucky" | "lucky" | "efficient" | "inefficient",
+  pointsRank: number
+): string => {
+  const lastThreeAverage = getAverage(user.points.slice(-3));
+  const scheduleDelta = roundToOneDecimal(user.wins - user.randomScheduleWins);
+
+  if (type === "hot") {
+    return `averaging ${lastThreeAverage} points over the last 3 weeks with a ${getCurrentStreak(
+      user.recordByWeek
+    )} streak and a ${getFiveMostRecent(user.recordByWeek)} last-five record`;
+  }
+
+  if (type === "cold") {
+    return `averaging ${lastThreeAverage} points over the last 3 weeks with a ${getCurrentStreak(
+      user.recordByWeek
+    )} streak and a ${getFiveMostRecent(user.recordByWeek)} last-five record`;
+  }
+
+  if (type === "unlucky") {
+    return `${pointsRank}${getOrdinalSuffix(pointsRank)} in scoring but ${
+      user.regularSeasonRank
+    }${getOrdinalSuffix(
+      user.regularSeasonRank
+    )} in the standings with ${scheduleDelta} schedule-win delta`;
+  }
+
+  if (type === "lucky") {
+    return `${user.regularSeasonRank}${getOrdinalSuffix(
+      user.regularSeasonRank
+    )} in the standings despite ranking ${pointsRank}${getOrdinalSuffix(
+      pointsRank
+    )} in scoring with ${scheduleDelta} schedule-win delta`;
+  }
+
+  if (type === "efficient") {
+    return `${roundToOneDecimal(user.managerEfficiency)}% manager efficiency`;
+  }
+
+  return `${roundToOneDecimal(user.managerEfficiency)}% manager efficiency`;
+};
+
+const getOrdinalSuffix = (value: number): string => {
+  const mod100 = value % 100;
+  if (mod100 >= 11 && mod100 <= 13) {
+    return "th";
+  }
+
+  switch (value % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+};
+
+const getStoryTeam = (
+  user: TableDataType,
+  note: string
+): Record<string, unknown> => ({
+  name: store.showUsernames ? user.username : user.name,
+  rank: user.regularSeasonRank,
+  record: `${user.wins}-${user.losses}`,
+  note,
+});
+
+const getPlayerName = (
+  user: TableDataType,
+  playerLookupMap: Map<string, Player>,
+  playerId: string | undefined,
+  weekIndex: number,
+  starterIndex: number
+): string => {
+  if (store.leagueInfo[store.currentLeagueIndex]?.platform === "espn") {
+    const starter = user.starterNames?.[weekIndex]?.[starterIndex];
+    return starter?.name ?? String(starter ?? "");
+  }
+
+  return playerLookupMap.get(String(playerId))?.name ?? "";
+};
+
+const buildLeagueNewsPayload = (
+  currentLeague: LeagueInfoType,
+  playerLookupMap: Map<string, Player>,
+  weekIndex: number
+): Record<string, unknown>[] => {
+  const teamsByPoints = [...props.tableData].sort(
+    (a, b) => b.pointsFor - a.pointsFor
+  );
+  const teamsByRank = [...props.tableData].sort(
+    (a, b) => a.regularSeasonRank - b.regularSeasonRank
+  );
+  const teamsWithScoringRank = props.tableData.map((user) => ({
+    user,
+    pointsRank: getScoringRank(user, teamsByPoints),
+  }));
+  const recentWeekStart = Math.max(1, currentLeague.lastScoredWeek - 1);
+  const recentTrades = (currentLeague.trades ?? []).filter(
+    (trade) =>
+      trade.status === "complete" &&
+      trade.type === "trade" &&
+      trade.leg >= recentWeekStart &&
+      trade.leg <= currentLeague.lastScoredWeek
+  );
+  const recentWaivers = (currentLeague.waivers ?? []).filter(
+    (waiver) =>
+      waiver.status === "complete" &&
+      ["free_agent", "waiver"].includes(waiver.type) &&
+      waiver.leg >= recentWeekStart &&
+      waiver.leg <= currentLeague.lastScoredWeek
+  );
+  const topActiveEntry = Object.entries(currentLeague.transactions ?? {}).sort(
+    ([, a], [, b]) => b - a
+  )[0];
+  const topStarterTeams = props.tableData
+    .map((user) => {
+      const starterPoints = user.starterPoints[weekIndex] ?? [];
+      const maxIndex = starterPoints.length > 0 ? getMaxIndex(starterPoints) : 0;
+      const points = roundToOneDecimal(starterPoints[maxIndex] ?? 0);
+      const playerId = user.starters[weekIndex]?.[maxIndex];
+
+      return {
+        user,
+        points,
+        player: getPlayerName(
+          user,
+          playerLookupMap,
+          playerId,
+          weekIndex,
+          maxIndex
+        ),
+      };
+    })
+    .sort((a, b) => b.points - a.points);
+  const benchTeams = props.tableData
+    .map((user) => ({
+      user,
+      benchPoints: getWeekTotal(user.benchPoints, weekIndex),
+      starterPoints: getWeekTotal(user.starterPoints, weekIndex),
+    }))
+    .sort((a, b) => b.benchPoints - a.benchPoints);
+  const highestScore = [...props.tableData].sort(
+    (a, b) => (b.points[weekIndex] ?? 0) - (a.points[weekIndex] ?? 0)
+  )[0];
+  const lowestScore = [...props.tableData].sort(
+    (a, b) => (a.points[weekIndex] ?? 0) - (b.points[weekIndex] ?? 0)
+  )[0];
+  const playoffCutoffTeam = teamsByRank[currentLeague.playoffTeams - 1];
+  const firstTeamOut = teamsByRank[currentLeague.playoffTeams];
+
+  return [
+    {
+      league: {
+        lastScoredWeek: currentLeague.lastScoredWeek,
+        regularSeasonLength: currentLeague.regularSeasonLength,
+        playoffTeams: currentLeague.playoffTeams,
+      },
+      stories: {
+        standings: {
+          leader: teamsByRank[0]
+            ? getStoryTeam(teamsByRank[0], "leads the standings")
+            : null,
+          playoffCutoffTeam: playoffCutoffTeam
+            ? getStoryTeam(
+                playoffCutoffTeam,
+                "currently holds the final playoff spot"
+              )
+            : null,
+          firstTeamOut: firstTeamOut
+            ? getStoryTeam(firstTeamOut, "first team outside the playoff field")
+            : null,
+        },
+        hotTeams: [...props.tableData]
+          .sort(
+            (a, b) =>
+              getAverage(b.points.slice(-3)) - getAverage(a.points.slice(-3))
+          )
+          .slice(0, 2)
+          .map((user) =>
+            getStoryTeam(
+              user,
+              getTeamNote(user, "hot", getScoringRank(user, teamsByPoints))
+            )
+          ),
+        coldTeams: [...props.tableData]
+          .sort(
+            (a, b) =>
+              getAverage(a.points.slice(-3)) - getAverage(b.points.slice(-3))
+          )
+          .slice(0, 2)
+          .map((user) =>
+            getStoryTeam(
+              user,
+              getTeamNote(user, "cold", getScoringRank(user, teamsByPoints))
+            )
+          ),
+        unluckyTeams: teamsWithScoringRank
+          .sort(
+            (a, b) =>
+              b.user.regularSeasonRank -
+              b.pointsRank -
+              (a.user.regularSeasonRank - a.pointsRank)
+          )
+          .slice(0, 2)
+          .map(({ user, pointsRank }) =>
+            getStoryTeam(user, getTeamNote(user, "unlucky", pointsRank))
+          ),
+        luckyTeams: teamsWithScoringRank
+          .sort(
+            (a, b) =>
+              b.pointsRank -
+              b.user.regularSeasonRank -
+              (a.pointsRank - a.user.regularSeasonRank)
+          )
+          .slice(0, 2)
+          .map(({ user, pointsRank }) =>
+            getStoryTeam(user, getTeamNote(user, "lucky", pointsRank))
+          ),
+        efficiencyWatch: {
+          bestManager: [...props.tableData]
+            .sort((a, b) => b.managerEfficiency - a.managerEfficiency)
+            .slice(0, 1)
+            .map((user) =>
+              getStoryTeam(
+                user,
+                getTeamNote(
+                  user,
+                  "efficient",
+                  getScoringRank(user, teamsByPoints)
+                )
+              )
+            )[0],
+          worstManager: [...props.tableData]
+            .sort((a, b) => a.managerEfficiency - b.managerEfficiency)
+            .slice(0, 1)
+            .map((user) =>
+              getStoryTeam(
+                user,
+                getTeamNote(
+                  user,
+                  "inefficient",
+                  getScoringRank(user, teamsByPoints)
+                )
+              )
+            )[0],
+        },
+        weeklyHighlights: {
+          highestScore: highestScore
+            ? getStoryTeam(
+                highestScore,
+                `scored ${roundToOneDecimal(highestScore.points[weekIndex] ?? 0)} points in week ${currentLeague.lastScoredWeek}`
+              )
+            : null,
+          lowestScore: lowestScore
+            ? getStoryTeam(
+                lowestScore,
+                `scored ${roundToOneDecimal(lowestScore.points[weekIndex] ?? 0)} points in week ${currentLeague.lastScoredWeek}`
+              )
+            : null,
+          biggestBenchMiss: benchTeams[0]
+            ? getStoryTeam(
+                benchTeams[0].user,
+                `${benchTeams[0].benchPoints} bench points versus ${benchTeams[0].starterPoints} starter points last week`
+              )
+            : null,
+          topPlayerPerformance: topStarterTeams[0]
+            ? getStoryTeam(
+                topStarterTeams[0].user,
+                `${topStarterTeams[0].player} scored ${topStarterTeams[0].points} points`
+              )
+            : null,
+        },
+        activity: {
+          mostActiveTeam: topActiveEntry
+            ? {
+                name: getNameFromTransactionId(topActiveEntry[0]),
+                transactions: topActiveEntry[1],
+                note: `${topActiveEntry[1]} completed roster moves`,
+              }
+            : null,
+          recentTradeCount: recentTrades.length,
+          recentWaiverCount: recentWaivers.length,
+        },
+      },
+    },
+  ];
+};
+
 const formatData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  if (!currentLeague) {
+    return;
+  }
+
   if (isPreDraftLeague(currentLeague)) {
     currentTrends.value = preseasonUnavailableTrends;
     return;
@@ -205,10 +533,15 @@ const formatData = async () => {
 
   const weekIndex = currentLeague.lastScoredWeek - 1;
 
-  const bestStarters = props.tableData.map((user) => {
-    const starterPoints = user.starterPoints[weekIndex];
+  const bestStarters = props.tableData.flatMap((user) => {
+    const starterPoints = user.starterPoints?.[weekIndex] ?? [];
+    if (starterPoints.length === 0) {
+      return [];
+    }
+
     const maxIndex = getMaxIndex(starterPoints);
-    return user.starters[weekIndex][maxIndex];
+    const starter = user.starters?.[weekIndex]?.[maxIndex];
+    return starter ? [starter] : [];
   });
 
   let playerLookupMap = new Map<string, Player>();
@@ -216,48 +549,20 @@ const formatData = async () => {
     playerLookupMap = await getPlayersByIdsMap(bestStarters);
   }
 
-  const userData = props.tableData.map((user) => {
-    const starterPoints = user.starterPoints[weekIndex];
-    const maxIndex = getMaxIndex(starterPoints);
-
-    let bestStarter = {};
-    if (currentLeague?.platform !== "espn") {
-      bestStarter = {
-        name: playerLookupMap.get(String(user.starters[weekIndex][maxIndex]))
-          ?.name,
-        points: starterPoints[maxIndex],
-      };
-    } else {
-      bestStarter = {
-        name: String(user.starterNames?.[weekIndex][maxIndex]),
-        points: starterPoints[maxIndex],
-      };
-    }
-
-    return {
-      name: store.showUsernames ? user.username : user.name,
-      record: `${user.wins}-${user.losses}`,
-      totalPoints: user.pointsFor,
-      currentStreak: user.recordByWeek
-        ? getCurrentStreak(user.recordByWeek)
-        : "",
-      lastFiveResults: user.recordByWeek
-        ? getFiveMostRecent(user.recordByWeek)
-        : "",
-      lastFiveScores: user.points ? user.points.slice(-5) : [],
-      currentRanking: user.regularSeasonRank,
-      topScoringPlayer: bestStarter,
-    };
-  });
+  const leagueNewsPayload = buildLeagueNewsPayload(
+    currentLeague,
+    playerLookupMap,
+    weekIndex
+  );
 
   try {
     let response;
     if (currentLeague.rosters.length <= 8) {
-      response = await generateTrends(userData, 50, 2);
+      response = await generateTrends(leagueNewsPayload, 50, 2);
     } else if (currentLeague.rosters.length <= 10) {
-      response = await generateTrends(userData, 55, 2);
+      response = await generateTrends(leagueNewsPayload, 55, 2);
     } else {
-      response = await generateTrends(userData, 70, 3);
+      response = await generateTrends(leagueNewsPayload, 70, 3);
     }
     currentTrends.value = response.bulletPoints;
     store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
