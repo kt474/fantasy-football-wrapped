@@ -2,7 +2,6 @@
 import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
 import { createTableData } from "../../api/helper";
-import { fakeRosters, fakeUsers } from "../../api/fakeLeague";
 import {
   computed,
   onMounted,
@@ -39,15 +38,6 @@ const ExpectedWinsChart = defineAsyncComponent(
 );
 const ExpectedWinsChart2 = defineAsyncComponent(
   () => import("../expected_wins/ExpectedWinsChart2.vue")
-);
-const BestManagerCard = defineAsyncComponent(
-  () => import("../standings/BestManagerCard.vue")
-);
-const WorstManagerCard = defineAsyncComponent(
-  () => import("../standings/WorstManagerCard.vue")
-);
-const TransactionsCard = defineAsyncComponent(
-  () => import("../standings/TransactionsCard.vue")
 );
 const TransactionsChart = defineAsyncComponent(
   () => import("../roster_management/TransactionsChart.vue")
@@ -291,12 +281,6 @@ const mostMedianLosses = computed(() => {
   return maxBy(originalData.value, "lossesWithMedian")?.lossesWithMedian;
 });
 
-const mostTransactions = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].transactions
-    : {};
-});
-
 const seasonType = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex]
     ? store.leagueInfo[store.currentLeagueIndex].seasonType
@@ -332,14 +316,22 @@ const getTeamName = (tableDataItem: TableDataType) => {
   <div :class="['min-w-0', store.currentTab === 'Home' ? '' : 'mx-4']">
     <div
       v-if="showStandingsTab"
-      class="flex flex-col h-full min-h-0 mt-4 xl:flex-row xl:justify-between"
+      class="grid h-full min-h-0 grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(0,1fr)_minmax(240px,300px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]"
     >
-      <Card class="relative w-full min-w-0 mx-auto overflow-x-auto xl:w-3/4">
+      <Card class="relative w-full min-w-0 overflow-x-auto xl:overflow-hidden">
         <TooltipProvider>
           <table
             v-if="tableData.length > 0"
-            class="w-full text-sm text-left rtl:text-right"
+            class="min-w-[760px] table-fixed text-sm text-left w-full rtl:text-right xl:min-w-0"
           >
+            <colgroup>
+              <col class="w-[30%]" />
+              <col class="w-[12%]" />
+              <col class="w-[12%]" />
+              <col class="w-[14%]" />
+              <col class="w-[16%]" />
+              <col class="w-[16%]" />
+            </colgroup>
             <thead class="text-xs uppercase bg-muted/50">
               <tr>
                 <th scope="col" class="px-4 py-3 sm:px-6">Team name</th>
@@ -520,9 +512,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
               >
                 <th
                   scope="row"
-                  class="px-4 py-3 font-medium sm:px-6 whitespace-nowrap"
+                  class="px-4 py-3 font-medium sm:px-6"
                 >
-                  <div class="flex items-center">
+                  <div class="flex items-center min-w-0">
                     <img
                       alt="User avatar"
                       v-if="item.avatarImg"
@@ -543,7 +535,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       />
                     </svg>
                     <p class="ml-2">{{ index + 1 }}.&nbsp;</p>
-                    <p class="truncate max-w-36 sm:max-w-48">
+                    <p class="min-w-0 truncate">
                       {{ getTeamName(item) }}
                     </p>
                   </div>
@@ -609,32 +601,11 @@ const getTeamName = (tableDataItem: TableDataType) => {
           </table>
         </TooltipProvider>
       </Card>
-      <div class="flex flex-col flex-1 w-full mt-4 xl:w-fit xl:ml-4 xl:mt-0">
-        <CurrentTrends
-          v-if="showLeagueNews && seasonType !== 'Guillotine'"
-          :tableData="tableData"
-        />
-        <Card class="flex-1 px-2 py-4 mt-4 md:w-auto min-w-56 min-h-56">
-          <BestManagerCard
-            :rosters="store.currentLeagueId ? props.rosters : fakeRosters"
-            :users="store.currentLeagueId ? props.users : fakeUsers"
-            class="mt-0.5"
-          />
-          <WorstManagerCard
-            :rosters="store.currentLeagueId ? props.rosters : fakeRosters"
-            :users="store.currentLeagueId ? props.users : fakeUsers"
-            class="mt-4"
-          />
-          <TransactionsCard
-            :users="store.currentLeagueId ? props.users : fakeUsers"
-            :mostTransactions="
-              store.currentLeagueId ? mostTransactions : { 1: 24 }
-            "
-            :rosters="store.currentLeagueId ? props.rosters : fakeRosters"
-            class="mt-4"
-          />
-        </Card>
-      </div>
+      <CurrentTrends
+        v-if="showLeagueNews && seasonType !== 'Guillotine'"
+        :tableData="tableData"
+        class="h-full"
+      />
     </div>
     <StandingsChart
       v-if="showStandingsTab"

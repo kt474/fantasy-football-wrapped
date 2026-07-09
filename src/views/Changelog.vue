@@ -2,6 +2,17 @@
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/09/26",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "Update the league news section to give more valulable insights.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/07/26",
     content: [
       {
@@ -754,7 +765,7 @@ const data = [
             </li>
           </ul>
         </div>
-        <hr class="h-px my-2 bg-muted border-0" />
+        <hr class="h-px my-2 border-0 bg-muted" />
       </div>
     </div>
   </div>
