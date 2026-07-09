@@ -8,7 +8,7 @@ const router = useRouter();
   <div class="container w-11/12 h-full max-w-screen-xl mx-auto">
     <div class="max-w-screen-sm mx-auto text-center">
       <h1 class="mt-12 mb-4 font-bold text-7xl lg:text-9xl">404</h1>
-      <p class="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+      <p class="mb-4 text-3xl font-bold md:text-4xl">
         Something's missing.
       </p>
       <p class="mb-4 text-lg font-light text-muted-foreground">

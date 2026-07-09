@@ -773,7 +773,7 @@ watch(
                 <div class="min-w-0">
                   <label
                     for="weekly-report-email-signup"
-                    class="block text-sm font-medium leading-none"
+                    class="block text-sm font-medium"
                   >
                     Email me weekly report reminders
                   </label>
@@ -956,7 +956,7 @@ watch(
                 <div class="min-w-0 space-y-1">
                   <label
                     for="weekly-report-email-setting"
-                    class="block text-sm font-medium leading-none"
+                    class="block text-sm font-medium"
                   >
                     Weekly report emails
                   </label>
@@ -1052,11 +1052,11 @@ watch(
                 Best value
               </Badge>
               <p
-                class="text-sm font-semibold tracking-[0.12em] uppercase text-muted-foreground -mt-2"
+                class="text-sm font-semibold uppercase text-muted-foreground -mt-2"
               >
                 Season Pass
               </p>
-              <p class="mt-2 text-5xl font-medium leading-none">
+              <p class="mt-2 text-5xl font-medium">
                 $18
                 <span class="-ml-1 text-base font-normal text-muted-foreground">
                   /season
@@ -1077,11 +1077,11 @@ watch(
             </div>
             <div class="flex flex-col flex-1 p-5 border rounded-xl">
               <p
-                class="text-sm font-semibold tracking-[0.12em] uppercase text-muted-foreground"
+                class="text-sm font-semibold uppercase text-muted-foreground"
               >
                 Monthly
               </p>
-              <p class="mt-2 text-5xl font-medium leading-none">
+              <p class="mt-2 text-5xl font-medium">
                 $6
                 <span class="-ml-1 text-base font-normal text-muted-foreground">
                   /month

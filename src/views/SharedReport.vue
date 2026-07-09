@@ -149,7 +149,7 @@ watch(() => route.params.token, loadReport);
       <header class="pb-5 border-b mb-7">
         <a
           href="/"
-          class="inline-flex items-center gap-2 mb-2 text-xl font-semibold tracking-tight"
+          class="inline-flex items-center gap-2 mb-2 text-xl font-semibold"
           aria-label="Go to ffwrapped home"
           @click="trackSharedReportCta('explore')"
         >
@@ -198,7 +198,7 @@ watch(() => route.params.token, loadReport);
           class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
         >
           <div>
-            <h2 class="mt-2 text-2xl font-bold tracking-tight">
+            <h2 class="mt-2 text-2xl font-bold">
               Want weekly reports for a different league?
             </h2>
             <p

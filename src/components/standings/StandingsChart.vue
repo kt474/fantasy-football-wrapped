@@ -118,7 +118,7 @@ watch(
   <Card class="w-full p-4 md:p-6 min-w-80">
     <div class="flex justify-between">
       <div>
-        <h1 class="pb-2 text-3xl font-bold leading-none">Win Percentages</h1>
+        <h1 class="pb-2 text-3xl font-bold">Win Percentages</h1>
       </div>
     </div>
     <!-- chart overflows on safari sometimes  -->

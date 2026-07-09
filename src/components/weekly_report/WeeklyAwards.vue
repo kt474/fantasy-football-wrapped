@@ -22,7 +22,7 @@ defineProps<{
           <div class="flex items-start gap-3">
             <div class="min-w-0 space-y-1">
               <div class="flex flex-wrap items-center gap-2">
-                <p class="text-base font-semibold leading-tight">
+                <p class="text-base font-semibold">
                   {{ award.title }}
                 </p>
               </div>

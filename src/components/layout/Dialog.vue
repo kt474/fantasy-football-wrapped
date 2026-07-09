@@ -82,7 +82,7 @@ const handleSubmit = async () => {
                 <img width="16.5" src="/espnlogo.webp" alt="ESPN logo" />
                 <p>ESPN</p>
                 <span
-                  class="rounded border border-primary/30 bg-primary/10 px-1 text-[10px] font-semibold uppercase leading-5 text-primary"
+                  class="rounded border border-primary/30 bg-primary/10 px-1 text-[10px] font-semibold uppercase text-primary"
                 >
                   Beta
                 </span>

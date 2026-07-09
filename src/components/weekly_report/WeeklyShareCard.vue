@@ -134,7 +134,7 @@ const moments = computed(() =>
           class="-mx-1"
           alt="ffwrapped logo"
         />
-        <span class="text-2xl font-semibold tracking-tight">
+        <span class="text-2xl font-semibold">
           <span class="text-primary">ff</span>wrapped
         </span>
       </div>
@@ -157,7 +157,7 @@ const moments = computed(() =>
       </p>
 
       <template v-if="isPremiumCard">
-        <h1 class="mt-3 line-clamp-2 max-w-[900px] text-3xl font-semibold leading-tight">
+        <h1 class="mt-3 line-clamp-2 max-w-[900px] text-3xl font-semibold">
           {{ cleanPremiumFrontPage.headline }}
         </h1>
         <p
@@ -180,11 +180,11 @@ const moments = computed(() =>
         class="min-h-[160px] rounded-2xl border border-border bg-card p-5"
       >
         <p
-          class="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+          class="text-xs font-semibold uppercase text-muted-foreground"
         >
           {{ moment.label }}
         </p>
-        <h2 class="mt-4 text-2xl font-semibold leading-tight line-clamp-2">
+        <h2 class="mt-4 text-2xl font-semibold line-clamp-2">
           {{ moment.title }}
         </h2>
         <p class="mt-2 text-lg leading-7 text-muted-foreground">

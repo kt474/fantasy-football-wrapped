@@ -348,7 +348,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
                 :class="getPlacementClass(cell)"
               >
                 <template v-if="cell">
-                  <span class="block text-[0.95rem] font-[650] leading-none">{{
+                  <span class="block text-[0.95rem] font-[650]">{{
                     getCellPlacementLabel(cell)
                   }}</span>
                   <span
@@ -358,12 +358,12 @@ const getPlacementClass = (cell: MatrixCell | null) => {
                 </template>
                 <span
                   v-else
-                  class="block text-[0.95rem] font-[650] leading-none"
+                  class="block text-[0.95rem] font-[650]"
                   >-</span
                 >
               </td>
               <td class="w-20 bg-muted/45 px-2 py-3.5 text-center">
-                <span class="block text-[0.95rem] font-[650] leading-none">
+                <span class="block text-[0.95rem] font-[650]">
                   {{ formatAveragePlacement(row.averagePlacement) }}
                 </span>
               </td>

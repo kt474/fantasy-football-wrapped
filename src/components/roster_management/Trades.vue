@@ -285,7 +285,7 @@ watch(
 </script>
 <template>
   <Card class="w-full py-4 pl-4 overflow-auto md:py-6 md:pl-6">
-    <h1 class="pb-2 text-3xl font-bold leading-none">League Trades</h1>
+    <h1 class="pb-2 text-3xl font-bold">League Trades</h1>
     <p
       class="mt-1 mb-3 text-sm max-w-80 sm:max-w-2xl sm:text-base text-muted-foreground"
     >

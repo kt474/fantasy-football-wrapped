@@ -215,7 +215,7 @@ const chartOptions = ref({
   <Card class="w-full min-w-0 p-4 overflow-hidden md:p-6">
     <div class="flex justify-between">
       <div>
-        <h1 class="pb-2 text-3xl font-bold leading-none">
+        <h1 class="pb-2 text-3xl font-bold">
           Expected Win Difference
         </h1>
       </div>

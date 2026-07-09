@@ -663,7 +663,7 @@ onBeforeUnmount(() => {
 <template>
   <Card class="w-full h-full p-4 mt-4 md:p-6">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <h5 class="text-3xl font-bold leading-none">Trade Lab (Beta)</h5>
+      <h5 class="text-3xl font-bold">Trade Lab (Beta)</h5>
       <Tabs v-model="activeMode">
         <TabsList>
           <TabsTrigger value="builder">Builder</TabsTrigger>
@@ -824,7 +824,7 @@ onBeforeUnmount(() => {
                   <div class="flex flex-col items-end gap-1 ml-auto">
                     <span
                       :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
                         posRankClass(player.projection),
                       ]"
                     >
@@ -832,7 +832,7 @@ onBeforeUnmount(() => {
                     </span>
                     <span
                       :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
                         overallRankClass(player.overallRank),
                       ]"
                     >
@@ -1002,7 +1002,7 @@ onBeforeUnmount(() => {
                     <div class="flex flex-col items-end gap-1 ml-auto mr-4">
                       <span
                         :class="[
-                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
                           posRankClass(player.projection),
                         ]"
                       >
@@ -1010,7 +1010,7 @@ onBeforeUnmount(() => {
                       </span>
                       <span
                         :class="[
-                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
                           overallRankClass(player.overallRank),
                         ]"
                       >
@@ -1180,7 +1180,7 @@ onBeforeUnmount(() => {
                     <div class="flex flex-col items-end gap-1 ml-auto mr-4">
                       <span
                         :class="[
-                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
                           posRankClass(player.projection),
                         ]"
                       >
@@ -1188,7 +1188,7 @@ onBeforeUnmount(() => {
                       </span>
                       <span
                         :class="[
-                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
                           overallRankClass(player.overallRank),
                         ]"
                       >
@@ -1228,7 +1228,7 @@ onBeforeUnmount(() => {
               <div class="flex items-center justify-between">
                 <span
                   :class="[
-                    'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                    'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
                     fairnessPillClass,
                   ]"
                 >
@@ -1311,7 +1311,7 @@ onBeforeUnmount(() => {
                   <div class="flex flex-col items-end gap-1 ml-auto">
                     <span
                       :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
                         posRankClass(player.projection),
                       ]"
                     >
@@ -1319,7 +1319,7 @@ onBeforeUnmount(() => {
                     </span>
                     <span
                       :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold leading-none',
+                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
                         overallRankClass(player.overallRank),
                       ]"
                     >

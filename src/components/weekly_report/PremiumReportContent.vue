@@ -18,7 +18,7 @@ defineProps<{
   <div class="space-y-4">
     <header class="max-w-5xl">
       <h2
-        class="max-w-4xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl text-pretty"
+        class="max-w-4xl text-3xl font-bold sm:text-4xl text-pretty"
       >
         {{ report.frontPage.headline }}
       </h2>
@@ -48,7 +48,7 @@ defineProps<{
           class="shadow-sm"
         >
           <CardHeader class="pb-3">
-            <CardTitle class="text-base leading-snug">
+            <CardTitle class="text-base">
               {{ matchup.headline }}
             </CardTitle>
           </CardHeader>
@@ -86,7 +86,7 @@ defineProps<{
                 {{ report.teamOfTheWeek.pointsScored }}
               </p>
               <p
-                class="text-xs font-medium tracking-wide uppercase text-muted-foreground"
+                class="text-xs font-medium uppercase text-muted-foreground"
               >
                 Points
               </p>

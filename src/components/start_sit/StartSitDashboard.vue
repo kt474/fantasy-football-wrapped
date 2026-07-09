@@ -508,7 +508,7 @@ watch(
   <Card class="p-4 mb-4 md:p-6">
     <Tabs default-value="roster">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <p class="text-3xl font-bold leading-none">Start/Sit</p>
+        <p class="text-3xl font-bold">Start/Sit</p>
         <TabsList>
           <TabsTrigger value="roster">Roster</TabsTrigger>
           <TabsTrigger value="news">News</TabsTrigger>
@@ -626,7 +626,7 @@ watch(
                   class="flex items-start justify-between gap-3 px-4 py-3 bg-muted/20"
                 >
                   <div class="min-w-0">
-                    <p class="mt-1 font-semibold leading-tight truncate">
+                    <p class="mt-1 font-semibold truncate">
                       {{ getPlayerLabel(recommendation.start) }}
                     </p>
                     <p class="mt-1 text-sm truncate">
@@ -721,7 +721,7 @@ watch(
             >
               <div v-if="index === activeStarterCount" class="w-full mt-5 mb-3">
                 <p
-                  class="text-xs font-semibold tracking-wide uppercase text-muted-foreground"
+                  class="text-xs font-semibold uppercase text-muted-foreground"
                 >
                   Bench
                 </p>
@@ -748,7 +748,7 @@ watch(
                   />
                   <div class="flex justify-between w-full min-w-0 gap-3">
                     <div class="min-w-0">
-                      <p class="font-semibold leading-tight truncate">
+                      <p class="font-semibold truncate">
                         {{ player.name ? player.name : player.team }}
                       </p>
                       <p class="mt-1 text-sm">
@@ -781,7 +781,7 @@ watch(
                 <div class="px-4 py-3 border-t bg-muted/20">
                   <div class="grid grid-cols-4 gap-3 sm:grid-cols-5">
                     <p
-                      class="hidden text-xs font-semibold tracking-wide uppercase sm:block"
+                      class="hidden text-xs font-semibold uppercase sm:block"
                     >
                       Recent
                     </p>

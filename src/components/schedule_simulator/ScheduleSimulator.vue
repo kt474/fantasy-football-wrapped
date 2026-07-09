@@ -987,7 +987,7 @@ function runMonteCarloDistribution() {
     <Card class="w-full p-4 space-y-4 md:p-6">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p class="text-3xl font-semibold leading-none">Schedule Simulator</p>
+          <p class="text-3xl font-semibold">Schedule Simulator</p>
           <p class="mt-4 text-muted-foreground">
             Test alternate matchups and see how the standings change.
           </p>
@@ -1105,7 +1105,7 @@ function runMonteCarloDistribution() {
               class="p-3.5 rounded-md bg-background/70"
             >
               <p
-                class="text-xs font-semibold tracking-wide uppercase text-muted-foreground"
+                class="text-xs font-semibold uppercase text-muted-foreground"
               >
                 {{ card.label }}
               </p>
@@ -1124,11 +1124,11 @@ function runMonteCarloDistribution() {
           <div class="grid grid-cols-1 gap-3 mt-3 sm:grid-cols-2">
             <div class="p-3.5 rounded-md bg-background/70">
               <p
-                class="text-xs font-semibold tracking-wide uppercase text-muted-foreground"
+                class="text-xs font-semibold uppercase text-muted-foreground"
               >
                 Biggest Boost
               </p>
-              <p class="mt-2 text-base font-semibold leading-tight">
+              <p class="mt-2 text-base font-semibold">
                 {{ helpedMostTeam?.name || "No movement" }}
               </p>
               <p class="mt-1 text-sm text-muted-foreground">
@@ -1137,11 +1137,11 @@ function runMonteCarloDistribution() {
             </div>
             <div class="p-3.5 rounded-md bg-background/70">
               <p
-                class="text-xs font-semibold tracking-wide uppercase text-muted-foreground"
+                class="text-xs font-semibold uppercase text-muted-foreground"
               >
                 Biggest Drop
               </p>
-              <p class="mt-2 text-base font-semibold leading-tight">
+              <p class="mt-2 text-base font-semibold">
                 {{ hurtMostTeam?.name || "No movement" }}
               </p>
               <p class="mt-1 text-sm text-muted-foreground">

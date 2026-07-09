@@ -335,7 +335,7 @@ const chartOptions = ref({
     >
       <div class="flex justify-between">
         <div>
-          <h1 class="pb-2 text-3xl font-bold leading-none">Power Rankings</h1>
+          <h1 class="pb-2 text-3xl font-bold">Power Rankings</h1>
         </div>
       </div>
       <apexchart

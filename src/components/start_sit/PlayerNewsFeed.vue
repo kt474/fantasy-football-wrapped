@@ -41,7 +41,7 @@ const formatDate = (dateStr: string) => {
   <section>
     <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight">Roster News</h2>
+        <h2 class="text-2xl font-semibold">Roster News</h2>
       </div>
     </div>
     <div v-if="posts.length > 0" class="grid max-w-2xl gap-3">

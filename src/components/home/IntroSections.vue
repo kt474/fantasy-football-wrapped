@@ -167,7 +167,7 @@ const toolSummaries: ToolSummary[] = [
         <div class="max-w-xl mx-auto">
           <h2
             id="intro-testimonials-heading"
-            class="text-3xl font-bold leading-tight tracking-tight md:text-4xl"
+            class="text-3xl font-bold md:text-4xl"
           >
             Analysis your league will actually talk about
           </h2>
@@ -178,7 +178,7 @@ const toolSummaries: ToolSummary[] = [
 
           <div class="grid max-w-lg grid-cols-3 mt-6 divide-x divide-border">
             <div class="pr-5">
-              <p class="text-xl font-semibold tracking-tight sm:text-2xl">
+              <p class="text-xl font-semibold sm:text-2xl">
                 13,000+
               </p>
               <p class="mt-1 text-xs text-muted-foreground">
@@ -186,7 +186,7 @@ const toolSummaries: ToolSummary[] = [
               </p>
             </div>
             <div class="px-5">
-              <p class="text-xl font-semibold tracking-tight sm:text-2xl">
+              <p class="text-xl font-semibold sm:text-2xl">
                 50,000+
               </p>
               <p class="mt-1 text-xs text-muted-foreground">
@@ -194,7 +194,7 @@ const toolSummaries: ToolSummary[] = [
               </p>
             </div>
             <div class="pl-5">
-              <p class="text-xl font-semibold tracking-tight sm:text-2xl">
+              <p class="text-xl font-semibold sm:text-2xl">
                 No login
               </p>
               <p class="mt-1 text-xs text-muted-foreground">Needed to start</p>
@@ -230,7 +230,7 @@ const toolSummaries: ToolSummary[] = [
                   alt="Reddit logo"
                 />
                 <div>
-                  <p class="text-sm font-semibold leading-none">
+                  <p class="text-sm font-semibold">
                     {{ testimonial.author }}
                   </p>
                   <p class="mt-1 text-xs text-muted-foreground">
@@ -258,7 +258,7 @@ const toolSummaries: ToolSummary[] = [
         <div class="max-w-3xl mx-auto text-center">
           <h2
             id="intro-tools-heading"
-            class="mt-3 text-3xl font-bold leading-tight tracking-tight md:text-4xl"
+            class="mt-3 text-3xl font-bold md:text-4xl"
           >
             Explore your league from every angle
           </h2>
@@ -277,7 +277,7 @@ const toolSummaries: ToolSummary[] = [
             class="p-8 transition-colors tool-cell group hover:bg-muted/20"
           >
             <component :is="tool.icon" class="transition-colors size-6" />
-            <h3 class="text-xl font-semibold tracking-tight mt-7">
+            <h3 class="text-xl font-semibold mt-7">
               {{ tool.title }}
             </h3>
             <p class="max-w-sm mt-4 text-sm leading-6 text-muted-foreground">
@@ -286,7 +286,7 @@ const toolSummaries: ToolSummary[] = [
           </div>
           <div class="premium-cell">
             <div class="max-w-3xl">
-              <h3 class="mt-2 text-2xl font-semibold tracking-tight">
+              <h3 class="mt-2 text-2xl font-semibold">
                 Premium features for leagues that want more
               </h3>
               <p class="mt-4 text-sm leading-6 text-muted-foreground">

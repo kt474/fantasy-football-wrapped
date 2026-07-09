@@ -463,12 +463,12 @@ const recordCards = computed<AllTimeRecordCard[]>(() => {
           class="flex flex-col h-44"
         >
           <CardHeader class="h-12 p-4 pb-1 space-y-0">
-            <p class="text-sm font-medium leading-snug text-muted-foreground">
+            <p class="text-sm font-medium text-muted-foreground">
               {{ record.title }}
             </p>
           </CardHeader>
           <CardContent class="flex flex-col flex-1 p-4 pt-0">
-            <p class="text-2xl font-bold tracking-tight tabular-nums">
+            <p class="text-2xl font-bold tabular-nums">
               {{ record.value }}
             </p>
 
@@ -478,11 +478,11 @@ const recordCards = computed<AllTimeRecordCard[]>(() => {
                 :key="`${record.title}-${team.name}-${team.score}`"
                 class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 rounded-md bg-muted/40 px-2 py-1"
               >
-                <p class="min-w-0 text-xs font-medium leading-snug break-words">
+                <p class="min-w-0 text-xs font-medium break-words">
                   {{ team.name }}
                 </p>
                 <p
-                  class="text-xs font-semibold leading-snug text-right tabular-nums"
+                  class="text-xs font-semibold text-right tabular-nums"
                 >
                   {{ team.score }}
                 </p>
@@ -491,14 +491,14 @@ const recordCards = computed<AllTimeRecordCard[]>(() => {
 
             <p
               v-else
-              class="min-w-0 mt-2 text-sm font-medium leading-snug break-words"
+              class="min-w-0 mt-2 text-sm font-medium break-words"
             >
               {{ record.detail }}
             </p>
 
             <Badge
               variant="outline"
-              class="max-w-full mt-auto text-xs leading-snug text-left whitespace-normal w-fit"
+              class="max-w-full mt-auto text-xs text-left whitespace-normal w-fit"
             >
               {{ record.meta }}
             </Badge>

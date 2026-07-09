@@ -260,7 +260,7 @@ const openAddLeagueDialog = async () => {
               size="lg"
               class="text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div class="flex flex-col gap-0.5 leading-none w-40">
+              <div class="flex flex-col gap-0.5 w-40">
                 <span class="font-medium truncate">{{
                   currentLeague?.name ?? "Loading... "
                 }}</span>

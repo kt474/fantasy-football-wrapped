@@ -189,7 +189,7 @@ const matchupSections = computed<MatchupSection[]>(() => [
           class="space-y-3"
         >
           <div>
-            <h4 class="text-lg font-semibold tracking-tight">
+            <h4 class="text-lg font-semibold">
               {{ section.title }}
             </h4>
           </div>
@@ -203,7 +203,7 @@ const matchupSections = computed<MatchupSection[]>(() => [
               <CardHeader class="p-4 pb-1">
                 <div class="flex items-start justify-between gap-3">
                   <div>
-                    <p class="text-2xl font-bold tracking-tight tabular-nums">
+                    <p class="text-2xl font-bold tabular-nums">
                       {{ formatPoints(matchup.difference) }}
                     </p>
                     <p class="text-xs font-medium text-muted-foreground">
@@ -212,7 +212,7 @@ const matchupSections = computed<MatchupSection[]>(() => [
                   </div>
                   <Badge
                     variant="outline"
-                    class="text-xs leading-snug text-right whitespace-normal max-w-28"
+                    class="text-xs text-right whitespace-normal max-w-28"
                   >
                     {{
                       getWeek(matchup.teamA.pointSeason, matchup.matchupIndex)
@@ -229,12 +229,12 @@ const matchupSections = computed<MatchupSection[]>(() => [
                     class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 rounded-md bg-muted/40 px-3 py-1.5"
                   >
                     <p
-                      class="min-w-0 text-sm font-medium leading-snug break-words"
+                      class="min-w-0 text-sm font-medium break-words"
                     >
                       {{ displayName(team.team) }}
                     </p>
                     <p
-                      class="text-sm font-semibold leading-snug text-right tabular-nums"
+                      class="text-sm font-semibold text-right tabular-nums"
                       :class="{ 'text-primary': team.isWinner }"
                     >
                       {{ formatPoints(team.score) }}

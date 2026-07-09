@@ -146,7 +146,7 @@ watch(
 </script>
 <template>
   <Card class="block w-full p-4 mt-4 lg:mt-0 lg:w-1/4 min-w-60">
-    <h5 class="ml-0.5 text-2xl font-bold leading-none text-pretty">
+    <h5 class="ml-0.5 text-2xl font-bold text-pretty">
       Regular Season vs Final Placement
     </h5>
     <apexchart

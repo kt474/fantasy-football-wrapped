@@ -104,7 +104,7 @@ const listPadding = computed(() => {
 <template>
   <Card class="px-6 pt-4 min-h-96 custom-width">
     <div class="flex items-center justify-between sm:mt-1.5 mb-1.5">
-      <h5 class="w-20 text-xl font-bold leading-none text-pretty">
+      <h5 class="w-20 text-xl font-bold text-pretty">
         Ranking score
       </h5>
       <Select v-model="currentRatingIndex">

@@ -1136,7 +1136,7 @@ watch(
           <div
             class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl"
           >
-            <p class="mb-2 text-xs tracking-widest uppercase text-cyan-300">
+            <p class="mb-2 text-xs uppercase text-cyan-300">
               Most Active
             </p>
             <img
@@ -1175,7 +1175,7 @@ watch(
             v-if="fewestMoves?.user"
             class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl"
           >
-            <p class="mb-2 text-xs tracking-widest uppercase text-cyan-300">
+            <p class="mb-2 text-xs uppercase text-cyan-300">
               Least Active
             </p>
             <img
@@ -1951,7 +1951,7 @@ watch(
           <div>
             <div class="flex items-center gap-4 px-2 mb-1">
               <h3
-                class="text-sm font-bold tracking-widest uppercase text-fuchsia-200"
+                class="text-sm font-bold uppercase text-fuchsia-200"
               >
                 Luckiest Schedules
               </h3>
@@ -2017,7 +2017,7 @@ watch(
           <div>
             <div class="flex items-center gap-4 px-2 mb-1">
               <h3
-                class="text-sm font-bold tracking-widest uppercase text-fuchsia-200"
+                class="text-sm font-bold uppercase text-fuchsia-200"
               >
                 Hardest Roads
               </h3>

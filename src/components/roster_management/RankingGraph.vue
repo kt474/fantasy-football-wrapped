@@ -174,7 +174,7 @@ const chartOptions = ref({
   <Card class="w-full p-4 md:p-6">
     <div class="flex justify-between">
       <div>
-        <h1 class="-mb-2 text-3xl font-bold leading-none">
+        <h1 class="-mb-2 text-3xl font-bold">
           Points vs Potential Points
         </h1>
       </div>
