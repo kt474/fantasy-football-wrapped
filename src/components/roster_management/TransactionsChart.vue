@@ -135,7 +135,7 @@ const updateChartColor = () => {
     chart: {
       type: "bar",
       stacked: true,
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: "hsl(var(--foreground))",
       toolbar: {
         show: false,
       },
@@ -201,7 +201,7 @@ const updateChartColor = () => {
 
 const chartOptions = ref({
   chart: {
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    foreColor: "hsl(var(--foreground))",
     type: "bar",
     stacked: true,
     toolbar: {
@@ -219,7 +219,11 @@ const chartOptions = ref({
       columnWidth: "75%",
     },
   },
-  colors: ["#0ea5e9", "#22c55e", "#eab308"],
+  colors: [
+    "hsl(var(--chart-1))",
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-3))",
+  ],
   dataLabels: {
     enabled: false,
   },
@@ -277,7 +281,7 @@ const chartOptions = ref({
   <Card class="w-full p-4 md:p-6 min-w-80">
     <div class="flex justify-between">
       <div>
-        <h1 class="pb-2 text-3xl font-bold">
+        <h1 class="pb-2 text-2xl font-semibold tracking-tight">
           League Transactions
         </h1>
       </div>

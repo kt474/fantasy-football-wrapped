@@ -38,7 +38,7 @@ const isMatchupWinner = (
 </script>
 
 <template>
-  <p class="text-xl font-bold">Matchups</p>
+  <p class="text-xl font-semibold tracking-tight">Matchups</p>
   <div class="flex flex-wrap w-full mb-2 overflow-x-hidden">
     <Card
       v-for="matchupNumber in matchupNumbers"

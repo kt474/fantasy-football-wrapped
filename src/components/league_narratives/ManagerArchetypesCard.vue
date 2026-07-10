@@ -106,8 +106,8 @@ watch(
 <template>
   <Card class="p-4 md:p-6">
     <div>
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <p class="text-3xl font-bold">Manager Profiles</p>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <p class="text-2xl font-semibold tracking-tight">Manager Profiles</p>
         <Button :disabled="!canGenerateArchetypes" @click="getManagerArchetypes">
           {{ generateButtonLabel }}
         </Button>

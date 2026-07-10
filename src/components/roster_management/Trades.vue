@@ -284,8 +284,8 @@ watch(
 );
 </script>
 <template>
-  <Card class="w-full py-4 pl-4 overflow-auto md:py-6 md:pl-6">
-    <h1 class="pb-2 text-3xl font-bold">League Trades</h1>
+  <Card class="w-full p-4 overflow-auto md:p-6">
+    <h1 class="pb-2 text-2xl font-semibold tracking-tight">League Trades</h1>
     <p
       class="mt-1 mb-3 text-sm max-w-80 sm:max-w-2xl sm:text-base text-muted-foreground"
     >
@@ -553,7 +553,7 @@ watch(
       <div
         v-for="x in 3"
         role="status"
-        class="max-w-sm p-4 mt-4 mr-4 border border-border rounded shadow-sm animate-pulse"
+        class="max-w-sm p-4 mt-4 mr-4 border border-border rounded-lg bg-card shadow-sm animate-pulse"
       >
         <div class="flex items-center mb-4">
           <svg

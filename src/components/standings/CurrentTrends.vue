@@ -725,13 +725,13 @@ const cardHeight = computed(() => {
 </script>
 <template>
   <Card :class="[cardHeight]" class="flex flex-col h-full p-0 overflow-hidden">
-    <CardHeader class="px-5 pt-4 pb-0 sm:px-6">
+    <CardHeader class="p-4 pb-0 md:p-6 md:pb-0">
       <div class="min-w-0">
-        <CardTitle class="text-2xl">League News</CardTitle>
+        <CardTitle>League News</CardTitle>
       </div>
     </CardHeader>
 
-    <div v-if="renderedCurrentTrends.length > 0" class="px-5 sm:px-6">
+    <div v-if="renderedCurrentTrends.length > 0" class="px-4 md:px-6">
       <ul class="divide-y">
         <li
           v-for="(trend, index) in renderedCurrentTrends"

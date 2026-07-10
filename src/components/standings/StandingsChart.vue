@@ -48,12 +48,16 @@ const chartOptions = ref({});
 const buildChartOptions = () => ({
   chart: {
     type: "bar",
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    foreColor: "hsl(var(--foreground))",
     toolbar: { show: false },
     zoom: { enabled: false },
     animations: { enabled: false },
   },
-  colors: ["#f97316", "#22c55e", "#0ea5e9"],
+  colors: [
+    "hsl(var(--chart-1))",
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-3))",
+  ],
   tooltip: { theme: store.darkMode ? "dark" : "light" },
   plotOptions: {
     bar: {
@@ -118,7 +122,7 @@ watch(
   <Card class="w-full p-4 md:p-6 min-w-80">
     <div class="flex justify-between">
       <div>
-        <h1 class="pb-2 text-3xl font-bold">Win Percentages</h1>
+        <h1 class="pb-2 text-2xl font-semibold tracking-tight">Win Percentages</h1>
       </div>
     </div>
     <!-- chart overflows on safari sometimes  -->

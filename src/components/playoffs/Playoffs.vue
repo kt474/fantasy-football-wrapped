@@ -706,8 +706,8 @@ const numberOfLoserRounds = computed(() => {
   <div class="w-full">
     <LeagueSummary :tableData="tableData" :finalPlacements="finalPlacements" />
     <div class="flex flex-wrap my-4 lg:flex-nowrap">
-      <Card class="block w-full p-4 overflow-x-auto lg:w-3/4">
-        <p class="text-3xl font-bold">Winner's Bracket</p>
+      <Card class="block w-full p-4 overflow-x-auto lg:w-3/4 md:p-6">
+        <p class="mb-4 text-2xl font-semibold tracking-tight">Winner's Bracket</p>
         <div
           v-if="store.leagueInfo[store.currentLeagueIndex]?.platform !== 'espn'"
           class="flex flex-nowrap"
@@ -1064,8 +1064,8 @@ const numberOfLoserRounds = computed(() => {
     </div>
     <!-- losers bracket -->
     <div class="flex flex-wrap lg:flex-nowrap">
-      <Card class="block w-full p-4 overflow-x-auto lg:mr-4 lg:w-3/4">
-        <p class="text-3xl font-bold">Loser's Bracket</p>
+      <Card class="block w-full p-4 overflow-x-auto lg:mr-4 lg:w-3/4 md:p-6">
+        <p class="mb-4 text-2xl font-semibold tracking-tight">Loser's Bracket</p>
         <div
           v-if="store.leagueInfo[store.currentLeagueIndex]?.platform !== 'espn'"
           class="flex flex-nowrap"

@@ -32,7 +32,7 @@ const seriesData = computed(() => {
           name: "Expected",
           value: user.randomScheduleWins,
           strokeHeight: 5,
-          strokeColor: "#a855f7",
+          strokeColor: "hsl(var(--chart-4))",
         },
       ],
     });
@@ -45,7 +45,7 @@ const updateChartColor = () => {
     ...chartOptions.value,
     chart: {
       type: "bar",
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: "hsl(var(--foreground))",
       toolbar: {
         show: false,
       },
@@ -77,7 +77,7 @@ watch([() => store.darkMode], () => {
 
 const chartOptions = ref({
   chart: {
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    foreColor: "hsl(var(--foreground))",
     type: "bar",
     toolbar: {
       show: false,
@@ -91,7 +91,7 @@ const chartOptions = ref({
       columnWidth: "75%",
     },
   },
-  colors: ["#22c55e"],
+  colors: ["hsl(var(--chart-2))"],
   dataLabels: {
     enabled: false,
   },
@@ -148,7 +148,7 @@ const chartOptions = ref({
     offsetX: 21,
     customLegendItems: ["Actual", "Expected"],
     markers: {
-      fillColors: ["#22c55e", "#a855f7"],
+      fillColors: ["hsl(var(--chart-2))", "hsl(var(--chart-4))"],
     },
   },
 });
@@ -157,7 +157,7 @@ const chartOptions = ref({
   <Card class="w-full p-4 md:p-6">
     <div class="flex justify-between">
       <div>
-        <h1 class="pb-2 text-3xl font-bold">
+        <h1 class="pb-2 text-2xl font-semibold tracking-tight">
           Actual vs Expected Wins
         </h1>
       </div>

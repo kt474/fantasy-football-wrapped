@@ -30,7 +30,7 @@ const managerNames = computed(() => {
 
 const chartOptions = computed(() => ({
   chart: {
-    foreColor: props.darkMode ? "#ffffff" : "#111827",
+    foreColor: "hsl(var(--foreground))",
     type: "bar",
     toolbar: {
       show: false,
@@ -47,7 +47,7 @@ const chartOptions = computed(() => ({
       columnWidth: "75%",
     },
   },
-  colors: ["#22c55e"],
+  colors: ["hsl(var(--chart-2))"],
   dataLabels: {
     enabled: false,
   },
@@ -108,7 +108,7 @@ const chartOptions = computed(() => ({
 </script>
 
 <template>
-  <p class="text-xl font-bold">Points</p>
+  <p class="text-xl font-semibold tracking-tight">Points</p>
   <apexchart
     width="100%"
     height="475"

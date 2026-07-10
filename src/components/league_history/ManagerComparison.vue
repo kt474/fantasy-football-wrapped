@@ -379,7 +379,7 @@ const updateChartColor = () => {
     ...chartOptions.value,
     chart: {
       height: 350,
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: "hsl(var(--foreground))",
       type: "line",
       zoom: {
         enabled: false,
@@ -391,7 +391,7 @@ const updateChartColor = () => {
         enabled: false,
       },
     },
-    colors: ["#f97316", "#22c55e"],
+    colors: ["hsl(var(--chart-1))", "hsl(var(--chart-2))"],
     tooltip: {
       theme: store.darkMode ? "dark" : "light",
     },
@@ -448,7 +448,7 @@ const updateChartColor = () => {
 const chartOptions = ref({
   chart: {
     height: 350,
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    foreColor: "hsl(var(--foreground))",
     type: "line",
     zoom: {
       enabled: false,
@@ -460,7 +460,7 @@ const chartOptions = ref({
       enabled: false,
     },
   },
-  colors: ["#f97316", "#22c55e"],
+  colors: ["hsl(var(--chart-1))", "hsl(var(--chart-2))"],
   tooltip: {
     theme: store.darkMode ? "dark" : "light",
   },
@@ -516,7 +516,7 @@ const chartOptions = ref({
 
 <template>
   <Card v-if="manager1 && manager2" class="w-full p-4 md:p-6">
-    <h5 class="-mt-1.5 mb-4 text-2xl font-bold sm:text-3xl">
+    <h5 class="mb-4 text-2xl font-semibold tracking-tight">
       Manager Comparison
     </h5>
     <div class="relative overflow-x-auto rounded-lg">

@@ -290,7 +290,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
       v-else-if="showNoCompletedSeasonData"
       class="p-4 border rounded-lg md:p-6"
     >
-      <p class="text-3xl font-bold">Manager Profiles</p>
+      <p class="text-2xl font-semibold tracking-tight">Manager Profiles</p>
       <p class="mt-2 text-muted-foreground">Please come back after week 1!</p>
     </div>
     <div v-else class="h-screen">

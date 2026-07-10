@@ -57,7 +57,7 @@ const updateChartColor = () => {
     ...chartOptions.value,
     chart: {
       type: "bar",
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: "hsl(var(--foreground))",
       toolbar: {
         show: false,
       },
@@ -136,7 +136,7 @@ watch(
 
 const chartOptions = ref({
   chart: {
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    foreColor: "hsl(var(--foreground))",
     type: "bar",
     toolbar: {
       show: false,
@@ -153,7 +153,7 @@ const chartOptions = ref({
       columnWidth: "75%",
     },
   },
-  colors: ["#22c55e"],
+  colors: ["hsl(var(--chart-2))"],
   dataLabels: {
     enabled: false,
   },
@@ -215,7 +215,7 @@ const chartOptions = ref({
   <Card class="w-full min-w-0 p-4 overflow-hidden md:p-6">
     <div class="flex justify-between">
       <div>
-        <h1 class="pb-2 text-3xl font-bold">
+        <h1 class="pb-2 text-2xl font-semibold tracking-tight">
           Expected Win Difference
         </h1>
       </div>

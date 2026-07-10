@@ -18,7 +18,7 @@ withDefaults(
 
 <template>
   <div>
-    <p class="my-1 text-xl font-bold">{{ title }}</p>
+    <p class="my-1 text-xl font-semibold tracking-tight">{{ title }}</p>
     <div v-if="!loading" class="flex flex-wrap">
       <Card
         v-for="performer in performers"

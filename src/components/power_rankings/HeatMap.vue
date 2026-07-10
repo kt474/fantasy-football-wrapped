@@ -2,6 +2,7 @@
 import { ref, watch, computed } from "vue";
 import { useStore } from "../../store/store";
 import { Card } from "../ui/card";
+import { getChartTheme } from "@/lib/chartTheme";
 
 const store = useStore();
 
@@ -91,10 +92,11 @@ const seriesData = computed(() => {
 });
 
 const updateChartColor = () => {
+  const theme = getChartTheme();
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: theme.foreground,
       toolbar: {
         show: false,
       },
@@ -124,12 +126,11 @@ const updateChartColor = () => {
       },
     },
     plotOptions: {
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: theme.foreground,
       heatmap: {
         shadeIntensity: 0.25,
         radius: 0,
         colorScale: {
-          // ["#0ea5e9", "#22c55e", "#eab308", "#ef4444"]
           ranges: [
             {
               from: 0,
@@ -139,22 +140,22 @@ const updateChartColor = () => {
             {
               from: 1,
               to: Math.floor(totalRosters.value / 4),
-              color: "#0ea5e9",
+              color: theme.neutral,
             },
             {
               from: Math.floor(totalRosters.value / 4) + 1,
               to: Math.floor(totalRosters.value / 2),
-              color: "#22c55e",
+              color: theme.positive,
             },
             {
               from: Math.floor(totalRosters.value / 2) + 1,
               to: Math.floor(totalRosters.value * (3 / 4)),
-              color: "#eab308",
+              color: theme.series[2],
             },
             {
               from: Math.floor(totalRosters.value * (3 / 4)) + 1,
               to: totalRosters.value,
-              color: "#ef4444",
+              color: theme.negative,
             },
           ],
         },
@@ -165,7 +166,7 @@ const updateChartColor = () => {
 
 const chartOptions = ref({
   chart: {
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    foreColor: getChartTheme().foreground,
     toolbar: {
       show: false,
     },
@@ -187,12 +188,11 @@ const chartOptions = ref({
     width: 1,
   },
   plotOptions: {
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    foreColor: getChartTheme().foreground,
     heatmap: {
       shadeIntensity: 0.25,
       radius: 0,
       colorScale: {
-        // ["#0ea5e9", "#22c55e", "#eab308", "#ef4444"]
         ranges: [
           {
             from: 0,
@@ -202,22 +202,22 @@ const chartOptions = ref({
           {
             from: 1,
             to: Math.floor(totalRosters.value / 4),
-            color: "#0ea5e9",
+            color: getChartTheme().neutral,
           },
           {
             from: Math.floor(totalRosters.value / 4) + 1,
             to: Math.floor(totalRosters.value / 2),
-            color: "#22c55e",
+            color: getChartTheme().positive,
           },
           {
             from: Math.floor(totalRosters.value / 2) + 1,
             to: Math.floor(totalRosters.value * (3 / 4)),
-            color: "#eab308",
+            color: getChartTheme().series[2],
           },
           {
             from: Math.floor(totalRosters.value * (3 / 4)) + 1,
             to: totalRosters.value,
-            color: "#ef4444",
+            color: getChartTheme().negative,
           },
         ],
       },
@@ -240,7 +240,7 @@ const chartOptions = ref({
   <Card class="w-full p-4 md:p-6 min-w-80">
     <div class="flex justify-between">
       <div>
-        <h1 class="pb-2 text-3xl font-bold">
+        <h1 class="pb-2 text-2xl font-semibold tracking-tight">
           Position Group Rankings
         </h1>
       </div>

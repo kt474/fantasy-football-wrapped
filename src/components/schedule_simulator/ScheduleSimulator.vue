@@ -809,7 +809,7 @@ const volatilityChartOptions = computed(() => {
   return {
     chart: {
       type: "area",
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: "hsl(var(--foreground))",
       toolbar: { show: false },
       zoom: { enabled: false },
       animations: { enabled: false },
@@ -826,7 +826,7 @@ const volatilityChartOptions = computed(() => {
         opacityTo: 0.05,
       },
     },
-    colors: ["#2563eb"],
+    colors: ["hsl(var(--chart-1))"],
     dataLabels: { enabled: false },
     xaxis: {
       categories: selectedVolatilitySeries.value.categories,
@@ -987,7 +987,7 @@ function runMonteCarloDistribution() {
     <Card class="w-full p-4 space-y-4 md:p-6">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p class="text-3xl font-semibold">Schedule Simulator</p>
+          <p class="text-2xl font-semibold tracking-tight">Schedule Simulator</p>
           <p class="mt-4 text-muted-foreground">
             Test alternate matchups and see how the standings change.
           </p>
@@ -1311,7 +1311,7 @@ function runMonteCarloDistribution() {
     <Card class="w-full p-4 md:p-6">
       <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 class="text-3xl font-semibold">Random Schedule Outcomes</h3>
+          <h3 class="text-2xl font-semibold tracking-tight">Random Schedule Outcomes</h3>
           <p class="mt-2 text-muted-foreground">
             Distribution of likely win totals from simulating 1000 randomized
             schedules.

@@ -10,13 +10,13 @@ defineProps<{
 <template>
   <section v-if="awards.length > 0" class="space-y-3">
     <div>
-      <p class="text-xl font-bold">Weekly Awards</p>
+      <p class="text-xl font-semibold tracking-tight">Weekly Awards</p>
     </div>
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       <Card
         v-for="award in awards"
         :key="award.id"
-        class="relative flex flex-col justify-between p-4 overflow-hidden transition-colors hover:bg-muted/30"
+        class="relative flex flex-col justify-between p-4 overflow-hidden transition-colors"
       >
         <div class="space-y-3">
           <div class="flex items-start gap-3">

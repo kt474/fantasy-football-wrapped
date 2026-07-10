@@ -34,7 +34,8 @@ const weekOptions = computed(() => {
   }
 
   const ratingCount =
-    props.powerRankings[0].data?.length ?? props.powerRankings[0].ratings.length;
+    props.powerRankings[0].data?.length ??
+    props.powerRankings[0].ratings.length;
   const regularSeasonWeekCount = props.hasPreseasonRankings
     ? ratingCount - 1
     : ratingCount;
@@ -102,9 +103,9 @@ const listPadding = computed(() => {
 });
 </script>
 <template>
-  <Card class="px-6 pt-4 min-h-96 custom-width">
-    <div class="flex items-center justify-between sm:mt-1.5 mb-1.5">
-      <h5 class="w-20 text-xl font-bold text-pretty">
+  <Card class="min-h-96 p-4 md:p-6 custom-width">
+    <div class="flex items-start justify-between gap-3 mb-4">
+      <h5 class="text-2xl font-semibold tracking-tight">
         Ranking score
       </h5>
       <Select v-model="currentRatingIndex">

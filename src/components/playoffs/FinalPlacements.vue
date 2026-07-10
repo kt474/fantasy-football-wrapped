@@ -7,9 +7,9 @@ const props = defineProps<{
 }>();
 </script>
 <template>
-  <Card class="w-full lg:w-1/4 px-6 pt-2.5 mt-4 lg:mt-0 lg:ml-4">
-    <div class="flex items-center justify-between my-2">
-      <h5 class="w-20 text-2xl font-bold text-pretty">
+  <Card class="w-full p-4 mt-4 lg:w-1/4 lg:mt-0 lg:ml-4 md:p-6">
+    <div class="flex items-start justify-between mb-4">
+      <h5 class="text-2xl font-semibold tracking-tight text-pretty">
         Final Placements
       </h5>
     </div>

@@ -233,7 +233,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
 </script>
 <template>
   <Card class="w-full p-4 mt-4 md:p-6">
-    <h1 class="pb-2 mb-2 text-3xl font-bold">
+    <h1 class="pb-2 mb-2 text-2xl font-semibold tracking-tight">
       Luckiest/Unluckiest Teams
     </h1>
     <p class="max-w-3xl mb-4 text-sm sm:text-base text-muted-foreground">
@@ -361,7 +361,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
     </div>
   </Card>
   <Card class="w-full p-4 my-4 md:p-6">
-    <h1 class="pb-2 mb-2 text-3xl font-bold">Schedule Analysis</h1>
+    <h1 class="pb-2 mb-2 text-2xl font-semibold tracking-tight">Schedule Analysis</h1>
     <p class="max-w-3xl mb-4 text-sm text-muted-foreground sm:text-base">
       Actual record, expected number of wins, and best/worst possible records
       (team names in parentheses indicate the teams with the schedule that would

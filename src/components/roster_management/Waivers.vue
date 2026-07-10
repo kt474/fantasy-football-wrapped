@@ -274,7 +274,7 @@ watch(
       v-if="store.currentTab === 'Roster Management'"
       class="w-full py-4 pl-4 overflow-auto xl:w-2/3 md:py-6 md:pl-6"
     >
-      <h1 class="pb-2 text-3xl font-bold">
+      <h1 class="pb-2 text-2xl font-semibold tracking-tight">
         Waivers & Free Agent Adds
       </h1>
       <p
@@ -465,7 +465,7 @@ watch(
           store.currentTab === 'Roster Management',
       }"
     >
-      <p class="mb-4 text-3xl font-bold">Best Adds</p>
+      <p class="mb-4 text-2xl font-semibold tracking-tight">Best Adds</p>
       <div
         v-if="orderedData.length > 0"
         v-for="(move, index) in orderedData"

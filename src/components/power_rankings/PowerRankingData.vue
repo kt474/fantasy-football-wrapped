@@ -169,7 +169,7 @@ const updateChartColor = () => {
     ...chartOptions.value,
     chart: {
       width: "98%",
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: "hsl(var(--foreground))",
       toolbar: {
         show: false,
       },
@@ -252,18 +252,18 @@ const chartOptions = ref({
     },
   },
   colors: [
-    "#ef4444",
-    "#f97316",
-    "#f59e0b",
-    "#eab308",
-    "#84cc16",
-    "#14b8a6",
-    "#22c55e",
-    "#0ea5e9",
-    "#6366f1",
-    "#a855f7",
-    "#ec4899",
-    "#f43f5e",
+    "hsl(var(--chart-rank-1))",
+    "hsl(var(--chart-rank-2))",
+    "hsl(var(--chart-rank-3))",
+    "hsl(var(--chart-rank-4))",
+    "hsl(var(--chart-rank-5))",
+    "hsl(var(--chart-rank-6))",
+    "hsl(var(--chart-rank-7))",
+    "hsl(var(--chart-rank-8))",
+    "hsl(var(--chart-rank-9))",
+    "hsl(var(--chart-rank-10))",
+    "hsl(var(--chart-rank-11))",
+    "hsl(var(--chart-rank-12))",
   ],
   xaxis: {
     categories: chartCategories.value,
@@ -335,7 +335,7 @@ const chartOptions = ref({
     >
       <div class="flex justify-between">
         <div>
-          <h1 class="pb-2 text-3xl font-bold">Power Rankings</h1>
+          <h1 class="pb-2 text-2xl font-semibold tracking-tight">Power Rankings</h1>
         </div>
       </div>
       <apexchart

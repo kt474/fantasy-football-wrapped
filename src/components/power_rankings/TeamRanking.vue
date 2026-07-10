@@ -151,11 +151,11 @@ watch(
 );
 </script>
 <template>
-  <Card class="w-full py-4 pl-4 md:py-6 md:pl-6 min-w-80">
+  <Card class="w-full p-4 min-w-80 md:p-6">
     <Tabs v-if="!loading" default-value="score">
       <div class="flex justify-between">
-        <h1 class="pb-2 text-3xl font-bold">Player Rankings</h1>
-        <div class="inline-flex p-1 mr-4 rounded-lg md:mr-6 max-h-12">
+        <h1 class="pb-2 text-2xl font-semibold tracking-tight">Player Rankings</h1>
+        <div class="inline-flex max-h-12 p-1 rounded-lg">
           <TabsList>
             <TabsTrigger value="roster"> By Roster </TabsTrigger>
             <TabsTrigger value="score"> Overall </TabsTrigger>

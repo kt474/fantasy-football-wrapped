@@ -453,7 +453,7 @@ const recordCards = computed<AllTimeRecordCard[]>(() => {
 <template>
   <Card v-if="recordCards.length" class="mt-4 overflow-hidden">
     <CardHeader class="p-4 border-b bg-muted/30 sm:p-6">
-      <CardTitle class="text-2xl sm:text-3xl">All Time Records</CardTitle>
+      <CardTitle>All Time Records</CardTitle>
     </CardHeader>
     <CardContent class="p-4 sm:p-6">
       <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">

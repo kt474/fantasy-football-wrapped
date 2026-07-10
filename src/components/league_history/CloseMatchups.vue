@@ -179,7 +179,7 @@ const matchupSections = computed<MatchupSection[]>(() => [
 <template>
   <Card v-if="matchupRecords.length" class="mt-4 overflow-hidden">
     <CardHeader class="p-4 border-b sm:p-6 bg-muted/30">
-      <CardTitle class="text-2xl sm:text-3xl">Matchup Margins</CardTitle>
+      <CardTitle>Matchup Margins</CardTitle>
     </CardHeader>
     <CardContent class="p-4 sm:p-6">
       <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">

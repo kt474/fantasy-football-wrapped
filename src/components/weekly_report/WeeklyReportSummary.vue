@@ -183,7 +183,7 @@ const trackPremiumCtaClick = (cta: string) => {
     <div>
       <div class="flex">
         <div class="flex flex-wrap sm:flex-nowrap">
-          <p class="mb-2 text-xl font-bold">Summary</p>
+          <p class="mb-2 text-xl font-semibold tracking-tight">Summary</p>
           <TabsList class="sm:ml-4">
             <TabsTrigger value="Standard"> Standard </TabsTrigger>
             <TabsTrigger value="Premium"> Premium </TabsTrigger>

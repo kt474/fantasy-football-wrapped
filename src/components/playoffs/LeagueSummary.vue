@@ -162,9 +162,9 @@ const copyReport = () => {
 };
 </script>
 <template>
-  <Card v-if="showSummary" class="w-full h-full px-6 pt-4 mx-auto mt-4">
+  <Card v-if="showSummary" class="w-full h-full p-4 mx-auto mt-4 md:p-6">
     <div class="flex justify-between">
-      <h5 class="text-2xl font-bold sm:text-3xl">League Recap</h5>
+      <h5 class="text-2xl font-semibold tracking-tight">League Recap</h5>
       <Button @click="copyReport()" variant="outline" size="sm">
         <Copy class="size-4" />
       </Button>

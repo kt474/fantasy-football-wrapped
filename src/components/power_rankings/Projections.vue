@@ -313,7 +313,7 @@ const updateChartColor = () => {
     chart: {
       type: "bar",
       stacked: true,
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: "hsl(var(--foreground))",
       toolbar: {
         show: false,
       },
@@ -369,7 +369,7 @@ const updateChartColor = () => {
 
 const chartOptions = ref({
   chart: {
-    foreColor: store.darkMode ? "#ffffff" : "#111827",
+    foreColor: "hsl(var(--foreground))",
     type: "bar",
     stacked: true,
     toolbar: {
@@ -382,7 +382,14 @@ const chartOptions = ref({
       enabled: false,
     },
   },
-  colors: ["#0ea5e9", "#22c55e", "#eab308", "#ef4444", "#6366f1", "#ec4899"],
+  colors: [
+    "hsl(var(--chart-1))",
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-3))",
+    "hsl(var(--chart-4))",
+    "hsl(var(--chart-5))",
+    "hsl(var(--chart-6))",
+  ],
   stroke: {
     colors: ["#fff"],
     width: 1,
@@ -431,7 +438,7 @@ const chartOptions = ref({
       <Card class="w-full p-4 md:p-6 min-w-80">
         <div class="flex justify-between">
           <div>
-            <h1 class="pb-2 text-3xl font-bold">
+            <h1 class="pb-2 text-2xl font-semibold tracking-tight">
               Roster Projections
             </h1>
           </div>
@@ -452,7 +459,7 @@ const chartOptions = ref({
     <div
       v-else
       role="status"
-      class="p-4 border border-border rounded shadow-sm animate-pulse md:p-6 custom-height"
+      class="p-4 border border-border rounded-lg bg-card shadow-sm animate-pulse md:p-6 custom-height"
     >
       <p class="flex justify-center mb-4 text-xl font-semibold sm:-mb-6">
         Loading projection data...

@@ -274,7 +274,9 @@ describe("weekly report components", () => {
       "&quot;categories&quot;:[&quot;alpha_user&quot;,&quot;beta_user&quot;]"
     );
     expect(html).toContain("&quot;theme&quot;:&quot;light&quot;");
-    expect(html).toContain("&quot;foreColor&quot;:&quot;#111827&quot;");
+    expect(html).toContain(
+      "&quot;foreColor&quot;:&quot;hsl(var(--foreground))&quot;"
+    );
   });
 
   test("WeeklyPointsChart switches labels and theme from props", async () => {
@@ -322,7 +324,9 @@ describe("weekly report components", () => {
       "&quot;categories&quot;:[&quot;Alpha Team&quot;,&quot;Beta Team&quot;]"
     );
     expect(html).toContain("&quot;theme&quot;:&quot;dark&quot;");
-    expect(html).toContain("&quot;foreColor&quot;:&quot;#ffffff&quot;");
+    expect(html).toContain(
+      "&quot;foreColor&quot;:&quot;hsl(var(--foreground))&quot;"
+    );
     expect(html).toContain(
       "&quot;series&quot;:[{&quot;name&quot;:&quot;Points&quot;,&quot;data&quot;:[90,88]}]"
     );

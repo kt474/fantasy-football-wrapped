@@ -133,7 +133,7 @@ const promptData = computed(() => {
 <template>
   <div class="w-full mb-4">
     <div class="flex justify-between">
-      <h3 class="text-xl font-bold">Matchup Forecast</h3>
+      <h3 class="text-xl font-semibold tracking-tight">Matchup Forecast</h3>
       <Button class="" v-if="preview === ''" @click="getPreview">
         Generate
       </Button>

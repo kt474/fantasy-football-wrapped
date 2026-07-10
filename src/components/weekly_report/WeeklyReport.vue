@@ -735,10 +735,10 @@ watch(
 watch(() => currentWeek.value, fetchPlayerNames);
 </script>
 <template>
-  <Card class="h-full px-6 pt-4 my-4 custom-width">
+  <Card class="h-full p-4 my-4 custom-width md:p-6">
     <Tabs default-value="Report" v-model="activeTab">
       <div class="flex justify-between w-full mb-3">
-        <h5 class="mr-4 text-2xl font-bold sm:text-3xl">
+        <h5 class="mr-4 text-2xl font-semibold tracking-tight">
           Weekly {{ activeTab }}
         </h5>
         <div class="flex flex-wrap justify-end">

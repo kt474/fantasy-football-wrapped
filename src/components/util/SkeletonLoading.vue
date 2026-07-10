@@ -29,7 +29,7 @@ const store = useStore();
     <div class="flex w-full">
       <div
         role="status"
-        class="w-full p-4 space-y-4 border border-border divide-y divide-border rounded shadow-sm lg:mr-4 lg:w-3/4 animate-pulse md:p-6"
+        class="w-full p-4 space-y-4 border border-border divide-y divide-border rounded-lg bg-card shadow-sm lg:mr-4 lg:w-3/4 animate-pulse md:p-6"
       >
         <div class="flex items-center justify-between">
           <p class="-mt-1 text-lg dark:text-gray-50">
@@ -57,7 +57,7 @@ const store = useStore();
       <div class="hidden w-1/4 lg:block">
         <div
           role="status"
-          class="p-4 border border-border rounded shadow-sm animate-pulse md:p-6"
+          class="p-4 border border-border rounded-lg bg-card shadow-sm animate-pulse md:p-6"
         >
           <div
             class="h-2.5 bg-muted rounded-full w-32 mb-2.5"
@@ -93,7 +93,7 @@ const store = useStore();
         </div>
         <div
           role="status"
-          class="p-4 mt-4 border border-border rounded shadow-sm animate-pulse md:p-6"
+          class="p-4 mt-4 border border-border rounded-lg bg-card shadow-sm animate-pulse md:p-6"
         >
           <div
             class="h-2.5 bg-muted rounded-full w-32 mb-2.5"

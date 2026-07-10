@@ -507,8 +507,8 @@ watch(
 <template>
   <Card class="p-4 mb-4 md:p-6">
     <Tabs default-value="roster">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <p class="text-3xl font-bold">Start/Sit</p>
+      <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+        <p class="text-2xl font-semibold tracking-tight">Start/Sit</p>
         <TabsList>
           <TabsTrigger value="roster">Roster</TabsTrigger>
           <TabsTrigger value="news">News</TabsTrigger>

@@ -17,7 +17,7 @@ const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
-      foreColor: store.darkMode ? "#ffffff" : "#111827",
+      foreColor: "hsl(var(--foreground))",
       type: "line",
       toolbar: {
         show: false,
@@ -92,18 +92,18 @@ const chartOptions = ref({
     },
   },
   colors: [
-    "#ef4444",
-    "#f97316",
-    "#f59e0b",
-    "#eab308",
-    "#84cc16",
-    "#14b8a6",
-    "#22c55e",
-    "#0ea5e9",
-    "#6366f1",
-    "#a855f7",
-    "#ec4899",
-    "#f43f5e",
+    "hsl(var(--chart-rank-1))",
+    "hsl(var(--chart-rank-2))",
+    "hsl(var(--chart-rank-3))",
+    "hsl(var(--chart-rank-4))",
+    "hsl(var(--chart-rank-5))",
+    "hsl(var(--chart-rank-6))",
+    "hsl(var(--chart-rank-7))",
+    "hsl(var(--chart-rank-8))",
+    "hsl(var(--chart-rank-9))",
+    "hsl(var(--chart-rank-10))",
+    "hsl(var(--chart-rank-11))",
+    "hsl(var(--chart-rank-12))",
   ],
   tooltip: {
     enabled: false,
@@ -145,8 +145,8 @@ watch(
 );
 </script>
 <template>
-  <Card class="block w-full p-4 mt-4 lg:mt-0 lg:w-1/4 min-w-60">
-    <h5 class="ml-0.5 text-2xl font-bold text-pretty">
+  <Card class="block w-full p-4 mt-4 lg:mt-0 lg:w-1/4 min-w-60 md:p-6">
+    <h5 class="mb-4 text-2xl font-semibold tracking-tight text-pretty">
       Regular Season vs Final Placement
     </h5>
     <apexchart
