@@ -140,8 +140,6 @@ export const useLeagueInput = (
         localStorage.setItem("inputType", "League ID");
         store.updateShowInput(false);
         inputUsername(user.display_name, seasonYear.value);
-        store.currentTab = "Standings";
-        localStorage.setItem("currentTab", "Standings");
         await resetRoute();
         return;
       }

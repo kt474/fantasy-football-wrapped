@@ -26,7 +26,8 @@ const leagueCountError = computed(() => {
 });
 
 const addLeagues = async () => {
-  const source = store.currentLeagueId ? "add_league" : "home";
+  const isFirstLeague = !store.currentLeagueId;
+  const source = isFirstLeague ? "home" : "add_league";
   if (checkedLeagues.value.some((league) => store.leagueIds.includes(league))) {
     duplicateLeagueError.value = true;
     trackEvent("League Add Failed", {
@@ -67,6 +68,10 @@ const addLeagues = async () => {
       const firstLoadedLeague = loaded[0];
       if (firstLoadedLeague) {
         store.updateCurrentLeagueId(firstLoadedLeague.leagueId);
+        if (isFirstLeague) {
+          store.currentTab = "Standings";
+          localStorage.setItem("currentTab", "Standings");
+        }
         store.updateShowLeaguesList(false);
         store.setLeaguesList([]);
         loaded.forEach(() =>
@@ -128,8 +133,6 @@ const toggleLeague = (id: string) => {
 const goBack = () => {
   store.leaguesList = [];
   store.showLeaguesList = false;
-  store.currentTab = "Home";
-  localStorage.setItem("currentTab", "Home");
 };
 </script>
 <template>
@@ -225,7 +228,7 @@ const goBack = () => {
           Try searching for another season.
         </div>
 
-        <div class="flex items-center justify-between mt-4">
+        <div class="flex items-center gap-2 mt-4">
           <Button
             @click="goBack"
             aria-label="Go back"
