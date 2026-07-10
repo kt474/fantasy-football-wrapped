@@ -478,7 +478,10 @@ const recordCards = computed<AllTimeRecordCard[]>(() => {
                 :key="`${record.title}-${team.name}-${team.score}`"
                 class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 rounded-md bg-muted/40 px-2 py-1"
               >
-                <p class="min-w-0 text-xs font-medium break-words">
+                <p
+                  :title="team.name"
+                  class="min-w-0 max-w-32 truncate text-xs font-medium"
+                >
                   {{ team.name }}
                 </p>
                 <p
@@ -491,7 +494,8 @@ const recordCards = computed<AllTimeRecordCard[]>(() => {
 
             <p
               v-else
-              class="min-w-0 mt-2 text-sm font-medium break-words"
+              :title="record.detail"
+              class="min-w-0 max-w-32 mt-2 truncate text-sm font-medium"
             >
               {{ record.detail }}
             </p>

@@ -52,6 +52,22 @@ const lastWeek = computed(() => {
   return 0;
 });
 
+const noLuckyWeekText = (team: TeamLuckSummary) => {
+  if (team.luckDiff <= 0) {
+    return "No meaningful favorable matchup luck has emerged yet.";
+  }
+
+  return "Their favorable result came from consistently facing lower-scoring opponents rather than a single low-scoring win.";
+};
+
+const noUnluckyWeekText = (team: TeamLuckSummary) => {
+  if (team.luckDiff >= 0) {
+    return "No meaningful unfavorable matchup luck has emerged yet.";
+  }
+
+  return "Their unfavorable result came from consistently facing higher-scoring opponents rather than a single high-scoring loss.";
+};
+
 const luckAnalysis = computed(() => {
   const teams = promptData.value;
 
@@ -292,9 +308,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
         </ul>
         <div v-if="team.luckyWeeks.length === 0">
           <p>
-            <b>{{ team.teamName }}</b> did not have any individual weeks where
-            they won with a particularly low score. Their luck came from facing
-            opponents with below average scores.
+            {{ noLuckyWeekText(team) }}
           </p>
         </div>
       </Card>
@@ -352,16 +366,16 @@ const getDotPosition = (value: number, min: number, max: number) => {
         </ul>
         <div v-if="team.unluckyWeeks.length === 0">
           <p>
-            <b>{{ team.teamName }}</b> did not have any individual weeks where
-            they lost with a particularly high score. Their bad luck came from
-            facing opponents with above average scores.
+            {{ noUnluckyWeekText(team) }}
           </p>
         </div>
       </Card>
     </div>
   </Card>
   <Card class="w-full p-4 my-4 md:p-6">
-    <h1 class="pb-2 mb-2 text-2xl font-semibold tracking-tight">Schedule Analysis</h1>
+    <h1 class="pb-2 mb-2 text-2xl font-semibold tracking-tight">
+      Schedule Analysis
+    </h1>
     <p class="max-w-3xl mb-4 text-sm text-muted-foreground sm:text-base">
       Actual record, expected number of wins, and best/worst possible records
       (team names in parentheses indicate the teams with the schedule that would

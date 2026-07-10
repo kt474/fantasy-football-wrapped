@@ -54,7 +54,7 @@ const monteCarloRunCount = ref(0);
 const scenarioLabel = ref("Original schedule");
 
 const dataWeekCount = computed(() => {
-  return Math.max(...props.tableData.map((team) => team.points.length), 0);
+  return Math.max(...props.tableData.map((team) => team.points?.length), 0);
 });
 
 const usesMedianScoring = computed(() => {
@@ -115,7 +115,7 @@ const teamName = (team: TableDataType) => {
 };
 
 const getWeekPoints = (teamIndex: number, week: number) => {
-  const points = props.tableData[teamIndex]?.points[week];
+  const points = props.tableData[teamIndex]?.points?.[week];
   return Number.isFinite(points) ? points : 0;
 };
 
@@ -987,7 +987,9 @@ function runMonteCarloDistribution() {
     <Card class="w-full p-4 space-y-4 md:p-6">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p class="text-2xl font-semibold tracking-tight">Schedule Simulator</p>
+          <p class="text-2xl font-semibold tracking-tight">
+            Schedule Simulator
+          </p>
           <p class="mt-4 text-muted-foreground">
             Test alternate matchups and see how the standings change.
           </p>
@@ -1011,39 +1013,37 @@ function runMonteCarloDistribution() {
             </TabsList>
 
             <TabsContent value="swap" class="mt-3">
-              <div
-                class="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
-              >
-                <div>
+              <div class="flex flex-wrap items-end gap-2">
+                <div class="w-full max-w-56">
                   <p class="mb-1 text-sm">First team</p>
                   <Select v-model="selectedSwapTeamAValue">
                     <SelectTrigger class="w-full">
                       <SelectValue placeholder="Select team" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent class="w-56 max-w-[calc(100vw-2rem)]">
                       <SelectItem
                         v-for="team in teamOptions"
                         :key="`swap-a-${team.value}`"
                         :value="team.value"
                       >
-                        {{ team.label }}
+                        <span class="block truncate">{{ team.label }}</span>
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
+                <div class="w-full max-w-56">
                   <p class="mb-1 text-sm">Second team</p>
                   <Select v-model="selectedSwapTeamBValue">
                     <SelectTrigger class="w-full">
                       <SelectValue placeholder="Select team" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent class="w-56 max-w-[calc(100vw-2rem)]">
                       <SelectItem
                         v-for="team in teamOptions"
                         :key="`swap-b-${team.value}`"
                         :value="team.value"
                       >
-                        {{ team.label }}
+                        <span class="block truncate">{{ team.label }}</span>
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -1104,9 +1104,7 @@ function runMonteCarloDistribution() {
               :key="card.label"
               class="p-3.5 rounded-md bg-background/70"
             >
-              <p
-                class="text-xs font-semibold uppercase text-muted-foreground"
-              >
+              <p class="text-xs font-semibold uppercase text-muted-foreground">
                 {{ card.label }}
               </p>
               <p
@@ -1123,9 +1121,7 @@ function runMonteCarloDistribution() {
 
           <div class="grid grid-cols-1 gap-3 mt-3 sm:grid-cols-2">
             <div class="p-3.5 rounded-md bg-background/70">
-              <p
-                class="text-xs font-semibold uppercase text-muted-foreground"
-              >
+              <p class="text-xs font-semibold uppercase text-muted-foreground">
                 Biggest Boost
               </p>
               <p class="mt-2 text-base font-semibold">
@@ -1136,9 +1132,7 @@ function runMonteCarloDistribution() {
               </p>
             </div>
             <div class="p-3.5 rounded-md bg-background/70">
-              <p
-                class="text-xs font-semibold uppercase text-muted-foreground"
-              >
+              <p class="text-xs font-semibold uppercase text-muted-foreground">
                 Biggest Drop
               </p>
               <p class="mt-2 text-base font-semibold">
@@ -1311,7 +1305,9 @@ function runMonteCarloDistribution() {
     <Card class="w-full p-4 md:p-6">
       <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 class="text-2xl font-semibold tracking-tight">Random Schedule Outcomes</h3>
+          <h3 class="text-2xl font-semibold tracking-tight">
+            Random Schedule Outcomes
+          </h3>
           <p class="mt-2 text-muted-foreground">
             Distribution of likely win totals from simulating 1000 randomized
             schedules.

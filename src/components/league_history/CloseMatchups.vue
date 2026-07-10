@@ -229,7 +229,8 @@ const matchupSections = computed<MatchupSection[]>(() => [
                     class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 rounded-md bg-muted/40 px-3 py-1.5"
                   >
                     <p
-                      class="min-w-0 text-sm font-medium break-words"
+                      :title="displayName(team.team)"
+                      class="min-w-0 max-w-32 truncate text-sm font-medium"
                     >
                       {{ displayName(team.team) }}
                     </p>

@@ -33,14 +33,23 @@ const seriesData = computed(() => [
   },
 ]);
 
-const userLabelList = computed(() =>
+const managerNames = computed(() =>
   props.tableData.map((user) => {
-    const label = store.showUsernames
-      ? (user.username ?? "")
-      : (user.name ?? "");
-    const n = 17;
-    return label.length > n ? label.slice(0, n - 1) + "..." : label;
+    return store.showUsernames ? (user.username ?? "") : (user.name ?? "");
   })
+);
+
+const axisLabelList = computed(() =>
+  managerNames.value.map((name) => {
+    const maxLength = 14;
+    return name.length > maxLength ? `${name.slice(0, maxLength - 1)}…` : name;
+  })
+);
+
+const shouldRotateAxisLabels = computed(
+  () =>
+    managerNames.value.length > 6 ||
+    managerNames.value.some((name) => name.length > 12)
 );
 
 const chartOptions = ref({});
@@ -53,12 +62,16 @@ const buildChartOptions = () => ({
     zoom: { enabled: false },
     animations: { enabled: false },
   },
-  colors: [
-    "hsl(var(--chart-1))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-3))",
-  ],
-  tooltip: { theme: store.darkMode ? "dark" : "light" },
+  colors: ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))"],
+  tooltip: {
+    theme: store.darkMode ? "dark" : "light",
+    x: {
+      formatter: (
+        _label: string,
+        { dataPointIndex }: { dataPointIndex: number }
+      ) => managerNames.value[dataPointIndex] ?? _label,
+    },
+  },
   plotOptions: {
     bar: {
       horizontal: false,
@@ -68,16 +81,19 @@ const buildChartOptions = () => ({
   dataLabels: { enabled: false },
   stroke: { show: true, width: 2, colors: ["transparent"] },
   xaxis: {
-    categories: userLabelList.value,
-    tickAmount: userLabelList.value.length - 1,
+    categories: axisLabelList.value,
+    tickAmount: axisLabelList.value.length - 1,
     hideOverlappingLabels: false,
     labels: {
-      // label formatting already handled above
+      rotate: shouldRotateAxisLabels.value ? -45 : 0,
+      rotateAlways: shouldRotateAxisLabels.value,
+      minHeight: shouldRotateAxisLabels.value ? 88 : undefined,
+      maxHeight: shouldRotateAxisLabels.value ? 88 : undefined,
       formatter: (str: string) => str,
     },
     title: {
       text: "League Manager",
-      offsetY: -5,
+      offsetY: shouldRotateAxisLabels.value ? 14 : -5,
       style: {
         fontSize: "16px",
         fontFamily:
@@ -102,7 +118,11 @@ const buildChartOptions = () => ({
     },
   },
   fill: { opacity: 1 },
-  legend: { offsetX: 20 },
+  legend: {
+    position: "bottom",
+    offsetX: 20,
+    offsetY: shouldRotateAxisLabels.value ? 22 : 0,
+  },
 });
 
 watch(
@@ -122,14 +142,16 @@ watch(
   <Card class="w-full p-4 md:p-6 min-w-80">
     <div class="flex justify-between">
       <div>
-        <h1 class="pb-2 text-2xl font-semibold tracking-tight">Win Percentages</h1>
+        <h1 class="pb-2 text-2xl font-semibold tracking-tight">
+          Win Percentages
+        </h1>
       </div>
     </div>
     <!-- chart overflows on safari sometimes  -->
     <apexchart
       type="bar"
       width="99.9%"
-      height="475"
+      :height="shouldRotateAxisLabels ? 540 : 475"
       :options="chartOptions"
       :series="seriesData"
       class="overflow-hidden"

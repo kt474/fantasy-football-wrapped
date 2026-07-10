@@ -673,7 +673,7 @@ onBeforeUnmount(() => {
     </div>
     <TradeDatabase v-if="activeMode === 'database'" class="mt-5" />
     <div v-else>
-      <p v-if="!isMobile" class="mt-4 mb-2 text-muted-foreground">
+      <p v-if="!isMobile" class="my-4 text-muted-foreground">
         Drag players into each team's package to brainstorm offers.
       </p>
       <p v-if="isMobile" class="mt-4 mb-2 text-muted-foreground">

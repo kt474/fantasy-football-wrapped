@@ -85,9 +85,7 @@ const hasCompletePreseasonRankings = computed(() => {
   );
 });
 
-const chartIncludesPreseasonRankings = ref(
-  hasCompletePreseasonRankings.value
-);
+const chartIncludesPreseasonRankings = ref(hasCompletePreseasonRankings.value);
 
 const chartCategories = computed(() => {
   const weeks = Array(props.regularSeasonLength)
@@ -230,12 +228,9 @@ watch(
   }
 );
 
-watch(
-  hasCompletePreseasonRankings,
-  (isComplete) => {
-    chartIncludesPreseasonRankings.value = isComplete;
-  }
-);
+watch(hasCompletePreseasonRankings, (isComplete) => {
+  chartIncludesPreseasonRankings.value = isComplete;
+});
 
 const chartOptions = ref({
   chart: {
@@ -335,7 +330,9 @@ const chartOptions = ref({
     >
       <div class="flex justify-between">
         <div>
-          <h1 class="pb-2 text-2xl font-semibold tracking-tight">Power Rankings</h1>
+          <h1 class="pb-2 text-2xl font-semibold tracking-tight">
+            Power Rankings
+          </h1>
         </div>
       </div>
       <apexchart
@@ -345,7 +342,7 @@ const chartOptions = ref({
         :options="chartOptions"
         :series="chartPowerRankings"
       ></apexchart>
-      <p class="mt-4 text-xs sm:-mb-4 footer-font text-muted-foreground">
+      <p class="mt-8 text-xs sm:-mb-4 footer-font text-muted-foreground">
         Ranking formula:
         <span class="italic"
           >((average weekly score * 6) + ((highest score + lowest score) * 2) +
