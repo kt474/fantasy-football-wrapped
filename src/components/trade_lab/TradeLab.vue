@@ -671,7 +671,7 @@ onBeforeUnmount(() => {
         </TabsList>
       </Tabs>
     </div>
-    <TradeDatabase v-if="activeMode === 'database'" class="mt-5" />
+    <TradeDatabase v-if="activeMode === 'database'" class="mt-4" />
     <div v-else>
       <p v-if="!isMobile" class="my-4 text-muted-foreground">
         Drag players into each team's package to brainstorm offers.
@@ -682,7 +682,7 @@ onBeforeUnmount(() => {
 
       <div
         v-if="loading"
-        class="grid min-h-[31rem] gap-3 py-2 xl:grid-cols-3"
+        class="grid min-h-[31rem] gap-3 xl:grid-cols-3"
         aria-busy="true"
         aria-live="polite"
       >
@@ -846,11 +846,12 @@ onBeforeUnmount(() => {
 
           <Card class="p-3">
             <p class="mb-1 text-sm font-semibold">Trade Package</p>
-            <p class="text-sm text-muted-foreground">
+            <p v-if="!isMobile" class="mb-2 text-sm text-muted-foreground">
               Drop players from each roster into its matching side.
             </p>
-            <Separator class="h-px my-2" />
-
+            <p v-else class="mb-2 text-sm text-muted-foreground">
+              Click/tap players from each roster into its matching side.
+            </p>
             <div
               class="min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
               @dragover.prevent
