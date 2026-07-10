@@ -320,7 +320,6 @@ const getValueColor = (value: number) => {
     return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
   return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
 };
-
 </script>
 <template>
   <Card class="w-full p-4 md:p-6">
@@ -365,10 +364,8 @@ const getValueColor = (value: number) => {
           <p class="max-w-3xl mb-2 text-sm text-muted-foreground sm:text-base">
             Draft grades are calculated using each player's draft pick position,
             ADP, and projections from Sleeper. Please remember that fantasy
-            football projections are rarely accurate, so these grades should be
-            viewed as a fun reference for preseason expectations and
-            <span class="italic">not</span> as an indicator for how well each
-            team will perform.
+            football projections are rarely accurate, so these grades should
+            just be viewed as a fun reference for preseason expectations.
           </p>
           <div v-if="data.length === 0">
             <Separator class="h-px mt-1 mb-4" />

@@ -91,6 +91,38 @@ const seriesData = computed(() => {
   return result.reverse(); // heat map chart inputs backwards
 });
 
+const getRankColorScale = () => {
+  const theme = getChartTheme();
+
+  return [
+    {
+      from: 0,
+      to: 0.1,
+      color: theme.border,
+    },
+    {
+      from: 1,
+      to: Math.floor(totalRosters.value / 4),
+      color: theme.series[0],
+    },
+    {
+      from: Math.floor(totalRosters.value / 4) + 1,
+      to: Math.floor(totalRosters.value / 2),
+      color: theme.series[1],
+    },
+    {
+      from: Math.floor(totalRosters.value / 2) + 1,
+      to: Math.floor(totalRosters.value * (3 / 4)),
+      color: theme.series[2],
+    },
+    {
+      from: Math.floor(totalRosters.value * (3 / 4)) + 1,
+      to: totalRosters.value,
+      color: theme.negative,
+    },
+  ];
+};
+
 const updateChartColor = () => {
   const theme = getChartTheme();
   chartOptions.value = {
@@ -130,35 +162,7 @@ const updateChartColor = () => {
       heatmap: {
         shadeIntensity: 0.25,
         radius: 0,
-        colorScale: {
-          ranges: [
-            {
-              from: 0,
-              to: 0.1,
-              color: "#000",
-            },
-            {
-              from: 1,
-              to: Math.floor(totalRosters.value / 4),
-              color: theme.neutral,
-            },
-            {
-              from: Math.floor(totalRosters.value / 4) + 1,
-              to: Math.floor(totalRosters.value / 2),
-              color: theme.positive,
-            },
-            {
-              from: Math.floor(totalRosters.value / 2) + 1,
-              to: Math.floor(totalRosters.value * (3 / 4)),
-              color: theme.series[2],
-            },
-            {
-              from: Math.floor(totalRosters.value * (3 / 4)) + 1,
-              to: totalRosters.value,
-              color: theme.negative,
-            },
-          ],
-        },
+        colorScale: { ranges: getRankColorScale() },
       },
     },
   };
@@ -189,39 +193,11 @@ const chartOptions = ref({
   },
   plotOptions: {
     foreColor: getChartTheme().foreground,
-    heatmap: {
-      shadeIntensity: 0.25,
-      radius: 0,
-      colorScale: {
-        ranges: [
-          {
-            from: 0,
-            to: 0.1,
-            color: "#000",
-          },
-          {
-            from: 1,
-            to: Math.floor(totalRosters.value / 4),
-            color: getChartTheme().neutral,
-          },
-          {
-            from: Math.floor(totalRosters.value / 4) + 1,
-            to: Math.floor(totalRosters.value / 2),
-            color: getChartTheme().positive,
-          },
-          {
-            from: Math.floor(totalRosters.value / 2) + 1,
-            to: Math.floor(totalRosters.value * (3 / 4)),
-            color: getChartTheme().series[2],
-          },
-          {
-            from: Math.floor(totalRosters.value * (3 / 4)) + 1,
-            to: totalRosters.value,
-            color: getChartTheme().negative,
-          },
-        ],
+      heatmap: {
+        shadeIntensity: 0.25,
+        radius: 0,
+        colorScale: { ranges: getRankColorScale() },
       },
-    },
   },
   legend: {
     show: false,

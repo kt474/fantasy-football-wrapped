@@ -175,23 +175,24 @@ const copyReport = () => {
         v-html="renderedSummary"
         class="max-w-5xl my-3 leading-7 text-foreground/90 dark:text-foreground/85 report-content"
       ></div>
-
-      <p class="text-xs text-muted-foreground">
-        AI-generated summary. Information provided may not always be accurate.
-      </p>
-      <p class="mb-4 text-xs text-muted-foreground">
-        If you've enjoyed using ffwrapped this season please consider
-        <a
-          aria-label="buymeacoffee donation page"
-          class="text-primary hover:underline"
-          href="https://buymeacoffee.com/kt474"
-          title="buymeacoffee donation page"
-          target="_blank"
-          rel="noopener noreferrer"
-          >supporting</a
-        >
-        this project.
-      </p>
+      <div class="-mb-2">
+        <p class="text-xs text-muted-foreground">
+          AI-generated summary. Information provided may not always be accurate.
+        </p>
+        <p class="text-xs text-muted-foreground">
+          If you've enjoyed using ffwrapped this season please consider
+          <a
+            aria-label="buymeacoffee donation page"
+            class="text-primary hover:underline"
+            href="https://buymeacoffee.com/kt474"
+            title="buymeacoffee donation page"
+            target="_blank"
+            rel="noopener noreferrer"
+            >supporting</a
+          >
+          this project.
+        </p>
+      </div>
     </div>
     <!-- Fake data for home page  -->
     <div v-else-if="store.leagueInfo.length == 0" class="max-w-5xl">
