@@ -162,8 +162,8 @@ const chartOptions = ref({
     },
   },
   legend: {
-    offsetY: 8,
-    offsetX: -40,
+    offsetY: 5,
+    offsetX: -25,
   },
   markers: {
     size: 0,
@@ -174,7 +174,7 @@ const chartOptions = ref({
   <Card class="w-full p-4 md:p-6">
     <div class="flex justify-between">
       <div>
-        <h1 class="mb-4 text-2xl font-semibold tracking-tight">
+        <h1 class="text-2xl font-semibold tracking-tight">
           Points vs Potential Points
         </h1>
       </div>

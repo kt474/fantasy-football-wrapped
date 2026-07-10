@@ -569,11 +569,7 @@ watch(
             <Skeleton class="w-32 h-8 bg-muted dark:bg-muted/70" />
           </div>
           <div class="grid gap-3">
-            <Card
-              v-for="index in 6"
-              :key="index"
-              class="overflow-hidden"
-            >
+            <Card v-for="index in 6" :key="index" class="overflow-hidden">
               <div class="flex w-full gap-3 p-4">
                 <Skeleton class="w-10 mt-3 bg-muted dark:bg-muted/70 h-7" />
                 <Skeleton
@@ -730,20 +726,20 @@ watch(
                 <div class="flex w-full gap-3 p-4">
                   <Badge
                     variant="outline"
-                    class="justify-center w-10 mt-3 rounded-md h-7"
+                    class="justify-center hidden w-10 mt-3 rounded-md h-7 sm:inline-flex"
                   >
                     {{ player.position }}
                   </Badge>
                   <img
                     v-if="player.position !== 'DEF'"
                     alt="Player image"
-                    class="object-cover border rounded-full size-14 bg-muted"
+                    class="object-cover border rounded-full size-12 bg-muted sm:size-14"
                     :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
                   />
                   <img
                     v-else
                     alt="Defense image"
-                    class="border rounded-full h-14 bg-muted"
+                    class="h-12 border rounded-full bg-muted sm:h-14"
                     :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
                   />
                   <div class="flex justify-between w-full min-w-0 gap-3">
@@ -751,13 +747,15 @@ watch(
                       <p class="font-semibold truncate">
                         {{ player.name ? player.name : player.team }}
                       </p>
-                      <p class="mt-1 text-sm">
+                      <p class="mt-1 text-sm text-muted-foreground">
                         {{ getPlayerMatchupLabel(player) }}
                       </p>
                     </div>
-                    <div class="flex items-start gap-2 shrink-0">
+                    <div class="flex items-start gap-2 sm:gap-4 shrink-0">
                       <div v-if="player.projection?.stats" class="text-right">
-                        <p class="text-xs font-medium">Projected</p>
+                        <p class="text-xs font-medium text-muted-foreground">
+                          Projected
+                        </p>
                         <p class="text-xl font-semibold tabular-nums">
                           {{ player.projection?.stats }}
                         </p>
@@ -780,9 +778,7 @@ watch(
                 </div>
                 <div class="px-4 py-3 border-t bg-muted/20">
                   <div class="grid grid-cols-4 gap-3 sm:grid-cols-5">
-                    <p
-                      class="hidden text-xs font-semibold uppercase sm:block"
-                    >
+                    <p class="hidden text-xs font-semibold uppercase sm:block">
                       Recent
                     </p>
                     <div class="text-center">

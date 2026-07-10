@@ -846,12 +846,7 @@ onBeforeUnmount(() => {
 
           <Card class="p-3">
             <p class="mb-1 text-sm font-semibold">Trade Package</p>
-            <p v-if="!isMobile" class="mb-2 text-sm text-muted-foreground">
-              Drop players from each roster into its matching side.
-            </p>
-            <p v-else class="mb-2 text-sm text-muted-foreground">
-              Click/tap players from each roster into its matching side.
-            </p>
+
             <div
               class="min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
               @dragover.prevent

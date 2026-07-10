@@ -985,7 +985,7 @@ function runMonteCarloDistribution() {
 <template>
   <div class="w-full space-y-4">
     <Card class="w-full p-4 space-y-4 md:p-6">
-      <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
         <div>
           <p class="text-2xl font-semibold tracking-tight">
             Schedule Simulator
@@ -994,22 +994,35 @@ function runMonteCarloDistribution() {
             Test alternate matchups and see how the standings change.
           </p>
         </div>
-        <Button variant="outline" @click="resetScenario">Reset</Button>
       </div>
 
       <div
         class="grid grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(360px,0.9fr)_1.1fr]"
       >
         <Card class="p-4">
-          <div>
+          <div class="flex items-center justify-between gap-3">
             <h3 class="text-lg font-semibold">Scenario Builder</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              :disabled="scenarioLabel === 'Original schedule'"
+              @click="resetScenario"
+            >
+              Reset
+            </Button>
           </div>
 
           <Tabs v-model="activeScenarioValue" class="mt-3">
-            <TabsList class="inline-flex flex-wrap h-auto">
-              <TabsTrigger value="swap">Swap Schedules</TabsTrigger>
-              <TabsTrigger value="week">Shuffle Week</TabsTrigger>
-              <TabsTrigger value="all">Random Season</TabsTrigger>
+            <TabsList class="grid w-full h-auto grid-cols-1 sm:inline-flex sm:w-auto">
+              <TabsTrigger value="swap" class="w-full sm:w-auto">
+                Swap Schedules
+              </TabsTrigger>
+              <TabsTrigger value="week" class="w-full sm:w-auto">
+                Shuffle Week
+              </TabsTrigger>
+              <TabsTrigger value="all" class="w-full sm:w-auto">
+                Random Season
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="swap" class="mt-3">

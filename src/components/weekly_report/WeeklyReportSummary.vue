@@ -425,12 +425,14 @@ const trackPremiumCtaClick = (cta: string) => {
           <p class="text-xs text-muted-foreground">
             Smarter, more detailed, newsletter style weekly recaps with
             customizable tones and deeper league context are available in the
-            <router-link
-              :to="{ path: '/account', query: route.query }"
+            <button
+              type="button"
               class="cursor-pointer text-primary hover:underline"
-              @click="trackPremiumCtaClick('standard_report_inline_link')"
-              >Premium tier</router-link
-            >.
+              @click="emit('update:tier', 'Premium')"
+            >
+              Premium tier
+            </button>
+            .
           </p>
         </div>
         <div v-else-if="!hasLeagues" class="max-w-5xl">
