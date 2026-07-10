@@ -24,3 +24,5 @@ declare module "markdown-it" {
 declare module "virtual:pwa-register" {
   export const registerSW: (options?: { immediate?: boolean }) => () => void;
 }
+
+declare module "apexcharts/features/legend";

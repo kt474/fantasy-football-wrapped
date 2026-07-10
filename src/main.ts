@@ -141,7 +141,17 @@ router.afterEach(() => {
 
 const pinia = createPinia();
 const app = createApp(App);
-const ApexChart = defineAsyncComponent(() => import("vue3-apexcharts"));
+const ApexChart = defineAsyncComponent(async () => {
+  await Promise.all([
+    import("apexcharts/line"),
+    import("apexcharts/area"),
+    import("apexcharts/bar"),
+    import("apexcharts/pie"),
+    import("apexcharts/heatmap"),
+    import("apexcharts/features/legend"),
+  ]);
+  return import("vue3-apexcharts/core");
+});
 
 app.use(pinia);
 app.use(posthogPlugin);

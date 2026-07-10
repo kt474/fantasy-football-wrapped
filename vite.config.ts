@@ -64,18 +64,4 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules/apexcharts")) {
-            return "vendor-apexcharts";
-          }
-          if (id.includes("node_modules/vue3-apexcharts")) {
-            return "vendor-vue3-apexcharts";
-          }
-        },
-      },
-    },
-  },
 }));

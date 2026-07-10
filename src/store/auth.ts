@@ -27,6 +27,7 @@ export const useAuthStore = defineStore("auth", () => {
   const weeklyReportEmailsPreference = ref(false);
 
   let unsubscribeAuthChange: (() => void) | null = null;
+  let initializationPromise: Promise<void> | null = null;
 
   const isAuthenticated = computed(() => Boolean(session.value?.access_token));
   const isConfigured = computed(() => isSupabaseConfigured());
@@ -34,58 +35,66 @@ export const useAuthStore = defineStore("auth", () => {
     return weeklyReportEmailsPreference.value;
   });
 
-  const initialize = async () => {
-    if (initialized.value || initializing.value) return;
+  const initialize = (): Promise<void> => {
+    if (initialized.value) return Promise.resolve();
+    if (initializationPromise) return initializationPromise;
 
     if (!isSupabaseConfigured()) {
       initialized.value = true;
-      return;
+      return Promise.resolve();
     }
 
     initializing.value = true;
-    try {
-      const supabase = getSupabaseClient();
-      const callbackUrl = new URL(window.location.href);
-      const recoveryType =
-        callbackUrl.searchParams.get("type") ??
-        new URLSearchParams(callbackUrl.hash.replace(/^#/, "")).get("type");
-      isPasswordRecovery.value = recoveryType === "recovery";
+    initializationPromise = (async () => {
+      try {
+        const supabase = getSupabaseClient();
+        const callbackUrl = new URL(window.location.href);
+        const recoveryType =
+          callbackUrl.searchParams.get("type") ??
+          new URLSearchParams(callbackUrl.hash.replace(/^#/, "")).get("type");
+        isPasswordRecovery.value = recoveryType === "recovery";
 
-      const {
-        data: { session: initialSession },
-      } = await supabase.auth.getSession();
+        const {
+          data: { session: initialSession },
+        } = await supabase.auth.getSession();
 
-      session.value = initialSession;
-      user.value = initialSession?.user ?? null;
+        session.value = initialSession;
+        user.value = initialSession?.user ?? null;
 
-      if (!initialSession) {
-        const authCode = callbackUrl.searchParams.get("code");
-        if (authCode) {
-          const { data, error } =
-            await supabase.auth.exchangeCodeForSession(authCode);
-          if (!error) {
-            session.value = data.session;
-            user.value = data.session?.user ?? null;
+        if (!initialSession) {
+          const authCode = callbackUrl.searchParams.get("code");
+          if (authCode) {
+            const { data, error } =
+              await supabase.auth.exchangeCodeForSession(authCode);
+            if (!error) {
+              session.value = data.session;
+              user.value = data.session?.user ?? null;
+            }
           }
         }
+
+        const { data } = supabase.auth.onAuthStateChange(
+          (event, nextSession) => {
+            if (event === "PASSWORD_RECOVERY") {
+              isPasswordRecovery.value = true;
+            }
+            session.value = nextSession;
+            user.value = nextSession?.user ?? null;
+          }
+        );
+
+        unsubscribeAuthChange = () => data.subscription.unsubscribe();
+        initialized.value = true;
+      } catch (error) {
+        initialized.value = false;
+        console.error("Failed to initialize auth store:", error);
+      } finally {
+        initializing.value = false;
+        initializationPromise = null;
       }
+    })();
 
-      const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
-        if (event === "PASSWORD_RECOVERY") {
-          isPasswordRecovery.value = true;
-        }
-        session.value = nextSession;
-        user.value = nextSession?.user ?? null;
-      });
-
-      unsubscribeAuthChange = () => data.subscription.unsubscribe();
-      initialized.value = true;
-    } catch (error) {
-      initialized.value = false;
-      console.error("Failed to initialize auth store:", error);
-    } finally {
-      initializing.value = false;
-    }
+    return initializationPromise;
   };
 
   const signInWithPassword = async (email: string, password: string) => {

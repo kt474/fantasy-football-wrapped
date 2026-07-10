@@ -1,10 +1,13 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 
 const mocks = vi.hoisted(() => ({
   signUp: vi.fn(),
   signInWithOAuth: vi.fn(),
   newUserAlert: vi.fn(),
+  getSession: vi.fn(),
+  exchangeCodeForSession: vi.fn(),
+  onAuthStateChange: vi.fn(),
 }));
 
 vi.mock("../src/lib/supabase.ts", () => ({
@@ -13,6 +16,9 @@ vi.mock("../src/lib/supabase.ts", () => ({
     auth: {
       signUp: mocks.signUp,
       signInWithOAuth: mocks.signInWithOAuth,
+      getSession: mocks.getSession,
+      exchangeCodeForSession: mocks.exchangeCodeForSession,
+      onAuthStateChange: mocks.onAuthStateChange,
     },
   }),
 }));
@@ -28,6 +34,47 @@ beforeEach(() => {
   mocks.signUp.mockReset();
   mocks.signInWithOAuth.mockReset();
   mocks.newUserAlert.mockReset();
+  mocks.getSession.mockReset();
+  mocks.exchangeCodeForSession.mockReset();
+  mocks.onAuthStateChange.mockReset();
+  mocks.onAuthStateChange.mockReturnValue({
+    data: { subscription: { unsubscribe: vi.fn() } },
+  });
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+describe("auth store initialization", () => {
+  test("concurrent callers wait for the same session initialization", async () => {
+    let resolveSession;
+    mocks.getSession.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSession = resolve;
+      })
+    );
+    vi.stubGlobal("window", {
+      location: { href: "https://ffwrapped.com/account" },
+    });
+    const store = useAuthStore();
+
+    const firstInitialization = store.initialize();
+    let secondInitializationFinished = false;
+    const secondInitialization = store.initialize().then(() => {
+      secondInitializationFinished = true;
+    });
+
+    await Promise.resolve();
+    expect(mocks.getSession).toHaveBeenCalledOnce();
+    expect(secondInitializationFinished).toBe(false);
+
+    resolveSession({ data: { session: null } });
+    await Promise.all([firstInitialization, secondInitialization]);
+
+    expect(store.initialized).toBe(true);
+    expect(mocks.onAuthStateChange).toHaveBeenCalledOnce();
+  });
 });
 
 describe("auth store signup alerts", () => {
