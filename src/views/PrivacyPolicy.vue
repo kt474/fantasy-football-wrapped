@@ -30,16 +30,23 @@
         and use billing and access metadata, such as subscription status,
         billing period dates, purchase records, and seasonal access expiration
         dates, to enable premium features and manage access.
-        <p class="my-3 text-xl font-semibold">Session Storage and Cookies</p>
-        We use browser storage and cookies to keep you signed in, remember
-        preferences, and store app and league data on your device. Our service
-        providers may also use storage necessary for authentication, billing,
-        and security.
+        <p class="my-3 text-xl font-semibold">Browser Storage</p>
+        We use browser storage, including local storage and session storage, to
+        keep you signed in, remember preferences, and store app, league, and
+        subscription-status data on your device. ffwrapped does not directly
+        set cookies. Third-party websites or services you visit through
+        ffwrapped, such as authentication, billing, or fantasy football
+        providers, may use cookies or other storage under their own privacy
+        policies.
 
         <p class="my-3 text-xl font-semibold">Analytics</p>
-        We use Vercel Web Analytics to understand traffic and improve the
-        Service. It may process information such as pages visited, referrers,
-        approximate location, browser, device type, and usage events. We do not
+        We use Vercel Web Analytics, PostHog, and Umami to understand traffic,
+        product usage, and how we can improve the Service. These providers may
+        process information such as pages visited, referrers, approximate
+        location, browser, device type, and usage events. When you sign in, we
+        may associate PostHog analytics with your ffwrapped user ID, email
+        address, account creation date, and subscription status or plan type.
+        PostHog stores its analytics identifier in local storage. We do not
         sell personal information or use it for targeted advertising.
 
         <p class="my-3 text-xl font-semibold">Third-Party Services</p>
@@ -62,7 +69,7 @@
         <p class="my-3 text-xl font-semibold">Changes to This Privacy Policy</p>
         We may update this Privacy Policy from time to time. Any changes will be
         posted on this page, and the "Last updated" date will be revised
-        accordingly. Last updated: June 19, 2026.
+        accordingly. Last updated: July 9, 2026.
         <p class="my-3 text-xl font-semibold">Contact Us</p>
         If you have any questions or concerns about this Privacy Policy, please
         contact us at this
