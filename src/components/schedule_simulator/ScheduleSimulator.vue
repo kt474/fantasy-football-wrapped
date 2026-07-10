@@ -998,7 +998,7 @@ function runMonteCarloDistribution() {
       <div
         class="grid grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(360px,0.9fr)_1.1fr]"
       >
-        <div class="p-4 rounded-md bg-muted/20">
+        <Card class="p-4">
           <div>
             <h3 class="text-lg font-semibold">Scenario Builder</h3>
           </div>
@@ -1091,9 +1091,9 @@ function runMonteCarloDistribution() {
               </div>
             </TabsContent>
           </Tabs>
-        </div>
+        </Card>
 
-        <div class="p-4 rounded-md bg-muted/20">
+        <Card class="p-4">
           <div>
             <h3 class="text-lg font-semibold">Scenario Impact</h3>
           </div>
@@ -1149,10 +1149,10 @@ function runMonteCarloDistribution() {
               </p>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
-      <div class="p-4 rounded-md bg-muted/20">
+      <Card class="p-4">
         <h3 class="text-lg font-semibold">Simulation Results</h3>
 
         <Tabs v-model="activeDetailValue" class="mt-3">
@@ -1305,7 +1305,7 @@ function runMonteCarloDistribution() {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </Card>
     </Card>
 
     <Card class="w-full p-4 md:p-6">

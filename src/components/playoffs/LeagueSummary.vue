@@ -163,7 +163,7 @@ const copyReport = () => {
 </script>
 <template>
   <Card v-if="showSummary" class="w-full h-full p-4 mx-auto mt-4 md:p-6">
-    <div class="flex justify-between">
+    <div class="flex justify-between mb-3">
       <h5 class="text-2xl font-semibold tracking-tight">League Recap</h5>
       <Button @click="copyReport()" variant="outline" size="sm">
         <Copy class="size-4" />
@@ -224,70 +224,34 @@ const copyReport = () => {
       <div role="status" class="space-y-2.5 animate-pulse max-w-lg mb-6">
         <p class="mt-4">Generating Recap...</p>
         <div class="flex items-center w-full">
-          <div
-            class="h-2.5 bg-muted rounded-full w-32"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-          ></div>
+          <div class="h-2.5 bg-muted rounded-full w-32"></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
         </div>
         <div class="flex items-center w-full max-w-[480px]">
-          <div
-            class="h-2.5 bg-muted rounded-full w-full"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-          ></div>
+          <div class="h-2.5 bg-muted rounded-full w-full"></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
         </div>
         <div class="flex items-center w-full max-w-[400px]">
-          <div
-            class="h-2.5 bg-muted/80 rounded-full w-full"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted rounded-full w-80"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-          ></div>
+          <div class="h-2.5 bg-muted/80 rounded-full w-full"></div>
+          <div class="h-2.5 ms-2 bg-muted rounded-full w-80"></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
         </div>
         <div class="flex items-center w-full max-w-[480px]">
-          <div
-            class="h-2.5 ms-2 bg-muted rounded-full w-full"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-          ></div>
+          <div class="h-2.5 ms-2 bg-muted rounded-full w-full"></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
         </div>
         <div class="flex items-center w-full max-w-[440px]">
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-32"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted rounded-full w-full"
-          ></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-32"></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
+          <div class="h-2.5 ms-2 bg-muted rounded-full w-full"></div>
         </div>
         <div class="flex items-center w-full max-w-[360px]">
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted rounded-full w-80"
-          ></div>
-          <div
-            class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-          ></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
+          <div class="h-2.5 ms-2 bg-muted rounded-full w-80"></div>
+          <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
         </div>
         <span class="sr-only">Loading...</span>
       </div>

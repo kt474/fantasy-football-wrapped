@@ -768,7 +768,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
           </Select>
         </div>
       </div>
-      <Separator class="h-px my-2" />
+      <Separator class="h-px mt-2 mb-3" />
       <TabsContent value="Report">
         <WeeklyReportSummary
           v-if="
@@ -814,10 +814,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
         <Separator class="h-px mt-4 mb-2.5" />
 
         <WeeklyAwards :awards="weeklyAwards" />
-        <Separator
-          v-if="weeklyAwards.length > 0"
-          class="h-px mt-4 mb-2.5"
-        />
+        <Separator v-if="weeklyAwards.length > 0" class="h-px mt-4 mb-2.5" />
 
         <WeeklyPerformers
           title="Top Performers"

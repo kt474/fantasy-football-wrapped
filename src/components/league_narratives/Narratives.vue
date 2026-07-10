@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref, watch } from "vue";
-import { useStore } from "../../store/store.ts";
+import { getLeagueKey, useStore } from "../../store/store.ts";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
@@ -14,6 +14,7 @@ import type { ManagerBlurbsPayload } from "@/api/api";
 import { getDraftMetadata, getDraftPicks } from "@/api/sleeperApi";
 import { fakeManagerProfiles } from "@/api/fakeLeague.ts";
 import ManagerComparison from "../league_history/ManagerComparison.vue";
+import { getParsedStorageItem } from "@/lib/storage";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -29,9 +30,29 @@ const seasons = computed(() =>
   normalizeHistoricalSeasons(store.leagueInfo[store.currentLeagueIndex])
 );
 
-const narratives = ref<NarrativeBundle>({
-  managerArchetypes: [],
-});
+const getNarrativeCacheKey = () => {
+  const league = store.leagueInfo[store.currentLeagueIndex];
+  return league ? `narrative-bundle:${getLeagueKey(league)}` : null;
+};
+
+const getCachedNarratives = (): NarrativeBundle => {
+  const cacheKey = getNarrativeCacheKey();
+  if (!cacheKey) return { managerArchetypes: [] };
+
+  return getParsedStorageItem<NarrativeBundle>(
+    cacheKey,
+    { managerArchetypes: [] },
+    {
+      isValid: (value): value is NarrativeBundle =>
+        typeof value === "object" &&
+        value !== null &&
+        "managerArchetypes" in value &&
+        Array.isArray(value.managerArchetypes),
+    }
+  );
+};
+
+const narratives = ref<NarrativeBundle>(getCachedNarratives());
 const isLeagueHistoryReady = ref(false);
 
 type PointSeasonEntry = {
@@ -107,6 +128,11 @@ const rebuildNarratives = async () => {
   narratives.value = await buildNarrativeBundle(
     normalizeHistoricalSeasons(store.leagueInfo[store.currentLeagueIndex])
   );
+
+  const cacheKey = getNarrativeCacheKey();
+  if (cacheKey) {
+    localStorage.setItem(cacheKey, JSON.stringify(narratives.value));
+  }
 };
 
 const prepareManagerPayload = async () => {
@@ -276,7 +302,7 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
       @loading-year="leagueHistoryLoadingYear = $event"
     />
     <ManagerArchetypesCard
-      v-if="isLeagueHistoryReady && areNarrativesReady"
+      v-if="areNarrativesReady"
       :archetypes="narratives.managerArchetypes"
       :payload="managerPayload"
       :prepare-payload="prepareManagerPayload"

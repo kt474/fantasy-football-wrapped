@@ -662,7 +662,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <Card class="w-full h-full p-4 mt-4 md:p-6">
-    <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+    <div class="flex flex-wrap items-start justify-between gap-3">
       <h5 class="text-2xl font-semibold tracking-tight">Trade Lab (Beta)</h5>
       <Tabs v-model="activeMode">
         <TabsList>
@@ -695,7 +695,7 @@ onBeforeUnmount(() => {
         >
           <div class="mb-3 space-y-2">
             <Skeleton class="w-16 h-4 bg-muted dark:bg-muted/70" />
-            <Skeleton class="w-44 h-10 bg-muted dark:bg-muted/70" />
+            <Skeleton class="h-10 w-44 bg-muted dark:bg-muted/70" />
           </div>
           <div class="grid gap-2 pr-1">
             <div
@@ -728,7 +728,7 @@ onBeforeUnmount(() => {
             :class="{ 'mt-3': side === 'B' }"
           >
             <div class="flex items-start justify-between gap-3">
-              <Skeleton class="w-28 h-5 bg-muted dark:bg-muted/70" />
+              <Skeleton class="h-5 w-28 bg-muted dark:bg-muted/70" />
               <Skeleton class="w-8 h-8 bg-muted dark:bg-muted/70" />
             </div>
             <div class="pt-3 mt-3 space-y-2 border-t border-border">
@@ -745,7 +745,7 @@ onBeforeUnmount(() => {
             <Skeleton class="w-40 h-5 bg-muted dark:bg-muted/70" />
             <div v-for="index in 2" :key="`value-skeleton-${index}`">
               <div class="flex items-center justify-between mb-2">
-                <Skeleton class="w-28 h-4 bg-muted dark:bg-muted/70" />
+                <Skeleton class="h-4 w-28 bg-muted dark:bg-muted/70" />
                 <Skeleton class="w-10 h-4 bg-muted dark:bg-muted/70" />
               </div>
               <Skeleton class="w-3/4 h-3 bg-muted dark:bg-muted/70" />

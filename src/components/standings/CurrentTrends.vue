@@ -725,7 +725,7 @@ const cardHeight = computed(() => {
 </script>
 <template>
   <Card :class="[cardHeight]" class="flex flex-col h-full p-0 overflow-hidden">
-    <CardHeader class="p-4 pb-0 md:p-6 md:pb-0">
+    <CardHeader class="p-4 pb-0 md:px-6 md:pb-0">
       <div class="min-w-0">
         <CardTitle>League News</CardTitle>
       </div>
