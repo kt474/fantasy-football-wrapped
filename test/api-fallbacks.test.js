@@ -112,11 +112,22 @@ describe("API fallback behavior", () => {
     });
   });
 
-  test("generateTrends returns empty object on server errors", async () => {
+  test("generateTrends rejects on server errors so callers can show a fallback", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockFetchResponse(500, {})));
 
-    const result = await generateTrends([], 120, 5, "post_season");
+    await expect(
+      generateTrends([], 120, 5, "post_season")
+    ).rejects.toThrow("Trends generation request failed with status 500");
+  });
 
-    expect(result).toEqual({});
+  test("generateTrends rejects malformed successful responses", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(mockFetchResponse(200, {}))
+    );
+
+    await expect(generateTrends([], 120, 5)).rejects.toThrow(
+      "Trends generation returned an invalid response"
+    );
   });
 });

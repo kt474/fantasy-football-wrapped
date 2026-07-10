@@ -414,26 +414,33 @@ export const generateTrends = async (
   wordLimit: number,
   bulletCount: number,
   leagueState: string = "in_season"
-): Promise<Record<string, []>> => {
-  try {
-    const response = await fetch(import.meta.env.VITE_TRENDS_RECAP, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data,
-        wordLimit,
-        bulletCount,
-        leagueState,
-      }),
-    });
-    assertOk(response, "Trends generation request");
-    return await parseJson<Record<string, []>>(response, "Trends generation");
-  } catch (error) {
-    console.error("Error generating trends:", error);
-    return {} as Record<string, []>;
+): Promise<{ bulletPoints: string[] }> => {
+  const response = await fetch(import.meta.env.VITE_TRENDS_RECAP, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      data,
+      wordLimit,
+      bulletCount,
+      leagueState,
+    }),
+  });
+  assertOk(response, "Trends generation request");
+
+  const result = await parseJson<unknown>(response, "Trends generation");
+  if (
+    typeof result !== "object" ||
+    result === null ||
+    !("bulletPoints" in result) ||
+    !Array.isArray(result.bulletPoints) ||
+    !result.bulletPoints.every((bulletPoint) => typeof bulletPoint === "string")
+  ) {
+    throw new Error("Trends generation returned an invalid response");
   }
+
+  return { bulletPoints: result.bulletPoints };
 };
 
 export const generateSummary = async (
