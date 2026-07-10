@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch, ref, computed } from "vue";
+import { onMounted, watch, ref, computed, nextTick } from "vue";
 import AppSidebar from "@/components/layout/AppSidebar.vue";
 import CardContainer from "./components/util/CardContainer.vue";
 import { useStore } from "./store/store";
@@ -51,13 +51,7 @@ const setColorMode = () => {
 
 onMounted(async () => {
   inject();
-  setHtmlBackground();
 });
-
-watch(
-  () => store.darkMode,
-  () => setHtmlBackground()
-);
 
 watch(
   () => store.currentLeagueId,
@@ -119,26 +113,30 @@ watch(
 
 watch(
   () => store.darkMode,
-  (isDark) => {
+  async (isDark) => {
     document.documentElement.classList.toggle("dark", isDark);
+    await nextTick();
+    setHtmlBackground();
   },
   { immediate: true }
+);
+
+watch(
+  () => route.fullPath,
+  async () => {
+    await nextTick();
+    document.getElementById("mainScrollSection")?.scrollTo({ top: 0 });
+  }
 );
 
 const setHtmlBackground = () => {
   const html = document.querySelector("html");
   if (html) {
-    if (store.darkMode) {
-      html.style.backgroundColor = "#030712";
-      document
-        .querySelector('meta[name="theme-color"]')
-        ?.setAttribute("content", "#030712");
-    } else {
-      html.style.backgroundColor = "#F9FAFB";
-      document
-        .querySelector('meta[name="theme-color"]')
-        ?.setAttribute("content", "#F9FAFB");
-    }
+    const backgroundColor = getComputedStyle(document.body).backgroundColor;
+    html.style.backgroundColor = backgroundColor;
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", backgroundColor);
   }
 };
 </script>

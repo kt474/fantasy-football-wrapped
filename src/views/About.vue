@@ -6,6 +6,9 @@ import Switch from "@/components/ui/switch/Switch.vue";
 import { useRoute } from "vue-router";
 import Separator from "@/components/ui/separator/Separator.vue";
 import { trackPremiumFunnelEvent } from "@/lib/analytics";
+import PageContainer from "@/components/layout/PageContainer.vue";
+import PageHeader from "@/components/layout/PageHeader.vue";
+import SectionHeader from "@/components/layout/SectionHeader.vue";
 
 const route = useRoute();
 const leagueCount = ref(13436); // initial load current unique league count value 7/8/26
@@ -31,9 +34,8 @@ watch(
 );
 </script>
 <template>
-  <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto sm:ml-8">
-    <div class="container mx-auto mt-4">
-      <h1 class="mb-4 text-3xl font-semibold">About</h1>
+  <PageContainer>
+      <PageHeader title="About" class="mb-4" />
 
       <div class="max-w-4xl text-base leading-relaxed">
         <div class="space-y-4">
@@ -122,9 +124,7 @@ watch(
             /></a>
           </div>
         </div>
-        <div class="flex items-center justify-between mt-2">
-          <h3 class="text-3xl font-semibold">Settings</h3>
-        </div>
+        <SectionHeader title="Settings" class="mt-6" />
         <div class="flex items-center mt-4 space-x-2">
           <Switch
             v-model="store.showUsernames"
@@ -132,9 +132,7 @@ watch(
           />
           <label>Show usernames instead of team names</label>
         </div>
-        <div class="flex items-center justify-between mt-4">
-          <h3 class="text-3xl font-semibold">League Count</h3>
-        </div>
+        <SectionHeader title="League Count" class="mt-6" />
         <div>
           <p class="mt-2 text-xl font-medium">
             {{ leagueCount.toLocaleString() }}
@@ -146,6 +144,5 @@ watch(
           &copy; 2024-2026. Kevin Tian
         </p>
       </div>
-    </div>
-  </div>
+  </PageContainer>
 </template>

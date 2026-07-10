@@ -1,4 +1,13 @@
 <script setup lang="ts">
+import PageContainer from "@/components/layout/PageContainer.vue";
+import PageHeader from "@/components/layout/PageHeader.vue";
+import { Badge, type BadgeVariants } from "@/components/ui/badge";
+
+const badgeVariant = (type: string): BadgeVariants["variant"] => {
+  if (type === "Feature") return "success";
+  if (type === "Fix") return "destructive";
+  return "info";
+};
 // this should eventually be moved to the server side
 const data = [
   {
@@ -709,9 +718,8 @@ const data = [
 ];
 </script>
 <template>
-  <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto sm:ml-8">
-    <div class="container mx-auto mt-4">
-      <h1 class="mb-2 text-3xl font-semibold">Changelog</h1>
+  <PageContainer>
+      <PageHeader title="Changelog" class="mb-2" />
       <div class="max-w-lg mb-6">
         <p>
           Join our
@@ -741,21 +749,9 @@ const data = [
             {{ entry.date }}
           </p>
           <div v-for="content in entry.content" class="mt-0.5">
-            <span
-              v-if="content.type == 'Update'"
-              class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
-              >{{ content.type }}</span
-            >
-            <span
-              v-if="content.type == 'Feature'"
-              class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300"
-              >{{ content.type }}</span
-            >
-            <span
-              v-if="content.type == 'Fix'"
-              class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300"
-              >{{ content.type }}</span
-            >
+            <Badge :variant="badgeVariant(content.type)" class="me-2">
+              {{ content.type }}
+            </Badge>
           </div>
         </div>
         <div v-for="content in entry.content" class="max-w-4xl">
@@ -767,6 +763,5 @@ const data = [
         </div>
         <hr class="h-px my-2 border-0 bg-muted" />
       </div>
-    </div>
-  </div>
+  </PageContainer>
 </template>

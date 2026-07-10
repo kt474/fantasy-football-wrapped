@@ -1,8 +1,10 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import PageContainer from "@/components/layout/PageContainer.vue";
+import PageHeader from "@/components/layout/PageHeader.vue";
+</script>
 <template>
-  <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto sm:ml-8">
-    <div class="container mx-auto mt-4">
-      <h1 class="mb-4 text-3xl font-semibold">Terms of Service</h1>
+  <PageContainer>
+      <PageHeader title="Terms of Service" class="mb-4" />
 
       <div class="max-w-4xl text-base leading-relaxed">
         <p class="mb-3 text-xl font-semibold">Acceptance of Terms</p>
@@ -180,6 +182,5 @@
         >. <br /><br />
         Last updated: July 9, 2026.
       </div>
-    </div>
-  </div>
+  </PageContainer>
 </template>

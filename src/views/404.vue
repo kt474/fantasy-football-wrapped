@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import Button from "@/components/ui/button/Button.vue";
+import PageContainer from "@/components/layout/PageContainer.vue";
 
 const router = useRouter();
 </script>
 <template>
-  <div class="container w-11/12 h-full max-w-screen-xl mx-auto">
+  <PageContainer class="h-full">
     <div class="max-w-screen-sm mx-auto text-center">
       <h1 class="mt-12 mb-4 font-bold text-7xl lg:text-9xl">404</h1>
       <p class="mb-4 text-3xl font-bold md:text-4xl">
@@ -22,5 +23,5 @@ const router = useRouter();
         Return Home
       </Button>
     </div>
-  </div>
+  </PageContainer>
 </template>

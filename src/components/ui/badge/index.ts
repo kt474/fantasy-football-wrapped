@@ -14,6 +14,11 @@ export const badgeVariants = cva(
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
+        success:
+          "border-success/25 bg-success/15 text-success-foreground dark:text-success",
+        warning:
+          "border-warning/30 bg-warning/15 text-warning-foreground dark:text-warning",
+        info: "border-info/25 bg-info/15 text-info-foreground dark:text-info",
         outline: "text-foreground",
       },
     },

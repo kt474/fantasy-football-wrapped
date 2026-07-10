@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/field";
 import { Check } from "lucide-vue-next";
 import Separator from "@/components/ui/separator/Separator.vue";
+import PageContainer from "@/components/layout/PageContainer.vue";
+import PageHeader from "@/components/layout/PageHeader.vue";
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
@@ -652,9 +654,8 @@ watch(
 );
 </script>
 <template>
-  <div class="container w-11/12 h-auto max-w-screen-xl pb-20 mx-auto sm:ml-8">
-    <div class="container mx-auto mt-4">
-      <h1 class="mb-4 text-3xl font-semibold">Account</h1>
+  <PageContainer>
+      <PageHeader title="Account" class="mb-4" />
       <div v-if="showPasswordRecoveryForm">
         <Card class="max-w-sm">
           <CardHeader>
@@ -1102,6 +1103,5 @@ watch(
           </div>
         </CardContent>
       </Card>
-    </div>
-  </div>
+  </PageContainer>
 </template>
