@@ -161,6 +161,16 @@ const teamBOutgoingPlayers = computed(() => {
   );
 });
 
+const isTradePackageEmpty = computed(
+  () =>
+    teamASends.value.length === 0 &&
+    teamBSends.value.length === 0 &&
+    teamAPicks.value.length === 0 &&
+    teamBPicks.value.length === 0 &&
+    teamAFaab.value === 0 &&
+    teamBFaab.value === 0
+);
+
 const getWeekLineup = (team: TableDataType, weekIndex: number) => {
   const starters =
     Array.isArray(team.starters?.[weekIndex]) && team.starters[weekIndex]
@@ -673,10 +683,15 @@ onBeforeUnmount(() => {
     </div>
     <TradeDatabase v-if="activeMode === 'database'" class="mt-4" />
     <div v-else>
-      <p v-if="!isMobile" class="my-4 text-muted-foreground">
-        Drag players into each team's package to brainstorm offers.
+      <p
+        v-if="!isMobile"
+        class="max-w-3xl my-4 text-muted-foreground text-balance"
+      >
+        Drag players into each team's package to brainstorm offers. The trade
+        value estimate combines player rank strength, position scarcity, and
+        depth discounts.
       </p>
-      <p v-if="isMobile" class="mt-4 mb-2 text-muted-foreground">
+      <p v-if="isMobile" class="mt-4 mb-2 text-sm text-muted-foreground">
         Click/tap players to add or remove from each package.
       </p>
 
@@ -724,7 +739,7 @@ onBeforeUnmount(() => {
           <div
             v-for="side in ['A', 'B']"
             :key="`package-skeleton-${side}`"
-            class="min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
+            class="min-h-[14.5rem] rounded-[0.7rem] border border-dashed border-border p-3"
             :class="{ 'mt-3': side === 'B' }"
           >
             <div class="flex items-start justify-between gap-3">
@@ -758,8 +773,11 @@ onBeforeUnmount(() => {
         </Card>
       </div>
       <div v-else>
-        <div class="grid gap-3 xl:grid-cols-3">
-          <Card class="px-4 py-3">
+        <div
+          class="grid gap-3 xl:grid-cols-3"
+          :class="isTradePackageEmpty ? 'items-stretch' : 'items-start'"
+        >
+          <Card class="flex flex-col px-4 py-3">
             <div class="mb-2">
               <Label class="block mb-1 text-sm">Manager</Label>
               <Select
@@ -783,7 +801,9 @@ onBeforeUnmount(() => {
                 </SelectContent>
               </Select>
             </div>
-            <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
+            <div
+              class="grid min-h-0 max-h-[35rem] flex-1 content-start gap-2 overflow-y-auto pr-1"
+            >
               <button
                 v-for="player in teamA?.players || []"
                 :key="`A-${player.player_id}`"
@@ -848,7 +868,7 @@ onBeforeUnmount(() => {
             <p class="mb-1 text-sm font-semibold">Trade Package</p>
 
             <div
-              class="min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
+              class="min-h-[14.5rem] rounded-[0.7rem] border border-dashed border-border p-3"
               @dragover.prevent
               @drop.prevent="onDropToTradePackage('A')"
             >
@@ -942,7 +962,7 @@ onBeforeUnmount(() => {
                   </DialogContent>
                 </Dialog>
               </div>
-              <div class="space-y-1 overflow-y-auto max-h-72">
+              <div class="space-y-1">
                 <div class="pt-2 mt-2 border-t border-border">
                   <div class="flex flex-wrap items-center gap-1.5 mb-2">
                     <span
@@ -1026,7 +1046,7 @@ onBeforeUnmount(() => {
             </div>
 
             <div
-              class="mt-3 min-h-44 rounded-[0.7rem] border border-dashed border-border p-3"
+              class="mt-3 min-h-[14.5rem] rounded-[0.7rem] border border-dashed border-border p-3"
               @dragover.prevent
               @drop.prevent="onDropToTradePackage('B')"
             >
@@ -1146,7 +1166,7 @@ onBeforeUnmount(() => {
                   </span>
                 </div>
               </div>
-              <div class="space-y-1 overflow-y-auto max-h-72">
+              <div class="space-y-1">
                 <div
                   v-for="player in teamBOutgoingPlayers"
                   :key="`send-b-${player.player_id}`"
@@ -1213,7 +1233,7 @@ onBeforeUnmount(() => {
                 Players: {{ teamAPlayerValue }} | Picks:
                 {{ teamADraftPickValue }} | FAAB: {{ teamAFaabValue }}
               </div>
-              <div class="flex items-center justify-between mb-2.5 text-sm">
+              <div class="flex items-center justify-between mb-1.5 text-sm">
                 <span>{{ teamB?.managerName }}</span>
                 <span class="font-semibold">{{ teamBTradeValue }}</span>
               </div>
@@ -1235,14 +1255,10 @@ onBeforeUnmount(() => {
                 </span>
               </div>
               <Separator class="h-px mt-3" />
-              <p class="mt-4 text-xs text-muted-foreground">
-                Formula combines player rank strength, position scarcity, and
-                depth discounts.
-              </p>
             </div>
           </Card>
 
-          <Card class="px-4 py-3">
+          <Card class="flex flex-col px-4 py-3">
             <div class="mb-2">
               <Label class="block mb-1 text-sm">Manager</Label>
               <Select
@@ -1266,7 +1282,9 @@ onBeforeUnmount(() => {
                 </SelectContent>
               </Select>
             </div>
-            <div class="grid max-h-[31rem] gap-2 overflow-y-auto pr-1">
+            <div
+              class="grid min-h-0 max-h-[35rem] flex-1 content-start gap-2 overflow-y-auto pr-1"
+            >
               <button
                 v-for="player in teamB?.players || []"
                 :key="`B-${player.player_id}`"

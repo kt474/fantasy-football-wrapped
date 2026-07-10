@@ -207,8 +207,7 @@ const getPointsPerGame = (manager: ComparisonManager) =>
     ? manager.points / (manager.wins + manager.losses)
     : 0;
 
-const formatPoints = (points: number) =>
-  String(Number(points.toFixed(2)));
+const formatPoints = (points: number) => String(Number(points.toFixed(2)));
 
 const getAverageEfficiency = (manager: ComparisonManager) =>
   manager.seasons.length > 0
@@ -687,7 +686,9 @@ const chartOptions = ref({
                   currentManager1.points > currentManager2.points,
               }"
             >
-              <p class="text-center">{{ formatPoints(currentManager1.points) }}</p>
+              <p class="text-center">
+                {{ formatPoints(currentManager1.points) }}
+              </p>
             </td>
             <td
               class="px-3 py-4 sm:px-6"
@@ -696,7 +697,9 @@ const chartOptions = ref({
                   currentManager1.points < currentManager2.points,
               }"
             >
-              <p class="text-center">{{ formatPoints(currentManager2.points) }}</p>
+              <p class="text-center">
+                {{ formatPoints(currentManager2.points) }}
+              </p>
             </td>
           </tr>
           <tr class="border-b">
@@ -884,7 +887,7 @@ const chartOptions = ref({
         </p>
       </div>
       <div v-else class="max-w-4xl mt-3">
-        <p class="max-w-3xl text-muted-foreground">
+        <p class="max-w-3xl text-sm text-muted-foreground sm:text-base">
           Premium rivalry reports turn the manager comparison into a short story
           about the selected managers' history, style, and bragging rights.
         </p>

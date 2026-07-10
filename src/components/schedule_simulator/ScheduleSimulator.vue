@@ -990,7 +990,7 @@ function runMonteCarloDistribution() {
           <p class="text-2xl font-semibold tracking-tight">
             Schedule Simulator
           </p>
-          <p class="mt-4 text-muted-foreground">
+          <p class="mt-4 text-sm text-muted-foreground sm:text-base">
             Test alternate matchups and see how the standings change.
           </p>
         </div>
@@ -1013,7 +1013,9 @@ function runMonteCarloDistribution() {
           </div>
 
           <Tabs v-model="activeScenarioValue" class="mt-3">
-            <TabsList class="grid w-full h-auto grid-cols-1 sm:inline-flex sm:w-auto">
+            <TabsList
+              class="grid w-full h-auto grid-cols-1 sm:inline-flex sm:w-auto"
+            >
               <TabsTrigger value="swap" class="w-full sm:w-auto">
                 Swap Schedules
               </TabsTrigger>
@@ -1321,7 +1323,7 @@ function runMonteCarloDistribution() {
           <h3 class="text-2xl font-semibold tracking-tight">
             Random Schedule Outcomes
           </h3>
-          <p class="mt-2 text-muted-foreground">
+          <p class="mt-2 text-sm text-muted-foreground sm:text-base">
             Distribution of likely win totals from simulating 1000 randomized
             schedules.
           </p>

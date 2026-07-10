@@ -115,11 +115,14 @@ watch(
     <div>
       <div class="flex flex-wrap items-start justify-between gap-3">
         <p class="text-2xl font-semibold tracking-tight">Manager Profiles</p>
-        <Button :disabled="!canGenerateArchetypes" @click="getManagerArchetypes">
+        <Button
+          :disabled="!canGenerateArchetypes"
+          @click="getManagerArchetypes"
+        >
           {{ generateButtonLabel }}
         </Button>
       </div>
-      <p class="mt-4 sm:max-w-2xl text-muted-foreground">
+      <p class="mt-4 text-sm sm:max-w-2xl text-muted-foreground sm:text-base">
         Long-term records, trends, and custom profiles that capture each
         manager’s tendencies, strengths, and overall identity.
       </p>

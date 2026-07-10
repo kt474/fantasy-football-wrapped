@@ -254,7 +254,7 @@ const leagueTypeLabel = (type: string | null) => {
     }"
   >
     <div class="max-w-3xl">
-      <p class="text-muted-foreground">
+      <p class="text-sm text-muted-foreground sm:text-base">
         Search any player to see real, anonymized trades from ffwrapped leagues.
       </p>
     </div>
