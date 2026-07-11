@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
@@ -52,6 +52,7 @@ const notificationPreferencesLoading = ref(false);
 const notificationPreferencesSaving = ref(false);
 const weeklyReportEmailsEnabled = ref(false);
 const trackedAccountPaywallView = ref(false);
+const authenticationSection = ref<HTMLElement | null>(null);
 
 type CheckoutPlan = "monthly" | "season_pass";
 
@@ -237,8 +238,30 @@ const accountSummaryContainerClass = computed(() => {
 
 const getCheckoutButtonText = (plan: CheckoutPlan) => {
   if (checkoutLoadingPlan.value === plan) return "Redirecting...";
+  if (!authStore.isAuthenticated) {
+    return plan === "season_pass"
+      ? "Sign in to buy season pass"
+      : "Sign in to subscribe";
+  }
   if (plan === "season_pass") return "Buy season pass";
   return "Subscribe monthly";
+};
+
+const guideToAuthentication = async (plan: CheckoutPlan) => {
+  showLogin.value = false;
+  await nextTick();
+  authenticationSection.value?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+  authenticationSection.value?.querySelector<HTMLInputElement>("input")?.focus({
+    preventScroll: true,
+  });
+  toast.info(
+    plan === "season_pass"
+      ? "Sign in to continue with the Season Pass."
+      : "Sign in to continue with a monthly subscription."
+  );
 };
 
 const getPlanAnalytics = (plan: CheckoutPlan) =>
@@ -485,7 +508,7 @@ const startCheckout = async (plan: CheckoutPlan) => {
       reason: "signed_out",
       ...getPlanAnalytics(plan),
     });
-    toast.error("Please sign in before choosing a plan.");
+    await guideToAuthentication(plan);
     return;
   }
 
@@ -738,7 +761,12 @@ watch(
         </CardContent>
       </Card>
     </div>
-    <div v-else-if="!authStore.isAuthenticated">
+    <div
+      v-else-if="!authStore.isAuthenticated"
+      ref="authenticationSection"
+      tabindex="-1"
+      class="scroll-mt-4"
+    >
       <Card v-if="showSignUpOtpForm" class="max-w-sm">
         <CardHeader>
           <CardTitle>Verify your email</CardTitle>
