@@ -888,8 +888,9 @@ const chartOptions = ref({
       </div>
       <div v-else class="max-w-4xl mt-3">
         <p class="max-w-3xl text-sm text-muted-foreground sm:text-base">
-          Premium rivalry reports turn the manager comparison into a short story
-          about the selected managers' history, style, and bragging rights.
+          Premium rivalry reports turn the manager comparison into a
+          personalized short story about the selected managers' history, style,
+          and bragging rights.
         </p>
         <div
           class="relative p-4 mt-3 overflow-hidden border max-h-48 rounded-xl sm:p-5"

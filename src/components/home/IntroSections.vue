@@ -178,25 +178,19 @@ const toolSummaries: ToolSummary[] = [
 
           <div class="grid max-w-lg grid-cols-3 mt-6 divide-x divide-border">
             <div class="pr-5">
-              <p class="text-xl font-semibold sm:text-2xl">
-                13,000+
-              </p>
+              <p class="text-xl font-semibold sm:text-2xl">13,000+</p>
               <p class="mt-1 text-xs text-muted-foreground">
                 Unique leagues entered
               </p>
             </div>
             <div class="px-5">
-              <p class="text-xl font-semibold sm:text-2xl">
-                50,000+
-              </p>
+              <p class="text-xl font-semibold sm:text-2xl">50,000+</p>
               <p class="mt-1 text-xs text-muted-foreground">
                 Reports generated
               </p>
             </div>
             <div class="pl-5">
-              <p class="text-xl font-semibold sm:text-2xl">
-                No login
-              </p>
+              <p class="text-xl font-semibold sm:text-2xl">No login</p>
               <p class="mt-1 text-xs text-muted-foreground">Needed to start</p>
             </div>
           </div>
@@ -297,10 +291,10 @@ const toolSummaries: ToolSummary[] = [
                 >
                   Premium tier
                 </router-link>
-                includes smarter newsletter-style weekly recaps with
-                customizable tones and deeper league context, plus custom
-                manager profiles and rivalry reports. Everything else from the
-                past three seasons, plus plenty more, is still free.
+                turns every week into a shareable league newspaper, reveals what
+                league full history says about every manager, and gives you the
+                receipts to settle old rivalries. Everything else from the past
+                three seasons, plus plenty more, is still free.
               </p>
             </div>
           </div>
