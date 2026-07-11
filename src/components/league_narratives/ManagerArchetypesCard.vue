@@ -9,6 +9,7 @@ import { LeagueInfoType } from "@/types/types";
 import Separator from "../ui/separator/Separator.vue";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { fakeProfileText } from "@/api/fakeLeague";
 import { trackPremiumFunnelEvent } from "@/lib/analytics";
 
@@ -76,10 +77,10 @@ const storedManagerProfiles = computed(
 
 const canGenerateArchetypes = computed(
   () =>
-    (props.payload.managers.length > 0 &&
-      !isLoading.value &&
-      Object.keys(blurbsByUserId.value).length == 0) ||
-    subscriptionStore.isPremium
+    props.payload.managers.length > 0 &&
+    !isLoading.value &&
+    (Object.keys(blurbsByUserId.value).length === 0 ||
+      subscriptionStore.isPremium)
 );
 
 const generateButtonLabel = computed(() => {
@@ -95,6 +96,275 @@ const hasHiddenProfiles = computed(() => props.archetypes.length > 6);
 
 const toggleProfiles = () => {
   showAllProfiles.value = !showAllProfiles.value;
+};
+
+type RankedMetric =
+  | "winRate"
+  | "averageEfficiency"
+  | "averagePointsPerSeason"
+  | "totalTrades"
+  | "totalWaivers"
+  | "tradeValueGained"
+  | "weeklyScoreStdDev"
+  | "averageDraftPickRank";
+
+type ManagerBadge = {
+  label: string;
+  title: string;
+};
+
+const rankMaps = computed(() => {
+  const buildRankMap = (
+    metric: RankedMetric,
+    direction: "asc" | "desc" = "desc"
+  ) => {
+    const managers = props.archetypes.filter(
+      (manager) => manager[metric] !== null
+    );
+    const sorted = [...managers].sort((left, right) => {
+      const leftValue = left[metric] as number;
+      const rightValue = right[metric] as number;
+      return direction === "desc"
+        ? rightValue - leftValue
+        : leftValue - rightValue;
+    });
+    const ranks: Record<string, number> = {};
+
+    sorted.forEach((manager, index) => {
+      const previous = sorted[index - 1];
+      ranks[manager.userId] =
+        previous && previous[metric] === manager[metric]
+          ? ranks[previous.userId]
+          : index + 1;
+    });
+
+    return ranks;
+  };
+
+  return {
+    winRate: buildRankMap("winRate"),
+    lowestWinRate: buildRankMap("winRate", "asc"),
+    efficiency: buildRankMap("averageEfficiency"),
+    lowestEfficiency: buildRankMap("averageEfficiency", "asc"),
+    scoring: buildRankMap("averagePointsPerSeason"),
+    lowestScoring: buildRankMap("averagePointsPerSeason", "asc"),
+    trades: buildRankMap("totalTrades"),
+    waivers: buildRankMap("totalWaivers"),
+    tradeValue: buildRankMap("tradeValueGained"),
+    lowestTradeValue: buildRankMap("tradeValueGained", "asc"),
+    volatility: buildRankMap("weeklyScoreStdDev"),
+    consistency: buildRankMap("weeklyScoreStdDev", "asc"),
+    draft: buildRankMap("averageDraftPickRank"),
+    lowestDraft: buildRankMap("averageDraftPickRank", "asc"),
+  };
+});
+
+const playoffRate = (manager: ManagerArchetype) =>
+  manager.seasons ? manager.playoffAppearances / manager.seasons : 0;
+
+const titleConversion = (manager: ManagerArchetype) =>
+  manager.playoffAppearances ? manager.titles / manager.playoffAppearances : 0;
+
+const pointsDifferentialPerSeason = (manager: ManagerArchetype) =>
+  manager.seasons
+    ? (manager.totalPointsFor - manager.totalPointsAgainst) / manager.seasons
+    : 0;
+
+const academicGrade = (score: number) => {
+  if (score >= 97) return "A+";
+  if (score >= 93) return "A";
+  if (score >= 90) return "A-";
+  if (score >= 87) return "B+";
+  if (score >= 83) return "B";
+  if (score >= 80) return "B-";
+  if (score >= 77) return "C+";
+  if (score >= 73) return "C";
+  if (score >= 70) return "C-";
+  if (score >= 67) return "D+";
+  if (score >= 63) return "D";
+  if (score >= 60) return "D-";
+  return "F";
+};
+
+const tradeGrade = (manager: ManagerArchetype) => {
+  if (!manager.totalTrades) return null;
+
+  // A neutral trade-value delta anchors at a B (85). Each net value point per
+  // trade moves the standardized score by 1.25 points in either direction.
+  // This keeps an average trader respectable without making elite grades easy.
+  const valuePerTrade = manager.tradeValueGained / manager.totalTrades;
+  const standardizedScore = Math.max(
+    0,
+    Math.min(100, 85 + valuePerTrade * 1.25)
+  );
+  return academicGrade(standardizedScore);
+};
+
+const draftGrade = (manager: ManagerArchetype) => {
+  const score = manager.averageDraftPickRank;
+  if (score === null) return null;
+
+  // Draft pick performance is a delta centered near zero, not a 0–100 score.
+  // These fixed bands refine the thresholds already used by the Draft page.
+  if (score >= 2.5) return "A+";
+  if (score >= 2.1) return "A";
+  if (score >= 1.75) return "A-";
+  if (score >= 1.4) return "B+";
+  if (score >= 1.1) return "B";
+  if (score >= 0.75) return "B-";
+  if (score >= 0.5) return "C+";
+  if (score >= 0.25) return "C";
+  if (score >= 0) return "C-";
+  if (score >= -0.6) return "D+";
+  if (score >= -1.2) return "D";
+  if (score >= -1.75) return "D-";
+  return "F";
+};
+
+const gradeIs = (grade: string | null, prefixes: string[]) =>
+  grade !== null && prefixes.some((prefix) => grade.startsWith(prefix));
+
+const getManagerBadges = (manager: ManagerArchetype): ManagerBadge[] => {
+  const badges: ManagerBadge[] = [];
+  const managerCount = props.archetypes.length;
+  const add = (label: string, title: string) => {
+    if (badges.length < 2 && !badges.some((badge) => badge.label === label)) {
+      badges.push({ label, title });
+    }
+  };
+
+  if (
+    manager.titles >= 2 ||
+    (manager.titles > 0 && titleConversion(manager) >= 0.5)
+  ) {
+    add("Final Boss Energy", "Turns playoff trips into championships");
+  }
+  if (manager.seasons >= 2 && playoffRate(manager) >= 0.7) {
+    add("Always in the Hunt", "Makes the playoffs in at least 70% of seasons");
+  }
+  if (
+    manager.titles === 0 &&
+    manager.winRate >= 0.55 &&
+    manager.playoffAppearances > 0
+  ) {
+    add(
+      "Regular Season Royalty",
+      "Wins often, but is still chasing the championship that matters"
+    );
+  }
+  if (
+    rankMaps.value.tradeValue[manager.userId] === 1 &&
+    manager.tradeValueGained > 0
+  ) {
+    add("Certified Trade Thief", "Leads the league in net trade value gained");
+  }
+  if (
+    rankMaps.value.efficiency[manager.userId] === 1 &&
+    manager.averageEfficiency > 0
+  ) {
+    add("Lineup Whisperer", "Owns the league's best average lineup efficiency");
+  }
+  if (
+    rankMaps.value.draft[manager.userId] === 1 &&
+    manager.averageDraftPickRank !== null
+  ) {
+    add("Draft Room Menace", "Ranks first in average draft performance");
+  }
+  if (
+    managerCount >= 3 &&
+    (rankMaps.value.trades[manager.userId] === 1 ||
+      rankMaps.value.waivers[manager.userId] === 1)
+  ) {
+    add("Roster Never Sleeps", "Leads the league in trades or waiver moves");
+  }
+  if (pointsDifferentialPerSeason(manager) > 0 && manager.winRate < 0.5) {
+    add(
+      "Schedule’s Favorite Victim",
+      "Scores more than opponents but owns a losing record"
+    );
+  }
+  if (pointsDifferentialPerSeason(manager) < 0 && manager.winRate >= 0.5) {
+    add("Luck Merchant", "Wins despite being outscored overall");
+  }
+
+  const managerTradeGrade = tradeGrade(manager);
+  const managerDraftGrade = draftGrade(manager);
+
+  if (gradeIs(managerTradeGrade, ["A"])) {
+    add("Deal Maker", "Owns an A-range standardized trade value grade");
+  }
+  if (gradeIs(managerTradeGrade, ["D", "F"])) {
+    add("Trade Regret Collector", "Owns a D- or F-range standardized trade value grade");
+  }
+  if (gradeIs(managerDraftGrade, ["A"])) {
+    add("Draft Day Dealer", "Owns an A-range standardized draft ability grade");
+  }
+  if (gradeIs(managerDraftGrade, ["D", "F"])) {
+    add("Autodraft Advocate", "Owns a D- or F-range standardized draft ability grade");
+  }
+  if (Math.abs(manager.winRate - 0.5) <= 0.03) {
+    add("Coin Flip Commander", "Has a career win rate within three points of .500");
+  }
+  if (
+    manager.seasons >= 3 &&
+    manager.playoffAppearances === 1 &&
+    manager.titles === 0
+  ) {
+    add("Playoff Cameo", "Has made one playoff appearance without a title");
+  }
+
+  if (
+    manager.seasons >= 2 &&
+    rankMaps.value.lowestWinRate[manager.userId] === 1
+  ) {
+    add("Rebuilding Since Forever", "Owns the league's lowest career win rate");
+  }
+  if (manager.seasons >= 2 && manager.playoffAppearances === 0) {
+    add("Playoff Allergy", "Has yet to make the playoffs");
+  }
+  if (
+    managerCount >= 3 &&
+    rankMaps.value.lowestEfficiency[manager.userId] === 1
+  ) {
+    add(
+      "Bench Points Champion",
+      "Owns the league's lowest average lineup efficiency"
+    );
+  }
+  if (
+    manager.totalTrades > 0 &&
+    manager.tradeValueGained < 0 &&
+    rankMaps.value.lowestTradeValue[manager.userId] === 1
+  ) {
+    add("Trade Donation Center", "Has given away the most net value in trades");
+  }
+  if (
+    manager.averageDraftPickRank !== null &&
+    manager.averageDraftPickRank < 0 &&
+    rankMaps.value.lowestDraft[manager.userId] === 1
+  ) {
+    add(
+      "Draft Day Panic",
+      "Owns the league's lowest average draft performance"
+    );
+  }
+  if (managerCount >= 3 && rankMaps.value.lowestScoring[manager.userId] === 1) {
+    add("Scoreboard Optional", "Ranks last in average points per season");
+  }
+  if (!badges.length) {
+    if (manager.seasons <= 1) {
+      add("Small Sample Superstar", "Still building a long-term league resume");
+    } else if (manager.winRate >= 0.5) {
+      add("Quietly Getting It Done", "Owns a winning or even career record");
+    } else {
+      add(
+        "Trust the Process",
+        "The long-term results are still a work in progress"
+      );
+    }
+  }
+
+  return badges;
 };
 
 watch(
@@ -160,6 +430,17 @@ watch(
             </p>
           </div>
         </div>
+        <div class="flex flex-wrap gap-1.5 mt-3">
+          <Badge
+            v-for="badge in getManagerBadges(archetype)"
+            :key="badge.label"
+            variant="secondary"
+            :title="badge.title"
+            class="font-medium"
+          >
+            {{ badge.label }}
+          </Badge>
+        </div>
         <Separator class="mt-2" />
         <p
           v-if="blurbsByUserId[archetype.userId]"
@@ -208,9 +489,40 @@ watch(
         >
           {{ fakeProfileText }}
         </p>
-        <div
-          class="grid gap-3 mt-4 text-sm sm:grid-cols-2 text-muted-foreground"
-        >
+        <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-muted-foreground">
+          <div class="px-3 py-2 rounded-md bg-secondary">
+            <p class="text-xs uppercase">Win Rate</p>
+            <p class="mt-1 font-medium text-foreground">
+              {{ (archetype.winRate * 100).toFixed(1) }}%
+              <span class="ml-1 text-xs text-muted-foreground">
+                #{{ rankMaps.winRate[archetype.userId] }}
+              </span>
+            </p>
+          </div>
+          <div class="px-3 py-2 rounded-md bg-secondary">
+            <p class="text-xs uppercase">Playoffs</p>
+            <p class="mt-1 font-medium text-foreground">
+              {{ archetype.playoffAppearances }}
+              <span class="ml-1 text-xs text-muted-foreground">
+                {{ (playoffRate(archetype) * 100).toFixed(0) }}%
+              </span>
+            </p>
+          </div>
+          <div class="px-3 py-2 rounded-md bg-secondary">
+            <p class="text-xs uppercase">Titles</p>
+            <p class="mt-1 font-medium text-foreground">
+              {{ archetype.titles }}
+            </p>
+          </div>
+          <div class="px-3 py-2 rounded-md bg-secondary">
+            <p class="text-xs uppercase">Avg Efficiency</p>
+            <p class="mt-1 font-medium text-foreground">
+              {{ (archetype.averageEfficiency * 100).toFixed(1) }}%
+              <span class="ml-1 text-xs text-muted-foreground">
+                #{{ rankMaps.efficiency[archetype.userId] }}
+              </span>
+            </p>
+          </div>
           <div class="px-3 py-2 rounded-md bg-secondary">
             <p class="text-xs uppercase">Record</p>
             <p class="mt-1 font-medium text-foreground">
@@ -218,12 +530,6 @@ watch(
               }}<span v-if="archetype.totalTies"
                 >-{{ archetype.totalTies }}</span
               >
-            </p>
-          </div>
-          <div class="px-3 py-2 rounded-md bg-secondary">
-            <p class="text-xs uppercase">Win Rate</p>
-            <p class="mt-1 font-medium text-foreground">
-              {{ (archetype.winRate * 100).toFixed(1) }}%
             </p>
           </div>
           <div class="px-3 py-2 rounded-md bg-secondary">
@@ -239,39 +545,54 @@ watch(
             </p>
           </div>
           <div class="px-3 py-2 rounded-md bg-secondary">
-            <p class="text-xs uppercase">Avg Points / Season</p>
+            <p class="text-xs uppercase">Points / Season</p>
             <p class="mt-1 font-medium text-foreground">
               {{ archetype.averagePointsPerSeason.toFixed(1) }}
+              <span class="text-xs text-muted-foreground"
+                >#{{ rankMaps.scoring[archetype.userId] }}</span
+              >
             </p>
           </div>
           <div class="px-3 py-2 rounded-md bg-secondary">
-            <p class="text-xs uppercase">Avg Efficiency</p>
+            <p class="text-xs uppercase">Trades / Season</p>
             <p class="mt-1 font-medium text-foreground">
-              {{ (archetype.averageEfficiency * 100).toFixed(1) }}%
+              {{ archetype.averageTradesPerSeason.toFixed(1) }}
+              <span class="text-xs text-muted-foreground"
+                >({{ archetype.totalTrades }} total)</span
+              >
             </p>
           </div>
           <div class="px-3 py-2 rounded-md bg-secondary">
-            <p class="text-xs uppercase">Trades</p>
+            <p class="text-xs uppercase">Waivers / Season</p>
             <p class="mt-1 font-medium text-foreground">
-              {{ archetype.totalTrades }}
+              {{ archetype.averageWaiversPerSeason.toFixed(1) }}
+              <span class="text-xs text-muted-foreground"
+                >({{ archetype.totalWaivers }} total)</span
+              >
             </p>
           </div>
           <div class="px-3 py-2 rounded-md bg-secondary">
-            <p class="text-xs uppercase">Waivers</p>
+            <p class="text-xs uppercase">Trade Value</p>
             <p class="mt-1 font-medium text-foreground">
-              {{ archetype.totalWaivers }}
+              <template v-if="tradeGrade(archetype)"
+                >{{ tradeGrade(archetype) }}
+                <span class="text-xs text-muted-foreground"
+                  >#{{ rankMaps.tradeValue[archetype.userId] }}</span
+                ></template
+              >
+              <span v-else class="text-muted-foreground">No grade</span>
             </p>
           </div>
-          <div class="px-3 py-2 rounded-md bg-secondary">
-            <p class="text-xs uppercase">Titles</p>
+          <div
+            v-if="archetype.averageDraftPickRank !== null"
+            class="px-3 py-2 rounded-md bg-secondary"
+          >
+            <p class="text-xs uppercase">Draft Ability</p>
             <p class="mt-1 font-medium text-foreground">
-              {{ archetype.titles }}
-            </p>
-          </div>
-          <div class="px-3 py-2 rounded-md bg-secondary">
-            <p class="text-xs uppercase">Playoff Appearances</p>
-            <p class="mt-1 font-medium text-foreground">
-              {{ archetype.playoffAppearances }}
+              {{ draftGrade(archetype) }}
+              <span class="text-xs text-muted-foreground"
+                >#{{ rankMaps.draft[archetype.userId] }}</span
+              >
             </p>
           </div>
         </div>
