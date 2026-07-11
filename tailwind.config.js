@@ -88,6 +88,11 @@ export default {
         },
       },
       borderRadius: {
+        // Semantic radius roles. Prefer these in application components so
+        // controls and surfaces do not drift as the visual system evolves.
+        control: "calc(var(--radius) - 2px)",
+        card: "var(--radius)",
+        feature: "calc(var(--radius) + 4px)",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",

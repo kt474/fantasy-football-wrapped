@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import SectionCard from "../layout/SectionCard.vue";
+import ScrollableTableCard from "../layout/ScrollableTableCard.vue";
 const store = useStore();
 const tableOrder = ref("points");
 const props = defineProps<{
@@ -64,18 +64,28 @@ const listPadding = computed(() => {
 });
 </script>
 <template>
-  <SectionCard class="p-0 sm:p-0">
+  <ScrollableTableCard label="Roster management standings">
     <TooltipProvider>
       <table class="w-full text-sm text-left rtl:text-right">
         <thead class="text-xs uppercase bg-muted/50">
           <tr>
-            <th scope="col" class="px-4 py-3 sm:px-6">Team Name</th>
-            <th scope="col" class="px-1 py-3">
+            <th
+              scope="col"
+              class="sticky left-0 z-20 bg-muted px-4 py-3 shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
+            >
+              Team Name
+            </th>
+            <th
+              scope="col"
+              class="px-1 py-0"
+              :aria-sort="tableOrder === 'points' ? 'descending' : 'none'"
+            >
               <Tooltip>
                 <TooltipTrigger as-child>
-                  <div
+                  <button
+                    type="button"
                     @click="tableOrder = 'points'"
-                    class="flex items-center w-20 uppercase cursor-pointer"
+                    class="flex min-h-11 w-20 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                   >
                     Total Points
                     <div>
@@ -96,19 +106,26 @@ const listPadding = computed(() => {
                         />
                       </svg>
                     </div>
-                  </div>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent class="bg-muted-foreground">
                   Total regular season points
                 </TooltipContent>
               </Tooltip>
             </th>
-            <th scope="col" class="px-1 py-3 max-w-24">
+            <th
+              scope="col"
+              class="px-1 py-0 max-w-24"
+              :aria-sort="
+                tableOrder === 'potentialPoints' ? 'descending' : 'none'
+              "
+            >
               <Tooltip>
                 <TooltipTrigger as-child>
-                  <div
+                  <button
+                    type="button"
                     @click="tableOrder = 'potentialPoints'"
-                    class="flex items-center w-24 uppercase cursor-pointer"
+                    class="flex min-h-11 w-24 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                   >
                     Potential Points
                     <div>
@@ -129,19 +146,24 @@ const listPadding = computed(() => {
                         />
                       </svg>
                     </div>
-                  </div>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent class="w-36 bg-muted-foreground">
                   Maximum points possible if the best lineup was set each week
                 </TooltipContent>
               </Tooltip>
             </th>
-            <th scope="col" class="py-3 pl-2 pr-3 lg:pr-0">
+            <th
+              scope="col"
+              class="py-0 pl-2 pr-3 lg:pr-0"
+              :aria-sort="tableOrder === 'efficiency' ? 'descending' : 'none'"
+            >
               <Tooltip>
                 <TooltipTrigger as-child>
-                  <div
+                  <button
+                    type="button"
                     @click="tableOrder = 'efficiency'"
-                    class="flex items-center w-24 uppercase cursor-pointer"
+                    class="flex min-h-11 w-24 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                   >
                     Efficiency
                     <div>
@@ -162,7 +184,7 @@ const listPadding = computed(() => {
                         />
                       </svg>
                     </div>
-                  </div>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent class="bg-muted-foreground">
                   Points / Potential Points
@@ -176,7 +198,7 @@ const listPadding = computed(() => {
             <th
               scope="row"
               :class="listPadding"
-              class="px-4 font-medium truncate sm:px-6 max-w-56 whitespace-nowrap"
+              class="sticky left-0 z-10 max-w-56 truncate whitespace-nowrap bg-card px-4 font-medium shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
             >
               {{
                 store.showUsernames
@@ -223,5 +245,5 @@ const listPadding = computed(() => {
         </tbody>
       </table>
     </TooltipProvider>
-  </SectionCard>
+  </ScrollableTableCard>
 </template>

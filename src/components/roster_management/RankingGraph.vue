@@ -182,7 +182,7 @@ const chartOptions = ref({
     <apexchart
       width="100%"
       height="475"
-      class="ml-6"
+      class="sm:ml-6"
       :options="chartOptions"
       :series="series"
     ></apexchart>

@@ -251,24 +251,26 @@ const openAddLeagueDialog = async () => {
 </script>
 
 <template>
-  <div class="flex">
-    <SidebarMenu>
+  <div class="flex w-full min-w-0 items-center md:w-auto">
+    <SidebarMenu
+      class="min-w-0 flex-1 min-[390px]:w-[200px] min-[390px]:flex-none"
+    >
       <SidebarMenuItem>
         <DropdownMenu v-model:open="leagueMenuOpen">
           <DropdownMenuTrigger as-child>
             <SidebarMenuButton
               size="lg"
-              class="text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              class="w-full min-w-0 text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div class="flex flex-col gap-0.5 w-40">
+              <div class="flex min-w-0 flex-1 flex-col gap-0.5 md:w-40">
                 <span class="font-medium truncate">{{
                   currentLeague?.name ?? "Loading... "
                 }}</span>
-                <span class="text-sm text-muted-foreground">{{
+                <span class="truncate text-sm text-muted-foreground">{{
                   leagueMetadata
                 }}</span>
               </div>
-              <ChevronsUpDown class="ml-auto" />
+              <ChevronsUpDown class="ml-auto shrink-0" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent class="w-60" align="start">
@@ -318,10 +320,10 @@ const openAddLeagueDialog = async () => {
     </SidebarMenu>
     <Separator
       orientation="vertical"
-      class="data-[orientation=vertical]:h-8 mt-2 ml-2"
+      class="hidden data-[orientation=vertical]:h-8 md:ml-2 md:block"
     />
     <!-- Desktop: horizontal buttons -->
-    <div class="justify-between hidden mt-2 ml-2 md:flex">
+    <div class="justify-between hidden ml-2 md:flex">
       <Button
         @click="removeLeague"
         variant="ghost"
@@ -363,7 +365,7 @@ const openAddLeagueDialog = async () => {
     </div>
 
     <!-- Mobile: dropdown menu -->
-    <div class="flex mt-2 ml-2 md:hidden">
+    <div class="flex shrink-0 md:hidden">
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
           <Button

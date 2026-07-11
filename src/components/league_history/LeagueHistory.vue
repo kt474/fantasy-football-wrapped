@@ -13,7 +13,7 @@ import MostPoints from "./MostPoints.vue";
 import FewestPoints from "./FewestPoints.vue";
 import CloseMatchups from "./CloseMatchups.vue";
 import SeasonFinishHistory from "./SeasonFinishHistory.vue";
-import Card from "../ui/card/Card.vue";
+import ScrollableTableCard from "../layout/ScrollableTableCard.vue";
 import { toast } from "vue-sonner";
 import { hasLeagueSeasonData } from "@/lib/leagueHistory";
 
@@ -715,18 +715,32 @@ watch(
 </script>
 <template>
   <div class="my-4">
-    <Card v-if="!isLoading" class="relative mt-4 overflow-x-auto">
+    <ScrollableTableCard
+      v-if="!isLoading"
+      label="All-time league standings"
+      class="mt-4"
+    >
       <TooltipProvider>
         <table class="w-full text-sm text-left rtl:text-right">
           <thead class="text-xs uppercase bg-muted/50">
             <tr class="">
-              <th scope="col" class="px-4 py-3 sm:px-6">Team name</th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
+              <th
+                scope="col"
+                class="sticky left-0 z-20 bg-muted px-4 py-3 shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
+              >
+                Team name
+              </th>
+              <th
+                scope="col"
+                class="px-2 py-0 sm:px-6"
+                :aria-sort="tableOrder === 'wins' ? 'descending' : 'none'"
+              >
                 <Tooltip>
                   <TooltipTrigger as-child>
-                    <div
+                    <button
+                      type="button"
                       @click="tableOrder = 'wins'"
-                      class="flex items-center w-24 uppercase cursor-pointer"
+                      class="flex min-h-11 w-24 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                     >
                       Compiled Record
                       <div>
@@ -747,19 +761,24 @@ watch(
                           />
                         </svg>
                       </div>
-                    </div>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent class="bg-muted-foreground">
                     Total wins and losses across all seasons
                   </TooltipContent>
                 </Tooltip>
               </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
+              <th
+                scope="col"
+                class="px-2 py-0 sm:px-6"
+                :aria-sort="tableOrder === 'points' ? 'descending' : 'none'"
+              >
                 <Tooltip>
                   <TooltipTrigger as-child>
-                    <div
+                    <button
+                      type="button"
                       @click="tableOrder = 'points'"
-                      class="flex items-center uppercase cursor-pointer w-28"
+                      class="flex min-h-11 w-28 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                     >
                       Points per game
                       <div>
@@ -780,19 +799,26 @@ watch(
                           />
                         </svg>
                       </div>
-                    </div>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent class="bg-muted-foreground">
                     Total regular season points across all seasons
                   </TooltipContent>
                 </Tooltip>
               </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
+              <th
+                scope="col"
+                class="px-2 py-0 sm:px-6"
+                :aria-sort="
+                  tableOrder === 'expectedWins' ? 'descending' : 'none'
+                "
+              >
                 <Tooltip>
                   <TooltipTrigger as-child>
-                    <div
+                    <button
+                      type="button"
                       @click="tableOrder = 'expectedWins'"
-                      class="flex items-center uppercase cursor-pointer w-28"
+                      class="flex min-h-11 w-28 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                     >
                       Wins above expected
                       <div>
@@ -813,7 +839,7 @@ watch(
                           />
                         </svg>
                       </div>
-                    </div>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent class="bg-muted-foreground w-52">
                     (Actual wins) - (Average number of wins after simulating
@@ -821,12 +847,19 @@ watch(
                   </TooltipContent>
                 </Tooltip>
               </th>
-              <th scope="col" class="px-2 py-3 sm:px-6">
+              <th
+                scope="col"
+                class="px-2 py-0 sm:px-6"
+                :aria-sort="
+                  tableOrder === 'managerEfficiency' ? 'descending' : 'none'
+                "
+              >
                 <Tooltip>
                   <TooltipTrigger as-child>
-                    <div
+                    <button
+                      type="button"
                       @click="tableOrder = 'managerEfficiency'"
-                      class="flex items-center uppercase cursor-pointer w-28"
+                      class="flex min-h-11 w-28 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                     >
                       Manager Efficiency
                       <div>
@@ -847,7 +880,7 @@ watch(
                           />
                         </svg>
                       </div>
-                    </div>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent class="bg-muted-foreground">
                     Points / Potential points
@@ -855,14 +888,7 @@ watch(
                 </Tooltip>
               </th>
               <th scope="col" class="px-2 py-3 sm:px-6">
-                <Tooltip>
-                  <TooltipTrigger as-child>
-                    <div>Seasons</div>
-                  </TooltipTrigger>
-                  <TooltipContent class="mr-20 bg-muted-foreground">
-                    Seasons Played
-                  </TooltipContent>
-                </Tooltip>
+                <abbr title="Seasons played" class="no-underline">Seasons</abbr>
               </th>
               <th scope="col" class="px-2 py-3 sm:px-6">
                 <span class="sr-only">Edit</span>
@@ -874,7 +900,7 @@ watch(
             <tr v-for="(user, index) in tableDataAllYears" class="border-b">
               <th
                 scope="row"
-                class="px-4 py-3 font-medium sm:px-6 whitespace-nowrap"
+                class="sticky left-0 z-10 whitespace-nowrap bg-card px-4 py-3 font-medium shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
               >
                 <div class="flex items-center">
                   <img
@@ -993,8 +1019,10 @@ watch(
                     v-for="(season, index) in user.seasons"
                     class="flex flex-nowrap"
                   >
-                    <div
-                      class="flex underline cursor-pointer text-primary"
+                    <button
+                      type="button"
+                      :aria-label="`Open ${season} league`"
+                      class="flex min-h-11 items-center underline text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       @click="addNewLeague(season)"
                     >
                       {{ season }}
@@ -1072,7 +1100,7 @@ watch(
                           </g>
                         </g>
                       </svg>
-                    </div>
+                    </button>
                     <span :class="{ hidden: index == user.seasons.length - 1 }"
                       >,&nbsp;
                     </span>
@@ -1084,7 +1112,7 @@ watch(
           </tbody>
         </table>
       </TooltipProvider>
-    </Card>
+    </ScrollableTableCard>
     <SeasonFinishHistory v-if="!isLoading" :tableData="props.tableData" />
     <AllMatchups v-if="!isLoading" :tableData="dataAllYears" class="mt-4" />
     <AllTimeRecords v-if="!isLoading" :seasonRows="seasonRows" />

@@ -801,9 +801,13 @@ watch(
             </Field>
             <FieldDescription class="text-center">
               Wrong email?
-              <a class="cursor-pointer" @click="resetSignUpOtpForm"
-                >Use a different email</a
+              <button
+                type="button"
+                class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                @click="resetSignUpOtpForm"
               >
+                Use a different email
+              </button>
             </FieldDescription>
           </FieldGroup>
         </CardContent>
@@ -890,9 +894,13 @@ watch(
                 </Button>
                 <FieldDescription class="px-6 text-center">
                   Already have an account?
-                  <a class="cursor-pointer" @click="showLogin = !showLogin"
-                    >Sign in</a
+                  <button
+                    type="button"
+                    class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    @click="showLogin = !showLogin"
                   >
+                    Sign in
+                  </button>
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -920,12 +928,13 @@ watch(
             <Field>
               <div class="flex items-center">
                 <FieldLabel for="password"> Password </FieldLabel>
-                <a
-                  class="inline-block ml-auto text-sm cursor-pointer underline-offset-4 hover:underline"
+                <button
+                  type="button"
+                  class="inline-block ml-auto text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   @click="sendPasswordResetEmail"
                 >
                   Forgot your password?
-                </a>
+                </button>
               </div>
               <Input
                 v-model="signInPassword"
@@ -970,9 +979,13 @@ watch(
               </Button>
               <FieldDescription class="text-center">
                 Don't have an account?
-                <a class="cursor-pointer" @click="showLogin = !showLogin"
-                  >Sign up</a
+                <button
+                  type="button"
+                  class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  @click="showLogin = !showLogin"
                 >
+                  Sign up
+                </button>
               </FieldDescription>
             </Field>
           </FieldGroup>

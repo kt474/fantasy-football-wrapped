@@ -329,7 +329,7 @@ const handleTeamSelectionChange = (team: "A" | "B", rosterId: number) => {
 };
 
 const updateMobileState = () => {
-  isMobile.value = window.innerWidth < 1280;
+  isMobile.value = window.innerWidth < 640;
 };
 
 const onPlayerDragStart = (playerId: string, fromTeam: "A" | "B") => {
@@ -434,14 +434,10 @@ const rankLabel = (rank: number) => {
 };
 
 const waiverPaletteClass = (tier: number) => {
-  if (tier === 1)
-    return "performance-excellent";
-  if (tier === 2)
-    return "performance-good";
-  if (tier === 3)
-    return "performance-average";
-  if (tier === 4)
-    return "performance-poor";
+  if (tier === 1) return "performance-excellent";
+  if (tier === 2) return "performance-good";
+  if (tier === 3) return "performance-average";
+  if (tier === 4) return "performance-poor";
   return "performance-bad";
 };
 
@@ -697,7 +693,7 @@ onBeforeUnmount(() => {
 
       <div
         v-if="loading"
-        class="grid min-h-[31rem] gap-3 xl:grid-cols-3"
+        class="grid gap-3 xl:min-h-[31rem] xl:grid-cols-3"
         aria-busy="true"
         aria-live="polite"
       >
@@ -739,7 +735,7 @@ onBeforeUnmount(() => {
           <div
             v-for="side in ['A', 'B']"
             :key="`package-skeleton-${side}`"
-            class="min-h-[14.5rem] rounded-lg border border-dashed border-border p-3"
+            class="min-h-40 rounded-lg border border-dashed border-border p-3 sm:min-h-[14.5rem]"
             :class="{ 'mt-3': side === 'B' }"
           >
             <div class="flex items-start justify-between gap-3">
@@ -868,7 +864,7 @@ onBeforeUnmount(() => {
             <p class="mb-1 text-sm font-semibold">Trade Package</p>
 
             <div
-              class="min-h-[14.5rem] rounded-lg border border-dashed border-border p-3"
+              class="min-h-40 rounded-lg border border-dashed border-border p-3 sm:min-h-[14.5rem]"
               @dragover.prevent
               @drop.prevent="onDropToTradePackage('A')"
             >
@@ -881,6 +877,7 @@ onBeforeUnmount(() => {
                     <Button
                       variant="secondary"
                       size="xs"
+                      :aria-label="`Add assets for ${teamA?.managerName || 'first team'}`"
                       class="-mt-1"
                       @click="openAssetsModal('A')"
                     >
@@ -970,7 +967,11 @@ onBeforeUnmount(() => {
                       class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
                     >
                       ${{ teamAFaab }} FAAB
-                      <button type="button" @click="clearFaab('A')">
+                      <button
+                        type="button"
+                        aria-label="Remove FAAB from first trade package"
+                        @click="clearFaab('A')"
+                      >
                         <X class="size-3 text-muted-foreground" />
                       </button>
                     </span>
@@ -982,6 +983,7 @@ onBeforeUnmount(() => {
                       {{ pick.season }} R{{ pick.round }}
                       <button
                         type="button"
+                        :aria-label="`Remove ${pick.season} round ${pick.round} pick from first trade package`"
                         @click="removeDraftPickFromPackage('A', pick.id)"
                       >
                         <X class="size-3 text-muted-foreground" />
@@ -1036,6 +1038,7 @@ onBeforeUnmount(() => {
                   </div>
                   <button
                     type="button"
+                    :aria-label="`Remove ${player.name || `${player.team} Defense`} from first trade package`"
                     class="text-xs underline text-muted-foreground"
                     @click="removeFromPackage('A', player.player_id)"
                   >
@@ -1046,7 +1049,7 @@ onBeforeUnmount(() => {
             </div>
 
             <div
-              class="mt-3 min-h-[14.5rem] rounded-lg border border-dashed border-border p-3"
+              class="mt-3 min-h-40 rounded-lg border border-dashed border-border p-3 sm:min-h-[14.5rem]"
               @dragover.prevent
               @drop.prevent="onDropToTradePackage('B')"
             >
@@ -1059,6 +1062,7 @@ onBeforeUnmount(() => {
                     <Button
                       variant="secondary"
                       size="xs"
+                      :aria-label="`Add assets for ${teamB?.managerName || 'second team'}`"
                       class="-mt-0.5"
                       @click="openAssetsModal('B')"
                     >
@@ -1147,7 +1151,11 @@ onBeforeUnmount(() => {
                     class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
                   >
                     ${{ teamBFaab }} FAAB
-                    <button type="button" @click="clearFaab('B')">
+                    <button
+                      type="button"
+                      aria-label="Remove FAAB from second trade package"
+                      @click="clearFaab('B')"
+                    >
                       <X class="size-3 text-muted-foreground" />
                     </button>
                   </span>
@@ -1159,6 +1167,7 @@ onBeforeUnmount(() => {
                     {{ pick.season }} R{{ pick.round }}
                     <button
                       type="button"
+                      :aria-label="`Remove ${pick.season} round ${pick.round} pick from second trade package`"
                       @click="removeDraftPickFromPackage('B', pick.id)"
                     >
                       <X class="size-3 text-muted-foreground" />
@@ -1214,6 +1223,7 @@ onBeforeUnmount(() => {
                   </div>
                   <button
                     type="button"
+                    :aria-label="`Remove ${player.name || `${player.team} Defense`} from second trade package`"
                     class="text-xs underline text-muted-foreground"
                     @click="removeFromPackage('B', player.player_id)"
                   >

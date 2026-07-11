@@ -165,7 +165,13 @@ const copyReport = () => {
   <Card v-if="showSummary" class="w-full h-full p-4 mx-auto mt-4 md:p-6">
     <div class="flex justify-between mb-3">
       <h5 class="text-2xl font-semibold tracking-tight">League Recap</h5>
-      <Button @click="copyReport()" variant="outline" size="sm">
+      <Button
+        aria-label="Copy league recap"
+        title="Copy league recap"
+        @click="copyReport()"
+        variant="outline"
+        size="sm"
+      >
         <Copy class="size-4" />
       </Button>
     </div>

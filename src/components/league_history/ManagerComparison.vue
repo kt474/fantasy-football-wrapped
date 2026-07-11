@@ -893,7 +893,7 @@ const chartOptions = ref({
           and bragging rights.
         </p>
         <div
-          class="relative p-4 mt-3 overflow-hidden border max-h-48 rounded-xl sm:p-5"
+          class="relative p-4 mt-3 overflow-hidden border max-h-48 rounded-card sm:p-5"
         >
           <div v-html="renderedReport" class="leading-relaxed"></div>
           <div

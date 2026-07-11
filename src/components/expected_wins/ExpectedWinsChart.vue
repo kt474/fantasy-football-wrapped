@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
+import { mobileCategoricalChartResponsive } from "@/lib/chartResponsive";
 const store = useStore();
 
 const props = defineProps<{
@@ -76,6 +77,7 @@ watch([() => store.darkMode], () => {
 });
 
 const chartOptions = ref({
+  responsive: mobileCategoricalChartResponsive(),
   chart: {
     foreColor: "hsl(var(--foreground))",
     type: "bar",

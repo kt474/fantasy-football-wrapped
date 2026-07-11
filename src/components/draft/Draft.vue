@@ -324,8 +324,8 @@ const getValueColor = (value: number) => {
 <template>
   <SectionCard class="w-full">
     <Tabs default-value="Recap" v-model="activeTab">
-      <div class="flex justify-between mb-2">
-        <h2 class="w-48 heading-section">
+      <div class="flex flex-col gap-2 mb-2 sm:flex-row sm:justify-between">
+        <h2 class="heading-section">
           Draft {{ activeTab }}
         </h2>
         <div class="inline-flex p-1" role="tablist">
@@ -369,7 +369,7 @@ const getValueColor = (value: number) => {
           </p>
           <div v-if="data.length === 0">
             <Separator class="h-px mt-1 mb-4" />
-            <p class="w-1/2 mt-3 text-balance">
+            <p class="w-full mt-3 text-balance sm:w-1/2">
               Draft has not happened yet. Please come back after draft is
               complete or try looking at the previous league season.
             </p>
@@ -418,7 +418,10 @@ const getValueColor = (value: number) => {
               <p v-else class="w-20 text-sm text-center truncate">No user</p>
             </div>
           </div>
-          <p v-if="data.length === 0" class="w-1/2 mt-3 ml-2 text-balance">
+          <p
+            v-if="data.length === 0"
+            class="w-full mt-3 ml-2 text-balance sm:w-1/2"
+          >
             Draft has not happened yet. Please come back after draft is complete
             or try looking at the previous league season.
           </p>

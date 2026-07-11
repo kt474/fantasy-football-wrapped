@@ -10,7 +10,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div :class="cn('rounded-lg border border-border bg-card p-4 shadow-sm', props.class)">
+  <div :class="cn('rounded-card border border-border bg-card p-4 shadow-sm', props.class)">
     <p class="text-sm font-medium text-muted-foreground">
       <slot name="label">{{ label }}</slot>
     </p>

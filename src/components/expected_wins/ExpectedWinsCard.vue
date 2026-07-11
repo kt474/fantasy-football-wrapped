@@ -6,7 +6,7 @@ import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
 import { zScoreToPValue } from "../../api/helper";
-import SectionCard from "../layout/SectionCard.vue";
+import ScrollableTableCard from "../layout/ScrollableTableCard.vue";
 import {
   Tooltip,
   TooltipContent,
@@ -77,18 +77,30 @@ const getTeamName = (tableDataItem: TableDataType) => {
 };
 </script>
 <template>
-  <SectionCard class="p-0 sm:p-0">
+  <ScrollableTableCard label="Expected wins standings">
     <TooltipProvider>
       <table class="w-full text-sm text-left rtl:text-right">
         <thead class="text-xs uppercase bg-muted/50">
           <tr>
-            <th scope="col" class="px-4 py-3 sm:px-6">Team Name</th>
-            <th scope="col" class="px-2 py-3">
+            <th
+              scope="col"
+              class="sticky left-0 z-20 bg-muted px-4 py-3 shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
+            >
+              Team Name
+            </th>
+            <th
+              scope="col"
+              class="px-2 py-0"
+              :aria-sort="
+                tableOrder === 'randomScheduleWins' ? 'descending' : 'none'
+              "
+            >
               <Tooltip>
                 <TooltipTrigger as-child>
-                  <div
+                  <button
+                    type="button"
                     @click="tableOrder = 'randomScheduleWins'"
-                    class="flex items-center w-24 uppercase cursor-pointer"
+                    class="flex min-h-11 w-24 items-center bg-transparent text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-0"
                   >
                     Expected Wins
                     <div>
@@ -109,7 +121,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                         />
                       </svg>
                     </div>
-                  </div>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent class="bg-muted-foreground w-52">
                   Average number of wins after simulating 10,000 randomized
@@ -117,12 +129,19 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 </TooltipContent>
               </Tooltip>
             </th>
-            <th scope="col" class="px-1 py-3">
+            <th
+              scope="col"
+              class="px-1 py-0"
+              :aria-sort="
+                tableOrder === 'winsDifference' ? 'descending' : 'none'
+              "
+            >
               <Tooltip>
                 <TooltipTrigger as-child>
-                  <div
+                  <button
+                    type="button"
                     @click="tableOrder = 'winsDifference'"
-                    class="flex items-center uppercase cursor-pointer w-28"
+                    class="flex min-h-11 w-28 items-center bg-transparent text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-0"
                   >
                     Wins above Expected
                     <div>
@@ -143,19 +162,26 @@ const getTeamName = (tableDataItem: TableDataType) => {
                         />
                       </svg>
                     </div>
-                  </div>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent class="bg-muted-foreground w-52">
                   Difference between expected wins and actual wins
                 </TooltipContent>
               </Tooltip>
             </th>
-            <th scope="col" class="px-2 py-3">
+            <th
+              scope="col"
+              class="px-2 py-0"
+              :aria-sort="
+                tableOrder === 'probability' ? 'descending' : 'none'
+              "
+            >
               <Tooltip>
                 <TooltipTrigger as-child>
-                  <div
+                  <button
+                    type="button"
                     @click="tableOrder = 'probability'"
-                    class="flex items-center uppercase cursor-pointer w-28"
+                    class="flex min-h-11 w-28 items-center bg-transparent text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-0"
                   >
                     Probability
                     <div>
@@ -176,7 +202,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                         />
                       </svg>
                     </div>
-                  </div>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent class="bg-muted-foreground w-52">
                   If wins above expected is positive, this is the probability of
@@ -193,7 +219,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
             <th
               scope="row"
               :class="listPadding"
-              class="px-4 font-medium truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap"
+              class="sticky left-0 z-10 max-w-36 truncate whitespace-nowrap bg-card px-4 font-medium shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:max-w-56 sm:px-6 sm:shadow-none"
             >
               {{ getTeamName(item) }}
             </th>
@@ -234,7 +260,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
         </tbody>
       </table>
     </TooltipProvider>
-  </SectionCard>
+  </ScrollableTableCard>
 </template>
 <style scoped>
 .light-custom-bg-color {

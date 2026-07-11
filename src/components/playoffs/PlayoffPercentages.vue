@@ -288,20 +288,18 @@ const tableData = computed(() => {
       store.leagueInfo[store.currentLeagueIndex].status !== 'complete'
     "
   >
-    <div
-      class="flex justify-between pb-2"
+    <button
+      type="button"
+      class="flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       :class="`${showData ? 'rounded-t-lg' : 'rounded-lg'}`"
+      :aria-expanded="showData"
+      aria-controls="playoff-odds-table"
+      @click="showData = !showData"
     >
-      <p
-        class="w-full pt-2 text-lg font-semibold text-center cursor-pointer"
-        @click="showData = !showData"
-      >
-        Playoff Odds
-      </p>
+      <span class="flex-1 text-center">Playoff Odds</span>
       <svg
         v-if="!showData"
-        @click="showData = !showData"
-        class="w-6 h-6 mt-2.5 mr-3 sm:mr-4 cursor-pointer"
+        class="w-6 h-6"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -317,8 +315,7 @@ const tableData = computed(() => {
       </svg>
       <svg
         v-else
-        @click="showData = !showData"
-        class="w-6 h-6 mt-2 mr-3 cursor-pointer sm:mr-4"
+        class="w-6 h-6"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -332,14 +329,18 @@ const tableData = computed(() => {
           clip-rule="evenodd"
         />
       </svg>
-    </div>
-    <div v-if="!loading" class="relative w-full overflow-x-auto bg-card">
+    </button>
+    <div
+      v-if="!loading"
+      id="playoff-odds-table"
+      class="relative w-full overflow-x-auto bg-card"
+    >
       <table v-if="showData" class="w-full text-sm text-left rtl:text-right">
         <thead class="text-xs uppercase bg-muted/50">
           <tr>
             <th scope="col" class="px-4 py-3 sm:px-6 w-60">Team Name</th>
             <th v-for="i in playoffTeams" scope="col" class="px-2 py-3">
-              <div class="flex items-center w-8 cursor-pointer">
+              <div class="flex items-center w-8">
                 {{ getOrdinalSuffix(i) }}
               </div>
             </th>

@@ -60,7 +60,7 @@ const mostPoints = computed(() => {
         <tr>
           <th scope="col" class="px-4 py-6 sm:px-6">Team Name</th>
           <th scope="col" class="px-2 py-3">
-            <div class="flex items-center cursor-pointer max-w-24">Points</div>
+            <div class="flex items-center max-w-24">Points</div>
           </th>
           <th scope="col" class="px-1 py-3">
             <div>Season</div>

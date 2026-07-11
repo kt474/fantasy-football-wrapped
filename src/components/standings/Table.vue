@@ -16,7 +16,7 @@ import {
   RosterType,
   PointsType,
 } from "../../types/types";
-import SectionCard from "../layout/SectionCard.vue";
+import ScrollableTableCard from "../layout/ScrollableTableCard.vue";
 import {
   Tooltip,
   TooltipContent,
@@ -322,7 +322,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       v-if="showStandingsTab"
       class="grid h-full min-h-0 grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(0,1fr)_minmax(240px,300px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]"
     >
-      <SectionCard class="relative w-full min-w-0 overflow-x-auto p-0 sm:p-0 xl:overflow-hidden">
+      <ScrollableTableCard label="League standings" class="w-full">
         <TooltipProvider>
           <table
             v-if="tableData.length > 0"
@@ -338,13 +338,23 @@ const getTeamName = (tableDataItem: TableDataType) => {
             </colgroup>
             <thead class="text-xs uppercase bg-muted/50">
               <tr>
-                <th scope="col" class="px-4 py-3 sm:px-6">Team name</th>
-                <th scope="col" class="px-2 sm:px-6">
+                <th
+                  scope="col"
+                  class="px-4 py-3 sm:sticky sm:left-0 sm:z-20 sm:bg-muted sm:px-6 sm:shadow-[2px_0_0_0_hsl(var(--border))] xl:static xl:shadow-none"
+                >
+                  Team name
+                </th>
+                <th
+                  scope="col"
+                  class="px-2 sm:px-6"
+                  :aria-sort="tableOrder === 'wins' ? 'descending' : 'none'"
+                >
                   <Tooltip>
                     <TooltipTrigger as-child>
-                      <div
+                      <button
+                        type="button"
                         @click="tableOrder = 'wins'"
-                        class="flex items-center uppercase cursor-pointer"
+                        class="flex min-h-11 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Record
                         <div>
@@ -365,19 +375,24 @@ const getTeamName = (tableDataItem: TableDataType) => {
                             />
                           </svg>
                         </div>
-                      </div>
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent class="bg-muted-foreground">
                       Regular season wins and losses
                     </TooltipContent>
                   </Tooltip>
                 </th>
-                <th scope="col" class="px-2 sm:px-6">
+                <th
+                  scope="col"
+                  class="px-2 sm:px-6"
+                  :aria-sort="tableOrder === 'points' ? 'descending' : 'none'"
+                >
                   <Tooltip>
                     <TooltipTrigger as-child>
-                      <div
+                      <button
+                        type="button"
                         @click="tableOrder = 'points'"
-                        class="flex items-center uppercase cursor-pointer"
+                        class="flex min-h-11 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Points
                         <div>
@@ -398,19 +413,26 @@ const getTeamName = (tableDataItem: TableDataType) => {
                             />
                           </svg>
                         </div>
-                      </div>
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent class="bg-muted-foreground">
                       Total regular season points
                     </TooltipContent>
                   </Tooltip>
                 </th>
-                <th scope="col" class="px-2 sm:px-6">
+                <th
+                  scope="col"
+                  class="px-2 sm:px-6"
+                  :aria-sort="
+                    tableOrder === 'pointsAgainst' ? 'descending' : 'none'
+                  "
+                >
                   <Tooltip>
                     <TooltipTrigger as-child>
-                      <div
+                      <button
+                        type="button"
                         @click="tableOrder = 'pointsAgainst'"
-                        class="flex items-center w-20 text-left uppercase cursor-pointer"
+                        class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Points Against
                         <div>
@@ -431,19 +453,26 @@ const getTeamName = (tableDataItem: TableDataType) => {
                             />
                           </svg>
                         </div>
-                      </div>
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent class="bg-muted-foreground">
                       Total regular season points against
                     </TooltipContent>
                   </Tooltip>
                 </th>
-                <th scope="col" class="px-2 py-3 sm:px-6">
+                <th
+                  scope="col"
+                  class="px-2 sm:px-6"
+                  :aria-sort="
+                    tableOrder === 'recordAgainstAll' ? 'descending' : 'none'
+                  "
+                >
                   <Tooltip>
                     <TooltipTrigger as-child>
-                      <div
+                      <button
+                        type="button"
                         @click="tableOrder = 'recordAgainstAll'"
-                        class="flex items-center w-20 text-left uppercase cursor-pointer"
+                        class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Record vs. All
                         <div>
@@ -464,19 +493,26 @@ const getTeamName = (tableDataItem: TableDataType) => {
                             />
                           </svg>
                         </div>
-                      </div>
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent class="w-40 bg-muted-foreground">
                       Team record if each team played every other team each week
                     </TooltipContent>
                   </Tooltip>
                 </th>
-                <th scope="col" class="px-2 py-3 sm:px-6">
+                <th
+                  scope="col"
+                  class="px-2 sm:px-6"
+                  :aria-sort="
+                    tableOrder === 'medianRecord' ? 'descending' : 'none'
+                  "
+                >
                   <Tooltip>
                     <TooltipTrigger as-child>
-                      <div
+                      <button
+                        type="button"
                         @click="tableOrder = 'medianRecord'"
-                        class="flex items-center w-20 text-left uppercase cursor-pointer"
+                        class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Median Record
                         <div>
@@ -497,7 +533,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                             />
                           </svg>
                         </div>
-                      </div>
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent class="w-40 bg-muted-foreground">
                       Team record where a win is awarded if a team's weekly
@@ -514,7 +550,10 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 :key="index"
                 class="border-b"
               >
-                <th scope="row" class="px-4 py-3 font-medium sm:px-6">
+                <th
+                  scope="row"
+                  class="px-4 py-3 font-medium sm:sticky sm:left-0 sm:z-10 sm:bg-card sm:px-6 sm:shadow-[2px_0_0_0_hsl(var(--border))] xl:static xl:shadow-none"
+                >
                   <div class="flex items-center min-w-0">
                     <img
                       alt="User avatar"
@@ -601,7 +640,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
             </tbody>
           </table>
         </TooltipProvider>
-      </SectionCard>
+      </ScrollableTableCard>
       <CurrentTrends
         v-if="showLeagueNews && seasonType !== 'Guillotine'"
         :tableData="tableData"
@@ -639,7 +678,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <div class="grid items-stretch grid-cols-1 gap-4 mt-4 xl:grid-cols-2">
         <ExpectedWinsCard
           :tableData="tableData"
-          class="w-full h-full min-w-0 overflow-auto"
+          class="w-full h-full min-w-0"
         />
         <ExpectedWinsChart
           :tableData="tableData"

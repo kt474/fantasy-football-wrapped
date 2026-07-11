@@ -330,7 +330,7 @@ const trackPremiumCtaClick = (cta: string) => {
             </p>
 
             <div
-              class="relative max-h-[400px] overflow-hidden rounded-xl border p-4 sm:p-6"
+              class="relative max-h-[400px] overflow-hidden rounded-card border p-4 sm:p-6"
             >
               <PremiumReportContent :report="premiumReportPreview" />
               <div
@@ -366,7 +366,7 @@ const trackPremiumCtaClick = (cta: string) => {
             >.
           </p>
           <div
-            class="relative max-h-[400px] overflow-hidden rounded-xl border p-4 sm:p-6"
+            class="relative max-h-[400px] overflow-hidden rounded-card border p-4 sm:p-6"
           >
             <PremiumReportContent :report="premiumReportPreview" />
             <div
