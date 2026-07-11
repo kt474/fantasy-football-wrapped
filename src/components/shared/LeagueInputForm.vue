@@ -85,7 +85,10 @@ const espnS2Model = computed({
     >
       <div class="flex flex-row gap-2">
         <Select v-model="inputTypeModel">
-          <SelectTrigger class="sm:w-32" aria-label="Input type">
+          <SelectTrigger
+            class="h-11 min-h-11 sm:h-9 sm:min-h-9 sm:w-32"
+            aria-label="Input type"
+          >
             <SelectValue placeholder="League ID" />
           </SelectTrigger>
           <SelectContent>
@@ -94,7 +97,10 @@ const espnS2Model = computed({
           </SelectContent>
         </Select>
         <Select v-if="inputTypeModel === 'Username'" v-model="seasonYearModel">
-          <SelectTrigger class="sm:w-24" aria-label="Season">
+          <SelectTrigger
+            class="h-11 min-h-11 sm:h-9 sm:min-h-9 sm:w-24"
+            aria-label="Season"
+          >
             <SelectValue placeholder="2025" />
           </SelectTrigger>
           <SelectContent>
@@ -111,7 +117,7 @@ const espnS2Model = computed({
       <Input
         v-model="leagueIdInputModel"
         type="text"
-        class="flex-1 min-h-9"
+        class="h-11 min-h-11 flex-1 sm:h-9 sm:min-h-9"
         :inputmode="inputTypeModel === 'League ID' ? 'numeric' : 'text'"
         enterkeyhint="go"
         autocapitalize="none"

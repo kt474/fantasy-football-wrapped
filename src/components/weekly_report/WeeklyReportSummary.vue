@@ -217,7 +217,7 @@ const trackPremiumCtaClick = (cta: string) => {
           :disabled="imageActionDisabled"
           variant="outline"
           size="sm"
-          :class="['mr-2', { 'ml-auto': !showShareButton }]"
+          :class="['h-8 mr-2', { 'ml-auto': !showShareButton }]"
           aria-label="Share recap image"
           title="Share recap image"
         >
@@ -228,6 +228,7 @@ const trackPremiumCtaClick = (cta: string) => {
           :disabled="copyActionDisabled"
           variant="outline"
           size="sm"
+          class="h-8"
           aria-label="Copy full report"
           title="Copy full report"
         >

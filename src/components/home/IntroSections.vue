@@ -158,7 +158,7 @@ const toolSummaries: ToolSummary[] = [
 </script>
 
 <template>
-  <div class="relative z-10 px-4 pb-16 sm:px-8 lg:px-12">
+  <div class="relative z-10 px-4 pt-12 pb-16 sm:px-8 sm:pt-0 lg:px-12">
     <div class="w-full mx-auto text-left space-y-14 max-w-7xl">
       <section
         aria-labelledby="intro-testimonials-heading"

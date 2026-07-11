@@ -194,19 +194,19 @@ watch(
                 <img
                   v-if="player.position !== 'DEF'"
                   alt="Player image"
-                  class="object-cover w-16 h-16 mx-2 sm:h-auto"
+                  class="object-cover w-12 h-12 mx-1 shrink-0 sm:mx-2 sm:h-auto sm:w-16"
                   :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.id}.jpg`"
                 />
                 <img
                   v-else
                   alt="Defense image"
-                  class="object-cover w-16 h-16 my-auto ml-2"
+                  class="object-cover w-12 h-12 my-auto ml-1 shrink-0 sm:ml-2 sm:h-16 sm:w-16"
                   :src="`https://sleepercdn.com/images/team_logos/nfl/${(player.id ?? '').toLowerCase()}.png`"
                 />
-                <div class="w-full mt-0.5 ml-3">
-                  <div class="flex justify-between px-2 mt-1 mb-4">
+                <div class="min-w-0 w-full mt-0.5 ml-2 sm:ml-3">
+                  <div class="flex justify-between gap-2 px-2 mt-1 mb-4">
                     <p
-                      class="text-base font-semibold truncate sm:text-lg max-w-24 sm:max-w-52"
+                      class="min-w-0 max-w-32 flex-1 truncate text-base font-semibold sm:max-w-52 sm:text-lg"
                     >
                       {{ index + 1 }}.
                       {{
@@ -216,9 +216,11 @@ watch(
                       }}
                       {{ player.lastName }}
                     </p>
-                    <div class="px-3 py-1 rounded-lg bg-muted/50">
+                    <div
+                      class="px-2 py-1 rounded-lg shrink-0 bg-muted/50 sm:px-3"
+                    >
                       <p
-                        class="text-sm truncate sm:text-base max-w-16 sm:max-w-52"
+                        class="max-w-20 truncate text-sm sm:max-w-52 sm:text-base"
                       >
                         {{ getTeamName(player.id ?? "") }}
                       </p>

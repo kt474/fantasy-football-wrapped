@@ -212,14 +212,10 @@ const getAllManagersSpend = (groupedMoves: WaiverMove[]) => {
 };
 
 const getValueColor = (value: number) => {
-  if (value <= 15)
-    return "performance-excellent";
-  if (value <= 25)
-    return "performance-good";
-  if (value <= 35)
-    return "performance-average";
-  if (value <= 45)
-    return "performance-poor";
+  if (value <= 15) return "performance-excellent";
+  if (value <= 25) return "performance-good";
+  if (value <= 35) return "performance-average";
+  if (value <= 45) return "performance-poor";
   return "performance-bad";
 };
 
@@ -286,16 +282,19 @@ watch(
       </p>
       <Label class="block mb-1 text-sm">Manager</Label>
       <Select v-model="currentManager">
-        <SelectTrigger class="w-full sm:w-52">
+        <SelectTrigger class="min-w-0 w-[calc(100%-1.5rem)] sm:w-52">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent
+          class="w-[--reka-select-trigger-width] max-w-[calc(100vw-2rem)]"
+        >
           <SelectItem
             v-for="manager in managers"
             :key="manager"
             :value="manager"
+            class="min-w-0"
           >
-            {{ manager }}
+            <span class="block truncate">{{ manager }}</span>
           </SelectItem>
         </SelectContent>
       </Select>
@@ -432,27 +431,15 @@ watch(
               />
             </svg>
             <div>
-              <p class="mb-1 text-foreground">
-                Loading waiver moves...
-              </p>
-              <div
-                class="h-2.5 bg-muted rounded-full w-48 mb-2"
-              ></div>
+              <p class="mb-1 text-foreground">Loading waiver moves...</p>
+              <div class="h-2.5 bg-muted rounded-full w-48 mb-2"></div>
             </div>
           </div>
-          <div
-            class="h-2.5 bg-muted rounded-full w-72 mb-4"
-          ></div>
-          <div
-            class="h-2 bg-muted rounded-full mb-2.5"
-          ></div>
-          <div
-            class="h-2 bg-muted rounded-full mb-2.5"
-          ></div>
-          <div
-            class="h-2 bg-muted rounded-full mb-2.5"
-          ></div>
-          <div class="h-2 bg-muted rounded-full"></div>
+          <div class="h-2.5 bg-muted rounded-full w-72 mb-4"></div>
+          <div class="h-2 bg-muted rounded-full mb-2.5"></div>
+          <div class="h-2 bg-muted rounded-full mb-2.5"></div>
+          <div class="h-2 bg-muted rounded-full mb-2.5"></div>
+          <div class="h-2 rounded-full bg-muted"></div>
 
           <span class="sr-only">Loading...</span>
         </div>
@@ -554,72 +541,42 @@ watch(
       <div
         v-else
         role="status"
-        class="ml-2 space-y-4 border-border divide-y divide-border max-w-80 animate-pulse"
+        class="ml-2 space-y-4 divide-y border-border divide-border max-w-80 animate-pulse"
       >
         <div class="flex items-center justify-between">
           <div>
-            <div
-              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
-            ></div>
-            <div
-              class="w-32 h-2 bg-muted rounded-full"
-            ></div>
+            <div class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"></div>
+            <div class="w-32 h-2 rounded-full bg-muted"></div>
           </div>
-          <div
-            class="h-2.5 bg-muted/80 rounded-full w-12"
-          ></div>
+          <div class="h-2.5 bg-muted/80 rounded-full w-12"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div>
-            <div
-              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
-            ></div>
-            <div
-              class="w-32 h-2 bg-muted rounded-full"
-            ></div>
+            <div class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"></div>
+            <div class="w-32 h-2 rounded-full bg-muted"></div>
           </div>
-          <div
-            class="h-2.5 bg-muted/80 rounded-full w-12"
-          ></div>
+          <div class="h-2.5 bg-muted/80 rounded-full w-12"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div>
-            <div
-              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
-            ></div>
-            <div
-              class="w-32 h-2 bg-muted rounded-full"
-            ></div>
+            <div class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"></div>
+            <div class="w-32 h-2 rounded-full bg-muted"></div>
           </div>
-          <div
-            class="h-2.5 bg-muted/80 rounded-full w-12"
-          ></div>
+          <div class="h-2.5 bg-muted/80 rounded-full w-12"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div>
-            <div
-              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
-            ></div>
-            <div
-              class="w-32 h-2 bg-muted rounded-full"
-            ></div>
+            <div class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"></div>
+            <div class="w-32 h-2 rounded-full bg-muted"></div>
           </div>
-          <div
-            class="h-2.5 bg-muted/80 rounded-full w-12"
-          ></div>
+          <div class="h-2.5 bg-muted/80 rounded-full w-12"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div>
-            <div
-              class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"
-            ></div>
-            <div
-              class="w-32 h-2 bg-muted rounded-full"
-            ></div>
+            <div class="h-2.5 bg-muted/80 rounded-full w-24 mb-2.5"></div>
+            <div class="w-32 h-2 rounded-full bg-muted"></div>
           </div>
-          <div
-            class="h-2.5 bg-muted/80 rounded-full w-12"
-          ></div>
+          <div class="h-2.5 bg-muted/80 rounded-full w-12"></div>
         </div>
         <span class="sr-only">Loading...</span>
       </div>

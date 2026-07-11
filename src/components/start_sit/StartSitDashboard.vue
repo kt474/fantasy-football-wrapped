@@ -743,7 +743,7 @@ watch(
                     :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
                   />
                   <div
-                    class="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:justify-between sm:gap-3"
+                    class="flex justify-between w-full min-w-0 gap-3"
                   >
                     <div class="min-w-0">
                       <p class="font-semibold truncate">
@@ -754,7 +754,7 @@ watch(
                       </p>
                     </div>
                     <div
-                      class="flex items-center justify-between gap-2 shrink-0 sm:items-start sm:justify-start sm:gap-4"
+                      class="flex items-start gap-2 sm:gap-4 shrink-0"
                     >
                       <div v-if="player.projection?.stats" class="text-right">
                         <p class="text-xs font-medium text-muted-foreground">
@@ -774,7 +774,7 @@ watch(
                         :aria-expanded="Boolean(expanded[player.player_id])"
                         variant="outline"
                         size="icon"
-                        class="mt-1 border"
+                        class="mt-1 border size-8"
                       >
                         <ChevronUp
                           v-if="expanded[player.player_id]"

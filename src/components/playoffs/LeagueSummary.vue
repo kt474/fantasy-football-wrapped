@@ -171,6 +171,7 @@ const copyReport = () => {
         @click="copyReport()"
         variant="outline"
         size="sm"
+        class="h-8"
       >
         <Copy class="size-4" />
       </Button>
