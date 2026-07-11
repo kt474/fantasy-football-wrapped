@@ -398,13 +398,13 @@ const trackPremiumCtaClick = (cta: string) => {
           </p>
           <p class="text-xs text-muted-foreground">
             Smarter, more detailed, newsletter style weekly recaps with
-            customizable tones and deeper league context are available in the
+            customizable tones and deeper league context are available with
             <button
               type="button"
               class="cursor-pointer text-primary hover:underline"
               @click="emit('update:tier', 'Premium')"
             >
-              Premium tier</button
+              Premium</button
             >.
           </p>
         </div>

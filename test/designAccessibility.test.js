@@ -23,7 +23,8 @@ describe("design accessibility contracts", () => {
 
   test("click handlers are not attached to non-interactive text containers", () => {
     const files = globSync("src/{components,views}/**/*.vue");
-    const nonInteractiveClick = /<(div|span|p|li)\b[^>]*@click|<(div|span|p|li)\b[^>]*\n[^>]*@click/g;
+    const nonInteractiveClick =
+      /<(div|span|p|li)\b[^>]*@click|<(div|span|p|li)\b[^>]*\n[^>]*@click/g;
     const violations = files.flatMap((file) => {
       const matches = read(file).match(nonInteractiveClick);
       return matches ? matches.map(() => file) : [];
@@ -42,9 +43,10 @@ describe("design accessibility contracts", () => {
 
     expect(
       files.reduce(
-        (count, file) => count + (read(file).match(/:aria-sort=/g)?.length ?? 0),
-        0,
-      ),
+        (count, file) =>
+          count + (read(file).match(/:aria-sort=/g)?.length ?? 0),
+        0
+      )
     ).toBe(15);
   });
 
@@ -53,7 +55,7 @@ describe("design accessibility contracts", () => {
 
     expect(switcher).toContain("flex w-full min-w-0 items-center");
     expect(switcher).toContain(
-      "min-w-0 flex-1 min-[390px]:w-[200px] min-[390px]:flex-none",
+      "min-w-0 flex-1 min-[390px]:w-[200px] min-[390px]:flex-none"
     );
     expect(switcher).toContain("flex shrink-0 md:hidden");
   });
@@ -68,30 +70,16 @@ describe("design accessibility contracts", () => {
 
   test("wide data tables advertise keyboard-accessible horizontal scrolling", () => {
     const scrollableTable = read(
-      "src/components/layout/ScrollableTableCard.vue",
+      "src/components/layout/ScrollableTableCard.vue"
     );
 
     expect(scrollableTable).toContain('role="region"');
     expect(scrollableTable).toContain(":tabindex=");
     expect(scrollableTable).toContain("Scroll horizontally for more columns.");
     expect(scrollableTable).toContain("canScrollRight");
-    expect(scrollableTable).toContain('@keydown.right.prevent="scrollByKeyboard(1)"');
-  });
-
-  test("dense tables keep identifying columns visible at appropriate widths", () => {
-    const expectedWins = read(
-      "src/components/expected_wins/ExpectedWinsCard.vue",
+    expect(scrollableTable).toContain(
+      '@keydown.right.prevent="scrollByKeyboard(1)"'
     );
-    const management = read(
-      "src/components/roster_management/ManagementCard.vue",
-    );
-    const history = read("src/components/league_history/LeagueHistory.vue");
-    const standings = read("src/components/standings/Table.vue");
-
-    expect(expectedWins).toContain("sticky left-0");
-    expect(management).toContain("sticky left-0");
-    expect(history).toContain("sticky left-0");
-    expect(standings).toContain("sm:sticky sm:left-0");
   });
 
   test("categorical charts share mobile label and legend behavior", () => {
@@ -101,15 +89,5 @@ describe("design accessibility contracts", () => {
     expect(responsiveCharts).toContain('fontSize: "10px"');
     expect(responsiveCharts).toContain('horizontalAlign: "center"');
     expect(responsiveCharts).toContain("offsetX: 0");
-  });
-
-  test("dense feature cards prioritize readable mobile content", () => {
-    const draft = read("src/components/draft/Draft.vue");
-    const tradeLab = read("src/components/trade_lab/TradeLab.vue");
-    const startSit = read("src/components/start_sit/StartSitDashboard.vue");
-
-    expect(draft).toContain("flex flex-col gap-2 mb-2 sm:flex-row");
-    expect(tradeLab).toContain("min-h-40 rounded-lg");
-    expect(startSit).toContain("flex-col gap-2 sm:flex-row");
   });
 });

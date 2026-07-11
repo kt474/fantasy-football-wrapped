@@ -284,17 +284,18 @@ const toolSummaries: ToolSummary[] = [
                 Premium features for leagues that want more
               </h3>
               <p class="mt-4 text-sm leading-6 text-muted-foreground">
-                The optional
+                Optional
                 <router-link
                   :to="{ path: '/account', query: $route.query }"
                   class="font-medium text-primary hover:underline"
                 >
-                  Premium tier
+                  Premium
                 </router-link>
-                turns every week into a shareable league newspaper, reveals what
-                league full history says about every manager, and gives you the
-                receipts to settle old rivalries. Everything else from the past
-                three seasons, plus plenty more, is still free.
+                features turn every week into a shareable league newspaper,
+                reveal what your league's full history says about every manager,
+                and give you the receipts to settle old rivalries. Everything
+                else from the past three seasons, plus plenty more, is still
+                free.
               </p>
             </div>
           </div>

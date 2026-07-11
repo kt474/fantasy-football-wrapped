@@ -76,15 +76,15 @@ const upgradeSource = computed(() => {
 
 const premiumDescription = computed(() => {
   if (upgradeIntent.value === "premium_report") {
-    return "Create shareable weekly recaps with custom commentary styles, plus every Premium tool for every league you manage.";
+    return "Create shareable weekly newsletters with custom commentary styles for every league you manage.";
   }
   if (upgradeIntent.value === "manager_profiles") {
-    return "Discover custom profiles for every manager in your league, plus every Premium tool across all the leagues you manage.";
+    return "Discover each manager’s tendencies, strengths, and identity across your league history.";
   }
   if (upgradeIntent.value === "rivalry_report") {
-    return "Explore personalized rivalry reports with league history, manager styles, and bragging rights, plus every other Premium tool.";
+    return "Turn your league history into personalized rivalry stories and bragging rights.";
   }
-  return "Get shareable weekly recaps, manager profiles, rivalry reports, and every future Premium feature for all your leagues.";
+  return "Get shareable weekly newsletters, manager profiles, and rivalry reports for every league you manage.";
 });
 
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
@@ -136,7 +136,7 @@ const subscriptionStatusLabel = computed(() => {
   const status = subscriptionStore.status.toLowerCase();
   if (status === "none") return "Not Subscribed";
   if (status === "season_pass") return "Season Pass Active";
-  if (status === "active") return "Premium Tier Active";
+  if (status === "active") return "Premium Active";
   return status
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -221,7 +221,7 @@ const subscriptionTimelineNote = computed(() => {
     return `Your free trial ends on ${trialTimelineLabel.value}.`;
   }
   if (subscriptionStore.status.toLowerCase() === "season_pass") {
-    return `Your Season Pass includes Premium tier access through ${seasonPassTimelineLabel.value}.`;
+    return `Your Season Pass includes Premium access through ${seasonPassTimelineLabel.value}.`;
   }
   if (subscriptionStore.cancelDate) {
     return `Your subscription remains active until ${cancelTimelineLabel.value}.`;
@@ -1036,19 +1036,16 @@ watch(
                   notificationPreferencesLoading ||
                   notificationPreferencesSaving
                 "
-                class="flex-none w-4 h-4 mt-1"
+                class="flex-none w-4 h-4 mt-0.5"
                 @update:model-value="saveWeeklyReportEmailPreference"
               />
-              <div class="min-w-0 space-y-1">
+              <div class="min-w-0">
                 <label
                   for="weekly-report-email-setting"
-                  class="block text-sm font-medium"
+                  class="block text-sm cursor-pointer"
                 >
                   Weekly report emails
                 </label>
-                <p class="text-sm text-muted-foreground">
-                  Send me an email when my weekly league report is ready.
-                </p>
               </div>
             </div>
           </div>
@@ -1098,9 +1095,8 @@ watch(
             <div class="flex align-middle">
               <Check class="w-5 h-5 mr-2 shrink-0" />
               <p class="text-muted-foreground max-w-96">
-                Smarter, shareable, newsletter style weekly league recaps with
-                customizable commentary tones, more league context, individual
-                matchup reports, and team highlights/lowlights
+                Smarter, shareable, newsletter style weekly recaps with
+                customizable commentary tones and more league context
               </p>
             </div>
             <div class="flex mt-3 align-middle">
@@ -1147,7 +1143,7 @@ watch(
               </span>
             </p>
             <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
-              One payment for Premium tier access through Feb 15, 2027. Does not
+              One payment for Premium access through Feb 15, 2027. Does not
               renew.
             </p>
 
@@ -1170,7 +1166,7 @@ watch(
               </span>
             </p>
             <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
-              Same Premium tier access, billed monthly. Cancel anytime.
+              Same Premium access with monthly flexibility. Cancel anytime.
             </p>
             <Button
               class="w-full mt-auto"

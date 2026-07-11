@@ -113,7 +113,7 @@ const data = [
       {
         type: "Update",
         text: [
-          "Users can now generate one manager profile without paying for the Premium tier.",
+          "Users can now generate one manager profile without paying for Premium.",
         ],
       },
     ],
@@ -177,7 +177,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "Users can now create an account with email/password or Google sign in. Accounts allow users to access the Premium tier of features.",
+          "Users can now create an account with email/password or Google sign in. Accounts allow users to access Premium features.",
         ],
       },
     ],
