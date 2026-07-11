@@ -21,6 +21,7 @@ const PrivacyPolicy = () => import("./views/PrivacyPolicy.vue");
 const Terms = () => import("./views/Terms.vue");
 const Account = () => import("./views/Account.vue");
 const SharedReport = () => import("./views/SharedReport.vue");
+const SeoLanding = () => import("./views/SeoLanding.vue");
 const NotFound = () => import("./views/404.vue");
 
 const siteUrl = "https://ffwrapped.com";
@@ -35,6 +36,84 @@ const routes = [
     path: "/",
     component: Home,
     meta: defaultMeta,
+  },
+  {
+    path: "/sleeper-league-analyzer",
+    component: SeoLanding,
+    meta: {
+      title: "Sleeper Fantasy Football League Analyzer | ffwrapped",
+      description:
+        "Analyze any Sleeper fantasy football league with power rankings, playoff odds, weekly recaps, draft grades, roster insights, and league history.",
+      landingPage: {
+        eyebrow: "Sleeper league tools",
+        heading: "A complete Sleeper fantasy football league analyzer",
+        introduction:
+          "Turn your Sleeper league data into power rankings, expected wins, playoff odds, draft grades, matchup recaps, manager profiles, and shareable season stories.",
+        benefits: [
+          "Import by league ID or username",
+          "Explore weekly and all-time trends",
+          "Share reports with your league",
+        ],
+        sectionHeading: "Go beyond the Sleeper standings",
+        sections: [
+          {
+            title: "Power rankings and expected wins",
+            body: "Compare records with underlying performance, schedule strength, roster projections, and the wins each manager would expect against the rest of the league.",
+          },
+          {
+            title: "Weekly league recaps",
+            body: "Transform matchup results and player performances into a readable weekly report with awards, trends, previews, and shareable league content.",
+          },
+          {
+            title: "Draft and roster analysis",
+            body: "Review draft grades, roster strengths, transactions, waiver activity, and trades without assembling data by hand.",
+          },
+          {
+            title: "League history",
+            body: "Follow seasons across a Sleeper league chain to compare managers, head-to-head records, finishes, scoring records, and long-term tendencies.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    path: "/fantasy-football-weekly-recap",
+    component: SeoLanding,
+    meta: {
+      title: "Fantasy Football Weekly Recap Generator | ffwrapped",
+      description:
+        "Create a personalized fantasy football weekly recap with matchup summaries, league awards, top performers, standings trends, and next-week previews.",
+      landingPage: {
+        eyebrow: "Weekly league reports",
+        heading: "Create a fantasy football weekly recap your league will read",
+        introduction:
+          "Turn the week’s matchups into a polished league recap with summaries, awards, top and bottom performers, standings context, and a preview of what comes next.",
+        benefits: [
+          "Built from your league results",
+          "Ready to share with league mates",
+          "Supports Sleeper and ESPN",
+        ],
+        sectionHeading: "Everything needed to recap the week",
+        sections: [
+          {
+            title: "Matchup-by-matchup summaries",
+            body: "Give every manager useful context about close games, blowouts, lineup performances, and the results that changed the standings.",
+          },
+          {
+            title: "Weekly awards and performers",
+            body: "Highlight the teams and players that defined the week, including the strongest performances and the decisions managers would rather forget.",
+          },
+          {
+            title: "Standings and season context",
+            body: "Connect one week of results to power rankings, playoff races, scoring trends, and each manager’s broader season.",
+          },
+          {
+            title: "Shareable presentation",
+            body: "Publish a report link for the league or turn the season into a visual Wrapped-style story designed for group chats and social sharing.",
+          },
+        ],
+      },
+    },
   },
   {
     path: "/about",

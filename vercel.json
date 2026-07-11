@@ -1,5 +1,23 @@
 {
-  "rewrites": [{ "source": "/((?!assets/|.*\\..*).*)", "destination": "/" }],
+  "rewrites": [
+    {
+      "source": "/about",
+      "destination": "/about/index.html"
+    },
+    {
+      "source": "/changelog",
+      "destination": "/changelog/index.html"
+    },
+    {
+      "source": "/sleeper-league-analyzer",
+      "destination": "/sleeper-league-analyzer/index.html"
+    },
+    {
+      "source": "/fantasy-football-weekly-recap",
+      "destination": "/fantasy-football-weekly-recap/index.html"
+    },
+    { "source": "/((?!assets/|.*\\..*).*)", "destination": "/" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
