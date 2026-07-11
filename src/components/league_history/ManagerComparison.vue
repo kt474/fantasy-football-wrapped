@@ -902,7 +902,14 @@ const chartOptions = ref({
           <div class="absolute inset-x-0 z-10 flex justify-center bottom-5">
             <Button class="mt-4" as-child>
               <router-link
-                :to="{ path: '/account', query: $route.query }"
+                :to="{
+                  path: '/account',
+                  query: {
+                    ...$route.query,
+                    intent: 'rivalry_report',
+                    upgrade_source: 'manager_comparison',
+                  },
+                }"
                 @click="
                   trackPremiumFunnelEvent('premium_cta_clicked', {
                     cta: 'unlock_rivalry_reports',

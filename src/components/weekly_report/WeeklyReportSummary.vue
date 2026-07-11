@@ -50,6 +50,15 @@ const route = useRoute();
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
 
+const premiumAccountRoute = computed(() => ({
+  path: "/account",
+  query: {
+    ...route.query,
+    intent: "premium_report",
+    upgrade_source: "weekly_report",
+  },
+}));
+
 const md = new MarkdownIt({
   html: false,
   linkify: true,
@@ -268,70 +277,34 @@ const trackPremiumCtaClick = (cta: string) => {
             <div role="status" class="space-y-2.5 animate-pulse max-w-lg mt-2">
               <p>Generating Premium Summary...</p>
               <div class="flex items-center w-full">
-                <div
-                  class="h-2.5 bg-muted rounded-full w-32"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-                ></div>
+                <div class="h-2.5 bg-muted rounded-full w-32"></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
               </div>
               <div class="flex items-center w-full max-w-[480px]">
-                <div
-                  class="h-2.5 bg-muted rounded-full w-full"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-                ></div>
+                <div class="h-2.5 bg-muted rounded-full w-full"></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
               </div>
               <div class="flex items-center w-full max-w-[400px]">
-                <div
-                  class="h-2.5 bg-muted/80 rounded-full w-full"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted rounded-full w-80"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-                ></div>
+                <div class="h-2.5 bg-muted/80 rounded-full w-full"></div>
+                <div class="h-2.5 ms-2 bg-muted rounded-full w-80"></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
               </div>
               <div class="flex items-center w-full max-w-[480px]">
-                <div
-                  class="h-2.5 ms-2 bg-muted rounded-full w-full"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-                ></div>
+                <div class="h-2.5 ms-2 bg-muted rounded-full w-full"></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
               </div>
               <div class="flex items-center w-full max-w-[440px]">
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-32"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted rounded-full w-full"
-                ></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-32"></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
+                <div class="h-2.5 ms-2 bg-muted rounded-full w-full"></div>
               </div>
               <div class="flex items-center w-full max-w-[360px]">
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted rounded-full w-80"
-                ></div>
-                <div
-                  class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-                ></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
+                <div class="h-2.5 ms-2 bg-muted rounded-full w-80"></div>
+                <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
               </div>
               <span class="sr-only">Loading...</span>
             </div>
@@ -366,7 +339,7 @@ const trackPremiumCtaClick = (cta: string) => {
               <div class="absolute inset-x-0 z-10 flex justify-center bottom-6">
                 <Button as-child>
                   <router-link
-                    :to="{ path: '/account', query: route.query }"
+                    :to="premiumAccountRoute"
                     @click="trackPremiumCtaClick('unlock_premium_reports')"
                   >
                     Unlock Premium Reports
@@ -430,9 +403,8 @@ const trackPremiumCtaClick = (cta: string) => {
               class="cursor-pointer text-primary hover:underline"
               @click="emit('update:tier', 'Premium')"
             >
-              Premium tier
-            </button>
-            .
+              Premium tier</button
+            >.
           </p>
         </div>
         <div v-else-if="!hasLeagues" class="max-w-5xl">
@@ -472,70 +444,34 @@ const trackPremiumCtaClick = (cta: string) => {
           <div role="status" class="space-y-2.5 animate-pulse max-w-lg">
             <p>Generating Summary...</p>
             <div class="flex items-center w-full">
-              <div
-                class="h-2.5 bg-muted rounded-full w-32"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-              ></div>
+              <div class="h-2.5 bg-muted rounded-full w-32"></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
             </div>
             <div class="flex items-center w-full max-w-[480px]">
-              <div
-                class="h-2.5 bg-muted rounded-full w-full"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-              ></div>
+              <div class="h-2.5 bg-muted rounded-full w-full"></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
             </div>
             <div class="flex items-center w-full max-w-[400px]">
-              <div
-                class="h-2.5 bg-muted/80 rounded-full w-full"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted rounded-full w-80"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-              ></div>
+              <div class="h-2.5 bg-muted/80 rounded-full w-full"></div>
+              <div class="h-2.5 ms-2 bg-muted rounded-full w-80"></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
             </div>
             <div class="flex items-center w-full max-w-[480px]">
-              <div
-                class="h-2.5 ms-2 bg-muted rounded-full w-full"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-              ></div>
+              <div class="h-2.5 ms-2 bg-muted rounded-full w-full"></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
             </div>
             <div class="flex items-center w-full max-w-[440px]">
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-32"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted rounded-full w-full"
-              ></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-32"></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-24"></div>
+              <div class="h-2.5 ms-2 bg-muted rounded-full w-full"></div>
             </div>
             <div class="flex items-center w-full max-w-[360px]">
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted rounded-full w-80"
-              ></div>
-              <div
-                class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"
-              ></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
+              <div class="h-2.5 ms-2 bg-muted rounded-full w-80"></div>
+              <div class="h-2.5 ms-2 bg-muted/80 rounded-full w-full"></div>
             </div>
             <span class="sr-only">Loading...</span>
           </div>

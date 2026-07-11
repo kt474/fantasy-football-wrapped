@@ -175,7 +175,14 @@ watch(
         >
           <Button size="sm" as-child>
             <router-link
-              :to="{ path: '/account', query: $route.query }"
+              :to="{
+                path: '/account',
+                query: {
+                  ...$route.query,
+                  intent: 'manager_profiles',
+                  upgrade_source: 'manager_profiles',
+                },
+              }"
               @click="
                 trackPremiumFunnelEvent('premium_cta_clicked', {
                   cta: 'unlock_all_manager_profiles',
