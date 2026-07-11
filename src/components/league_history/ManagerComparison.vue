@@ -401,11 +401,11 @@ const updateChartColor = () => {
       curve: "smooth",
     },
     grid: {
-      borderColor: "#e7e7e7",
+      borderColor: "hsl(var(--border))",
       row: {
         colors: store.darkMode
-          ? ["#374151", "transparent"]
-          : ["#f3f3f3", "transparent"],
+          ? ["hsl(var(--muted))", "transparent"]
+          : ["hsl(var(--muted))", "transparent"],
         opacity: 0.5,
       },
     },
@@ -470,11 +470,11 @@ const chartOptions = ref({
     curve: "smooth",
   },
   grid: {
-    borderColor: "#e7e7e7",
+    borderColor: "hsl(var(--border))",
     row: {
       colors: store.darkMode
-        ? ["#374151", "transparent"]
-        : ["#f3f3f3", "transparent"],
+        ? ["hsl(var(--muted))", "transparent"]
+        : ["hsl(var(--muted))", "transparent"],
       opacity: 0.5,
     },
   },

@@ -16,7 +16,7 @@ import {
   RosterType,
   PointsType,
 } from "../../types/types";
-import Card from "../ui/card/Card.vue";
+import SectionCard from "../layout/SectionCard.vue";
 import {
   Tooltip,
   TooltipContent,
@@ -322,7 +322,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       v-if="showStandingsTab"
       class="grid h-full min-h-0 grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(0,1fr)_minmax(240px,300px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]"
     >
-      <Card class="relative w-full min-w-0 overflow-x-auto xl:overflow-hidden">
+      <SectionCard class="relative w-full min-w-0 overflow-x-auto p-0 sm:p-0 xl:overflow-hidden">
         <TooltipProvider>
           <table
             v-if="tableData.length > 0"
@@ -601,7 +601,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
             </tbody>
           </table>
         </TooltipProvider>
-      </Card>
+      </SectionCard>
       <CurrentTrends
         v-if="showLeagueNews && seasonType !== 'Guillotine'"
         :tableData="tableData"
@@ -754,9 +754,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
   }
 }
 .light-custom-bg-color {
-  background-color: #eff0f2;
+  background-color: hsl(var(--muted));
 }
 .dark-custom-bg-color {
-  background-color: #374151;
+  background-color: hsl(var(--muted-foreground));
 }
 </style>

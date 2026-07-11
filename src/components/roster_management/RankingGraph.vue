@@ -44,7 +44,7 @@ const series = computed(() => {
   return result;
 });
 const chartTextColor = computed(() => {
-  return store.darkMode ? "#ffffff" : "#111827";
+  return "hsl(var(--foreground))";
 });
 
 const updateChartColor = () => {
@@ -75,7 +75,7 @@ const updateChartColor = () => {
         padding: 8,
         borderRadius: 10,
         borderWidth: 2,
-        borderColor: store.darkMode ? "#e5e7eb" : "#111827",
+        borderColor: "hsl(var(--border))",
       },
     },
   };
@@ -158,7 +158,7 @@ const chartOptions = ref({
       padding: 8,
       borderRadius: 10,
       borderWidth: 2,
-      borderColor: store.darkMode ? "#e5e7eb" : "#111827",
+      borderColor: "hsl(var(--border))",
     },
   },
   legend: {

@@ -10,7 +10,7 @@ const store = useStore();
   >
     <svg
       aria-hidden="true"
-      class="w-8 h-8 mb-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+      class="w-8 h-8 mb-4 text-muted animate-spin fill-primary"
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -32,7 +32,7 @@ const store = useStore();
         class="w-full p-4 space-y-4 border border-border divide-y divide-border rounded-lg bg-card shadow-sm lg:mr-4 lg:w-3/4 animate-pulse md:p-6"
       >
         <div class="flex items-center justify-between">
-          <p class="-mt-1 text-lg dark:text-gray-50">
+          <p class="-mt-1 text-lg text-foreground">
             Loading {{ store.loadingLeague }}...
           </p>
           <div

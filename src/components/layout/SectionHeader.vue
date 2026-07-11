@@ -12,12 +12,12 @@ const props = defineProps<{
 <template>
   <div :class="cn('space-y-1', props.class)">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <h2 class="text-xl font-semibold tracking-tight">
+      <h2 class="heading-section">
         <slot name="title">{{ title }}</slot>
       </h2>
       <slot name="actions" />
     </div>
-    <p v-if="description" class="text-sm text-muted-foreground">
+    <p v-if="description" class="text-supporting">
       {{ description }}
     </p>
     <slot />

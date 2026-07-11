@@ -13,7 +13,7 @@ import {
   getPlayersByIdsMap,
   sharePremiumReport,
 } from "../../api/api.ts";
-import Card from "../ui/card/Card.vue";
+import SectionCard from "../layout/SectionCard.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -735,12 +735,12 @@ watch(
 watch(() => currentWeek.value, fetchPlayerNames);
 </script>
 <template>
-  <Card class="h-full p-4 my-4 custom-width md:p-6">
+  <SectionCard class="h-full my-4 custom-width">
     <Tabs default-value="Report" v-model="activeTab">
       <div class="flex justify-between w-full mb-3">
-        <h5 class="mr-4 text-2xl font-semibold tracking-tight">
+        <h2 class="mr-4 heading-section">
           Weekly {{ activeTab }}
-        </h5>
+        </h2>
         <div class="flex flex-wrap justify-end">
           <div class="inline-flex pb-1 rounded-lg sm:mr-2" role="tablist">
             <TabsList>
@@ -856,7 +856,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
         />
       </TabsContent>
     </Tabs>
-  </Card>
+  </SectionCard>
   <div class="fixed top-0 left-[-10000px] pointer-events-none">
     <div ref="shareCardRef">
       <WeeklyShareCard

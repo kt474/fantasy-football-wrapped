@@ -74,21 +74,21 @@ const currentManager = ref(managers.value[0] ?? "");
 
 const getValueColor = (value: number) => {
   if (value <= 15)
-    return "bg-emerald-100 text-emerald-900 dark:bg-emerald-700 dark:text-gray-50";
+    return "performance-excellent";
   if (value <= 25)
-    return "bg-green-100 text-green-900 dark:bg-green-700 dark:text-gray-50";
+    return "performance-good";
   if (value <= 35)
-    return "bg-yellow-100 text-yellow-950 dark:bg-yellow-700 dark:text-gray-50";
+    return "performance-average";
   if (value <= 45)
-    return "bg-orange-100 text-orange-950 dark:bg-orange-700 dark:text-gray-50";
-  return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
+    return "performance-poor";
+  return "performance-bad";
 };
 </script>
 <template>
   <div>
     <Label class="block mb-1 text-sm">Manager</Label>
     <Select v-model="currentManager">
-      <SelectTrigger class="w-52">
+      <SelectTrigger class="w-full sm:w-52">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -108,7 +108,7 @@ const getValueColor = (value: number) => {
         class="flex flex-wrap gap-4 sm:gap-12"
       >
         <div
-          class="overflow-x-hidden w-80 sm:w-48"
+          class="w-full overflow-x-hidden sm:w-48"
           v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
           :key="position"
         >
@@ -162,7 +162,7 @@ const getValueColor = (value: number) => {
         </p>
         <div class="flex flex-wrap gap-4 sm:gap-12">
           <div
-            class="overflow-x-hidden w-80 sm:w-48"
+            class="w-full overflow-x-hidden sm:w-48"
             v-for="position in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']"
             :key="position"
           >

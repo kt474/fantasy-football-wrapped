@@ -240,7 +240,7 @@ watch(
   <div class="">
     <Label for="manager" class="block mb-1 text-sm">Manager</Label>
     <Select id="manager" v-model="currentManager">
-      <SelectTrigger id="manager" class="w-52">
+      <SelectTrigger id="manager" class="w-full sm:w-52">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

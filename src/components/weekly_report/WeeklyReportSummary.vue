@@ -246,7 +246,7 @@ const trackPremiumCtaClick = (cta: string) => {
                   emit('update:premiumCommentaryStyle', String($event))
                 "
               >
-                <SelectTrigger class="w-44">
+                <SelectTrigger class="w-full sm:w-44">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

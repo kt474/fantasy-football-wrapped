@@ -469,9 +469,9 @@ const tableData = computed(() => {
 </template>
 <style scoped>
 .light-custom-bg-color {
-  background-color: #eff0f2;
+  background-color: hsl(var(--muted));
 }
 .dark-custom-bg-color {
-  background-color: #374151;
+  background-color: hsl(var(--muted-foreground));
 }
 </style>

@@ -10,7 +10,7 @@ const props = defineProps<{
 const store = useStore();
 
 const chartTextColor = computed(() => {
-  return store.darkMode ? "#ffffff" : "#111827";
+  return "hsl(var(--foreground))";
 });
 
 const updateChartColor = () => {

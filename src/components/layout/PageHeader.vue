@@ -12,7 +12,7 @@ const props = defineProps<{
 <template>
   <header :class="cn('mb-6 space-y-1.5', props.class)">
     <div class="flex flex-wrap items-start justify-between gap-3">
-      <h1 class="text-3xl font-semibold tracking-tight">
+      <h1 class="heading-page">
         <slot name="title">{{ title }}</slot>
       </h1>
       <slot name="actions" />

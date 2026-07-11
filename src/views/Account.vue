@@ -153,16 +153,16 @@ const subscriptionStatusBadgeClass = computed(() => {
     status === "trialing" ||
     status === "season_pass"
   ) {
-    return "bg-emerald-100 text-emerald-900 border-emerald-200";
+    return "border-success/30 bg-success/15 text-success-foreground";
   }
   if (status === "none") {
     return "bg-muted text-muted-foreground border-border";
   }
   if (status === "canceled" || subscriptionStore.cancelDate) {
-    return "bg-orange-100 text-orange-900 border-orange-200";
+    return "border-warning/30 bg-warning/15 text-warning-foreground";
   }
 
-  return "bg-slate-100 text-slate-900 border-slate-200";
+  return "border-border bg-muted text-muted-foreground";
 });
 
 const accountInitial = computed(() => {

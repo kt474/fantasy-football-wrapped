@@ -325,7 +325,7 @@ const updateChartColor = () => {
       },
     },
     stroke: {
-      colors: ["#fff"],
+      colors: ["hsl(var(--chart-contrast))"],
       width: 1,
     },
     fill: {
@@ -341,7 +341,7 @@ const updateChartColor = () => {
             style: {
               fontSize: "13px",
               fontWeight: 900,
-              color: store.darkMode ? "#ffffff" : "#111827",
+              color: "hsl(var(--foreground))",
             },
           },
         },
@@ -391,7 +391,7 @@ const chartOptions = ref({
     "hsl(var(--chart-6))",
   ],
   stroke: {
-    colors: ["#fff"],
+    colors: ["hsl(var(--chart-contrast))"],
     width: 1,
   },
   fill: {
@@ -407,7 +407,7 @@ const chartOptions = ref({
           style: {
             fontSize: "13px",
             fontWeight: 900,
-            color: store.darkMode ? "#ffffff" : "#111827",
+            color: "hsl(var(--foreground))",
           },
         },
       },
@@ -435,7 +435,7 @@ const chartOptions = ref({
 <template>
   <div>
     <div v-if="!loading">
-      <Card class="w-full p-4 md:p-6 min-w-80">
+      <Card class="w-full min-w-0 p-4 md:p-6">
         <div class="flex justify-between">
           <div>
             <h1 class="pb-2 text-2xl font-semibold tracking-tight">

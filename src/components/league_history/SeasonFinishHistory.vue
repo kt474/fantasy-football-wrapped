@@ -311,7 +311,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
                   <span>{{ season.season }}</span>
                   <span
                     v-if="!season.isComplete"
-                    class="rounded-full border bg-background px-1.5 py-px text-[0.625rem] normal-case text-muted-foreground"
+                    class="rounded-full border bg-background px-1.5 py-px text-xs normal-case text-muted-foreground"
                   >
                     Live
                   </span>
@@ -352,7 +352,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
                     getCellPlacementLabel(cell)
                   }}</span>
                   <span
-                    class="block text-[0.7rem] font-medium text-muted-foreground"
+                    class="block text-xs font-medium text-muted-foreground"
                     >{{ getCellMeta(cell) }}</span
                   >
                 </template>

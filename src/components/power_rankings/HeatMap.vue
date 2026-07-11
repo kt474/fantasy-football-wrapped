@@ -146,7 +146,7 @@ const updateChartColor = () => {
       },
     },
     stroke: {
-      colors: ["#fff"],
+      colors: ["hsl(var(--chart-contrast))"],
       width: 1,
     },
     yaxis: {
@@ -188,7 +188,7 @@ const chartOptions = ref({
     },
   },
   stroke: {
-    colors: ["#fff"],
+    colors: ["hsl(var(--chart-contrast))"],
     width: 1,
   },
   plotOptions: {
@@ -213,7 +213,7 @@ const chartOptions = ref({
 });
 </script>
 <template>
-  <Card class="w-full p-4 md:p-6 min-w-80">
+  <Card class="w-full min-w-0 p-4 md:p-6">
     <div class="flex justify-between">
       <div>
         <h1 class="pb-2 text-2xl font-semibold tracking-tight">

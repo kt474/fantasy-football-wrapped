@@ -52,6 +52,13 @@ export default {
           raised: "hsl(var(--surface-raised))",
           subtle: "hsl(var(--surface-subtle))",
         },
+        performance: {
+          excellent: "hsl(var(--performance-excellent))",
+          good: "hsl(var(--performance-good))",
+          average: "hsl(var(--performance-average))",
+          poor: "hsl(var(--performance-poor))",
+          bad: "hsl(var(--performance-bad))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -67,6 +74,7 @@ export default {
           positive: "hsl(var(--chart-positive))",
           negative: "hsl(var(--chart-negative))",
           neutral: "hsl(var(--chart-neutral))",
+          contrast: "hsl(var(--chart-contrast))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

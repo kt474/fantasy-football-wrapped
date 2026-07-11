@@ -7,7 +7,7 @@ import { getLeagueKey, useStore } from "../../store/store";
 import { fakeUsers } from "../../api/fakeLeague.ts";
 import DraftGrades from "./DraftGrades.vue";
 import { DraftPick } from "../../types/apiTypes.ts";
-import Card from "../ui/card/Card.vue";
+import SectionCard from "../layout/SectionCard.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -322,12 +322,12 @@ const getValueColor = (value: number) => {
 };
 </script>
 <template>
-  <Card class="w-full p-4 md:p-6">
+  <SectionCard class="w-full">
     <Tabs default-value="Recap" v-model="activeTab">
       <div class="flex justify-between mb-2">
-        <h5 class="w-48 text-2xl font-semibold tracking-tight">
+        <h2 class="w-48 heading-section">
           Draft {{ activeTab }}
-        </h5>
+        </h2>
         <div class="inline-flex p-1" role="tablist">
           <TabsList>
             <TabsTrigger value="Grades"> Grades </TabsTrigger>
@@ -347,7 +347,7 @@ const getValueColor = (value: number) => {
               >Sort Picks</Label
             >
             <Select id="sort-order" v-model="sortOrder">
-              <SelectTrigger if="sort-order" class="w-40">
+              <SelectTrigger if="sort-order" class="w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -536,7 +536,7 @@ const getValueColor = (value: number) => {
         />
       </TabsContent>
     </Tabs>
-  </Card>
+  </SectionCard>
 </template>
 <style lang="css" scoped>
 .custom-margin {

@@ -435,14 +435,14 @@ const rankLabel = (rank: number) => {
 
 const waiverPaletteClass = (tier: number) => {
   if (tier === 1)
-    return "bg-emerald-100 text-emerald-900 dark:bg-emerald-700 dark:text-gray-50";
+    return "performance-excellent";
   if (tier === 2)
-    return "bg-green-100 text-green-900 dark:bg-green-700 dark:text-gray-50";
+    return "performance-good";
   if (tier === 3)
-    return "bg-yellow-100 text-yellow-950 dark:bg-yellow-700 dark:text-gray-50";
+    return "performance-average";
   if (tier === 4)
-    return "bg-orange-100 text-orange-950 dark:bg-orange-700 dark:text-gray-50";
-  return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
+    return "performance-poor";
+  return "performance-bad";
 };
 
 const posRankClass = (rank: number) => {
@@ -673,7 +673,7 @@ onBeforeUnmount(() => {
 <template>
   <Card class="w-full h-full p-4 mt-4 md:p-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
-      <h5 class="text-2xl font-semibold tracking-tight">Trade Lab (Beta)</h5>
+      <h2 class="heading-section">Trade Lab (Beta)</h2>
       <Tabs v-model="activeMode">
         <TabsList>
           <TabsTrigger value="builder">Builder</TabsTrigger>
@@ -716,7 +716,7 @@ onBeforeUnmount(() => {
             <div
               v-for="index in 7"
               :key="`player-skeleton-${side}-${index}`"
-              class="flex w-full rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem]"
+              class="flex w-full rounded-md border border-border bg-background px-[0.65rem] py-[0.55rem]"
             >
               <Skeleton
                 class="rounded-full size-14 shrink-0 bg-muted dark:bg-muted/70"
@@ -739,7 +739,7 @@ onBeforeUnmount(() => {
           <div
             v-for="side in ['A', 'B']"
             :key="`package-skeleton-${side}`"
-            class="min-h-[14.5rem] rounded-[0.7rem] border border-dashed border-border p-3"
+            class="min-h-[14.5rem] rounded-lg border border-dashed border-border p-3"
             :class="{ 'mt-3': side === 'B' }"
           >
             <div class="flex items-start justify-between gap-3">
@@ -786,7 +786,7 @@ onBeforeUnmount(() => {
                   handleTeamSelectionChange('A', Number($event))
                 "
               >
-                <SelectTrigger class="w-44">
+                <SelectTrigger class="w-full sm:w-44">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -811,7 +811,7 @@ onBeforeUnmount(() => {
                 @dragstart="onPlayerDragStart(player.player_id, 'A')"
                 @click="onPlayerCardTap('A', player.player_id)"
                 type="button"
-                class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
+                class="flex w-full flex-col items-start gap-[0.1rem] rounded-md border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
                 :class="{
                   'bg-primary/10 border-primary': isIncluded(
                     'A',
@@ -844,7 +844,7 @@ onBeforeUnmount(() => {
                   <div class="flex flex-col items-end gap-1 ml-auto">
                     <span
                       :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
+                        'rounded-md px-2 py-1 text-xs font-semibold',
                         posRankClass(player.projection),
                       ]"
                     >
@@ -852,7 +852,7 @@ onBeforeUnmount(() => {
                     </span>
                     <span
                       :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
+                        'rounded-md px-2 py-1 text-xs font-semibold',
                         overallRankClass(player.overallRank),
                       ]"
                     >
@@ -868,7 +868,7 @@ onBeforeUnmount(() => {
             <p class="mb-1 text-sm font-semibold">Trade Package</p>
 
             <div
-              class="min-h-[14.5rem] rounded-[0.7rem] border border-dashed border-border p-3"
+              class="min-h-[14.5rem] rounded-lg border border-dashed border-border p-3"
               @dragover.prevent
               @drop.prevent="onDropToTradePackage('A')"
             >
@@ -1018,7 +1018,7 @@ onBeforeUnmount(() => {
                     <div class="flex flex-col items-end gap-1 ml-auto mr-4">
                       <span
                         :class="[
-                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
+                          'rounded-md px-2 py-1 text-xs font-semibold',
                           posRankClass(player.projection),
                         ]"
                       >
@@ -1026,7 +1026,7 @@ onBeforeUnmount(() => {
                       </span>
                       <span
                         :class="[
-                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
+                          'rounded-md px-2 py-1 text-xs font-semibold',
                           overallRankClass(player.overallRank),
                         ]"
                       >
@@ -1046,7 +1046,7 @@ onBeforeUnmount(() => {
             </div>
 
             <div
-              class="mt-3 min-h-[14.5rem] rounded-[0.7rem] border border-dashed border-border p-3"
+              class="mt-3 min-h-[14.5rem] rounded-lg border border-dashed border-border p-3"
               @dragover.prevent
               @drop.prevent="onDropToTradePackage('B')"
             >
@@ -1196,7 +1196,7 @@ onBeforeUnmount(() => {
                     <div class="flex flex-col items-end gap-1 ml-auto mr-4">
                       <span
                         :class="[
-                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
+                          'rounded-md px-2 py-1 text-xs font-semibold',
                           posRankClass(player.projection),
                         ]"
                       >
@@ -1204,7 +1204,7 @@ onBeforeUnmount(() => {
                       </span>
                       <span
                         :class="[
-                          'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
+                          'rounded-md px-2 py-1 text-xs font-semibold',
                           overallRankClass(player.overallRank),
                         ]"
                       >
@@ -1244,7 +1244,7 @@ onBeforeUnmount(() => {
               <div class="flex items-center justify-between">
                 <span
                   :class="[
-                    'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
+                    'rounded-md px-2 py-1 text-xs font-semibold',
                     fairnessPillClass,
                   ]"
                 >
@@ -1267,7 +1267,7 @@ onBeforeUnmount(() => {
                   handleTeamSelectionChange('B', Number($event))
                 "
               >
-                <SelectTrigger class="w-44">
+                <SelectTrigger class="w-full sm:w-44">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1292,7 +1292,7 @@ onBeforeUnmount(() => {
                 @dragstart="onPlayerDragStart(player.player_id, 'B')"
                 @click="onPlayerCardTap('B', player.player_id)"
                 type="button"
-                class="flex w-full flex-col items-start gap-[0.1rem] rounded-[0.6rem] border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
+                class="flex w-full flex-col items-start gap-[0.1rem] rounded-md border border-border bg-background px-[0.65rem] py-[0.55rem] text-left"
                 :class="{
                   'bg-primary/10 border-primary': isIncluded(
                     'B',
@@ -1325,7 +1325,7 @@ onBeforeUnmount(() => {
                   <div class="flex flex-col items-end gap-1 ml-auto">
                     <span
                       :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
+                        'rounded-md px-2 py-1 text-xs font-semibold',
                         posRankClass(player.projection),
                       ]"
                     >
@@ -1333,7 +1333,7 @@ onBeforeUnmount(() => {
                     </span>
                     <span
                       :class="[
-                        'rounded-md px-2 py-1 text-[0.72rem] font-semibold',
+                        'rounded-md px-2 py-1 text-xs font-semibold',
                         overallRankClass(player.overallRank),
                       ]"
                     >

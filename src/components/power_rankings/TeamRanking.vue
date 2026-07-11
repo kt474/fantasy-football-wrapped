@@ -151,7 +151,7 @@ watch(
 );
 </script>
 <template>
-  <Card class="w-full p-4 min-w-80 md:p-6">
+  <Card class="w-full min-w-0 p-4 md:p-6">
     <Tabs v-if="!loading" default-value="score">
       <div class="flex justify-between">
         <h1 class="pb-2 text-2xl font-semibold tracking-tight">Player Rankings</h1>

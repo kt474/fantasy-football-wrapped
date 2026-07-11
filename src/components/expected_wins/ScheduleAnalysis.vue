@@ -411,7 +411,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
               },
               {
                 key: 'best',
-                color: 'bg-green-500',
+                color: 'bg-chart-positive',
                 label: 'Best',
                 value: team.bestPossibleRecord,
               },
@@ -457,7 +457,7 @@ const getDotPosition = (value: number, min: number, max: number) => {
           </div>
           <div class="flex-1">
             <p class="text-muted-foreground">Best</p>
-            <p class="text-xl font-semibold text-green-500">
+            <p class="text-xl font-semibold text-chart-positive">
               {{ team.bestPossibleRecord }}-{{
                 lastWeek - team.bestPossibleRecord
               }}

@@ -28,6 +28,16 @@
     --info-foreground: 201 96.3% 14.3%;
     --surface-raised: 0 0% 100%;
     --surface-subtle: 210 40% 98%;
+    --performance-excellent: 152 81% 96%;
+    --performance-excellent-foreground: 163 94% 24%;
+    --performance-good: 142 77% 96%;
+    --performance-good-foreground: 142 72% 29%;
+    --performance-average: 48 96% 89%;
+    --performance-average-foreground: 32 81% 21%;
+    --performance-poor: 33 100% 92%;
+    --performance-poor-foreground: 15 79% 28%;
+    --performance-bad: 0 93% 94%;
+    --performance-bad-foreground: 0 74% 30%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
@@ -43,6 +53,7 @@
     --chart-positive: 142.1 70.6% 45.3%;
     --chart-negative: 0 84.2% 60.2%;
     --chart-neutral: 199 89% 48%;
+    --chart-contrast: 0 0% 100%;
     --chart-rank-1: 0 84.2% 60.2%;
     --chart-rank-2: 24.6 95% 53.1%;
     --chart-rank-3: 37.7 92.1% 50.2%;
@@ -101,6 +112,16 @@
     --info-foreground: 201 100% 96%;
     --surface-raised: 222.2 20% 8%;
     --surface-subtle: 222.2 15% 11%;
+    --performance-excellent: 163 69% 25%;
+    --performance-excellent-foreground: 144 70% 96%;
+    --performance-good: 142 64% 25%;
+    --performance-good-foreground: 138 76% 97%;
+    --performance-average: 45 80% 29%;
+    --performance-average-foreground: 48 96% 89%;
+    --performance-poor: 21 78% 30%;
+    --performance-poor-foreground: 34 100% 92%;
+    --performance-bad: 0 65% 32%;
+    --performance-bad-foreground: 0 86% 97%;
 
     --ring: 217.2 91.2% 59.8%;
 
@@ -112,6 +133,7 @@
     --chart-6: 187.9 85.7% 53.3%;
     --chart-7: 27 96% 61%;
     --chart-8: 234.5 89.5% 73.9%;
+    --chart-contrast: 0 0% 100%;
 
     /* Sidebar */
     --sidebar-background: 222.2 20% 6%;
@@ -119,6 +141,44 @@
     --sidebar-border: 222.2 15% 18%;
     --sidebar-accent: 222.2 15% 15%;
     --sidebar-accent-foreground: 210 40% 98%;
+  }
+}
+
+@layer components {
+  .heading-page {
+    @apply text-2xl font-semibold tracking-tight sm:text-3xl;
+  }
+  .heading-section {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+  .heading-card {
+    @apply text-lg font-semibold tracking-tight;
+  }
+  .text-supporting {
+    @apply text-sm text-muted-foreground sm:text-base;
+  }
+  .text-caption {
+    @apply text-xs leading-relaxed text-muted-foreground;
+  }
+  .performance-excellent {
+    color: hsl(var(--performance-excellent-foreground));
+    background-color: hsl(var(--performance-excellent));
+  }
+  .performance-good {
+    color: hsl(var(--performance-good-foreground));
+    background-color: hsl(var(--performance-good));
+  }
+  .performance-average {
+    color: hsl(var(--performance-average-foreground));
+    background-color: hsl(var(--performance-average));
+  }
+  .performance-poor {
+    color: hsl(var(--performance-poor-foreground));
+    background-color: hsl(var(--performance-poor));
+  }
+  .performance-bad {
+    color: hsl(var(--performance-bad-foreground));
+    background-color: hsl(var(--performance-bad));
   }
 }
 

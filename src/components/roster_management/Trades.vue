@@ -227,14 +227,14 @@ const getOrdinalSuffix = (number: number) => {
 const getValueColor = (value: number | null | undefined) => {
   if (value == null) return "bg-muted text-muted-foreground";
   if (value <= 15)
-    return "bg-emerald-100 text-emerald-900 dark:bg-emerald-700 dark:text-gray-50";
+    return "performance-excellent";
   if (value <= 25)
-    return "bg-green-100 text-green-900 dark:bg-green-700 dark:text-gray-50";
+    return "performance-good";
   if (value <= 35)
-    return "bg-yellow-100 text-yellow-950 dark:bg-yellow-700 dark:text-gray-50";
+    return "performance-average";
   if (value <= 45)
-    return "bg-orange-100 text-orange-950 dark:bg-orange-700 dark:text-gray-50";
-  return "bg-red-100 text-red-900 dark:bg-red-700 dark:text-gray-50";
+    return "performance-poor";
+  return "performance-bad";
 };
 
 const getRatingLabel = (value: number | null | undefined) => {
@@ -557,7 +557,7 @@ watch(
       >
         <div class="flex items-center mb-4">
           <svg
-            class="w-10 h-10 text-gray-200 me-3 dark:text-gray-700"
+            class="w-10 h-10 text-muted me-3"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
@@ -568,7 +568,7 @@ watch(
             />
           </svg>
           <div>
-            <p v-if="x === 1" class="mb-1 text-gray-700 dark:text-gray-200">
+            <p v-if="x === 1" class="mb-1 text-foreground">
               Loading trades...
             </p>
             <div

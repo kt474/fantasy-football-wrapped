@@ -987,10 +987,10 @@ function runMonteCarloDistribution() {
     <Card class="w-full p-4 space-y-4 md:p-6">
       <div>
         <div>
-          <p class="text-2xl font-semibold tracking-tight">
+          <h2 class="heading-section">
             Schedule Simulator
-          </p>
-          <p class="mt-4 text-sm text-muted-foreground sm:text-base">
+          </h2>
+          <p class="mt-4 text-supporting">
             Test alternate matchups and see how the standings change.
           </p>
         </div>
@@ -1001,7 +1001,7 @@ function runMonteCarloDistribution() {
       >
         <Card class="p-4">
           <div class="flex items-center justify-between gap-3">
-            <h3 class="text-lg font-semibold">Scenario Builder</h3>
+            <h3 class="heading-card">Scenario Builder</h3>
             <Button
               variant="outline"
               size="sm"
@@ -1250,7 +1250,7 @@ function runMonteCarloDistribution() {
                 Changed matchups are highlighted.
               </p>
               <Select v-model="selectedWeekValue">
-                <SelectTrigger class="w-44">
+                <SelectTrigger class="w-full sm:w-44">
                   <SelectValue placeholder="Select week" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1320,16 +1320,16 @@ function runMonteCarloDistribution() {
     <Card class="w-full p-4 md:p-6">
       <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 class="text-2xl font-semibold tracking-tight">
+          <h2 class="heading-section">
             Random Schedule Outcomes
-          </h3>
-          <p class="mt-2 text-sm text-muted-foreground sm:text-base">
+          </h2>
+          <p class="mt-2 text-supporting">
             Distribution of likely win totals from simulating 1000 randomized
             schedules.
           </p>
         </div>
         <Select v-model="selectedVolatilityTeamValue">
-          <SelectTrigger class="w-44">
+          <SelectTrigger class="w-full sm:w-44">
             <SelectValue placeholder="Select team" />
           </SelectTrigger>
           <SelectContent>

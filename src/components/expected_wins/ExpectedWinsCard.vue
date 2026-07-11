@@ -6,7 +6,7 @@ import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
 import { zScoreToPValue } from "../../api/helper";
-import Card from "../ui/card/Card.vue";
+import SectionCard from "../layout/SectionCard.vue";
 import {
   Tooltip,
   TooltipContent,
@@ -77,7 +77,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
 };
 </script>
 <template>
-  <Card>
+  <SectionCard class="p-0 sm:p-0">
     <TooltipProvider>
       <table class="w-full text-sm text-left rtl:text-right">
         <thead class="text-xs uppercase bg-muted/50">
@@ -234,13 +234,13 @@ const getTeamName = (tableDataItem: TableDataType) => {
         </tbody>
       </table>
     </TooltipProvider>
-  </Card>
+  </SectionCard>
 </template>
 <style scoped>
 .light-custom-bg-color {
-  background-color: #eff0f2;
+  background-color: hsl(var(--muted));
 }
 .dark-custom-bg-color {
-  background-color: #374151;
+  background-color: hsl(var(--muted-foreground));
 }
 </style>

@@ -12,7 +12,7 @@ import {
   PowerRankingEntry,
 } from "../../types/types";
 import PowerRankingCard from "./PowerRankingCard.vue";
-import Card from "../ui/card/Card.vue";
+import SectionCard from "../layout/SectionCard.vue";
 const store = useStore();
 
 const props = defineProps<{
@@ -159,7 +159,7 @@ const chartPowerRankings = computed(() =>
 );
 
 const chartTextColor = computed(() => {
-  return store.darkMode ? "#ffffff" : "#111827";
+  return "hsl(var(--foreground))";
 });
 
 const updateChartColor = () => {
@@ -192,7 +192,7 @@ const updateChartColor = () => {
     markers: {
       size: 6,
       strokeWidth: 2,
-      strokeColors: store.darkMode ? "#e5e7eb" : "#374151",
+      strokeColors: "hsl(var(--border))",
       hover: {
         size: 7,
       },
@@ -305,7 +305,7 @@ const chartOptions = ref({
   markers: {
     size: 6,
     strokeWidth: 2,
-    strokeColors: store.darkMode ? "#e5e7eb" : "#374151",
+    strokeColors: "hsl(var(--border))",
     hover: {
       size: 7,
     },
@@ -324,15 +324,15 @@ const chartOptions = ref({
       :has-preseason-rankings="hasCompletePreseasonRankings"
       class="w-full mb-4 md:w-1/3 md:mr-4 md:mb-0"
     />
-    <Card
-      class="w-full p-4 md:p-6 min-w-80"
+    <SectionCard
+      class="w-full min-w-0"
       :class="{ 'md:w-2/3': store.currentTab === 'Power Rankings' }"
     >
       <div class="flex justify-between">
         <div>
-          <h1 class="pb-2 text-2xl font-semibold tracking-tight">
+          <h2 class="pb-2 heading-section">
             Power Rankings
-          </h1>
+          </h2>
         </div>
       </div>
       <apexchart
@@ -342,13 +342,13 @@ const chartOptions = ref({
         :options="chartOptions"
         :series="chartPowerRankings"
       ></apexchart>
-      <p class="mt-8 text-xs sm:-mb-4 footer-font text-muted-foreground">
+      <p class="mt-8 text-caption sm:-mb-4 footer-font">
         Ranking formula:
         <span class="italic"
           >((average weekly score * 6) + ((highest score + lowest score) * 2) +
           (win percentage * 400)) / 10</span
         >
       </p>
-    </Card>
+    </SectionCard>
   </div>
 </template>

@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import Card from "../ui/card/Card.vue";
+import SectionCard from "../layout/SectionCard.vue";
 const store = useStore();
 const tableOrder = ref("points");
 const props = defineProps<{
@@ -64,7 +64,7 @@ const listPadding = computed(() => {
 });
 </script>
 <template>
-  <Card>
+  <SectionCard class="p-0 sm:p-0">
     <TooltipProvider>
       <table class="w-full text-sm text-left rtl:text-right">
         <thead class="text-xs uppercase bg-muted/50">
@@ -223,5 +223,5 @@ const listPadding = computed(() => {
         </tbody>
       </table>
     </TooltipProvider>
-  </Card>
+  </SectionCard>
 </template>

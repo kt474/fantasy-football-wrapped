@@ -109,7 +109,7 @@ const listPadding = computed(() => {
         Ranking score
       </h5>
       <Select v-model="currentRatingIndex">
-        <SelectTrigger class="w-28">
+        <SelectTrigger class="w-full sm:w-28">
           <SelectValue placeholder="Select Week" />
         </SelectTrigger>
         <SelectContent>
