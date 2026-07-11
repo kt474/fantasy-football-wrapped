@@ -140,7 +140,7 @@ const goBack = () => {
     class="w-full px-4 py-5 sm:px-6"
     :class="{ 'min-h-screen': !store.currentLeagueId }"
   >
-    <section class="max-w-3xl">
+    <section class="max-w-2xl">
       <div class="mb-4">
         <h1 class="text-2xl font-semibold tracking-tight">
           {{

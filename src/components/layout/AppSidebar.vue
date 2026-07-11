@@ -116,12 +116,12 @@ const data = {
           icon: Move3D,
         },
         {
-          title: "Playoffs",
-          icon: Trophy,
-        },
-        {
           title: "Weekly Report",
           icon: NotebookPen,
+        },
+        {
+          title: "Playoffs",
+          icon: Trophy,
         },
         {
           title: "Start/Sit",

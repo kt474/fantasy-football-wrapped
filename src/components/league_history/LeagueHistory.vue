@@ -726,13 +726,13 @@ watch(
             <tr class="">
               <th
                 scope="col"
-                class="sticky left-0 z-20 bg-muted px-4 py-3 shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
+                class="px-4 py-3 sm:px-6"
               >
                 Team name
               </th>
               <th
                 scope="col"
-                class="px-2 py-0 sm:px-6"
+                class="px-2 py-3 sm:px-6"
                 :aria-sort="tableOrder === 'wins' ? 'descending' : 'none'"
               >
                 <Tooltip>
@@ -740,7 +740,7 @@ watch(
                     <button
                       type="button"
                       @click="tableOrder = 'wins'"
-                      class="flex min-h-11 w-24 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                      class="flex w-24 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Compiled Record
                       <div>
@@ -770,7 +770,7 @@ watch(
               </th>
               <th
                 scope="col"
-                class="px-2 py-0 sm:px-6"
+                class="px-2 py-3 sm:px-6"
                 :aria-sort="tableOrder === 'points' ? 'descending' : 'none'"
               >
                 <Tooltip>
@@ -778,7 +778,7 @@ watch(
                     <button
                       type="button"
                       @click="tableOrder = 'points'"
-                      class="flex min-h-11 w-28 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                      class="flex w-28 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Points per game
                       <div>
@@ -808,7 +808,7 @@ watch(
               </th>
               <th
                 scope="col"
-                class="px-2 py-0 sm:px-6"
+                class="px-2 py-3 sm:px-6"
                 :aria-sort="
                   tableOrder === 'expectedWins' ? 'descending' : 'none'
                 "
@@ -818,7 +818,7 @@ watch(
                     <button
                       type="button"
                       @click="tableOrder = 'expectedWins'"
-                      class="flex min-h-11 w-28 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                      class="flex w-28 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Wins above expected
                       <div>
@@ -849,7 +849,7 @@ watch(
               </th>
               <th
                 scope="col"
-                class="px-2 py-0 sm:px-6"
+                class="px-2 py-3 sm:px-6"
                 :aria-sort="
                   tableOrder === 'managerEfficiency' ? 'descending' : 'none'
                 "
@@ -859,7 +859,7 @@ watch(
                     <button
                       type="button"
                       @click="tableOrder = 'managerEfficiency'"
-                      class="flex min-h-11 w-28 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                      class="flex w-28 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Manager Efficiency
                       <div>
@@ -900,7 +900,7 @@ watch(
             <tr v-for="(user, index) in tableDataAllYears" class="border-b">
               <th
                 scope="row"
-                class="sticky left-0 z-10 whitespace-nowrap bg-card px-4 py-3 font-medium shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
+                class="whitespace-nowrap px-4 py-3 font-medium sm:px-6"
               >
                 <div class="flex items-center">
                   <img
@@ -1022,7 +1022,7 @@ watch(
                     <button
                       type="button"
                       :aria-label="`Open ${season} league`"
-                      class="flex min-h-11 items-center underline text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      class="flex underline text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       @click="addNewLeague(season)"
                     >
                       {{ season }}

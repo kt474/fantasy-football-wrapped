@@ -292,7 +292,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
             <tr>
               <th
                 scope="col"
-                class="sticky left-0 z-20 px-4 py-3 uppercase bg-muted/50 sm:px-6"
+                class="px-4 py-3 uppercase sm:px-6"
               >
                 Team Name
               </th>
@@ -337,7 +337,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
             >
               <th
                 scope="row"
-                class="sticky left-0 z-10 px-4 font-medium truncate max-w-40 whitespace-nowrap bg-card sm:px-6"
+                class="max-w-40 truncate whitespace-nowrap px-4 font-medium sm:px-6"
               >
                 <span class="truncate">{{ getMatrixDisplayName(row) }}</span>
               </th>

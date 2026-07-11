@@ -248,7 +248,6 @@ const getCheckoutButtonText = (plan: CheckoutPlan) => {
 };
 
 const guideToAuthentication = async (plan: CheckoutPlan) => {
-  showLogin.value = false;
   await nextTick();
   authenticationSection.value?.scrollIntoView({
     behavior: "smooth",

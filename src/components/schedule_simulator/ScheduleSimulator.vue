@@ -987,11 +987,10 @@ function runMonteCarloDistribution() {
     <Card class="w-full p-4 space-y-4 md:p-6">
       <div>
         <div>
-          <h2 class="heading-section">
-            Schedule Simulator
-          </h2>
+          <h2 class="heading-section">Schedule Simulator</h2>
           <p class="mt-4 text-supporting">
-            Test alternate matchups and see how the standings change.
+            Swap, shuffle, or randomize team schedules to see how each scenario
+            reshapes the standings.
           </p>
         </div>
       </div>
@@ -1320,9 +1319,7 @@ function runMonteCarloDistribution() {
     <Card class="w-full p-4 md:p-6">
       <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 class="heading-section">
-            Random Schedule Outcomes
-          </h2>
+          <h2 class="heading-section">Random Schedule Outcomes</h2>
           <p class="mt-2 text-supporting">
             Distribution of likely win totals from simulating 1000 randomized
             schedules.

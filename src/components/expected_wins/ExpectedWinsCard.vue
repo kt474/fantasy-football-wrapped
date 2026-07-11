@@ -84,13 +84,13 @@ const getTeamName = (tableDataItem: TableDataType) => {
           <tr>
             <th
               scope="col"
-              class="sticky left-0 z-20 bg-muted px-4 py-3 shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
+              class="px-4 py-3 sm:px-6"
             >
               Team Name
             </th>
             <th
               scope="col"
-              class="px-2 py-0"
+              class="px-2 py-0 sm:py-3"
               :aria-sort="
                 tableOrder === 'randomScheduleWins' ? 'descending' : 'none'
               "
@@ -131,7 +131,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
             </th>
             <th
               scope="col"
-              class="px-1 py-0"
+              class="px-1 py-0 sm:py-3"
               :aria-sort="
                 tableOrder === 'winsDifference' ? 'descending' : 'none'
               "
@@ -171,7 +171,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
             </th>
             <th
               scope="col"
-              class="px-2 py-0"
+              class="px-2 py-0 sm:py-3"
               :aria-sort="
                 tableOrder === 'probability' ? 'descending' : 'none'
               "
@@ -219,7 +219,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
             <th
               scope="row"
               :class="listPadding"
-              class="sticky left-0 z-10 max-w-36 truncate whitespace-nowrap bg-card px-4 font-medium shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:max-w-56 sm:px-6 sm:shadow-none"
+              class="max-w-36 truncate whitespace-nowrap px-4 font-medium sm:max-w-56 sm:px-6"
             >
               {{ getTeamName(item) }}
             </th>

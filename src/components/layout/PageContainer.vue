@@ -19,7 +19,7 @@ const widths = {
 
 <template>
   <div
-    :class="cn('mx-auto w-full px-4 py-5 pb-20 sm:px-6 sm:py-6 lg:px-8', widths[size], props.class)"
+    :class="cn('mx-auto w-11/12 px-4 py-5 pb-20 sm:ml-8 sm:px-0 sm:py-6', widths[size], props.class)"
   >
     <slot />
   </div>

@@ -340,13 +340,13 @@ const getTeamName = (tableDataItem: TableDataType) => {
               <tr>
                 <th
                   scope="col"
-                  class="px-4 py-3 sm:sticky sm:left-0 sm:z-20 sm:bg-muted sm:px-6 sm:shadow-[2px_0_0_0_hsl(var(--border))] xl:static xl:shadow-none"
+                  class="px-4 py-3 sm:px-6"
                 >
                   Team name
                 </th>
                 <th
                   scope="col"
-                  class="px-2 sm:px-6"
+                  class="px-2 py-0 sm:px-6 sm:py-3"
                   :aria-sort="tableOrder === 'wins' ? 'descending' : 'none'"
                 >
                   <Tooltip>
@@ -354,7 +354,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       <button
                         type="button"
                         @click="tableOrder = 'wins'"
-                        class="flex min-h-11 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                        class="flex min-h-11 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Record
                         <div>
@@ -384,7 +384,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 </th>
                 <th
                   scope="col"
-                  class="px-2 sm:px-6"
+                  class="px-2 py-0 sm:px-6 sm:py-3"
                   :aria-sort="tableOrder === 'points' ? 'descending' : 'none'"
                 >
                   <Tooltip>
@@ -392,7 +392,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       <button
                         type="button"
                         @click="tableOrder = 'points'"
-                        class="flex min-h-11 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                        class="flex min-h-11 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Points
                         <div>
@@ -422,7 +422,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 </th>
                 <th
                   scope="col"
-                  class="px-2 sm:px-6"
+                  class="px-2 py-0 sm:px-6 sm:py-3"
                   :aria-sort="
                     tableOrder === 'pointsAgainst' ? 'descending' : 'none'
                   "
@@ -462,7 +462,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 </th>
                 <th
                   scope="col"
-                  class="px-2 sm:px-6"
+                  class="px-2 py-0 sm:px-6 sm:py-3"
                   :aria-sort="
                     tableOrder === 'recordAgainstAll' ? 'descending' : 'none'
                   "
@@ -502,7 +502,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                 </th>
                 <th
                   scope="col"
-                  class="px-2 sm:px-6"
+                  class="px-2 py-0 sm:px-6 sm:py-3"
                   :aria-sort="
                     tableOrder === 'medianRecord' ? 'descending' : 'none'
                   "
@@ -552,7 +552,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
               >
                 <th
                   scope="row"
-                  class="px-4 py-3 font-medium sm:sticky sm:left-0 sm:z-10 sm:bg-card sm:px-6 sm:shadow-[2px_0_0_0_hsl(var(--border))] xl:static xl:shadow-none"
+                  class="px-4 py-3 font-medium sm:px-6"
                 >
                   <div class="flex items-center min-w-0">
                     <img

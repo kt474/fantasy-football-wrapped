@@ -6,7 +6,7 @@ const store = useStore();
 <template>
   <div
     role="status"
-    class="flex flex-wrap justify-center h-full mx-4 mt-4 mb-32"
+    class="container flex flex-wrap justify-center h-full px-4 mx-auto mt-4 mb-32"
   >
     <svg
       aria-hidden="true"

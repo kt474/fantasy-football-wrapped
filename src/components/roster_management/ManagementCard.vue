@@ -71,13 +71,13 @@ const listPadding = computed(() => {
           <tr>
             <th
               scope="col"
-              class="sticky left-0 z-20 bg-muted px-4 py-3 shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
+              class="px-4 py-3 sm:px-6"
             >
               Team Name
             </th>
             <th
               scope="col"
-              class="px-1 py-0"
+              class="px-1 py-0 sm:py-3"
               :aria-sort="tableOrder === 'points' ? 'descending' : 'none'"
             >
               <Tooltip>
@@ -85,7 +85,7 @@ const listPadding = computed(() => {
                   <button
                     type="button"
                     @click="tableOrder = 'points'"
-                    class="flex min-h-11 w-20 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                    class="flex items-center w-20 text-left uppercase min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                   >
                     Total Points
                     <div>
@@ -115,7 +115,7 @@ const listPadding = computed(() => {
             </th>
             <th
               scope="col"
-              class="px-1 py-0 max-w-24"
+              class="max-w-24 px-1 py-0 sm:py-3"
               :aria-sort="
                 tableOrder === 'potentialPoints' ? 'descending' : 'none'
               "
@@ -125,7 +125,7 @@ const listPadding = computed(() => {
                   <button
                     type="button"
                     @click="tableOrder = 'potentialPoints'"
-                    class="flex min-h-11 w-24 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                    class="flex items-center w-24 text-left uppercase min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                   >
                     Potential Points
                     <div>
@@ -155,7 +155,7 @@ const listPadding = computed(() => {
             </th>
             <th
               scope="col"
-              class="py-0 pl-2 pr-3 lg:pr-0"
+              class="py-0 pl-2 pr-3 sm:py-3 lg:pr-0"
               :aria-sort="tableOrder === 'efficiency' ? 'descending' : 'none'"
             >
               <Tooltip>
@@ -163,7 +163,7 @@ const listPadding = computed(() => {
                   <button
                     type="button"
                     @click="tableOrder = 'efficiency'"
-                    class="flex min-h-11 w-24 items-center uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                    class="flex items-center w-24 text-left uppercase min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                   >
                     Efficiency
                     <div>
@@ -198,7 +198,7 @@ const listPadding = computed(() => {
             <th
               scope="row"
               :class="listPadding"
-              class="sticky left-0 z-10 max-w-56 truncate whitespace-nowrap bg-card px-4 font-medium shadow-[2px_0_0_0_hsl(var(--border))] sm:static sm:px-6 sm:shadow-none"
+              class="max-w-56 truncate whitespace-nowrap px-4 font-medium sm:px-6"
             >
               {{
                 store.showUsernames

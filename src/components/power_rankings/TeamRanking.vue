@@ -154,8 +154,10 @@ watch(
   <Card class="w-full min-w-0 p-4 md:p-6">
     <Tabs v-if="!loading" default-value="score">
       <div class="flex justify-between">
-        <h1 class="pb-2 text-2xl font-semibold tracking-tight">Player Rankings</h1>
-        <div class="inline-flex max-h-12 p-1 rounded-lg">
+        <h1 class="pb-2 text-2xl font-semibold tracking-tight">
+          Player Rankings
+        </h1>
+        <div class="inline-flex p-1 rounded-lg max-h-12">
           <TabsList>
             <TabsTrigger value="roster"> By Roster </TabsTrigger>
             <TabsTrigger value="score"> Overall </TabsTrigger>
@@ -181,7 +183,7 @@ watch(
           </Tabs>
           <div
             v-for="(players, position) in data"
-            class="w-full mr-4 overflow-x-hidden md:mr-6"
+            class="w-full mr-2 overflow-x-hidden"
           >
             <Card
               v-if="position === tab"
@@ -236,7 +238,7 @@ watch(
                       </p>
                     </div>
                     <div
-                      class="hidden w-full px-3 py-1 m-1 rounded-lg sm:inline-block"
+                      class="hidden w-full px-3 py-1 m-1 rounded-lg bg-muted/50 sm:inline-block"
                     >
                       <p>Overall Rank:</p>
                       <p class="text-base font-semibold sm:text-lg">
