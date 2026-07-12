@@ -657,6 +657,12 @@ const exportPremiumFrontPage = computed(() =>
 
 const getReportImageFilename = () => `ffwrapped-week-${currentWeek.value}.png`;
 
+// html-to-image replaces remote images with this value when they cannot be
+// fetched (for example, an expired ESPN avatar). Its default is an empty src,
+// which causes the cloned image to fail loading and aborts the whole export.
+const transparentImagePlaceholder =
+  "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
 const downloadReportImageFile = (dataUrl: string) => {
   const link = document.createElement("a");
   link.href = dataUrl;
@@ -696,6 +702,10 @@ const shareOrDownloadReportImage = async () => {
     const exportHeight = shareCardRef.value.scrollHeight;
     const dataUrl = await toPng(shareCardRef.value, {
       cacheBust: true,
+      imagePlaceholder: transparentImagePlaceholder,
+      // The page has already loaded its fonts. Avoid reading cross-origin
+      // stylesheet rules, which browsers correctly block for Google Fonts.
+      skipFonts: true,
       pixelRatio: 2,
       backgroundColor: "#ffffff",
       width: exportWidth,
