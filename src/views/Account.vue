@@ -31,6 +31,11 @@ import { Check } from "lucide-vue-next";
 import Separator from "@/components/ui/separator/Separator.vue";
 import PageContainer from "@/components/layout/PageContainer.vue";
 import PageHeader from "@/components/layout/PageHeader.vue";
+import {
+  consumePendingCheckout,
+  savePendingCheckout,
+  type CheckoutPlan,
+} from "@/lib/pendingCheckout";
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
@@ -53,8 +58,6 @@ const notificationPreferencesSaving = ref(false);
 const weeklyReportEmailsEnabled = ref(false);
 const trackedAccountPaywallView = ref(false);
 const authenticationSection = ref<HTMLElement | null>(null);
-
-type CheckoutPlan = "monthly" | "season_pass";
 
 const upgradeIntent = computed(() => {
   const value = Array.isArray(route.query.intent)
@@ -489,33 +492,26 @@ const saveWeeklyReportEmailPreference = async (
   }
 };
 
-const startCheckout = async (plan: CheckoutPlan) => {
-  trackPremiumFunnelEvent("plan_selected", {
-    source: "account",
-    upgrade_source: upgradeSource.value,
-    feature: upgradeIntent.value,
-    authenticated: authStore.isAuthenticated,
-    ...getPlanAnalytics(plan),
-  });
+const beginAuthenticatedCheckout = async (
+  plan: CheckoutPlan,
+  resumedAfterAuth = false
+) => {
+  if (!authStore.isAuthenticated || checkoutLoadingPlan.value !== null) return;
 
-  if (!authStore.isAuthenticated) {
-    trackEvent("Checkout Failed", { plan, reason: "signed_out" });
-    trackPremiumFunnelEvent("checkout_blocked", {
+  trackEvent("Checkout Started", { plan, source: "account" });
+  if (resumedAfterAuth) {
+    trackPremiumFunnelEvent("checkout_resumed", {
       source: "account",
       upgrade_source: upgradeSource.value,
       feature: upgradeIntent.value,
-      reason: "signed_out",
       ...getPlanAnalytics(plan),
     });
-    await guideToAuthentication(plan);
-    return;
   }
-
-  trackEvent("Checkout Started", { plan, source: "account" });
   trackPremiumFunnelEvent("checkout_started", {
     source: "account",
     upgrade_source: upgradeSource.value,
     feature: upgradeIntent.value,
+    resumed_after_auth: resumedAfterAuth,
     ...getPlanAnalytics(plan),
   });
   checkoutLoadingPlan.value = plan;
@@ -559,6 +555,32 @@ const startCheckout = async (plan: CheckoutPlan) => {
     });
     toast.error(getErrorMessage(error, "Unable to start checkout"));
   }
+};
+
+const startCheckout = async (plan: CheckoutPlan) => {
+  trackPremiumFunnelEvent("plan_selected", {
+    source: "account",
+    upgrade_source: upgradeSource.value,
+    feature: upgradeIntent.value,
+    authenticated: authStore.isAuthenticated,
+    ...getPlanAnalytics(plan),
+  });
+
+  if (!authStore.isAuthenticated) {
+    savePendingCheckout(plan);
+    trackEvent("Checkout Failed", { plan, reason: "signed_out" });
+    trackPremiumFunnelEvent("checkout_blocked", {
+      source: "account",
+      upgrade_source: upgradeSource.value,
+      feature: upgradeIntent.value,
+      reason: "signed_out",
+      ...getPlanAnalytics(plan),
+    });
+    await guideToAuthentication(plan);
+    return;
+  }
+
+  await beginAuthenticatedCheckout(plan);
 };
 
 const openBillingPortal = async () => {
@@ -702,6 +724,24 @@ watch(
   () => authStore.weeklyReportEmailsEnabled,
   (enabled) => {
     weeklyReportEmailsEnabled.value = enabled;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => ({
+    initialized: authStore.initialized,
+    authenticated: authStore.isAuthenticated,
+    recovery: showPasswordRecoveryForm.value,
+  }),
+  async ({ initialized, authenticated, recovery }) => {
+    if (!initialized || !authenticated || recovery) return;
+    if (checkoutLoadingPlan.value !== null) return;
+
+    const pendingPlan = consumePendingCheckout();
+    if (!pendingPlan) return;
+
+    await beginAuthenticatedCheckout(pendingPlan, true);
   },
   { immediate: true }
 );

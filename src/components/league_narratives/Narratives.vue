@@ -135,10 +135,14 @@ const rebuildNarratives = async () => {
   }
 };
 
+const refreshNarratives = async () => {
+  await ensureHistoricalDraftData();
+  await rebuildNarratives();
+};
+
 const prepareManagerPayload = async () => {
   if (store.leagueInfo.length > 0) {
-    await ensureHistoricalDraftData();
-    await rebuildNarratives();
+    await refreshNarratives();
   }
 
   return managerPayload.value;
@@ -148,6 +152,11 @@ watch(
   [seasons, isLeagueHistoryReady],
   async ([, historyReady]) => {
     if (store.leagueInfo.length > 0 && !historyReady) {
+      return;
+    }
+
+    if (store.leagueInfo.length > 0) {
+      await refreshNarratives();
       return;
     }
 

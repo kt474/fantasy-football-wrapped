@@ -90,7 +90,7 @@ const template = await readFile(resolve("dist/index.html"), "utf8");
 
 for (const page of pages) {
   const canonical = `https://ffwrapped.com/${page.path}`;
-  const fallback = `<main><article><h1>${escapeHtml(page.heading)}</h1><p>${escapeHtml(page.introduction)}</p><h2>Explore your league</h2><ul>${page.sections.map((section) => `<li>${escapeHtml(section)}</li>`).join("")}</ul><p><a href="/">Analyze your fantasy football league</a></p></article></main>`;
+  const fallback = `<noscript><main><article><h1>${escapeHtml(page.heading)}</h1><p>${escapeHtml(page.introduction)}</p><h2>Explore your league</h2><ul>${page.sections.map((section) => `<li>${escapeHtml(section)}</li>`).join("")}</ul><p><a href="/">Analyze your fantasy football league</a></p></article></main></noscript>`;
   const html = template
     .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(page.title)}</title>`)
     .replace(

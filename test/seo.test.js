@@ -35,6 +35,7 @@ describe("SEO landing pages", () => {
     const prerender = read("scripts/prerender-seo.mjs");
 
     expect(packageJson.scripts.build).toContain("prerender-seo.mjs");
+    expect(prerender).toContain("<noscript><main>");
     expect(prerender).toContain('<div id="app">${fallback}</div>');
     expect(prerender).toContain('resolve("dist", page.path)');
   });
