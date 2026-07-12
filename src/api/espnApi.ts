@@ -39,7 +39,6 @@ export const saveEspnAuth = (
 export const removeSavedEspnAuth = (season: string, leagueId: string) => {
   const storageKey = getEspnAuthStorageKey(season, leagueId);
   localStorage.removeItem(storageKey);
-  sessionStorage.removeItem(storageKey);
 };
 
 export const getSavedEspnAuth = (
@@ -47,8 +46,7 @@ export const getSavedEspnAuth = (
   leagueId: string
 ): EspnAuth | undefined => {
   const storageKey = getEspnAuthStorageKey(season, leagueId);
-  const saved =
-    localStorage.getItem(storageKey) ?? sessionStorage.getItem(storageKey);
+  const saved = localStorage.getItem(storageKey);
   if (!saved) {
     return undefined;
   }
@@ -60,9 +58,6 @@ export const getSavedEspnAuth = (
     }
 
     const auth = { swid: parsed.swid, espnS2: parsed.espnS2 };
-    if (!localStorage.getItem(storageKey)) {
-      saveEspnAuth(season, leagueId, auth);
-    }
     return auth;
   } catch {
     return undefined;

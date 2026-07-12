@@ -208,22 +208,50 @@ const espnS2Model = computed({
                 <span class="font-medium text-foreground"> leagueId=</span>.
               </li>
               <li>
-                3. Open developer tools, then go to the
+                3. Open developer tools:
+                <ul class="mt-1 ml-5 list-disc space-y-1">
+                  <li>
+                    On Mac, press
+                    <span class="font-medium text-foreground">
+                      Command + Option + I</span
+                    >.
+                  </li>
+                  <li>
+                    On Windows or Linux, press
+                    <span class="font-medium text-foreground">
+                      Ctrl + Shift + I</span
+                    >.
+                  </li>
+                  <li>
+                    You can also right-click the ESPN page and choose
+                    <span class="font-medium text-foreground"> Inspect</span>.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                4. In developer tools, open the
                 <span class="font-medium text-foreground"> Application</span>
-                tab in Chrome or
+                tab in Chrome or Edge, or the
                 <span class="font-medium text-foreground"> Storage</span> tab in
-                Firefox/Safari.
+                Firefox or Safari. If you do not see the tab, check the
+                <span class="font-medium text-foreground"> »</span> overflow
+                menu.
               </li>
               <li>
-                4. Find
+                5. In the left sidebar, expand
                 <span class="font-medium text-foreground"> Cookies</span> for
-                <span class="font-medium text-foreground"> espn.com</span>.
+                and select
+                <span class="font-medium text-foreground">
+                  https://www.espn.com</span
+                >.
               </li>
               <li>
-                5. Copy the values for
+                6. Find the cookie rows named
                 <span class="font-medium text-foreground"> SWID</span> and
-                <span class="font-medium text-foreground"> espn_s2</span> into
-                the fields here.
+                <span class="font-medium text-foreground"> espn_s2</span>. Copy
+                each entry from the
+                <span class="font-medium text-foreground"> Value</span> column
+                and paste it into the matching field here.
               </li>
             </ol>
             <p class="text-xs text-muted-foreground">

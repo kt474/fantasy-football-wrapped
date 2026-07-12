@@ -43,15 +43,10 @@ const createStorageMock = () => {
 };
 
 describe("ESPN credential storage", () => {
-  test("removes saved credentials from local and session storage", () => {
+  test("removes saved credentials from local storage", () => {
     vi.stubGlobal("localStorage", createStorageMock());
-    vi.stubGlobal("sessionStorage", createStorageMock());
     const key = getEspnAuthStorageKey("2026", "12345");
     localStorage.setItem(
-      key,
-      JSON.stringify({ swid: "{abc}", espnS2: "secret" })
-    );
-    sessionStorage.setItem(
       key,
       JSON.stringify({ swid: "{abc}", espnS2: "secret" })
     );
@@ -59,7 +54,6 @@ describe("ESPN credential storage", () => {
     removeSavedEspnAuth("2026", "12345");
 
     expect(localStorage.getItem(key)).toBeNull();
-    expect(sessionStorage.getItem(key)).toBeNull();
   });
 });
 
