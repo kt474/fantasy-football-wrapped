@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ArrowLeft, CalendarDays, MoonStar, Sun } from "lucide-vue-next";
 import { getSharedReport, type SharedReportResponse } from "@/api/api";
@@ -53,6 +53,24 @@ const isReturningUser = () => {
   return Boolean(localStorage.getItem("leagueInfo"));
 };
 
+const canExploreSharedLeague = computed(
+  () =>
+    sharedReport.value?.platform === "sleeper" &&
+    Boolean(sharedReport.value.leagueId)
+);
+
+const exploreLeagueRoute = computed(() => {
+  if (!sharedReport.value?.leagueId) return { path: "/" };
+
+  const commonQuery = {
+    leagueId: sharedReport.value.leagueId,
+    source: "shared_report",
+    reportToken: String(route.params.token ?? ""),
+  };
+
+  return { path: "/", query: commonQuery };
+});
+
 const trackSharedReportCta = (cta: string) => {
   trackEvent("Shared Report CTA Clicked", {
     cta,
@@ -63,6 +81,11 @@ const trackSharedReportCta = (cta: string) => {
 const goToHome = (cta = "explore") => {
   trackSharedReportCta(cta);
   router.push("/");
+};
+
+const exploreLeague = () => {
+  trackSharedReportCta("explore_this_league");
+  router.push(exploreLeagueRoute.value);
 };
 
 const loadReport = async () => {
@@ -199,19 +222,43 @@ watch(() => route.params.token, loadReport);
         >
           <div>
             <h2 class="mt-2 text-2xl font-bold">
-              Want weekly reports for a different league?
+              {{
+                canExploreSharedLeague
+                  ? "See the full league story"
+                  : "Analyze your own league"
+              }}
             </h2>
             <p
               class="max-w-2xl mt-2 text-sm text-muted-foreground sm:text-base"
             >
-              Generate weekly reports, power rankings, playoff odds, and roster
-              insights for your own fantasy league. Join 13,000+ fantasy leagues
-              using ffwrapped.
+              <template v-if="!canExploreSharedLeague">
+                Get power rankings, playoff odds, roster insights, and weekly
+                reports for your fantasy league.
+              </template>
+              <template v-else>
+                Explore
+                <span class="font-semibold">{{ sharedReport.leagueName }}</span>
+                power rankings, playoff odds, roster insights, and more. Join
+                13,000+ fantasy leagues using ffwrapped.
+              </template>
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <Button @click="goToHome('analyze_league')">
-              Analyze Your League
+            <Button
+              v-if="canExploreSharedLeague"
+              @click="exploreLeague"
+            >
+              View League Analysis
+            </Button>
+            <Button
+              variant="outline"
+              @click="goToHome('analyze_another_league')"
+            >
+              {{
+                canExploreSharedLeague
+                  ? "Analyze Another League"
+                  : "Analyze Your League"
+              }}
             </Button>
           </div>
         </div>

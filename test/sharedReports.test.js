@@ -43,6 +43,8 @@ describe("shared report API", () => {
       .mockResolvedValue(mockResponse(201, responsePayload));
 
     const result = await sharePremiumReport({
+      leagueId: "123456789",
+      platform: "sleeper",
       leagueName: "Test League",
       season: "2026",
       week: 1,
@@ -54,10 +56,17 @@ describe("shared report API", () => {
       expect.stringContaining("/api/shareReport"),
       expect.objectContaining({ method: "POST" })
     );
+    const request = fetchSpy.mock.calls[0][1];
+    expect(JSON.parse(request.body)).toMatchObject({
+      leagueId: "123456789",
+      platform: "sleeper",
+    });
   });
 
   test("returns a public shared report", async () => {
     const responsePayload = {
+      leagueId: "123456789",
+      platform: "sleeper",
       leagueName: "Test League",
       season: "2026",
       week: 1,

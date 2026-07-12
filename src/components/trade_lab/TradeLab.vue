@@ -669,7 +669,7 @@ onBeforeUnmount(() => {
 <template>
   <Card class="w-full h-full p-4 mt-4 md:p-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
-      <h2 class="heading-section">Trade Lab (Beta)</h2>
+      <h2 class="heading-section">Trade Lab</h2>
       <Tabs v-model="activeMode">
         <TabsList>
           <TabsTrigger value="builder">Builder</TabsTrigger>

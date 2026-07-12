@@ -577,6 +577,8 @@ const shareReport = async () => {
     if (!sharedReportUrl.value) {
       const currentLeague = store.leagueInfo[store.currentLeagueIndex];
       const response = await sharePremiumReport({
+        leagueId: currentLeague.leagueId,
+        platform: currentLeague.platform === "espn" ? "espn" : "sleeper",
         leagueName: currentLeague.name,
         season: currentLeague.season,
         week: currentWeek.value,

@@ -18,6 +18,7 @@ import { useRoute, useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 import { getParsedStorageItem, isBoolean, isRecord } from "@/lib/storage";
 import { mapWithConcurrency } from "@/lib/async";
+import { trackEvent } from "@/lib/analytics";
 
 const Table = defineAsyncComponent(
   () => import("../components/standings/Table.vue")
@@ -136,6 +137,9 @@ onMounted(async () => {
       ? route.query.season[0]
       : route.query.season;
     const isEspnLeague = "espn" in route.query;
+    const routeSource = Array.isArray(route.query.source)
+      ? route.query.source[0]
+      : route.query.source;
     const routeLeagueKey =
       isEspnLeague && leagueId && season
         ? getLeagueKey({ platform: "espn", leagueId, season })
@@ -163,6 +167,10 @@ onMounted(async () => {
           store.updateCurrentLeagueId(getLeagueKey(league));
           store.currentTab = "Standings";
           localStorage.setItem("currentTab", "Standings");
+          trackEvent("League Added", {
+            platform: "espn",
+            source: routeSource || "shared_link",
+          });
         } catch (error) {
           toast.error(getEspnErrorMessage(error));
         }
@@ -186,6 +194,10 @@ onMounted(async () => {
         );
         store.currentTab = "Standings";
         localStorage.setItem("currentTab", "Standings");
+        trackEvent("League Added", {
+          platform: "sleeper",
+          source: routeSource || "shared_link",
+        });
         store.updateLoadingLeague("");
       } else {
         toast.error("Invalid League ID");

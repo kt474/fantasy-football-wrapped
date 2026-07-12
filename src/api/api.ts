@@ -120,6 +120,8 @@ export interface ManagerComparisonResponse {
 }
 
 export type SharedReportResponse = {
+  leagueId?: string | null;
+  platform?: "sleeper" | "espn" | null;
   leagueName: string;
   season: string;
   week: number;
@@ -128,6 +130,8 @@ export type SharedReportResponse = {
 };
 
 export type ShareReportPayload = {
+  leagueId: string;
+  platform: "sleeper" | "espn";
   leagueName: string;
   season: string;
   week: number;
