@@ -21,6 +21,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Field,
   FieldDescription,
   FieldGroup,
@@ -1114,111 +1120,185 @@ watch(
         </CardContent>
       </Card>
     </div>
-    <Card
+    <div
       v-if="
         !subscriptionStore.isPremium &&
         !subscriptionStore.loading &&
         !showPasswordRecoveryForm
       "
-      class="max-w-xl mt-4"
+      class="grid max-w-xl gap-4 mt-4"
     >
-      <CardHeader>
-        <CardTitle>Unlock Premium</CardTitle>
-        <CardDescription>
-          {{ premiumDescription }}
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="text-sm">
-        <div class="p-4 mb-5 border rounded-xl">
-          <p class="mb-3 text-sm font-semibold">Every paid plan includes:</p>
-          <div>
-            <div class="flex align-middle">
-              <Check class="w-5 h-5 mr-2 shrink-0" />
-              <p class="text-muted-foreground max-w-96">
-                Smarter, shareable, newsletter style weekly recaps with
-                customizable commentary tones and more league context
-              </p>
-            </div>
-            <div class="flex mt-3 align-middle">
-              <Check class="w-5 h-5 mr-2 shrink-0" />
-              <p class="text-muted-foreground max-w-96">
-                Custom manager profiles highlighting tendencies and league
-                identity
-              </p>
-            </div>
-            <div class="flex mt-3 align-middle">
-              <Check class="w-5 h-5 mr-2 shrink-0" />
-              <p class="text-muted-foreground max-w-96">
-                Rivalry reports that turn manager comparisons into personalized
-                league stories
-              </p>
-            </div>
-            <div class="flex mt-3 align-middle">
-              <Check class="w-5 h-5 mr-2 shrink-0" />
-              <p class="text-muted-foreground max-w-96">
-                Access to all premium features across every league you manage,
-                including all future premium features
-              </p>
+      <Card class="min-w-0">
+        <CardHeader>
+          <CardTitle>Unlock Premium</CardTitle>
+          <CardDescription>
+            {{ premiumDescription }}
+          </CardDescription>
+        </CardHeader>
+        <CardContent class="text-sm">
+          <div class="p-4 mb-5 border rounded-xl">
+            <p class="mb-3 text-sm font-semibold">Every paid plan includes:</p>
+            <div>
+              <div class="flex align-middle">
+                <Check class="w-5 h-5 mr-2 shrink-0" />
+                <p class="text-muted-foreground max-w-96">
+                  Smarter, shareable, newsletter style weekly recaps with
+                  customizable commentary tones and more league context
+                </p>
+              </div>
+              <div class="flex mt-3 align-middle">
+                <Check class="w-5 h-5 mr-2 shrink-0" />
+                <p class="text-muted-foreground max-w-96">
+                  Custom manager profiles highlighting tendencies and league
+                  identity
+                </p>
+              </div>
+              <div class="flex mt-3 align-middle">
+                <Check class="w-5 h-5 mr-2 shrink-0" />
+                <p class="text-muted-foreground max-w-96">
+                  Rivalry reports that turn manager comparisons into
+                  personalized league stories
+                </p>
+              </div>
+              <div class="flex mt-3 align-middle">
+                <Check class="w-5 h-5 mr-2 shrink-0" />
+                <p class="text-muted-foreground max-w-96">
+                  Access to all premium features across every league you manage,
+                  including all future premium features
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flex flex-col gap-4 sm:flex-row">
-          <div
-            class="relative flex flex-col flex-1 p-5 border pt-7 rounded-xl bg-muted/40"
-          >
-            <Badge
-              class="absolute top-0 px-2 -translate-x-1/2 -translate-y-1/2 left-1/2 hover:bg-primary"
+          <div class="flex flex-col gap-4 sm:flex-row">
+            <div
+              class="relative flex flex-col flex-1 p-5 border pt-7 rounded-xl bg-muted/40"
             >
-              Best value
-            </Badge>
-            <p
-              class="-mt-2 text-sm font-semibold uppercase text-muted-foreground"
-            >
-              Season Pass
-            </p>
-            <p class="mt-2 text-5xl font-medium">
-              $18
-              <span class="-ml-1 text-base font-normal text-muted-foreground">
-                /season
-              </span>
-            </p>
-            <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
-              One payment for Premium access through Feb 15, 2027. Does not
-              renew.
-            </p>
+              <Badge
+                class="absolute top-0 px-2 -translate-x-1/2 -translate-y-1/2 left-1/2 hover:bg-primary"
+              >
+                Best value
+              </Badge>
+              <p
+                class="-mt-2 text-sm font-semibold uppercase text-muted-foreground"
+              >
+                Season Pass
+              </p>
+              <p class="mt-2 text-5xl font-medium">
+                $18
+                <span class="-ml-1 text-base font-normal text-muted-foreground">
+                  /season
+                </span>
+              </p>
+              <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
+                One payment for Premium access through Feb 15, 2027. Does not
+                renew.
+              </p>
 
-            <Button
-              class="w-full mt-auto"
-              :disabled="checkoutLoadingPlan !== null"
-              @click="startCheckout('season_pass')"
-            >
-              {{ getCheckoutButtonText("season_pass") }}
-            </Button>
+              <Button
+                class="w-full mt-auto"
+                :disabled="checkoutLoadingPlan !== null"
+                @click="startCheckout('season_pass')"
+              >
+                {{ getCheckoutButtonText("season_pass") }}
+              </Button>
+            </div>
+            <div class="flex flex-col flex-1 p-5 border rounded-xl">
+              <p class="text-sm font-semibold uppercase text-muted-foreground">
+                Monthly
+              </p>
+              <p class="mt-2 text-5xl font-medium">
+                $6
+                <span class="-ml-1 text-base font-normal text-muted-foreground">
+                  /month
+                </span>
+              </p>
+              <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
+                Same Premium access with monthly flexibility. Cancel anytime.
+              </p>
+              <Button
+                class="w-full mt-auto"
+                :disabled="checkoutLoadingPlan !== null"
+                variant="outline"
+                @click="startCheckout('monthly')"
+              >
+                {{ getCheckoutButtonText("monthly") }}
+              </Button>
+            </div>
           </div>
-          <div class="flex flex-col flex-1 p-5 border rounded-xl">
-            <p class="text-sm font-semibold uppercase text-muted-foreground">
-              Monthly
-            </p>
-            <p class="mt-2 text-5xl font-medium">
-              $6
-              <span class="-ml-1 text-base font-normal text-muted-foreground">
-                /month
-              </span>
-            </p>
-            <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
-              Same Premium access with monthly flexibility. Cancel anytime.
-            </p>
-            <Button
-              class="w-full mt-auto"
-              :disabled="checkoutLoadingPlan !== null"
-              variant="outline"
-              @click="startCheckout('monthly')"
+        </CardContent>
+      </Card>
+
+      <Card class="min-w-0">
+        <CardHeader class="pb-2">
+          <CardTitle>Frequently Asked Questions</CardTitle>
+          <CardDescription>
+            Everything you need to know about features, pricing, and league
+            access.
+          </CardDescription>
+        </CardHeader>
+        <CardContent class="text-sm">
+          <section>
+            <Accordion
+              type="single"
+              collapsible
+              default-value="leagues"
+              class="mt-2"
             >
-              {{ getCheckoutButtonText("monthly") }}
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+              <AccordionItem value="leagues">
+                <AccordionTrigger class="text-left">
+                  Does one pass cover all of my leagues?
+                </AccordionTrigger>
+                <AccordionContent class="leading-6 text-muted-foreground">
+                  Yes. Your plan follows your account, so one purchase unlocks
+                  Premium across every league you manage. Adding another league
+                  never adds another charge.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="pricing">
+                <AccordionTrigger class="text-left">
+                  Why is the Season Pass only $18?
+                </AccordionTrigger>
+                <AccordionContent class="leading-6 text-muted-foreground">
+                  I’ve been building ffwrapped on my own for nearly three years
+                  with the simple goal of making fantasy football more fun and
+                  engaging for everyone. Because it’s a solo operation with low
+                  overhead, I can offer Premium for $18 across every league you
+                  manage. I want Premium to help me keep improving ffwrapped
+                  while remaining accessible to the community it was built for.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="complete-plan">
+                <AccordionTrigger class="text-left">
+                  Is the Season Pass different from the monthly plan?
+                </AccordionTrigger>
+                <AccordionContent class="leading-6 text-muted-foreground">
+                  Both plans include the same Premium features across every
+                  league you manage. The only difference is billing. The Season
+                  Pass is a one-time payment for access through February 15,
+                  2027, while the monthly plan renews each month until canceled.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="renewal" class="border-b-0">
+                <AccordionTrigger class="text-left">
+                  Do my league mates need Premium to view shared reports?
+                </AccordionTrigger>
+                <AccordionContent class="leading-6 text-muted-foreground">
+                  No. You can share a Premium report with the entire league, and
+                  they can open it without purchasing their own plan. View a
+                  full sample report
+                  <a
+                    href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-medium text-primary hover:underline"
+                    >here</a
+                  >.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </section>
+        </CardContent>
+      </Card>
+    </div>
   </PageContainer>
 </template>
