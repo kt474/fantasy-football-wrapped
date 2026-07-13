@@ -1258,11 +1258,14 @@ watch(
                     /season
                   </span>
                 </p>
-                <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
+                <p class="mt-3 mb-4 min-h-[2.5rem] text-muted-foreground">
                   One payment for Premium access through Feb 15, 2027. Does not
                   renew.
                 </p>
-
+                <!-- TODO remove this after week 1 -->
+                <p class="mb-3 text-xs text-muted-foreground">
+                  Get the most from your Season Pass by joining before Week 1.
+                </p>
                 <Button
                   class="w-full mt-auto"
                   :disabled="checkoutLoadingPlan !== null"
