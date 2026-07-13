@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { getLeagueKey } from "@/store/store";
@@ -38,6 +38,7 @@ import Separator from "@/components/ui/separator/Separator.vue";
 import PageContainer from "@/components/layout/PageContainer.vue";
 import PageHeader from "@/components/layout/PageHeader.vue";
 import {
+  clearPendingCheckout,
   consumePendingCheckout,
   savePendingCheckout,
   type CheckoutPlan,
@@ -64,6 +65,29 @@ const notificationPreferencesSaving = ref(false);
 const weeklyReportEmailsEnabled = ref(false);
 const trackedAccountPaywallView = ref(false);
 const authenticationSection = ref<HTMLElement | null>(null);
+const selectedCheckoutPlan = ref<CheckoutPlan | null>(null);
+
+onBeforeRouteLeave(() => {
+  clearPendingCheckout();
+});
+
+const isUpgradeFlow = computed(() => {
+  const intent = Array.isArray(route.query.intent)
+    ? route.query.intent[0]
+    : route.query.intent;
+  return (
+    intent === "premium_report" ||
+    intent === "manager_profiles" ||
+    intent === "rivalry_report"
+  );
+});
+
+const shouldShowAuthentication = computed(
+  () =>
+    !isUpgradeFlow.value ||
+    selectedCheckoutPlan.value !== null ||
+    showSignUpOtpForm.value
+);
 
 const upgradeIntent = computed(() => {
   const value = Array.isArray(route.query.intent)
@@ -573,6 +597,7 @@ const startCheckout = async (plan: CheckoutPlan) => {
   });
 
   if (!authStore.isAuthenticated) {
+    selectedCheckoutPlan.value = plan;
     savePendingCheckout(plan);
     trackEvent("Checkout Failed", { plan, reason: "signed_out" });
     trackPremiumFunnelEvent("checkout_blocked", {
@@ -771,140 +796,228 @@ watch(
 <template>
   <PageContainer>
     <PageHeader title="Account" class="mb-4" />
-    <div v-if="showPasswordRecoveryForm">
-      <Card class="max-w-sm">
-        <CardHeader>
-          <CardTitle>Reset your password</CardTitle>
-          <CardDescription>
-            Set a new password for your account.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FieldGroup>
-            <Field>
-              <FieldLabel for="new-password"> New password </FieldLabel>
-              <Input
-                v-model="recoveryPassword"
-                type="password"
-                placeholder="New password"
-                autocomplete="new-password"
-              />
-            </Field>
-            <Field>
-              <FieldLabel for="confirm-password"> Confirm password </FieldLabel>
-              <Input
-                v-model="recoveryPasswordConfirm"
-                type="password"
-                placeholder="Confirm password"
-                autocomplete="new-password"
-              />
-            </Field>
-            <Field>
-              <Button @click="resetPassword"> Update Password </Button>
-            </Field>
-          </FieldGroup>
-        </CardContent>
-      </Card>
-    </div>
-    <div
-      v-else-if="!authStore.isAuthenticated"
-      ref="authenticationSection"
-      tabindex="-1"
-      class="scroll-mt-4"
-    >
-      <Card v-if="showSignUpOtpForm" class="max-w-sm">
-        <CardHeader>
-          <CardTitle>Verify your email</CardTitle>
-          <CardDescription>
-            Enter the code sent to {{ pendingSignUpEmail }}.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FieldGroup>
-            <Field>
-              <FieldLabel for="verification-code">
-                Verification code
-              </FieldLabel>
-              <Input
-                v-model="signUpOtpCode"
-                type="text"
-                placeholder="123456"
-                autocomplete="one-time-code"
-              />
-            </Field>
-            <Field>
-              <Button :disabled="authStore.loading" @click="verifySignUpOtp">
-                Verify code
-              </Button>
-              <Button
-                variant="outline"
-                :disabled="authStore.loading"
-                @click="resendSignUpOtp"
-              >
-                Resend code
-              </Button>
-            </Field>
-            <FieldDescription class="text-center">
-              Wrong email?
-              <button
-                type="button"
-                class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                @click="resetSignUpOtpForm"
-              >
-                Use a different email
-              </button>
-            </FieldDescription>
-          </FieldGroup>
-        </CardContent>
-      </Card>
-      <Card v-else-if="showLogin" class="max-w-sm">
-        <CardHeader>
-          <CardTitle>Create an account</CardTitle>
-          <CardDescription>
-            Enter your email below to create your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FieldGroup>
-            <Field>
-              <FieldLabel for="email"> Email </FieldLabel>
-              <Input
-                v-model="signUpEmail"
-                type="email"
-                placeholder="Email"
-                autocomplete="email"
-              />
-            </Field>
-            <Field>
-              <FieldLabel for="password"> Password </FieldLabel>
-              <Input
-                v-model="signUpPassword"
-                type="password"
-                placeholder="Password"
-                autocomplete="new-password"
-              />
-            </Field>
-            <div class="flex items-start w-full gap-3">
-              <Checkbox
-                id="weekly-report-email-signup"
-                :model-value="signUpWeeklyReportEmailsEnabled"
-                class="flex-none w-4 h-4"
-                @update:model-value="
-                  signUpWeeklyReportEmailsEnabled = $event === true
-                "
-              />
-              <div class="min-w-0">
-                <label
-                  for="weekly-report-email-signup"
-                  class="block text-sm font-medium"
-                >
-                  Email me weekly report reminders
-                </label>
-              </div>
-            </div>
+    <div class="flex flex-col">
+      <div v-if="showPasswordRecoveryForm">
+        <Card class="max-w-sm">
+          <CardHeader>
+            <CardTitle>Reset your password</CardTitle>
+            <CardDescription>
+              Set a new password for your account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <FieldGroup>
               <Field>
-                <Button @click="signUp"> Create Account </Button>
+                <FieldLabel for="new-password"> New password </FieldLabel>
+                <Input
+                  v-model="recoveryPassword"
+                  type="password"
+                  placeholder="New password"
+                  autocomplete="new-password"
+                />
+              </Field>
+              <Field>
+                <FieldLabel for="confirm-password">
+                  Confirm password
+                </FieldLabel>
+                <Input
+                  v-model="recoveryPasswordConfirm"
+                  type="password"
+                  placeholder="Confirm password"
+                  autocomplete="new-password"
+                />
+              </Field>
+              <Field>
+                <Button @click="resetPassword"> Update Password </Button>
+              </Field>
+            </FieldGroup>
+          </CardContent>
+        </Card>
+      </div>
+      <div
+        v-else-if="!authStore.isAuthenticated && shouldShowAuthentication"
+        ref="authenticationSection"
+        tabindex="-1"
+        class="order-1 scroll-mt-4"
+      >
+        <Card v-if="showSignUpOtpForm" class="max-w-sm">
+          <CardHeader>
+            <CardTitle>Verify your email</CardTitle>
+            <CardDescription>
+              Enter the code sent to {{ pendingSignUpEmail }}.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup>
+              <Field>
+                <FieldLabel for="verification-code">
+                  Verification code
+                </FieldLabel>
+                <Input
+                  v-model="signUpOtpCode"
+                  type="text"
+                  placeholder="123456"
+                  autocomplete="one-time-code"
+                />
+              </Field>
+              <Field>
+                <Button :disabled="authStore.loading" @click="verifySignUpOtp">
+                  Verify code
+                </Button>
+                <Button
+                  variant="outline"
+                  :disabled="authStore.loading"
+                  @click="resendSignUpOtp"
+                >
+                  Resend code
+                </Button>
+              </Field>
+              <FieldDescription class="text-center">
+                Wrong email?
+                <button
+                  type="button"
+                  class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  @click="resetSignUpOtpForm"
+                >
+                  Use a different email
+                </button>
+              </FieldDescription>
+            </FieldGroup>
+          </CardContent>
+        </Card>
+        <Card v-else-if="showLogin" class="max-w-sm">
+          <CardHeader>
+            <CardTitle> Create an account </CardTitle>
+            <CardDescription>
+              Enter your email below to create your account
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup>
+              <Field>
+                <FieldLabel for="email"> Email </FieldLabel>
+                <Input
+                  v-model="signUpEmail"
+                  type="email"
+                  placeholder="Email"
+                  autocomplete="email"
+                />
+              </Field>
+              <Field>
+                <FieldLabel for="password"> Password </FieldLabel>
+                <Input
+                  v-model="signUpPassword"
+                  type="password"
+                  placeholder="Password"
+                  autocomplete="new-password"
+                />
+              </Field>
+              <div class="flex items-start w-full gap-3">
+                <Checkbox
+                  id="weekly-report-email-signup"
+                  :model-value="signUpWeeklyReportEmailsEnabled"
+                  class="flex-none w-4 h-4"
+                  @update:model-value="
+                    signUpWeeklyReportEmailsEnabled = $event === true
+                  "
+                />
+                <div class="min-w-0">
+                  <label
+                    for="weekly-report-email-signup"
+                    class="block text-sm font-medium"
+                  >
+                    Email me weekly report reminders
+                  </label>
+                </div>
+              </div>
+              <FieldGroup>
+                <Field>
+                  <Button @click="signUp"> Create Account </Button>
+                  <FieldSeparator class="my-2">Or continue with</FieldSeparator>
+                  <Button
+                    variant="outline"
+                    :disabled="authStore.loading"
+                    @click="signInWithGoogle"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335"
+                      />
+                      <path d="M1 1h22v22H1z" fill="none" />
+                    </svg>
+                    Google
+                  </Button>
+                  <FieldDescription class="px-6 text-center">
+                    Already have an account?
+                    <button
+                      type="button"
+                      class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      @click="showLogin = !showLogin"
+                    >
+                      Sign in
+                    </button>
+                  </FieldDescription>
+                </Field>
+              </FieldGroup>
+            </FieldGroup>
+          </CardContent>
+        </Card>
+        <Card v-else class="max-w-sm">
+          <CardHeader>
+            <CardTitle>Login to your account</CardTitle>
+            <CardDescription>
+              Enter your email below to login to your account
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup>
+              <Field>
+                <FieldLabel for="email"> Email </FieldLabel>
+                <Input
+                  v-model="signInEmail"
+                  type="email"
+                  placeholder="Email"
+                  autocomplete="email"
+                />
+              </Field>
+              <Field>
+                <div class="flex items-center">
+                  <FieldLabel for="password"> Password </FieldLabel>
+                  <button
+                    type="button"
+                    class="inline-block ml-auto text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    @click="sendPasswordResetEmail"
+                  >
+                    Forgot your password?
+                  </button>
+                </div>
+                <Input
+                  v-model="signInPassword"
+                  type="password"
+                  placeholder="Password"
+                  autocomplete="current-password"
+                />
+              </Field>
+              <Field>
+                <Button @click="signIn"> Login </Button>
                 <FieldSeparator class="my-2">Or continue with</FieldSeparator>
                 <Button
                   variant="outline"
@@ -937,368 +1050,317 @@ watch(
                   </svg>
                   Google
                 </Button>
-                <FieldDescription class="px-6 text-center">
-                  Already have an account?
+                <FieldDescription class="text-center">
+                  Don't have an account?
                   <button
                     type="button"
                     class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     @click="showLogin = !showLogin"
                   >
-                    Sign in
+                    Sign up
                   </button>
                 </FieldDescription>
               </Field>
             </FieldGroup>
-          </FieldGroup>
-        </CardContent>
-      </Card>
-      <Card v-else class="max-w-sm">
-        <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FieldGroup>
-            <Field>
-              <FieldLabel for="email"> Email </FieldLabel>
-              <Input
-                v-model="signInEmail"
-                type="email"
-                placeholder="Email"
-                autocomplete="email"
-              />
-            </Field>
-            <Field>
-              <div class="flex items-center">
-                <FieldLabel for="password"> Password </FieldLabel>
-                <button
-                  type="button"
-                  class="inline-block ml-auto text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  @click="sendPasswordResetEmail"
-                >
-                  Forgot your password?
-                </button>
-              </div>
-              <Input
-                v-model="signInPassword"
-                type="password"
-                placeholder="Password"
-                autocomplete="current-password"
-              />
-            </Field>
-            <Field>
-              <Button @click="signIn"> Login </Button>
-              <FieldSeparator class="my-2">Or continue with</FieldSeparator>
-              <Button
-                variant="outline"
-                :disabled="authStore.loading"
-                @click="signInWithGoogle"
+          </CardContent>
+        </Card>
+      </div>
+      <div
+        v-else-if="authStore.isAuthenticated"
+        :class="[
+          isUpgradeFlow ? 'order-2 mt-4' : 'order-1',
+          accountSummaryContainerClass,
+        ]"
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Summary</CardTitle>
+            <CardDescription> Your profile and plan details </CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex flex-wrap items-start gap-4">
+              <div
+                class="flex items-center justify-center w-12 h-12 mt-1 text-sm font-semibold rounded-full bg-accent"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  width="24"
-                >
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
-                  <path d="M1 1h22v22H1z" fill="none" />
-                </svg>
-                Google
-              </Button>
-              <FieldDescription class="text-center">
-                Don't have an account?
-                <button
-                  type="button"
-                  class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  @click="showLogin = !showLogin"
-                >
-                  Sign up
-                </button>
-              </FieldDescription>
-            </Field>
-          </FieldGroup>
-        </CardContent>
-      </Card>
-    </div>
-    <div v-else :class="accountSummaryContainerClass">
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Summary</CardTitle>
-          <CardDescription> Your profile and plan details </CardDescription>
-        </CardHeader>
-        <CardContent class="space-y-4">
-          <div class="flex flex-wrap items-start gap-4">
-            <div
-              class="flex items-center justify-center w-12 h-12 mt-1 text-sm font-semibold rounded-full bg-accent"
+                {{ accountInitial }}
+              </div>
+              <div class="flex-1 min-w-[12rem] mt-1.5">
+                <p class="font-medium break-all">{{ authStore.user?.email }}</p>
+                <p class="text-xs text-muted-foreground">
+                  Member since {{ memberSinceLabel }}
+                </p>
+              </div>
+              <span
+                class="inline-flex items-center px-3 py-1 text-xs font-medium border rounded-full"
+                :class="subscriptionStatusBadgeClass"
+              >
+                {{ subscriptionStatusLabel }}
+              </span>
+            </div>
+            <p
+              v-if="subscriptionTimelineNote"
+              class="text-sm text-muted-foreground"
             >
-              {{ accountInitial }}
+              {{ subscriptionTimelineNote }}
+            </p>
+            <Separator />
+            <div class="space-y-3">
+              <div>
+                <p class="text-sm font-medium">Email notifications</p>
+              </div>
+              <div class="flex items-start w-full gap-3">
+                <Checkbox
+                  id="weekly-report-email-setting"
+                  :model-value="weeklyReportEmailsEnabled"
+                  :disabled="
+                    notificationPreferencesLoading ||
+                    notificationPreferencesSaving
+                  "
+                  class="flex-none w-4 h-4 mt-0.5"
+                  @update:model-value="saveWeeklyReportEmailPreference"
+                />
+                <div class="min-w-0">
+                  <label
+                    for="weekly-report-email-setting"
+                    class="block text-sm cursor-pointer"
+                  >
+                    Weekly report emails
+                  </label>
+                </div>
+              </div>
             </div>
-            <div class="flex-1 min-w-[12rem] mt-1.5">
-              <p class="font-medium break-all">{{ authStore.user?.email }}</p>
-              <p class="text-xs text-muted-foreground">
-                Member since {{ memberSinceLabel }}
-              </p>
-            </div>
-            <span
-              class="inline-flex items-center px-3 py-1 text-xs font-medium border rounded-full"
-              :class="subscriptionStatusBadgeClass"
-            >
-              {{ subscriptionStatusLabel }}
-            </span>
-          </div>
-          <p
-            v-if="subscriptionTimelineNote"
-            class="text-sm text-muted-foreground"
-          >
-            {{ subscriptionTimelineNote }}
-          </p>
-          <Separator />
-          <div class="space-y-3">
-            <div>
-              <p class="text-sm font-medium">Email notifications</p>
-            </div>
-            <div class="flex items-start w-full gap-3">
-              <Checkbox
-                id="weekly-report-email-setting"
-                :model-value="weeklyReportEmailsEnabled"
+
+            <div class="flex flex-wrap gap-2 pt-1">
+              <Button
+                v-if="subscriptionStore.canManageSubscription"
+                @click="openBillingPortal"
                 :disabled="
-                  notificationPreferencesLoading ||
-                  notificationPreferencesSaving
+                  authStore.loading ||
+                  portalLoading ||
+                  subscriptionStore.loading
                 "
-                class="flex-none w-4 h-4 mt-0.5"
-                @update:model-value="saveWeeklyReportEmailPreference"
-              />
-              <div class="min-w-0">
-                <label
-                  for="weekly-report-email-setting"
-                  class="block text-sm cursor-pointer"
-                >
-                  Weekly report emails
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-2 pt-1">
-            <Button
-              v-if="subscriptionStore.canManageSubscription"
-              @click="openBillingPortal"
-              :disabled="
-                authStore.loading || portalLoading || subscriptionStore.loading
-              "
-              class="min-w-[9.5rem] justify-center"
-              size="sm"
-            >
-              {{ portalLoading ? "Opening..." : "Manage subscription" }}
-            </Button>
-            <Button
-              :disabled="authStore.loading"
-              variant="outline"
-              size="sm"
-              @click="signOut"
-            >
-              Sign out
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-    <div
-      v-if="
-        !subscriptionStore.isPremium &&
-        !subscriptionStore.loading &&
-        !showPasswordRecoveryForm
-      "
-      class="grid max-w-xl gap-4 mt-4"
-    >
-      <Card class="min-w-0">
-        <CardHeader>
-          <CardTitle>Unlock Premium</CardTitle>
-          <CardDescription>
-            {{ premiumDescription }}
-          </CardDescription>
-        </CardHeader>
-        <CardContent class="text-sm">
-          <div class="p-4 mb-5 border rounded-xl">
-            <p class="mb-3 text-sm font-semibold">Every paid plan includes:</p>
-            <div>
-              <div class="flex align-middle">
-                <Check class="w-5 h-5 mr-2 shrink-0" />
-                <p class="text-muted-foreground max-w-96">
-                  Smarter, shareable, newsletter style weekly recaps with
-                  customizable commentary tones and more league context
-                </p>
-              </div>
-              <div class="flex mt-3 align-middle">
-                <Check class="w-5 h-5 mr-2 shrink-0" />
-                <p class="text-muted-foreground max-w-96">
-                  Custom manager profiles highlighting tendencies and league
-                  identity
-                </p>
-              </div>
-              <div class="flex mt-3 align-middle">
-                <Check class="w-5 h-5 mr-2 shrink-0" />
-                <p class="text-muted-foreground max-w-96">
-                  Rivalry reports that turn manager comparisons into
-                  personalized league stories
-                </p>
-              </div>
-              <div class="flex mt-3 align-middle">
-                <Check class="w-5 h-5 mr-2 shrink-0" />
-                <p class="text-muted-foreground max-w-96">
-                  Access to all premium features across every league you manage,
-                  including all future premium features
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="flex flex-col gap-4 sm:flex-row">
-            <div
-              class="relative flex flex-col flex-1 p-5 border pt-7 rounded-xl bg-muted/40"
-            >
-              <Badge
-                class="absolute top-0 px-2 -translate-x-1/2 -translate-y-1/2 left-1/2 hover:bg-primary"
+                class="min-w-[9.5rem] justify-center"
+                size="sm"
               >
-                Best value
-              </Badge>
-              <p
-                class="-mt-2 text-sm font-semibold uppercase text-muted-foreground"
-              >
-                Season Pass
-              </p>
-              <p class="mt-2 text-5xl font-medium">
-                $18
-                <span class="-ml-1 text-base font-normal text-muted-foreground">
-                  /season
-                </span>
-              </p>
-              <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
-                One payment for Premium access through Feb 15, 2027. Does not
-                renew.
-              </p>
-
-              <Button
-                class="w-full mt-auto"
-                :disabled="checkoutLoadingPlan !== null"
-                @click="startCheckout('season_pass')"
-              >
-                {{ getCheckoutButtonText("season_pass") }}
+                {{ portalLoading ? "Opening..." : "Manage subscription" }}
               </Button>
-            </div>
-            <div class="flex flex-col flex-1 p-5 border rounded-xl">
-              <p class="text-sm font-semibold uppercase text-muted-foreground">
-                Monthly
-              </p>
-              <p class="mt-2 text-5xl font-medium">
-                $6
-                <span class="-ml-1 text-base font-normal text-muted-foreground">
-                  /month
-                </span>
-              </p>
-              <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
-                Same Premium access with monthly flexibility. Cancel anytime.
-              </p>
               <Button
-                class="w-full mt-auto"
-                :disabled="checkoutLoadingPlan !== null"
+                :disabled="authStore.loading"
                 variant="outline"
-                @click="startCheckout('monthly')"
+                size="sm"
+                @click="signOut"
               >
-                {{ getCheckoutButtonText("monthly") }}
+                Sign out
               </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+      <div
+        v-if="
+          !subscriptionStore.isPremium &&
+          !subscriptionStore.loading &&
+          !showPasswordRecoveryForm
+        "
+        :class="[
+          'grid max-w-xl gap-4',
+          isUpgradeFlow &&
+          (authStore.isAuthenticated || selectedCheckoutPlan === null)
+            ? 'order-1'
+            : 'order-2 mt-4',
+        ]"
+      >
+        <Card class="min-w-0">
+          <CardHeader>
+            <CardTitle>Unlock Premium</CardTitle>
+            <CardDescription>
+              {{ premiumDescription }}
+            </CardDescription>
+          </CardHeader>
+          <CardContent class="text-sm">
+            <div class="p-4 mb-5 border rounded-xl">
+              <p class="mb-3 text-sm font-semibold">
+                Every paid plan includes:
+              </p>
+              <div>
+                <div class="flex align-middle">
+                  <Check class="w-5 h-5 mr-2 shrink-0" />
+                  <p class="text-muted-foreground max-w-96">
+                    Smarter, shareable, newsletter style weekly recaps with
+                    customizable commentary tones and more league context
+                  </p>
+                </div>
+                <div class="flex mt-3 align-middle">
+                  <Check class="w-5 h-5 mr-2 shrink-0" />
+                  <p class="text-muted-foreground max-w-96">
+                    Custom manager profiles highlighting tendencies and league
+                    identity
+                  </p>
+                </div>
+                <div class="flex mt-3 align-middle">
+                  <Check class="w-5 h-5 mr-2 shrink-0" />
+                  <p class="text-muted-foreground max-w-96">
+                    Rivalry reports that turn manager comparisons into
+                    personalized league stories
+                  </p>
+                </div>
+                <div class="flex mt-3 align-middle">
+                  <Check class="w-5 h-5 mr-2 shrink-0" />
+                  <p class="text-muted-foreground max-w-96">
+                    Access to all premium features across every league you
+                    manage, including all future premium features
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-4 sm:flex-row">
+              <div
+                class="relative flex flex-col flex-1 p-5 border pt-7 rounded-xl bg-muted/40"
+              >
+                <Badge
+                  class="absolute top-0 px-2 -translate-x-1/2 -translate-y-1/2 left-1/2 hover:bg-primary"
+                >
+                  Best value
+                </Badge>
+                <p
+                  class="-mt-2 text-sm font-semibold uppercase text-muted-foreground"
+                >
+                  Season Pass
+                </p>
+                <p class="mt-2 text-5xl font-medium">
+                  $18
+                  <span
+                    class="-ml-1 text-base font-normal text-muted-foreground"
+                  >
+                    /season
+                  </span>
+                </p>
+                <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
+                  One payment for Premium access through Feb 15, 2027. Does not
+                  renew.
+                </p>
 
-      <Card class="min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle>Frequently Asked Questions</CardTitle>
-          <CardDescription>
-            Everything you need to know about features, pricing, and league
-            access.
-          </CardDescription>
-        </CardHeader>
-        <CardContent class="text-sm">
-          <section>
-            <Accordion
-              type="single"
-              collapsible
-              default-value="leagues"
-              class="mt-2"
-            >
-              <AccordionItem value="leagues">
-                <AccordionTrigger class="text-left">
-                  Does one pass cover all of my leagues?
-                </AccordionTrigger>
-                <AccordionContent class="leading-6 text-muted-foreground">
-                  Yes. Your plan follows your account, so one purchase unlocks
-                  Premium across every league you manage. Adding another league
-                  never adds another charge.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="pricing">
-                <AccordionTrigger class="text-left">
-                  Why is the Season Pass only $18?
-                </AccordionTrigger>
-                <AccordionContent class="leading-6 text-muted-foreground">
-                  I’ve been building ffwrapped on my own for nearly three years
-                  with the simple goal of making fantasy football more fun and
-                  engaging for everyone. Because it’s a solo operation with low
-                  overhead, I can offer Premium for $18 across every league you
-                  manage. I want Premium to help me keep improving ffwrapped
-                  while remaining accessible to the community it was built for.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="complete-plan">
-                <AccordionTrigger class="text-left">
-                  Is the Season Pass different from the monthly plan?
-                </AccordionTrigger>
-                <AccordionContent class="leading-6 text-muted-foreground">
-                  Both plans include the same Premium features across every
-                  league you manage. The only difference is billing. The Season
-                  Pass is a one-time payment for access through February 15,
-                  2027, while the monthly plan renews each month until canceled.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="renewal" class="border-b-0">
-                <AccordionTrigger class="text-left">
-                  Do my league mates need Premium to view shared reports?
-                </AccordionTrigger>
-                <AccordionContent class="leading-6 text-muted-foreground">
-                  No. You can share a Premium report with the entire league, and
-                  they can open it without purchasing their own plan. View a
-                  full sample report
-                  <a
-                    href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="font-medium text-primary hover:underline"
-                    >here</a
-                  >.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </section>
-        </CardContent>
-      </Card>
+                <Button
+                  class="w-full mt-auto"
+                  :disabled="checkoutLoadingPlan !== null"
+                  @click="startCheckout('season_pass')"
+                >
+                  {{ getCheckoutButtonText("season_pass") }}
+                </Button>
+              </div>
+              <div class="flex flex-col flex-1 p-5 border rounded-xl">
+                <p
+                  class="text-sm font-semibold uppercase text-muted-foreground"
+                >
+                  Monthly
+                </p>
+                <p class="mt-2 text-5xl font-medium">
+                  $6
+                  <span
+                    class="-ml-1 text-base font-normal text-muted-foreground"
+                  >
+                    /month
+                  </span>
+                </p>
+                <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
+                  Same Premium access with monthly flexibility. Cancel anytime.
+                </p>
+                <Button
+                  class="w-full mt-auto"
+                  :disabled="checkoutLoadingPlan !== null"
+                  variant="outline"
+                  @click="startCheckout('monthly')"
+                >
+                  {{ getCheckoutButtonText("monthly") }}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div
+        v-if="
+          !subscriptionStore.isPremium &&
+          !subscriptionStore.loading &&
+          !showPasswordRecoveryForm
+        "
+        class="grid order-3 max-w-xl gap-4 mt-4"
+      >
+        <Card class="min-w-0">
+          <CardHeader class="pb-2">
+            <CardTitle>Frequently Asked Questions</CardTitle>
+            <CardDescription>
+              Everything you need to know about features, pricing, and league
+              access.
+            </CardDescription>
+          </CardHeader>
+          <CardContent class="text-sm">
+            <section>
+              <Accordion
+                type="single"
+                collapsible
+                default-value="leagues"
+                class="mt-2"
+              >
+                <AccordionItem value="leagues">
+                  <AccordionTrigger class="text-left">
+                    Does one pass cover all of my leagues?
+                  </AccordionTrigger>
+                  <AccordionContent class="leading-6 text-muted-foreground">
+                    Yes. Your plan follows your account, so one purchase unlocks
+                    Premium across every league you manage. Adding another
+                    league never adds another charge.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="pricing">
+                  <AccordionTrigger class="text-left">
+                    Why is the Season Pass only $18?
+                  </AccordionTrigger>
+                  <AccordionContent class="leading-6 text-muted-foreground">
+                    I’ve been building ffwrapped on my own for nearly three
+                    years with the simple goal of making fantasy football more
+                    fun and engaging for everyone. Because it’s a solo operation
+                    with low overhead, I can offer Premium for $18 across every
+                    league you manage. I want Premium to help me keep improving
+                    ffwrapped while remaining accessible to the community it was
+                    built for.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="complete-plan">
+                  <AccordionTrigger class="text-left">
+                    Is the Season Pass different from the monthly plan?
+                  </AccordionTrigger>
+                  <AccordionContent class="leading-6 text-muted-foreground">
+                    Both plans include the same Premium features across every
+                    league you manage. The only difference is billing. The
+                    Season Pass is a one-time payment for access through
+                    February 15, 2027, while the monthly plan renews each month
+                    until canceled.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="renewal" class="border-b-0">
+                  <AccordionTrigger class="text-left">
+                    Do my league mates need Premium to view shared reports?
+                  </AccordionTrigger>
+                  <AccordionContent class="leading-6 text-muted-foreground">
+                    No. You can share a Premium report with the entire league,
+                    and they can open it without purchasing their own plan. View
+                    a full sample report
+                    <a
+                      href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="font-medium text-primary hover:underline"
+                      >here</a
+                    >.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </section>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   </PageContainer>
 </template>

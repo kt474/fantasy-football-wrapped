@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import {
+  clearPendingCheckout,
   consumePendingCheckout,
   PENDING_CHECKOUT_KEY,
   PENDING_CHECKOUT_TTL_MS,
@@ -21,6 +22,15 @@ const createStorage = () => {
 };
 
 describe("pending checkout", () => {
+  test("clears a pending checkout when the user cancels the upgrade flow", () => {
+    const storage = createStorage();
+    savePendingCheckout("season_pass", storage, 1_000);
+
+    clearPendingCheckout(storage);
+
+    expect(storage.getItem(PENDING_CHECKOUT_KEY)).toBeNull();
+  });
+
   let storage;
 
   beforeEach(() => {

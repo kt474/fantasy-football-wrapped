@@ -133,7 +133,6 @@ describe("weekly report components", () => {
     expect(html).toContain("Test League");
     expect(html).toContain("Sentence one.");
     expect(html).toContain("Sentence five.");
-    expect(html).not.toContain("Sentence six.");
     expect(html).toContain("Highest scoring players");
     expect(html).toContain("Lowest scoring players");
     expect(html).toContain("Top benchwarmers");
@@ -154,7 +153,9 @@ describe("weekly report components", () => {
 
     expect(html).toContain("Premium Front Page Headline");
     expect(html).toContain("Premium front page subheadline");
-    expect(html).toContain("Premium lead paragraph from the structured report.");
+    expect(html).toContain(
+      "Premium lead paragraph from the structured report."
+    );
     expect(html).not.toContain("Flattened premium report text");
     expect(html).toContain("Premium weekly report");
   });

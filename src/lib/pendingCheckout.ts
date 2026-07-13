@@ -20,6 +20,12 @@ export const savePendingCheckout = (
   storage.setItem(PENDING_CHECKOUT_KEY, JSON.stringify(pending));
 };
 
+export const clearPendingCheckout = (
+  storage: Storage = window.sessionStorage
+) => {
+  storage.removeItem(PENDING_CHECKOUT_KEY);
+};
+
 export const consumePendingCheckout = (
   storage: Storage = window.sessionStorage,
   now = Date.now()

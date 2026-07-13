@@ -40,6 +40,7 @@ import { useStore } from "../../store/store";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
+import { clearPendingCheckout } from "@/lib/pendingCheckout";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -55,6 +56,16 @@ const currentUser = computed(() => {
   }
 });
 
+const defaultRouteQuery = computed(() => {
+  const { intent, upgrade_source, ...query } = route.query;
+  return query;
+});
+
+const defaultAccountRoute = computed(() => ({
+  path: "/account",
+  query: defaultRouteQuery.value,
+}));
+
 const closeMobileSidebar = () => {
   if (isMobile.value) {
     setOpenMobile(false);
@@ -69,6 +80,7 @@ const scrollToTop = () => {
 };
 
 const RouteTabChange = () => {
+  clearPendingCheckout();
   if (isMobile.value) {
     setOpenMobile(false);
   }
@@ -77,13 +89,15 @@ const RouteTabChange = () => {
 };
 
 const goBackToHome = () => {
-  const currentQueryParams = route.query;
-  router.push({ path: "/", query: currentQueryParams });
+  router.push({ path: "/", query: defaultRouteQuery.value });
 };
 
 const changeTab = (tab: string) => {
+  clearPendingCheckout();
   if (route.path !== "/") {
     goBackToHome();
+  } else if (route.query.intent || route.query.upgrade_source) {
+    router.replace({ path: "/", query: defaultRouteQuery.value });
   }
   store.currentTab = tab;
   localStorage.setItem("currentTab", tab);
@@ -239,7 +253,7 @@ const data = {
           <SidebarMenu>
             <SidebarMenuItem>
               <router-link
-                :to="{ path: '/about', query: $route.query }"
+                :to="{ path: '/about', query: defaultRouteQuery }"
                 class="cursor-pointer"
                 @click="RouteTabChange"
               >
@@ -256,7 +270,7 @@ const data = {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <router-link
-                :to="{ path: '/changelog', query: $route.query }"
+                :to="{ path: '/changelog', query: defaultRouteQuery }"
                 class="cursor-pointer"
                 @click="RouteTabChange"
               >
@@ -273,7 +287,7 @@ const data = {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <router-link
-                :to="{ path: '/privacy', query: $route.query }"
+                :to="{ path: '/privacy', query: defaultRouteQuery }"
                 class="cursor-pointer"
                 @click="RouteTabChange"
               >
@@ -290,7 +304,7 @@ const data = {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <router-link
-                :to="{ path: '/terms', query: $route.query }"
+                :to="{ path: '/terms', query: defaultRouteQuery }"
                 class="cursor-pointer"
                 @click="RouteTabChange"
               >
@@ -307,7 +321,7 @@ const data = {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <router-link
-                :to="{ path: '/account', query: $route.query }"
+                :to="defaultAccountRoute"
                 class="cursor-pointer"
                 @click="RouteTabChange"
               >
