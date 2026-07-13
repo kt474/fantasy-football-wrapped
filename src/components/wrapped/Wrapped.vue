@@ -1136,9 +1136,7 @@ watch(
           <div
             class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl"
           >
-            <p class="mb-2 text-xs uppercase text-cyan-300">
-              Most Active
-            </p>
+            <p class="mb-2 text-xs uppercase text-cyan-300">Most Active</p>
             <img
               v-if="mostMoves.user?.avatarImg"
               class="w-10 mb-3 border-4 rounded-full sm:w-16 border-cyan-500/50"
@@ -1175,9 +1173,7 @@ watch(
             v-if="fewestMoves?.user"
             class="flex flex-col items-center p-4 bg-cyan-900/30 rounded-2xl"
           >
-            <p class="mb-2 text-xs uppercase text-cyan-300">
-              Least Active
-            </p>
+            <p class="mb-2 text-xs uppercase text-cyan-300">Least Active</p>
             <img
               v-if="fewestMoves.user.avatarImg"
               class="w-10 mb-3 border-4 rounded-full sm:w-16 border-cyan-500/50"
@@ -1691,7 +1687,7 @@ watch(
             </div>
             <div class="text-right">
               <p class="text-xl font-bold text-amber-300">
-                {{ user.potentialPoints - user.pointsFor }}
+                {{ Math.round(user.potentialPoints - user.pointsFor) }}
               </p>
             </div>
           </div>
@@ -1950,9 +1946,7 @@ watch(
           <!-- Luckiest -->
           <div>
             <div class="flex items-center gap-4 px-2 mb-1">
-              <h3
-                class="text-sm font-bold uppercase text-fuchsia-200"
-              >
+              <h3 class="text-sm font-bold uppercase text-fuchsia-200">
                 Luckiest Schedules
               </h3>
             </div>
@@ -2016,9 +2010,7 @@ watch(
           <!-- Unluckiest -->
           <div>
             <div class="flex items-center gap-4 px-2 mb-1">
-              <h3
-                class="text-sm font-bold uppercase text-fuchsia-200"
-              >
+              <h3 class="text-sm font-bold uppercase text-fuchsia-200">
                 Hardest Roads
               </h3>
             </div>

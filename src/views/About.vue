@@ -21,7 +21,6 @@ onMounted(async () => {
     }
   }
 });
-
 </script>
 <template>
   <PageContainer>
@@ -35,7 +34,7 @@ onMounted(async () => {
           each season’s story to life.
         </p>
         <p class="text-base leading-relaxed">
-          The source code can be found on
+          The frontend codebase can be found on
           <a
             aria-label="Link to github repository"
             class="font-medium text-primary hover:underline"
@@ -50,22 +49,13 @@ onMounted(async () => {
             href="https://discord.gg/sSVwNhyv7U"
             target="_blank"
             rel="noopener noreferrer"
-            >Discord,</a
+            >Discord</a
           >
-          send an
+          or send an
           <a
             href="mailto:kevin@ffwrapped.com?subject=ffwrapped request"
             class="font-medium text-primary hover:underline"
-            >email,</a
-          >
-          or reach out on
-          <a
-            aria-label="Link to twitter"
-            class="font-medium text-primary hover:underline"
-            href="https://twitter.com/kevkevkt"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Twitter</a
+            >email</a
           >. Any suggestions are welcome! I also have a
           <a
             aria-label="Link to ffwrapped blog"

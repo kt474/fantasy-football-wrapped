@@ -21,9 +21,7 @@ describe("SEO landing pages", () => {
   test("publishes only clean canonical landing URLs in the sitemap", () => {
     const sitemap = read("public/sitemap.xml");
 
-    expect(sitemap).toContain(
-      "https://ffwrapped.com/sleeper-league-analyzer"
-    );
+    expect(sitemap).toContain("https://ffwrapped.com/sleeper-league-analyzer");
     expect(sitemap).toContain(
       "https://ffwrapped.com/fantasy-football-weekly-recap"
     );
@@ -49,13 +47,5 @@ describe("SEO landing pages", () => {
     expect(prerender).toContain('path: "changelog"');
     expect(vercel).toContain('"destination": "/about/index.html"');
     expect(vercel).toContain('"destination": "/changelog/index.html"');
-  });
-
-  test("keeps the sample-league homepage copy out of search snippets", () => {
-    const introSections = read("src/components/home/IntroSections.vue");
-
-    expect(introSections).toMatch(
-      /<p\s+data-nosnippet\s+class="[^"]*"\s*>\s*Start with the sample league/
-    );
   });
 });

@@ -67,7 +67,9 @@ const notificationPreferencesSaving = ref(false);
 const weeklyReportEmailsEnabled = ref(false);
 const trackedAccountPaywallView = ref(false);
 const authenticationSection = ref<HTMLElement | null>(null);
+const pricingSection = ref<HTMLElement | null>(null);
 const selectedCheckoutPlan = ref<CheckoutPlan | null>(null);
+const lastAutoScrolledUpgradeRoute = ref("");
 
 onBeforeRouteLeave(() => {
   clearPendingCheckout();
@@ -768,6 +770,49 @@ watch(
 );
 
 watch(
+  () => ({
+    routeKey: route.fullPath,
+    isUpgradeFlow: isUpgradeFlow.value,
+    authenticated: authStore.isAuthenticated,
+    subscriptionInitialized: subscriptionStore.initialized,
+    subscriptionLoading: subscriptionStore.loading,
+    isPremium: subscriptionStore.isPremium,
+    recovery: showPasswordRecoveryForm.value,
+  }),
+  async ({
+    routeKey,
+    isUpgradeFlow,
+    authenticated,
+    subscriptionInitialized,
+    subscriptionLoading,
+    isPremium,
+    recovery,
+  }) => {
+    if (
+      !isUpgradeFlow ||
+      !authenticated ||
+      !subscriptionInitialized ||
+      subscriptionLoading ||
+      isPremium ||
+      recovery ||
+      lastAutoScrolledUpgradeRoute.value === routeKey
+    ) {
+      return;
+    }
+
+    await nextTick();
+    if (!pricingSection.value) return;
+
+    lastAutoScrolledUpgradeRoute.value = routeKey;
+    pricingSection.value.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  },
+  { immediate: true, flush: "post" }
+);
+
+watch(
   () => authStore.weeklyReportEmailsEnabled,
   (enabled) => {
     weeklyReportEmailsEnabled.value = enabled;
@@ -1083,10 +1128,7 @@ watch(
       </div>
       <div
         v-else-if="authStore.isAuthenticated"
-        :class="[
-          isUpgradeFlow ? 'order-2 mt-4' : 'order-1',
-          accountSummaryContainerClass,
-        ]"
+        :class="['order-1', accountSummaryContainerClass]"
       >
         <Card>
           <CardHeader>
@@ -1203,10 +1245,12 @@ watch(
           !subscriptionStore.loading &&
           !showPasswordRecoveryForm
         "
+        ref="pricingSection"
         :class="[
-          'grid max-w-xl gap-4',
+          'grid max-w-xl gap-4 scroll-mt-4',
+          !authStore.isAuthenticated &&
           isUpgradeFlow &&
-          (authStore.isAuthenticated || selectedCheckoutPlan === null)
+          selectedCheckoutPlan === null
             ? 'order-1'
             : 'order-2 mt-4',
         ]"
