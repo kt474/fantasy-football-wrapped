@@ -73,6 +73,9 @@ const renderedWeeklyReport = computed(() =>
 const canGeneratePremium = computed(
   () => authStore.isAuthenticated && subscriptionStore.isPremium
 );
+const canGenerateCurrentPremiumReport = computed(
+  () => canGeneratePremium.value && props.hasLastScoredWeek
+);
 
 const showShareButton = computed(
   () => props.tier === "Premium" && Boolean(props.premiumWeeklyReport)
@@ -169,11 +172,14 @@ const updateTier = (value: string) => {
 };
 
 const showPremiumReport = () => {
-  emit("update:tier", "Premium");
+  updateTier("Premium");
   scrollAppToTop("smooth");
 };
 
 const handleGeneratePremium = () => {
+  if (!canGenerateCurrentPremiumReport.value) {
+    return;
+  }
   emit("generate-premium");
 };
 
@@ -241,7 +247,6 @@ const trackPremiumCtaClick = (cta: string) => {
           <Copy class="size-4" />
         </Button>
       </div>
-      <p v-if="weeksLength === 0">Please come back after week 1!</p>
       <TabsContent value="Premium">
         <div v-if="hasLeagues">
           <div class="flex mb-4">
@@ -267,7 +272,7 @@ const trackPremiumCtaClick = (cta: string) => {
             </div>
             <Button
               @click="handleGeneratePremium"
-              :disabled="!canGeneratePremium || premiumLoading"
+              :disabled="!canGenerateCurrentPremiumReport || premiumLoading"
               type="button"
               class="mt-5 ml-2"
               >Generate</Button
@@ -316,6 +321,13 @@ const trackPremiumCtaClick = (cta: string) => {
               <span class="sr-only">Loading...</span>
             </div>
           </div>
+          <p
+            v-else-if="canGeneratePremium && !hasLastScoredWeek"
+            class="max-w-3xl"
+          >
+            Your first premium weekly report will be ready after Week 1 is
+            scored.
+          </p>
           <p v-else-if="canGeneratePremium" class="max-w-3xl">
             Choose a commentary style and generate your premium weekly report.
           </p>
@@ -445,6 +457,21 @@ const trackPremiumCtaClick = (cta: string) => {
             <b>Just the Tua Us</b> who's boss, winning 90.04 to 82.64. Russell
             Wilson must have found a new playbook, because he was cooking, and
             not just in the kitchen.
+          </p>
+        </div>
+        <div
+          v-else-if="weeksLength === 0 || !hasLastScoredWeek"
+          class="max-w-3xl"
+        >
+          <p>
+            Weekly reports will be ready after Week 1. There are also new
+            <button
+              type="button"
+              class="font-semibold cursor-pointer text-primary hover:underline"
+              @click="showPremiumReport"
+            >
+              Premium reports</button
+            >.
           </p>
         </div>
         <div v-else-if="loading && hasLastScoredWeek">

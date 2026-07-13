@@ -230,7 +230,10 @@ const fetchPlayerNames = async () => {
 };
 
 const getPremiumReport = async () => {
-  if (store.leagueIds.length > 0) {
+  if (
+    store.leagueIds.length > 0 &&
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+  ) {
     premiumWeeklyReport.value = null;
     sharedReportUrl.value = "";
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
@@ -783,11 +786,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
       <Separator class="h-px mt-2 mb-3" />
       <TabsContent value="Report">
         <WeeklyReportSummary
-          v-if="
-            currentWeek == weeks[0] &&
-            (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek ||
-              store.leagueInfo.length == 0)
-          "
+          v-if="currentWeek == weeks[0]"
           v-model:tier="tier"
           v-model:premium-commentary-style="premiumCommentaryStyle"
           :weeks-length="weeks.length"
@@ -807,15 +806,6 @@ watch(() => currentWeek.value, fetchPlayerNames);
           @share-report="shareReport"
           @generate-premium="getPremiumReport"
         />
-        <p
-          v-else-if="
-            currentWeek == 1 &&
-            !store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
-          "
-          class="mb-24"
-        >
-          Please come back after week 1!
-        </p>
         <WeeklyMatchups
           :sorted-table-data="sortedTableData"
           :matchup-numbers="numOfMatchups"
