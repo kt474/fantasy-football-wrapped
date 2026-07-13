@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { getLeagueCount } from "@/api/api";
-import { watch, ref, onMounted } from "vue";
-import { useStore } from "@/store/store";
-import Switch from "@/components/ui/switch/Switch.vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Separator from "@/components/ui/separator/Separator.vue";
 import { trackPremiumFunnelEvent } from "@/lib/analytics";
@@ -24,14 +22,6 @@ onMounted(async () => {
   }
 });
 
-const store = useStore();
-
-watch(
-  () => store.showUsernames,
-  (newValue) => {
-    localStorage.setItem("showUsernames", JSON.stringify(newValue));
-  }
-);
 </script>
 <template>
   <PageContainer>
@@ -122,14 +112,6 @@ watch(
               class="mx-auto my-4"
           /></a>
         </div>
-      </div>
-      <SectionHeader title="Settings" class="mt-6" />
-      <div class="flex items-center mt-4 space-x-2">
-        <Switch
-          v-model="store.showUsernames"
-          :disabled="store.leagueInfo.length == 0"
-        />
-        <label>Show usernames instead of team names</label>
       </div>
       <SectionHeader title="League Count" class="mt-6" />
       <div>

@@ -3,7 +3,7 @@ import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
-import { getLeagueKey } from "@/store/store";
+import { getLeagueKey, useStore } from "@/store/store";
 import type { LeagueInfoType } from "@/types/types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/field";
 import { Check } from "lucide-vue-next";
 import Separator from "@/components/ui/separator/Separator.vue";
+import Switch from "@/components/ui/switch/Switch.vue";
 import PageContainer from "@/components/layout/PageContainer.vue";
 import PageHeader from "@/components/layout/PageHeader.vue";
 import {
@@ -46,6 +47,7 @@ import {
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
+const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const showLogin = ref(true);
@@ -1089,7 +1091,9 @@ watch(
         <Card>
           <CardHeader>
             <CardTitle>Account Summary</CardTitle>
-            <CardDescription> Your profile and plan details </CardDescription>
+            <CardDescription>
+              Your profile, plan, and preferences
+            </CardDescription>
           </CardHeader>
           <CardContent class="space-y-4">
             <div class="flex flex-wrap items-start gap-4">
@@ -1119,30 +1123,53 @@ watch(
             </p>
             <Separator />
             <div class="space-y-3">
-              <div>
-                <p class="text-sm font-medium">Email notifications</p>
-              </div>
-              <div class="flex items-start w-full gap-3">
-                <Checkbox
-                  id="weekly-report-email-setting"
-                  :model-value="weeklyReportEmailsEnabled"
-                  :disabled="
-                    notificationPreferencesLoading ||
-                    notificationPreferencesSaving
-                  "
-                  class="flex-none w-4 h-4 mt-0.5"
-                  @update:model-value="saveWeeklyReportEmailPreference"
-                />
-                <div class="min-w-0">
-                  <label
-                    for="weekly-report-email-setting"
-                    class="block text-sm cursor-pointer"
-                  >
-                    Weekly report emails
-                  </label>
+              <p class="text-sm font-medium">Preferences</p>
+              <div class="overflow-hidden border rounded-lg divide-y">
+                <div class="flex items-center justify-between gap-4 p-3">
+                  <div class="min-w-0">
+                    <label
+                      for="weekly-report-email-setting"
+                      class="block text-sm font-medium cursor-pointer"
+                    >
+                      Weekly report emails
+                    </label>
+                    <p class="mt-0.5 text-xs text-muted-foreground">
+                      Get reminders when a new weekly report is ready.
+                    </p>
+                  </div>
+                  <Switch
+                    id="weekly-report-email-setting"
+                    :model-value="weeklyReportEmailsEnabled"
+                    :disabled="
+                      notificationPreferencesLoading ||
+                      notificationPreferencesSaving
+                    "
+                    class="shrink-0"
+                    @update:model-value="saveWeeklyReportEmailPreference"
+                  />
+                </div>
+                <div class="flex items-center justify-between gap-4 p-3">
+                  <div class="min-w-0">
+                    <label
+                      for="show-usernames-setting"
+                      class="block text-sm font-medium cursor-pointer"
+                    >
+                      Show usernames
+                    </label>
+                    <p class="mt-0.5 text-xs text-muted-foreground">
+                      Use manager usernames instead of fantasy team names.
+                    </p>
+                  </div>
+                  <Switch
+                    id="show-usernames-setting"
+                    :model-value="store.showUsernames"
+                    class="shrink-0"
+                    @update:model-value="store.updateShowUsernames"
+                  />
                 </div>
               </div>
             </div>
+            <Separator />
 
             <div class="flex flex-wrap gap-2 pt-1">
               <Button

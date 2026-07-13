@@ -115,7 +115,7 @@ const removeLeague = () => {
     toast.success("League removed!");
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentTab");
-      store.showUsernames = false;
+      store.updateShowUsernames(false);
       store.currentTab = "Home";
       // reset url if there are no leagues
       router.replace({

@@ -79,6 +79,7 @@ export const useStore = defineStore("main", {
     },
     updateShowUsernames(payload: boolean) {
       this.showUsernames = payload;
+      localStorage.setItem("showUsernames", JSON.stringify(payload));
     },
     updateLoadingUserLeagues(payload: boolean) {
       this.loadingUserLeagues = payload;
