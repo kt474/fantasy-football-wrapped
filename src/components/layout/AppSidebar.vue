@@ -41,6 +41,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { clearPendingCheckout } from "@/lib/pendingCheckout";
+import { scrollAppToTop } from "@/lib/appScroll";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -73,10 +74,7 @@ const closeMobileSidebar = () => {
 };
 
 const scrollToTop = () => {
-  const main = document.getElementById("mainScrollSection");
-  if (main) {
-    main.scrollTop = 0;
-  }
+  scrollAppToTop();
 };
 
 const RouteTabChange = () => {

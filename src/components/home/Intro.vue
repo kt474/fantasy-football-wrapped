@@ -8,11 +8,15 @@ import {
 import { useStore } from "@/store/store";
 import IntroSections from "@/components/home/IntroSections.vue";
 import Card from "../ui/card/Card.vue";
+import { useMediaQuery } from "@vueuse/core";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const store = useStore();
 const isDark = computed(() => store.darkMode);
+// The showcase contains several ApexCharts. CSS `display: none` still lets Vue
+// mount and update them, which is particularly expensive on mobile Safari.
+const showDesktopShowcase = useMediaQuery("(min-width: 1240px)");
 
 const activeTab = ref<"Sleeper" | "Espn">("Sleeper");
 const platform = computed<LeaguePlatform>(() =>
@@ -154,8 +158,9 @@ const {
           </div>
 
           <div
+            v-if="showDesktopShowcase"
             aria-hidden="true"
-            class="relative hidden h-[480px] overflow-hidden min-[1240px]:block"
+            class="relative h-[480px] overflow-hidden"
           >
             <div
               class="absolute inset-0 z-20 pointer-events-none showcase-fade"

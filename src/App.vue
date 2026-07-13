@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import "vue-sonner/style.css";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "vue-sonner";
+import { scrollAppToTop } from "@/lib/appScroll";
 
 const router = useRouter();
 const route = useRoute();
@@ -125,7 +126,7 @@ watch(
   () => route.fullPath,
   async () => {
     await nextTick();
-    document.getElementById("mainScrollSection")?.scrollTo({ top: 0 });
+    scrollAppToTop();
   }
 );
 
@@ -147,8 +148,10 @@ const setHtmlBackground = () => {
     <div v-else>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset class="flex h-svh flex-col">
-          <header class="flex items-center h-16 gap-2 px-4 border-b shrink-0">
+        <SidebarInset class="flex min-h-svh flex-col md:h-svh md:min-h-0">
+          <header
+            class="sticky top-0 z-30 flex items-center h-16 gap-2 px-4 border-b bg-background shrink-0 md:static md:z-auto"
+          >
             <SidebarTrigger
               class="-ml-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             />
@@ -195,7 +198,7 @@ const setHtmlBackground = () => {
           </header>
           <main
             id="mainScrollSection"
-            class="flex-1 min-w-0 overflow-x-hidden overflow-y-auto overscroll-none"
+            class="flex-1 min-w-0 overflow-x-clip md:overflow-x-hidden md:overflow-y-auto md:overscroll-none"
           >
             <RouterView />
           </main>

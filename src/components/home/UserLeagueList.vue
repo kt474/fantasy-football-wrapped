@@ -9,6 +9,7 @@ import { Check } from "lucide-vue-next";
 import { toast } from "vue-sonner";
 import { loadUserLeagues } from "./userLeagueLoader";
 import { trackEvent } from "@/lib/analytics";
+import { scrollAppToTop } from "@/lib/appScroll";
 
 const checkedLeagues = ref<string[]>([]);
 const duplicateLeagueError = ref(false);
@@ -116,10 +117,7 @@ const addLeagues = async () => {
   }
 };
 onMounted(() => {
-  const main = document.getElementById("mainScrollSection");
-  if (main) {
-    main.scrollTop = 0;
-  }
+  scrollAppToTop();
 });
 
 const toggleLeague = (id: string) => {

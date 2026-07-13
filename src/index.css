@@ -193,6 +193,10 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  #mainScrollSection {
+    -webkit-overflow-scrolling: touch;
+  }
+
   h1,
   h2,
   h3,

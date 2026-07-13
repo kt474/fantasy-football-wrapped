@@ -20,6 +20,7 @@ import Separator from "../ui/separator/Separator.vue";
 import PremiumReportContent from "./PremiumReportContent.vue";
 import type { PremiumReport } from "@/types/types";
 import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
+import { scrollAppToTop } from "@/lib/appScroll";
 
 const props = defineProps<{
   tier: string;
@@ -169,10 +170,7 @@ const updateTier = (value: string) => {
 
 const showPremiumReport = () => {
   emit("update:tier", "Premium");
-  document.getElementById("mainScrollSection")?.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
+  scrollAppToTop("smooth");
 };
 
 const handleGeneratePremium = () => {

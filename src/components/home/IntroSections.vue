@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, type Component } from "vue";
+import {
+  useDocumentVisibility,
+  useElementVisibility,
+} from "@vueuse/core";
 import Card from "@/components/ui/card/Card.vue";
 import {
   Move3D,
@@ -59,6 +63,9 @@ const testimonials: Testimonial[] = [
 ];
 
 const activeTestimonialIndex = ref(0);
+const testimonialDeck = ref<HTMLElement | null>(null);
+const documentVisibility = useDocumentVisibility();
+const testimonialDeckIsVisible = useElementVisibility(testimonialDeck);
 let testimonialInterval: ReturnType<typeof window.setInterval> | undefined;
 
 const getTestimonialPosition = (index: number) =>
@@ -72,34 +79,28 @@ const getTestimonialStyle = (index: number) => {
     {
       opacity: 1,
       transform: "translate3d(0, 42px, 0) scale(1) rotate(-0.2deg)",
-      filter: "blur(0)",
       boxShadow: "0 18px 45px hsl(var(--foreground) / 0.08)",
     },
     {
       opacity: 0.84,
       transform: "translate3d(0, 15px, -18px) scale(0.965) rotate(0.35deg)",
-      filter: "blur(0)",
       boxShadow: "0 12px 32px hsl(var(--foreground) / 0.055)",
     },
     {
       opacity: 0.64,
       transform: "translate3d(0, -8px, -36px) scale(0.93) rotate(-0.45deg)",
-      filter: "blur(0.15px)",
       boxShadow: "0 8px 22px hsl(var(--foreground) / 0.04)",
     },
     {
       opacity: 0,
       transform: "translate3d(0, -30px, -54px) scale(0.9) rotate(0.45deg)",
-      filter: "blur(0.4px)",
       boxShadow: "0 4px 14px hsl(var(--foreground) / 0.03)",
     },
   ];
   const state = stackStates[visiblePosition];
-
   return {
     opacity: state.opacity,
     transform: state.transform,
-    filter: state.filter,
     boxShadow: state.boxShadow,
     zIndex: stackStates.length - visiblePosition,
   };
@@ -107,6 +108,12 @@ const getTestimonialStyle = (index: number) => {
 
 onMounted(() => {
   testimonialInterval = window.setInterval(() => {
+    if (
+      documentVisibility.value !== "visible" ||
+      !testimonialDeckIsVisible.value
+    ) {
+      return;
+    }
     activeTestimonialIndex.value =
       (activeTestimonialIndex.value + 1) % testimonials.length;
   }, 4200);
@@ -197,6 +204,7 @@ const toolSummaries: ToolSummary[] = [
         </div>
 
         <div
+          ref="testimonialDeck"
           class="testimonial-deck relative mt-12 mx-auto h-[330px] w-full max-w-xl"
         >
           <Card
@@ -318,10 +326,14 @@ const toolSummaries: ToolSummary[] = [
   transform-origin: center top;
   transition:
     opacity 720ms ease,
-    filter 720ms ease,
     transform 620ms cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 720ms ease;
-  will-change: opacity, filter, transform;
+}
+
+@media (min-width: 1024px) {
+  .testimonial-card {
+    will-change: opacity, transform;
+  }
 }
 
 .tool-grid {

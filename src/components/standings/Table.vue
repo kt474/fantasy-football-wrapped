@@ -4,11 +4,14 @@ import minBy from "lodash/minBy";
 import { createTableData } from "../../api/helper";
 import {
   computed,
+  onBeforeUnmount,
   onMounted,
   ref,
+  watch,
   ComputedRef,
   defineAsyncComponent,
 } from "vue";
+import { useElementVisibility } from "@vueuse/core";
 import { useStore } from "../../store/store";
 import {
   TableDataType,
@@ -100,6 +103,21 @@ const TradeLab = defineAsyncComponent(
 
 const tableOrder = ref("wins");
 const showLeagueNews = ref(false);
+const leagueNewsTrigger = ref<HTMLElement | null>(null);
+const leagueNewsIsVisible = useElementVisibility(leagueNewsTrigger);
+let leagueNewsIdleCallback: number | undefined;
+let leagueNewsFallbackTimer: ReturnType<typeof window.setTimeout> | undefined;
+
+const cancelPendingLeagueNews = () => {
+  if (leagueNewsIdleCallback !== undefined) {
+    window.cancelIdleCallback(leagueNewsIdleCallback);
+    leagueNewsIdleCallback = undefined;
+  }
+  if (leagueNewsFallbackTimer !== undefined) {
+    window.clearTimeout(leagueNewsFallbackTimer);
+    leagueNewsFallbackTimer = undefined;
+  }
+};
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
@@ -153,16 +171,42 @@ onMounted(() => {
     }
   }
 
-  const showNews = () => {
-    showLeagueNews.value = true;
-  };
-
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(showNews, { timeout: 2000 });
-  } else {
-    setTimeout(showNews, 0);
-  }
 });
+
+watch(
+  leagueNewsIsVisible,
+  (isVisible) => {
+    if (!isVisible) {
+      cancelPendingLeagueNews();
+      return;
+    }
+    if (showLeagueNews.value) return;
+
+    const showNews = () => {
+      leagueNewsIdleCallback = undefined;
+      leagueNewsFallbackTimer = undefined;
+      if (!leagueNewsIsVisible.value) return;
+      showLeagueNews.value = true;
+    };
+
+    const requestIdleCallback = (
+      window as unknown as {
+        requestIdleCallback?: (callback: IdleRequestCallback) => number;
+      }
+    ).requestIdleCallback;
+
+    if (requestIdleCallback) {
+      // Do not use a timeout here: forcing this work during a swipe can stall
+      // mobile Safari's main thread for a noticeable amount of time.
+      leagueNewsIdleCallback = requestIdleCallback(showNews);
+    } else {
+      leagueNewsFallbackTimer = window.setTimeout(showNews, 250);
+    }
+  },
+  { immediate: true }
+);
+
+onBeforeUnmount(cancelPendingLeagueNews);
 
 const originalData = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
@@ -648,11 +692,13 @@ const getTeamName = (tableDataItem: TableDataType) => {
           </table>
         </TooltipProvider>
       </ScrollableTableCard>
-      <CurrentTrends
-        v-if="showLeagueNews && seasonType !== 'Guillotine'"
-        :tableData="tableData"
-        class="h-full"
-      />
+      <div ref="leagueNewsTrigger" class="min-h-px min-w-0">
+        <CurrentTrends
+          v-if="showLeagueNews && seasonType !== 'Guillotine'"
+          :tableData="tableData"
+          class="h-full"
+        />
+      </div>
     </div>
     <StandingsChart
       v-if="showStandingsTab"
