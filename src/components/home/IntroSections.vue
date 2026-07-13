@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, type Component } from "vue";
-import {
-  useDocumentVisibility,
-  useElementVisibility,
-} from "@vueuse/core";
+import { useDocumentVisibility, useElementVisibility } from "@vueuse/core";
 import Card from "@/components/ui/card/Card.vue";
 import {
   Move3D,
@@ -179,8 +176,8 @@ const toolSummaries: ToolSummary[] = [
             Analysis your league will actually talk about
           </h2>
           <p class="mt-4 leading-7 sm:text-lg text-muted-foreground">
-            Turn matchups, manager trends, rivalries, and league history into
-            shareable stories. All for free.
+            Turn matchups, manager trends, power rankings, and league history
+            into shareable stories. All for free.
           </p>
 
           <div class="grid max-w-lg grid-cols-3 mt-6 divide-x divide-border">
@@ -266,10 +263,10 @@ const toolSummaries: ToolSummary[] = [
           </h2>
           <p
             data-nosnippet
-            class="max-w-2xl mx-auto mt-4 leading-7 sm:text-lg text-muted-foreground"
+            class="max-w-xl mx-auto mt-4 leading-7 sm:text-lg text-muted-foreground"
           >
-            Start with the sample league or enter your own to see the insights
-            and storylines ffwrapped can generate from real fantasy data.
+            Try the demo league or enter your own, then dig into the numbers,
+            decisions, and outcomes behind every season.
           </p>
         </div>
 
