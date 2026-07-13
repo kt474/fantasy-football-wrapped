@@ -257,6 +257,7 @@ const toolSummaries: ToolSummary[] = [
             Explore your league from every angle
           </h2>
           <p
+            data-nosnippet
             class="max-w-2xl mx-auto mt-4 leading-7 sm:text-lg text-muted-foreground"
           >
             Start with the sample league or enter your own to see the insights

@@ -50,4 +50,12 @@ describe("SEO landing pages", () => {
     expect(vercel).toContain('"destination": "/about/index.html"');
     expect(vercel).toContain('"destination": "/changelog/index.html"');
   });
+
+  test("keeps the sample-league homepage copy out of search snippets", () => {
+    const introSections = read("src/components/home/IntroSections.vue");
+
+    expect(introSections).toMatch(
+      /<p\s+data-nosnippet\s+class="[^"]*"\s*>\s*Start with the sample league/
+    );
+  });
 });

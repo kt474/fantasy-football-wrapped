@@ -14,6 +14,10 @@ import { fakeUsers } from "../../api/fakeLeague";
 import Roster from "./Roster.vue";
 import Card from "../ui/card/Card.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  attachRosterIdsToStats,
+  hasUsablePlayerRankingData,
+} from "./teamRankingData";
 
 const store = useStore();
 const props = defineProps<{
@@ -28,9 +32,7 @@ const loading = ref(false);
 const tab = ref("QB");
 
 const hasPlayerRankingData = (league: LeagueInfoType) =>
-  Boolean(
-    league.playerRankings && Object.keys(league.playerRankings).length > 0
-  );
+  hasUsablePlayerRankingData(league.playerRankings);
 
 const getData = async () => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
@@ -47,12 +49,7 @@ const getData = async () => {
     )
   );
 
-  const allPlayersWithRoster = allPlayers.map((stats, idx) => ({
-    ...stats,
-    rosterId: rosterPlayers[idx].rosterId,
-  }));
-
-  const filtered = allPlayersWithRoster.filter((item) => item !== null);
+  const filtered = attachRosterIdsToStats(allPlayers, rosterPlayers);
 
   function groupByRosterId(arr: WeeklyEntry[]) {
     return arr.reduce<Record<number, WeeklyEntry[]>>((acc, item) => {
@@ -164,9 +161,6 @@ watch(
           </TabsList>
         </div>
       </div>
-      <div v-if="Object.keys(data).length === 0">
-        <p class="">Please come back after week 1!</p>
-      </div>
       <TabsContent value="score">
         <div class="flex flex-wrap mt-2">
           <Tabs v-model="tab" class="w-full">
@@ -181,6 +175,9 @@ watch(
               </TabsTrigger>
             </TabsList>
           </Tabs>
+          <div class="mt-4" v-if="Object.keys(data).length === 0">
+            <p>Please come back after week 1!</p>
+          </div>
           <div
             v-for="(players, position) in data"
             class="w-full mr-2 overflow-x-hidden"
@@ -206,7 +203,7 @@ watch(
                 <div class="min-w-0 w-full mt-0.5 ml-2 sm:ml-3">
                   <div class="flex justify-between gap-2 px-2 mt-1 mb-4">
                     <p
-                      class="min-w-0 max-w-32 flex-1 truncate text-base font-semibold sm:max-w-52 sm:text-lg"
+                      class="flex-1 min-w-0 text-base font-semibold truncate max-w-32 sm:max-w-52 sm:text-lg"
                     >
                       {{ index + 1 }}.
                       {{
@@ -220,7 +217,7 @@ watch(
                       class="px-2 py-1 rounded-lg shrink-0 bg-muted/50 sm:px-3"
                     >
                       <p
-                        class="max-w-20 truncate text-sm sm:max-w-52 sm:text-base"
+                        class="text-sm truncate max-w-20 sm:max-w-52 sm:text-base"
                       >
                         {{ getTeamName(player.id ?? "") }}
                       </p>
@@ -264,6 +261,9 @@ watch(
       </TabsContent>
       <TabsContent value="roster">
         <Roster :player-data="allData" :table-data="tableData" />
+        <div class="mt-4" v-if="Object.keys(allData).length === 0">
+          <p>Please come back after week 1!</p>
+        </div>
       </TabsContent>
     </Tabs>
     <!-- Loading div -->

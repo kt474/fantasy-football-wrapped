@@ -167,6 +167,14 @@ const updateTier = (value: string) => {
   }
 };
 
+const showPremiumReport = () => {
+  emit("update:tier", "Premium");
+  document.getElementById("mainScrollSection")?.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+
 const handleGeneratePremium = () => {
   emit("generate-premium");
 };
@@ -376,7 +384,7 @@ const trackPremiumCtaClick = (cta: string) => {
             <div class="absolute inset-x-0 z-10 flex justify-center bottom-6">
               <Button as-child>
                 <router-link
-                  :to="{ path: '/account', query: route.query }"
+                  :to="premiumAccountRoute"
                   @click="trackPremiumCtaClick('unlock_premium_reports')"
                 >
                   Unlock Premium Reports
@@ -402,7 +410,7 @@ const trackPremiumCtaClick = (cta: string) => {
             <button
               type="button"
               class="cursor-pointer text-primary hover:underline"
-              @click="emit('update:tier', 'Premium')"
+              @click="showPremiumReport"
             >
               Premium</button
             >.
