@@ -245,6 +245,55 @@ describe("helper utilities", () => {
     ]);
   });
 
+  test("createTableData reconstructs head-to-head records for median leagues", () => {
+    const tableData = createTableData(
+      [buildUser("u1", "Alpha"), buildUser("u2", "Beta")],
+      [
+        {
+          ...buildRoster({
+            id: "u1",
+            rosterId: 1,
+            wins: 3,
+            losses: 1,
+            pointsFor: 210,
+            recordByWeek: "WWWL",
+          }),
+          ties: 0,
+        },
+        {
+          ...buildRoster({
+            id: "u2",
+            rosterId: 2,
+            wins: 0,
+            losses: 3,
+            pointsFor: 190,
+            recordByWeek: "LLLT",
+          }),
+          ties: 1,
+        },
+      ],
+      [
+        { ...buildPoints(1, [110, 100]), matchups: [1, 1] },
+        { ...buildPoints(2, [90, 100]), matchups: [1, 1] },
+      ],
+      true
+    );
+
+    expect(
+      tableData.map(
+        ({ rosterId, headToHeadWins, headToHeadLosses, headToHeadTies }) => ({
+          rosterId,
+          headToHeadWins,
+          headToHeadLosses,
+          headToHeadTies,
+        })
+      )
+    ).toEqual([
+      { rosterId: 1, headToHeadWins: 1, headToHeadLosses: 0, headToHeadTies: 1 },
+      { rosterId: 2, headToHeadWins: 0, headToHeadLosses: 1, headToHeadTies: 1 },
+    ]);
+  });
+
   test("createTableData includes ghost rosters without a matching user", () => {
     const tableData = createTableData(
       [buildUser("u1", "Alpha")],

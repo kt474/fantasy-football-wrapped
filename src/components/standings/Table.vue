@@ -220,12 +220,22 @@ const originalData = computed(() => {
     );
     const savedLeagueData = savedData[store.currentLeagueId];
     if (Array.isArray(savedLeagueData)) {
-      if (currentLeague?.platform !== "espn") {
+      const hasHeadToHeadRecords = savedLeagueData.every(
+        (team) => typeof team.headToHeadWins === "number"
+      );
+      if (
+        currentLeague?.platform !== "espn" &&
+        (!medianScoring.value || hasHeadToHeadRecords)
+      ) {
         return savedLeagueData;
       }
     } else if (
       savedLeagueData?.data &&
-      savedLeagueData.lastUpdated === currentLeague?.lastUpdated
+      savedLeagueData.lastUpdated === currentLeague?.lastUpdated &&
+      (!medianScoring.value ||
+        savedLeagueData.data.every(
+          (team) => typeof team.headToHeadWins === "number"
+        ))
     ) {
       return savedLeagueData.data;
     }
@@ -296,8 +306,20 @@ const tableData: ComputedRef<TableDataType[]> = computed(() => {
     });
   } else if (tableOrder.value === "medianRecord") {
     return data.sort((a, b) => {
-      if (a.winsWithMedian !== b.winsWithMedian) {
-        return b.winsWithMedian - a.winsWithMedian;
+      const aWins = medianScoring.value
+        ? (a.headToHeadWins ?? 0)
+        : a.winsWithMedian;
+      const bWins = medianScoring.value
+        ? (b.headToHeadWins ?? 0)
+        : b.winsWithMedian;
+      if (aWins !== bWins) {
+        return bWins - aWins;
+      }
+      if (
+        medianScoring.value &&
+        (a.headToHeadTies ?? 0) !== (b.headToHeadTies ?? 0)
+      ) {
+        return (b.headToHeadTies ?? 0) - (a.headToHeadTies ?? 0);
       }
       return b.pointsFor - a.pointsFor;
     });
@@ -334,6 +356,12 @@ const mostMedianWins = computed(() => {
 });
 const mostMedianLosses = computed(() => {
   return maxBy(originalData.value, "lossesWithMedian")?.lossesWithMedian;
+});
+const mostHeadToHeadWins = computed(() => {
+  return maxBy(originalData.value, "headToHeadWins")?.headToHeadWins;
+});
+const mostHeadToHeadLosses = computed(() => {
+  return maxBy(originalData.value, "headToHeadLosses")?.headToHeadLosses;
 });
 
 const seasonType = computed(() => {
@@ -565,7 +593,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                         @click="tableOrder = 'medianRecord'"
                         class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
-                        Median Record
+                        {{ medianScoring ? "H2H Record" : "Median Record" }}
                         <div>
                           <svg
                             class="w-3 h-3 ms-1.5"
@@ -587,9 +615,15 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent class="w-40 bg-muted-foreground">
-                      Team record where a win is awarded if a team's weekly
-                      score is higher than the league median, and a loss is
-                      added if the score is less than the median.
+                      <template v-if="medianScoring">
+                        Head-to-head record from each team's scheduled weekly
+                        matchup, excluding results against the league median.
+                      </template>
+                      <template v-else>
+                        Team record where a win is awarded if a team's weekly
+                        score is higher than the league median, and a loss is
+                        added if the score is less than the median.
+                      </template>
                     </TooltipContent>
                   </Tooltip>
                 </th>
@@ -679,13 +713,24 @@ const getTeamName = (tableDataItem: TableDataType) => {
                   class="px-2 py-3 sm:px-6"
                   :class="{
                     'text-primary font-semibold':
-                      item.winsWithMedian === mostMedianWins,
+                      medianScoring
+                        ? item.headToHeadWins === mostHeadToHeadWins
+                        : item.winsWithMedian === mostMedianWins,
                     'text-destructive font-semibold':
-                      item.lossesWithMedian === mostMedianLosses,
+                      medianScoring
+                        ? item.headToHeadLosses === mostHeadToHeadLosses
+                        : item.lossesWithMedian === mostMedianLosses,
                   }"
                 >
-                  {{ item.winsWithMedian ? item.winsWithMedian : 0 }} -
-                  {{ item.lossesWithMedian ? item.lossesWithMedian : 0 }}
+                  <template v-if="medianScoring">
+                    {{ item.headToHeadWins ?? 0 }} -
+                    {{ item.headToHeadLosses ?? 0 }}
+                    {{ item.headToHeadTies ? `- ${item.headToHeadTies}` : "" }}
+                  </template>
+                  <template v-else>
+                    {{ item.winsWithMedian ? item.winsWithMedian : 0 }} -
+                    {{ item.lossesWithMedian ? item.lossesWithMedian : 0 }}
+                  </template>
                 </td>
               </tr>
             </tbody>

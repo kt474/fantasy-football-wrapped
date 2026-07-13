@@ -245,6 +245,35 @@ export const createTableData = (
           value.winsWithMedian = value.wins;
           value.lossesWithMedian = value.losses;
         }
+
+        value.headToHeadWins = 0;
+        value.headToHeadLosses = 0;
+        value.headToHeadTies = 0;
+        if (medianScoring) {
+          const recordedResults = value.recordByWeek?.length ?? 0;
+          const officialResults = value.wins + value.losses + value.ties;
+          const completedWeeks = Math.floor(
+            (recordedResults || officialResults) / 2
+          );
+
+          for (let week = 0; week < completedWeeks; week++) {
+            const matchupId = value.matchups?.[week];
+            const teamScore = value.points?.[week];
+            if (matchupId == null || teamScore == null) continue;
+
+            const opponent = combinedPoints.find(
+              (team) =>
+                team.rosterId !== value.rosterId &&
+                team.matchups?.[week] === matchupId
+            );
+            const opponentScore = opponent?.points?.[week];
+            if (opponentScore == null) continue;
+
+            if (teamScore > opponentScore) value.headToHeadWins++;
+            else if (teamScore < opponentScore) value.headToHeadLosses++;
+            else value.headToHeadTies++;
+          }
+        }
       });
 
       combinedPoints.sort((a, b) => {

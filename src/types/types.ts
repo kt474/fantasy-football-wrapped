@@ -172,6 +172,9 @@ export type TableDataType = {
   lossesAgainstAll: number;
   winsWithMedian: number;
   lossesWithMedian: number;
+  headToHeadWins: number;
+  headToHeadLosses: number;
+  headToHeadTies: number;
   rating: number;
   randomScheduleWins: number;
   avatarImg: string;
