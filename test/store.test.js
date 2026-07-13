@@ -112,9 +112,12 @@ describe("main store", () => {
     const league = buildLeague("league-1");
     store.updateLeagueInfo(league);
 
-    store.addProjectionData(getLeagueKey(league), "u2", [
-      { projection: 22.4, position: "RB" },
-    ]);
+    store.addProjectionData(
+      getLeagueKey(league),
+      "u2",
+      [{ projection: 22.4, position: "RB" }],
+      8
+    );
 
     const updatedLeague = store.leagueInfo[0];
     const roster1 = updatedLeague.rosters.find((r) => r.id === "u1");
@@ -122,5 +125,6 @@ describe("main store", () => {
 
     expect(roster1?.projections).toBeUndefined();
     expect(roster2?.projections).toEqual([{ projection: 22.4, position: "RB" }]);
+    expect(roster2?.projectionStartWeek).toBe(8);
   });
 });

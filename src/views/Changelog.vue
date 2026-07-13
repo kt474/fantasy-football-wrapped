@@ -11,6 +11,17 @@ const badgeVariant = (type: string): BadgeVariants["variant"] => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/13/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Added a new season forecast component that simulates a whole season based on projections.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/09/26",
     content: [
       {
@@ -719,49 +730,49 @@ const data = [
 </script>
 <template>
   <PageContainer>
-      <PageHeader title="Changelog" class="mb-2" />
-      <div class="max-w-lg mb-6">
-        <p>
-          Join our
-          <a
-            aria-label="Discord link"
-            class="font-medium text-primary hover:underline"
-            href="https://discord.gg/sSVwNhyv7U"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Discord</a
-          >
-          for more updates, feature requests, or bug reports. The entire
-          codebase is also available on
-          <a
-            aria-label="Github link"
-            class="font-medium text-primary hover:underline"
-            href="https://github.com/kt474/fantasy-football-wrapped"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Github</a
-          >.
+    <PageHeader title="Changelog" class="mb-2" />
+    <div class="max-w-lg mb-6">
+      <p>
+        Join our
+        <a
+          aria-label="Discord link"
+          class="font-medium text-primary hover:underline"
+          href="https://discord.gg/sSVwNhyv7U"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Discord</a
+        >
+        for more updates, feature requests, or bug reports. The entire codebase
+        is also available on
+        <a
+          aria-label="Github link"
+          class="font-medium text-primary hover:underline"
+          href="https://github.com/kt474/fantasy-football-wrapped"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Github</a
+        >.
+      </p>
+    </div>
+    <div v-for="entry in data" class="my-2 ml-1">
+      <div class="flex">
+        <p class="w-20 mb-1 mr-2 text-xl font-semibold">
+          {{ entry.date }}
         </p>
-      </div>
-      <div v-for="entry in data" class="my-2 ml-1">
-        <div class="flex">
-          <p class="w-20 mb-1 mr-2 text-xl font-semibold">
-            {{ entry.date }}
-          </p>
-          <div v-for="content in entry.content" class="mt-0.5">
-            <Badge :variant="badgeVariant(content.type)" class="me-2">
-              {{ content.type }}
-            </Badge>
-          </div>
+        <div v-for="content in entry.content" class="mt-0.5">
+          <Badge :variant="badgeVariant(content.type)" class="me-2">
+            {{ content.type }}
+          </Badge>
         </div>
-        <div v-for="content in entry.content" class="max-w-4xl">
-          <ul class="space-y-1">
-            <li v-for="text in content.text" class="px-2 my-1 ml-20 text-base">
-              {{ text }}
-            </li>
-          </ul>
-        </div>
-        <hr class="h-px my-2 border-0 bg-muted" />
       </div>
+      <div v-for="content in entry.content" class="max-w-4xl">
+        <ul class="space-y-1">
+          <li v-for="text in content.text" class="px-2 my-1 ml-20 text-base">
+            {{ text }}
+          </li>
+        </ul>
+      </div>
+      <hr class="h-px my-2 border-0 bg-muted" />
+    </div>
   </PageContainer>
 </template>

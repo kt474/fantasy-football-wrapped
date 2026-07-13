@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { getDraftProjections, getProjections } from "../src/api/sleeperApi.ts";
+import {
+  getDraftProjections,
+  getPlayerPositionsById,
+  getProjections,
+  getWeeklyProjections,
+} from "../src/api/sleeperApi.ts";
 
 const mockFetchResponse = (status, data, overrides = {}) =>
   Promise.resolve({
@@ -110,5 +115,41 @@ describe("getProjections", () => {
       projection: 0,
       position: "",
     });
+  });
+
+  test("loads player positions from one shared directory request", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      mockFetchResponse(200, {
+        p1: { position: "QB" },
+        p2: { fantasy_positions: ["WR"] },
+      })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getPlayerPositionsById(["p1", "p2"])).resolves.toEqual({
+      p1: "QB",
+      p2: "WR",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("shares weekly projection requests for the same forecast input", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      mockFetchResponse(200, {
+        7: { stats: { pts_ppr: 10 } },
+        8: { stats: { pts_ppr: 12.6 } },
+      })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const inputs = ["cache-player", "2026", 8, 1];
+    const [first, second] = await Promise.all([
+      getWeeklyProjections(...inputs),
+      getWeeklyProjections(...inputs),
+    ]);
+
+    expect(first).toBe(13);
+    expect(second).toBe(13);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

@@ -114,7 +114,7 @@ const tabOptions = [
   "Roster Management",
   "Playoffs",
   "Weekly Report",
-  "Schedule Simulator",
+  "Season Forecast",
   "Trade Lab",
   "Draft",
   "Start/Sit",
@@ -143,7 +143,14 @@ interface savedData {
 onMounted(() => {
   const savedCurrentTab = localStorage.getItem("currentTab");
   if (savedCurrentTab) {
-    store.currentTab = savedCurrentTab;
+    const currentTab =
+      savedCurrentTab === "Schedule Simulator"
+        ? "Season Forecast"
+        : savedCurrentTab;
+    store.currentTab = currentTab;
+    if (currentTab !== savedCurrentTab) {
+      localStorage.setItem("currentTab", currentTab);
+    }
   }
 
   const showNews = () => {
@@ -725,7 +732,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
     </div>
     <div
       v-if="
-        store.currentTab === 'Schedule Simulator' && seasonType !== 'Guillotine'
+        store.currentTab === 'Season Forecast' && seasonType !== 'Guillotine'
       "
     >
       <ScheduleSimulator class="my-4" :tableData="tableData" />

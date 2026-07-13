@@ -107,7 +107,8 @@ export const useStore = defineStore("main", {
     addProjectionData(
       leagueId: string,
       rosterId: string,
-      projectionData: { projection: number; position: string }[]
+      projectionData: { projection: number; position: string }[],
+      projectionStartWeek?: number
     ) {
       const index = this.leagueInfo.findIndex(
         (league) => getLeagueKey(league) === leagueId
@@ -123,6 +124,7 @@ export const useStore = defineStore("main", {
             return {
               ...roster,
               projections: projectionData,
+              projectionStartWeek,
             };
           }
           return roster;

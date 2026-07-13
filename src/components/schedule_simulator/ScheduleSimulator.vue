@@ -2,7 +2,19 @@
 import { computed, ref, watch } from "vue";
 import { TableDataType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
+import {
+  getPlayerPositionsById,
+  getProjections,
+  getWeeklyProjections,
+} from "../../api/sleeperApi";
+import { mapWithConcurrency } from "@/lib/async";
+import {
+  getProjectedStarterTotal,
+  runForecastSimulation,
+  runReplaySimulation,
+  shouldUseLiveSeasonForecast,
+} from "./seasonSimulation";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
@@ -36,6 +48,8 @@ const selectedSwapTeamBValue = ref("1");
 const selectedVolatilityTeamValue = ref("0");
 const activeScenarioValue = ref("swap");
 const activeDetailValue = ref("standings");
+const activeToolValue = ref("season-simulation");
+const replayThroughWeekValue = ref("1");
 const monteCarloRuns = ref(1000);
 const monteCarloDistributions = ref<number[][]>([]);
 const monteCarloSummaryByTeam = ref<
@@ -52,6 +66,40 @@ const monteCarloSummaryByTeam = ref<
 >({});
 const monteCarloRunCount = ref(0);
 const scenarioLabel = ref("Original schedule");
+const forecastRuns = ref(5000);
+const forecastRunCount = ref(0);
+const forecastLoadingLeagueKeys = ref<Set<string>>(new Set());
+const forecastWeeklyWinsByTeam = ref<number[][]>([]);
+const forecastSummaryByTeam = ref<
+  Record<
+    number,
+    {
+      averageWins: number;
+      p10Wins: number;
+      p90Wins: number;
+      playoffOdds: number;
+      topSeedOdds: number;
+      averageSeed: number;
+    }
+  >
+>({});
+const replayRuns = ref(5000);
+const replayRunCount = ref(0);
+const replayWeeklyWinsByTeam = ref<number[][]>([]);
+const replaySummaryByTeam = ref<
+  Record<
+    number,
+    {
+      averageWins: number;
+      p10Wins: number;
+      p90Wins: number;
+      playoffOdds: number;
+      topSeedOdds: number;
+      averageSeed: number;
+      sameSeedOdds: number;
+    }
+  >
+>({});
 
 const dataWeekCount = computed(() => {
   return Math.max(...props.tableData.map((team) => team.points?.length), 0);
@@ -74,9 +122,18 @@ const displayedWeekCount = computed(() => {
   const regularSeasonLength =
     league?.regularSeasonLength || dataWeekCount.value;
   const lastScoredWeek = league?.lastScoredWeek || 0;
-  const completedWeeks =
-    recordWeekCount.value ||
-    (lastScoredWeek > 0 ? lastScoredWeek : dataWeekCount.value);
+  const isActiveLeague =
+    league?.status === "pre_draft" ||
+    league?.status === "drafting" ||
+    league?.status === "in_season";
+  const completedWeeks = isActiveLeague
+    ? Math.max(recordWeekCount.value, lastScoredWeek)
+    : recordWeekCount.value ||
+      (lastScoredWeek > 0 ? lastScoredWeek : dataWeekCount.value);
+
+  if (isActiveLeague) {
+    return Math.min(regularSeasonLength, completedWeeks);
+  }
 
   if (regularSeasonLength > 0 && completedWeeks > 0) {
     return Math.min(regularSeasonLength, completedWeeks);
@@ -84,6 +141,27 @@ const displayedWeekCount = computed(() => {
 
   return regularSeasonLength;
 });
+
+const regularSeasonWeekCount = computed(() => {
+  const configured =
+    store.leagueInfo[store.currentLeagueIndex]?.regularSeasonLength || 0;
+  return Math.max(configured, displayedWeekCount.value);
+});
+
+const remainingWeekCount = computed(() =>
+  Math.max(regularSeasonWeekCount.value - displayedWeekCount.value, 0)
+);
+
+const isCurrentSeasonLeague = computed(() => {
+  const league = store.leagueInfo[store.currentLeagueIndex];
+  return shouldUseLiveSeasonForecast({
+    season: league?.season,
+    status: league?.status,
+    remainingWeeks: remainingWeekCount.value,
+  });
+});
+
+const seasonSimulationTabLabel = "Season Forecast";
 
 const weeklyMedians = computed(() => {
   if (props.tableData[0]?.points) {
@@ -137,8 +215,10 @@ const isValidMatchupNumber = (
   return Number.isFinite(matchupNumber) && Number(matchupNumber) > 0;
 };
 
-const createOpponentMatrix = (tableData: TableDataType[]) => {
-  const weeks = displayedWeekCount.value;
+const createOpponentMatrix = (
+  tableData: TableDataType[],
+  weeks = displayedWeekCount.value
+) => {
   const matrix: (number | null)[][] = tableData.map((team) =>
     Array.from({ length: weeks }, (_, week) => {
       const matchupNumber = team.matchups ? team.matchups[week] : null;
@@ -173,6 +253,9 @@ const createOpponentMatrix = (tableData: TableDataType[]) => {
 };
 
 const originalOpponents = computed(() => createOpponentMatrix(props.tableData));
+const fullSeasonOpponents = computed(() =>
+  createOpponentMatrix(props.tableData, regularSeasonWeekCount.value)
+);
 
 const resetSimulation = () => {
   simulatedOpponents.value = originalOpponents.value.map((teamWeeks) => [
@@ -980,404 +1063,1264 @@ function runMonteCarloDistribution() {
   monteCarloSummaryByTeam.value = summary;
   monteCarloRunCount.value = runs;
 }
+
+const projectionTotalsByTeam = computed(() => {
+  const league = store.leagueInfo[store.currentLeagueIndex];
+  const rosterById = new Map(
+    (league?.rosters || []).map((roster) => [roster.rosterId, roster])
+  );
+
+  return props.tableData.map((team) => {
+    const projections = rosterById.get(team.rosterId)?.projections || [];
+    return getProjectedStarterTotal(projections, league?.rosterPositions || []);
+  });
+});
+
+const forecastProjectionStartWeek = computed(() =>
+  Math.max(displayedWeekCount.value + 1, 1)
+);
+
+const hasCurrentForecastProjections = computed(() => {
+  const league = store.leagueInfo[store.currentLeagueIndex];
+  if (!league) return false;
+  return league.rosters.every(
+    (roster) =>
+      !roster.players?.length ||
+      (Boolean(roster.projections?.length) &&
+        roster.projectionStartWeek === forecastProjectionStartWeek.value)
+  );
+});
+
+const currentLeagueKey = computed(() => {
+  const league = store.leagueInfo[store.currentLeagueIndex];
+  return league ? getLeagueKey(league) : "";
+});
+
+const forecastLoadingProjections = computed(() =>
+  forecastLoadingLeagueKeys.value.has(currentLeagueKey.value)
+);
+
+const forecastReady = computed(
+  () => forecastRunCount.value > 0 && !forecastLoadingProjections.value
+);
+
+async function loadForecastProjections() {
+  const league = store.leagueInfo[store.currentLeagueIndex];
+  if (!league) return;
+  const leagueKey = getLeagueKey(league);
+  if (forecastLoadingLeagueKeys.value.has(leagueKey)) return;
+  const projectionStartWeek = forecastProjectionStartWeek.value;
+  if (hasCurrentForecastProjections.value) return;
+
+  forecastLoadingLeagueKeys.value = new Set([
+    ...forecastLoadingLeagueKeys.value,
+    leagueKey,
+  ]);
+  try {
+    const playerIds = [
+      ...new Set(league.rosters.flatMap((roster) => roster.players || [])),
+    ];
+    let positionsByPlayer: Record<string, string> | null = null;
+    try {
+      positionsByPlayer = await getPlayerPositionsById(playerIds);
+    } catch (error) {
+      console.error("Error fetching player positions:", error);
+    }
+    await mapWithConcurrency(league.rosters, 2, async (roster) => {
+      if (!roster.players?.length) return;
+      const projections = await mapWithConcurrency(
+        roster.players,
+        4,
+        (player) =>
+          positionsByPlayer
+            ? getWeeklyProjections(
+                player,
+                league.season,
+                projectionStartWeek,
+                league.scoringType
+              ).then((projection) => ({
+                projection,
+                position: positionsByPlayer?.[player] || "",
+              }))
+            : getProjections(
+                player,
+                league.season,
+                projectionStartWeek,
+                league.scoringType
+              )
+      );
+      store.addProjectionData(
+        leagueKey,
+        roster.id,
+        projections,
+        projectionStartWeek
+      );
+    });
+    localStorage.setItem("leagueInfo", JSON.stringify(store.leagueInfo));
+  } finally {
+    const loadingLeagueKeys = new Set(forecastLoadingLeagueKeys.value);
+    loadingLeagueKeys.delete(leagueKey);
+    forecastLoadingLeagueKeys.value = loadingLeagueKeys;
+
+    if (currentLeagueKey.value !== leagueKey) return;
+    if (projectionStartWeek !== forecastProjectionStartWeek.value) {
+      await loadForecastProjections();
+      return;
+    }
+    runSeasonForecast();
+  }
+}
+
+const historicalTeamAverage = (teamIndex: number) => {
+  const scores = (props.tableData[teamIndex]?.points || [])
+    .slice(0, displayedWeekCount.value)
+    .filter((score) => Number.isFinite(score) && score > 0);
+  if (scores.length === 0) return 100;
+  return scores.reduce((total, score) => total + score, 0) / scores.length;
+};
+
+const historicalTeamDeviation = (teamIndex: number, average: number) => {
+  const scores = (props.tableData[teamIndex]?.points || [])
+    .slice(0, displayedWeekCount.value)
+    .filter((score) => Number.isFinite(score) && score > 0);
+  if (scores.length < 2) return Math.max(12, average * 0.16);
+  const variance =
+    scores.reduce((total, score) => total + (score - average) ** 2, 0) /
+    scores.length;
+  return Math.max(10, Math.sqrt(variance));
+};
+
+const forecastRows = computed(() =>
+  props.tableData
+    .map((team, index) => {
+      const result = forecastSummaryByTeam.value[index] || {
+        averageWins: recordPoints(team.wins, team.ties ?? 0),
+        p10Wins: recordPoints(team.wins, team.ties ?? 0),
+        p90Wins: recordPoints(team.wins, team.ties ?? 0),
+        playoffOdds: 0,
+        topSeedOdds: 0,
+        averageSeed: index + 1,
+      };
+      return { index, name: teamName(team), ...result };
+    })
+    .sort((a, b) =>
+      b.playoffOdds !== a.playoffOdds
+        ? b.playoffOdds - a.playoffOdds
+        : a.averageSeed - b.averageSeed
+    )
+);
+
+function runSeasonForecast() {
+  const teamCount = props.tableData.length;
+  const runs = Math.max(500, Math.min(10000, Math.floor(forecastRuns.value)));
+  if (teamCount === 0) return;
+  const completedWeeks = displayedWeekCount.value;
+  const projectionWeeks = Math.max(18 - completedWeeks, 1);
+  const teams = props.tableData.map((team, index) => {
+    const formAverage = historicalTeamAverage(index);
+    const projectionAverage =
+      projectionTotalsByTeam.value[index] / projectionWeeks;
+    return {
+      index,
+      wins: team.wins,
+      losses: team.losses,
+      ties: team.ties ?? 0,
+      pointsFor: team.pointsFor,
+      mean:
+        projectionAverage > 0
+          ? projectionAverage * 0.7 + formAverage * 0.3
+          : formAverage,
+      deviation: historicalTeamDeviation(index, formAverage),
+    };
+  });
+  const result = runForecastSimulation({
+    teams,
+    opponents: fullSeasonOpponents.value,
+    completedWeeks,
+    regularSeasonWeeks: regularSeasonWeekCount.value,
+    playoffCutoff: playoffCutoff.value,
+    medianScoring: usesMedianScoring.value,
+    runs,
+  });
+  forecastSummaryByTeam.value = result.summaryByTeam;
+  forecastWeeklyWinsByTeam.value = result.weeklyWinsByTeam;
+  forecastRunCount.value = result.runCount;
+}
+
+const forecastRaceSeries = computed(() =>
+  props.tableData.map((team, index) => ({
+    name: teamName(team),
+    data: [
+      recordPoints(team.wins, team.ties ?? 0),
+      ...(forecastWeeklyWinsByTeam.value[index] || []),
+    ],
+  }))
+);
+
+const forecastRaceChartOptions = computed(() => ({
+  chart: {
+    type: "line",
+    foreColor: "hsl(var(--foreground))",
+    toolbar: { show: false },
+    zoom: { enabled: false },
+    animations: { enabled: false },
+  },
+  colors: Array.from(
+    { length: props.tableData.length },
+    (_, index) => `hsl(var(--chart-rank-${(index % 12) + 1}))`
+  ),
+  stroke: { curve: "smooth", width: 2.5 },
+  markers: { size: 3, hover: { size: 6 } },
+  dataLabels: { enabled: false },
+  xaxis: {
+    categories: [
+      "Now",
+      ...Array.from(
+        { length: remainingWeekCount.value },
+        (_, index) => `Week ${displayedWeekCount.value + index + 1}`
+      ),
+    ],
+    tickAmount: Math.max(0, Math.min(remainingWeekCount.value, 13)),
+    labels: { rotate: -45, rotateAlways: remainingWeekCount.value > 8 },
+  },
+  yaxis: {
+    min: 0,
+    max: usesMedianScoring.value
+      ? regularSeasonWeekCount.value * 2
+      : regularSeasonWeekCount.value,
+    forceNiceScale: true,
+    title: { text: "Average cumulative wins" },
+  },
+  legend: {
+    position: "bottom",
+    horizontalAlign: "center",
+    onItemClick: { toggleDataSeries: true },
+    onItemHover: { highlightDataSeries: true },
+  },
+  grid: { borderColor: "hsl(var(--border))" },
+  tooltip: {
+    shared: true,
+    intersect: false,
+    theme: store.darkMode ? "dark" : "light",
+    y: { formatter: (value: number) => `${value.toFixed(2)} wins` },
+  },
+}));
+
+const forecastComparisonRows = computed(() =>
+  [...forecastRows.value].sort((a, b) => b.averageWins - a.averageWins)
+);
+
+const forecastComparisonSeries = computed(() => [
+  {
+    name: "Current wins",
+    data: forecastComparisonRows.value.map((team) =>
+      recordPoints(
+        props.tableData[team.index]?.wins ?? 0,
+        props.tableData[team.index]?.ties ?? 0
+      )
+    ),
+  },
+  {
+    name: "Projected wins",
+    data: forecastComparisonRows.value.map((team) => team.averageWins),
+  },
+]);
+
+const forecastComparisonChartOptions = computed(() => ({
+  chart: {
+    type: "bar",
+    foreColor: "hsl(var(--foreground))",
+    toolbar: { show: false },
+    animations: { enabled: false },
+  },
+  colors: ["hsl(var(--chart-1))", "hsl(var(--chart-3))"],
+  plotOptions: {
+    bar: { horizontal: true, borderRadius: 3, barHeight: "70%" },
+  },
+  dataLabels: { enabled: false },
+  xaxis: {
+    categories: forecastComparisonRows.value.map((team) => team.name),
+    title: { text: "Wins" },
+    min: 0,
+    max: usesMedianScoring.value
+      ? regularSeasonWeekCount.value * 2
+      : regularSeasonWeekCount.value,
+    tickAmount: usesMedianScoring.value
+      ? Math.min(regularSeasonWeekCount.value * 2, 10)
+      : Math.min(regularSeasonWeekCount.value, 10),
+  },
+  yaxis: { labels: { maxWidth: 180 } },
+  legend: { position: "top", horizontalAlign: "left" },
+  tooltip: {
+    theme: store.darkMode ? "dark" : "light",
+    y: { formatter: (value: number) => `${value.toFixed(2)} wins` },
+  },
+}));
+
+const replayWeekCount = computed(() =>
+  Math.min(displayedWeekCount.value, regularSeasonWeekCount.value)
+);
+
+const replayThroughWeek = computed(() => {
+  const week = Number(replayThroughWeekValue.value);
+  if (!Number.isFinite(week)) return Math.min(1, replayWeekCount.value);
+  return Math.min(Math.max(Math.floor(week), 1), replayWeekCount.value);
+});
+
+const replayThroughWeekOptions = computed(() =>
+  Array.from({ length: replayWeekCount.value }, (_, index) => ({
+    value: String(index + 1),
+    label: `After Week ${index + 1}`,
+  }))
+);
+
+const replayRows = computed(() => {
+  const actualSeedByTeam = new Map<number, number>();
+  actualStandings.value.forEach((team, index) => {
+    actualSeedByTeam.set(team.index, index + 1);
+  });
+
+  return props.tableData
+    .map((team, index) => {
+      const actualWins = recordPoints(team.wins, team.ties ?? 0);
+      const result = replaySummaryByTeam.value[index] || {
+        averageWins: actualWins,
+        p10Wins: actualWins,
+        p90Wins: actualWins,
+        playoffOdds: 0,
+        topSeedOdds: 0,
+        averageSeed: actualSeedByTeam.get(index) ?? index + 1,
+        sameSeedOdds: 0,
+      };
+      return {
+        index,
+        name: teamName(team),
+        actualWins,
+        actualSeed: actualSeedByTeam.get(index) ?? index + 1,
+        ...result,
+      };
+    })
+    .sort((a, b) =>
+      b.playoffOdds !== a.playoffOdds
+        ? b.playoffOdds - a.playoffOdds
+        : a.averageSeed - b.averageSeed
+    );
+});
+
+const replayComparisonRows = computed(() =>
+  [...replayRows.value].sort(
+    (a, b) =>
+      Math.abs(b.actualWins - b.averageWins) -
+      Math.abs(a.actualWins - a.averageWins)
+  )
+);
+
+const replayComparisonSeries = computed(() => [
+  {
+    name: "Actual wins",
+    data: replayComparisonRows.value.map((team) => team.actualWins),
+  },
+  {
+    name: "Projected wins",
+    data: replayComparisonRows.value.map((team) => team.averageWins),
+  },
+]);
+
+const replayComparisonChartOptions = computed(() => ({
+  chart: {
+    type: "bar",
+    foreColor: "hsl(var(--foreground))",
+    toolbar: { show: false },
+    animations: { enabled: false },
+  },
+  colors: ["hsl(var(--chart-1))", "hsl(var(--chart-3))"],
+  plotOptions: {
+    bar: {
+      horizontal: true,
+      borderRadius: 3,
+      barHeight: "70%",
+    },
+  },
+  dataLabels: { enabled: false },
+  xaxis: {
+    categories: replayComparisonRows.value.map((team) => team.name),
+    title: { text: "Wins" },
+    min: 0,
+    max: usesMedianScoring.value
+      ? replayWeekCount.value * 2
+      : replayWeekCount.value,
+    tickAmount: usesMedianScoring.value
+      ? Math.min(replayWeekCount.value * 2, 10)
+      : Math.min(replayWeekCount.value, 10),
+  },
+  yaxis: {
+    labels: {
+      maxWidth: 180,
+    },
+  },
+  legend: {
+    position: "top",
+    horizontalAlign: "left",
+  },
+  tooltip: {
+    theme: store.darkMode ? "dark" : "light",
+    y: {
+      formatter: (value: number) => `${value.toFixed(2)} wins`,
+    },
+  },
+}));
+
+const replayRecordSeries = computed(() => {
+  return props.tableData.map((team, index) => ({
+    name: teamName(team),
+    data: replayWeeklyWinsByTeam.value[index] || [],
+  }));
+});
+
+const replayRecordChartOptions = computed(() => ({
+  chart: {
+    type: "line",
+    foreColor: "hsl(var(--foreground))",
+    toolbar: { show: false },
+    zoom: { enabled: false },
+    animations: {
+      enabled: true,
+      easing: "easeinout",
+      speed: 900,
+      animateGradually: { enabled: true, delay: 80 },
+      dynamicAnimation: { enabled: true, speed: 500 },
+    },
+  },
+  colors: Array.from(
+    { length: props.tableData.length },
+    (_, index) => `hsl(var(--chart-rank-${(index % 12) + 1}))`
+  ),
+  stroke: {
+    curve: "smooth",
+    width: 2.5,
+  },
+  markers: {
+    size: 3,
+    hover: { size: 6 },
+  },
+  dataLabels: { enabled: false },
+  xaxis: {
+    categories: Array.from(
+      { length: replayWeekCount.value },
+      (_, index) => `Week ${index + 1}`
+    ),
+    tickAmount: Math.max(0, Math.min(replayWeekCount.value - 1, 13)),
+    labels: { rotate: -45, rotateAlways: replayWeekCount.value > 8 },
+  },
+  yaxis: {
+    min: 0,
+    max: usesMedianScoring.value
+      ? replayWeekCount.value * 2
+      : replayWeekCount.value,
+    forceNiceScale: true,
+    title: { text: "Average cumulative wins" },
+  },
+  legend: {
+    position: "bottom",
+    horizontalAlign: "center",
+    onItemClick: { toggleDataSeries: true },
+    onItemHover: { highlightDataSeries: true },
+  },
+  grid: {
+    borderColor: "hsl(var(--border))",
+  },
+  tooltip: {
+    shared: true,
+    intersect: false,
+    theme: store.darkMode ? "dark" : "light",
+    y: { formatter: (value: number) => `${value.toFixed(2)} wins` },
+  },
+}));
+
+function runSeasonReplay() {
+  const teamCount = props.tableData.length;
+  const weeks = replayWeekCount.value;
+  const runs = Math.max(500, Math.min(10000, Math.floor(replayRuns.value)));
+  if (teamCount === 0 || weeks === 0) {
+    replaySummaryByTeam.value = {};
+    replayWeeklyWinsByTeam.value = [];
+    replayRunCount.value = 0;
+    return;
+  }
+  const actualSeedByTeam = new Map<number, number>();
+  actualStandings.value.forEach((team, index) => {
+    actualSeedByTeam.set(team.index, index + 1);
+  });
+  const result = runReplaySimulation({
+    teams: props.tableData.map((team, index) => ({
+      index,
+      wins: team.wins,
+      losses: team.losses,
+      ties: team.ties ?? 0,
+      pointsFor: team.pointsFor,
+      scores: (team.points || [])
+        .slice(0, weeks)
+        .filter((score) => Number.isFinite(score) && score >= 0),
+      actualSeed: actualSeedByTeam.get(index) ?? index + 1,
+    })),
+    actualScores: props.tableData.map((team) => team.points || []),
+    opponents: fullSeasonOpponents.value,
+    weeks,
+    keepResultsThroughWeek: replayThroughWeek.value,
+    playoffCutoff: playoffCutoff.value,
+    medianScoring: usesMedianScoring.value,
+    runs,
+  });
+  replaySummaryByTeam.value = result.summaryByTeam;
+  replayWeeklyWinsByTeam.value = result.weeklyWinsByTeam;
+  replayRunCount.value = result.runCount;
+}
+
+watch(
+  [() => props.tableData, regularSeasonWeekCount, displayedWeekCount],
+  () => {
+    if (isCurrentSeasonLeague.value && !hasCurrentForecastProjections.value) {
+      return;
+    }
+    runSeasonForecast();
+  },
+  { immediate: true, deep: true }
+);
+
+watch(
+  [activeToolValue, () => store.currentLeagueId, isCurrentSeasonLeague],
+  async () => {
+    if (
+      activeToolValue.value === "season-simulation" &&
+      isCurrentSeasonLeague.value
+    ) {
+      await loadForecastProjections();
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  [
+    () => props.tableData,
+    replayWeekCount,
+    replayThroughWeek,
+    fullSeasonOpponents,
+  ],
+  () => runSeasonReplay(),
+  { immediate: true, deep: true }
+);
+
+watch(
+  replayWeekCount,
+  (count) => {
+    if (count <= 0) return;
+    const selectedWeek = Number(replayThroughWeekValue.value);
+    const normalizedWeek = Number.isFinite(selectedWeek)
+      ? Math.min(Math.max(Math.floor(selectedWeek), 1), count)
+      : 1;
+    if (normalizedWeek !== selectedWeek) {
+      replayThroughWeekValue.value = String(normalizedWeek);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
   <div class="w-full space-y-4">
-    <Card class="w-full p-4 space-y-4 md:p-6">
-      <div>
-        <div>
-          <h2 class="heading-section">Schedule Simulator</h2>
-          <p class="mt-4 text-supporting">
-            Swap, shuffle, or randomize team schedules to see how each scenario
-            reshapes the standings.
-          </p>
-        </div>
-      </div>
-
-      <div
-        class="grid grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(360px,0.9fr)_1.1fr]"
-      >
-        <Card class="p-4">
-          <div class="flex items-center justify-between gap-3">
-            <h3 class="heading-card">Scenario Builder</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              :disabled="scenarioLabel === 'Original schedule'"
-              @click="resetScenario"
-            >
-              Reset
-            </Button>
-          </div>
-
-          <Tabs v-model="activeScenarioValue" class="mt-3">
-            <TabsList
-              class="grid w-full h-auto grid-cols-1 sm:inline-flex sm:w-auto"
-            >
-              <TabsTrigger value="swap" class="w-full sm:w-auto">
-                Swap Schedules
-              </TabsTrigger>
-              <TabsTrigger value="week" class="w-full sm:w-auto">
-                Shuffle Week
-              </TabsTrigger>
-              <TabsTrigger value="all" class="w-full sm:w-auto">
-                Random Season
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="swap" class="mt-3">
-              <div class="flex flex-wrap items-end gap-2">
-                <div class="w-full max-w-56">
-                  <p class="mb-1 text-sm">First team</p>
-                  <Select v-model="selectedSwapTeamAValue">
-                    <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Select team" />
-                    </SelectTrigger>
-                    <SelectContent class="w-56 max-w-[calc(100vw-2rem)]">
-                      <SelectItem
-                        v-for="team in teamOptions"
-                        :key="`swap-a-${team.value}`"
-                        :value="team.value"
-                      >
-                        <span class="block truncate">{{ team.label }}</span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div class="w-full max-w-56">
-                  <p class="mb-1 text-sm">Second team</p>
-                  <Select v-model="selectedSwapTeamBValue">
-                    <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Select team" />
-                    </SelectTrigger>
-                    <SelectContent class="w-56 max-w-[calc(100vw-2rem)]">
-                      <SelectItem
-                        v-for="team in teamOptions"
-                        :key="`swap-b-${team.value}`"
-                        :value="team.value"
-                      >
-                        <span class="block truncate">{{ team.label }}</span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  class="mt-1 lg:mt-0"
-                  :disabled="selectedSwapTeamAIndex === selectedSwapTeamBIndex"
-                  @click="swapSelectedTeamSchedules"
-                >
-                  Apply Swap
-                </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="week" class="mt-3">
-              <div class="flex flex-wrap items-end gap-3">
-                <div class="min-w-40">
-                  <p class="mb-1 text-sm">Week to shuffle</p>
-                  <Select v-model="selectedWeekValue">
-                    <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Select week" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="week in weekOptions"
-                        :key="week.value"
-                        :value="week.value"
-                      >
-                        {{ week.label }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button @click="shuffleSelectedWeek">
-                  Shuffle Week {{ selectedWeekNumber }}
-                </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="all" class="mt-3">
-              <div class="flex flex-wrap items-center gap-3">
-                <Button @click="randomizeEntireSchedule">
-                  Randomize Full Schedule
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </Card>
-
-        <Card class="p-4">
+    <div v-if="activeToolValue === 'schedule-luck'" class="space-y-4">
+      <Card class="w-full p-4 space-y-4 md:p-6">
+        <div
+          class="flex flex-col items-start justify-between gap-4 sm:flex-row"
+        >
           <div>
-            <h3 class="text-lg font-semibold">Scenario Impact</h3>
+            <h2 class="heading-section">Schedule Luck</h2>
+            <p class="mt-4 text-supporting">
+              Swap, shuffle, or randomize team schedules to see how each
+              scenario reshapes the standings.
+            </p>
           </div>
+          <Tabs v-model="activeToolValue" class="w-full sm:w-auto sm:shrink-0">
+            <TabsList class="grid w-full h-auto grid-cols-2 sm:w-auto">
+              <TabsTrigger value="season-simulation">
+                {{ seasonSimulationTabLabel }}
+              </TabsTrigger>
+              <TabsTrigger value="schedule-luck">Schedule Luck</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
-          <div class="grid grid-cols-1 gap-3 mt-4 sm:grid-cols-3">
-            <div
-              v-for="card in scenarioCards"
-              :key="card.label"
-              class="p-3.5 rounded-md bg-background/70"
-            >
-              <p class="text-xs font-semibold uppercase text-muted-foreground">
-                {{ card.label }}
-              </p>
-              <p
-                class="mt-2 text-2xl font-semibold tabular-nums"
-                :class="card.tone"
+        <div
+          class="grid grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(360px,0.9fr)_1.1fr]"
+        >
+          <section class="p-4 border rounded-lg bg-muted/20">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="heading-card">Scenario Builder</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="scenarioLabel === 'Original schedule'"
+                @click="resetScenario"
               >
-                {{ card.value }}
-              </p>
-              <p class="mt-1 text-sm truncate text-muted-foreground">
-                {{ card.detail }}
-              </p>
+                Reset
+              </Button>
             </div>
-          </div>
 
-          <div class="grid grid-cols-1 gap-3 mt-3 sm:grid-cols-2">
-            <div class="p-3.5 rounded-md bg-background/70">
-              <p class="text-xs font-semibold uppercase text-muted-foreground">
-                Biggest Boost
-              </p>
-              <p class="mt-2 text-base font-semibold">
-                {{ helpedMostTeam?.name || "No movement" }}
-              </p>
-              <p class="mt-1 text-sm text-muted-foreground">
-                {{ impactTeamDetail(helpedMostTeam) }}
-              </p>
-            </div>
-            <div class="p-3.5 rounded-md bg-background/70">
-              <p class="text-xs font-semibold uppercase text-muted-foreground">
-                Biggest Drop
-              </p>
-              <p class="mt-2 text-base font-semibold">
-                {{ hurtMostTeam?.name || "No movement" }}
-              </p>
-              <p class="mt-1 text-sm text-muted-foreground">
-                {{ impactTeamDetail(hurtMostTeam) }}
-              </p>
-            </div>
-          </div>
-        </Card>
-      </div>
+            <Tabs v-model="activeScenarioValue" class="mt-3">
+              <TabsList
+                class="grid w-full h-auto grid-cols-1 sm:inline-flex sm:w-auto"
+              >
+                <TabsTrigger value="swap" class="w-full sm:w-auto">
+                  Swap Schedules
+                </TabsTrigger>
+                <TabsTrigger value="week" class="w-full sm:w-auto">
+                  Shuffle Week
+                </TabsTrigger>
+                <TabsTrigger value="all" class="w-full sm:w-auto">
+                  Random Season
+                </TabsTrigger>
+              </TabsList>
 
-      <Card class="p-4">
-        <h3 class="text-lg font-semibold">Simulation Results</h3>
-
-        <Tabs v-model="activeDetailValue" class="mt-3">
-          <TabsList class="inline-flex flex-wrap h-auto">
-            <TabsTrigger value="standings">Standings</TabsTrigger>
-            <TabsTrigger value="matchups">Matchups</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="standings" class="mt-3">
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead
-                  class="sticky top-0 text-xs uppercase bg-card text-muted-foreground"
-                >
-                  <tr>
-                    <th class="pb-2 text-left min-w-32">Team</th>
-                    <th class="pb-2 text-left min-w-20">Actual</th>
-                    <th class="pb-2 text-left min-w-20">Simulated</th>
-                    <th class="pb-2 text-left min-w-20">Seed</th>
-                    <th class="pb-2 text-left min-w-24">Playoff Status</th>
-                    <th class="pb-2 text-left min-w-20">Record Delta</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="team in scenarioImpactRows"
-                    :key="`standings-${team.index}`"
-                    class="border-t h-9"
+              <TabsContent value="swap" class="mt-3">
+                <div class="flex flex-wrap items-end gap-2">
+                  <div class="w-full max-w-56">
+                    <p class="mb-1 text-sm">First team</p>
+                    <Select v-model="selectedSwapTeamAValue">
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Select team" />
+                      </SelectTrigger>
+                      <SelectContent class="w-56 max-w-[calc(100vw-2rem)]">
+                        <SelectItem
+                          v-for="team in teamOptions"
+                          :key="`swap-a-${team.value}`"
+                          :value="team.value"
+                        >
+                          <span class="block truncate">{{ team.label }}</span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div class="w-full max-w-56">
+                    <p class="mb-1 text-sm">Second team</p>
+                    <Select v-model="selectedSwapTeamBValue">
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Select team" />
+                      </SelectTrigger>
+                      <SelectContent class="w-56 max-w-[calc(100vw-2rem)]">
+                        <SelectItem
+                          v-for="team in teamOptions"
+                          :key="`swap-b-${team.value}`"
+                          :value="team.value"
+                        >
+                          <span class="block truncate">{{ team.label }}</span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    class="mt-1 lg:mt-0"
+                    :disabled="
+                      selectedSwapTeamAIndex === selectedSwapTeamBIndex
+                    "
+                    @click="swapSelectedTeamSchedules"
                   >
-                    <td class="py-1.5 pr-2">{{ team.name }}</td>
-                    <td class="py-1.5 pr-2">
-                      {{ team.actualWins }}-{{ team.actualLosses
-                      }}<span v-if="team.actualTies"
-                        >-{{ team.actualTies }}</span
-                      >
-                      <span class="ml-1 text-muted-foreground">
-                        ({{ seedText(team.actualSeed) }})
-                      </span>
-                    </td>
-                    <td class="py-1.5 pr-2">
-                      {{ team.wins }}-{{ team.losses
-                      }}<span v-if="team.ties">-{{ team.ties }}</span>
-                      <span class="ml-1 text-muted-foreground">
-                        ({{ seedText(team.simulatedSeed) }})
-                      </span>
-                    </td>
-                    <td
-                      class="py-1.5 pr-2"
-                      :class="
-                        team.seedDelta > 0
-                          ? 'text-primary'
-                          : team.seedDelta < 0
-                            ? 'text-destructive'
-                            : 'text-muted-foreground'
-                      "
-                    >
-                      {{ seedDeltaText(team.seedDelta) }}
-                    </td>
-                    <td
-                      class="py-1.5 pr-2"
-                      :class="playoffStatusClass(team.playoffChange)"
-                    >
-                      {{ playoffStatusText(team.playoffChange) }}
-                    </td>
-                    <td
-                      class="py-1.5 pr-2"
-                      :class="
-                        team.winDelta > 0
-                          ? 'text-primary'
-                          : team.winDelta < 0
-                            ? 'text-destructive'
-                            : 'text-muted-foreground'
-                      "
-                    >
-                      {{ winDeltaText(team.winDelta) }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </TabsContent>
+                    Apply Swap
+                  </Button>
+                </div>
+              </TabsContent>
 
-          <TabsContent value="matchups" class="mt-3">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <p class="text-sm text-muted-foreground">
-                Changed matchups are highlighted.
-              </p>
-              <Select v-model="selectedWeekValue">
-                <SelectTrigger class="w-full sm:w-44">
-                  <SelectValue placeholder="Select week" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="week in weekOptions"
-                    :key="`detail-${week.value}`"
-                    :value="week.value"
-                  >
-                    {{ week.label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <TabsContent value="week" class="mt-3">
+                <div class="flex flex-wrap items-end gap-3">
+                  <div class="min-w-40">
+                    <p class="mb-1 text-sm">Week to shuffle</p>
+                    <Select v-model="selectedWeekValue">
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Select week" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem
+                          v-for="week in weekOptions"
+                          :key="week.value"
+                          :value="week.value"
+                        >
+                          {{ week.label }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button @click="shuffleSelectedWeek">
+                    Shuffle Week {{ selectedWeekNumber }}
+                  </Button>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="all" class="mt-3">
+                <div class="flex flex-wrap items-center gap-3">
+                  <Button @click="randomizeEntireSchedule">
+                    Randomize Full Schedule
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </section>
+
+          <section class="p-4 border rounded-lg bg-muted/20">
+            <div>
+              <h3 class="text-lg font-semibold">Scenario Impact</h3>
             </div>
 
-            <div
-              v-if="selectedWeekMatchups.length === 0"
-              class="mt-3 text-sm text-muted-foreground"
-            >
-              No matchups found for this view.
-            </div>
-
-            <div v-else class="grid grid-cols-1 gap-2 mt-3 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-3 mt-4 sm:grid-cols-3">
               <div
-                v-for="matchup in selectedWeekMatchups"
-                :key="`matchup-${selectedWeekData.week}-${matchup.teamA}-${matchup.teamB}`"
-                class="px-2 py-1.5 rounded-md bg-muted/30"
-                :class="matchup.changed ? 'bg-secondary' : ''"
+                v-for="card in scenarioCards"
+                :key="card.label"
+                class="p-3.5 rounded-md bg-background/70"
               >
-                <p class="text-sm">
-                  <span
-                    class="font-semibold"
-                    :class="
-                      matchup.winner === matchup.teamA ? 'text-primary' : ''
-                    "
-                  >
-                    {{ teamName(tableData[matchup.teamA]) }}
-                  </span>
-                  <span class="mx-1 text-muted-foreground"
-                    >({{ matchup.pointsA.toFixed(2) }})</span
-                  >
-                  vs
-                  <span
-                    class="ml-1 font-semibold"
-                    :class="
-                      matchup.winner === matchup.teamB ? 'text-primary' : ''
-                    "
-                  >
-                    {{ teamName(tableData[matchup.teamB]) }}
-                  </span>
-                  <span class="mx-1 text-muted-foreground"
-                    >({{ matchup.pointsB.toFixed(2) }})</span
-                  >
-                  <span
-                    v-if="matchup.winner === null"
-                    class="ml-2 text-xs text-muted-foreground"
-                  >
-                    Tie
-                  </span>
+                <p
+                  class="text-xs font-semibold uppercase text-muted-foreground"
+                >
+                  {{ card.label }}
+                </p>
+                <p
+                  class="mt-2 text-2xl font-semibold tabular-nums"
+                  :class="card.tone"
+                >
+                  {{ card.value }}
+                </p>
+                <p class="mt-1 text-sm truncate text-muted-foreground">
+                  {{ card.detail }}
                 </p>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
-      </Card>
-    </Card>
 
-    <Card class="w-full p-4 md:p-6">
-      <div class="flex flex-wrap items-end justify-between gap-3">
+            <div class="grid grid-cols-1 gap-3 mt-3 sm:grid-cols-2">
+              <div class="p-3.5 rounded-md bg-background/70">
+                <p
+                  class="text-xs font-semibold uppercase text-muted-foreground"
+                >
+                  Biggest Boost
+                </p>
+                <p class="mt-2 text-base font-semibold">
+                  {{ helpedMostTeam?.name || "No movement" }}
+                </p>
+                <p class="mt-1 text-sm text-muted-foreground">
+                  {{ impactTeamDetail(helpedMostTeam) }}
+                </p>
+              </div>
+              <div class="p-3.5 rounded-md bg-background/70">
+                <p
+                  class="text-xs font-semibold uppercase text-muted-foreground"
+                >
+                  Biggest Drop
+                </p>
+                <p class="mt-2 text-base font-semibold">
+                  {{ hurtMostTeam?.name || "No movement" }}
+                </p>
+                <p class="mt-1 text-sm text-muted-foreground">
+                  {{ impactTeamDetail(hurtMostTeam) }}
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section class="p-4 border rounded-lg bg-muted/20">
+          <h3 class="text-lg font-semibold">Simulation Results</h3>
+
+          <Tabs v-model="activeDetailValue" class="mt-3">
+            <TabsList class="inline-flex flex-wrap h-auto">
+              <TabsTrigger value="standings">Standings</TabsTrigger>
+              <TabsTrigger value="matchups">Matchups</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="standings" class="mt-3">
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead
+                    class="sticky top-0 text-xs uppercase bg-card text-muted-foreground"
+                  >
+                    <tr>
+                      <th class="pb-2 text-left min-w-32">Team</th>
+                      <th class="pb-2 text-left min-w-20">Actual</th>
+                      <th class="pb-2 text-left min-w-20">Simulated</th>
+                      <th class="pb-2 text-left min-w-20">Seed</th>
+                      <th class="pb-2 text-left min-w-24">Playoff Status</th>
+                      <th class="pb-2 text-left min-w-20">Record Delta</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="team in scenarioImpactRows"
+                      :key="`standings-${team.index}`"
+                      class="border-t h-9"
+                    >
+                      <td class="py-1.5 pr-2">{{ team.name }}</td>
+                      <td class="py-1.5 pr-2">
+                        {{ team.actualWins }}-{{ team.actualLosses
+                        }}<span v-if="team.actualTies"
+                          >-{{ team.actualTies }}</span
+                        >
+                        <span class="ml-1 text-muted-foreground">
+                          ({{ seedText(team.actualSeed) }})
+                        </span>
+                      </td>
+                      <td class="py-1.5 pr-2">
+                        {{ team.wins }}-{{ team.losses
+                        }}<span v-if="team.ties">-{{ team.ties }}</span>
+                        <span class="ml-1 text-muted-foreground">
+                          ({{ seedText(team.simulatedSeed) }})
+                        </span>
+                      </td>
+                      <td
+                        class="py-1.5 pr-2"
+                        :class="
+                          team.seedDelta > 0
+                            ? 'text-primary'
+                            : team.seedDelta < 0
+                              ? 'text-destructive'
+                              : 'text-muted-foreground'
+                        "
+                      >
+                        {{ seedDeltaText(team.seedDelta) }}
+                      </td>
+                      <td
+                        class="py-1.5 pr-2"
+                        :class="playoffStatusClass(team.playoffChange)"
+                      >
+                        {{ playoffStatusText(team.playoffChange) }}
+                      </td>
+                      <td
+                        class="py-1.5 pr-2"
+                        :class="
+                          team.winDelta > 0
+                            ? 'text-primary'
+                            : team.winDelta < 0
+                              ? 'text-destructive'
+                              : 'text-muted-foreground'
+                        "
+                      >
+                        {{ winDeltaText(team.winDelta) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="matchups" class="mt-3">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <p class="text-sm text-muted-foreground">
+                  Changed matchups are highlighted.
+                </p>
+                <Select v-model="selectedWeekValue">
+                  <SelectTrigger class="w-full sm:w-44">
+                    <SelectValue placeholder="Select week" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="week in weekOptions"
+                      :key="`detail-${week.value}`"
+                      :value="week.value"
+                    >
+                      {{ week.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div
+                v-if="selectedWeekMatchups.length === 0"
+                class="mt-3 text-sm text-muted-foreground"
+              >
+                No matchups found for this view.
+              </div>
+
+              <div v-else class="grid grid-cols-1 gap-2 mt-3 md:grid-cols-2">
+                <div
+                  v-for="matchup in selectedWeekMatchups"
+                  :key="`matchup-${selectedWeekData.week}-${matchup.teamA}-${matchup.teamB}`"
+                  class="px-2 py-1.5 rounded-md bg-muted/30"
+                  :class="matchup.changed ? 'bg-secondary' : ''"
+                >
+                  <p class="text-sm">
+                    <span
+                      class="font-semibold"
+                      :class="
+                        matchup.winner === matchup.teamA ? 'text-primary' : ''
+                      "
+                    >
+                      {{ teamName(tableData[matchup.teamA]) }}
+                    </span>
+                    <span class="mx-1 text-muted-foreground"
+                      >({{ matchup.pointsA.toFixed(2) }})</span
+                    >
+                    vs
+                    <span
+                      class="ml-1 font-semibold"
+                      :class="
+                        matchup.winner === matchup.teamB ? 'text-primary' : ''
+                      "
+                    >
+                      {{ teamName(tableData[matchup.teamB]) }}
+                    </span>
+                    <span class="mx-1 text-muted-foreground"
+                      >({{ matchup.pointsB.toFixed(2) }})</span
+                    >
+                    <span
+                      v-if="matchup.winner === null"
+                      class="ml-2 text-xs text-muted-foreground"
+                    >
+                      Tie
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </section>
+      </Card>
+
+      <Card class="w-full p-4 md:p-6">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 class="heading-section">Random Schedule Outcomes</h2>
+            <p class="mt-2 text-supporting">
+              Distribution of likely win totals from simulating 1000 randomized
+              schedules.
+            </p>
+          </div>
+          <Select v-model="selectedVolatilityTeamValue">
+            <SelectTrigger class="w-full sm:w-44">
+              <SelectValue placeholder="Select team" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="team in teamOptions"
+                :key="`volatility-${team.value}`"
+                :value="team.value"
+              >
+                {{ team.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <apexchart
+          type="area"
+          width="100%"
+          height="320"
+          :options="volatilityChartOptions"
+          :series="selectedVolatilitySeries.series"
+          class="mt-2"
+        ></apexchart>
+
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-xs uppercase text-muted-foreground">
+              <tr>
+                <th class="pb-2 text-left min-w-32">Team</th>
+                <th class="pb-2 text-left min-w-20">Actual</th>
+                <th class="pb-2 text-left min-w-20">Average</th>
+                <th class="pb-2 text-left min-w-20">Most Common</th>
+                <th class="pb-2 text-left min-w-20">P10</th>
+                <th class="pb-2 text-left min-w-20">P90</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="team in monteCarloTeamSummaryRows"
+                :key="`volatility-summary-${team.index}`"
+                class="border-t"
+              >
+                <td class="py-2 pr-2">{{ team.name }}</td>
+                <td class="py-2 pr-2">{{ team.actualWins.toFixed(1) }}</td>
+                <td class="py-2 pr-2">{{ team.average.toFixed(2) }}</td>
+                <td class="py-2 pr-2">{{ team.mode.toFixed(1) }}</td>
+                <td class="py-2 pr-2">{{ team.p10.toFixed(1) }}</td>
+                <td class="py-2 pr-2">{{ team.p90.toFixed(1) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+
+    <div v-else-if="isCurrentSeasonLeague" class="space-y-4">
+      <Card class="w-full p-4 md:p-6">
+        <div
+          class="flex flex-col items-start justify-between gap-4 sm:flex-row"
+        >
+          <div>
+            <h2 class="heading-section">Season Forecast</h2>
+            <p class="max-w-3xl mt-4 text-supporting">
+              Simulate the remaining schedule using current records, roster
+              projections, and scoring volatility.
+            </p>
+          </div>
+          <Tabs v-model="activeToolValue" class="w-full sm:w-auto">
+            <TabsList class="grid w-full h-auto grid-cols-2 sm:w-auto">
+              <TabsTrigger value="season-simulation">
+                {{ seasonSimulationTabLabel }}
+              </TabsTrigger>
+              <TabsTrigger value="schedule-luck">Schedule Luck</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        <div class="flex items-end mt-4">
+          <Button
+            class="w-full sm:w-auto"
+            :disabled="forecastLoadingProjections"
+            @click="runSeasonForecast"
+          >
+            {{
+              forecastLoadingProjections
+                ? "Loading Projections…"
+                : "Rerun Simulations"
+            }}
+          </Button>
+        </div>
+
+        <div
+          v-if="forecastLoadingProjections"
+          role="status"
+          aria-live="polite"
+          class="flex items-center gap-2 p-3 mt-4 text-sm rounded-md bg-muted/35 text-muted-foreground"
+        >
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          Updating player projections and rerunning the forecast…
+        </div>
+        <div
+          v-if="forecastReady"
+          class="grid grid-cols-1 gap-6 mt-4 xl:grid-cols-2"
+        >
+          <div class="min-w-0">
+            <div>
+              <h3 class="heading-card">Projected Season Race</h3>
+              <p class="text-supporting">
+                Average cumulative wins across all
+                {{ forecastRunCount.toLocaleString() }} simulated seasons.
+              </p>
+            </div>
+            <apexchart
+              type="line"
+              width="100%"
+              height="440"
+              :options="forecastRaceChartOptions"
+              :series="forecastRaceSeries"
+              class="mt-3"
+            ></apexchart>
+          </div>
+
+          <div class="min-w-0">
+            <div>
+              <h3 class="heading-card">Current Record vs. Projected Finish</h3>
+              <p class="text-supporting">
+                Wins already secured compared with the forecasted final total.
+              </p>
+            </div>
+            <apexchart
+              type="bar"
+              width="100%"
+              height="440"
+              :options="forecastComparisonChartOptions"
+              :series="forecastComparisonSeries"
+              class="mt-3"
+            ></apexchart>
+          </div>
+        </div>
+      </Card>
+
+      <Card v-if="forecastReady" class="w-full p-4 md:p-6">
         <div>
-          <h2 class="heading-section">Random Schedule Outcomes</h2>
+          <h3 class="heading-card">Projected Standings</h3>
           <p class="mt-2 text-supporting">
-            Distribution of likely win totals from simulating 1000 randomized
-            schedules.
+            Win ranges show the 10th through 90th percentile outcome.
           </p>
         </div>
-        <Select v-model="selectedVolatilityTeamValue">
-          <SelectTrigger class="w-full sm:w-44">
-            <SelectValue placeholder="Select team" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="team in teamOptions"
-              :key="`volatility-${team.value}`"
-              :value="team.value"
-            >
-              {{ team.label }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
-      <apexchart
-        type="area"
-        width="100%"
-        height="320"
-        :options="volatilityChartOptions"
-        :series="selectedVolatilitySeries.series"
-        class="mt-2"
-      ></apexchart>
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-xs uppercase text-muted-foreground">
+              <tr>
+                <th class="pb-2 text-left min-w-40">Team</th>
+                <th class="pb-2 text-left min-w-24">Playoffs</th>
+                <th class="pb-2 text-left min-w-24">Avg. Wins</th>
+                <th class="pb-2 text-left min-w-28">Win Range</th>
+                <th class="pb-2 text-left min-w-24">Avg. Seed</th>
+                <th class="pb-2 text-left min-w-24">No. 1 Seed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(team, rowIndex) in forecastRows"
+                :key="`forecast-${team.index}`"
+                class="transition-colors border-t hover:bg-muted/35"
+                :class="{
+                  'border-b-2 border-b-primary/50':
+                    rowIndex === playoffCutoff - 1,
+                }"
+              >
+                <td class="py-3 pr-3 font-medium">{{ team.name }}</td>
+                <td class="py-3 pr-3 font-semibold text-primary tabular-nums">
+                  {{ team.playoffOdds.toFixed(1) }}%
+                </td>
+                <td class="py-3 pr-3 tabular-nums">
+                  {{ team.averageWins.toFixed(2) }}
+                </td>
+                <td class="py-3 pr-3 tabular-nums">
+                  {{ team.p10Wins.toFixed(1) }}–{{ team.p90Wins.toFixed(1) }}
+                </td>
+                <td class="py-3 pr-3 tabular-nums">
+                  #{{ team.averageSeed.toFixed(1) }}
+                </td>
+                <td class="py-3 pr-3 tabular-nums">
+                  {{ team.topSeedOdds.toFixed(1) }}%
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
 
-      <div class="mt-4 overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="text-xs uppercase text-muted-foreground">
-            <tr>
-              <th class="pb-2 text-left min-w-32">Team</th>
-              <th class="pb-2 text-left min-w-20">Actual</th>
-              <th class="pb-2 text-left min-w-20">Average</th>
-              <th class="pb-2 text-left min-w-20">Most Common</th>
-              <th class="pb-2 text-left min-w-20">P10</th>
-              <th class="pb-2 text-left min-w-20">P90</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="team in monteCarloTeamSummaryRows"
-              :key="`volatility-summary-${team.index}`"
-              class="border-t"
-            >
-              <td class="py-2 pr-2">{{ team.name }}</td>
-              <td class="py-2 pr-2">{{ team.actualWins.toFixed(1) }}</td>
-              <td class="py-2 pr-2">{{ team.average.toFixed(2) }}</td>
-              <td class="py-2 pr-2">{{ team.mode.toFixed(1) }}</td>
-              <td class="py-2 pr-2">{{ team.p10.toFixed(1) }}</td>
-              <td class="py-2 pr-2">{{ team.p90.toFixed(1) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </Card>
+    <div v-else class="space-y-4">
+      <Card class="w-full p-4 md:p-6">
+        <div
+          class="flex flex-col items-start justify-between gap-4 sm:flex-row"
+        >
+          <div>
+            <h2 class="heading-section">Season Forecast</h2>
+            <p class="max-w-3xl mt-4 text-supporting">
+              Simulate the schedule after a certain week using current records,
+              roster projections, and scoring volatility.
+            </p>
+          </div>
+          <Tabs v-model="activeToolValue" class="w-full sm:w-auto">
+            <TabsList class="grid w-full h-auto grid-cols-2 sm:w-auto">
+              <TabsTrigger value="season-simulation">
+                {{ seasonSimulationTabLabel }}
+              </TabsTrigger>
+              <TabsTrigger value="schedule-luck">Schedule Luck</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        <div
+          class="flex flex-col items-stretch gap-2 mt-4 sm:flex-row sm:items-end"
+        >
+          <div class="w-full sm:min-w-44 sm:w-auto">
+            <p class="mb-1 text-sm">Start forecast</p>
+            <Select v-model="replayThroughWeekValue">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="Select week" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="week in replayThroughWeekOptions"
+                  :key="`replay-through-${week.value}`"
+                  :value="week.value"
+                >
+                  {{ week.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button class="w-full sm:w-auto" @click="runSeasonReplay">
+            Rerun Simulations
+          </Button>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 mt-4 xl:grid-cols-2">
+          <div class="min-w-0">
+            <h3 class="heading-card">Projected Season Race</h3>
+            <p class="text-supporting">
+              Average cumulative wins across all
+              {{ replayRunCount.toLocaleString() }} simulated seasons
+            </p>
+            <apexchart
+              type="line"
+              width="100%"
+              height="440"
+              :options="replayRecordChartOptions"
+              :series="replayRecordSeries"
+              class="mt-3"
+            ></apexchart>
+          </div>
+
+          <div class="min-w-0">
+            <h3 class="heading-card">Actual Record vs. Projected Finish</h3>
+            <p class="text-supporting">
+              Actual number of wins compared with the projected number of wins
+            </p>
+            <apexchart
+              type="bar"
+              width="100%"
+              height="440"
+              :options="replayComparisonChartOptions"
+              :series="replayComparisonSeries"
+              class="mt-3"
+            ></apexchart>
+          </div>
+        </div>
+      </Card>
+
+      <Card class="w-full p-4 md:p-6">
+        <div>
+          <h3 class="heading-card">Projected Standings</h3>
+          <p class="mt-2 text-supporting">
+            Compare the real finish with the range forecast using only results
+            available through the selected week.
+          </p>
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-xs uppercase text-muted-foreground">
+              <tr>
+                <th class="pb-2 text-left min-w-40">Team</th>
+                <th class="pb-2 text-left min-w-24">Actual</th>
+                <th class="pb-2 text-left min-w-24">Avg. Wins</th>
+                <th class="pb-2 text-left min-w-28">Win Range</th>
+                <th class="pb-2 text-left min-w-24">Playoffs</th>
+                <th class="pb-2 text-left min-w-24">Avg. Seed</th>
+                <th class="pb-2 text-left min-w-24">Same Finish</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(team, rowIndex) in replayRows"
+                :key="`replay-${team.index}`"
+                class="transition-colors border-t hover:bg-muted/35"
+                :class="{
+                  'border-b-2 border-b-primary/50':
+                    rowIndex === playoffCutoff - 1,
+                }"
+              >
+                <td class="py-3 pr-3 font-medium">{{ team.name }}</td>
+                <td class="py-3 pr-3 tabular-nums">
+                  {{ team.actualWins.toFixed(1) }} / #{{ team.actualSeed }}
+                </td>
+                <td class="py-3 pr-3 tabular-nums">
+                  {{ team.averageWins.toFixed(2) }}
+                </td>
+                <td class="py-3 pr-3 tabular-nums">
+                  {{ team.p10Wins.toFixed(1) }}–{{ team.p90Wins.toFixed(1) }}
+                </td>
+                <td class="py-3 pr-3 font-semibold text-primary tabular-nums">
+                  {{ team.playoffOdds.toFixed(1) }}%
+                </td>
+                <td class="py-3 pr-3 tabular-nums">
+                  #{{ team.averageSeed.toFixed(1) }}
+                </td>
+                <td class="py-3 pr-3 tabular-nums">
+                  {{ team.sameSeedOdds.toFixed(1) }}%
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
   </div>
 </template>

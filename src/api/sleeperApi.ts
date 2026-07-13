@@ -106,6 +106,10 @@ type SleeperWeekProjectionMap = Record<
 
 const PROJECTION_FETCH_TIMEOUT_MS = 8000;
 let searchablePlayersCache: SearchableSleeperPlayer[] | null = null;
+let sleeperPlayerDirectoryPromise: Promise<
+  Record<string, SleeperPlayerDirectoryEntry>
+> | null = null;
+const weeklyProjectionCache = new Map<string, Promise<number>>();
 
 export type SearchableSleeperPlayer = {
   player_id: string;
@@ -125,6 +129,33 @@ type SleeperPlayerDirectoryEntry = {
   fantasy_positions?: string[] | null;
 };
 
+const getSleeperPlayerDirectory = async () => {
+  if (!sleeperPlayerDirectoryPromise) {
+    sleeperPlayerDirectoryPromise = (async () => {
+      const response = await fetch("https://api.sleeper.app/v1/players/nfl");
+      assertOk(response, "Sleeper player directory request");
+      return parseJson<Record<string, SleeperPlayerDirectoryEntry>>(
+        response,
+        "Sleeper player directory"
+      );
+    })().catch((error) => {
+      sleeperPlayerDirectoryPromise = null;
+      throw error;
+    });
+  }
+  return sleeperPlayerDirectoryPromise;
+};
+
+export const getPlayerPositionsById = async (playerIds: string[]) => {
+  const directory = await getSleeperPlayerDirectory();
+  return playerIds.reduce<Record<string, string>>((positions, playerId) => {
+    const player = directory[playerId];
+    positions[playerId] =
+      player?.position ?? player?.fantasy_positions?.[0] ?? "";
+    return positions;
+  }, {});
+};
+
 export const getSearchablePlayers = async (): Promise<
   SearchableSleeperPlayer[]
 > => {
@@ -132,12 +163,7 @@ export const getSearchablePlayers = async (): Promise<
     return searchablePlayersCache;
   }
 
-  const response = await fetch("https://api.sleeper.app/v1/players/nfl");
-  assertOk(response, "Sleeper player directory request");
-  const directory = await parseJson<Record<string, SleeperPlayerDirectoryEntry>>(
-    response,
-    "Sleeper player directory"
-  );
+  const directory = await getSleeperPlayerDirectory();
   const fantasyPositions = new Set(["QB", "RB", "WR", "TE", "K", "DEF"]);
 
   searchablePlayersCache = Object.entries(directory)
@@ -407,39 +433,47 @@ export const getWeeklyProjections = async (
   week: number,
   scoringType: number
 ): Promise<number> => {
-  let allWeeks: SleeperWeekProjectionMap = {};
-  try {
-    const response = await fetchWithTimeout(
-      `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`,
-      PROJECTION_FETCH_TIMEOUT_MS
-    );
-    assertOk(response, "Weekly projections request");
-    allWeeks = await parseJson<SleeperWeekProjectionMap>(
-      response,
-      "Weekly projections"
-    );
-  } catch (error) {
-    console.error("Error fetching weekly projections:", error);
-    return 0;
-  }
-  let totalProjection = 0;
-  let scoring = "pts_ppr";
-  if (scoringType === 0) {
-    scoring = "pts_std";
-  } else if (scoringType === 0.5) {
-    scoring = "pts_half_ppr";
-  }
-  for (const scoredWeek in allWeeks) {
-    const weekStats = allWeeks[scoredWeek]?.stats;
-    if (
-      weekStats &&
-      weekStats[scoring] !== undefined &&
-      Number(scoredWeek) >= week
-    ) {
-      totalProjection += weekStats[scoring] ?? 0;
+  const cacheKey = `${player}:${year}:${week}:${scoringType}`;
+  const cached = weeklyProjectionCache.get(cacheKey);
+  if (cached) return cached;
+
+  const request = (async () => {
+    try {
+      const response = await fetchWithTimeout(
+        `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}&grouping=week`,
+        PROJECTION_FETCH_TIMEOUT_MS
+      );
+      assertOk(response, "Weekly projections request");
+      const allWeeks = await parseJson<SleeperWeekProjectionMap>(
+        response,
+        "Weekly projections"
+      );
+      let totalProjection = 0;
+      let scoring = "pts_ppr";
+      if (scoringType === 0) {
+        scoring = "pts_std";
+      } else if (scoringType === 0.5) {
+        scoring = "pts_half_ppr";
+      }
+      for (const scoredWeek in allWeeks) {
+        const weekStats = allWeeks[scoredWeek]?.stats;
+        if (
+          weekStats &&
+          weekStats[scoring] !== undefined &&
+          Number(scoredWeek) >= week
+        ) {
+          totalProjection += weekStats[scoring] ?? 0;
+        }
+      }
+      return Math.round(totalProjection);
+    } catch (error) {
+      weeklyProjectionCache.delete(cacheKey);
+      console.error("Error fetching weekly projections:", error);
+      return 0;
     }
-  }
-  return Math.round(totalProjection);
+  })();
+  weeklyProjectionCache.set(cacheKey, request);
+  return request;
 };
 
 export const getDraftProjections = async (

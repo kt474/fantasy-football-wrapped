@@ -142,7 +142,7 @@ const data = {
           icon: Newspaper,
         },
         {
-          title: "Schedule Simulator",
+          title: "Season Forecast",
           icon: Dices,
         },
         {
