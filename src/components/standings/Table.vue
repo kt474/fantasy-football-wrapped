@@ -4,11 +4,14 @@ import minBy from "lodash/minBy";
 import { createTableData } from "../../api/helper";
 import {
   computed,
+  onBeforeUnmount,
   onMounted,
   ref,
+  watch,
   ComputedRef,
   defineAsyncComponent,
 } from "vue";
+import { useElementVisibility } from "@vueuse/core";
 import { useStore } from "../../store/store";
 import {
   TableDataType,
@@ -30,8 +33,6 @@ import {
   isRecord,
   migrateLegacyArrayCacheEntry,
 } from "@/lib/storage";
-import { useDeferredVisibleMount } from "@/composables/useDeferredVisibleMount";
-import { useMediaQuery } from "@vueuse/core";
 
 const PowerRankingData = defineAsyncComponent(
   () => import("../power_rankings/PowerRankingData.vue")
@@ -105,26 +106,22 @@ const TradeLab = defineAsyncComponent(
 );
 
 const tableOrder = ref("wins");
+const showLeagueNews = ref(false);
 const leagueNewsTrigger = ref<HTMLElement | null>(null);
-const standingsChartTrigger = ref<HTMLElement | null>(null);
-const isMobileViewport = useMediaQuery("(max-width: 767px)");
-const deferredLeagueNews = useDeferredVisibleMount(leagueNewsTrigger, {
-  settleDelay: 650,
-  minimumDelay: 1600,
-});
-const deferredStandingsChart = useDeferredVisibleMount(
-  standingsChartTrigger,
-  {
-    settleDelay: 500,
-    minimumDelay: 1200,
+const leagueNewsIsVisible = useElementVisibility(leagueNewsTrigger);
+let leagueNewsIdleCallback: number | undefined;
+let leagueNewsFallbackTimer: ReturnType<typeof window.setTimeout> | undefined;
+
+const cancelPendingLeagueNews = () => {
+  if (leagueNewsIdleCallback !== undefined) {
+    window.cancelIdleCallback(leagueNewsIdleCallback);
+    leagueNewsIdleCallback = undefined;
   }
-);
-const showLeagueNews = computed(
-  () => !isMobileViewport.value || deferredLeagueNews.value
-);
-const showStandingsChart = computed(
-  () => !isMobileViewport.value || deferredStandingsChart.value
-);
+  if (leagueNewsFallbackTimer !== undefined) {
+    window.clearTimeout(leagueNewsFallbackTimer);
+    leagueNewsFallbackTimer = undefined;
+  }
+};
 const props = defineProps<{
   users: UserType[];
   rosters: RosterType[];
@@ -184,6 +181,41 @@ onMounted(() => {
   }
 
 });
+
+watch(
+  leagueNewsIsVisible,
+  (isVisible) => {
+    if (!isVisible) {
+      cancelPendingLeagueNews();
+      return;
+    }
+    if (showLeagueNews.value) return;
+
+    const showNews = () => {
+      leagueNewsIdleCallback = undefined;
+      leagueNewsFallbackTimer = undefined;
+      if (!leagueNewsIsVisible.value) return;
+      showLeagueNews.value = true;
+    };
+
+    const requestIdleCallback = (
+      window as unknown as {
+        requestIdleCallback?: (callback: IdleRequestCallback) => number;
+      }
+    ).requestIdleCallback;
+
+    if (requestIdleCallback) {
+      // Do not use a timeout here: forcing this work during a swipe can stall
+      // mobile Safari's main thread for a noticeable amount of time.
+      leagueNewsIdleCallback = requestIdleCallback(showNews);
+    } else {
+      leagueNewsFallbackTimer = window.setTimeout(showNews, 250);
+    }
+  },
+  { immediate: true }
+);
+
+onBeforeUnmount(cancelPendingLeagueNews);
 
 const originalData = computed(() => {
   const currentLeague = store.leagueInfo[store.currentLeagueIndex];
@@ -350,16 +382,6 @@ const regularSeasonLength = computed(() => {
 
 const totalRosters = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex].totalRosters;
-});
-
-const leagueNewsPlaceholderClass = computed(() => {
-  const rosterCount =
-    store.leagueInfo[store.currentLeagueIndex]?.totalRosters ??
-    props.rosters.length;
-  if (rosterCount <= 8) return "min-h-[360px]";
-  if (rosterCount <= 10) return "min-h-[400px]";
-  if (rosterCount <= 12) return "min-h-[460px]";
-  return "min-h-[520px]";
 });
 
 const medianScoring = computed(() => {
@@ -718,11 +740,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
           </table>
         </TooltipProvider>
       </ScrollableTableCard>
-      <div
-        ref="leagueNewsTrigger"
-        :class="leagueNewsPlaceholderClass"
-        class="min-w-0"
-      >
+      <div ref="leagueNewsTrigger" class="min-h-px min-w-0">
         <CurrentTrends
           v-if="showLeagueNews && seasonType !== 'Guillotine'"
           :tableData="tableData"
@@ -730,13 +748,11 @@ const getTeamName = (tableDataItem: TableDataType) => {
         />
       </div>
     </div>
-    <div v-if="showStandingsTab" ref="standingsChartTrigger" class="min-h-px">
-      <StandingsChart
-        v-if="showStandingsChart"
-        :tableData="tableData"
-        class="my-4"
-      />
-    </div>
+    <StandingsChart
+      v-if="showStandingsTab"
+      :tableData="tableData"
+      class="my-4"
+    />
     <div v-if="store.currentTab === 'Power Rankings'">
       <PowerRankingData
         v-if="store.currentLeagueId"
