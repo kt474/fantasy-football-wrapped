@@ -39,7 +39,12 @@ import {
   removeSavedEspnAuth,
 } from "@/api/espnApi";
 import Dialog from "./Dialog.vue";
-import { getParsedStorageItem, isRecord } from "@/lib/storage";
+import {
+  getParsedStorageItem,
+  isRecord,
+  removeAllNarrativeBundles,
+  removeNarrativeBundle,
+} from "@/lib/storage";
 import { trackEvent } from "@/lib/analytics";
 
 const router = useRouter();
@@ -114,6 +119,7 @@ const removeLeague = () => {
     store.updateCurrentLeagueId(store.leagueIds[0] || "");
     toast.success("League removed!");
     if (store.currentLeagueId === "") {
+      removeAllNarrativeBundles();
       localStorage.removeItem("currentTab");
       store.updateShowUsernames(false);
       store.currentTab = "Home";
@@ -122,6 +128,8 @@ const removeLeague = () => {
         path: "/",
         query: {},
       });
+    } else {
+      removeNarrativeBundle(removedLeagueId);
     }
     const originalData = localStorage.getItem("originalData");
     if (originalData) {

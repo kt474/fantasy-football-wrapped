@@ -14,7 +14,10 @@ import type { ManagerBlurbsPayload } from "@/api/api";
 import { getDraftMetadata, getDraftPicks } from "@/api/sleeperApi";
 import { fakeManagerProfiles } from "@/api/fakeLeague.ts";
 import ManagerComparison from "../league_history/ManagerComparison.vue";
-import { getParsedStorageItem } from "@/lib/storage";
+import {
+  getNarrativeBundleStorageKey,
+  getParsedStorageItem,
+} from "@/lib/storage";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -32,7 +35,9 @@ const seasons = computed(() =>
 
 const getNarrativeCacheKey = () => {
   const league = store.leagueInfo[store.currentLeagueIndex];
-  return league ? `narrative-bundle:${getLeagueKey(league)}` : null;
+  return league
+    ? getNarrativeBundleStorageKey(getLeagueKey(league))
+    : null;
 };
 
 const getCachedNarratives = (): NarrativeBundle => {
