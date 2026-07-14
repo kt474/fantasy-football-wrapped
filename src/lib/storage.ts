@@ -10,6 +10,29 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
 export const isBoolean = (value: unknown): value is boolean =>
   typeof value === "boolean";
 
+type TimestampedCacheEntry<T> =
+  | T[]
+  | {
+      lastUpdated?: number;
+      data?: T[];
+    };
+
+/** Converts an old array-only cache entry to the timestamped cache format. */
+export const migrateLegacyArrayCacheEntry = <T>(
+  cache: Record<string, TimestampedCacheEntry<T>>,
+  key: string,
+  lastUpdated?: number
+) => {
+  const legacyData = cache[key];
+  if (!Array.isArray(legacyData)) return false;
+
+  cache[key] = {
+    lastUpdated,
+    data: legacyData,
+  };
+  return true;
+};
+
 const NARRATIVE_BUNDLE_STORAGE_PREFIX = "narrative-bundle:";
 
 export const getNarrativeBundleStorageKey = (leagueKey: string) =>

@@ -11,6 +11,17 @@ const badgeVariant = (type: string): BadgeVariants["variant"] => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/14/26",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Made a lot of optimizations so performance on mobile devices should be much better. Also fixed some bugs related to stale cached data.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/13/26",
     content: [
       {
@@ -27,7 +38,7 @@ const data = [
       {
         type: "Update",
         text: [
-          "Update the league news section to give more valulable insights.",
+          "Updated the league news section to give more valuable insights.",
         ],
       },
     ],

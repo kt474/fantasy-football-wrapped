@@ -4,6 +4,7 @@ import {
   getParsedStorageItem,
   isBoolean,
   isRecord,
+  migrateLegacyArrayCacheEntry,
   removeAllNarrativeBundles,
   removeNarrativeBundle,
 } from "../src/lib/storage.ts";
@@ -75,5 +76,31 @@ describe("storage helpers", () => {
       getParsedStorageItem("cache", {}, { storage, isValid: isRecord })
     ).toEqual({});
     expect(storage.removeItem).toHaveBeenCalledWith("cache");
+  });
+
+  test("migrates legacy array cache entries with their league timestamp", () => {
+    const legacyData = [{ name: "Team One", wins: 8 }];
+    const cache = { "league-1": legacyData };
+
+    expect(
+      migrateLegacyArrayCacheEntry(cache, "league-1", 1_752_518_400_000)
+    ).toBe(true);
+    expect(cache["league-1"]).toEqual({
+      lastUpdated: 1_752_518_400_000,
+      data: legacyData,
+    });
+  });
+
+  test("leaves timestamped cache entries unchanged", () => {
+    const timestampedEntry = {
+      lastUpdated: 1_752_518_400_000,
+      data: [{ name: "Team One", wins: 8 }],
+    };
+    const cache = { "league-1": timestampedEntry };
+
+    expect(
+      migrateLegacyArrayCacheEntry(cache, "league-1", 1_752_604_800_000)
+    ).toBe(false);
+    expect(cache["league-1"]).toBe(timestampedEntry);
   });
 });

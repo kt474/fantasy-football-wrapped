@@ -4,11 +4,11 @@ import { createRouter, createWebHistory } from "vue-router";
 import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import App from "./App.vue";
-import posthogPlugin from "./plugins/posthog";
 import { useAuthStore } from "./store/auth";
 import { useSubscriptionStore } from "./store/subscription";
 import {
   identifyUser,
+  initializeAnalytics,
   resetAnalytics,
   setUserProperties,
   trackPageView,
@@ -234,7 +234,6 @@ const ApexChart = defineAsyncComponent(async () => {
 });
 
 app.use(pinia);
-app.use(posthogPlugin);
 const authStore = useAuthStore(pinia);
 authStore.initialize();
 const subscriptionStore = useSubscriptionStore(pinia);
@@ -327,3 +326,4 @@ app.component("apexchart", ApexChart);
 app.use(router);
 registerSW({ immediate: true });
 app.mount("#app");
+initializeAnalytics();

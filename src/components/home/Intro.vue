@@ -49,14 +49,14 @@ const {
     <div
       aria-hidden="true"
       :class="[
-        'absolute -translate-x-1/2 rounded-full -top-28 left-1/2 size-96 blur-3xl',
+        'absolute hidden -translate-x-1/2 rounded-full -top-28 left-1/2 size-96 blur-3xl md:block',
         isDark ? 'bg-sky-500/[0.03]' : 'bg-sky-500/12',
       ]"
     />
     <div
       aria-hidden="true"
       :class="[
-        'absolute rounded-full -bottom-24 -left-10 size-80 blur-3xl',
+        'absolute hidden rounded-full -bottom-24 -left-10 size-80 blur-3xl md:block',
         isDark ? 'bg-blue-500/[0.02]' : 'bg-blue-500/10',
       ]"
     />

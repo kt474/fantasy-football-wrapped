@@ -16,7 +16,7 @@ import { getLeague } from "../api/sleeperApi";
 import { LeagueInfoType } from "../types/types";
 import { useRoute, useRouter } from "vue-router";
 import { toast } from "vue-sonner";
-import { getParsedStorageItem, isBoolean, isRecord } from "@/lib/storage";
+import { getParsedStorageItem, isBoolean } from "@/lib/storage";
 import { mapWithConcurrency } from "@/lib/async";
 import { trackEvent } from "@/lib/analytics";
 
@@ -28,7 +28,6 @@ const route = useRoute();
 const router = useRouter();
 const store = useStore();
 
-const showLoading = ref(false);
 const isInitialLoading = ref(true);
 const cachedGoogleSitelinks = ["1218604624068497408", "1057743221285101568"];
 
@@ -42,6 +41,56 @@ const hasMissingEspnPlayerIds = (league: LeagueInfoType) =>
   league.rosters.length > 0 &&
   league.rosters.every((roster) => !roster.players?.length);
 
+const persistSavedLeagues = () => {
+  localStorage.setItem("leagueInfo", JSON.stringify(store.leagueInfo));
+};
+
+const canApplyRefresh = (league: LeagueInfoType) =>
+  store.findLeague(getLeagueKey(league))?.lastUpdated === league.lastUpdated;
+
+const refreshSavedLeagues = async (savedLeagues: LeagueInfoType[]) => {
+  const staleLeagues = savedLeagues.filter((league) => {
+    const age = Date.now() - league.lastUpdated;
+    return age > 86400000 || hasMissingEspnPlayerIds(league);
+  });
+
+  await mapWithConcurrency(staleLeagues, 2, async (league) => {
+    if (league.platform === "espn") {
+      try {
+        const refreshedData = await getEspnLeagueInfo(
+          league.season,
+          league.leagueId,
+          getSavedEspnAuth(league.season, league.leagueId)
+        );
+        if (!canApplyRefresh(league)) return;
+        store.updateLeagueInfo(refreshedData);
+        persistSavedLeagues();
+      } catch (error) {
+        toast.error(getEspnErrorMessage(error));
+      }
+      return;
+    }
+
+    try {
+      const refreshedData = await getData(league.leagueId);
+      if (!canApplyRefresh(league)) return;
+      store.updateLeagueInfo(refreshedData);
+      persistSavedLeagues();
+      await inputLeague(
+        league.leagueId,
+        league.name,
+        league.totalRosters,
+        league.seasonType,
+        league.season,
+        "sleeper"
+      );
+    } catch (error) {
+      console.error(`Unable to refresh saved league ${league.leagueId}:`, error);
+      toast.error(`Unable to refresh ${league.name}. Showing saved data.`);
+    }
+  });
+};
+
 onMounted(async () => {
   try {
     checkSystemTheme();
@@ -51,84 +100,16 @@ onMounted(async () => {
       { isValid: Array.isArray }
     );
     if (savedLeagues.length > 0) {
-      showLoading.value = true;
-      store.updateLoadingLeague("saved leagues");
-
       const leaguesToHydrate = savedLeagues.filter(
         (league) => !store.leagueIds.includes(getLeagueKey(league))
       );
-      const staleLeagueKeys = leaguesToHydrate
-        .filter((league) => {
-          const age = Date.now() - league.lastUpdated;
-          return age > 86400000 || hasMissingEspnPlayerIds(league);
-        })
-        .map(getLeagueKey);
-      if (staleLeagueKeys.length > 0) {
-        const currentData = getParsedStorageItem<Record<string, unknown>>(
-          "originalData",
-          {},
-          { isValid: isRecord }
-        );
-        staleLeagueKeys.forEach((leagueKey) => delete currentData[leagueKey]);
-        localStorage.setItem("originalData", JSON.stringify(currentData));
-      }
+      leaguesToHydrate.forEach((league) => store.updateLeagueInfo(league));
+      store.updateCurrentLeagueId(localStorage.getItem("currentLeagueId") ?? "");
+      isInitialLoading.value = false;
 
-      try {
-        await mapWithConcurrency(
-          leaguesToHydrate,
-          2,
-          async (league: LeagueInfoType) => {
-            const currentTime = new Date().getTime();
-            const diff = currentTime - league.lastUpdated;
-            if (diff > 86400000 || hasMissingEspnPlayerIds(league)) {
-              // 1 day
-              if (league.platform === "espn") {
-                try {
-                  const refreshedData = await getEspnLeagueInfo(
-                    league.season,
-                    league.leagueId,
-                    getSavedEspnAuth(league.season, league.leagueId)
-                  );
-                  store.updateLeagueInfo(refreshedData);
-                } catch (error) {
-                  toast.error(getEspnErrorMessage(error));
-                  store.updateLeagueInfo(league);
-                }
-              } else {
-                try {
-                  const refreshedData = await getData(league.leagueId);
-                  store.updateLeagueInfo(refreshedData);
-                  await inputLeague(
-                    league.leagueId,
-                    league.name,
-                    league.totalRosters,
-                    league.seasonType,
-                    league.season,
-                    "sleeper"
-                  );
-                } catch (error) {
-                  console.error(
-                    `Unable to refresh saved league ${league.leagueId}:`,
-                    error
-                  );
-                  toast.error(
-                    `Unable to refresh ${league.name}. Showing saved data.`
-                  );
-                  store.updateLeagueInfo(league);
-                }
-              }
-            } else {
-              store.updateLeagueInfo(league);
-            }
-          }
-        );
-        store.updateCurrentLeagueId(
-          localStorage.getItem("currentLeagueId") ?? ""
-        );
-      } finally {
-        store.updateLoadingLeague("");
-        showLoading.value = false;
-      }
+      // Cached data is immediately usable. Refresh stale leagues without
+      // keeping Safari's main view behind a loading screen.
+      void refreshSavedLeagues(leaguesToHydrate);
     }
     const leagueId = Array.isArray(route.query.leagueId)
       ? route.query.leagueId[0]
@@ -239,7 +220,7 @@ const checkSystemTheme = () => {
   <div>
     <SkeletonLoading v-if="isInitialLoading" />
     <div v-else>
-      <SkeletonLoading v-if="showLoading || store.loadingLeague" />
+      <SkeletonLoading v-if="store.loadingLeague" />
       <div
         v-else-if="store.currentLeagueId"
         :class="store.currentTab === 'Home' ? '' : 'container mx-auto'"
