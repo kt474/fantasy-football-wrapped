@@ -292,7 +292,11 @@ const toolSummaries: ToolSummary[] = [
               <p class="mt-4 text-sm leading-6 text-muted-foreground">
                 Optional
                 <router-link
-                  :to="{ path: '/account', query: $route.query }"
+                  :to="{
+                    path: '/account',
+                    query: $route.query,
+                    state: { scrollToPricing: true },
+                  }"
                   class="font-medium text-primary hover:underline"
                 >
                   Premium

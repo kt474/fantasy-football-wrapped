@@ -12,6 +12,7 @@ import Checkbox from "@/components/ui/checkbox/Checkbox.vue";
 import { authenticatedFetch } from "@/lib/authFetch";
 import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
 import { getParsedStorageItem } from "@/lib/storage";
+import { scrollAppToTop } from "@/lib/appScroll";
 import {
   Card,
   CardContent,
@@ -282,9 +283,7 @@ const subscriptionTimelineNote = computed(() => {
 
 const accountSummaryContainerClass = computed(() => {
   if (!authStore.isAuthenticated) return "";
-  if (!subscriptionStore.isPremium && subscriptionStore.status === "none")
-    return "max-w-sm";
-  return "max-w-2xl";
+  return "max-w-xl";
 });
 
 const getCheckoutButtonText = (plan: CheckoutPlan) => {
@@ -300,10 +299,7 @@ const getCheckoutButtonText = (plan: CheckoutPlan) => {
 
 const guideToAuthentication = async (plan: CheckoutPlan) => {
   await nextTick();
-  authenticationSection.value?.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
+  scrollAppToTop("smooth");
   authenticationSection.value?.querySelector<HTMLInputElement>("input")?.focus({
     preventScroll: true,
   });
@@ -773,6 +769,7 @@ watch(
   () => ({
     routeKey: route.fullPath,
     isUpgradeFlow: isUpgradeFlow.value,
+    scrollToPricing: window.history.state?.scrollToPricing === true,
     authenticated: authStore.isAuthenticated,
     subscriptionInitialized: subscriptionStore.initialized,
     subscriptionLoading: subscriptionStore.loading,
@@ -782,6 +779,7 @@ watch(
   async ({
     routeKey,
     isUpgradeFlow,
+    scrollToPricing,
     authenticated,
     subscriptionInitialized,
     subscriptionLoading,
@@ -789,8 +787,7 @@ watch(
     recovery,
   }) => {
     if (
-      !isUpgradeFlow ||
-      !authenticated ||
+      (!scrollToPricing && (!isUpgradeFlow || !authenticated)) ||
       !subscriptionInitialized ||
       subscriptionLoading ||
       isPremium ||
@@ -804,6 +801,9 @@ watch(
     if (!pricingSection.value) return;
 
     lastAutoScrolledUpgradeRoute.value = routeKey;
+    const historyState = { ...window.history.state };
+    delete historyState.scrollToPricing;
+    window.history.replaceState(historyState, "");
     pricingSection.value.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -1166,7 +1166,7 @@ watch(
             <Separator />
             <div class="space-y-3">
               <p class="text-sm font-medium">Preferences</p>
-              <div class="overflow-hidden border rounded-lg divide-y">
+              <div class="overflow-hidden border divide-y rounded-lg">
                 <div class="flex items-center justify-between gap-4 p-3">
                   <div class="min-w-0">
                     <label
@@ -1246,6 +1246,7 @@ watch(
           !showPasswordRecoveryForm
         "
         ref="pricingSection"
+        id="pricing"
         :class="[
           'grid max-w-xl gap-4 scroll-mt-4',
           !authStore.isAuthenticated &&

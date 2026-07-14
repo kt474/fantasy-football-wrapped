@@ -72,7 +72,11 @@ onMounted(async () => {
           userbase grows, hosting and AI costs grow too, so donations are always
           appreciated. I also offer a
           <router-link
-            :to="{ path: '/account', query: $route.query }"
+            :to="{
+              path: '/account',
+              query: $route.query,
+              state: { scrollToPricing: true },
+            }"
             class="font-medium cursor-pointer text-primary hover:underline"
             @click="
               trackPremiumFunnelEvent('premium_cta_clicked', {
