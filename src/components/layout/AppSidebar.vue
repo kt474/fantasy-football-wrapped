@@ -41,7 +41,6 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { clearPendingCheckout } from "@/lib/pendingCheckout";
-import { scrollAppToTop } from "@/lib/appScroll";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -73,17 +72,11 @@ const closeMobileSidebar = () => {
   }
 };
 
-const scrollToTop = () => {
-  scrollAppToTop();
-};
-
 const RouteTabChange = () => {
   clearPendingCheckout();
   if (isMobile.value) {
     setOpenMobile(false);
   }
-  store.currentTab = "";
-  scrollToTop();
 };
 
 const goBackToHome = () => {
@@ -100,7 +93,6 @@ const changeTab = (tab: string) => {
   store.currentTab = tab;
   localStorage.setItem("currentTab", tab);
   closeMobileSidebar();
-  scrollToTop();
 };
 
 const data = {

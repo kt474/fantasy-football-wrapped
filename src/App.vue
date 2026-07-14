@@ -126,7 +126,12 @@ watch(
   () => route.fullPath,
   async () => {
     await nextTick();
-    scrollAppToTop();
+    if (
+      window.matchMedia("(min-width: 768px)").matches &&
+      document.getElementById("mainScrollSection")
+    ) {
+      scrollAppToTop();
+    }
   }
 );
 

@@ -72,6 +72,13 @@ const pricingSection = ref<HTMLElement | null>(null);
 const selectedCheckoutPlan = ref<CheckoutPlan | null>(null);
 const lastAutoScrolledUpgradeRoute = ref("");
 
+const waitForRouteScroll = () =>
+  new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => resolve());
+    });
+  });
+
 onBeforeRouteLeave(() => {
   clearPendingCheckout();
 });
@@ -787,23 +794,31 @@ watch(
     recovery,
   }) => {
     if (
-      (!scrollToPricing && (!isUpgradeFlow || !authenticated)) ||
       !subscriptionInitialized ||
       subscriptionLoading ||
-      isPremium ||
-      recovery ||
       lastAutoScrolledUpgradeRoute.value === routeKey
     ) {
       return;
     }
 
+    if (scrollToPricing) {
+      const historyState = { ...window.history.state };
+      delete historyState.scrollToPricing;
+      window.history.replaceState(historyState, "");
+    }
+
+    if (isPremium || recovery) {
+      if (scrollToPricing) scrollAppToTop();
+      return;
+    }
+
+    if (!scrollToPricing && (!isUpgradeFlow || !authenticated)) return;
+
     await nextTick();
-    if (!pricingSection.value) return;
+    await waitForRouteScroll();
+    if (route.fullPath !== routeKey || !pricingSection.value) return;
 
     lastAutoScrolledUpgradeRoute.value = routeKey;
-    const historyState = { ...window.history.state };
-    delete historyState.scrollToPricing;
-    window.history.replaceState(historyState, "");
     pricingSection.value.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -1248,7 +1263,7 @@ watch(
         ref="pricingSection"
         id="pricing"
         :class="[
-          'grid max-w-xl gap-4 scroll-mt-4',
+          'grid max-w-xl gap-4 scroll-mt-20 md:scroll-mt-4',
           !authStore.isAuthenticated &&
           isUpgradeFlow &&
           selectedCheckoutPlan === null
