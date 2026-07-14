@@ -36,7 +36,7 @@ export type LeagueInfoType = {
   espnPlayoffMatchupPeriods?: number[][];
   playoffProjections?: PlayoffProjection[];
   weeklyReport?: string;
-  premiumWeeklyReport?: PremiumReport | string;
+  premiumWeeklyReports?: Record<number, PremiumReport>;
   weeklyPreview?: string;
   managerProfiles?: Record<string, string>;
   yearEndReport?: string;

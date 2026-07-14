@@ -27,12 +27,14 @@ const props = defineProps<{
   premiumCommentaryStyle: string;
   weeksLength: number;
   currentWeek: number;
+  isLatestWeek: boolean;
   hasLeagues: boolean;
   hasLastScoredWeek: boolean;
   rawWeeklyReport: string;
   premiumWeeklyReport: PremiumReport | null;
   loading: boolean;
   premiumLoading: boolean;
+  reportDataLoading: boolean;
   isGeneratingImage: boolean;
   isSharingReport: boolean;
 }>();
@@ -74,7 +76,10 @@ const canGeneratePremium = computed(
   () => authStore.isAuthenticated && subscriptionStore.isPremium
 );
 const canGenerateCurrentPremiumReport = computed(
-  () => canGeneratePremium.value && props.hasLastScoredWeek
+  () =>
+    canGeneratePremium.value &&
+    props.hasLastScoredWeek &&
+    !props.reportDataLoading
 );
 
 const showShareButton = computed(
@@ -472,6 +477,20 @@ const trackPremiumCtaClick = (cta: string) => {
             >
               Premium reports</button
             >.
+          </p>
+        </div>
+        <div v-else-if="!isLatestWeek" class="max-w-2xl">
+          <p>
+            Standard weekly reports are only available for the latest scored
+            week.
+            <button
+              type="button"
+              class="font-semibold cursor-pointer text-primary hover:underline"
+              @click="showPremiumReport"
+            >
+              Premium reports
+            </button>
+            are available for every scored week.
           </p>
         </div>
         <div v-else-if="loading && hasLastScoredWeek">

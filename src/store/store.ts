@@ -102,7 +102,13 @@ export const useStore = defineStore("main", {
       }
 
       this.$patch((state) => {
-        state.leagueInfo[existingIndex] = payload;
+        const existingLeague = state.leagueInfo[existingIndex];
+        state.leagueInfo[existingIndex] = {
+          ...payload,
+          premiumWeeklyReports:
+            payload.premiumWeeklyReports ??
+            existingLeague.premiumWeeklyReports,
+        };
       });
     },
     addProjectionData(
@@ -151,10 +157,17 @@ export const useStore = defineStore("main", {
         item.weeklyReport = payload;
       }
     },
-    addPremiumWeeklyReport(leagueId: string, payload: PremiumReport) {
+    addPremiumWeeklyReport(
+      leagueId: string,
+      week: number,
+      payload: PremiumReport
+    ) {
       const item = this.findLeague(leagueId);
       if (item) {
-        item.premiumWeeklyReport = payload;
+        item.premiumWeeklyReports = {
+          ...item.premiumWeeklyReports,
+          [week]: payload,
+        };
       }
     },
     addManagerProfiles(leagueId: string, payload: Record<string, string>) {

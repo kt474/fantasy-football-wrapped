@@ -127,4 +127,64 @@ describe("main store", () => {
     expect(roster2?.projections).toEqual([{ projection: 22.4, position: "RB" }]);
     expect(roster2?.projectionStartWeek).toBe(8);
   });
+
+  test("stores premium weekly reports separately by week", () => {
+    const store = useStore();
+    const league = buildLeague("league-1");
+    const report = (headline) => ({
+      frontPage: { headline, subheadline: "Subheadline", lead: "Lead" },
+      matchupReports: [],
+      teamOfTheWeek: {
+        teamName: "Team One",
+        pointsScored: 120,
+        headline: "Team headline",
+        analysis: "Team analysis",
+      },
+      managersBlotter: { headline: "Blotter", entries: [] },
+    });
+
+    store.updateLeagueInfo(league);
+    store.addPremiumWeeklyReport(getLeagueKey(league), 7, report("Week 7"));
+    store.addPremiumWeeklyReport(getLeagueKey(league), 14, report("Week 14"));
+
+    expect(store.leagueInfo[0].premiumWeeklyReports[7].frontPage.headline).toBe(
+      "Week 7"
+    );
+    expect(store.leagueInfo[0].premiumWeeklyReports[14].frontPage.headline).toBe(
+      "Week 14"
+    );
+  });
+
+  test("preserves premium weekly reports when league data refreshes", () => {
+    const store = useStore();
+    const league = buildLeague("league-1");
+    const report = {
+      frontPage: {
+        headline: "Saved report",
+        subheadline: "Subheadline",
+        lead: "Lead",
+      },
+      matchupReports: [],
+      teamOfTheWeek: {
+        teamName: "Team One",
+        pointsScored: 120,
+        headline: "Team headline",
+        analysis: "Team analysis",
+      },
+      managersBlotter: { headline: "Blotter", entries: [] },
+    };
+
+    store.updateLeagueInfo(league);
+    store.addPremiumWeeklyReport(getLeagueKey(league), 7, report);
+    store.updateLeagueInfo({
+      ...buildLeague("league-1"),
+      name: "Refreshed League",
+      lastUpdated: league.lastUpdated + 1,
+    });
+
+    expect(store.leagueInfo[0].name).toBe("Refreshed League");
+    expect(store.leagueInfo[0].premiumWeeklyReports[7]).toEqual(
+      report
+    );
+  });
 });

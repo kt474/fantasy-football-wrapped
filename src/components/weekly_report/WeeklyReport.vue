@@ -95,6 +95,14 @@ const isPremiumReport = (value: unknown): value is PremiumReport => {
   );
 };
 
+const getSavedPremiumReport = (
+  league: LeagueInfoType | undefined,
+  week: number
+): PremiumReport | null => {
+  const weeklyReport = league?.premiumWeeklyReports?.[week];
+  return isPremiumReport(weeklyReport) ? weeklyReport : null;
+};
+
 const premiumReportText = computed(() => {
   const report = premiumWeeklyReport.value;
   if (!report) {
@@ -177,6 +185,7 @@ const playoffWeeks = computed(() => {
 });
 
 const currentWeek = ref(weeks.value[0]);
+let playerRequestId = 0;
 
 const fetchPlayerNames = async () => {
   if (
@@ -184,6 +193,7 @@ const fetchPlayerNames = async () => {
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek &&
     weeks.value.length > 0
   ) {
+    const requestId = ++playerRequestId;
     fetchingPlayers.value = true;
     const weekIndex = currentWeek.value - 1;
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
@@ -213,6 +223,9 @@ const fetchPlayerNames = async () => {
       uniquePlayerIds.length > 0
         ? await getPlayersByIdsMap(uniquePlayerIds)
         : new Map<string, Player>();
+    if (requestId !== playerRequestId) {
+      return;
+    }
     weeklyPlayerLookup.value = playerLookupMap;
     const result = props.tableData.map((user) => {
       const starterIds = user.starters[weekIndex];
@@ -237,15 +250,19 @@ const fetchPlayerNames = async () => {
 const getPremiumReport = async () => {
   if (
     store.leagueIds.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek &&
+    !fetchingPlayers.value
   ) {
+    const reportWeek = currentWeek.value;
+    const reportPrompt = premiumReportPrompt.value;
     premiumWeeklyReport.value = null;
     sharedReportUrl.value = "";
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const reportLeagueKey = getLeagueKey(currentLeague);
     let leagueMetadata: Record<string, string | number>;
-    if (isPlayoffs.value) {
+    if (reportWeek > currentLeague.regularSeasonLength) {
       const playoffRound = getPlayoffRoundMetadata({
-        currentWeek: currentWeek.value,
+        currentWeek: reportWeek,
         regularSeasonLength: currentLeague.regularSeasonLength,
         playoffTeams: currentLeague.playoffTeams,
         espnPlayoffMatchupPeriods: currentLeague.espnPlayoffMatchupPeriods,
@@ -261,12 +278,12 @@ const getPremiumReport = async () => {
         leagueName: currentLeague.name,
         numberOfPlayoffTeams: currentLeague.playoffTeams,
         numberRegularSeasonWeeks: currentLeague.regularSeasonLength,
-        currentWeek: currentWeek.value,
+        currentWeek: reportWeek,
       };
     }
     premiumLoading.value = true;
     const response = await generatePremiumReport(
-      premiumReportPrompt.value,
+      reportPrompt,
       leagueMetadata,
       premiumCommentaryStyle.value
     );
@@ -276,15 +293,22 @@ const getPremiumReport = async () => {
       return;
     }
     premiumLoading.value = false;
-    premiumWeeklyReport.value = response.report;
-    sharedReportUrl.value = "";
+    if (
+      store.currentLeagueId === reportLeagueKey &&
+      currentWeek.value === reportWeek
+    ) {
+      premiumWeeklyReport.value = response.report;
+      sharedReportUrl.value = "";
+    }
     trackEvent("Weekly Report Generated", {
       ...getWeeklyReportAnalyticsProperties("report_generated"),
       tier: "premium",
+      week: reportWeek,
     });
     store.addPremiumWeeklyReport(
-      getLeagueKey(currentLeague),
-      premiumWeeklyReport.value
+      reportLeagueKey,
+      reportWeek,
+      response.report
     );
     localStorage.setItem(
       "leagueInfo",
@@ -361,11 +385,10 @@ onMounted(async () => {
       ? (store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "")
       : "";
     rawWeeklyReport.value = savedText;
-    const savedPremiumReport =
-      store.leagueInfo[store.currentLeagueIndex].premiumWeeklyReport;
-    premiumWeeklyReport.value = isPremiumReport(savedPremiumReport)
-      ? savedPremiumReport
-      : null;
+    premiumWeeklyReport.value = getSavedPremiumReport(
+      store.leagueInfo[store.currentLeagueIndex],
+      currentWeek.value
+    );
     loading.value = false;
   }
 });
@@ -553,11 +576,10 @@ watch(
     }
     rawWeeklyReport.value =
       store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "";
-    const savedPremiumReport =
-      store.leagueInfo[store.currentLeagueIndex].premiumWeeklyReport;
-    premiumWeeklyReport.value = isPremiumReport(savedPremiumReport)
-      ? savedPremiumReport
-      : null;
+    premiumWeeklyReport.value = getSavedPremiumReport(
+      store.leagueInfo[store.currentLeagueIndex],
+      currentWeek.value
+    );
   }
 );
 
@@ -761,7 +783,20 @@ watch(
   [() => props.regularSeasonLength, () => activeTab.value],
   () => (currentWeek.value = weeks.value[0])
 );
-watch(() => currentWeek.value, fetchPlayerNames);
+watch(
+  () => currentWeek.value,
+  async (week) => {
+    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    rawWeeklyReport.value =
+      week === weeks.value[0] ? (currentLeague?.weeklyReport ?? "") : "";
+    premiumWeeklyReport.value = getSavedPremiumReport(currentLeague, week);
+    sharedReportUrl.value = "";
+    playerNames.value = [];
+    benchPlayerNames.value = [];
+    weeklyPlayerLookup.value = new Map();
+    await fetchPlayerNames();
+  }
+);
 </script>
 <template>
   <SectionCard class="h-full my-4 custom-width">
@@ -800,11 +835,11 @@ watch(() => currentWeek.value, fetchPlayerNames);
       <Separator class="h-px mt-2 mb-3" />
       <TabsContent value="Report">
         <WeeklyReportSummary
-          v-if="currentWeek == weeks[0]"
           v-model:tier="tier"
           v-model:premium-commentary-style="premiumCommentaryStyle"
           :weeks-length="weeks.length"
           :current-week="currentWeek"
+          :is-latest-week="currentWeek === weeks[0]"
           :has-leagues="store.leagueIds.length !== 0"
           :has-last-scored-week="
             Boolean(store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek)
@@ -813,6 +848,7 @@ watch(() => currentWeek.value, fetchPlayerNames);
           :premium-weekly-report="premiumWeeklyReport"
           :loading="loading"
           :premium-loading="premiumLoading"
+          :report-data-loading="fetchingPlayers"
           :is-generating-image="isGeneratingImage"
           :is-sharing-report="isSharingReport"
           @download-image="shareOrDownloadReportImage"
