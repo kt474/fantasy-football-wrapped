@@ -2,7 +2,7 @@
 import { onMounted, watch, ref, computed, nextTick } from "vue";
 import AppSidebar from "@/components/layout/AppSidebar.vue";
 import CardContainer from "./components/util/CardContainer.vue";
-import { useStore } from "./store/store";
+import { getLeagueKey, useStore } from "./store/store";
 import { LeagueInfoType } from "./types/types";
 import { inject } from "@vercel/analytics";
 import { useRoute, useRouter } from "vue-router";
@@ -19,10 +19,22 @@ import "vue-sonner/style.css";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "vue-sonner";
 import { scrollAppToTop } from "@/lib/appScroll";
+import { useAuthStore } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription";
+import {
+  createFeatureViewTracker,
+  getLeagueAnalyticsProperties,
+} from "@/lib/analytics";
 
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
+const authStore = useAuthStore();
+const subscriptionStore = useSubscriptionStore();
+const currentLeague = computed(
+  () => store.leagueInfo[store.currentLeagueIndex]
+);
+const trackFeatureView = createFeatureViewTracker();
 
 const systemDarkMode = window.matchMedia(
   "(prefers-color-scheme: dark)"
@@ -120,6 +132,45 @@ watch(
     setHtmlBackground();
   },
   { immediate: true }
+);
+
+watch(
+  () => [
+    route.path,
+    store.currentTab,
+    store.currentLeagueId,
+    currentLeague.value?.leagueId ?? "",
+    authStore.initialized,
+    subscriptionStore.initialized,
+    subscriptionStore.loading,
+  ],
+  () => {
+    if (
+      !authStore.initialized ||
+      !subscriptionStore.initialized ||
+      subscriptionStore.loading
+    ) {
+      return;
+    }
+    // A league ID is set before its data finishes loading. Waiting prevents a
+    // real import from being recorded as a demo feature view.
+    if (store.currentLeagueId && !currentLeague.value) return;
+
+    trackFeatureView({
+      path: route.path,
+      tab: store.currentTab,
+      leagueKey: currentLeague.value
+        ? getLeagueKey(currentLeague.value)
+        : undefined,
+      properties: {
+        ...getLeagueAnalyticsProperties(currentLeague.value),
+        is_authenticated: authStore.isAuthenticated,
+        is_premium: subscriptionStore.isPremium,
+        plan_type: subscriptionStore.planType ?? "none",
+      },
+    });
+  },
+  { immediate: true, flush: "post" }
 );
 
 watch(

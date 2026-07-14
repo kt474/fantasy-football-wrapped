@@ -11,7 +11,11 @@ import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { fakeProfileText } from "@/api/fakeLeague";
-import { trackPremiumFunnelEvent } from "@/lib/analytics";
+import {
+  getLeagueAnalyticsProperties,
+  trackEvent,
+  trackPremiumFunnelEvent,
+} from "@/lib/analytics";
 
 const store = useStore();
 const subscriptionStore = useSubscriptionStore();
@@ -60,12 +64,29 @@ const getManagerArchetypes = async () => {
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
     );
+    trackEvent("Feature Action Completed", {
+      feature: "manager_profiles",
+      action: "profiles_generated",
+      profile_count: Object.keys(blurbsByUserId.value).length,
+      ...getLeagueAnalyticsProperties(
+        store.leagueInfo[store.currentLeagueIndex]
+      ),
+    });
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : "Unable to generate manager blurbs.";
     toast.error(message);
+    trackEvent("Feature Action Failed", {
+      feature: "manager_profiles",
+      action: "profiles_generated",
+      error_code: "generation_failed",
+      recoverable: true,
+      ...getLeagueAnalyticsProperties(
+        store.leagueInfo[store.currentLeagueIndex]
+      ),
+    });
   } finally {
     isLoading.value = false;
   }

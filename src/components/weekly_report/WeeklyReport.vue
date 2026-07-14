@@ -37,7 +37,7 @@ import WeeklyPointsChart from "./WeeklyPointsChart.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import { toPng } from "html-to-image";
-import { trackEvent } from "@/lib/analytics";
+import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
 import {
   buildPremiumReportPrompt,
   buildReportPrompt,
@@ -74,8 +74,13 @@ const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("roast");
 const premiumWeeklyReport = ref<PremiumReport | null>(null);
 
-const getAnalyticsPlatform = (league: LeagueInfoType) =>
-  league.platform ?? "sleeper";
+const getWeeklyReportAnalyticsProperties = (action: string) => ({
+  feature: "weekly_report",
+  action,
+  ...getLeagueAnalyticsProperties(
+    store.leagueInfo[store.currentLeagueIndex]
+  ),
+});
 
 const isPremiumReport = (value: unknown): value is PremiumReport => {
   if (!value || typeof value !== "object") {
@@ -274,8 +279,8 @@ const getPremiumReport = async () => {
     premiumWeeklyReport.value = response.report;
     sharedReportUrl.value = "";
     trackEvent("Weekly Report Generated", {
+      ...getWeeklyReportAnalyticsProperties("report_generated"),
       tier: "premium",
-      platform: getAnalyticsPlatform(currentLeague),
     });
     store.addPremiumWeeklyReport(
       getLeagueKey(currentLeague),
@@ -321,8 +326,8 @@ const getReport = async () => {
     );
     rawWeeklyReport.value = response.text;
     trackEvent("Weekly Report Generated", {
+      ...getWeeklyReportAnalyticsProperties("report_generated"),
       tier: "standard",
-      platform: getAnalyticsPlatform(currentLeague),
     });
     store.addWeeklyReport(getLeagueKey(currentLeague), rawWeeklyReport.value);
     localStorage.setItem(
@@ -567,6 +572,11 @@ const copyReport = () => {
   navigator.clipboard.writeText(
     reportText + "\n\nCreated with https://ffwrapped.com"
   );
+  trackEvent("Weekly Report Shared", {
+    ...getWeeklyReportAnalyticsProperties("report_copied"),
+    method: "clipboard_copy",
+    tier: tier.value.toLowerCase(),
+  });
   toast.success("Full report copied to clipboard");
 };
 
@@ -599,6 +609,7 @@ const shareReport = async () => {
     if (navigator.share) {
       await navigator.share(shareData);
       trackEvent("Weekly Report Shared", {
+        ...getWeeklyReportAnalyticsProperties("report_shared"),
         method: "native",
         tier: "premium",
       });
@@ -607,6 +618,7 @@ const shareReport = async () => {
 
     await navigator.clipboard.writeText(sharedReportUrl.value);
     trackEvent("Weekly Report Shared", {
+      ...getWeeklyReportAnalyticsProperties("report_shared"),
       method: "clipboard",
       tier: "premium",
     });
@@ -672,6 +684,7 @@ const downloadReportImageFile = (dataUrl: string) => {
   link.download = getReportImageFilename();
   link.click();
   trackEvent("Weekly Report Shared", {
+    ...getWeeklyReportAnalyticsProperties("report_image_exported"),
     method: "image_download",
     tier: tier.value.toLowerCase(),
   });
@@ -725,6 +738,7 @@ const shareOrDownloadReportImage = async () => {
         files: [file],
       });
       trackEvent("Weekly Report Shared", {
+        ...getWeeklyReportAnalyticsProperties("report_image_exported"),
         method: "image_share",
         tier: tier.value.toLowerCase(),
       });

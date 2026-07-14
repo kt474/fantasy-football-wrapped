@@ -8,7 +8,7 @@ import Card from "../ui/card/Card.vue";
 import { Check } from "lucide-vue-next";
 import { toast } from "vue-sonner";
 import { loadUserLeagues } from "./userLeagueLoader";
-import { trackEvent } from "@/lib/analytics";
+import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
 import { scrollAppToTop } from "@/lib/appScroll";
 
 const checkedLeagues = ref<string[]>([]);
@@ -29,11 +29,19 @@ const leagueCountError = computed(() => {
 const addLeagues = async () => {
   const isFirstLeague = !store.currentLeagueId;
   const source = isFirstLeague ? "home" : "add_league";
+  const attemptStartedAt = Date.now();
+  const selectionProperties = {
+    platform: "sleeper",
+    source,
+    input_type: "username_selection",
+    selected_league_count: checkedLeagues.value.length,
+  };
   if (checkedLeagues.value.some((league) => store.leagueIds.includes(league))) {
     duplicateLeagueError.value = true;
     trackEvent("League Add Failed", {
-      platform: "sleeper",
+      ...selectionProperties,
       reason: "duplicate",
+      duration_ms: Date.now() - attemptStartedAt,
     });
     return;
   }
@@ -75,10 +83,11 @@ const addLeagues = async () => {
         }
         store.updateShowLeaguesList(false);
         store.setLeaguesList([]);
-        loaded.forEach(() =>
+        loaded.forEach(({ league }) =>
           trackEvent("League Added", {
-            platform: "sleeper",
-            source,
+            ...selectionProperties,
+            duration_ms: Date.now() - attemptStartedAt,
+            ...getLeagueAnalyticsProperties(league),
           })
         );
         toast.success(
@@ -91,8 +100,9 @@ const addLeagues = async () => {
       if (failed.length > 0) {
         failed.forEach(() =>
           trackEvent("League Add Failed", {
-            platform: "sleeper",
+            ...selectionProperties,
             reason: "api_error",
+            duration_ms: Date.now() - attemptStartedAt,
           })
         );
         toast.error(
@@ -106,8 +116,9 @@ const addLeagues = async () => {
     } catch (error) {
       console.error("Unable to finish adding selected leagues:", error);
       trackEvent("League Add Failed", {
-        platform: "sleeper",
+        ...selectionProperties,
         reason: "api_error",
+        duration_ms: Date.now() - attemptStartedAt,
       });
       toast.error("Unable to finish adding the selected leagues.");
     } finally {

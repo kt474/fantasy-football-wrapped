@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
 
 type SimulatedTeamRecord = {
   index: number;
@@ -1247,6 +1248,19 @@ function runSeasonForecast() {
   forecastRunCount.value = result.runCount;
 }
 
+const rerunSeasonForecast = () => {
+  runSeasonForecast();
+  if (forecastRunCount.value <= 0) return;
+  trackEvent("Feature Action Completed", {
+    feature: "season_forecast",
+    action: "forecast_run",
+    simulation_count: forecastRunCount.value,
+    ...getLeagueAnalyticsProperties(
+      store.leagueInfo[store.currentLeagueIndex]
+    ),
+  });
+};
+
 const forecastRaceSeries = computed(() =>
   props.tableData.map((team, index) => ({
     name: teamName(team),
@@ -1575,6 +1589,20 @@ function runSeasonReplay() {
   replayWeeklyWinsByTeam.value = result.weeklyWinsByTeam;
   replayRunCount.value = result.runCount;
 }
+
+const rerunSeasonReplay = () => {
+  runSeasonReplay();
+  if (replayRunCount.value <= 0) return;
+  trackEvent("Feature Action Completed", {
+    feature: "season_forecast",
+    action: "replay_run",
+    simulation_count: replayRunCount.value,
+    through_week: replayThroughWeek.value,
+    ...getLeagueAnalyticsProperties(
+      store.leagueInfo[store.currentLeagueIndex]
+    ),
+  });
+};
 
 watch(
   [() => props.tableData, regularSeasonWeekCount, displayedWeekCount],
@@ -2071,7 +2099,7 @@ watch(
           <Button
             class="w-full sm:w-auto"
             :disabled="forecastLoadingProjections"
-            @click="runSeasonForecast"
+            @click="rerunSeasonForecast"
           >
             {{
               forecastLoadingProjections
@@ -2226,7 +2254,7 @@ watch(
               </SelectContent>
             </Select>
           </div>
-          <Button class="w-full sm:w-auto" @click="runSeasonReplay">
+          <Button class="w-full sm:w-auto" @click="rerunSeasonReplay">
             Rerun Simulations
           </Button>
         </div>
