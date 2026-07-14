@@ -169,7 +169,7 @@ const goBack = () => {
 
         <div v-if="store.leaguesList.length > 0">
           <ul
-            class="grid max-h-[32rem] grid-cols-1 gap-2 overflow-auto pr-1 sm:grid-cols-2"
+            class="grid grid-cols-1 gap-2 sm:max-h-[32rem] sm:grid-cols-2 sm:overflow-auto sm:pr-1"
           >
             <li v-for="league in store.leaguesList" :key="league.league_id">
               <label
