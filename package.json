@@ -10,7 +10,6 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@sentry/vue": "^10.65.0",
     "@supabase/supabase-js": "^2.108.0",
     "@vercel/analytics": "^1.1.1",
     "@vueuse/core": "^14.2.1",

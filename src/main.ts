@@ -13,7 +13,6 @@ import {
   setUserProperties,
   trackPageView,
 } from "./lib/analytics";
-import * as Sentry from "@sentry/vue";
 
 const Home = () => import("./views/Home.vue");
 const About = () => import("./views/About.vue");
@@ -222,21 +221,6 @@ router.afterEach(() => {
 const pinia = createPinia();
 const app = createApp(App);
 
-const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
-if (import.meta.env.PROD && sentryDsn) {
-  Sentry.init({
-    app,
-    dsn: sentryDsn,
-    environment: import.meta.env.MODE,
-    sendDefaultPii: false,
-    dataCollection: {
-      userInfo: false,
-      httpBodies: [],
-    },
-    integrations: [Sentry.browserTracingIntegration({ router })],
-    tracesSampleRate: 0.02,
-  });
-}
 const ApexChart = defineAsyncComponent(async () => {
   await Promise.all([
     import("apexcharts/line"),
