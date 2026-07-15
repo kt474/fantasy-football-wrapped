@@ -85,23 +85,23 @@ const premiumFeatures = [
   "Lineup efficiency and manager decisions",
   "Standings movement, streaks, and season averages",
   "Waiver impact when transaction data is available",
-  "Five commentary styles, report links, and audio recap",
+  "Four commentary styles, report links, and audio recap",
 ];
 
 const sampleStorylines = [
   {
     label: "Playoff race",
-    title: "Breece's Puffs climbs two places",
+    title: "Breece's Puffs escapes onto the cutoff",
     detail: "132.60–128.80",
   },
   {
     label: "Team of the Week",
-    title: "Bijan Mustard separates from the field",
+    title: "Bijan Mustard turns a matchup into a warning",
     detail: "156.42 points · Four starters above 20",
   },
   {
     label: "Decision that mattered",
-    title: "Lamario Kart misses the winning swap",
+    title: "Lamario Kart benches the winning points",
     detail: "11.40-point miss · 3.20-point loss",
   },
 ];
