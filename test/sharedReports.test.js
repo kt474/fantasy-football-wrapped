@@ -15,8 +15,8 @@ const report = {
     headline: "Big week",
     analysis: "Strong lineup.",
   },
-  managersBlotter: {
-    headline: "Blunders",
+  weeklyLowlights: {
+    headline: "Weekly Lowlights",
     entries: [],
   },
 };

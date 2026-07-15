@@ -11,6 +11,7 @@ import {
 import { LeagueInfoType, PremiumReport } from "../types/types";
 import { authenticatedFetch } from "@/lib/authFetch";
 import { mapWithConcurrency } from "@/lib/async";
+import { normalizePremiumReport } from "@/lib/premiumReport";
 import {
   getAvatar,
   getCurrentLeagueState,
@@ -252,7 +253,12 @@ export const getSharedReport = async (
   }
 
   assertOk(response, "Shared report request");
-  return await parseJson<SharedReportResponse>(response, "Shared report");
+  const sharedReport = await parseJson<
+    Omit<SharedReportResponse, "report"> & { report: unknown }
+  >(response, "Shared report");
+  const report = normalizePremiumReport(sharedReport.report);
+
+  return report ? { ...sharedReport, report } : null;
 };
 
 export const getPlayerNews = async (
@@ -533,10 +539,18 @@ export const generatePremiumReport = async (
       throw new Error("Please sign in to use premium reports.");
     }
     assertOk(response, "Premium report request");
-    return await parseJson<{ report: PremiumReport }>(
+    const payload = await parseJson<{ report?: unknown; text?: string }>(
       response,
       "Premium report"
     );
+    if (payload.report == null && payload.text) {
+      return { text: payload.text };
+    }
+    const report = normalizePremiumReport(payload.report);
+    if (!report) {
+      throw new Error("Premium report response was invalid.");
+    }
+    return { report };
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Unable to generate report.";

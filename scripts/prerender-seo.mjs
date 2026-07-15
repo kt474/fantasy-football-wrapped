@@ -104,10 +104,10 @@ const pages = [
     path: "fantasy-football-weekly-recap-example",
     title: "Fantasy Football Weekly Recap Example | ffwrapped",
     description:
-      "Read a complete fantasy football weekly recap example with championship analysis, matchup summaries, Team of the Week, and manager blunders.",
+      "Read a complete fantasy football weekly recap example with championship analysis, matchup summaries, Team of the Week, and weekly lowlights.",
     heading: "Fantasy football weekly recap example: championship week",
     introduction:
-      "A complete AI-written Premium report from an anonymized Sleeper league, including every Week 17 matchup, the championship story, Team of the Week, and manager blunders.",
+      "A complete AI-written Premium report from an anonymized Sleeper league, including every Week 17 matchup, the championship story, Team of the Week, and weekly lowlights.",
     sectionHeading: "Full sample Premium report",
     ctaHref: "/fantasy-football-weekly-recap",
     ctaLabel: "Learn how fantasy football weekly recaps work",
@@ -125,7 +125,7 @@ const pages = [
         title: `Team of the Week: ${premiumReportExample.report.teamOfTheWeek.teamName}`,
         body: `${premiumReportExample.report.teamOfTheWeek.headline}. ${premiumReportExample.report.teamOfTheWeek.analysis}`,
       },
-      ...premiumReportExample.report.managersBlotter.entries.map((entry) => ({
+      ...premiumReportExample.report.weeklyLowlights.entries.map((entry) => ({
         title: `${entry.teamName}: ${entry.headline}`,
         body: entry.analysis,
       })),
@@ -135,7 +135,7 @@ const pages = [
       "@type": "Article",
       headline: "Fantasy football weekly recap example: championship week",
       description:
-        "A complete AI-written fantasy football Premium report with championship analysis, four matchup recaps, Team of the Week, and manager blunders.",
+        "A complete AI-written fantasy football Premium report with championship analysis, four matchup recaps, Team of the Week, and weekly lowlights.",
       datePublished: "2026-07-05",
       dateModified: "2026-07-14",
       mainEntityOfPage:

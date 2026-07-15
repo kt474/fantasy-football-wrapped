@@ -103,14 +103,16 @@ defineProps<{
 
     <section class="space-y-3">
       <div>
-        <h3 class="text-lg font-semibold">Manager Blunders</h3>
+        <h3 class="text-lg font-semibold">
+          {{ report.weeklyLowlights.headline }}
+        </h3>
         <p class="text-sm text-muted-foreground">
-          The lineup decisions that shaped the week.
+          The decisions and performances that went wrong.
         </p>
       </div>
       <div class="grid gap-4 lg:grid-cols-2">
         <Card
-          v-for="entry in report.managersBlotter.entries"
+          v-for="entry in report.weeklyLowlights.entries"
           :key="`${entry.teamName}-${entry.category}`"
           class="shadow-sm"
         >

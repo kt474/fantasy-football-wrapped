@@ -38,6 +38,7 @@ import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import { toPng } from "html-to-image";
 import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
+import { normalizePremiumReport } from "@/lib/premiumReport";
 import {
   buildPremiumReportPrompt,
   buildReportPrompt,
@@ -77,30 +78,15 @@ const premiumWeeklyReport = ref<PremiumReport | null>(null);
 const getWeeklyReportAnalyticsProperties = (action: string) => ({
   feature: "weekly_report",
   action,
-  ...getLeagueAnalyticsProperties(
-    store.leagueInfo[store.currentLeagueIndex]
-  ),
+  ...getLeagueAnalyticsProperties(store.leagueInfo[store.currentLeagueIndex]),
 });
-
-const isPremiumReport = (value: unknown): value is PremiumReport => {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-  const report = value as Partial<PremiumReport>;
-  return Boolean(
-    report.frontPage &&
-    Array.isArray(report.matchupReports) &&
-    report.teamOfTheWeek &&
-    report.managersBlotter
-  );
-};
 
 const getSavedPremiumReport = (
   league: LeagueInfoType | undefined,
   week: number
 ): PremiumReport | null => {
   const weeklyReport = league?.premiumWeeklyReports?.[week];
-  return isPremiumReport(weeklyReport) ? weeklyReport : null;
+  return normalizePremiumReport(weeklyReport);
 };
 
 const premiumReportText = computed(() => {
@@ -115,7 +101,7 @@ const premiumReportText = computed(() => {
         `Matchup ${matchup.matchupNumber} (${matchup.bracket} bracket)\n${matchup.headline}\n${matchup.recap}`
     )
     .join("\n\n");
-  const blotter = report.managersBlotter.entries
+  const lowlights = report.weeklyLowlights.entries
     .map((entry) => `${entry.teamName} — ${entry.headline}\n${entry.analysis}`)
     .join("\n\n");
 
@@ -127,8 +113,8 @@ const premiumReportText = computed(() => {
     `Team of the Week: ${report.teamOfTheWeek.teamName} (${report.teamOfTheWeek.pointsScored} points)`,
     report.teamOfTheWeek.headline,
     report.teamOfTheWeek.analysis,
-    "Manager Blunders",
-    blotter,
+    report.weeklyLowlights.headline,
+    lowlights,
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -248,6 +234,8 @@ const fetchPlayerNames = async () => {
 };
 
 const getPremiumReport = async () => {
+  if (premiumLoading.value) return;
+
   if (
     store.leagueIds.length > 0 &&
     store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek &&
@@ -259,7 +247,14 @@ const getPremiumReport = async () => {
     sharedReportUrl.value = "";
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     const reportLeagueKey = getLeagueKey(currentLeague);
-    let leagueMetadata: Record<string, string | number>;
+    let leagueMetadata: Record<string, string | number> = {
+      leagueName: currentLeague.name,
+      season: currentLeague.season,
+      currentWeek: reportWeek,
+      numberOfPlayoffTeams: currentLeague.playoffTeams,
+      numberRegularSeasonWeeks: currentLeague.regularSeasonLength,
+      medianScoring: currentLeague.medianScoring,
+    };
     if (reportWeek > currentLeague.regularSeasonLength) {
       const playoffRound = getPlayoffRoundMetadata({
         currentWeek: reportWeek,
@@ -268,17 +263,8 @@ const getPremiumReport = async () => {
         espnPlayoffMatchupPeriods: currentLeague.espnPlayoffMatchupPeriods,
       });
       leagueMetadata = {
+        ...leagueMetadata,
         playoffRound: playoffRound.playoffRound,
-      };
-      if (playoffRound.championshipMatchup) {
-        leagueMetadata["ChampionshipMatchup"] = 1;
-      }
-    } else {
-      leagueMetadata = {
-        leagueName: currentLeague.name,
-        numberOfPlayoffTeams: currentLeague.playoffTeams,
-        numberRegularSeasonWeeks: currentLeague.regularSeasonLength,
-        currentWeek: reportWeek,
       };
     }
     premiumLoading.value = true;
@@ -305,11 +291,7 @@ const getPremiumReport = async () => {
       tier: "premium",
       week: reportWeek,
     });
-    store.addPremiumWeeklyReport(
-      reportLeagueKey,
-      reportWeek,
-      response.report
-    );
+    store.addPremiumWeeklyReport(reportLeagueKey, reportWeek, response.report);
     localStorage.setItem(
       "leagueInfo",
       JSON.stringify(store.leagueInfo as LeagueInfoType[])
@@ -802,9 +784,7 @@ watch(
   <SectionCard class="h-full my-4 custom-width">
     <Tabs default-value="Report" v-model="activeTab">
       <div class="flex justify-between w-full mb-3">
-        <h2 class="mr-4 heading-section">
-          Weekly {{ activeTab }}
-        </h2>
+        <h2 class="mr-4 heading-section">Weekly {{ activeTab }}</h2>
         <div class="flex flex-wrap justify-end">
           <div class="inline-flex pb-1 rounded-lg sm:mr-2" role="tablist">
             <TabsList>

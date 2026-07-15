@@ -60,7 +60,7 @@ export type PremiumReport = {
   };
   matchupReports: Array<{
     matchupNumber: number;
-    bracket: "winners" | "losers";
+    bracket: "regular" | "winners" | "losers" | "unknown";
     headline: string;
     recap: string;
   }>;
@@ -70,7 +70,7 @@ export type PremiumReport = {
     headline: string;
     analysis: string;
   };
-  managersBlotter: {
+  weeklyLowlights: {
     headline: string;
     entries: Array<{
       teamName: string;
@@ -78,7 +78,9 @@ export type PremiumReport = {
         | "bench_burn"
         | "starter_disaster"
         | "defensive_meltdown"
-        | "weekly_low";
+        | "weekly_low"
+        | "lineup_efficiency"
+        | "waiver_flop";
       headline: string;
       analysis: string;
     }>;

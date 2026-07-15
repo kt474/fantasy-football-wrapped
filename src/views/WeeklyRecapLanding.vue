@@ -42,7 +42,7 @@ const reportFeatures = [
   {
     title: "A voice that fits the league",
     description:
-      "Roast, neutral, newspaper, cutthroat, or chaos commentary without changing the underlying facts.",
+      "Roast, neutral, newspaper, or cutthroat commentary without changing the underlying facts.",
   },
   {
     title: "Simple sharing",
@@ -91,7 +91,7 @@ const premiumFeatures = [
 const sampleStorylines = [
   {
     label: "Playoff race",
-    title: "Gridiron Royalty climbs two places",
+    title: "Breece's Puffs climbs two places",
     detail: "132.60–128.80",
   },
   {
@@ -101,16 +101,28 @@ const sampleStorylines = [
   },
   {
     label: "Decision that mattered",
-    title: "Fourth and Regret misses the winning swap",
+    title: "Lamario Kart misses the winning swap",
     detail: "11.40-point miss · 3.20-point loss",
   },
 ];
 
 const methodology = [
-  ["Real league context", "Team names, player scoring, records, lineup choices, and completed league activity."],
-  ["Legal lineup decisions", "Bench analysis respects roster slots so every suggested swap was actually possible."],
-  ["Week and season together", "Results are connected to rank movement, records, streaks, averages, and playoff context."],
-  ["Structured before generation", "The underlying facts are normalized and calculated before AI writes the report."],
+  [
+    "Real league context",
+    "Team names, player scoring, records, lineup choices, and completed league activity.",
+  ],
+  [
+    "Legal lineup decisions",
+    "Bench analysis respects roster slots so every suggested swap was actually possible.",
+  ],
+  [
+    "Week and season together",
+    "Results are connected to rank movement, records, streaks, averages, and playoff context.",
+  ],
+  [
+    "Structured before generation",
+    "The underlying facts are normalized and calculated before AI writes the report.",
+  ],
 ];
 
 const faqs = [
@@ -149,22 +161,30 @@ const faqs = [
 
 <template>
   <PublicPageShell>
-    <section class="px-5 py-16 mx-auto max-w-6xl sm:py-24">
-      <div class="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.9fr)] lg:items-center">
+    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-24">
+      <div
+        class="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.9fr)] lg:items-center"
+      >
         <div>
           <Badge variant="secondary">Sleeper and ESPN leagues</Badge>
-          <h1 class="max-w-3xl mt-5 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl">
+          <h1
+            class="max-w-3xl mt-5 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl"
+          >
             Fantasy football weekly recaps your league will actually read
           </h1>
           <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
-            Turn matchup results, lineup decisions, standings changes, and the week’s best performances into a polished report built from your league data.
+            Turn matchup results, lineup decisions, standings changes, and the
+            week’s best performances into a polished report built from your
+            league data.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
             <Button as-child size="lg">
               <RouterLink to="/">Generate your recap</RouterLink>
             </Button>
             <Button as-child size="lg" variant="outline">
-              <RouterLink to="/fantasy-football-weekly-recap-example">Read a full example</RouterLink>
+              <RouterLink to="/fantasy-football-weekly-recap-example"
+                >Read a full example</RouterLink
+              >
             </Button>
           </div>
           <p class="mt-5 text-sm text-muted-foreground">
@@ -190,7 +210,9 @@ const faqs = [
                   <p class="text-xs font-medium text-primary">
                     {{ storyline.label }}
                   </p>
-                  <p class="text-xs text-right text-muted-foreground tabular-nums">
+                  <p
+                    class="text-xs text-right text-muted-foreground tabular-nums"
+                  >
                     {{ storyline.detail }}
                   </p>
                 </div>
@@ -205,13 +227,20 @@ const faqs = [
     </section>
 
     <section class="border-y bg-muted/30">
-      <div class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
-        <div class="grid gap-10 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)]">
+      <div class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
+        <div
+          class="grid gap-10 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)]"
+        >
           <div>
-            <p class="text-sm font-medium text-primary">Premium report preview</p>
-            <h2 class="mt-2 text-3xl font-semibold tracking-tight">A league newspaper grounded in the numbers</h2>
+            <p class="text-sm font-medium text-primary">
+              Premium report preview
+            </p>
+            <h2 class="mt-2 text-3xl font-semibold tracking-tight">
+              A league newspaper grounded in the numbers
+            </h2>
             <p class="mt-4 leading-7 text-muted-foreground">
-              The structure keeps the biggest story, matchup details, standout team, and manager decisions easy to scan and share.
+              The structure keeps the biggest story, matchup details, standout
+              team, and manager decisions easy to scan and share.
             </p>
           </div>
           <Card class="relative max-h-[400px] overflow-hidden shadow-none">
@@ -224,7 +253,9 @@ const faqs = [
             ></div>
             <div class="absolute inset-x-0 z-10 flex justify-center bottom-6">
               <Button as-child variant="outline" class="bg-card">
-                <RouterLink to="/fantasy-football-weekly-recap-example">Read the complete example</RouterLink>
+                <RouterLink to="/fantasy-football-weekly-recap-example"
+                  >Read the complete example</RouterLink
+                >
               </Button>
             </div>
           </Card>
@@ -232,53 +263,76 @@ const faqs = [
       </div>
     </section>
 
-    <section class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
       <div class="max-w-2xl">
         <p class="text-sm font-medium text-primary">How it works</p>
-        <h2 class="mt-2 text-3xl font-semibold tracking-tight">From final score to finished report</h2>
+        <h2 class="mt-2 text-3xl font-semibold tracking-tight">
+          From final score to finished report
+        </h2>
       </div>
       <ol class="grid gap-8 mt-10 md:grid-cols-3">
         <li v-for="step in steps" :key="step.number" class="pt-5 border-t">
-          <p class="text-sm font-medium text-muted-foreground">{{ step.number }}</p>
+          <p class="text-sm font-medium text-muted-foreground">
+            {{ step.number }}
+          </p>
           <h3 class="mt-3 text-lg font-semibold">{{ step.title }}</h3>
-          <p class="mt-2 text-sm leading-6 text-muted-foreground">{{ step.description }}</p>
+          <p class="mt-2 text-sm leading-6 text-muted-foreground">
+            {{ step.description }}
+          </p>
         </li>
       </ol>
     </section>
 
     <section class="border-y">
-      <div class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+      <div class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
         <div class="max-w-2xl">
           <p class="text-sm font-medium text-primary">Inside every recap</p>
-          <h2 class="mt-2 text-3xl font-semibold tracking-tight">The moments and decisions behind the scores</h2>
+          <h2 class="mt-2 text-3xl font-semibold tracking-tight">
+            The moments and decisions behind the scores
+          </h2>
         </div>
         <div class="grid gap-4 mt-8 md:grid-cols-2 lg:grid-cols-3">
-          <Card v-for="feature in reportFeatures" :key="feature.title" class="shadow-none">
+          <Card
+            v-for="feature in reportFeatures"
+            :key="feature.title"
+            class="shadow-none"
+          >
             <CardHeader class="pb-3">
               <CardTitle class="text-lg">{{ feature.title }}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p class="text-sm leading-6 text-muted-foreground">{{ feature.description }}</p>
+              <p class="text-sm leading-6 text-muted-foreground">
+                {{ feature.description }}
+              </p>
             </CardContent>
           </Card>
         </div>
       </div>
     </section>
 
-    <section class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
       <div class="max-w-2xl">
         <p class="text-sm font-medium text-primary">Standard and Premium</p>
-        <h2 class="mt-2 text-3xl font-semibold tracking-tight">Choose how much of the week you want covered</h2>
+        <h2 class="mt-2 text-3xl font-semibold tracking-tight">
+          Choose how much of the week you want covered
+        </h2>
       </div>
       <div class="grid gap-4 mt-8 lg:grid-cols-2">
         <Card class="shadow-none">
           <CardHeader>
             <CardTitle>Standard</CardTitle>
-            <CardDescription>A useful weekly snapshot included in the free experience.</CardDescription>
+            <CardDescription
+              >A useful weekly snapshot included in the free
+              experience.</CardDescription
+            >
           </CardHeader>
           <CardContent>
             <ul class="space-y-3 text-sm">
-              <li v-for="feature in standardFeatures" :key="feature" class="pb-3 border-b last:border-0 last:pb-0">
+              <li
+                v-for="feature in standardFeatures"
+                :key="feature"
+                class="pb-3 border-b last:border-0 last:pb-0"
+              >
                 {{ feature }}
               </li>
             </ul>
@@ -290,11 +344,18 @@ const faqs = [
               <CardTitle>Premium</CardTitle>
               <Badge>Full report</Badge>
             </div>
-            <CardDescription>A deeper publication for leagues that want the full story.</CardDescription>
+            <CardDescription
+              >A deeper publication for leagues that want the full
+              story.</CardDescription
+            >
           </CardHeader>
           <CardContent>
             <ul class="space-y-3 text-sm">
-              <li v-for="feature in premiumFeatures" :key="feature" class="pb-3 border-b last:border-0 last:pb-0">
+              <li
+                v-for="feature in premiumFeatures"
+                :key="feature"
+                class="pb-3 border-b last:border-0 last:pb-0"
+              >
                 {{ feature }}
               </li>
             </ul>
@@ -304,45 +365,72 @@ const faqs = [
     </section>
 
     <section class="border-y bg-muted/30">
-      <div class="grid gap-10 px-5 py-16 mx-auto max-w-6xl lg:grid-cols-[0.8fr_1.2fr] sm:py-20">
+      <div
+        class="grid gap-10 px-5 py-16 mx-auto max-w-6xl lg:grid-cols-[0.8fr_1.2fr] sm:py-20"
+      >
         <div>
           <p class="text-sm font-medium text-primary">Methodology</p>
-          <h2 class="mt-2 text-3xl font-semibold tracking-tight">The statistics are calculated before the story is written</h2>
+          <h2 class="mt-2 text-3xl font-semibold tracking-tight">
+            The statistics are calculated before the story is written
+          </h2>
           <p class="mt-4 leading-7 text-muted-foreground">
-            ffwrapped prepares the matchup and lineup context first, then sends structured facts for report generation.
+            ffwrapped prepares the matchup and lineup context first, then sends
+            structured facts for report generation.
           </p>
         </div>
         <dl class="divide-y border-y">
-          <div v-for="item in methodology" :key="item[0]" class="grid gap-2 py-4 sm:grid-cols-[11rem_1fr]">
+          <div
+            v-for="item in methodology"
+            :key="item[0]"
+            class="grid gap-2 py-4 sm:grid-cols-[11rem_1fr]"
+          >
             <dt class="text-sm font-medium">{{ item[0] }}</dt>
-            <dd class="text-sm leading-6 text-muted-foreground">{{ item[1] }}</dd>
+            <dd class="text-sm leading-6 text-muted-foreground">
+              {{ item[1] }}
+            </dd>
           </div>
         </dl>
       </div>
     </section>
 
-    <section class="px-5 py-16 mx-auto max-w-4xl sm:py-20">
+    <section class="max-w-4xl px-5 py-16 mx-auto sm:py-20">
       <p class="text-sm font-medium text-primary">Frequently asked questions</p>
-      <h2 class="mt-2 text-3xl font-semibold tracking-tight">Fantasy football recap questions</h2>
+      <h2 class="mt-2 text-3xl font-semibold tracking-tight">
+        Fantasy football recap questions
+      </h2>
       <Card class="mt-8 shadow-none">
         <CardContent class="px-6 py-2">
           <Accordion type="single" collapsible>
-            <AccordionItem v-for="(faq, index) in faqs" :key="faq.question" :value="`faq-${index}`" :class="index === faqs.length - 1 ? 'border-b-0' : ''">
-              <AccordionTrigger class="text-left">{{ faq.question }}</AccordionTrigger>
-              <AccordionContent class="leading-6 text-muted-foreground">{{ faq.answer }}</AccordionContent>
+            <AccordionItem
+              v-for="(faq, index) in faqs"
+              :key="faq.question"
+              :value="`faq-${index}`"
+              :class="index === faqs.length - 1 ? 'border-b-0' : ''"
+            >
+              <AccordionTrigger class="text-left">{{
+                faq.question
+              }}</AccordionTrigger>
+              <AccordionContent class="leading-6 text-muted-foreground">{{
+                faq.answer
+              }}</AccordionContent>
             </AccordionItem>
           </Accordion>
         </CardContent>
       </Card>
     </section>
 
-    <section class="px-5 pb-4 mx-auto max-w-6xl">
+    <section class="max-w-6xl px-5 pb-4 mx-auto">
       <Card class="shadow-none">
-        <CardContent class="flex flex-col items-start gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <CardContent
+          class="flex flex-col items-start gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
+        >
           <div>
-            <h2 class="text-2xl font-semibold tracking-tight">Give this week the recap it deserves</h2>
+            <h2 class="text-2xl font-semibold tracking-tight">
+              Give this week the recap it deserves
+            </h2>
             <p class="max-w-2xl mt-2 leading-7 text-muted-foreground">
-              Connect a Sleeper or ESPN league and turn its latest completed matchups into a report for the whole league.
+              Connect a Sleeper or ESPN league and turn its latest completed
+              matchups into a report for the whole league.
             </p>
           </div>
           <Button as-child size="lg" class="shrink-0">

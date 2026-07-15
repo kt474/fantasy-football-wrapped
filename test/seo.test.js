@@ -37,7 +37,7 @@ describe("SEO landing pages", () => {
     expect(example.leagueId).toBeUndefined();
     expect(example.leagueName).toBe("Sample ffwrapped league");
     expect(example.report.matchupReports).toHaveLength(4);
-    expect(example.report.managersBlotter.entries).toHaveLength(2);
+    expect(example.report.weeklyLowlights.entries).toHaveLength(2);
     expect(example.report.frontPage.headline).toContain("Grabs the Crown");
   });
 

@@ -350,7 +350,150 @@ describe("weekly report transforms", () => {
       rankAfterWeek: 1,
       rankChange: 0,
       seasonAverageThroughWeek: 101,
+      seasonAverageBeforeWeek: null,
+      scoreVsSeasonAverageBeforeWeek: null,
       currentStreak: "W1",
+    });
+    expect(result[0]).not.toHaveProperty("previousHeadToHeadResult");
+    expect(result[0].teams[0]).not.toHaveProperty("previousMatchupResult");
+  });
+
+  test("adds each team's previous result and separate head-to-head history", () => {
+    const historicalTableData = [
+      {
+        ...tableData[0],
+        points: [104, 110, 101],
+        matchups: [9, 10, 7],
+        starterPoints: [
+          tableData[0].starterPoints[0],
+          tableData[0].starterPoints[0],
+          tableData[0].starterPoints[0],
+        ],
+        benchPoints: [
+          tableData[0].benchPoints[0],
+          tableData[0].benchPoints[0],
+          tableData[0].benchPoints[0],
+        ],
+        recordByWeek: "LWW",
+      },
+      {
+        ...tableData[1],
+        points: [108, 95, 89],
+        matchups: [9, 11, 7],
+        starterPoints: [
+          tableData[1].starterPoints[0],
+          tableData[1].starterPoints[0],
+          tableData[1].starterPoints[0],
+        ],
+        benchPoints: [
+          tableData[1].benchPoints[0],
+          tableData[1].benchPoints[0],
+          tableData[1].benchPoints[0],
+        ],
+        recordByWeek: "WLL",
+      },
+      {
+        ...tableData[2],
+        points: [80, 105, 0],
+        matchups: [3, 10, null],
+        recordByWeek: "WL",
+      },
+      {
+        ...tableData[2],
+        id: "user-4",
+        rosterId: 4,
+        name: "Delta Team",
+        username: "delta",
+        points: [70, 100, 0],
+        matchups: [4, 11, null],
+        recordByWeek: "WW",
+      },
+    ];
+
+    const result = buildPremiumReportPrompt({
+      tableData: historicalTableData,
+      playerNames: [...playerNames.slice(0, 2), [], []],
+      benchPlayerNames: [...benchPlayerNames.slice(0, 2), [], []],
+      weekIndex: 2,
+      showUsernames: false,
+      isPlayoffs: false,
+      losersBracketIds: [],
+      winnersBracketIds: [],
+    });
+
+    expect(result[0].teams[0].previousMatchupResult).toEqual({
+      week: 2,
+      opponentName: "Gamma Team",
+      result: "win",
+      pointsScored: 110,
+      opponentPoints: 105,
+      margin: 5,
+    });
+    expect(result[0].teams[0]).toMatchObject({
+      seasonAverageBeforeWeek: 107,
+      scoreVsSeasonAverageBeforeWeek: -6,
+    });
+    expect(result[0].teams[1].previousMatchupResult).toEqual({
+      week: 2,
+      opponentName: "Delta Team",
+      result: "loss",
+      pointsScored: 95,
+      opponentPoints: 100,
+      margin: 5,
+    });
+    expect(result[0].previousHeadToHeadResult).toEqual({
+      week: 1,
+      margin: 4,
+      teams: [
+        {
+          name: "Beta Team",
+          pointsScored: 108,
+          result: "win",
+        },
+        {
+          name: "Alpha Team",
+          pointsScored: 104,
+          result: "loss",
+        },
+      ],
+    });
+  });
+
+  test("skips bye weeks when finding a team's previous matchup", () => {
+    const historicalTableData = tableData.slice(0, 2).map((entry, index) => ({
+      ...entry,
+      points: index === 0 ? [110, 0, 101] : [95, 0, 89],
+      matchups: index === 0 ? [1, null, 7] : [1, null, 7],
+      starterPoints: [
+        entry.starterPoints[0],
+        entry.starterPoints[0],
+        entry.starterPoints[0],
+      ],
+      benchPoints: [
+        entry.benchPoints[0],
+        entry.benchPoints[0],
+        entry.benchPoints[0],
+      ],
+      recordByWeek: index === 0 ? "WW" : "LL",
+    }));
+
+    const result = buildPremiumReportPrompt({
+      tableData: historicalTableData,
+      playerNames: playerNames.slice(0, 2),
+      benchPlayerNames: benchPlayerNames.slice(0, 2),
+      weekIndex: 2,
+      showUsernames: false,
+      isPlayoffs: false,
+      losersBracketIds: [],
+      winnersBracketIds: [],
+    });
+
+    expect(result[0].teams[0].previousMatchupResult).toMatchObject({
+      week: 1,
+      opponentName: "Beta Team",
+      result: "win",
+      pointsScored: 110,
+      opponentPoints: 95,
     });
   });
 

@@ -140,7 +140,7 @@ describe("main store", () => {
         headline: "Team headline",
         analysis: "Team analysis",
       },
-      managersBlotter: { headline: "Blotter", entries: [] },
+      weeklyLowlights: { headline: "Weekly Lowlights", entries: [] },
     });
 
     store.updateLeagueInfo(league);
@@ -171,7 +171,7 @@ describe("main store", () => {
         headline: "Team headline",
         analysis: "Team analysis",
       },
-      managersBlotter: { headline: "Blotter", entries: [] },
+      weeklyLowlights: { headline: "Weekly Lowlights", entries: [] },
     };
 
     store.updateLeagueInfo(league);

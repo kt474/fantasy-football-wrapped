@@ -72,6 +72,15 @@ export type PremiumWaiverMove = {
   pointsScored: number | null;
 };
 
+export type PreviousTeamMatchupResult = {
+  week: number;
+  opponentName: string;
+  result: "win" | "loss" | "tie";
+  pointsScored: number;
+  opponentPoints: number;
+  margin: number;
+};
+
 export type PremiumReportTeam = {
   name: string;
   result: "win" | "loss" | "tie";
@@ -84,6 +93,9 @@ export type PremiumReportTeam = {
   lineupEfficiency: number;
   bestBenchSwap: PremiumLineupDecision | null;
   seasonAverageThroughWeek: number;
+  seasonAverageBeforeWeek: number | null;
+  scoreVsSeasonAverageBeforeWeek: number | null;
+  previousMatchupResult?: PreviousTeamMatchupResult;
   waiverMoves?: PremiumWaiverMove[];
 };
 
@@ -108,6 +120,16 @@ export type PlayoffMatchupContext = {
   leagueChampion: string | null;
 };
 
+export type PreviousHeadToHeadResult = {
+  week: number;
+  margin: number;
+  teams: Array<{
+    name: string;
+    pointsScored: number;
+    result: "win" | "loss" | "tie";
+  }>;
+};
+
 type EspnPlayoffMatchup = {
   id?: number;
   matchupPeriodId?: number;
@@ -119,6 +141,7 @@ type EspnPlayoffMatchup = {
 
 export type PremiumReportMatchup = Record<string, unknown> & {
   teams: Array<RegularSeasonPremiumReportTeam | PlayoffPremiumReportTeam>;
+  previousHeadToHeadResult?: PreviousHeadToHeadResult;
   playoffContext?: PlayoffMatchupContext;
 };
 
@@ -502,6 +525,128 @@ const getTeamResult = (
     return "tie";
   }
   return pointsScored === highestScore ? "win" : "loss";
+};
+
+const getPreviousTeamMatchupResult = ({
+  team,
+  tableData,
+  weekIndex,
+  showUsernames,
+}: {
+  team: TableDataType;
+  tableData: TableDataType[];
+  weekIndex: number;
+  showUsernames: boolean;
+}): PreviousTeamMatchupResult | null => {
+  for (
+    let previousWeekIndex = weekIndex - 1;
+    previousWeekIndex >= 0;
+    previousWeekIndex -= 1
+  ) {
+    const priorMatchupId = team.matchups[previousWeekIndex];
+    if (priorMatchupId == null) {
+      continue;
+    }
+
+    const opponent = tableData.find(
+      (candidate) =>
+        candidate.rosterId !== team.rosterId &&
+        candidate.matchups[previousWeekIndex] === priorMatchupId
+    );
+    if (!opponent) {
+      continue;
+    }
+
+    const pointsScored = Number(team.points[previousWeekIndex]);
+    const opponentPoints = Number(opponent.points[previousWeekIndex]);
+    if (!Number.isFinite(pointsScored) || !Number.isFinite(opponentPoints)) {
+      continue;
+    }
+
+    return {
+      week: previousWeekIndex + 1,
+      opponentName: getManagerName(opponent, showUsernames),
+      result:
+        pointsScored === opponentPoints
+          ? "tie"
+          : pointsScored > opponentPoints
+            ? "win"
+            : "loss",
+      pointsScored,
+      opponentPoints,
+      margin: roundPoints(Math.abs(pointsScored - opponentPoints)),
+    };
+  }
+
+  return null;
+};
+
+const getPreviousHeadToHeadResult = ({
+  tableData,
+  rosterIds,
+  weekIndex,
+  showUsernames,
+}: {
+  tableData: TableDataType[];
+  rosterIds: number[];
+  weekIndex: number;
+  showUsernames: boolean;
+}): PreviousHeadToHeadResult | null => {
+  const matchupTeams = rosterIds
+    .map((rosterId) =>
+      tableData.find((team) => team.rosterId === rosterId)
+    )
+    .filter((team): team is TableDataType => Boolean(team));
+
+  if (matchupTeams.length < 2) {
+    return null;
+  }
+
+  for (
+    let previousWeekIndex = weekIndex - 1;
+    previousWeekIndex >= 0;
+    previousWeekIndex -= 1
+  ) {
+    const priorMatchupId = matchupTeams[0].matchups[previousWeekIndex];
+    if (
+      priorMatchupId == null ||
+      !matchupTeams.every(
+        (team) => team.matchups[previousWeekIndex] === priorMatchupId
+      )
+    ) {
+      continue;
+    }
+
+    const scores = matchupTeams.map((team) =>
+      Number(team.points[previousWeekIndex])
+    );
+    if (scores.some((score) => !Number.isFinite(score))) {
+      continue;
+    }
+
+    const highestScore = Math.max(...scores);
+    const lowestScore = Math.min(...scores);
+    const tied = highestScore === lowestScore;
+    const teams = matchupTeams
+      .map((team, index) => ({
+        name: getManagerName(team, showUsernames),
+        pointsScored: scores[index],
+        result: tied
+          ? ("tie" as const)
+          : scores[index] === highestScore
+            ? ("win" as const)
+            : ("loss" as const),
+      }))
+      .sort((a, b) => b.pointsScored - a.pointsScored);
+
+    return {
+      week: previousWeekIndex + 1,
+      margin: roundPoints(highestScore - lowestScore),
+      teams,
+    };
+  }
+
+  return null;
 };
 
 export const getRecordForWeek = (
@@ -1190,6 +1335,10 @@ export const buildPremiumReportPrompt = ({
     const starterPoints = roundPoints(
       starters.reduce((total, player) => total + player.points, 0)
     );
+    const seasonAverageBeforeWeek =
+      weekIndex > 0
+        ? roundPoints(getPointsThroughWeek(user, weekIndex) / weekIndex)
+        : null;
     const baseTeam: PremiumReportTeam = {
       name: getManagerName(user, showUsernames),
       result,
@@ -1209,7 +1358,21 @@ export const buildPremiumReportPrompt = ({
       seasonAverageThroughWeek: roundPoints(
         getPointsThroughWeek(user, weekIndex + 1) / (weekIndex + 1)
       ),
+      seasonAverageBeforeWeek,
+      scoreVsSeasonAverageBeforeWeek:
+        seasonAverageBeforeWeek == null
+          ? null
+          : roundPoints(pointsScored - seasonAverageBeforeWeek),
     };
+    const previousMatchupResult = getPreviousTeamMatchupResult({
+      team: user,
+      tableData,
+      weekIndex,
+      showUsernames,
+    });
+    if (previousMatchupResult) {
+      baseTeam.previousMatchupResult = previousMatchupResult;
+    }
     const weeklyWaiverMoves = waiverMovesByRoster[user.rosterId];
     if (weeklyWaiverMoves?.length) {
       baseTeam.waiverMoves = weeklyWaiverMoves;
@@ -1263,10 +1426,19 @@ export const buildPremiumReportPrompt = ({
     const matchup: PremiumReportMatchup = {
       teams: [...teams].sort((a, b) => b.pointsScored - a.pointsScored),
     };
+    const rosterIds = tableData
+      .filter((user) => user.matchups[weekIndex] === matchupNumber)
+      .map((user) => user.rosterId);
+    const previousHeadToHeadResult = getPreviousHeadToHeadResult({
+      tableData,
+      rosterIds,
+      weekIndex,
+      showUsernames,
+    });
+    if (previousHeadToHeadResult) {
+      matchup.previousHeadToHeadResult = previousHeadToHeadResult;
+    }
     if (isPlayoffs) {
-      const rosterIds = tableData
-        .filter((user) => user.matchups[weekIndex] === matchupNumber)
-        .map((user) => user.rosterId);
       matchup.playoffContext = getPlayoffMatchupContext(
         rosterIds,
         winnersBracket,

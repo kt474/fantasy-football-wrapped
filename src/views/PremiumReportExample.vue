@@ -20,7 +20,7 @@ const exampleHighlights = [
   },
   {
     title: "Connect awards to evidence",
-    description: "Team of the Week and manager blunders are explained with lineup and transaction context.",
+    description: "Team of the Week and weekly lowlights are explained with lineup and transaction context.",
   },
 ];
 </script>
@@ -38,7 +38,7 @@ const exampleHighlights = [
             Fantasy football weekly recap example: championship week
           </h1>
           <p class="max-w-3xl mt-5 text-lg leading-8 text-muted-foreground">
-            A complete AI-written report from an anonymized Sleeper league, including every Week 17 matchup, the championship story, Team of the Week, and manager blunders.
+            A complete AI-written report from an anonymized Sleeper league, including every Week 17 matchup, the championship story, Team of the Week, and weekly lowlights.
           </p>
           <p class="mt-5 text-sm text-muted-foreground">
             {{ premiumReportExample.leagueName }} · {{ premiumReportExample.season }} season · Week {{ premiumReportExample.week }}
