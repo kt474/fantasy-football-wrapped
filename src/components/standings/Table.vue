@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/tooltip";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import Narratives from "../league_narratives/Narratives.vue";
+import PreviousSeasonPrompt from "./PreviousSeasonPrompt.vue";
 import {
   getParsedStorageItem,
   isRecord,
@@ -400,6 +401,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
 </script>
 <template>
   <div :class="['min-w-0', store.currentTab === 'Home' ? '' : 'mx-4']">
+    <PreviousSeasonPrompt v-if="showStandingsTab && store.currentLeagueId" />
     <div
       v-if="showStandingsTab"
       class="grid h-full min-h-0 grid-cols-1 gap-4 mt-4 xl:grid-cols-[minmax(0,1fr)_minmax(240px,300px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]"

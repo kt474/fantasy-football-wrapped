@@ -16,6 +16,12 @@ import SeasonFinishHistory from "./SeasonFinishHistory.vue";
 import ScrollableTableCard from "../layout/ScrollableTableCard.vue";
 import { toast } from "vue-sonner";
 import { hasLeagueSeasonData } from "@/lib/leagueHistory";
+import {
+  getPreviousLeagueEntries,
+  getPreviousSeasonReference,
+  isLeagueInfoEntry,
+  type PreviousLeagueEntry,
+} from "@/lib/previousSeason";
 
 import {
   Tooltip,
@@ -42,8 +48,6 @@ const tableOrder = ref("wins");
 const previousLeagues = ref<string[]>([]);
 const hasEmittedReady = ref(false);
 const previousLeagueLoads = new Map<string, Promise<void>>();
-
-type PreviousLeagueEntry = LeagueInfoType | string | number;
 
 const emitReady = () => {
   if (hasEmittedReady.value) return;
@@ -88,17 +92,6 @@ const getHistoricalTableData = (league: LeagueInfoType) => {
   return tableData;
 };
 
-const isLeagueInfoEntry = (entry: unknown): entry is LeagueInfoType =>
-  typeof entry === "object" &&
-  entry !== null &&
-  "leagueId" in entry &&
-  "season" in entry;
-
-const getPreviousLeagueEntries = (
-  league: LeagueInfoType
-): PreviousLeagueEntry[] =>
-  league.previousLeagues as unknown as PreviousLeagueEntry[];
-
 const replacePreviousLeagueEntries = (
   league: LeagueInfoType,
   leagues: PreviousLeagueEntry[]
@@ -108,25 +101,6 @@ const replacePreviousLeagueEntries = (
     getPreviousLeagueEntries(league).length,
     ...leagues
   );
-};
-
-const getPreviousSeasonReference = (entry: unknown): string | null => {
-  if (typeof entry === "string" || typeof entry === "number") {
-    const season = String(entry).trim();
-    return season ? season : null;
-  }
-
-  if (
-    typeof entry === "object" &&
-    entry !== null &&
-    "season" in entry &&
-    !("leagueId" in entry)
-  ) {
-    const season = String(entry.season ?? "").trim();
-    return season ? season : null;
-  }
-
-  return null;
 };
 
 interface PointSeasonEntry {

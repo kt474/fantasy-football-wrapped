@@ -2,7 +2,7 @@ import type { PremiumReport } from "@/types/types";
 
 export const premiumReportPreview: PremiumReport = {
   frontPage: {
-    headline: "Week 8 Turned the Playoff Line Into a Trapdoor",
+    headline: "A Trapdoor Has Opened at the Playoff Line",
     subheadline:
       "Breece's Puffs escaped onto the cutoff, Bijan Mustard buried the field, and Lamario Kart benched the points that would have won the week.",
     lead: "Week 8 turned the playoff race into a revolving door. Breece's Puffs escaped the closest matchup by 3.8 and jumped onto the final playoff spot, while Bijan Mustard dropped 156.42 to separate from the field. The real pain belonged to Lamario Kart, who lost by 3.2 with an 11.4-point winning swap sitting on the bench like a receipt nobody wanted to read. Add a 71.26-point weekly low from Fourth and Long, and the standings were not the only thing getting rearranged. The league chat now has material for days.",
@@ -43,7 +43,8 @@ export const premiumReportPreview: PremiumReport = {
       {
         teamName: "Lamario Kart",
         category: "bench_burn",
-        headline: "The Winning Lineup Was Available, Just Apparently Too Obvious",
+        headline:
+          "The Winning Lineup Was Available, Just Apparently Too Obvious",
         analysis:
           "Lamario Kart lost 109.34 to 106.14 while Terry McLaurin's 19.6 points watched from the bench and D.J. Moore supplied 8.2 in the starting lineup. The legal swap was worth 11.4, more than enough to reverse the result. This was not harmless bench regret or hindsight theater. The winning points were present, eligible, and denied entry at the door.",
       },
