@@ -1,6 +1,10 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+const premiumReportExample = JSON.parse(
+  await readFile(resolve("src/data/premiumReportExample.json"), "utf8")
+);
+
 const pages = [
   {
     path: "",
@@ -70,11 +74,85 @@ const pages = [
     introduction:
       "Turn the week’s matchups into a polished league recap with summaries, awards, top and bottom performers, standings context, and a preview of what comes next.",
     sections: [
-      "Matchup-by-matchup summaries",
-      "Weekly awards and performers",
-      "Standings and season context",
-      "Shareable presentation",
+      {
+        title: "Every matchup, in context",
+        body: "Go beyond the final score with standout starters, close calls, blowouts, weekly scoring rank, and the results that changed the standings.",
+      },
+      {
+        title: "Manager decisions and lineup efficiency",
+        body: "Identify legal bench swaps, points left unused, lineup efficiency, and decisions that were large enough to change a matchup result.",
+      },
+      {
+        title: "Standings and season consequences",
+        body: "Connect each result to records, rank movement, streaks, playoff position, season averages, and the broader story around every manager.",
+      },
+      {
+        title: "Standard and Premium reports",
+        body: "Start with a free weekly summary or generate a detailed league-newspaper report with customizable commentary, sharing, and audio options.",
+      },
+      {
+        title: "Built for Sleeper and ESPN leagues",
+        body: "Import a real fantasy football league without assembling matchup, roster, standings, or transaction data in a spreadsheet.",
+      },
+      {
+        title: "Calculated before it is written",
+        body: "ffwrapped normalizes league data and calculates the underlying matchup and lineup facts before AI turns the structured context into a report.",
+      },
     ],
+  },
+  {
+    path: "fantasy-football-weekly-recap-example",
+    title: "Fantasy Football Weekly Recap Example | ffwrapped",
+    description:
+      "Read a complete fantasy football weekly recap example with championship analysis, matchup summaries, Team of the Week, and manager blunders.",
+    heading: "Fantasy football weekly recap example: championship week",
+    introduction:
+      "A complete AI-written Premium report from an anonymized Sleeper league, including every Week 17 matchup, the championship story, Team of the Week, and manager blunders.",
+    sectionHeading: "Full sample Premium report",
+    ctaHref: "/fantasy-football-weekly-recap",
+    ctaLabel: "Learn how fantasy football weekly recaps work",
+    ogType: "article",
+    sections: [
+      {
+        title: premiumReportExample.report.frontPage.headline,
+        body: `${premiumReportExample.report.frontPage.subheadline} ${premiumReportExample.report.frontPage.lead}`,
+      },
+      ...premiumReportExample.report.matchupReports.map((matchup) => ({
+        title: matchup.headline,
+        body: matchup.recap,
+      })),
+      {
+        title: `Team of the Week: ${premiumReportExample.report.teamOfTheWeek.teamName}`,
+        body: `${premiumReportExample.report.teamOfTheWeek.headline}. ${premiumReportExample.report.teamOfTheWeek.analysis}`,
+      },
+      ...premiumReportExample.report.managersBlotter.entries.map((entry) => ({
+        title: `${entry.teamName}: ${entry.headline}`,
+        body: entry.analysis,
+      })),
+    ],
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: "Fantasy football weekly recap example: championship week",
+      description:
+        "A complete AI-written fantasy football Premium report with championship analysis, four matchup recaps, Team of the Week, and manager blunders.",
+      datePublished: "2026-07-05",
+      dateModified: "2026-07-14",
+      mainEntityOfPage:
+        "https://ffwrapped.com/fantasy-football-weekly-recap-example",
+      author: {
+        "@type": "Organization",
+        name: "ffwrapped",
+        url: "https://ffwrapped.com/",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "ffwrapped",
+        url: "https://ffwrapped.com/",
+      },
+      isAccessibleForFree: true,
+      articleSection: "Fantasy Football Weekly Recaps",
+    },
   },
 ];
 
@@ -86,11 +164,38 @@ const escapeHtml = (value) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 
+const renderStaticPage = (page) => `
+  <main data-prerendered="true">
+    <article class="container max-w-5xl px-5 py-16 mx-auto">
+      <header>
+        <h1>${escapeHtml(page.heading)}</h1>
+        <p>${escapeHtml(page.introduction)}</p>
+        <p><a href="${escapeHtml(page.ctaHref ?? "/")}">${escapeHtml(page.ctaLabel ?? "Analyze your fantasy football league")}</a></p>
+      </header>
+      <section aria-labelledby="prerendered-page-features">
+        <h2 id="prerendered-page-features">${escapeHtml(page.sectionHeading ?? "Explore your league")}</h2>
+        <ul>
+          ${page.sections
+            .map((section) => {
+              const title = typeof section === "string" ? section : section.title;
+              const body = typeof section === "string" ? "" : section.body;
+              return `<li><h3>${escapeHtml(title)}</h3>${body ? `<p>${escapeHtml(body)}</p>` : ""}</li>`;
+            })
+            .join("")}
+        </ul>
+      </section>
+    </article>
+  </main>
+`;
+
 const template = await readFile(resolve("dist/index.html"), "utf8");
 
 for (const page of pages) {
   const canonical = `https://ffwrapped.com/${page.path}`;
-  const fallback = `<noscript><main><article><h1>${escapeHtml(page.heading)}</h1><p>${escapeHtml(page.introduction)}</p><h2>Explore your league</h2><ul>${page.sections.map((section) => `<li>${escapeHtml(section)}</li>`).join("")}</ul><p><a href="/">Analyze your fantasy football league</a></p></article></main></noscript>`;
+  const staticPage = renderStaticPage(page);
+  const structuredData = page.structuredData
+    ? `<script type="application/ld+json">${JSON.stringify(page.structuredData).replaceAll("<", "\\u003c")}</script>`
+    : "";
   const html = template
     .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(page.title)}</title>`)
     .replace(
@@ -110,11 +215,13 @@ for (const page of pages) {
       `<link rel="canonical" href="${canonical}" />`
     )
     .replace(/<meta property="og:url" content="[^"]*"\s*\/>/, `<meta property="og:url" content="${canonical}" />`)
+    .replace(/<meta property="og:type" content="[^"]*"\s*\/>/, `<meta property="og:type" content="${escapeHtml(page.ogType ?? "website")}" />`)
     .replace(/<meta property="og:title" content="[^"]*"\s*\/>/, `<meta property="og:title" content="${escapeHtml(page.title)}" />`)
     .replace(/<meta\s+property="og:description"\s+content="[^"]*"\s*\/>/, `<meta property="og:description" content="${escapeHtml(page.description)}" />`)
     .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/, `<meta name="twitter:title" content="${escapeHtml(page.title)}" />`)
     .replace(/<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/>/, `<meta name="twitter:description" content="${escapeHtml(page.description)}" />`)
-    .replace('<div id="app"></div>', `<div id="app">${fallback}</div>`);
+    .replace('<div id="app"></div>', `<div id="app">${staticPage}</div>`)
+    .replace("</head>", `${structuredData}</head>`);
 
   const outputDirectory = resolve("dist", page.path);
   await mkdir(outputDirectory, { recursive: true });

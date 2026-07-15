@@ -16,6 +16,10 @@
       "source": "/fantasy-football-weekly-recap",
       "destination": "/fantasy-football-weekly-recap/index.html"
     },
+    {
+      "source": "/fantasy-football-weekly-recap-example",
+      "destination": "/fantasy-football-weekly-recap-example/index.html"
+    },
     { "source": "/((?!assets/|.*\\..*).*)", "destination": "/" }
   ],
   "headers": [

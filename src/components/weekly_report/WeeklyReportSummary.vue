@@ -21,6 +21,7 @@ import PremiumReportContent from "./PremiumReportContent.vue";
 import type { PremiumReport } from "@/types/types";
 import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
 import { scrollAppToTop } from "@/lib/appScroll";
+import { premiumReportPreview } from "@/lib/premiumReportSample";
 
 const props = defineProps<{
   tier: string;
@@ -125,43 +126,6 @@ watch(
   },
   { immediate: true }
 );
-
-const premiumReportPreview: PremiumReport = {
-  frontPage: {
-    headline: "One Comeback, Two Blunders, and a New League Villain",
-    subheadline:
-      "Bijan Mustard steals Sunday night while Dak to the Future leaves 31 winning points on the bench.",
-    lead: "Week 8 had everything: a 22-point Sunday night comeback, a league-best lineup firing on every cylinder, and 31 winning points stranded on the bench. Here’s who earned the glory, who deserves the group-chat heat, and how one chaotic week changed the race for the playoffs.",
-  },
-  matchupReports: [
-    {
-      matchupNumber: 1,
-      bracket: "winners",
-      headline: "Sunday Night Rally Steals the Week",
-      recap:
-        "Gridiron Royalty erased a 22-point deficit behind a huge primetime performance, turning a comfortable lead into the week's most painful loss.",
-    },
-  ],
-  teamOfTheWeek: {
-    teamName: "Gridiron Royalty",
-    pointsScored: 156.42,
-    headline: "The lineup that could not miss",
-    analysis:
-      "Every starter contributed, three players cleared 25 points, and the league's highest score was never seriously threatened.",
-  },
-  managersBlotter: {
-    headline: "Manager Blunders",
-    entries: [
-      {
-        teamName: "Fourth and Regret",
-        category: "bench_burn",
-        headline: "The winning points watched from the bench",
-        analysis:
-          "A 31-point receiver sat behind a struggling starter, turning what should have been a comfortable win into a narrow loss.",
-      },
-    ],
-  },
-};
 
 const updateTier = (value: string) => {
   emit("update:tier", value);

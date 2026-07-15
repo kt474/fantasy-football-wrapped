@@ -1,0 +1,63 @@
+{
+  "platform": "sleeper",
+  "leagueName": "Sample ffwrapped league",
+  "season": "2025",
+  "week": 17,
+  "createdAt": "2026-07-05T14:11:41.065266+00:00",
+  "report": {
+    "frontPage": {
+      "lead": "Championship week belonged to Saquondo, who did the only thing that matters in late December: leave with the trophy and let everyone else argue about style points. The title game was not a masterpiece, but it was absolutely a verdict. A sharp free agent hit from Tyler Shough gave the lineup real lift, and even a comedy-grade bench regret could not knock the new champ off course. Elsewhere, Dak to the Future dropped the week’s biggest score, which is nice and all, but banners are not handed out for winning the side quest.",
+      "headline": "Saquondo Survives the Bench Gremlins and Grabs the Crown",
+      "subheadline": "A title won on waiver nerve, while Dak to the Future lit up the consolation side like the league owed them money."
+    },
+    "teamOfTheWeek": {
+      "analysis": "Dak to the Future had the loudest point total, but Team of the Week goes where the trophy goes. Saquondo won the championship, and that outweighs every consolation fireworks show in the building. Tyler Shough was a brilliant late pickup who paid off exactly when it mattered most, and Chris Olave helped keep the final from getting weird. Yes, the bench left behind enough points to make the title look messier than it needed to. That just makes the ring funnier, not smaller.",
+      "headline": "The Week Belongs to the Champ, Not the Box Score Hero",
+      "teamName": "Saquondo",
+      "pointsScored": 107.02
+    },
+    "matchupReports": [
+      {
+        "recap": "This winners bracket placement game was really about who could finish with a little dignity, and Ja’Marr the Merrier handled that business cleanly. A perfectly efficient lineup meant no self-inflicted nonsense, while Breece's Puffs got one huge push from Drake Maye and then watched the rest of the roster shrug like it had dinner plans. Even the defensive swap left points on the table. In a week for sharp choices, Breece's Puffs brought empty calories and a clipboard full of almosts.",
+        "bracket": "winners",
+        "headline": "Ja’Marr the Merrier Claims Third While Breece's Puffs Wastes a Good Carry Job",
+        "matchupNumber": 1
+      },
+      {
+        "recap": "Here is the only result that gets remembered: Saquondo is the champion. The new title holder beat Baby Back Gibbs by 32.02, thanks in large part to the free agent jackpot of Tyler Shough and another strong push from Chris Olave. The funniest part is that Saquondo still left Zach Charbonnet on the bench, so this could have been even nastier. Baby Back Gibbs never found enough punch and got sabotaged by a zero from Taysom Hill. In the final, that kind of lineup gamble is just donating suspense.",
+        "bracket": "winners",
+        "headline": "Saquondo Wins the Title, Even After Trying to Make It Harder Than Necessary",
+        "matchupNumber": 2
+      },
+      {
+        "recap": "For a losers bracket placement game, this had real pride attached, and The Princess McBride treated it like a closing statement. Derrick Henry detonated the matchup and made the rest of the scoreboard look optional, while LaPorta Potty had to stew over a brutal start sit miss. Leaving Luther Burden parked while Adonai Mitchell put up a dud is exactly how a respectable score turns into a comfortable loss. The waiver stab at Geno Smith helped a little, but this game was already leaking from the lineup card.",
+        "bracket": "losers",
+        "headline": "The Princess McBride Finishes Strong While LaPorta Potty Benches the Better Idea",
+        "matchupNumber": 3
+      },
+      {
+        "recap": "This was a placement game in name only. In practice, it was a public service announcement about what happens when one team catches fire and the other forgets how fantasy works. Dak to the Future posted the week’s best total and won by 88.04, with Bijan Robinson leading the stampede and Caleb Williams adding more than enough insult. On the other side, Lamario Kart delivered the weekly low, started Drake London for almost nothing, and even managed a negative from the defense. That is not bad luck. That is a demolition permit.",
+        "bracket": "losers",
+        "headline": "Dak to the Future Drops a Nuclear Score on Lamario Kart",
+        "matchupNumber": 4
+      }
+    ],
+    "managersBlotter": {
+      "entries": [
+        {
+          "analysis": "Scoring 52.56 in the final week is already rough. Doing it with the shakiest lineup efficiency among the notable teams is the real roastable offense. Jayden Higgins sat on the bench while Drake London gave basically nothing, and the GB defense somehow tunneled below zero just to make the whole scene feel cursed. Even the optimal lineup would not have saved the matchup, but this version looked like it was assembled during airport turbulence.",
+          "category": "weekly_low",
+          "headline": "The Weekly Low Arrived With Extra Bad Choices",
+          "teamName": "Lamario Kart"
+        },
+        {
+          "analysis": "Breece's Puffs put up a respectable losing score, which somehow makes the inactivity sting more. Zero waiver moves meant no attempt to patch a roster that ended up wasting a monster Drake Maye performance. This was the fantasy version of seeing smoke under the hood and deciding the best fix was optimism. The bench was not catastrophic, but the passive approach left too much pressure on one star to carry an entire matchup. He did his part. The rest of the roster sent regrets.",
+          "category": "starter_disaster",
+          "headline": "Standing Still Is a Decision, and It Aged Like Gas Station Sushi",
+          "teamName": "Breece's Puffs"
+        }
+      ],
+      "headline": "Manager's Blunder"
+    }
+  }
+}

@@ -22,6 +22,8 @@ const Terms = () => import("./views/Terms.vue");
 const Account = () => import("./views/Account.vue");
 const SharedReport = () => import("./views/SharedReport.vue");
 const SeoLanding = () => import("./views/SeoLanding.vue");
+const WeeklyRecapLanding = () => import("./views/WeeklyRecapLanding.vue");
+const PremiumReportExample = () => import("./views/PremiumReportExample.vue");
 const NotFound = () => import("./views/404.vue");
 
 const siteUrl = "https://ffwrapped.com";
@@ -44,6 +46,7 @@ const routes = [
       title: "Sleeper Fantasy Football League Analyzer | ffwrapped",
       description:
         "Analyze any Sleeper fantasy football league with power rankings, playoff odds, weekly recaps, draft grades, roster insights, and league history.",
+      standalone: true,
       landingPage: {
         eyebrow: "Sleeper league tools",
         heading: "A complete Sleeper fantasy football league analyzer",
@@ -78,41 +81,23 @@ const routes = [
   },
   {
     path: "/fantasy-football-weekly-recap",
-    component: SeoLanding,
+    component: WeeklyRecapLanding,
     meta: {
       title: "Fantasy Football Weekly Recap Generator | ffwrapped",
       description:
         "Create a personalized fantasy football weekly recap with matchup summaries, league awards, top performers, standings trends, and next-week previews.",
-      landingPage: {
-        eyebrow: "Weekly league reports",
-        heading: "Create a fantasy football weekly recap your league will read",
-        introduction:
-          "Turn the week’s matchups into a polished league recap with summaries, awards, top and bottom performers, standings context, and a preview of what comes next.",
-        benefits: [
-          "Built from your league results",
-          "Ready to share with league mates",
-          "Supports Sleeper and ESPN",
-        ],
-        sectionHeading: "Everything needed to recap the week",
-        sections: [
-          {
-            title: "Matchup-by-matchup summaries",
-            body: "Give every manager useful context about close games, blowouts, lineup performances, and the results that changed the standings.",
-          },
-          {
-            title: "Weekly awards and performers",
-            body: "Highlight the teams and players that defined the week, including the strongest performances and the decisions managers would rather forget.",
-          },
-          {
-            title: "Standings and season context",
-            body: "Connect one week of results to power rankings, playoff races, scoring trends, and each manager’s broader season.",
-          },
-          {
-            title: "Shareable presentation",
-            body: "Publish a report link for the league or turn the season into a visual Wrapped-style story designed for group chats and social sharing.",
-          },
-        ],
-      },
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-weekly-recap-example",
+    component: PremiumReportExample,
+    meta: {
+      title: "Fantasy Football Weekly Recap Example | ffwrapped",
+      description:
+        "Read a complete fantasy football weekly recap example with championship analysis, matchup summaries, Team of the Week, and manager blunders.",
+      ogType: "article",
+      standalone: true,
     },
   },
   {
@@ -253,6 +238,7 @@ router.afterEach((to) => {
   const title = String(to.meta.title ?? defaultMeta.title);
   const description = String(to.meta.description ?? defaultMeta.description);
   const robots = String(to.meta.robots ?? "index, follow");
+  const ogType = String(to.meta.ogType ?? "website");
   const canonicalUrl = `${siteUrl}${to.path === "/" ? "/" : to.path}`;
 
   document.title = title;
@@ -267,6 +253,7 @@ router.afterEach((to) => {
   setMetaContent('meta[property="og:title"]', title);
   setMetaContent('meta[property="og:description"]', description);
   setMetaContent('meta[property="og:url"]', canonicalUrl);
+  setMetaContent('meta[property="og:type"]', ogType);
   setMetaContent('meta[name="twitter:title"]', title);
   setMetaContent('meta[name="twitter:description"]', description);
 

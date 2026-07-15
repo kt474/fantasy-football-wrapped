@@ -65,7 +65,7 @@ defineProps<{
       <div>
         <h3 class="text-lg font-semibold">Team of the Week</h3>
         <p class="text-sm text-muted-foreground">
-          The week's top-scoring lineup.
+          The team that defined the week.
         </p>
       </div>
       <Card>
