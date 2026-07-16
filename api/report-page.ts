@@ -7,7 +7,7 @@ import {
   fetchSharedReportPreview,
   injectReportPreviewMetadata,
   type ReportPreviewMetadata,
-} from "../server/reportPreview.ts";
+} from "./_lib/reportPreview.js";
 
 type ApiRequest = {
   method?: string;

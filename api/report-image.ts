@@ -7,7 +7,7 @@ import {
   fetchSharedReportPreview,
   truncatePreviewText,
   type SharedReportPreview,
-} from "../server/reportPreview.ts";
+} from "./_lib/reportPreview.js";
 
 type ApiRequest = {
   method?: string;

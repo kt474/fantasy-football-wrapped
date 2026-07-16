@@ -9,7 +9,7 @@ import {
   injectReportPreviewMetadata,
   normalizeSharedReportPreview,
   truncatePreviewText,
-} from "../server/reportPreview.ts";
+} from "../api/_lib/reportPreview.ts";
 
 const token = "a".repeat(32);
 const sharedReport = {

@@ -288,4 +288,3 @@ export const injectReportPreviewMetadata = (
 
   return html.replace("</head>", `    ${additionalTags}\n  </head>`);
 };
-
