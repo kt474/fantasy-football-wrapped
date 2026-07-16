@@ -1,4 +1,15 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/report-page.ts": {
+      "includeFiles": "dist/index.html",
+      "maxDuration": 10
+    },
+    "api/report-image.ts": {
+      "includeFiles": "server/og-assets/**",
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     {
       "source": "/about",
@@ -19,6 +30,10 @@
     {
       "source": "/fantasy-football-weekly-recap-example",
       "destination": "/fantasy-football-weekly-recap-example/index.html"
+    },
+    {
+      "source": "/report/:token",
+      "destination": "/api/report-page?token=:token"
     },
     { "source": "/((?!assets/|.*\\..*).*)", "destination": "/" }
   ],

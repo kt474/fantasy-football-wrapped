@@ -1,4 +1,5 @@
 User-agent: *
+Allow: /api/report-image
 Allow: /
 
 Sitemap: https://ffwrapped.com/sitemap.xml
