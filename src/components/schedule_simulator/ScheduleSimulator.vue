@@ -1157,7 +1157,6 @@ async function loadForecastProjections() {
         projectionStartWeek
       );
     });
-    localStorage.setItem("leagueInfo", JSON.stringify(store.leagueInfo));
   } finally {
     const loadingLeagueKeys = new Set(forecastLoadingLeagueKeys.value);
     loadingLeagueKeys.delete(leagueKey);

@@ -1,14 +1,12 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  inputLeague: vi.fn(),
   getPlayerIdLookupMap: vi.fn(),
   getPlayerIdsByNameTeamMap: vi.fn(),
   getStats: vi.fn(),
 }));
 
 vi.mock("../src/api/api.ts", () => ({
-  inputLeague: mocks.inputLeague,
   getPlayerIdLookupMap: mocks.getPlayerIdLookupMap,
   getPlayerIdsByNameTeamMap: mocks.getPlayerIdsByNameTeamMap,
 }));
@@ -25,6 +23,7 @@ import {
   getLeagueStatus,
   removeSavedEspnAuth,
 } from "../src/api/espnApi.ts";
+import { RequestTimeoutError } from "../src/lib/request.ts";
 
 const mockFetchResponse = (status, data) =>
   Promise.resolve({
@@ -490,7 +489,6 @@ const installEspnFetchMock = (fixture) => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
-  mocks.inputLeague.mockReset();
   mocks.getPlayerIdLookupMap.mockReset();
   mocks.getPlayerIdsByNameTeamMap.mockReset();
   mocks.getStats.mockReset();
@@ -547,17 +545,29 @@ describe("ESPN API transforms", () => {
       espnS2: "secret",
     });
 
-    expect(fetchMock).toHaveBeenCalledWith("/api/espn", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: "https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/2025/segments/0/leagues/12345?view=mSettings",
-        swid: "{abc}",
-        espnS2: "secret",
-      }),
-    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/espn",
+      expect.objectContaining({
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: "https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/2025/segments/0/leagues/12345?view=mSettings",
+          swid: "{abc}",
+          espnS2: "secret",
+        }),
+        signal: expect.any(AbortSignal),
+      })
+    );
+  });
+
+  test("applies an overall timeout to the complete ESPN league load", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+
+    await expect(
+      getEspnLeagueInfo("2025", "slow-league", undefined, { timeoutMs: 10 })
+    ).rejects.toBeInstanceOf(RequestTimeoutError);
   });
 
   test("normalizes ESPN league data into the app league shape", async () => {
@@ -594,14 +604,6 @@ describe("ESPN API transforms", () => {
     const league = await getEspnLeagueInfo("2025", "12345");
 
     expect(fetchMock).toHaveBeenCalledTimes(7);
-    expect(mocks.inputLeague).toHaveBeenCalledWith(
-      "12345",
-      "Fixture League",
-      2,
-      "Redraft",
-      "2025",
-      "espn"
-    );
     expect(mocks.getPlayerIdLookupMap).toHaveBeenCalled();
 
     expect(league).toMatchObject({

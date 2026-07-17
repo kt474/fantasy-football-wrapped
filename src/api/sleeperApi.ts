@@ -19,6 +19,7 @@ import {
   Player,
 } from "../types/apiTypes";
 import { RosterType, UserType, UserLeagueListItem } from "../types/types";
+import { fetchWithRetry, isRequestCancellation } from "@/lib/request";
 
 const assertOk = (response: Response, context: string) => {
   if (!response.ok) {
@@ -220,7 +221,8 @@ export type SleeperUserLookupResponse = {
 export const getStats = async (
   player: string,
   year: string,
-  scoringType: number
+  scoringType: number,
+  signal?: AbortSignal
 ): Promise<WeeklyStats | null> => {
   try {
     let rank = "pos_rank_ppr";
@@ -235,8 +237,9 @@ export const getStats = async (
       ppg = "pts_half_ppr";
       overall_rank = "rank_half_ppr";
     }
-    const response = await fetch(
-      `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}`
+    const response = await fetchWithRetry(
+      `https://api.sleeper.com/stats/nfl/player/${player}?season_type=regular&season=${year}`,
+      { signal }
     );
     assertOk(response, "Player stats request");
     const result = await parseJson<SleeperPlayerStatsResponse>(
@@ -261,6 +264,7 @@ export const getStats = async (
       gp: stats["gp"] ?? 0,
     };
   } catch (error) {
+    if (isRequestCancellation(error)) throw error;
     console.error("Error fetching player stats:", error);
     return null;
   }
@@ -575,40 +579,50 @@ export const getProjections = async (
 };
 
 export const getWinnersBracket = async (
-  leagueId: string
+  leagueId: string,
+  signal?: AbortSignal
 ): Promise<Bracket[]> => {
   try {
-    const response = await fetch(
-      `https://api.sleeper.app/v1/league/${leagueId}/winners_bracket`
+    const response = await fetchWithRetry(
+      `https://api.sleeper.app/v1/league/${leagueId}/winners_bracket`,
+      { signal }
     );
     assertOk(response, "Winners bracket request");
     return await parseJson<Bracket[]>(response, "Winners bracket");
   } catch (error) {
+    if (isRequestCancellation(error)) throw error;
     console.error("Error fetching winners bracket:", error);
     return [];
   }
 };
 
 export const getLosersBracket = async (
-  leagueId: string
+  leagueId: string,
+  signal?: AbortSignal
 ): Promise<Bracket[]> => {
   try {
-    const response = await fetch(
-      `https://api.sleeper.app/v1/league/${leagueId}/losers_bracket`
+    const response = await fetchWithRetry(
+      `https://api.sleeper.app/v1/league/${leagueId}/losers_bracket`,
+      { signal }
     );
     assertOk(response, "Losers bracket request");
     return await parseJson<Bracket[]>(response, "Losers bracket");
   } catch (error) {
+    if (isRequestCancellation(error)) throw error;
     console.error("Error fetching losers bracket:", error);
     return [];
   }
 };
 
 export const getUsername = async (
-  username: string
+  username: string,
+  signal?: AbortSignal
 ): Promise<SleeperUserLookupResponse | null> => {
   try {
-    const response = await fetch(`https://api.sleeper.app/v1/user/${username}`);
+    const response = await fetchWithRetry(
+      `https://api.sleeper.app/v1/user/${username}`,
+      { signal }
+    );
     if (response.status === 404) {
       return null;
     }
@@ -618,24 +632,30 @@ export const getUsername = async (
       "Username lookup"
     );
   } catch (error) {
-    console.error("Error fetching username:", error);
-    return null;
+    if (!isRequestCancellation(error)) {
+      console.error("Error fetching username:", error);
+    }
+    throw error;
   }
 };
 
 export const getAllLeagues = async (
   userId: string,
-  season: string
+  season: string,
+  signal?: AbortSignal
 ): Promise<UserLeagueListItem[]> => {
   try {
-    const response = await fetch(
-      `https://api.sleeper.app/v1/user/${userId}/leagues/nfl/${season}`
+    const response = await fetchWithRetry(
+      `https://api.sleeper.app/v1/user/${userId}/leagues/nfl/${season}`,
+      { signal }
     );
     assertOk(response, "User leagues request");
     return await parseJson<UserLeagueListItem[]>(response, "User leagues");
   } catch (error) {
-    console.error("Error fetching user leagues:", error);
-    return [];
+    if (!isRequestCancellation(error)) {
+      console.error("Error fetching user leagues:", error);
+    }
+    throw error;
   }
 };
 
@@ -712,8 +732,14 @@ export const getDraftPicks = async (
   return picksWithStats;
 };
 
-export const getLeague = async (leagueId: string): Promise<LeagueOriginal> => {
-  const response = await fetch(`https://api.sleeper.app/v1/league/${leagueId}`);
+export const getLeague = async (
+  leagueId: string,
+  signal?: AbortSignal
+): Promise<LeagueOriginal> => {
+  const response = await fetchWithRetry(
+    `https://api.sleeper.app/v1/league/${leagueId}`,
+    { signal }
+  );
   if (response.status === 404) {
     return {
       name: "",
@@ -769,9 +795,13 @@ export const getLeague = async (leagueId: string): Promise<LeagueOriginal> => {
   };
 };
 
-export const getRosters = async (leagueId: string): Promise<RosterType[]> => {
-  const response = await fetch(
-    `https://api.sleeper.app/v1/league/${leagueId}/rosters`
+export const getRosters = async (
+  leagueId: string,
+  signal?: AbortSignal
+): Promise<RosterType[]> => {
+  const response = await fetchWithRetry(
+    `https://api.sleeper.app/v1/league/${leagueId}/rosters`,
+    { signal }
   );
   assertOk(response, "Rosters request");
   const rosters: Roster[] = await parseJson<Roster[]>(response, "Rosters");
@@ -795,9 +825,13 @@ export const getRosters = async (leagueId: string): Promise<RosterType[]> => {
   });
 };
 
-export const getUsers = async (leagueId: string): Promise<UserType[]> => {
-  const response = await fetch(
-    `https://api.sleeper.app/v1/league/${leagueId}/users`
+export const getUsers = async (
+  leagueId: string,
+  signal?: AbortSignal
+): Promise<UserType[]> => {
+  const response = await fetchWithRetry(
+    `https://api.sleeper.app/v1/league/${leagueId}/users`,
+    { signal }
   );
   assertOk(response, "Users request");
   const users: User[] = await parseJson<User[]>(response, "Users");
@@ -811,9 +845,14 @@ export const getUsers = async (leagueId: string): Promise<UserType[]> => {
   });
 };
 
-export const getMatchup = async (week: number, leagueId: string) => {
-  const response = await fetch(
-    `https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`
+export const getMatchup = async (
+  week: number,
+  leagueId: string,
+  signal?: AbortSignal
+) => {
+  const response = await fetchWithRetry(
+    `https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`,
+    { signal }
   );
   assertOk(response, "Matchup request");
   const matchup: Matchup[] = await parseJson<Matchup[]>(response, "Matchup");
@@ -850,17 +889,22 @@ export const getAvatar = async (avatarId: string) => {
 
 export const getTransactions = async (
   leagueId: string,
-  week: number
+  week: number,
+  signal?: AbortSignal
 ): Promise<WeeklyWaiver[]> => {
-  const response = await fetch(
-    `https://api.sleeper.app/v1/league/${leagueId}/transactions/${week}`
+  const response = await fetchWithRetry(
+    `https://api.sleeper.app/v1/league/${leagueId}/transactions/${week}`,
+    { signal }
   );
   assertOk(response, "Transactions request");
   return await parseJson<WeeklyWaiver[]>(response, "Transactions");
 };
 
-export const getCurrentLeagueState = async () => {
-  const response = await fetch("https://api.sleeper.app/v1/state/nfl");
+export const getCurrentLeagueState = async (signal?: AbortSignal) => {
+  const response = await fetchWithRetry(
+    "https://api.sleeper.app/v1/state/nfl",
+    { signal }
+  );
   assertOk(response, "Current league state request");
   const state = await parseJson<{ week?: number }>(
     response,

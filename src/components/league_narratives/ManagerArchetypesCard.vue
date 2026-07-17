@@ -5,7 +5,6 @@ import { generateManagerArchetype, type ManagerBlurbsPayload } from "@/api/api";
 import type { ManagerArchetype } from "@/lib/narratives";
 import { toast } from "vue-sonner";
 import { getLeagueKey, useStore } from "@/store/store";
-import { LeagueInfoType } from "@/types/types";
 import Separator from "../ui/separator/Separator.vue";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
@@ -59,10 +58,6 @@ const getManagerArchetypes = async () => {
     store.addManagerProfiles(
       getLeagueKey(store.leagueInfo[store.currentLeagueIndex]),
       blurbsByUserId.value
-    );
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
     );
     trackEvent("Feature Action Completed", {
       feature: "manager_profiles",

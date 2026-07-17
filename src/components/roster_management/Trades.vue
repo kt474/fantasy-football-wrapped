@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
-import { LeagueInfoType } from "../../types/types.ts";
 import { getPlayersByIdsMap } from "../../api/api.ts";
 import { getTradeValue } from "../../api/sleeperApi.ts";
 import { fakeRosters, fakeTrades, fakeUsers } from "../../api/fakeLeague";
@@ -190,10 +189,6 @@ const getData = async () => {
   store.addTradeNames(
     getLeagueKey(currentLeague),
     tradeData.value as TradeNameRow[]
-  );
-  localStorage.setItem(
-    "leagueInfo",
-    JSON.stringify(store.leagueInfo as LeagueInfoType[])
   );
 };
 

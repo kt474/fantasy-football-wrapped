@@ -1,4 +1,12 @@
-import { computed, onMounted, ref, unref, watch, type MaybeRef } from "vue";
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  unref,
+  watch,
+  type MaybeRef,
+} from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { getLeagueKey, useStore } from "@/store/store";
 import type { LeagueOriginal } from "@/types/apiTypes";
@@ -16,6 +24,12 @@ import {
   trackEvent,
   type AnalyticsProperties,
 } from "@/lib/analytics";
+import {
+  createLatestRequestGuard,
+  getLeagueLoadErrorMessage,
+  isRequestCancellation,
+  isRequestTimeout,
+} from "@/lib/request";
 
 export const SEASON_YEAR_OPTIONS = [
   "2026",
@@ -48,6 +62,18 @@ export const useLeagueInput = (
   const showErrorMsg = ref(false);
   const errorMsg = ref("");
   const showHelperMsg = ref(false);
+  const leagueLoadRequests = createLatestRequestGuard();
+
+  const cancelActiveLeagueLoad = () => {
+    leagueLoadRequests.cancel();
+    showHelperMsg.value = false;
+    store.updateLoadingLeague("");
+  };
+
+  const isActiveLeagueLoad = (controller: AbortController) =>
+    leagueLoadRequests.isActive(controller);
+
+  onBeforeUnmount(cancelActiveLeagueLoad);
 
   const leagueIds = computed(() => {
     return store.leagueIds;
@@ -62,7 +88,8 @@ export const useLeagueInput = (
 
   const updateURL = async (
     leagueID: string,
-    currentPlatform: LeaguePlatform = "sleeper"
+    currentPlatform: LeaguePlatform = "sleeper",
+    espnSeason = seasonYear.value
   ) => {
     const query =
       currentPlatform === "espn"
@@ -70,7 +97,7 @@ export const useLeagueInput = (
             ...route.query,
             espn: null,
             leagueId: leagueID,
-            season: seasonYear.value,
+            season: espnSeason,
           }
         : {
             ...route.query,
@@ -121,6 +148,7 @@ export const useLeagueInput = (
   );
 
   const onSubmit = async () => {
+    cancelActiveLeagueLoad();
     clearError();
     const currentPlatform = unref(platform);
     const attemptStartedAt = Date.now();
@@ -153,22 +181,47 @@ export const useLeagueInput = (
           trackAttemptFailed("invalid");
           return;
         }
-        const user = await getUsername(leagueIdInput.value);
-        if (!user?.user_id || !user?.display_name) {
-          showError("Invalid username");
-          trackAttemptFailed("invalid");
-          return;
+        const submittedUsername = leagueIdInput.value;
+        const submittedSeason = seasonYear.value;
+        const controller = leagueLoadRequests.start();
+        try {
+          const user = await getUsername(
+            submittedUsername,
+            controller.signal
+          );
+          if (!isActiveLeagueLoad(controller)) return;
+          if (!user?.user_id || !user?.display_name) {
+            showError("Invalid username");
+            trackAttemptFailed("invalid");
+            return;
+          }
+
+          showHelperMsg.value = true;
+          const leagues = await getAllLeagues(
+            user.user_id,
+            submittedSeason,
+            controller.signal
+          );
+          if (!isActiveLeagueLoad(controller)) return;
+
+          store.username = user.display_name;
+          store.setLeaguesList(leagues);
+          store.updateShowLeaguesList(true);
+          localStorage.setItem("inputType", "League ID");
+          store.updateShowInput(false);
+          void inputUsername(user.display_name, submittedSeason);
+          await resetRoute();
+        } catch (error) {
+          if (isRequestCancellation(error)) return;
+          showError(getLeagueLoadErrorMessage(error));
+          trackAttemptFailed(
+            isRequestTimeout(error) ? "timeout" : "api_error"
+          );
+        } finally {
+          if (leagueLoadRequests.finish(controller)) {
+            showHelperMsg.value = false;
+          }
         }
-        showHelperMsg.value = true;
-        const leagues = await getAllLeagues(user.user_id, seasonYear.value);
-        store.username = user.display_name;
-        store.setLeaguesList(leagues);
-        store.updateShowLeaguesList(true);
-        showHelperMsg.value = false;
-        localStorage.setItem("inputType", "League ID");
-        store.updateShowInput(false);
-        inputUsername(user.display_name, seasonYear.value);
-        await resetRoute();
         return;
       }
 
@@ -183,57 +236,73 @@ export const useLeagueInput = (
         return;
       }
 
-      const checkInput: LeagueOriginal = await getLeague(leagueIdInput.value);
-      if (!checkInput["name"]) {
-        showError("Invalid league ID");
-        trackAttemptFailed("invalid");
-      } else if ((leagueIds.value as string[]).includes(leagueIdInput.value)) {
-        showError("League already added");
-        trackAttemptFailed("duplicate");
-      } else if (checkInput["sport"] !== "nfl") {
-        showError("Only NFL leagues are supported");
-        trackAttemptFailed("invalid");
-      } else {
-        store.currentTab = "Standings";
-        localStorage.setItem("currentTab", "Standings");
+      const submittedLeagueId = leagueIdInput.value;
+      const controller = leagueLoadRequests.start();
+      try {
+        const checkInput: LeagueOriginal = await getLeague(
+          submittedLeagueId,
+          controller.signal
+        );
+        if (!isActiveLeagueLoad(controller)) return;
+
+        if (!checkInput["name"]) {
+          showError("Invalid league ID");
+          trackAttemptFailed("invalid");
+          return;
+        }
+        if ((leagueIds.value as string[]).includes(submittedLeagueId)) {
+          showError("League already added");
+          trackAttemptFailed("duplicate");
+          return;
+        }
+        if (checkInput["sport"] !== "nfl") {
+          showError("Only NFL leagues are supported");
+          trackAttemptFailed("invalid");
+          return;
+        }
+
         await resetRoute();
+        if (!isActiveLeagueLoad(controller)) return;
+
         showErrorMsg.value = false;
         store.updateLoadingLeague(checkInput["name"]);
-        store.updateCurrentLeagueId(leagueIdInput.value);
-        try {
-          const newLeagueInfo = await getData(leagueIdInput.value);
-          store.updateLeagueInfo(newLeagueInfo);
-          store.leagueSubmitted = true;
-          store.updateShowInput(false);
-          await updateURL(leagueIdInput.value);
-          trackEvent("League Added", {
-            ...attemptProperties,
-            ...getLeagueAnalyticsProperties(newLeagueInfo),
-            duration_ms: Date.now() - attemptStartedAt,
-          });
+        const newLeagueInfo = await getData(submittedLeagueId, {
+          signal: controller.signal,
+        });
+        if (!isActiveLeagueLoad(controller)) return;
 
-          try {
-            await inputLeague(
-              leagueIdInput.value,
-              newLeagueInfo.name,
-              newLeagueInfo.totalRosters,
-              newLeagueInfo.seasonType,
-              newLeagueInfo.season,
-              "sleeper"
-            );
-          } catch (error) {
-            console.error("Failed to save league metadata:", error);
-          }
-        } catch (error) {
-          console.error("Failed to load league:", error);
-          showError("Unable to load league right now. Please try again.");
-          trackAttemptFailed("api_error");
-        } finally {
+        await updateURL(submittedLeagueId);
+        if (!isActiveLeagueLoad(controller)) return;
+        store.updateLeagueInfo(newLeagueInfo);
+        store.updateCurrentLeagueId(getLeagueKey(newLeagueInfo));
+        store.currentTab = "Standings";
+        localStorage.setItem("currentTab", "Standings");
+        store.leagueSubmitted = true;
+        store.updateShowInput(false);
+        trackEvent("League Added", {
+          ...attemptProperties,
+          ...getLeagueAnalyticsProperties(newLeagueInfo),
+          duration_ms: Date.now() - attemptStartedAt,
+        });
+        void inputLeague(
+          submittedLeagueId,
+          newLeagueInfo.name,
+          newLeagueInfo.totalRosters,
+          newLeagueInfo.seasonType,
+          newLeagueInfo.season,
+          "sleeper"
+        );
+      } catch (error) {
+        if (isRequestCancellation(error)) return;
+        console.error("Failed to load league:", error);
+        showError(getLeagueLoadErrorMessage(error));
+        trackAttemptFailed(isRequestTimeout(error) ? "timeout" : "api_error");
+      } finally {
+        if (leagueLoadRequests.finish(controller)) {
           store.updateLoadingLeague("");
+          leagueIdInput.value = "";
         }
       }
-
-      leagueIdInput.value = "";
       return;
     }
 
@@ -273,18 +342,25 @@ export const useLeagueInput = (
         return;
       }
 
+      const submittedLeagueId = leagueIdInput.value;
+      const submittedSeason = seasonYear.value;
+      const controller = leagueLoadRequests.start();
       try {
         await resetRoute();
+        if (!isActiveLeagueLoad(controller)) return;
         showErrorMsg.value = false;
         store.updateLoadingLeague("ESPN League");
         const espnLeague = await getEspnLeagueInfo(
-          seasonYear.value,
-          leagueIdInput.value,
-          espnAuth
+          submittedSeason,
+          submittedLeagueId,
+          espnAuth,
+          { signal: controller.signal }
         );
-        if (espnLeague) {
+        if (espnLeague && isActiveLeagueLoad(controller)) {
+          await updateURL(submittedLeagueId, "espn", submittedSeason);
+          if (!isActiveLeagueLoad(controller)) return;
           if (espnAuth) {
-            saveEspnAuth(seasonYear.value, leagueIdInput.value, espnAuth);
+            saveEspnAuth(submittedSeason, submittedLeagueId, espnAuth);
           }
           store.updateLeagueInfo(espnLeague);
           store.updateCurrentLeagueId(getLeagueKey(espnLeague));
@@ -292,21 +368,33 @@ export const useLeagueInput = (
           store.updateShowInput(false);
           store.currentTab = "Standings";
           localStorage.setItem("currentTab", "Standings");
-          await updateURL(leagueIdInput.value, "espn");
           trackEvent("League Added", {
             ...attemptProperties,
             ...getLeagueAnalyticsProperties(espnLeague),
             duration_ms: Date.now() - attemptStartedAt,
           });
+          void inputLeague(
+            submittedLeagueId,
+            espnLeague.name,
+            espnLeague.totalRosters,
+            espnLeague.seasonType,
+            espnLeague.season,
+            "espn"
+          );
         } else {
           showError("Unable to load league right now. Please try again.");
           trackAttemptFailed("api_error");
         }
       } catch (error) {
+        if (isRequestCancellation(error)) return;
         showError(getEspnErrorMessage(error));
-        trackAttemptFailed("espn_auth");
+        trackAttemptFailed(
+          isRequestTimeout(error) ? "timeout" : "espn_auth"
+        );
       } finally {
-        store.updateLoadingLeague("");
+        if (leagueLoadRequests.finish(controller)) {
+          store.updateLoadingLeague("");
+        }
       }
     }
   };

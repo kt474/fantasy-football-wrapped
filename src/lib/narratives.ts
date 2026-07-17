@@ -6,6 +6,10 @@ import {
   WaiverStatus,
   WaiverType,
 } from "../types/apiTypes";
+import {
+  getPreviousLeagueEntries,
+  isLeagueInfoEntry,
+} from "./previousSeason";
 
 type PlayoffParticipantMatchup = {
   t1?: number | null;
@@ -453,7 +457,7 @@ export const normalizeHistoricalSeasons = (
 
   const seasons = [
     currentLeague,
-    ...(currentLeague.previousLeagues ?? []),
+    ...getPreviousLeagueEntries(currentLeague).filter(isLeagueInfoEntry),
   ].filter((season) => season.lastScoredWeek !== 0);
   return seasons.map((season) => ({
     season: season.season,

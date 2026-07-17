@@ -11,6 +11,17 @@ const badgeVariant = (type: string): BadgeVariants["variant"] => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/17/26",
+    content: [
+      {
+        type: "Fix",
+        text: [
+          "Moved all league data from local storage to indexedDB. You can now save up to 10 leagues.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/14/26",
     content: [
       {

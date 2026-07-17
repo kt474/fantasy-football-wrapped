@@ -4,7 +4,11 @@ import { LoaderCircle } from "lucide-vue-next";
 import { toast } from "vue-sonner";
 
 import { getData, inputLeague } from "@/api/api";
-import { getEspnLeagueInfo, getSavedEspnAuth } from "@/api/espnApi";
+import {
+  getEspnErrorMessage,
+  getEspnLeagueInfo,
+  getSavedEspnAuth,
+} from "@/api/espnApi";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +19,10 @@ import {
 } from "@/components/ui/card";
 import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
 import { hasLeagueSeasonData } from "@/lib/leagueHistory";
+import {
+  getLeagueLoadErrorMessage,
+  isRequestTimeout,
+} from "@/lib/request";
 import {
   getPreviousSeasonOption,
   isSeasonWithoutStandings,
@@ -112,16 +120,15 @@ const openPreviousSeason = async () => {
     store.updateCurrentLeagueId(getLeagueKey(league));
     store.currentTab = "Standings";
     localStorage.setItem("currentTab", "Standings");
-    localStorage.setItem("leagueInfo", JSON.stringify(store.leagueInfo));
 
-    if (league.platform !== "espn" && !wasAlreadyLoaded) {
+    if (!wasAlreadyLoaded) {
       await inputLeague(
         league.leagueId,
         league.name,
         league.totalRosters,
         league.seasonType,
         league.season,
-        "sleeper"
+        league.platform === "espn" ? "espn" : "sleeper"
       );
     }
 
@@ -134,8 +141,14 @@ const openPreviousSeason = async () => {
   } catch (error) {
     console.error("Unable to load previous season:", error);
     trackEvent("Previous Season Load Failed", getTrackingProperties());
+    const isOffline =
+      typeof navigator !== "undefined" && navigator.onLine === false;
     toast.error(
-      `Unable to load the ${option.season} season. It may not have matchup data.`
+      option.platform === "espn"
+        ? getEspnErrorMessage(error)
+        : isRequestTimeout(error) || isOffline
+          ? getLeagueLoadErrorMessage(error)
+          : `Unable to load the ${option.season} season. It may not have matchup data.`
     );
   } finally {
     isLoading.value = false;

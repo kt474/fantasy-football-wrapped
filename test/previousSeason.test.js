@@ -1,8 +1,10 @@
 import { describe, expect, test } from "vitest";
 import {
+  getLoadedPreviousLeagues,
   getPreviousSeasonOption,
   getPreviousSeasonReference,
   isSeasonWithoutStandings,
+  reconcileEspnPreviousLeagueEntries,
 } from "../src/lib/previousSeason.ts";
 
 const buildLeague = (overrides = {}) => ({
@@ -125,5 +127,64 @@ describe("previous season helpers", () => {
         buildLeague({ season: "2025", leagueId: "previous-id" })
       )
     ).toBeNull();
+  });
+
+  test("exposes only complete league objects to object-only consumers", () => {
+    const loaded = buildLeague({ season: "2025", leagueId: "previous-id" });
+    const current = buildLeague({
+      platform: "espn",
+      previousLeagues: ["2025", 2024, { season: "2023" }, loaded],
+    });
+
+    expect(getLoadedPreviousLeagues(current)).toEqual([loaded]);
+  });
+
+  test("keeps failed and unattempted ESPN season references retryable", () => {
+    const loaded2025 = buildLeague({
+      platform: "espn",
+      leagueId: "espn-id",
+      season: "2025",
+    });
+    const loaded2023 = buildLeague({
+      platform: "espn",
+      leagueId: "espn-id",
+      season: "2023",
+    });
+
+    const reconciled = reconcileEspnPreviousLeagueEntries(
+      ["2025", "2024", "2023", "2022"],
+      [loaded2025, loaded2023],
+      [{ season: "2025" }, { season: "2024" }, { season: "2023" }],
+      [{ season: "2024" }]
+    );
+
+    expect(reconciled).toEqual([
+      loaded2025,
+      "2024",
+      loaded2023,
+      "2022",
+    ]);
+  });
+
+  test("replaces a failed ESPN reference after a successful retry", () => {
+    const loaded2025 = buildLeague({
+      platform: "espn",
+      leagueId: "espn-id",
+      season: "2025",
+    });
+    const loaded2024 = buildLeague({
+      platform: "espn",
+      leagueId: "espn-id",
+      season: "2024",
+    });
+
+    const reconciled = reconcileEspnPreviousLeagueEntries(
+      [loaded2025, "2024", "2023"],
+      [loaded2024],
+      [{ season: "2024" }],
+      []
+    );
+
+    expect(reconciled).toEqual([loaded2025, loaded2024, "2023"]);
   });
 });

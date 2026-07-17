@@ -174,8 +174,8 @@ const chartOptions = ref({
       class="text-xs sm:-mb-4 footer-font text-muted-foreground"
       :class="props.tableData.length <= 12 ? 'mt-4' : 'mt-6'"
     >
-      Expected number of wins is calculated by simulating 10000 randomized
-      weekly matchups
+      Expected wins are calculated against a uniformly random opponent each
+      week
     </p>
   </Card>
 </template>

@@ -84,10 +84,6 @@ const getDraftOrder = async () => {
     roundReversal: roundReversal.value,
     draftType: draftType.value,
   });
-  localStorage.setItem(
-    "leagueInfo",
-    JSON.stringify(store.leagueInfo as LeagueInfoType[])
-  );
 };
 
 const draftSize = computed(() => {
@@ -234,10 +230,6 @@ const getData = async () => {
   }
 
   store.addDraftPicks(getLeagueKey(currentLeague), data.value);
-  localStorage.setItem(
-    "leagueInfo",
-    JSON.stringify(store.leagueInfo as LeagueInfoType[])
-  );
 };
 
 const getTeamName = (userId: string) => {

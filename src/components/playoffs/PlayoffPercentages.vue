@@ -132,10 +132,6 @@ const getData = async () => {
             );
           })
         );
-        localStorage.setItem(
-          "leagueInfo",
-          JSON.stringify(store.leagueInfo as LeagueInfoType[])
-        );
       }
 
       const nameMapping = new Map(
@@ -212,10 +208,6 @@ const getData = async () => {
   if (currentLeague) {
     store.addPlayoffOdds(getLeagueKey(currentLeague), playoffOdds.value);
   }
-  localStorage.setItem(
-    "leagueInfo",
-    JSON.stringify(store.leagueInfo as LeagueInfoType[])
-  );
 };
 
 const getTopProjectionsSum = (

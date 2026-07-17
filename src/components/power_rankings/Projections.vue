@@ -136,10 +136,6 @@ const getData = async () => {
       );
     }
   );
-  localStorage.setItem(
-    "leagueInfo",
-    JSON.stringify(store.leagueInfo as LeagueInfoType[])
-  );
 };
 
 const formattedData = computed(() => {

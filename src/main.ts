@@ -5,7 +5,12 @@ import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import App from "./App.vue";
 import { useAuthStore } from "./store/auth";
+import { useStore } from "./store/store";
 import { useSubscriptionStore } from "./store/subscription";
+import {
+  flushLeaguePersistence,
+  watchLeaguePersistence,
+} from "./lib/leagueStorage";
 import {
   identifyUser,
   initializeAnalytics,
@@ -219,6 +224,14 @@ const ApexChart = defineAsyncComponent(async () => {
 });
 
 app.use(pinia);
+const store = useStore(pinia);
+watchLeaguePersistence(store);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    void flushLeaguePersistence();
+  }
+});
+window.addEventListener("pagehide", () => void flushLeaguePersistence());
 const authStore = useAuthStore(pinia);
 authStore.initialize();
 const subscriptionStore = useSubscriptionStore(pinia);

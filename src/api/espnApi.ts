@@ -7,13 +7,20 @@ import type {
   UserType,
 } from "@/types/types";
 import {
-  inputLeague,
   getPlayerIdLookupMap,
   getPlayerIdsByNameTeamMap,
   type PlayerNameTeamLookup,
 } from "@/api/api";
 import { getStats } from "./sleeperApi";
 import { calculateDraftRank } from "./helper";
+import {
+  fetchWithRetry,
+  ESPN_LEAGUE_LOAD_TIMEOUT_MS,
+  getLeagueLoadErrorMessage,
+  isRequestCancellation,
+  runWithRequestTimeout,
+  type RequestOptions,
+} from "@/lib/request";
 
 const ESPN_BASE_URL = "https://lm-api-reads.fantasy.espn.com";
 
@@ -207,7 +214,7 @@ export const getEspnErrorMessage = (error: unknown) => {
   if (error instanceof EspnLeagueError) {
     return error.message;
   }
-  return "Unable to load ESPN league right now. Please try again.";
+  return getLeagueLoadErrorMessage(error, "espn");
 };
 
 const safeJson = async (response: Response) => {
@@ -232,12 +239,16 @@ const safeJson = async (response: Response) => {
   return response.json();
 };
 
-const fetchEspnJson = async (url: string, auth?: EspnAuth) => {
+const fetchEspnJson = async (
+  url: string,
+  auth?: EspnAuth,
+  signal?: AbortSignal
+) => {
   if (!auth) {
-    return safeJson(await fetch(url));
+    return safeJson(await fetchWithRetry(url, { signal }));
   }
 
-  const response = await fetch("/api/espn", {
+  const response = await fetchWithRetry("/api/espn", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -247,6 +258,7 @@ const fetchEspnJson = async (url: string, auth?: EspnAuth) => {
       swid: auth.swid,
       espnS2: auth.espnS2,
     }),
+    signal,
   });
 
   return safeJson(response);
@@ -817,7 +829,8 @@ const getDraftPicks = async (
   teams: Array<Record<string, unknown>> = [],
   playerLookups: EspnPlayerLookup[] = [],
   season: string,
-  scoringType: number
+  scoringType: number,
+  signal?: AbortSignal
 ) => {
   const picks = (
     Array.isArray(draft?.picks)
@@ -866,7 +879,8 @@ const getDraftPicks = async (
   const sleeperPlayerIds = await getPlayerIdsByNameTeamMap(
     draftPlayerLookups.flatMap((pick) =>
       pick.lookup ? [{ name: pick.lookup.name, team: pick.lookup.team }] : []
-    )
+    ),
+    signal
   );
   let sleeperPlayerIdIndex = 0;
   const playerStatsCache = new Map<
@@ -900,7 +914,8 @@ const getDraftPicks = async (
         sleeperPlayerId == null
           ? Promise.resolve(null)
           : (playerStatsCache.get(sleeperPlayerId) ??
-            getStats(sleeperPlayerId, season, scoringType).catch((error) => {
+            getStats(sleeperPlayerId, season, scoringType, signal).catch((error) => {
+              if (isRequestCancellation(error)) throw error;
               console.error("Error fetching ESPN draft player stats:", error);
               return null;
             }));
@@ -1094,44 +1109,52 @@ export const getLastScoredWeek = (
 export const getLeagueData = async (
   season: string,
   league_id: string,
-  auth?: EspnAuth
+  auth?: EspnAuth,
+  signal?: AbortSignal
 ) => {
   return fetchEspnJson(
     `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mSettings`,
-    auth
+    auth,
+    signal
   );
 };
 
 export const getTeamData = async (
   season: string,
   league_id: string,
-  auth?: EspnAuth
+  auth?: EspnAuth,
+  signal?: AbortSignal
 ) => {
   return fetchEspnJson(
     `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTeam`,
-    auth
+    auth,
+    signal
   );
 };
 
 export const getRosterData = async (
   season: string,
   league_id: string,
-  auth?: EspnAuth
+  auth?: EspnAuth,
+  signal?: AbortSignal
 ) => {
   return fetchEspnJson(
     `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mRoster`,
-    auth
+    auth,
+    signal
   );
 };
 
 export const getDraftData = async (
   season: string,
   league_id: string,
-  auth?: EspnAuth
+  auth?: EspnAuth,
+  signal?: AbortSignal
 ) => {
   return fetchEspnJson(
     `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mDraftDetail`,
-    auth
+    auth,
+    signal
   );
 };
 
@@ -1139,33 +1162,39 @@ export const getPlayerStats = async (
   season: string,
   league_id: string,
   week: number,
-  auth?: EspnAuth
+  auth?: EspnAuth,
+  signal?: AbortSignal
 ) => {
   return fetchEspnJson(
     `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore&view=mScoreboard&scoringPeriodId=${String(week)}`,
-    auth
+    auth,
+    signal
   );
 };
 
 export const getScoreboardData = async (
   season: string,
   league_id: string,
-  auth?: EspnAuth
+  auth?: EspnAuth,
+  signal?: AbortSignal
 ) => {
   return fetchEspnJson(
     `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore&view=mScoreboard`,
-    auth
+    auth,
+    signal
   );
 };
 
 export const getPlayoffMatchups = async (
   season: string,
   league_id: string,
-  auth?: EspnAuth
+  auth?: EspnAuth,
+  signal?: AbortSignal
 ) => {
   return fetchEspnJson(
     `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore`,
-    auth
+    auth,
+    signal
   );
 };
 
@@ -1173,11 +1202,13 @@ export const getWaivers = async (
   season: string,
   league_id: string,
   week: number,
-  auth?: EspnAuth
+  auth?: EspnAuth,
+  signal?: AbortSignal
 ) => {
   return fetchEspnJson(
     `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mTransactions2&scoringPeriodId=${String(week)}`,
-    auth
+    auth,
+    signal
   );
 };
 
@@ -1263,18 +1294,19 @@ const hasCompleteEspnWeeklySchedule = (
   );
 };
 
-export const getEspnLeagueInfo = async (
+const getEspnLeagueInfoWithSignal = async (
   season: string,
   leagueId: string,
-  auth?: EspnAuth
+  auth: EspnAuth | undefined,
+  signal: AbortSignal
 ): Promise<LeagueInfoType> => {
   const [league, teamData, rosterData, draftData, scoreboardData] =
     await Promise.all([
-      getLeagueData(season, leagueId, auth),
-      getTeamData(season, leagueId, auth),
-      getRosterData(season, leagueId, auth),
-      getDraftData(season, leagueId, auth),
-      getScoreboardData(season, leagueId, auth),
+      getLeagueData(season, leagueId, auth, signal),
+      getTeamData(season, leagueId, auth, signal),
+      getRosterData(season, leagueId, auth, signal),
+      getDraftData(season, leagueId, auth, signal),
+      getScoreboardData(season, leagueId, auth, signal),
     ]);
 
   const leagueRoot = assertRecord(
@@ -1372,7 +1404,7 @@ export const getEspnLeagueInfo = async (
     ? await Promise.all(
         completedWeeks.map(async (week) =>
           assertRecord(
-            await getPlayerStats(season, leagueId, week, auth),
+            await getPlayerStats(season, leagueId, week, auth, signal),
             `ESPN weekly scoring data is missing for week ${week}.`
           )
         )
@@ -1386,7 +1418,7 @@ export const getEspnLeagueInfo = async (
   const waivers = await Promise.all(
     completedWeeks.map(async (week) => {
       const waiverData = assertRecord(
-        await getWaivers(season, leagueId, week, auth),
+        await getWaivers(season, leagueId, week, auth, signal),
         `ESPN transaction data is missing for week ${week}.`
       );
       return assertArray<Record<string, unknown>>(
@@ -1441,7 +1473,7 @@ export const getEspnLeagueInfo = async (
     ),
   ];
 
-  const playerLookupMap = await getPlayerIdLookupMap(allPlayerLookups);
+  const playerLookupMap = await getPlayerIdLookupMap(allPlayerLookups, signal);
   const sleeperPlayerIdByEspnId = getSleeperPlayerIdByEspnIdMap(
     allPlayerLookups,
     playerLookupMap
@@ -1512,7 +1544,8 @@ export const getEspnLeagueInfo = async (
     teams,
     allPlayerLookups,
     season,
-    scoringType
+    scoringType,
+    signal
   );
   const espnWinnersBracket = playoffMatchups.filter((matchup: any) =>
     matchup.playoffTierType.includes("WINNER")
@@ -1530,15 +1563,6 @@ export const getEspnLeagueInfo = async (
     regularSeasonLength,
     finalScoringPeriod,
     isEspnDraftComplete(draftDetail, draftPicks)
-  );
-
-  await inputLeague(
-    leagueId,
-    leagueName,
-    totalRosters,
-    seasonType,
-    season,
-    "espn"
   );
 
   return {
@@ -1590,3 +1614,15 @@ export const getEspnLeagueInfo = async (
     sport: "nfl",
   };
 };
+
+export const getEspnLeagueInfo = async (
+  season: string,
+  leagueId: string,
+  auth?: EspnAuth,
+  { signal, timeoutMs = ESPN_LEAGUE_LOAD_TIMEOUT_MS }: RequestOptions = {}
+): Promise<LeagueInfoType> =>
+  runWithRequestTimeout(
+    (requestSignal) =>
+      getEspnLeagueInfoWithSignal(season, leagueId, auth, requestSignal),
+    { signal, timeoutMs }
+  );

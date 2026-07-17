@@ -15,6 +15,7 @@ import {
   getUsers,
 } from "../src/api/sleeperApi.ts";
 import * as authFetchModule from "../src/lib/authFetch.ts";
+import { RequestTimeoutError } from "../src/lib/request.ts";
 
 const mockFetchResponse = (status, data, overrides = {}) =>
   Promise.resolve({
@@ -557,5 +558,13 @@ describe("Sleeper API data transforms", () => {
     expect(leagueData.waivers).toHaveLength(2);
     expect(leagueData.weeklyPoints).toHaveLength(2);
     expect(leagueData.legacyWinner).toBe(1);
+  });
+
+  test("applies an overall timeout to the complete Sleeper league load", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+
+    await expect(
+      getData("slow-league", { timeoutMs: 10 })
+    ).rejects.toBeInstanceOf(RequestTimeoutError);
   });
 });

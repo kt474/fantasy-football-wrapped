@@ -3,7 +3,6 @@ import { onMounted, watch, ref, computed, nextTick } from "vue";
 import AppSidebar from "@/components/layout/AppSidebar.vue";
 import CardContainer from "./components/util/CardContainer.vue";
 import { getLeagueKey, useStore } from "./store/store";
-import { LeagueInfoType } from "./types/types";
 import { inject } from "@vercel/analytics";
 import { useRoute, useRouter } from "vue-router";
 
@@ -71,7 +70,6 @@ watch(
   () => {
     if (store.currentLeagueId === "") {
       localStorage.removeItem("currentLeagueId");
-      localStorage.removeItem("leagueInfo");
     } else {
       localStorage.setItem("currentLeagueId", store.currentLeagueId);
       if (
@@ -103,7 +101,6 @@ watch(
         }
       } else {
         localStorage.removeItem("currentLeagueId");
-        localStorage.removeItem("leagueInfo");
         toast.error("Error fetching data. Please try refreshing the page.");
       }
     }
@@ -117,10 +114,6 @@ watch(
       toast.success("League added!");
       store.leagueSubmitted = false;
     }
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
   }
 );
 

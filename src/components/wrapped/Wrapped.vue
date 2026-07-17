@@ -14,6 +14,7 @@ import Trades from "../roster_management/Trades.vue";
 import Waivers from "../roster_management/Waivers.vue";
 import OverallStats from "./OverallStats.vue";
 import WinnerPyramid from "./WinnerPyramid.vue";
+import { getLoadedPreviousLeagues } from "@/lib/previousSeason";
 
 const store = useStore();
 const LeagueHistory = defineAsyncComponent(
@@ -174,6 +175,10 @@ const currentManager = ref(managers.value[0]);
 const league = computed(() => {
   return store.leagueInfo[store.currentLeagueIndex];
 });
+
+const historicalLeagues = computed(() =>
+  league.value ? getLoadedPreviousLeagues(league.value) : []
+);
 
 const leagueSize = computed(() => {
   return league.value.totalRosters;
@@ -522,8 +527,8 @@ const allTimeRecord = computed(() => {
     avatarImg: user.avatarImg,
   }));
 
-  if (league.value.previousLeagues.length > 0) {
-    league.value.previousLeagues.forEach((league: LeagueInfoType) => {
+  if (historicalLeagues.value.length > 0) {
+    historicalLeagues.value.forEach((league: LeagueInfoType) => {
       league.rosters.forEach((roster: RosterType) => {
         let currentUser = result.find((user) => user.userId === roster.id);
         if (currentUser) {
@@ -550,7 +555,7 @@ const winStreak = computed(() => {
 
 const totalSlides = computed(() => {
   let total = 17;
-  if (league.value?.previousLeagues.length > 0) {
+  if (historicalLeagues.value.length > 0) {
     total += 1;
   }
   if (draftSteal.value && draftSteal.value.length > 0) {
@@ -2179,7 +2184,7 @@ watch(
         v-if="
           allTimeRecord &&
           allTimeRecord.length > 0 &&
-          league.previousLeagues.length > 0
+          historicalLeagues.length > 0
         "
       >
         <h2 class="mb-4 text-3xl font-bold sm:text-5xl text-slate-200">
@@ -2457,7 +2462,7 @@ watch(
     <Draft v-show="false" />
     <Trades v-show="false" />
     <Waivers v-show="false" />
-    <LeagueHistory v-show="false" :table-data="tableData" />
+    <LeagueHistory data-only :table-data="tableData" />
   </div>
 </template>
 

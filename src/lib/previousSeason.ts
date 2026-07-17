@@ -27,6 +27,68 @@ export const getPreviousLeagueEntries = (
 ): PreviousLeagueEntry[] =>
   league.previousLeagues as unknown as PreviousLeagueEntry[];
 
+export const getLoadedPreviousLeagues = (league: LeagueInfoType) =>
+  getPreviousLeagueEntries(league).filter(isLeagueInfoEntry);
+
+type SeasonCandidate = { season: string };
+
+/**
+ * Replaces successfully loaded ESPN season references without discarding
+ * references that failed or were not part of the current attempt.
+ */
+export const reconcileEspnPreviousLeagueEntries = (
+  currentEntries: PreviousLeagueEntry[],
+  loadedLeagues: LeagueInfoType[],
+  attemptedCandidates: SeasonCandidate[],
+  failures: SeasonCandidate[]
+): PreviousLeagueEntry[] => {
+  const attemptedSeasons = new Set(
+    attemptedCandidates.map((candidate) => candidate.season)
+  );
+  const failedSeasons = new Set(failures.map((failure) => failure.season));
+  const loadedBySeason = new Map<string, LeagueInfoType>();
+
+  currentEntries.filter(isLeagueInfoEntry).forEach((league) => {
+    loadedBySeason.set(league.season, league);
+  });
+  loadedLeagues.forEach((league) => {
+    loadedBySeason.set(league.season, league);
+  });
+
+  const referencesBySeason = new Map<string, PreviousLeagueEntry>();
+  currentEntries.forEach((entry) => {
+    if (isLeagueInfoEntry(entry)) return;
+    const season = getPreviousSeasonReference(entry);
+    if (
+      !season ||
+      loadedBySeason.has(season) ||
+      (attemptedSeasons.has(season) && !failedSeasons.has(season))
+    ) {
+      return;
+    }
+    referencesBySeason.set(season, entry);
+  });
+
+  failedSeasons.forEach((season) => {
+    if (!loadedBySeason.has(season) && !referencesBySeason.has(season)) {
+      referencesBySeason.set(season, season);
+    }
+  });
+
+  return [
+    ...loadedBySeason.values(),
+    ...referencesBySeason.values(),
+  ].sort((left, right) => {
+    const leftSeason = isLeagueInfoEntry(left)
+      ? left.season
+      : (getPreviousSeasonReference(left) ?? "");
+    const rightSeason = isLeagueInfoEntry(right)
+      ? right.season
+      : (getPreviousSeasonReference(right) ?? "");
+    return Number(rightSeason) - Number(leftSeason);
+  });
+};
+
 export const getPreviousSeasonReference = (entry: unknown): string | null => {
   if (typeof entry === "string" || typeof entry === "number") {
     const season = String(entry).trim();

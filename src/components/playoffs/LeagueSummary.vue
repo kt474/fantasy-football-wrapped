@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TableDataType, LeagueInfoType, UserType } from "../../types/types.ts";
+import { TableDataType, UserType } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import { generateSummary, getPlayersByIdsMap } from "../../api/api.ts";
 import { ref, onMounted, watch, computed } from "vue";
@@ -148,10 +148,6 @@ const getSummary = async () => {
     const response = await generateSummary(userData, leagueMetadata);
     rawSummary.value = response.text;
     store.addYearEndReport(getLeagueKey(currentLeague), rawSummary.value);
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
   }
 };
 const copyReport = () => {

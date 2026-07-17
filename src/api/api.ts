@@ -13,6 +13,13 @@ import { authenticatedFetch } from "@/lib/authFetch";
 import { mapWithConcurrency } from "@/lib/async";
 import { normalizePremiumReport } from "@/lib/premiumReport";
 import {
+  fetchWithRetry,
+  isRequestCancellation,
+  LEAGUE_LOAD_TIMEOUT_MS,
+  runWithRequestTimeout,
+  type RequestOptions,
+} from "@/lib/request";
+import {
   getAvatar,
   getCurrentLeagueState,
   getLeague,
@@ -343,7 +350,8 @@ export const resolvePlayerIdLookupEndpoint = (
 };
 
 export const getPlayerIdLookupMap = async (
-  players: PlayerNameTeamLookup[]
+  players: PlayerNameTeamLookup[],
+  signal?: AbortSignal
 ): Promise<Map<string, string>> => {
   if (players.length === 0) {
     return new Map();
@@ -370,7 +378,7 @@ export const getPlayerIdLookupMap = async (
       url.searchParams.append("team", team);
     });
 
-    const response = await fetch(url.toString());
+    const response = await fetchWithRetry(url.toString(), { signal });
     assertOk(response, "Player ID lookup request");
 
     const result = await parseJson<
@@ -389,19 +397,21 @@ export const getPlayerIdLookupMap = async (
 
     return playerLookupMap;
   } catch (error) {
+    if (isRequestCancellation(error)) throw error;
     console.error("Error fetching player IDs by name/team:", error);
     return new Map();
   }
 };
 
 export const getPlayerIdsByNameTeamMap = async (
-  players: PlayerNameTeamLookup[]
+  players: PlayerNameTeamLookup[],
+  signal?: AbortSignal
 ): Promise<(string | null)[]> => {
   if (players.length === 0) {
     return [];
   }
 
-  const playerLookupMap = await getPlayerIdLookupMap(players);
+  const playerLookupMap = await getPlayerIdLookupMap(players, signal);
 
   return players.map(
     (player) => playerLookupMap.get(getPlayerLookupKey(player)) ?? null
@@ -709,7 +719,7 @@ export const inputUsername = async (
     });
     assertOk(response, "Username input request");
   } catch (error) {
-    console.error("Error:", error);
+    console.warn("Unable to record username lookup:", error);
   }
 };
 
@@ -722,7 +732,7 @@ export const inputLeague = async (
   platform: string
 ): Promise<void> => {
   try {
-    const response = await fetch(import.meta.env.VITE_LEAGUE_URL, {
+    const response = await fetchWithRetry(import.meta.env.VITE_LEAGUE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -737,10 +747,12 @@ export const inputLeague = async (
           platform: platform,
         },
       }),
+      retries: 0,
+      attemptTimeoutMs: 5_000,
     });
     assertOk(response, "League input request");
   } catch (error) {
-    console.error("Error:", error);
+    console.warn("Unable to record league input:", error);
   }
 };
 
@@ -784,13 +796,16 @@ export const getLeagueDataWeekCount = ({
   return Math.max(lastScoredWeek, 1);
 };
 
-export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
+const getDataWithSignal = async (
+  leagueId: string,
+  signal: AbortSignal
+): Promise<LeagueInfoType> => {
   const [leagueInfo, rosters, winnersBracket, losersBracket] =
     await Promise.all([
-      getLeague(leagueId),
-      getRosters(leagueId),
-      getWinnersBracket(leagueId),
-      getLosersBracket(leagueId),
+      getLeague(leagueId, signal),
+      getRosters(leagueId, signal),
+      getWinnersBracket(leagueId, signal),
+      getLosersBracket(leagueId, signal),
     ]);
 
   const newLeagueInfo: NewLeagueInfoType = {
@@ -809,7 +824,7 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     newLeagueInfo.status === "in_season" ||
     newLeagueInfo.status === "post_season"
   ) {
-    const leagueState = await getCurrentLeagueState();
+    const leagueState = await getCurrentLeagueState(signal);
     currentWeek = leagueState.week;
     newLeagueInfo.currentWeek = currentWeek;
   } else {
@@ -828,10 +843,10 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
   const weeks = Array.from({ length: weekCount }, (_, index) => index + 1);
 
   const [weeklyPoints, users, weeklyTransactionResults] = await Promise.all([
-    getWeeklyPoints(leagueId, weekCount),
-    getUsers(leagueId),
+    getWeeklyPoints(leagueId, weekCount, 0, signal),
+    getUsers(leagueId, signal),
     mapWithConcurrency(weeks, 4, async (week) => {
-      const weeklyTransaction = await getTransactions(leagueId, week);
+      const weeklyTransaction = await getTransactions(leagueId, week, signal);
       const waiverMoves = getWaiverMoves(weeklyTransaction);
       return {
         totals: getTotalTransactions(weeklyTransaction),
@@ -878,3 +893,12 @@ export const getData = async (leagueId: string): Promise<LeagueInfoType> => {
     espnLosersBracket: [],
   };
 };
+
+export const getData = async (
+  leagueId: string,
+  { signal, timeoutMs = LEAGUE_LOAD_TIMEOUT_MS }: RequestOptions = {}
+): Promise<LeagueInfoType> =>
+  runWithRequestTimeout(
+    (requestSignal) => getDataWithSignal(leagueId, requestSignal),
+    { signal, timeoutMs }
+  );

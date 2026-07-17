@@ -2,7 +2,6 @@
 import mean from "lodash/mean";
 import { ref, onMounted, computed, watch } from "vue";
 import { getDraftProjections } from "../../api/sleeperApi";
-import { LeagueInfoType } from "../../types/types.ts";
 import { DraftPick, PickObj } from "../../types/apiTypes.ts";
 import { getLeagueKey, useStore } from "../../store/store";
 import { standardDeviation } from "../../api/helper";
@@ -122,10 +121,6 @@ const getProjections = async () => {
 
   projectionData.value = totalDraftScores;
   store.addDraftGrades(getLeagueKey(currentLeague), projectionData.value);
-  localStorage.setItem(
-    "leagueInfo",
-    JSON.stringify(store.leagueInfo as LeagueInfoType[])
-  );
 };
 
 const zScoreToGrade = (z: number) => {

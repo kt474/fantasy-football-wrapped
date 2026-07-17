@@ -22,10 +22,6 @@ const getPreview = async () => {
     preview.value = response.text;
     const currentLeague = store.leagueInfo[store.currentLeagueIndex];
     store.addWeeklyPreview(getLeagueKey(currentLeague), preview.value);
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
     loading.value = false;
   }
 };

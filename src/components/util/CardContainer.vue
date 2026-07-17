@@ -6,6 +6,7 @@ import { useRoute } from "vue-router";
 
 import { useStore } from "../../store/store";
 import { computed } from "vue";
+import { leaguePersistenceStatus } from "@/lib/leagueStorage";
 
 const store = useStore();
 const route = useRoute();
@@ -23,19 +24,33 @@ const hasLeagueIdInUrl = computed(() => {
 const showAddLeagueButton = computed(() => {
   const isHomeTabOnHomeRoute =
     route.path === "/" && store.currentTab === "Home";
-  return !store.loadingLeague && !hasLeagueIdInUrl.value && !isHomeTabOnHomeRoute;
+  return (
+    leaguePersistenceStatus.value !== "blocked" &&
+    !store.loadingLeague &&
+    !hasLeagueIdInUrl.value &&
+    !isHomeTabOnHomeRoute
+  );
 });
+
+const showLeagueSwitcher = computed(
+  () =>
+    leaguePersistenceStatus.value !== "blocked" &&
+    hasLeagueIdInUrl.value &&
+    route.path === "/"
+);
 </script>
 <template>
   <div class="flex min-w-0 flex-1">
     <div class="flex w-full min-w-0 overflow-auto no-scrollbar">
       <LeagueSwitcher
-        v-if="hasLeagueIdInUrl && route.path === '/'"
+        v-if="leaguePersistenceStatus !== 'blocked'"
+        v-show="showLeagueSwitcher"
         :leagues="leagues"
       />
       <div
+        v-if="leaguePersistenceStatus !== 'blocked'"
+        v-show="!showLeagueSwitcher && showAddLeagueButton"
         class="flex w-full min-w-0 items-center gap-2"
-        v-else-if="showAddLeagueButton"
       >
         <Dialog>
           <template #trigger>

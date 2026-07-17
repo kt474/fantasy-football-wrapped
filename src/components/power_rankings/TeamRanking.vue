@@ -80,10 +80,6 @@ const getData = async () => {
     getLeagueKey(currentLeague),
     data.value as unknown as Record<string, PlayerType[]>
   );
-  localStorage.setItem(
-    "leagueInfo",
-    JSON.stringify(store.leagueInfo as LeagueInfoType[])
-  );
 };
 
 const getTeamName = (playerId: string) => {

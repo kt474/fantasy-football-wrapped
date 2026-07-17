@@ -15,9 +15,16 @@ import { getDraftMetadata, getDraftPicks } from "@/api/sleeperApi";
 import { fakeManagerProfiles } from "@/api/fakeLeague.ts";
 import ManagerComparison from "../league_history/ManagerComparison.vue";
 import {
-  getNarrativeBundleStorageKey,
-  getParsedStorageItem,
-} from "@/lib/storage";
+  getCachedValue,
+  getNarrativeBundleCacheKey,
+  NARRATIVE_BUNDLE_CACHE_TTL_MS,
+  setCachedValue,
+} from "@/lib/leagueStorage";
+import type { HistoryLoadStatus } from "@/lib/historyLoad";
+import {
+  getPreviousLeagueEntries,
+  isLeagueInfoEntry,
+} from "@/lib/previousSeason";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -36,29 +43,33 @@ const seasons = computed(() =>
 const getNarrativeCacheKey = () => {
   const league = store.leagueInfo[store.currentLeagueIndex];
   return league
-    ? getNarrativeBundleStorageKey(getLeagueKey(league))
+    ? getNarrativeBundleCacheKey(getLeagueKey(league))
     : null;
 };
 
-const getCachedNarratives = (): NarrativeBundle => {
-  const cacheKey = getNarrativeCacheKey();
-  if (!cacheKey) return { managerArchetypes: [] };
+const isNarrativeBundle = (value: unknown): value is NarrativeBundle =>
+  typeof value === "object" &&
+  value !== null &&
+  "managerArchetypes" in value &&
+  Array.isArray(value.managerArchetypes);
 
-  return getParsedStorageItem<NarrativeBundle>(
-    cacheKey,
-    { managerArchetypes: [] },
-    {
-      isValid: (value): value is NarrativeBundle =>
-        typeof value === "object" &&
-        value !== null &&
-        "managerArchetypes" in value &&
-        Array.isArray(value.managerArchetypes),
-    }
-  );
-};
-
-const narratives = ref<NarrativeBundle>(getCachedNarratives());
-const isLeagueHistoryReady = ref(false);
+const narratives = ref<NarrativeBundle>({ managerArchetypes: [] });
+const leagueHistoryStatus = ref<HistoryLoadStatus>({
+  leagueKey: "",
+  loading: false,
+  settled: false,
+  complete: false,
+  loaded: 0,
+  total: 0,
+  loadingSeason: "",
+  failures: [],
+});
+const isLeagueHistoryReady = computed(
+  () => leagueHistoryStatus.value.settled
+);
+const isLeagueHistoryComplete = computed(
+  () => leagueHistoryStatus.value.complete
+);
 
 type PointSeasonEntry = {
   season: string;
@@ -124,25 +135,38 @@ const ensureHistoricalDraftData = async () => {
     return;
   }
 
-  const leagues = [currentLeague, ...(currentLeague.previousLeagues ?? [])];
+  const leagues = [
+    currentLeague,
+    ...getPreviousLeagueEntries(currentLeague).filter(isLeagueInfoEntry),
+  ];
   await Promise.all(leagues.map((league) => hydrateLeagueDraftPicks(league)));
-  localStorage.setItem("leagueInfo", JSON.stringify(store.leagueInfo));
 };
 
-const rebuildNarratives = async () => {
-  narratives.value = await buildNarrativeBundle(
+const rebuildNarratives = async (cacheResult = true) => {
+  const cacheKey = getNarrativeCacheKey();
+  const rebuiltNarratives = await buildNarrativeBundle(
     normalizeHistoricalSeasons(store.leagueInfo[store.currentLeagueIndex])
   );
 
-  const cacheKey = getNarrativeCacheKey();
-  if (cacheKey) {
-    localStorage.setItem(cacheKey, JSON.stringify(narratives.value));
+  if (cacheKey !== getNarrativeCacheKey()) return;
+
+  narratives.value = rebuiltNarratives;
+  if (cacheKey && cacheResult) {
+    await setCachedValue(
+      cacheKey,
+      rebuiltNarratives,
+      NARRATIVE_BUNDLE_CACHE_TTL_MS
+    );
   }
 };
 
-const refreshNarratives = async () => {
+const refreshNarratives = async (cacheResult = true) => {
   await ensureHistoricalDraftData();
-  await rebuildNarratives();
+  if (cacheResult) {
+    await rebuildNarratives();
+  } else {
+    await rebuildNarratives(false);
+  }
 };
 
 const prepareManagerPayload = async () => {
@@ -154,14 +178,33 @@ const prepareManagerPayload = async () => {
 };
 
 watch(
-  [seasons, isLeagueHistoryReady],
-  async ([, historyReady]) => {
+  [
+    () => getNarrativeCacheKey(),
+    seasons,
+    isLeagueHistoryReady,
+    isLeagueHistoryComplete,
+  ],
+  async ([cacheKey, , historyReady, historyComplete], previousValues) => {
+    const previousCacheKey = previousValues?.[0];
+    if (cacheKey !== previousCacheKey) {
+      narratives.value = { managerArchetypes: [] };
+    }
+
+    if (cacheKey) {
+      const cachedNarratives = await getCachedValue(
+        cacheKey,
+        isNarrativeBundle
+      );
+      if (cacheKey !== getNarrativeCacheKey()) return;
+      if (cachedNarratives) narratives.value = cachedNarratives;
+    }
+
     if (store.leagueInfo.length > 0 && !historyReady) {
       return;
     }
 
     if (store.leagueInfo.length > 0) {
-      await refreshNarratives();
+      await refreshNarratives(Boolean(historyComplete));
       return;
     }
 
@@ -309,9 +352,9 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
 <template>
   <div class="my-4 space-y-4">
     <LeagueHistory
-      v-show="false"
+      data-only
       :table-data="props.tableData"
-      @ready="isLeagueHistoryReady = true"
+      @history-status="leagueHistoryStatus = $event"
       @history-data="historicalManagerRows = $event"
       @loading-year="leagueHistoryLoadingYear = $event"
     />

@@ -187,19 +187,11 @@ const getPreseasonData = async () => {
       }
       currentTrends.value = response.bulletPoints;
       store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
-      localStorage.setItem(
-        "leagueInfo",
-        JSON.stringify(store.leagueInfo as LeagueInfoType[])
-      );
     } catch (e) {
       currentTrends.value = [
         "Unable to generate league news. Please try again later",
       ];
       store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
-      localStorage.setItem(
-        "leagueInfo",
-        JSON.stringify(store.leagueInfo as LeagueInfoType[])
-      );
     }
   }
 };
@@ -628,19 +620,11 @@ const formatData = async () => {
     }
     currentTrends.value = response.bulletPoints;
     store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
   } catch {
     currentTrends.value = [
       "Unable to generate league news. Please try again later",
     ];
     store.addCurrentTrends(getLeagueKey(currentLeague), currentTrends.value);
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
   }
 };
 

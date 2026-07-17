@@ -4,14 +4,13 @@ import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { getLeagueKey, useStore } from "@/store/store";
-import type { LeagueInfoType } from "@/types/types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
 import Checkbox from "@/components/ui/checkbox/Checkbox.vue";
 import { authenticatedFetch } from "@/lib/authFetch";
 import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
-import { getParsedStorageItem } from "@/lib/storage";
+import { loadSavedLeagues } from "@/lib/leagueStorage";
 import { scrollAppToTop } from "@/lib/appScroll";
 import {
   Card,
@@ -714,11 +713,8 @@ const ensureLeagueIdQueryParam = async () => {
   const currentLeagueId = window.localStorage.getItem("currentLeagueId");
   if (!currentLeagueId) return;
 
-  const savedLeagues = getParsedStorageItem<LeagueInfoType[]>(
-    "leagueInfo",
-    [],
-    { isValid: Array.isArray }
-  );
+  const savedLeagues =
+    store.leagueInfo.length > 0 ? store.leagueInfo : await loadSavedLeagues();
   const currentLeague = savedLeagues.find(
     (league) => getLeagueKey(league) === currentLeagueId
   );

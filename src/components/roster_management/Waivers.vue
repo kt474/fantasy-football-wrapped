@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, ComputedRef } from "vue";
-import { LeagueInfoType, WaiverMove } from "../../types/types.ts";
+import { WaiverMove } from "../../types/types.ts";
 import { getPlayersByIdsMap } from "../../api/api.ts";
 import { getTradeValue } from "../../api/sleeperApi.ts";
 import { getLeagueKey, useStore } from "../../store/store";
@@ -90,10 +90,6 @@ const getData = async () => {
   );
 
   store.addWaiverMoves(getLeagueKey(currentLeague), rawData.value);
-  localStorage.setItem(
-    "leagueInfo",
-    JSON.stringify(store.leagueInfo as LeagueInfoType[])
-  );
 };
 
 const currentManagerMoves = computed(() => {

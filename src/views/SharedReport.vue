@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStore } from "@/store/store";
 import { trackEvent } from "@/lib/analytics";
+import { hasSavedLeagues } from "@/lib/leagueStorage";
 
 const route = useRoute();
 const router = useRouter();
@@ -46,11 +47,6 @@ const getEntrySource = () => {
   } catch {
     return "unknown";
   }
-};
-
-const isReturningUser = () => {
-  if (typeof localStorage === "undefined") return false;
-  return Boolean(localStorage.getItem("leagueInfo"));
 };
 
 const canExploreSharedLeague = computed(
@@ -108,9 +104,10 @@ const loadReport = async () => {
       return;
     }
     sharedReport.value = result;
+    const returning = store.leagueInfo.length > 0 || (await hasSavedLeagues());
     trackEvent("Shared Report Viewed", {
       entry: getEntrySource(),
-      returning: isReturningUser(),
+      returning,
     });
   } catch (error) {
     console.error("Unable to load shared report:", error);

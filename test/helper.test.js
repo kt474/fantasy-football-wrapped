@@ -157,13 +157,7 @@ describe("helper utilities", () => {
     ]);
   });
 
-  test("createTableData avoids self-matchups when simulating random schedule wins", () => {
-    let randomCallCount = 0;
-    vi.spyOn(Math, "random").mockImplementation(() => {
-      randomCallCount += 1;
-      return randomCallCount <= 20000 ? 0.75 : 0.25;
-    });
-
+  test("createTableData calculates exact random-schedule expectations", () => {
     const tableData = createTableData(
       [buildUser("u1", "Alpha"), buildUser("u2", "Beta")],
       [
@@ -188,12 +182,15 @@ describe("helper utilities", () => {
       false
     );
 
-    expect(tableData.map(({ rosterId, randomScheduleWins }) => ({
-      rosterId,
-      randomScheduleWins,
-    }))).toEqual([
-      { rosterId: 1, randomScheduleWins: 2 },
-      { rosterId: 2, randomScheduleWins: 0 },
+    expect(
+      tableData.map(({ rosterId, randomScheduleWins, expectedWinsSTD }) => ({
+        rosterId,
+        randomScheduleWins,
+        expectedWinsSTD,
+      }))
+    ).toEqual([
+      { rosterId: 1, randomScheduleWins: 2, expectedWinsSTD: 0 },
+      { rosterId: 2, randomScheduleWins: 0, expectedWinsSTD: 0 },
     ]);
   });
 

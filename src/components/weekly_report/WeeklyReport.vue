@@ -292,10 +292,6 @@ const getPremiumReport = async () => {
       week: reportWeek,
     });
     store.addPremiumWeeklyReport(reportLeagueKey, reportWeek, response.report);
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
   }
 };
 
@@ -336,10 +332,6 @@ const getReport = async () => {
       tier: "standard",
     });
     store.addWeeklyReport(getLeagueKey(currentLeague), rawWeeklyReport.value);
-    localStorage.setItem(
-      "leagueInfo",
-      JSON.stringify(store.leagueInfo as LeagueInfoType[])
-    );
   }
 };
 

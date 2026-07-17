@@ -164,6 +164,8 @@ export const createTableData = (
       row.filter((v): v is number => v !== undefined)
     );
     const medians: number[] = [];
+    const expectedScheduleWins = new Map<TableDataType, number>();
+    const expectedWinsVariances = new Map<TableDataType, number>();
     for (let i: number = 0; i < zipped.length; i++) {
       const weeklyScores = combinedPoints
         .map((team) => ({
@@ -180,6 +182,18 @@ export const createTableData = (
         const numberOfWins = scores.filter(
           (otherScore) => otherScore < score
         ).length;
+        const opponentCount = scores.length - 1;
+        const winProbability =
+          opponentCount > 0 ? numberOfWins / opponentCount : 0;
+        expectedScheduleWins.set(
+          team,
+          (expectedScheduleWins.get(team) ?? 0) + winProbability
+        );
+        expectedWinsVariances.set(
+          team,
+          (expectedWinsVariances.get(team) ?? 0) +
+            winProbability * (1 - winProbability)
+        );
         if (team.pointsFor !== 0) {
           team.winsAgainstAll += numberOfWins;
           team.lossesAgainstAll += scores.length - numberOfWins - 1;
@@ -187,44 +201,14 @@ export const createTableData = (
       });
     }
     if (combinedPoints) {
-      combinedPoints.forEach((value, teamIndex) => {
-        let randomScheduleWins = 0;
-        const numOfSimulations = 10000;
-        const numberWeeks = medianScoring
-          ? 2 * (value.wins + value.losses)
-          : value.wins + value.losses;
-        const simulationWins = Array(numOfSimulations).fill(0);
-        if (value.points) {
-          for (let i = 0; i < numberWeeks; i++) {
-            for (
-              let simulations = 0;
-              simulations < numOfSimulations;
-              simulations++
-            )
-              if (
-                value.points[i] >
-                combinedPoints[
-                  getRandomUser(combinedPoints.length, teamIndex)
-                ].points[i]
-              ) {
-                randomScheduleWins++;
-                simulationWins[simulations]++;
-              }
-          }
-        }
-        const meanWins =
-          simulationWins.reduce((sum, wins) => sum + wins, 0) /
-          numOfSimulations;
-        const variance =
-          simulationWins.reduce(
-            (sum, wins) => sum + Math.pow(wins - meanWins, 2),
-            0
-          ) / numOfSimulations;
-        value.expectedWinsSTD = Math.sqrt(variance);
-        value.randomScheduleWins = randomScheduleWins / numOfSimulations;
+      combinedPoints.forEach((value) => {
+        const scheduleWins = expectedScheduleWins.get(value) ?? 0;
+        value.expectedWinsSTD = Math.sqrt(
+          expectedWinsVariances.get(value) ?? 0
+        );
+        value.randomScheduleWins = scheduleWins;
         if (medianScoring) {
-          value.randomScheduleWins =
-            (2 * randomScheduleWins) / numOfSimulations;
+          value.randomScheduleWins = 2 * scheduleWins;
         }
         value.rating = getPowerRanking(
           mean(value.points),
@@ -318,14 +302,6 @@ export const getWinProbability = (z: number) => {
   return 0.5 * (1 + erf(z / Math.sqrt(2)));
 };
 
-export const getRandomUser = (leagueSize: number, excludedIndex: number) => {
-  let randomIndex;
-  do {
-    randomIndex = Math.floor(Math.random() * leagueSize);
-  } while (randomIndex === excludedIndex);
-  return randomIndex;
-};
-
 export const winsOnWeek = (recordString: string, week: number) => {
   let count = 0;
   for (let i = 0; i <= week; i++) {
@@ -390,14 +366,17 @@ export const getMedian = (arr: number[]): number | undefined => {
 export const getWeeklyPoints = async (
   leagueId: string,
   regularSeasonLength: number,
-  startWeek: number = 0
+  startWeek: number = 0,
+  signal?: AbortSignal
 ) => {
   const weeks = Array.from(
     { length: Math.max(0, regularSeasonLength - startWeek) },
     (_, index) => startWeek + index + 1
   );
   const allMatchups = await mapWithConcurrency(weeks, 4, (week) =>
-    getMatchup(week, leagueId)
+    signal
+      ? getMatchup(week, leagueId, signal)
+      : getMatchup(week, leagueId)
   );
   const validMatchups = flatten(allMatchups).filter(
     (matchup): matchup is MatchupPointRow =>

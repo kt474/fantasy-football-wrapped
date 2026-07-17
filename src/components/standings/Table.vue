@@ -29,11 +29,6 @@ import {
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import Narratives from "../league_narratives/Narratives.vue";
 import PreviousSeasonPrompt from "./PreviousSeasonPrompt.vue";
-import {
-  getParsedStorageItem,
-  isRecord,
-  migrateLegacyArrayCacheEntry,
-} from "@/lib/storage";
 
 const PowerRankingData = defineAsyncComponent(
   () => import("../power_rankings/PowerRankingData.vue")
@@ -152,22 +147,6 @@ const showStandingsTab = computed(() => {
   );
 });
 
-type SavedTableData =
-  | TableDataType[]
-  | {
-      lastUpdated?: number;
-      data?: TableDataType[];
-    };
-
-interface savedData {
-  [key: string]: SavedTableData;
-}
-
-const getOriginalDataCache = () =>
-  getParsedStorageItem<savedData>("originalData", {}, {
-    isValid: (value): value is savedData => isRecord(value),
-  });
-
 onMounted(() => {
   const savedCurrentTab = localStorage.getItem("currentTab");
   if (savedCurrentTab) {
@@ -219,53 +198,13 @@ watch(
 onBeforeUnmount(cancelPendingLeagueNews);
 
 const originalData = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
-  if (store.currentLeagueId) {
-    const savedData = getOriginalDataCache();
-    const savedLeagueData = savedData[store.currentLeagueId];
-    if (Array.isArray(savedLeagueData)) {
-      const hasHeadToHeadRecords = savedLeagueData.every(
-        (team) => typeof team.headToHeadWins === "number"
-      );
-      if (
-        currentLeague?.platform !== "espn" &&
-        (!medianScoring.value || hasHeadToHeadRecords)
-      ) {
-        migrateLegacyArrayCacheEntry(
-          savedData,
-          store.currentLeagueId,
-          currentLeague?.lastUpdated
-        );
-        localStorage.setItem("originalData", JSON.stringify(savedData));
-        return savedLeagueData;
-      }
-    } else if (
-      savedLeagueData?.data &&
-      savedLeagueData.lastUpdated === currentLeague?.lastUpdated &&
-      (!medianScoring.value ||
-        savedLeagueData.data.every(
-          (team) => typeof team.headToHeadWins === "number"
-        ))
-    ) {
-      return savedLeagueData.data;
-    }
-  }
   if (props.users && props.points) {
-    let combinedPoints = createTableData(
+    return createTableData(
       props.users,
       props.rosters,
       props.points,
       medianScoring.value
     );
-    if (store.currentLeagueId) {
-      const savedData = getOriginalDataCache();
-      savedData[store.currentLeagueId] = {
-        lastUpdated: currentLeague?.lastUpdated,
-        data: combinedPoints,
-      };
-      localStorage.setItem("originalData", JSON.stringify(savedData));
-    }
-    return combinedPoints;
   }
   return [];
 });
