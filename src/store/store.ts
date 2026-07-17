@@ -2,7 +2,6 @@ import { defineStore } from "pinia";
 import {
   LeagueInfoType,
   PlayoffProjection,
-  RosterType,
   LeagueDraftMetadata,
   WaiverMove,
   PlayerRankingsType,
@@ -41,27 +40,12 @@ export const useStore = defineStore("main", {
     }),
   }),
   getters: {
-    transactions: (state) =>
-      state.leagueInfo.map((league: LeagueInfoType) => league.transactions),
-    leagueUsers: (state) =>
-      state.leagueInfo.map((league: LeagueInfoType) => league.users),
-    leagueRosters: (state) =>
-      state.leagueInfo.map(
-        (league: LeagueInfoType) => league.rosters as RosterType[]
-      ),
-    weeklyPoints: (state) =>
-      state.leagueInfo.map((league: LeagueInfoType) => league.weeklyPoints),
     leagueIds: (state) =>
       state.leagueInfo.map((league: LeagueInfoType) => getLeagueKey(league)),
-    currentLeagueIndex: (state) =>
-      state.leagueInfo.findIndex(
-        (league) => getLeagueKey(league) === state.currentLeagueId
-      ),
     currentLeague: (state): LeagueInfoType =>
       state.leagueInfo.find(
         (league) => getLeagueKey(league) === state.currentLeagueId
       ) as LeagueInfoType,
-    isDemoLeague: (state) => state.currentLeagueId === "",
   },
   actions: {
     findLeague(leagueId: string) {

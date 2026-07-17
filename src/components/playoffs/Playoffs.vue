@@ -464,18 +464,19 @@ const getRosterDisplayName = (rosterId: number) =>
   getManagerDisplayName(matchRosterId(rosterId), store.showUsernames);
 
 const getPointsScored = (rosterId: number, week: number) => {
-  if (!store.currentLeague) {
+  const currentLeague = store.currentLeague;
+  if (!currentLeague) {
     const pointsArray = fakePoints.find(
       (roster) => roster.rosterId === rosterId
     );
     return pointsArray?.playoffPoints[week - 1];
   }
-  const pointsArray = store.leagueInfo[
-    store.currentLeagueIndex
-  ].weeklyPoints.find((roster: PointsType) => roster.rosterId === rosterId);
+  const pointsArray = currentLeague.weeklyPoints.find(
+    (roster: PointsType) => roster.rosterId === rosterId
+  );
   if (!pointsArray) return;
   return pointsArray.points[
-    week - 1 + store.currentLeague.regularSeasonLength
+    week - 1 + currentLeague.regularSeasonLength
   ];
 };
 

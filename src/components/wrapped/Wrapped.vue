@@ -6,8 +6,8 @@ import {
   RosterType,
 } from "../../types/types.ts";
 import { useStore } from "../../store/store";
-import maxBy from "lodash/maxBy";
-import minBy from "lodash/minBy";
+import { maxBy, minBy } from "@/lib/collection";
+import { formatOrdinal } from "@/lib/format";
 import WrappedSlide from "./WrappedSlide.vue";
 import Draft from "../draft/Draft.vue";
 import Trades from "../roster_management/Trades.vue";
@@ -151,13 +151,6 @@ const seriesData = computed(() => {
   ];
 });
 
-const getOrdinalSuffix = (number: number) => {
-  const suffixes = ["th", "st", "nd", "rd"];
-  const v = number % 100;
-
-  return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
-};
-
 const managers = computed(() => {
   if (store.leagueInfo.length > 0) {
     return props.tableData.map((user) => {
@@ -172,9 +165,7 @@ const managers = computed(() => {
 
 const currentManager = ref(managers.value[0]);
 
-const league = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex];
-});
+const league = computed(() => store.currentLeague);
 
 const historicalLeagues = computed(() =>
   league.value ? getLoadedPreviousLeagues(league.value) : []
@@ -383,9 +374,7 @@ const scheduleAnalysis = computed(() => {
       for (
         let week = 0;
         week <
-        (store.leagueInfo.length > 0
-          ? store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
-          : 14);
+        (store.currentLeague?.lastScoredWeek ?? 14);
         week++
       ) {
         const opponentId = otherTeam.matchups[week];
@@ -1490,7 +1479,7 @@ watch(
                 class="p-2 text-xs rounded-lg sm:text-sm bg-emerald-950/50"
               >
                 {{ pick ? pick.season : "" }}
-                {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+                {{ pick ? `${formatOrdinal(pick.round)} round` : "" }}
               </p>
               <p
                 v-for="budget in trade.team1.waiverBudget"
@@ -1578,7 +1567,7 @@ watch(
                 class="p-2 text-xs rounded-lg sm:text-sm bg-emerald-950/50"
               >
                 {{ pick ? pick.season : "" }}
-                {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+                {{ pick ? `${formatOrdinal(pick.round)} round` : "" }}
               </p>
               <p
                 v-for="budget in trade.team2.waiverBudget"

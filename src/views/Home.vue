@@ -334,14 +334,13 @@ const checkSystemTheme = () => {
           </div>
           <div
             v-if="
-              store.leagueUsers[store.currentLeagueIndex] &&
-              !store.loadingUserLeagues
+              store.currentLeague && !store.loadingUserLeagues
             "
           >
             <Table
-              :users="store.leagueUsers[store.currentLeagueIndex]"
-              :rosters="store.leagueRosters[store.currentLeagueIndex]"
-              :points="store.weeklyPoints[store.currentLeagueIndex]"
+              :users="store.currentLeague.users"
+              :rosters="store.currentLeague.rosters"
+              :points="store.currentLeague.weeklyPoints"
             />
           </div>
           <SkeletonLoading v-else />

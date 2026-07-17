@@ -178,12 +178,9 @@ describe("league IndexedDB storage", () => {
 
     const store = useStore();
     store.leagueInfo = firstReload;
-    leagueKeys.forEach((leagueKey, expectedIndex) => {
+    leagueKeys.forEach((leagueKey) => {
       store.updateCurrentLeagueId(leagueKey);
-      expect(store.currentLeagueIndex).toBe(expectedIndex);
-      expect(getLeagueKey(store.leagueInfo[store.currentLeagueIndex])).toBe(
-        leagueKey
-      );
+      expect(getLeagueKey(store.currentLeague)).toBe(leagueKey);
     });
 
     const now = new Date("2026-07-16T12:00:00Z").getTime();

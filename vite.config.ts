@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     ...(mode === "development" ? [vueDevTools()] : []),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png"],
+      includeAssets: ["favicon.webp", "robots.txt"],
       manifest: {
         name: "ffwrapped",
         short_name: "ffwrapped",

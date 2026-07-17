@@ -35,11 +35,6 @@ import {
   type PlayerNameTeamLookup,
 } from "@/lib/playerLookup";
 
-export {
-  getPlayerLookupKey,
-  type PlayerNameTeamLookup,
-} from "@/lib/playerLookup";
-
 export interface ManagerBlurbsPayload {
   league: {
     leagueId: string;
