@@ -19,10 +19,7 @@ import {
 } from "@/components/ui/card";
 import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
 import { hasLeagueSeasonData } from "@/lib/leagueHistory";
-import {
-  getLeagueLoadErrorMessage,
-  isRequestTimeout,
-} from "@/lib/request";
+import { getLeagueLoadErrorMessage, isRequestTimeout } from "@/lib/request";
 import {
   getPreviousSeasonOption,
   isSeasonWithoutStandings,
@@ -171,7 +168,7 @@ const dismissPrompt = () => {
     >
       <div class="flex min-w-0 gap-3">
         <CardHeader class="min-w-0 space-y-0.5 p-0">
-          <CardTitle class="text-sm font-medium tracking-normal">
+          <CardTitle class="font-medium tracking-normal">
             Looking for last season?
           </CardTitle>
           <CardDescription class="max-w-md leading-5">

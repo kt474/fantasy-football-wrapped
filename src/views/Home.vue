@@ -79,6 +79,14 @@ const refreshSavedLeagues = async (savedLeagues: LeagueInfoType[]) => {
       await refreshLeagueAtomically(league, (refreshedLeague) => {
         if (!canApplyRefresh(league)) return;
         store.updateLeagueInfo(refreshedLeague);
+        void inputLeague(
+          refreshedLeague.leagueId,
+          refreshedLeague.name,
+          refreshedLeague.totalRosters,
+          refreshedLeague.seasonType,
+          refreshedLeague.season,
+          refreshedLeague.platform === "espn" ? "espn" : "sleeper"
+        );
       });
     } catch (error) {
       console.error(`Unable to refresh saved league ${league.leagueId}:`, error);

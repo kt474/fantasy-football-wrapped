@@ -35,6 +35,7 @@ import {
   getEspnErrorMessage,
   removeSavedEspnAuth,
 } from "@/api/espnApi";
+import { inputLeague } from "@/api/api";
 import Dialog from "./Dialog.vue";
 import {
   removeAllNarrativeBundles,
@@ -155,7 +156,7 @@ const refreshLeague = async () => {
   let didCommit = false;
   store.updateLoadingLeague(leagueToRefresh.name);
   try {
-    await refreshLeagueAtomically(
+    const refreshedLeague = await refreshLeagueAtomically(
       leagueToRefresh,
       (replacement) => {
         if (
@@ -176,6 +177,16 @@ const refreshLeague = async () => {
     );
 
     if (!refreshRequests.isActive(controller) || !didCommit) return;
+
+    await inputLeague(
+      refreshedLeague.leagueId,
+      refreshedLeague.name,
+      refreshedLeague.totalRosters,
+      refreshedLeague.seasonType,
+      refreshedLeague.season,
+      refreshedLeague.platform === "espn" ? "espn" : "sleeper"
+    );
+    if (!refreshRequests.isActive(controller)) return;
 
     toast.success("League data refreshed!");
   } catch (error) {
