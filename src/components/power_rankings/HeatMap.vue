@@ -2,7 +2,7 @@
 import { ref, watch, computed } from "vue";
 import { useStore } from "../../store/store";
 import { Card } from "../ui/card";
-import { getChartTheme } from "@/lib/chartTheme";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 
 const store = useStore();
 
@@ -30,8 +30,8 @@ watch(
 );
 
 const totalRosters = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].totalRosters
+  return store.currentLeague
+    ? store.currentLeague.totalRosters
     : 10; // 10 is league size for fake league
 });
 
@@ -140,7 +140,7 @@ const updateChartColor = () => {
       },
     },
     tooltip: {
-      theme: store.darkMode ? "dark" : "light",
+      theme: getChartTooltipTheme(store.darkMode),
       marker: {
         show: false,
       },
@@ -182,7 +182,7 @@ const chartOptions = ref({
     },
   },
   tooltip: {
-    theme: store.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(store.darkMode),
     marker: {
       show: false,
     },

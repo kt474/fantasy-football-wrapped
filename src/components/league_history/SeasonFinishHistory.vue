@@ -58,7 +58,7 @@ const isLeagueInfo = (value: unknown): value is LeagueInfoType =>
   "season" in value;
 
 const currentLeague = computed(
-  () => store.leagueInfo[store.currentLeagueIndex]
+  () => store.currentLeague
 );
 
 const seasons = computed(() => {

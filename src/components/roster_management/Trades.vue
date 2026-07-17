@@ -11,6 +11,11 @@ import type { TradeNameRow } from "../../types/types.ts";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import Button from "../ui/button/Button.vue";
+import { formatOrdinal } from "@/lib/format";
+import {
+  getTransactionRatingClass as getValueColor,
+  getTransactionRatingLabel as getRatingLabel,
+} from "@/lib/transactionRating";
 
 const store = useStore();
 type TradePick = { owner_id: number; season: string; round: number };
@@ -66,7 +71,7 @@ const slicedTradeData = computed(() => {
 });
 
 const getData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   const temp: Trade[] = currentLeague.trades.map((trade: LeagueTrade) => {
     let grouped: Record<number, string[]> = {};
     if (trade.adds) {
@@ -193,11 +198,11 @@ const getData = async () => {
 };
 
 const getRosterName = (rosterId: number) => {
-  const rosters = store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].rosters
+  const rosters = store.currentLeague
+    ? store.currentLeague.rosters
     : fakeRosters;
-  const users = store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].users
+  const users = store.currentLeague
+    ? store.currentLeague.users
     : fakeUsers;
   const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
@@ -212,35 +217,6 @@ const getRosterName = (rosterId: number) => {
   }
 };
 
-const getOrdinalSuffix = (number: number) => {
-  const suffixes = ["th", "st", "nd", "rd"];
-  const v = number % 100;
-
-  return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
-};
-
-const getValueColor = (value: number | null | undefined) => {
-  if (value == null) return "bg-muted text-muted-foreground";
-  if (value <= 15)
-    return "performance-excellent";
-  if (value <= 25)
-    return "performance-good";
-  if (value <= 35)
-    return "performance-average";
-  if (value <= 45)
-    return "performance-poor";
-  return "performance-bad";
-};
-
-const getRatingLabel = (value: number | null | undefined) => {
-  if (value == null) return "";
-  if (value <= 15) return "Excellent";
-  if (value <= 25) return "Good";
-  if (value <= 35) return "Average";
-  if (value <= 45) return "Below Avg";
-  return "Poor";
-};
-
 const getDisplayName = (
   user: { name: string; username?: string },
   showUsernames: boolean
@@ -252,15 +228,15 @@ const getDisplayName = (
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].tradeNames
+    store.currentLeague &&
+    !store.currentLeague.tradeNames
   ) {
     await getData();
   } else if (store.leagueInfo.length == 0) {
     tradeData.value = fakeTrades;
-  } else if (store.leagueInfo[store.currentLeagueIndex]) {
+  } else if (store.currentLeague) {
     tradeData.value =
-      (store.leagueInfo[store.currentLeagueIndex].tradeNames as TradeRow[]) ??
+      (store.currentLeague.tradeNames as TradeRow[]) ??
       [];
   }
 });
@@ -268,12 +244,12 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
-    if (!store.leagueInfo[store.currentLeagueIndex].tradeNames) {
+    if (!store.currentLeague.tradeNames) {
       tradeData.value = [];
       await getData();
     }
     tradeData.value =
-      (store.leagueInfo[store.currentLeagueIndex].tradeNames as TradeRow[]) ??
+      (store.currentLeague.tradeNames as TradeRow[]) ??
       [];
   }
 );
@@ -404,7 +380,7 @@ watch(
                 class="mt-1.5 text-sm font-medium"
               >
                 {{ pick ? pick.season : "" }}
-                {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+                {{ pick ? `${formatOrdinal(pick.round)} round` : "" }}
               </p>
               <p
                 v-for="budget in trade.team1.waiverBudget"
@@ -451,7 +427,7 @@ watch(
                 class="mt-1.5 text-sm font-medium"
               >
                 {{ pick ? pick.season : "" }}
-                {{ pick ? `${getOrdinalSuffix(pick.round)} round` : "" }}
+                {{ pick ? `${formatOrdinal(pick.round)} round` : "" }}
               </p>
               <p
                 v-for="budget in trade.team2.waiverBudget"
@@ -518,8 +494,8 @@ watch(
     <div
       v-else-if="
         store.leagueInfo.length > 0 &&
-        store.leagueInfo[store.currentLeagueIndex] &&
-        store.leagueInfo[store.currentLeagueIndex].platform == 'espn'
+        store.currentLeague &&
+        store.currentLeague.platform == 'espn'
       "
     >
       <p class="text-muted-foreground">
@@ -538,8 +514,8 @@ watch(
     <div
       v-else-if="
         store.leagueInfo.length > 0 &&
-        store.leagueInfo[store.currentLeagueIndex] &&
-        store.leagueInfo[store.currentLeagueIndex].trades.length === 0
+        store.currentLeague &&
+        store.currentLeague.trades.length === 0
       "
     >
       <p class="text-muted-foreground">No trades have been made.</p>

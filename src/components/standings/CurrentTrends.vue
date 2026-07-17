@@ -81,7 +81,7 @@ const getFiveMostRecent = (str: string, n = 5): string => {
 };
 
 const getPreseasonData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (!currentLeague) {
     return;
   }
@@ -278,7 +278,7 @@ const getPlayerName = (
   weekIndex: number,
   starterIndex: number
 ): string => {
-  if (store.leagueInfo[store.currentLeagueIndex]?.platform === "espn") {
+  if (store.currentLeague?.platform === "espn") {
     const starter = user.starterNames?.[weekIndex]?.[starterIndex];
     return starter?.name ?? String(starter ?? "");
   }
@@ -575,7 +575,7 @@ const buildLeagueNewsPayload = (
 };
 
 const formatData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (!currentLeague) {
     return;
   }
@@ -631,33 +631,33 @@ const formatData = async () => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    isPreDraftLeague(store.leagueInfo[store.currentLeagueIndex])
+    isPreDraftLeague(store.currentLeague)
   ) {
     currentTrends.value = preseasonUnavailableTrends;
   } else if (
     store.leagueInfo.length > 0 &&
-    !store.leagueInfo[store.currentLeagueIndex]?.currentTrends &&
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+    !store.currentLeague?.currentTrends &&
+    store.currentLeague?.lastScoredWeek
   ) {
     await formatData();
   } else if (
     store.leagueInfo.length > 0 &&
-    !store.leagueInfo[store.currentLeagueIndex]?.currentTrends &&
-    store.leagueInfo[store.currentLeagueIndex]?.status !== "pre_draft"
+    !store.currentLeague?.currentTrends &&
+    store.currentLeague?.status !== "pre_draft"
   ) {
     await getPreseasonData();
   } else if (store.leagueInfo.length == 0) {
     currentTrends.value = fakeHighlights;
   } else if (
     store.leagueInfo.length > 0 &&
-    (store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek ||
-      store.leagueInfo[store.currentLeagueIndex]?.status === "in_season")
+    (store.currentLeague?.lastScoredWeek ||
+      store.currentLeague?.status === "in_season")
   ) {
     const savedText: string[] =
-      store.leagueInfo[store.currentLeagueIndex].currentTrends ?? [];
+      store.currentLeague.currentTrends ?? [];
     if (
       savedText.length === 0 &&
-      store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+      store.currentLeague?.lastScoredWeek
     ) {
       await formatData();
     } else {
@@ -669,29 +669,29 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
-    if (isPreDraftLeague(store.leagueInfo[store.currentLeagueIndex])) {
+    if (isPreDraftLeague(store.currentLeague)) {
       currentTrends.value = preseasonUnavailableTrends;
       return;
     }
 
     if (
-      store.leagueInfo[store.currentLeagueIndex] &&
-      (!store.leagueInfo[store.currentLeagueIndex].currentTrends ||
-        (store.leagueInfo[store.currentLeagueIndex].currentTrends?.length ??
+      store.currentLeague &&
+      (!store.currentLeague.currentTrends ||
+        (store.currentLeague.currentTrends?.length ??
           0) === 0) &&
-      store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+      store.currentLeague.lastScoredWeek
     ) {
       currentTrends.value = [];
       await formatData();
       return;
     }
     currentTrends.value =
-      store.leagueInfo[store.currentLeagueIndex]?.currentTrends ?? [];
+      store.currentLeague?.currentTrends ?? [];
   }
 );
 
 const cardHeight = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (!currentLeague) {
     return "min-h-[360px]";
   } else {
@@ -729,9 +729,9 @@ const cardHeight = computed(() => {
 
     <div
       v-else-if="
-        store.leagueInfo[store.currentLeagueIndex] &&
-        !store.leagueInfo[store.currentLeagueIndex].lastScoredWeek &&
-        store.leagueInfo[store.currentLeagueIndex]?.status === 'pre_draft'
+        store.currentLeague &&
+        !store.currentLeague.lastScoredWeek &&
+        store.currentLeague?.status === 'pre_draft'
       "
       class="p-5"
     >

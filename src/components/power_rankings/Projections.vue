@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import intersection from "lodash/intersection";
 import { ref, computed, watch, onMounted } from "vue";
 import { getLeagueKey, useStore } from "../../store/store";
 import { RosterType, LeagueInfoType } from "../../types/types";
@@ -7,6 +6,8 @@ import { fakeProjectionData } from "../../api/fakeLeague";
 import { getProjections } from "../../api/sleeperApi";
 import HeatMap from "./HeatMap.vue";
 import Card from "../ui/card/Card.vue";
+import { mapWithConcurrency } from "@/lib/async";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 
 const store = useStore();
 const loading = ref(false);
@@ -16,29 +17,6 @@ type FormattedProjectionRoster = {
   username?: string;
   data: ProjectionByPosition[];
   total: number;
-};
-
-const mapWithConcurrency = async <T, R>(
-  items: T[],
-  concurrency: number,
-  mapper: (item: T, index: number) => Promise<R>
-): Promise<R[]> => {
-  const results: R[] = new Array(items.length);
-  let nextIndex = 0;
-
-  const worker = async () => {
-    while (nextIndex < items.length) {
-      const currentIndex = nextIndex;
-      nextIndex += 1;
-      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
-    }
-  };
-
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, items.length) }, () => worker())
-  );
-
-  return results;
 };
 
 const hasProjectionData = (league: LeagueInfoType) =>
@@ -61,8 +39,8 @@ const categories = computed(() => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    !hasProjectionData(store.leagueInfo[store.currentLeagueIndex])
+    store.currentLeague &&
+    !hasProjectionData(store.currentLeague)
   ) {
     loading.value = true;
     try {
@@ -77,7 +55,7 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     if (!currentLeague) {
       return;
     }
@@ -97,7 +75,7 @@ watch(
 );
 
 const getData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (!currentLeague) {
     return;
   }
@@ -141,25 +119,27 @@ const getData = async () => {
 const formattedData = computed(() => {
   if (
     store.leagueInfo.length == 0 ||
-    !store.leagueInfo[store.currentLeagueIndex]
+    !store.currentLeague
   ) {
     return fakeProjectionData as FormattedProjectionRoster[];
   }
   const topPositions: string[] = ["RB", "WR"];
-  const otherPositions = intersection(
-    ["QB", "TE", "K", "DEF"],
-    store.leagueInfo[store.currentLeagueIndex].rosterPositions
+  const rosterPositions = new Set(
+    store.currentLeague.rosterPositions
+  );
+  const otherPositions = ["QB", "TE", "K", "DEF"].filter((position) =>
+    rosterPositions.has(position)
   );
 
   const nameMapping = new Map(
-    store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
+    store.currentLeague.users.map((user) => [
       user.id,
       user.name,
     ])
   );
 
   const userNameMapping = new Map(
-    store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
+    store.currentLeague.users.map((user) => [
       user.id,
       user.username,
     ])
@@ -169,7 +149,7 @@ const formattedData = computed(() => {
     username?: string;
     data: ProjectionByPosition[];
   }> = [];
-  store.leagueInfo[store.currentLeagueIndex].rosters.forEach(
+  store.currentLeague.rosters.forEach(
     (roster: RosterType) => {
       mappedData.push({
         name: nameMapping.get(roster.id) ?? "",
@@ -309,7 +289,7 @@ const updateChartColor = () => {
     chart: {
       type: "bar",
       stacked: true,
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       toolbar: {
         show: false,
       },
@@ -344,7 +324,7 @@ const updateChartColor = () => {
       },
     },
     tooltip: {
-      theme: store.darkMode ? "dark" : "light",
+      theme: getChartTooltipTheme(store.darkMode),
       marker: {
         show: false,
       },
@@ -365,7 +345,7 @@ const updateChartColor = () => {
 
 const chartOptions = ref({
   chart: {
-    foreColor: "hsl(var(--foreground))",
+    foreColor: getChartTheme().foreground,
     type: "bar",
     stacked: true,
     toolbar: {
@@ -410,7 +390,7 @@ const chartOptions = ref({
     },
   },
   tooltip: {
-    theme: store.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(store.darkMode),
     marker: {
       show: false,
     },

@@ -55,4 +55,7 @@ export const getChartTheme = () => ({
   ),
 });
 
+export const getChartTooltipTheme = (darkMode: boolean): "dark" | "light" =>
+  darkMode ? "dark" : "light";
+
 export type ChartTheme = ReturnType<typeof getChartTheme>;

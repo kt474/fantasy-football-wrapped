@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import maxBy from "lodash/maxBy";
-import sum from "lodash/sum";
+import { maxBy, sum } from "@/lib/collection";
 import { getLeagueKey, useStore } from "../../store/store";
 import {
   RosterType,
@@ -12,6 +11,7 @@ import {
 import { getProjections } from "../../api/sleeperApi";
 import { fakePlayoffData } from "../../api/fakeLeague";
 import Card from "../ui/card/Card.vue";
+import { formatOrdinal } from "@/lib/format";
 const store = useStore();
 const loading = ref(false);
 const playoffOdds = ref<PlayoffProjection[]>([]);
@@ -30,39 +30,39 @@ onMounted(async () => {
   showData.value = showPlayoffOdds.value;
   if (
     store.leagueInfo.length > 0 &&
-    !store.leagueInfo[store.currentLeagueIndex]?.playoffProjections
+    !store.currentLeague?.playoffProjections
   ) {
     loading.value = true;
     await getData();
     loading.value = false;
   } else if (store.leagueInfo.length > 0) {
     playoffOdds.value =
-      store.leagueInfo[store.currentLeagueIndex].playoffProjections ?? [];
+      store.currentLeague.playoffProjections ?? [];
   }
 });
 
 watch(
   () => store.currentLeagueId,
   async () => {
-    if (!store.leagueInfo[store.currentLeagueIndex].playoffProjections) {
+    if (!store.currentLeague.playoffProjections) {
       playoffOdds.value = [];
       loading.value = true;
       await getData();
       loading.value = false;
     }
     playoffOdds.value =
-      store.leagueInfo[store.currentLeagueIndex].playoffProjections ?? [];
+      store.currentLeague.playoffProjections ?? [];
   }
 );
 
 const maxPoints = computed(() => {
-  return maxBy(store.leagueInfo[store.currentLeagueIndex].rosters, "pointsFor")
+  return maxBy(store.currentLeague.rosters, "pointsFor")
     ?.pointsFor;
 });
 
 const playoffTeams = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].playoffTeams
+  return store.currentLeague
+    ? store.currentLeague.playoffTeams
     : 6;
 });
 
@@ -70,15 +70,8 @@ const playoffArray = computed(() => {
   return Array.from({ length: playoffTeams.value }, (_, i) => i + 1);
 });
 
-const getOrdinalSuffix = (number: number) => {
-  const suffixes = ["th", "st", "nd", "rd"];
-  const v = number % 100;
-
-  return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
-};
-
 const getRecord = (wins: number) => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague) {
     const wholeWins = Math.round(wins);
     const losses = currentLeague.regularSeasonLength - wholeWins;
@@ -89,7 +82,7 @@ const getRecord = (wins: number) => {
 const numSimulations = 2000;
 
 const getData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague) {
     if (currentLeague.lastScoredWeek >= currentLeague.regularSeasonLength) {
       playoffOdds.value = props.propsTableData.map((user, index) => {
@@ -108,7 +101,7 @@ const getData = async () => {
     } else {
       if (
         store.leagueInfo.length > 0 &&
-        !hasProjectionData(store.leagueInfo[store.currentLeagueIndex])
+        !hasProjectionData(store.currentLeague)
       ) {
         await Promise.all(
           currentLeague.rosters.map(async (roster) => {
@@ -135,14 +128,14 @@ const getData = async () => {
       }
 
       const nameMapping = new Map(
-        store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
+        store.currentLeague.users.map((user) => [
           user.id,
           user.name,
         ])
       );
 
       const userNameMapping = new Map(
-        store.leagueInfo[store.currentLeagueIndex].users.map((user) => [
+        store.currentLeague.users.map((user) => [
           user.id,
           user.username,
         ])
@@ -227,7 +220,7 @@ const getTopProjectionsSum = (
 };
 
 const maxProjectedScore = computed(() => {
-  const result = store.leagueInfo[store.currentLeagueIndex].rosters.map(
+  const result = store.currentLeague.rosters.map(
     (roster) => {
       if (roster.projections) {
         return getTopProjectionsSum(roster.projections);
@@ -240,7 +233,7 @@ const maxProjectedScore = computed(() => {
 
 const showPlayoffOdds = computed(() => {
   if (store.leagueInfo.length > 0) {
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     if (
       currentLeague &&
       currentLeague.lastScoredWeek < currentLeague.regularSeasonLength
@@ -268,7 +261,7 @@ const calculatePowerScore = (
 
 const tableData = computed(() => {
   return store.leagueInfo.length > 0
-    ? store.leagueInfo[store.currentLeagueIndex].playoffProjections
+    ? store.currentLeague.playoffProjections
     : fakePlayoffData;
 });
 </script>
@@ -276,8 +269,8 @@ const tableData = computed(() => {
   <Card
     v-if="
       store.leagueInfo.length != 0 &&
-      store.leagueInfo[store.currentLeagueIndex] &&
-      store.leagueInfo[store.currentLeagueIndex].status !== 'complete'
+      store.currentLeague &&
+      store.currentLeague.status !== 'complete'
     "
   >
     <button
@@ -333,7 +326,7 @@ const tableData = computed(() => {
             <th scope="col" class="px-4 py-3 sm:px-6 w-60">Team Name</th>
             <th v-for="i in playoffTeams" scope="col" class="px-2 py-3">
               <div class="flex items-center w-8">
-                {{ getOrdinalSuffix(i) }}
+                {{ formatOrdinal(i) }}
               </div>
             </th>
             <th

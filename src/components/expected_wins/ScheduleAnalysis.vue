@@ -43,7 +43,7 @@ const promptData = computed(() => {
 });
 
 const lastWeek = computed(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
+  const league = store.currentLeague;
   if (!league) return 14;
   const week = Math.min(league.lastScoredWeek, league.regularSeasonLength);
   if (week) {
@@ -159,7 +159,7 @@ const luckAnalysis = computed(() => {
 
 const scheduleAnalysis = computed(() => {
   const teams = promptData.value;
-  const league = store.leagueInfo[store.currentLeagueIndex];
+  const league = store.currentLeague;
   const week = league
     ? Math.min(league.lastScoredWeek, league.regularSeasonLength)
     : 14;
@@ -214,7 +214,7 @@ const scheduleAnalysis = computed(() => {
       actualWins: team.actualWins,
       expectedWins: team.expectedWins,
       bestPossibleRecord: bestRecord,
-      worstPossibleRecord: store.leagueInfo[store.currentLeagueIndex]
+      worstPossibleRecord: store.currentLeague
         ?.medianScoring
         ? bestRecord > week
           ? Math.round(worstRecord * 1.5)

@@ -1,13 +1,14 @@
 // helper methods
-import countBy from "lodash/countBy";
-import flatten from "lodash/flatten";
-import groupBy from "lodash/groupBy";
-import map from "lodash/map";
-import max from "lodash/max";
-import mean from "lodash/mean";
-import min from "lodash/min";
-import sum from "lodash/sum";
-import zip from "lodash/zip";
+import {
+  countBy,
+  flatten,
+  groupBy,
+  max,
+  mean,
+  min,
+  sum,
+  zip,
+} from "@/lib/collection";
 import { getMatchup } from "./sleeperApi";
 import {
   RosterType,
@@ -76,7 +77,7 @@ const getTierMultiplier = (position: string, rank: number) => {
 
 export const standardDeviation = (arr: number[]) => {
   const avg = mean(arr);
-  const squaredDiffs = map(arr, (n) => Math.pow(n - avg, 2));
+  const squaredDiffs = arr.map((n) => Math.pow(n - avg, 2));
   const variance = sum(squaredDiffs) / arr.length;
   return Math.sqrt(variance);
 };
@@ -220,7 +221,10 @@ export const createTableData = (
           const weekLength = value.recordByWeek ? value.recordByWeek.length : 0;
           const pointsList = value.points ? value.points : [];
           const pairs = zip(pointsList.slice(0, weekLength), medians);
-          const counts = countBy(pairs, ([a, b]: [number, number]) => a > b);
+          const counts = countBy(
+            pairs,
+            ([a, b]) => Number(a) > Number(b)
+          );
           const addedWins = counts["true"] ? counts["true"] : 0;
           const addedLosses = counts["false"] ? counts["false"] : 0;
           value.winsWithMedian = addedWins + value.wins;

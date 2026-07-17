@@ -17,9 +17,6 @@ describe("design radius contracts", () => {
     expect(read("src/components/layout/SectionCard.vue")).toContain(
       "rounded-card",
     );
-    expect(read("src/components/layout/MetricCard.vue")).toContain(
-      "rounded-card",
-    );
   });
 
   test("large presentation radii stay in documented expressive surfaces", () => {

@@ -1,8 +1,11 @@
 import type { Bracket } from "@/types/apiTypes";
 import type { LeagueInfoType, TableDataType, UserType } from "@/types/types";
+import { formatOrdinal as formatDefinedOrdinal } from "@/lib/format";
 
 export type EspnTeamSide = {
   teamId?: number;
+  totalPoints?: number;
+  pointsByScoringPeriod?: Record<string, number>;
 };
 
 export type EspnPlayoffMatchup = {
@@ -21,11 +24,7 @@ export type FinalPlacement = UserType & {
 
 export const formatOrdinal = (value?: number | null) => {
   if (value == null || Number.isNaN(value)) return "-";
-
-  const suffixes = ["th", "st", "nd", "rd"];
-  const remainder = value % 100;
-  const suffix = suffixes[(remainder - 20) % 10] ?? suffixes[remainder] ?? "th";
-  return `${value}${suffix}`;
+  return formatDefinedOrdinal(value);
 };
 
 const matchRosterId = (
@@ -49,13 +48,13 @@ const matchRosterId = (
   };
 };
 
-const getEspnWinnerId = (matchup: EspnPlayoffMatchup) => {
+export const getEspnWinnerId = (matchup: EspnPlayoffMatchup) => {
   if (matchup.winner === "HOME") return matchup.home?.teamId;
   if (matchup.winner === "AWAY") return matchup.away?.teamId;
   return undefined;
 };
 
-const getEspnLoserId = (matchup: EspnPlayoffMatchup) => {
+export const getEspnLoserId = (matchup: EspnPlayoffMatchup) => {
   if (matchup.winner === "HOME") return matchup.away?.teamId;
   if (matchup.winner === "AWAY") return matchup.home?.teamId;
   return undefined;

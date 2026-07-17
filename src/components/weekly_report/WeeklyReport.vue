@@ -78,7 +78,7 @@ const premiumWeeklyReport = ref<PremiumReport | null>(null);
 const getWeeklyReportAnalyticsProperties = (action: string) => ({
   feature: "weekly_report",
   action,
-  ...getLeagueAnalyticsProperties(store.leagueInfo[store.currentLeagueIndex]),
+  ...getLeagueAnalyticsProperties(store.currentLeague),
 });
 
 const getSavedPremiumReport = (
@@ -123,18 +123,18 @@ const premiumReportText = computed(() => {
 const weeks = computed(() => {
   if (
     store.leagueInfo.length == 0 ||
-    !store.leagueInfo[store.currentLeagueIndex]
+    !store.currentLeague
   ) {
     return [...Array(15).keys()].slice(1).reverse();
   }
   if (
     props.tableData[0].matchups &&
-    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+    store.currentLeague.lastScoredWeek
   ) {
     const recordLength = props.tableData[0].matchups.length + 1;
     const weeksList = [
       ...Array(
-        store.leagueInfo[store.currentLeagueIndex].lastScoredWeek + 1
+        store.currentLeague.lastScoredWeek + 1
       ).keys(),
     ]
       .slice(1)
@@ -158,9 +158,9 @@ const weeks = computed(() => {
 const playoffWeeks = computed(() => {
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex]
+    store.currentLeague
   ) {
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     const result: number[] = [];
     for (let i = currentLeague.regularSeasonLength + 1; i <= 18; i++) {
       result.push(i);
@@ -176,13 +176,13 @@ let playerRequestId = 0;
 const fetchPlayerNames = async () => {
   if (
     store.leagueIds.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek &&
+    store.currentLeague?.lastScoredWeek &&
     weeks.value.length > 0
   ) {
     const requestId = ++playerRequestId;
     fetchingPlayers.value = true;
     const weekIndex = currentWeek.value - 1;
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     const waiverPlayerIds = currentLeague.waivers
       .filter(
         (transaction) =>
@@ -238,14 +238,14 @@ const getPremiumReport = async () => {
 
   if (
     store.leagueIds.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek &&
+    store.currentLeague?.lastScoredWeek &&
     !fetchingPlayers.value
   ) {
     const reportWeek = currentWeek.value;
     const reportPrompt = premiumReportPrompt.value;
     premiumWeeklyReport.value = null;
     sharedReportUrl.value = "";
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     const reportLeagueKey = getLeagueKey(currentLeague);
     let leagueMetadata: Record<string, string | number> = {
       leagueName: currentLeague.name,
@@ -297,7 +297,7 @@ const getPremiumReport = async () => {
 
 const getReport = async () => {
   if (store.leagueIds.length > 0) {
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     let leagueMetadata: Record<string, string | number>;
     if (isPlayoffs.value) {
       const playoffRound = getPlayoffRoundMetadata({
@@ -340,9 +340,10 @@ onMounted(async () => {
     store.leagueInfo.length > 0 &&
     props.tableData[0].matchups &&
     weeks.value.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].weeklyReport &&
-    store.leagueInfo[store.currentLeagueIndex].seasonType !== "Guillotine"
+    store.currentLeague &&
+    store.currentLeague.lastScoredWeek &&
+    !store.currentLeague.weeklyReport &&
+    store.currentLeague.seasonType !== "Guillotine"
   ) {
     loading.value = true;
     await fetchPlayerNames();
@@ -350,17 +351,17 @@ onMounted(async () => {
     loading.value = false;
   } else if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+    store.currentLeague &&
+    store.currentLeague.lastScoredWeek
   ) {
     loading.value = true;
     await fetchPlayerNames();
-    const savedText = store.leagueInfo[store.currentLeagueIndex]?.weeklyReport
-      ? (store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "")
+    const savedText = store.currentLeague?.weeklyReport
+      ? (store.currentLeague.weeklyReport ?? "")
       : "";
     rawWeeklyReport.value = savedText;
     premiumWeeklyReport.value = getSavedPremiumReport(
-      store.leagueInfo[store.currentLeagueIndex],
+      store.currentLeague,
       currentWeek.value
     );
     loading.value = false;
@@ -368,7 +369,7 @@ onMounted(async () => {
 });
 
 const isPlayoffs = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentWeek.value > currentLeague?.regularSeasonLength) {
     return true;
   }
@@ -377,20 +378,20 @@ const isPlayoffs = computed(() => {
 
 const losersBracketIDs = computed(() => {
   return getBracketRosterIds(
-    store.leagueInfo[store.currentLeagueIndex].losersBracket
+    store.currentLeague.losersBracket
   );
 });
 
 const winnersBracketIDs = computed(() => {
   return getBracketRosterIds(
-    store.leagueInfo[store.currentLeagueIndex].winnersBracket
+    store.currentLeague.winnersBracket
   );
 });
 
 const bestPerformers = computed(() => {
   if (
     playerNames.value.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+    store.currentLeague?.lastScoredWeek
   ) {
     return getWeeklyPerformers({
       tableData: props.tableData,
@@ -408,7 +409,7 @@ const bestPerformers = computed(() => {
 const worstPerformers = computed(() => {
   if (
     playerNames.value.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+    store.currentLeague?.lastScoredWeek
   ) {
     return getWeeklyPerformers({
       tableData: props.tableData,
@@ -427,7 +428,7 @@ const benchPerformers = computed(() => {
   if (
     playerNames.value.length > 0 &&
     benchPlayerNames.value.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+    store.currentLeague?.lastScoredWeek
   ) {
     return getBenchPerformers({
       tableData: props.tableData,
@@ -445,7 +446,7 @@ const weeklyAwards = computed(() => {
   if (
     playerNames.value.length > 0 &&
     benchPlayerNames.value.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek
+    store.currentLeague?.lastScoredWeek
   ) {
     return getWeeklyAwards({
       tableData: props.tableData,
@@ -454,7 +455,7 @@ const weeklyAwards = computed(() => {
       weekIndex: currentWeek.value - 1,
       showUsernames: store.showUsernames,
       rosterPositions:
-        store.leagueInfo[store.currentLeagueIndex]?.rosterPositions ?? [],
+        store.currentLeague?.rosterPositions ?? [],
     });
   }
   return [];
@@ -469,19 +470,19 @@ const reportPrompt = computed(() => {
     showUsernames: store.showUsernames,
     isPlayoffs: isPlayoffs.value,
     losersBracket:
-      store.leagueInfo[store.currentLeagueIndex]?.losersBracket ?? [],
+      store.currentLeague?.losersBracket ?? [],
     winnersBracket:
-      store.leagueInfo[store.currentLeagueIndex]?.winnersBracket ?? [],
+      store.currentLeague?.winnersBracket ?? [],
     espnLosersBracket:
-      store.leagueInfo[store.currentLeagueIndex]?.espnLosersBracket ?? [],
+      store.currentLeague?.espnLosersBracket ?? [],
     espnWinnersBracket:
-      store.leagueInfo[store.currentLeagueIndex]?.espnWinnersBracket ?? [],
+      store.currentLeague?.espnWinnersBracket ?? [],
     medianScoring: medianScoring.value,
   });
 });
 
 const premiumReportPrompt = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   const waiverMovesByRoster = buildWeeklyWaiverContext({
     waivers: currentLeague?.waivers ?? [],
     tableData: props.tableData,
@@ -499,13 +500,13 @@ const premiumReportPrompt = computed(() => {
     losersBracketIds: losersBracketIDs.value,
     winnersBracketIds: winnersBracketIDs.value,
     losersBracket:
-      store.leagueInfo[store.currentLeagueIndex]?.losersBracket ?? [],
+      store.currentLeague?.losersBracket ?? [],
     winnersBracket:
-      store.leagueInfo[store.currentLeagueIndex]?.winnersBracket ?? [],
+      store.currentLeague?.winnersBracket ?? [],
     espnLosersBracket:
-      store.leagueInfo[store.currentLeagueIndex]?.espnLosersBracket ?? [],
+      store.currentLeague?.espnLosersBracket ?? [],
     espnWinnersBracket:
-      store.leagueInfo[store.currentLeagueIndex]?.espnWinnersBracket ?? [],
+      store.currentLeague?.espnWinnersBracket ?? [],
     rosterPositions: currentLeague?.rosterPositions ?? [],
     medianScoring: medianScoring.value,
     waiverMovesByRoster,
@@ -519,8 +520,8 @@ const numOfMatchups = computed(() => {
 const medianScoring = computed(() => {
   return Boolean(
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
+    store.currentLeague &&
+    store.currentLeague.medianScoring === 1
   );
 });
 
@@ -533,8 +534,9 @@ watch(
   async () => {
     currentWeek.value = weeks.value[0];
     if (
-      !store.leagueInfo[store.currentLeagueIndex].weeklyReport &&
-      store.leagueInfo[store.currentLeagueIndex].seasonType !== "Guillotine" &&
+      store.currentLeague.lastScoredWeek &&
+      !store.currentLeague.weeklyReport &&
+      store.currentLeague.seasonType !== "Guillotine" &&
       weeks.value.length > 0
     ) {
       rawWeeklyReport.value = "";
@@ -543,15 +545,15 @@ watch(
       await getReport();
       loading.value = false;
     } else if (
-      store.leagueInfo[store.currentLeagueIndex].lastScoredWeek &&
+      store.currentLeague.lastScoredWeek &&
       weeks.value.length > 0
     ) {
       await fetchPlayerNames();
     }
     rawWeeklyReport.value =
-      store.leagueInfo[store.currentLeagueIndex].weeklyReport ?? "";
+      store.currentLeague.weeklyReport ?? "";
     premiumWeeklyReport.value = getSavedPremiumReport(
-      store.leagueInfo[store.currentLeagueIndex],
+      store.currentLeague,
       currentWeek.value
     );
   }
@@ -584,7 +586,7 @@ const shareReport = async () => {
   isSharingReport.value = true;
   try {
     if (!sharedReportUrl.value) {
-      const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+      const currentLeague = store.currentLeague;
       const response = await sharePremiumReport({
         leagueId: currentLeague.leagueId,
         platform: currentLeague.platform === "espn" ? "espn" : "sleeper",
@@ -597,7 +599,7 @@ const shareReport = async () => {
     }
 
     const shareData = {
-      title: `${store.leagueInfo[store.currentLeagueIndex].name} Week ${currentWeek.value} Report`,
+      title: `${store.currentLeague.name} Week ${currentWeek.value} Report`,
       text: "Check out this ffwrapped premium weekly report.",
       url: sharedReportUrl.value,
     };
@@ -760,7 +762,7 @@ watch(
 watch(
   () => currentWeek.value,
   async (week) => {
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     rawWeeklyReport.value =
       week === weeks.value[0] ? (currentLeague?.weeklyReport ?? "") : "";
     premiumWeeklyReport.value = getSavedPremiumReport(currentLeague, week);
@@ -814,7 +816,7 @@ watch(
           :is-latest-week="currentWeek === weeks[0]"
           :has-leagues="store.leagueIds.length !== 0"
           :has-last-scored-week="
-            Boolean(store.leagueInfo[store.currentLeagueIndex]?.lastScoredWeek)
+            Boolean(store.currentLeague?.lastScoredWeek)
           "
           :raw-weekly-report="rawWeeklyReport"
           :premium-weekly-report="premiumWeeklyReport"
@@ -869,7 +871,7 @@ watch(
       <TabsContent
         value="Preview"
         v-if="
-          store.leagueInfo[store.currentLeagueIndex]?.seasonType !==
+          store.currentLeague?.seasonType !==
           'Guillotine'
         "
       >
@@ -884,7 +886,7 @@ watch(
   <div class="fixed top-0 left-[-10000px] pointer-events-none">
     <div ref="shareCardRef">
       <WeeklyShareCard
-        :league-name="store.leagueInfo[store.currentLeagueIndex]?.name"
+        :league-name="store.currentLeague?.name"
         :week="currentWeek"
         :top-teams="exportTopTeams"
         :hot-players="exportHotPlayers"

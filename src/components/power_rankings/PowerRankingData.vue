@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import max from "lodash/max";
-import mean from "lodash/mean";
-import min from "lodash/min";
-import zip from "lodash/zip";
+import { max, mean, min, zip } from "@/lib/collection";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 import { useStore } from "../../store/store";
 import { getPowerRanking, winsOnWeek } from "../../api/helper";
 import {
@@ -26,7 +24,7 @@ const preseasonRank = computed(() => {
   const positions: Position[] = ["QB", "WR", "TE", "RB"];
   type Top2Sums = Record<Position, number>;
 
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague?.rosters) {
     const projectionsAreLoaded = currentLeague.rosters.every(
       (roster) => roster.projections && roster.projections.length > 0
@@ -102,7 +100,7 @@ const buildPowerRankings = (includePreseasonRankings: boolean) => {
     if (value.recordByWeek && value.points) {
       value.points.forEach((_: number, week: number) => {
         const weekLength =
-          store.leagueInfo[store.currentLeagueIndex]?.medianScoring === 1
+          store.currentLeague?.medianScoring === 1
             ? value.recordByWeek.length / 2
             : value.recordByWeek.length;
         if (week < weekLength) {
@@ -158,16 +156,12 @@ const chartPowerRankings = computed(() =>
     : weeklyPowerRankings.value
 );
 
-const chartTextColor = computed(() => {
-  return "hsl(var(--foreground))";
-});
-
 const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
       width: "98%",
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       toolbar: {
         show: false,
       },
@@ -183,7 +177,7 @@ const updateChartColor = () => {
       categories: chartCategories.value,
     },
     tooltip: {
-      theme: store.darkMode ? "dark" : "light",
+      theme: getChartTooltipTheme(store.darkMode),
       x: {
         show: true,
         formatter: (x: number) => `Week ${x}`,
@@ -235,7 +229,7 @@ watch(hasCompletePreseasonRankings, (isComplete) => {
 const chartOptions = ref({
   chart: {
     width: "98%",
-    foreColor: chartTextColor.value,
+    foreColor: getChartTheme().foreground,
     toolbar: {
       show: false,
     },
@@ -292,7 +286,7 @@ const chartOptions = ref({
     },
   },
   tooltip: {
-    theme: store.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(store.darkMode),
     x: {
       show: true,
       formatter: (x: number) => `Week ${x}`,

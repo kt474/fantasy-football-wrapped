@@ -1,16 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
-import maxBy from "lodash/maxBy";
-import minBy from "lodash/minBy";
+import { ref, onBeforeUnmount, computed, watch } from "vue";
+import { maxBy, minBy } from "@/lib/collection";
 import { getLeagueKey, useStore } from "../../store/store.ts";
-import { getData, inputLeague } from "../../api/api.ts";
-import {
-  getEspnErrorMessage,
-  getEspnLeagueInfo,
-  getSavedEspnAuth,
-} from "../../api/espnApi.ts";
+import { inputLeague } from "../../api/api.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";
-import { createTableData } from "../../api/helper.ts";
 import AllMatchups from "./AllMatchups.vue";
 import AllTimeRecords from "./AllTimeRecords.vue";
 import MostPoints from "./MostPoints.vue";
@@ -19,14 +12,13 @@ import CloseMatchups from "./CloseMatchups.vue";
 import SeasonFinishHistory from "./SeasonFinishHistory.vue";
 import ScrollableTableCard from "../layout/ScrollableTableCard.vue";
 import { toast } from "vue-sonner";
-import { hasLeagueSeasonData } from "@/lib/leagueHistory";
 import {
-  getPreviousLeagueEntries,
-  getPreviousSeasonReference,
-  isLeagueInfoEntry,
-  reconcileEspnPreviousLeagueEntries,
-  type PreviousLeagueEntry,
-} from "@/lib/previousSeason";
+  buildHistoricalManagerRows,
+  getHistoricalTableData,
+  hasLeagueSeasonData,
+  type HistoricalManagerRow,
+} from "@/lib/leagueHistory";
+import { isLeagueInfoEntry } from "@/lib/previousSeason";
 
 import {
   Tooltip,
@@ -35,19 +27,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
-import {
-  loadHistoryCandidates,
-  loadLinkedHistory,
-  type HistoryCandidate,
-  type HistoryLoadFailure,
-  type HistoryLoadStatus,
-} from "@/lib/historyLoad";
-import {
-  createLatestRequestGuard,
-  getLeagueLoadErrorMessage,
-  isRequestCancellation,
-} from "@/lib/request";
-import { trackEvent } from "@/lib/analytics";
+import type { HistoryLoadStatus } from "@/lib/historyLoad";
+import { useLeagueHistory } from "@/composables/useLeagueHistory";
 
 const store = useStore();
 const props = defineProps<{
@@ -61,15 +42,13 @@ const emit = defineEmits<{
   (event: "historyStatus", status: HistoryLoadStatus): void;
 }>();
 
-const isLoading = ref(false);
-const loadingYear = ref("");
+const {
+  isLoading,
+  loadingYear,
+  status: historyStatus,
+} = useLeagueHistory();
 const tableOrder = ref("wins");
-const historyFailures = ref<HistoryLoadFailure[]>([]);
-const historyTotal = ref<number | null>(0);
-const historySettled = ref(false);
-const historyLoadSucceeded = ref(false);
 const visibleDetailSections = ref(0);
-const historyRequests = createLatestRequestGuard();
 let detailRenderGeneration = 0;
 
 const scheduleDetailSections = () => {
@@ -99,64 +78,6 @@ const scheduleDetailSections = () => {
   revealNext();
 };
 
-const getLeagueHistoryKey = ({
-  leagueId,
-  season,
-  platform,
-}: {
-  leagueId?: string;
-  season?: string;
-  platform?: string;
-}) => `${platform ?? "unknown"}:${leagueId ?? ""}:${season ?? ""}`;
-
-const getHistoricalTableData = (league: LeagueInfoType) => {
-  if (!league.leagueId || !league.season) {
-    return [];
-  }
-
-  return createTableData(
-    league.users,
-    league.rosters,
-    league.weeklyPoints,
-    league.medianScoring && league.medianScoring === 1 ? true : false
-  );
-};
-
-const replacePreviousLeagueEntries = (
-  league: LeagueInfoType,
-  leagues: PreviousLeagueEntry[]
-) => {
-  getPreviousLeagueEntries(league).splice(
-    0,
-    getPreviousLeagueEntries(league).length,
-    ...leagues
-  );
-};
-
-interface PointSeasonEntry {
-  season: string;
-  points: number[];
-}
-
-interface HistoricalManagerRow {
-  name: string;
-  username: string;
-  id: string;
-  wins: number;
-  losses: number;
-  ties: number;
-  points: number;
-  pointsArr: number[];
-  pointSeason: PointSeasonEntry[];
-  avatarImg?: string;
-  rosterId: number;
-  matchups: (number | null)[];
-  managerEfficiency: number;
-  randomScheduleWins: number;
-  leagueWinner: (number | null)[];
-  seasons: string[];
-}
-
 interface HistoricalSeasonRow {
   name: string;
   username: string;
@@ -173,243 +94,10 @@ interface HistoricalSeasonRow {
   avatarImg?: string;
 }
 
-const dedupePreviousLeagues = (league: LeagueInfoType) => {
-  const seenEntries = new Set<string>();
-  const uniqueEntries = getPreviousLeagueEntries(league).filter((entry) => {
-    if (isLeagueInfoEntry(entry)) {
-      if (!hasLeagueSeasonData(entry)) {
-        return false;
-      }
-
-      const leagueKey = getLeagueHistoryKey(entry);
-      if (
-        leagueKey === getLeagueHistoryKey(league) ||
-        seenEntries.has(leagueKey)
-      ) {
-        return false;
-      }
-
-      seenEntries.add(leagueKey);
-      return true;
-    }
-
-    const season = getPreviousSeasonReference(entry);
-    if (!season || season === league.season || seenEntries.has(season)) {
-      return false;
-    }
-
-    seenEntries.add(season);
-    return true;
-  });
-
-  if (uniqueEntries.length !== getPreviousLeagueEntries(league).length) {
-    replacePreviousLeagueEntries(league, uniqueEntries);
-    return true;
-  }
-
-  return false;
-};
-
-const getLoadedHistoryCount = (league: LeagueInfoType) =>
-  getPreviousLeagueEntries(league).filter(
-    (entry) => isLeagueInfoEntry(entry) && hasLeagueSeasonData(entry)
-  ).length;
-
-const getFirstUnloadedSleeperCandidate = (
-  league: LeagueInfoType
-): HistoryCandidate | null => {
-  const loadedLeagues =
-    getPreviousLeagueEntries(league).filter(isLeagueInfoEntry);
-  const seen = new Set<string>();
-  let leagueId = league.previousLeagueId;
-  let season = Number.isInteger(Number(league.season))
-    ? String(Number(league.season) - 1)
-    : "";
-
-  while (leagueId && leagueId !== "0" && !seen.has(leagueId)) {
-    seen.add(leagueId);
-    const loadedLeague = loadedLeagues.find(
-      (previousLeague) => previousLeague.leagueId === leagueId
-    );
-    if (!loadedLeague) {
-      return {
-        key: `sleeper:${leagueId}:${season}`,
-        leagueId,
-        season,
-        platform: "sleeper",
-      };
-    }
-    leagueId = loadedLeague.previousLeagueId;
-    season = Number.isInteger(Number(loadedLeague.season))
-      ? String(Number(loadedLeague.season) - 1)
-      : "";
-  }
-
-  return null;
-};
-
-const getEspnCandidates = (
-  league: LeagueInfoType,
-  failures?: HistoryLoadFailure[]
-): HistoryCandidate[] => {
-  if (failures) {
-    return failures.map(({ message: _message, ...failure }) => failure);
-  }
-
-  const loadedSeasons = new Set(
-    getPreviousLeagueEntries(league)
-      .filter(isLeagueInfoEntry)
-      .map((entry) => entry.season)
-  );
-
-  return [
-    ...new Set(
-      getPreviousLeagueEntries(league)
-        .map(getPreviousSeasonReference)
-        .filter((season): season is string => Boolean(season))
-        .filter(
-          (season) => Number(season) >= 2019 && !loadedSeasons.has(season)
-        )
-    ),
-  ]
-    .sort((left, right) => Number(right) - Number(left))
-    .map((season) => ({
-      key: `espn:${league.leagueId}:${season}`,
-      leagueId: league.leagueId,
-      season,
-      platform: "espn" as const,
-    }));
-};
-
-const loadEspnHistory = async (
-  league: LeagueInfoType,
-  candidates: HistoryCandidate[],
-  signal: AbortSignal
-) => {
-  const resolvedLeagues =
-    getPreviousLeagueEntries(league).filter(isLeagueInfoEntry);
-  const result = await loadHistoryCandidates({
-    candidates,
-    signal,
-    fetchCandidate: (candidate, requestSignal) =>
-      getEspnLeagueInfo(
-        candidate.season,
-        league.leagueId,
-        getSavedEspnAuth(league.season, league.leagueId),
-        { signal: requestSignal }
-      ),
-    isValid: hasLeagueSeasonData,
-    onStart: (candidate) => {
-      loadingYear.value = candidate.season;
-    },
-    onLoaded: (loadedLeague) => {
-      resolvedLeagues.push(loadedLeague);
-    },
-    getErrorMessage: getEspnErrorMessage,
-    concurrency: 2,
-  });
-
-  replacePreviousLeagueEntries(
-    league,
-    reconcileEspnPreviousLeagueEntries(
-      getPreviousLeagueEntries(league),
-      resolvedLeagues,
-      candidates,
-      result.failures
-    )
-  );
-  dedupePreviousLeagues(league);
-  return result;
-};
-
-const loadSleeperHistory = async (
-  league: LeagueInfoType,
-  candidate: HistoryCandidate,
-  signal: AbortSignal
-) =>
-  loadLinkedHistory({
-    initialCandidate: candidate,
-    signal,
-    fetchLeague: (leagueId, requestSignal) =>
-      getData(leagueId, { signal: requestSignal }),
-    isValid: hasLeagueSeasonData,
-    onStart: (nextCandidate) => {
-      loadingYear.value = nextCandidate.season;
-    },
-    onLoaded: (loadedLeague) => {
-      getPreviousLeagueEntries(league).push(loadedLeague);
-      dedupePreviousLeagues(league);
-    },
-    getErrorMessage: (error) => getLeagueLoadErrorMessage(error, "sleeper"),
-  });
-
-const ensurePreviousLeaguesLoaded = async (
-  league: LeagueInfoType,
-  retryFailures?: HistoryLoadFailure[]
-) => {
-  dedupePreviousLeagues(league);
-  const controller = historyRequests.start();
-  const leagueKey = getLeagueHistoryKey(league);
-  isLoading.value = true;
-  historySettled.value = false;
-  historyLoadSucceeded.value = false;
-  historyFailures.value = [];
-  loadingYear.value = "";
-
-  try {
-    if (league.platform === "espn") {
-      const candidates = getEspnCandidates(league, retryFailures);
-      historyTotal.value = getLoadedHistoryCount(league) + candidates.length;
-      const result = await loadEspnHistory(
-        league,
-        candidates,
-        controller.signal
-      );
-      if (!historyRequests.isActive(controller)) return;
-      historyFailures.value = result.failures;
-    } else {
-      const candidate =
-        retryFailures?.[0] ?? getFirstUnloadedSleeperCandidate(league);
-      historyTotal.value = null;
-      if (candidate) {
-        const result = await loadSleeperHistory(
-          league,
-          candidate,
-          controller.signal
-        );
-        if (!historyRequests.isActive(controller)) return;
-        historyFailures.value = result.failures;
-      }
-      if (historyFailures.value.length === 0) {
-        historyTotal.value = getLoadedHistoryCount(league);
-      }
-    }
-    if (historyFailures.value.length > 0) {
-      trackEvent("League History Load Failed", {
-        platform: league.platform === "espn" ? "espn" : "sleeper",
-        failure_count: historyFailures.value.length,
-        loaded_seasons: getLoadedHistoryCount(league),
-      });
-    }
-    historyLoadSucceeded.value = true;
-  } catch (error) {
-    if (!isRequestCancellation(error)) {
-      console.error(`Failed to load history for ${leagueKey}:`, error);
-    }
-  } finally {
-    if (historyRequests.finish(controller)) {
-      isLoading.value = false;
-      loadingYear.value = "";
-      historySettled.value = true;
-      emit("ready");
-    }
-  }
-};
-
 const currentLeague = computed(() => {
   if (
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+    store.currentLeague &&
+    store.currentLeague.lastScoredWeek
   ) {
     return 0;
   }
@@ -417,10 +105,10 @@ const currentLeague = computed(() => {
 });
 
 const addNewLeague = async (season: string) => {
-  if (store.leagueInfo[store.currentLeagueIndex]) {
-    const newLeagueInfo = store.leagueInfo[
-      store.currentLeagueIndex
-    ].previousLeagues.find((league) => league.season === season);
+  if (store.currentLeague) {
+    const newLeagueInfo = store.currentLeague.previousLeagues.find(
+      (league) => league.season === season
+    );
     if (newLeagueInfo) {
       if (
         !store.leagueInfo
@@ -449,30 +137,8 @@ const addNewLeague = async (season: string) => {
   }
 };
 
-onMounted(async () => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
-  if (league) {
-    await ensurePreviousLeaguesLoaded(league);
-  } else {
-    historyLoadSucceeded.value = true;
-    historySettled.value = true;
-    emit("ready");
-  }
-});
-
-watch(
-  () => store.currentLeagueId,
-  async () => {
-    const league = store.leagueInfo[store.currentLeagueIndex];
-    if (league) {
-      await ensurePreviousLeaguesLoaded(league);
-    }
-  }
-);
-
 onBeforeUnmount(() => {
   detailRenderGeneration += 1;
-  historyRequests.cancel();
 });
 
 watch(
@@ -481,120 +147,9 @@ watch(
   { immediate: true, flush: "post" }
 );
 
-const dataAllYears = computed(() => {
-  const result: HistoricalManagerRow[] = props.tableData.map((user) => {
-    const latestWinner =
-      store.leagueInfo[store.currentLeagueIndex] &&
-      store.leagueInfo[store.currentLeagueIndex].status == "complete"
-        ? store.leagueInfo[store.currentLeagueIndex].leagueWinner
-          ? Number(store.leagueInfo[store.currentLeagueIndex].leagueWinner)
-          : (store.leagueInfo[store.currentLeagueIndex].legacyWinner ?? null)
-        : null;
-
-    return {
-      name: user.name,
-      username: user.username,
-      id: user.id,
-      wins: user.wins,
-      losses: user.losses,
-      ties: user.ties,
-      points: user.pointsFor,
-      pointsArr: user.points ? [...user.points] : [],
-      pointSeason: store.leagueInfo[store.currentLeagueIndex]
-        ? [
-            {
-              season: store.leagueInfo[store.currentLeagueIndex].season,
-              points: user.points ? [...user.points] : [],
-            },
-          ]
-        : [
-            {
-              season: "2023",
-              points: Array.from({ length: 5 }, () =>
-                parseFloat((Math.random() * (200 - 100) + 100).toFixed(2))
-              ),
-            },
-            {
-              season: "2024",
-              points: Array.from({ length: 5 }, () =>
-                parseFloat((Math.random() * (200 - 100) + 100).toFixed(2))
-              ),
-            },
-          ],
-      avatarImg: user.avatarImg,
-      rosterId: user.rosterId,
-      matchups: user.matchups ? [...user.matchups] : [],
-      managerEfficiency: store.leagueInfo[store.currentLeagueIndex]
-        ? user.managerEfficiency
-        : 2 * user.managerEfficiency,
-      randomScheduleWins: store.leagueInfo[store.currentLeagueIndex]
-        ? user.randomScheduleWins
-        : 3 * user.randomScheduleWins,
-      leagueWinner: [latestWinner],
-      seasons: store.leagueInfo[store.currentLeagueIndex]
-        ? [store.leagueInfo[store.currentLeagueIndex].season]
-        : ["2023", "2022", "2021"],
-    };
-  });
-
-  if (
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].previousLeagues.length > 0
-  ) {
-    store.leagueInfo[store.currentLeagueIndex].previousLeagues
-      .filter(isLeagueInfoEntry)
-      .forEach((league: LeagueInfoType) => {
-        const tableData = getHistoricalTableData(league);
-        if (!hasLeagueSeasonData(league, tableData)) return;
-
-        tableData.forEach((user: TableDataType) => {
-          const resultUser = result.find((ru) => ru.id === user.id);
-          if (resultUser) {
-            resultUser.wins += user.wins;
-            resultUser.losses += user.losses;
-            resultUser.points += user.pointsFor;
-            resultUser.randomScheduleWins += user.randomScheduleWins;
-            resultUser.managerEfficiency += user.managerEfficiency;
-
-            if (league.weeklyPoints.length > 0) {
-              resultUser.seasons.push(league.season);
-            }
-            if (league.leagueWinner) {
-              resultUser.leagueWinner.push(Number(league.leagueWinner));
-            } else if (league.legacyWinner) {
-              resultUser.leagueWinner.push(league.legacyWinner);
-            }
-            if (user.matchups?.length) {
-              resultUser.matchups.push(...user.matchups);
-            }
-            if (user.points?.length) {
-              resultUser.pointsArr.push(...user.points);
-              resultUser.pointSeason.push({
-                season: league.season,
-                points: user.points,
-              });
-            }
-          }
-        });
-        const maxLength = Math.max(...result.map((obj) => obj.matchups.length));
-        result.forEach((obj) => {
-          while (obj.matchups.length < maxLength) {
-            obj.matchups.push(null);
-          }
-        });
-      });
-  } else if (!store.leagueInfo[store.currentLeagueIndex]) {
-    // fake data for main page
-    result.forEach((user) => {
-      user.wins += 2 * user.wins;
-      user.losses += 2 * user.losses;
-      user.points += 2 * user.points;
-      user.pointsArr.push(...user.pointsArr, ...user.pointsArr);
-      user.matchups.push(...user.matchups, ...user.matchups);
-    });
-  }
-  return result;
-});
+const dataAllYears = computed(() =>
+  buildHistoricalManagerRows(props.tableData, store.currentLeague)
+);
 
 const mapSeasonRows = (
   tableData: TableDataType[],
@@ -617,7 +172,7 @@ const mapSeasonRows = (
   }));
 
 const seasonRows = computed(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
+  const league = store.currentLeague;
 
   if (!league) {
     return mapSeasonRows(props.tableData, "2024");
@@ -716,23 +271,6 @@ const worstManager = computed(() => {
     : null;
 });
 
-const historyStatus = computed<HistoryLoadStatus>(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
-  return {
-    leagueKey: league ? getLeagueHistoryKey(league) : "",
-    loading: isLoading.value,
-    settled: historySettled.value,
-    complete:
-      historySettled.value &&
-      historyLoadSucceeded.value &&
-      historyFailures.value.length === 0,
-    loaded: league ? getLoadedHistoryCount(league) : 0,
-    total: historyTotal.value,
-    loadingSeason: loadingYear.value,
-    failures: historyFailures.value,
-  };
-});
-
 watch(
   loadingYear,
   (year) => {
@@ -753,6 +291,7 @@ watch(
   historyStatus,
   (status) => {
     emit("historyStatus", status);
+    if (status.settled) emit("ready");
   },
   { immediate: true, deep: true }
 );

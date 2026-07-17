@@ -16,6 +16,10 @@ import {
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
+import {
+  getTransactionRatingClass as getValueColor,
+  getTransactionRatingLabel as getRatingLabel,
+} from "@/lib/transactionRating";
 
 type WaiverData = Record<string | number, WaiverMove[]>;
 
@@ -34,7 +38,7 @@ type TempWaiverMove = {
 };
 
 const getData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   const temp: TempWaiverMove[] = (currentLeague.waivers as LeagueWaiverMove[])
     .filter((waiver) => waiver.adds)
     .map((waiver) => ({
@@ -162,7 +166,7 @@ const orderedData = computed(() => {
 });
 
 const managers = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague) {
     const currentRosterIds = currentLeague.rosters.map((roster) => roster.id);
     const result = currentLeague.users
@@ -179,11 +183,11 @@ const managers = computed(() => {
 const currentManager = ref(managers.value[1]);
 
 const getRosterName = (rosterId: number) => {
-  const rosters = store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].rosters
+  const rosters = store.currentLeague
+    ? store.currentLeague.rosters
     : fakeRosters;
-  const users = store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].users
+  const users = store.currentLeague
+    ? store.currentLeague.users
     : fakeUsers;
   const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
@@ -207,46 +211,30 @@ const getAllManagersSpend = (groupedMoves: WaiverMove[]) => {
     .reduce((sum, m) => sum + (m.bid || 0), 0);
 };
 
-const getValueColor = (value: number) => {
-  if (value <= 15) return "performance-excellent";
-  if (value <= 25) return "performance-good";
-  if (value <= 35) return "performance-average";
-  if (value <= 45) return "performance-poor";
-  return "performance-bad";
-};
-
-const getRatingLabel = (value: number) => {
-  if (value <= 15) return "Excellent";
-  if (value <= 25) return "Good";
-  if (value <= 35) return "Average";
-  if (value <= 45) return "Below Avg";
-  return "Poor";
-};
-
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].waiverMoves
+    store.currentLeague &&
+    !store.currentLeague.waiverMoves
   ) {
     await getData();
   } else if (store.leagueInfo.length == 0) {
     rawData.value = fakeWaiverMoves;
-  } else if (store.leagueInfo[store.currentLeagueIndex]) {
+  } else if (store.currentLeague) {
     rawData.value =
-      store.leagueInfo[store.currentLeagueIndex].waiverMoves ?? [];
+      store.currentLeague.waiverMoves ?? [];
   }
 });
 
 watch(
   () => store.currentLeagueId,
   async () => {
-    if (!store.leagueInfo[store.currentLeagueIndex].waiverMoves) {
+    if (!store.currentLeague.waiverMoves) {
       rawData.value = [];
       await getData();
     }
     rawData.value =
-      store.leagueInfo[store.currentLeagueIndex].waiverMoves ?? [];
+      store.currentLeague.waiverMoves ?? [];
     currentManager.value = managers.value[0];
   }
 );
@@ -321,7 +309,7 @@ watch(
             </template>
           </div>
           <Card
-            v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
+            v-if="store.currentLeague?.waiverType === 2"
             class="flex p-3 mt-4 mr-4 text-sm"
           >
             <div class="mr-4">
@@ -376,7 +364,7 @@ watch(
             </template>
           </div>
           <Card
-            v-if="store.leagueInfo[store.currentLeagueIndex]?.waiverType === 2"
+            v-if="store.currentLeague?.waiverType === 2"
             class="flex p-3 mt-4 mr-4 text-sm"
           >
             <div class="mr-4">
@@ -404,7 +392,7 @@ watch(
       <div
         v-else-if="
           store.leagueInfo.length > 0 &&
-          store.leagueInfo[store.currentLeagueIndex] &&
+          store.currentLeague &&
           currentManagerMoves.length == 0
         "
       >
@@ -519,8 +507,8 @@ watch(
       <div
         v-else-if="
           store.leagueInfo.length > 0 &&
-          store.leagueInfo[store.currentLeagueIndex] &&
-          store.leagueInfo[store.currentLeagueIndex].waivers.length === 0
+          store.currentLeague &&
+          store.currentLeague.waivers.length === 0
         "
       >
         <p class="text-muted-foreground">No waiver moves have been made.</p>
@@ -528,8 +516,8 @@ watch(
       <div
         v-else-if="
           store.leagueInfo.length > 0 &&
-          store.leagueInfo[store.currentLeagueIndex] &&
-          !store.leagueInfo[store.currentLeagueIndex].lastScoredWeek
+          store.currentLeague &&
+          !store.currentLeague.lastScoredWeek
         "
       >
         <p>Please come back after week 1!</p>

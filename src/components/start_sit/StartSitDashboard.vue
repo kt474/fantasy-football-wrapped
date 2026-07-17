@@ -9,8 +9,7 @@ import {
 } from "../../api/sleeperApi";
 import { TableDataType } from "../../types/types";
 import { fakePosts, fakeStartSit, fakeUsers } from "../../api/fakeLeague";
-import max from "lodash/max";
-import min from "lodash/min";
+import { max, min } from "@/lib/collection";
 import { Player, SingleWeekProjection } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 import { Badge } from "../ui/badge";
@@ -139,7 +138,7 @@ const getPlayerMatchupLabel = (player: StartSitPlayer) => {
 };
 
 const getRecentWeekLabel = (index: number) => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   return getRecentStartSitWeekLabel(currentLeague, Number(index));
 };
 
@@ -283,7 +282,7 @@ const managers = computed(() => {
 });
 
 const starterSize = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague) {
     return getStartingRosterSlots(currentLeague.rosterPositions).length;
   }
@@ -291,7 +290,7 @@ const starterSize = computed(() => {
 });
 
 const rosterHeading = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague?.status === "complete") return "Roster";
 
   return `Week ${getStartSitWeek(currentLeague)} Roster`;
@@ -376,7 +375,7 @@ const loadSelectedRoster = async () => {
       return;
     }
 
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     const selectedManager = currentManager.value;
     if (!currentLeague || !selectedManager) {
       currentRoster.value = null;

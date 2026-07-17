@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import mean from "lodash/mean";
+import { mean } from "@/lib/collection";
 import { ref, onMounted, computed, watch } from "vue";
 import { getDraftProjections } from "../../api/sleeperApi";
 import { DraftPick, PickObj } from "../../types/apiTypes.ts";
@@ -35,7 +35,7 @@ const props = defineProps<{
 }>();
 
 const managers = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague) {
     const currentRosterIds = currentLeague.rosters.map((roster) => roster.id);
     return currentLeague.users
@@ -53,7 +53,7 @@ const managers = computed(() => {
 const currentManager = ref(managers.value[0]);
 
 const getProjections = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   const qbs = currentLeague.rosterPositions.reduce(
     (sum, item) => sum + (item === "QB" || item === "SUPER_FLEX" ? 1 : 0),
     0
@@ -140,7 +140,7 @@ const zScoreToGrade = (z: number) => {
 };
 
 const pickToGrade = (pickNumber: number, adp: number, round: number) => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   // Sleeper API does not return dynasty ADPs for returning leagues
   if (
     currentLeague &&
@@ -203,13 +203,13 @@ const getBgColor = (position: string) => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].draftGrades
+    store.currentLeague &&
+    !store.currentLeague.draftGrades
   ) {
     await getProjections();
-  } else if (store.leagueInfo[store.currentLeagueIndex]) {
+  } else if (store.currentLeague) {
     projectionData.value =
-      store.leagueInfo[store.currentLeagueIndex].draftGrades ?? [];
+      store.currentLeague.draftGrades ?? [];
   } else if (store.leagueInfo.length === 0) {
     projectionData.value = fakeDraftGrades as DraftGradeSummary[];
   }
@@ -219,15 +219,15 @@ watch(
   () => store.currentLeagueId,
   async () => {
     if (
-      store.leagueInfo[store.currentLeagueIndex] &&
-      !store.leagueInfo[store.currentLeagueIndex].draftGrades
+      store.currentLeague &&
+      !store.currentLeague.draftGrades
     ) {
       projectionData.value = [];
       await getProjections();
     }
     currentManager.value = managers.value[0];
     projectionData.value =
-      store.leagueInfo[store.currentLeagueIndex].draftGrades ?? [];
+      store.currentLeague.draftGrades ?? [];
   }
 );
 </script>

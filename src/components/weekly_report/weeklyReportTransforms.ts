@@ -1,6 +1,8 @@
 import type { Player, WeeklyWaiver } from "@/types/apiTypes";
 import type { Bracket } from "@/types/apiTypes";
 import type { TableDataType } from "@/types/types";
+import { getOrdinalSuffix } from "@/lib/format";
+import { getManagerDisplayName } from "@/lib/manager";
 
 export type WeeklyReportPlayer = Omit<Player, "name"> & {
   name?: string | null;
@@ -203,10 +205,7 @@ export const getPlayerLabel = (player: WeeklyReportPlayer) =>
   player.name ? player.name : `${player.team} Defense`;
 
 export const getManagerName = (user: TableDataType, showUsernames: boolean) => {
-  if (showUsernames) {
-    return user.username ? user.username : "Ghost Roster";
-  }
-  return user.name ? user.name : "Ghost Roster";
+  return getManagerDisplayName(user, showUsernames);
 };
 
 const getWaiverPlayerName = (
@@ -283,12 +282,12 @@ export const buildWeeklyWaiverContext = ({
 const roundPoints = (points: number) => Math.round(points * 100) / 100;
 
 const getRecordCountsForWeek = (
-  recordString: string,
+  recordString: string | null | undefined,
   completedWeeks: number,
   medianScoring: boolean
 ) => {
   const resultCount = completedWeeks * (medianScoring ? 2 : 1);
-  const results = recordString.slice(0, resultCount);
+  const results = (recordString ?? "").slice(0, resultCount);
   return {
     wins: [...results].filter((result) => result === "W").length,
     losses: [...results].filter((result) => result === "L").length,
@@ -307,12 +306,12 @@ const formatRecord = ({
 }) => `${wins}-${losses}${ties ? `-${ties}` : ""}`;
 
 const getCurrentStreak = (
-  recordString: string,
+  recordString: string | null | undefined,
   completedWeeks: number,
   medianScoring: boolean
 ) => {
   const resultCount = completedWeeks * (medianScoring ? 2 : 1);
-  const results = recordString.slice(0, resultCount);
+  const results = (recordString ?? "").slice(0, resultCount);
   const latestResult = results[results.length - 1];
   if (!latestResult) {
     return "N/A";
@@ -1119,22 +1118,6 @@ export const getWeeklyAwards = ({
   }
 
   return awards.slice(0, 4);
-};
-
-const getOrdinalSuffix = (rank: number) => {
-  if (rank % 100 >= 11 && rank % 100 <= 13) {
-    return "th";
-  }
-  switch (rank % 10) {
-    case 1:
-      return "st";
-    case 2:
-      return "nd";
-    case 3:
-      return "rd";
-    default:
-      return "th";
-  }
 };
 
 export const buildReportPrompt = ({

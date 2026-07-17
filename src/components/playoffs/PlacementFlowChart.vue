@@ -3,21 +3,18 @@ import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType, UserType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
+import { getChartTheme } from "@/lib/chartTheme";
 const props = defineProps<{
   tableData: TableDataType[];
   finalPlacements: UserType[];
 }>();
 const store = useStore();
 
-const chartTextColor = computed(() => {
-  return "hsl(var(--foreground))";
-});
-
 const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       type: "line",
       toolbar: {
         show: false,
@@ -72,7 +69,7 @@ const seriesData = computed(() => {
 const chartOptions = ref({
   chart: {
     type: "line",
-    foreColor: chartTextColor.value,
+    foreColor: getChartTheme().foreground,
     toolbar: {
       show: false,
     },

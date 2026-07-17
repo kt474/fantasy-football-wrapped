@@ -9,8 +9,11 @@ import type {
 import {
   getPlayerIdLookupMap,
   getPlayerIdsByNameTeamMap,
-  type PlayerNameTeamLookup,
 } from "@/api/api";
+import {
+  getPlayerLookupKey,
+  type PlayerNameTeamLookup,
+} from "@/lib/playerLookup";
 import { getStats } from "./sleeperApi";
 import { calculateDraftRank } from "./helper";
 import {
@@ -150,9 +153,6 @@ const getTeam = (posId: number) => {
 const getPosition = (posId: number) => {
   return POSITION_MAP[posId] || "NA";
 };
-
-const getPlayerLookupKey = ({ name, team }: PlayerNameTeamLookup): string =>
-  `${name.trim().toLowerCase()}::${team.trim().toUpperCase()}`;
 
 interface EspnPlayerLookup extends PlayerNameTeamLookup {
   espnId: number | string;

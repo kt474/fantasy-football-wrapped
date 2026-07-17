@@ -4,6 +4,7 @@ import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 import { mobileCategoricalChartResponsive } from "@/lib/chartResponsive";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 const store = useStore();
 
 const props = defineProps<{
@@ -46,7 +47,7 @@ const updateChartColor = () => {
     ...chartOptions.value,
     chart: {
       type: "bar",
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       toolbar: {
         show: false,
       },
@@ -55,7 +56,7 @@ const updateChartColor = () => {
       },
     },
     tooltip: {
-      theme: store.darkMode ? "dark" : "light",
+      theme: getChartTooltipTheme(store.darkMode),
       y: {
         show: true,
         formatter: (x: number) => {
@@ -79,7 +80,7 @@ watch([() => store.darkMode], () => {
 const chartOptions = ref({
   responsive: mobileCategoricalChartResponsive(),
   chart: {
-    foreColor: "hsl(var(--foreground))",
+    foreColor: getChartTheme().foreground,
     type: "bar",
     toolbar: {
       show: false,
@@ -98,7 +99,7 @@ const chartOptions = ref({
     enabled: false,
   },
   tooltip: {
-    theme: store.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(store.darkMode),
     y: {
       show: true,
       formatter: (x: number) => {

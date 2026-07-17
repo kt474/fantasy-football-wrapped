@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
+import { getChartTheme } from "@/lib/chartTheme";
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
@@ -43,15 +44,11 @@ const series = computed(() => {
   });
   return result;
 });
-const chartTextColor = computed(() => {
-  return "hsl(var(--foreground))";
-});
-
 const updateChartColor = () => {
   chartOptions.value = {
     ...chartOptions.value,
     chart: {
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       id: "ranking-bump-chart",
       toolbar: {
         show: false,
@@ -87,7 +84,7 @@ watch([() => store.darkMode, () => store.showUsernames], () =>
 
 const chartOptions = ref({
   chart: {
-    foreColor: chartTextColor.value,
+    foreColor: getChartTheme().foreground,
     id: "potential-points",
     toolbar: {
       show: false,

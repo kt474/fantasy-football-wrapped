@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import type { TableDataType } from "@/types/types";
 import { getSeriesData } from "./weeklyReportTransforms";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 
 const props = defineProps<{
   sortedTableData: TableDataType[];
@@ -30,7 +31,7 @@ const managerNames = computed(() => {
 
 const chartOptions = computed(() => ({
   chart: {
-    foreColor: "hsl(var(--foreground))",
+    foreColor: getChartTheme().foreground,
     type: "bar",
     toolbar: {
       show: false,
@@ -52,7 +53,7 @@ const chartOptions = computed(() => ({
     enabled: false,
   },
   tooltip: {
-    theme: props.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(props.darkMode),
     y: {
       show: true,
       formatter: (x: number) => {

@@ -6,6 +6,7 @@ import Card from "../ui/card/Card.vue";
 import CardContent from "../ui/card/CardContent.vue";
 import CardHeader from "../ui/card/CardHeader.vue";
 import CardTitle from "../ui/card/CardTitle.vue";
+import { getManagerDisplayName } from "@/lib/manager";
 
 const store = useStore();
 
@@ -80,9 +81,7 @@ const props = defineProps<{
 }>();
 
 const displayName = (row: SeasonRow) =>
-  store.showUsernames
-    ? row.username || "Ghost Roster"
-    : row.name || "Ghost Roster";
+  getManagerDisplayName(row, store.showUsernames);
 
 const formatPoints = (value: number) =>
   value.toLocaleString(undefined, {

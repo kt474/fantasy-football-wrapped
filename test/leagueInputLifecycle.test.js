@@ -18,10 +18,7 @@ const cardContainerSource = readFileSync(
 );
 const leagueHistorySource = readFileSync(
   fileURLToPath(
-    new URL(
-      "../src/components/league_history/LeagueHistory.vue",
-      import.meta.url
-    )
+    new URL("../src/composables/useLeagueHistory.ts", import.meta.url)
   ),
   "utf8"
 );
@@ -107,9 +104,9 @@ describe("league input lifecycle", () => {
   });
 
   test("does not mark an unexpectedly failed history load complete", () => {
-    expect(leagueHistorySource).toContain(
-      "const historyLoadSucceeded = ref(false)"
-    );
-    expect(leagueHistorySource).toContain("historyLoadSucceeded.value &&");
+    expect(leagueHistorySource).toContain("const loadSucceeded = ref(false)");
+    expect(leagueHistorySource).toContain("loadSucceeded.value = false");
+    expect(leagueHistorySource).toContain("loadSucceeded.value = true");
+    expect(leagueHistorySource).toContain("loadSucceeded.value &&");
   });
 });

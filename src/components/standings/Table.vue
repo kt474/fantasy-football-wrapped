@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import maxBy from "lodash/maxBy";
-import minBy from "lodash/minBy";
+import { maxBy, minBy } from "@/lib/collection";
 import { createTableData } from "../../api/helper";
 import {
   computed,
@@ -27,6 +26,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
+import { getManagerDisplayName } from "@/lib/manager";
+import {
+  isLeagueFeature,
+  isLeagueFeatureAvailable,
+  normalizeLeagueFeature,
+  type LeagueFeature,
+} from "@/lib/features";
 import Narratives from "../league_narratives/Narratives.vue";
 import PreviousSeasonPrompt from "./PreviousSeasonPrompt.vue";
 
@@ -124,36 +130,20 @@ const props = defineProps<{
   points: PointsType[];
 }>();
 const store = useStore();
-const tabOptions = [
-  "Home",
-  "Standings",
-  "Power Rankings",
-  "Expected Wins",
-  "Roster Management",
-  "Playoffs",
-  "Weekly Report",
-  "Season Forecast",
-  "Trade Lab",
-  "Draft",
-  "Start/Sit",
-  "League History",
-  "Manager Profiles",
-  "Wrapped",
-  "ESPN",
-];
 const showStandingsTab = computed(() => {
   return (
-    store.currentTab === "Standings" || !tabOptions.includes(store.currentTab)
+    store.currentTab === "Standings" || !isLeagueFeature(store.currentTab)
   );
 });
+
+const isActiveFeature = (feature: LeagueFeature) =>
+  store.currentTab === feature &&
+  isLeagueFeatureAvailable(feature, seasonType.value);
 
 onMounted(() => {
   const savedCurrentTab = localStorage.getItem("currentTab");
   if (savedCurrentTab) {
-    const currentTab =
-      savedCurrentTab === "Schedule Simulator"
-        ? "Season Forecast"
-        : savedCurrentTab;
+    const currentTab = normalizeLeagueFeature(savedCurrentTab);
     store.currentTab = currentTab;
     if (currentTab !== savedCurrentTab) {
       localStorage.setItem("currentTab", currentTab);
@@ -308,34 +298,31 @@ const mostHeadToHeadLosses = computed(() => {
 });
 
 const seasonType = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].seasonType
+  return store.currentLeague
+    ? store.currentLeague.seasonType
     : "";
 });
 
 const regularSeasonLength = computed(() => {
-  if (store.leagueInfo[store.currentLeagueIndex].status == "in_season") {
-    return store.leagueInfo[store.currentLeagueIndex].lastScoredWeek + 1;
+  if (store.currentLeague.status == "in_season") {
+    return store.currentLeague.lastScoredWeek + 1;
   }
-  return store.leagueInfo[store.currentLeagueIndex].regularSeasonLength + 1;
+  return store.currentLeague.regularSeasonLength + 1;
 });
 
 const totalRosters = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex].totalRosters;
+  return store.currentLeague.totalRosters;
 });
 
 const medianScoring = computed(() => {
-  if (store.leagueInfo[store.currentLeagueIndex]) {
-    return store.leagueInfo[store.currentLeagueIndex].medianScoring === 1;
+  if (store.currentLeague) {
+    return store.currentLeague.medianScoring === 1;
   }
   return false;
 });
 
 const getTeamName = (tableDataItem: TableDataType) => {
-  if (store.showUsernames) {
-    return tableDataItem.username ? tableDataItem.username : `Ghost Roster`;
-  }
-  return tableDataItem.name ? tableDataItem.name : `Ghost Roster`;
+  return getManagerDisplayName(tableDataItem, store.showUsernames);
 };
 </script>
 <template>
@@ -756,7 +743,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <Playoffs class="mb-4" :tableData="tableData" />
     </div>
     <div
-      v-if="store.currentTab === 'Weekly Report' && seasonType !== 'Guillotine'"
+      v-if="isActiveFeature('Weekly Report')"
     >
       <WeeklyReport
         v-if="store.currentLeagueId"
@@ -766,9 +753,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <WeeklyReport v-else :tableData="tableData" :regular-season-length="15" />
     </div>
     <div
-      v-if="
-        store.currentTab === 'Season Forecast' && seasonType !== 'Guillotine'
-      "
+      v-if="isActiveFeature('Season Forecast')"
     >
       <ScheduleSimulator class="my-4" :tableData="tableData" />
     </div>
@@ -785,9 +770,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <LeagueHistory :tableData="tableData" />
     </div>
     <div
-      v-if="
-        store.currentTab === 'Manager Profiles' && seasonType !== 'Guillotine'
-      "
+      v-if="isActiveFeature('Manager Profiles')"
     >
       <Narratives :tableData="tableData" />
     </div>
@@ -795,7 +778,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <Wrapped
         v-if="
           store.currentLeagueId &&
-          store.leagueInfo[store.currentLeagueIndex]?.season === '2025' &&
+          store.currentLeague?.season === '2025' &&
           seasonType !== 'Guillotine'
         "
         :tableData="originalData"
@@ -803,7 +786,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
       <div
         class="p-4"
         v-else-if="
-          store.leagueInfo[store.currentLeagueIndex]?.season === '2026'
+          store.currentLeague?.season === '2026'
         "
       >
         <p>Come back after the season is complete!</p>

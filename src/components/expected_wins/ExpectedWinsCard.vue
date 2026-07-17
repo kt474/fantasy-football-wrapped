@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import cloneDeep from "lodash/cloneDeep";
-import maxBy from "lodash/maxBy";
-import minBy from "lodash/minBy";
+import { maxBy, minBy } from "@/lib/collection";
 import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
 import { zScoreToPValue } from "../../api/helper";
 import ScrollableTableCard from "../layout/ScrollableTableCard.vue";
+import { getManagerDisplayName } from "@/lib/manager";
 import {
   Tooltip,
   TooltipContent,
@@ -19,7 +18,7 @@ const props = defineProps<{
   tableData: TableDataType[];
 }>();
 const tableData = computed(() => {
-  const tableDataCopy = cloneDeep(props.tableData);
+  const tableDataCopy = [...props.tableData];
   if (tableOrder.value === "randomScheduleWins") {
     return tableDataCopy.sort((a, b) => {
       return b.randomScheduleWins - a.randomScheduleWins;
@@ -36,6 +35,7 @@ const tableData = computed(() => {
       );
     });
   }
+  return tableDataCopy;
 });
 
 const getProbability = (actualWins: number, meanWins: number, std: number) => {
@@ -70,10 +70,7 @@ const listPadding = computed(() => {
 });
 
 const getTeamName = (tableDataItem: TableDataType) => {
-  if (store.showUsernames) {
-    return tableDataItem.username ? tableDataItem.username : `Ghost Roster`;
-  }
-  return tableDataItem.name ? tableDataItem.name : `Ghost Roster`;
+  return getManagerDisplayName(tableDataItem, store.showUsernames);
 };
 </script>
 <template>

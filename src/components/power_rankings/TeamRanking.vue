@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
-import groupBy from "lodash/groupBy";
+import { groupBy } from "@/lib/collection";
 import {
   TableDataType,
   LeagueInfoType,
@@ -35,7 +35,7 @@ const hasPlayerRankingData = (league: LeagueInfoType) =>
   hasUsablePlayerRankingData(league.playerRankings);
 
 const getData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   const rosterPlayers = props.tableData.flatMap((user) =>
     user.players.map((player) => ({
       rosterId: user.rosterId,
@@ -83,7 +83,7 @@ const getData = async () => {
 };
 
 const getTeamName = (playerId: string) => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague) {
     const roster = currentLeague.rosters.find((roster) =>
       roster.players?.includes(playerId)
@@ -104,19 +104,21 @@ const getTeamName = (playerId: string) => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    !hasPlayerRankingData(store.leagueInfo[store.currentLeagueIndex])
+    store.currentLeague &&
+    !hasPlayerRankingData(store.currentLeague)
   ) {
     loading.value = true;
     data.value = {};
     allData.value = {};
     await getData();
     loading.value = false;
-  } else if (store.leagueInfo[store.currentLeagueIndex]) {
-    data.value =
-      store.leagueInfo[store.currentLeagueIndex].playerRankings ?? {};
+  } else if (store.currentLeague) {
+    data.value = (store.currentLeague.playerRankings ?? {}) as unknown as Record<
+      string,
+      RankingPlayer[]
+    >;
     allData.value =
-      store.leagueInfo[store.currentLeagueIndex].rosterRankings ?? {};
+      store.currentLeague.rosterRankings ?? {};
   } else if (store.leagueInfo.length === 0) {
     data.value = fakePlayerRankings as unknown as Record<
       string,
@@ -129,17 +131,19 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
-    if (!hasPlayerRankingData(store.leagueInfo[store.currentLeagueIndex])) {
+    if (!hasPlayerRankingData(store.currentLeague)) {
       data.value = {};
       allData.value = {};
       loading.value = true;
       await getData();
       loading.value = false;
     }
-    data.value =
-      store.leagueInfo[store.currentLeagueIndex].playerRankings ?? {};
+    data.value = (store.currentLeague.playerRankings ?? {}) as unknown as Record<
+      string,
+      RankingPlayer[]
+    >;
     allData.value =
-      store.leagueInfo[store.currentLeagueIndex].rosterRankings ?? {};
+      store.currentLeague.rosterRankings ?? {};
   }
 );
 </script>

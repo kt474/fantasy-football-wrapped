@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import findIndex from "lodash/findIndex";
 import {
   LeagueInfoType,
   PlayoffProjection,
@@ -54,12 +53,15 @@ export const useStore = defineStore("main", {
       state.leagueInfo.map((league: LeagueInfoType) => league.weeklyPoints),
     leagueIds: (state) =>
       state.leagueInfo.map((league: LeagueInfoType) => getLeagueKey(league)),
-    currentLeagueIndex: (state) => {
-      return findIndex(
-        state.leagueInfo,
+    currentLeagueIndex: (state) =>
+      state.leagueInfo.findIndex(
         (league) => getLeagueKey(league) === state.currentLeagueId
-      );
-    },
+      ),
+    currentLeague: (state): LeagueInfoType =>
+      state.leagueInfo.find(
+        (league) => getLeagueKey(league) === state.currentLeagueId
+      ) as LeagueInfoType,
+    isDemoLeague: (state) => state.currentLeagueId === "",
   },
   actions: {
     findLeague(leagueId: string) {

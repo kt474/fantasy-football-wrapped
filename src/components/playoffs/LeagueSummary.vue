@@ -7,10 +7,9 @@ import { getLeagueKey, useStore } from "../../store/store";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
-import MarkdownIt from "markdown-it";
-import DOMPurify from "dompurify";
 import { Copy } from "lucide-vue-next";
 import { Button } from "../ui/button/index.ts";
+import { renderMarkdown } from "@/lib/markdown";
 
 const store = useStore();
 const props = defineProps<{
@@ -26,21 +25,15 @@ type PlayoffPromptRow = {
 };
 const playoffPromptData = ref<PlayoffPromptRow[]>([]);
 
-const md = new MarkdownIt({
-  html: false,
-  linkify: true,
-  breaks: true,
-});
-
 const renderedSummary = computed(() => {
-  return DOMPurify.sanitize(md.render(rawSummary.value));
+  return renderMarkdown(rawSummary.value);
 });
 
 const showSummary = computed(() => {
   if (store.leagueInfo.length > 0) {
     if (
-      store.leagueInfo[store.currentLeagueIndex] &&
-      store.leagueInfo[store.currentLeagueIndex].status === "complete"
+      store.currentLeague &&
+      store.currentLeague.status === "complete"
     ) {
       return true;
     }
@@ -52,13 +45,13 @@ const showSummary = computed(() => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    !store.leagueInfo[store.currentLeagueIndex]?.yearEndReport
+    !store.currentLeague?.yearEndReport
   ) {
     await fetchPlayerNames();
     await getSummary();
   } else if (store.leagueInfo.length > 0) {
     const savedText =
-      store.leagueInfo[store.currentLeagueIndex].yearEndReport ?? "";
+      store.currentLeague.yearEndReport ?? "";
     rawSummary.value = savedText;
   }
 });
@@ -66,19 +59,19 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
-    if (!store.leagueInfo[store.currentLeagueIndex].yearEndReport) {
+    if (!store.currentLeague.yearEndReport) {
       rawSummary.value = "";
       await fetchPlayerNames();
       await getSummary();
     }
     rawSummary.value =
-      store.leagueInfo[store.currentLeagueIndex].yearEndReport ?? "";
+      store.currentLeague.yearEndReport ?? "";
   }
 );
 
 const fetchPlayerNames = async () => {
   if (store.leagueIds.length > 0) {
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     if (currentLeague) {
       const allPlayerIds = currentLeague.weeklyPoints
         .map((user) => user.starters[user.starters.length - 1] ?? [])
@@ -112,7 +105,7 @@ const fetchPlayerNames = async () => {
 };
 
 const getSummary = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague && props.finalPlacements.length > 0) {
     const winner = props.finalPlacements.find((val) => val.placement === 1);
     const lastPlace = props.finalPlacements.find(

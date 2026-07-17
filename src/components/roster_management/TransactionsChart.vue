@@ -5,11 +5,12 @@ import { fakeUsers, fakeTransactions } from "../../api/fakeLeague";
 import type { WeeklyWaiver } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 import { mobileCategoricalChartResponsive } from "@/lib/chartResponsive";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 
 const store = useStore();
 
 const transactionData = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague) {
     type TradeAsWaiver = Pick<
       WeeklyWaiver,
@@ -116,7 +117,7 @@ watch(
   () => updateChartColor()
 );
 const getNameFromId = (rosterId: string) => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague) {
     const rosterObj = currentLeague.rosters.find(
       (roster) => roster.rosterId === Number(rosterId)
@@ -136,7 +137,7 @@ const updateChartColor = () => {
     chart: {
       type: "bar",
       stacked: true,
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       toolbar: {
         show: false,
       },
@@ -148,7 +149,7 @@ const updateChartColor = () => {
       },
     },
     tooltip: {
-      theme: store.darkMode ? "dark" : "light",
+      theme: getChartTooltipTheme(store.darkMode),
       y: {
         show: true,
         formatter: (x: number) => {
@@ -203,7 +204,7 @@ const updateChartColor = () => {
 const chartOptions = ref({
   responsive: mobileCategoricalChartResponsive(),
   chart: {
-    foreColor: "hsl(var(--foreground))",
+    foreColor: getChartTheme().foreground,
     type: "bar",
     stacked: true,
     toolbar: {
@@ -230,7 +231,7 @@ const chartOptions = ref({
     enabled: false,
   },
   tooltip: {
-    theme: store.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(store.darkMode),
     y: {
       show: true,
       formatter: (x: number) => {

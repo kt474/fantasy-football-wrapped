@@ -61,10 +61,12 @@ describe("design accessibility contracts", () => {
   });
 
   test("icon-only feature actions expose descriptive names", () => {
-    const tradeLab = read("src/components/trade_lab/TradeLab.vue");
+    const tradeAssetDialog = read(
+      "src/components/trade_lab/TradeAssetDialog.vue"
+    );
     const recap = read("src/components/playoffs/LeagueSummary.vue");
 
-    expect(tradeLab).toContain("Add assets for");
+    expect(tradeAssetDialog).toContain("Add assets for");
     expect(recap).toContain('aria-label="Copy league recap"');
   });
 

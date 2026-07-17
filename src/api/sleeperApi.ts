@@ -1,5 +1,4 @@
-import mean from "lodash/mean";
-import round from "lodash/round";
+import { mean, round } from "@/lib/collection";
 import { calculateDraftRank } from "./helper";
 import {
   seasonType,
@@ -20,68 +19,14 @@ import {
 } from "../types/apiTypes";
 import { RosterType, UserType, UserLeagueListItem } from "../types/types";
 import { fetchWithRetry, isRequestCancellation } from "@/lib/request";
-
-const assertOk = (response: Response, context: string) => {
-  if (!response.ok) {
-    throw new Error(`${context} failed with status ${response.status}`);
-  }
-};
-
-const parseJson = async <T>(
-  response: Response,
-  context: string
-): Promise<T> => {
-  try {
-    return (await response.json()) as T;
-  } catch {
-    throw new Error(`${context} returned invalid JSON`);
-  }
-};
+import { mapWithConcurrency } from "@/lib/async";
+import { assertOk, parseJson } from "@/lib/http";
 
 const fetchWithTimeout = async (
   input: RequestInfo | URL,
   timeoutMs: number
-): Promise<Response> => {
-  const controller = new AbortController();
-
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-      reject(new Error(`Request timed out after ${timeoutMs}ms`));
-    }, timeoutMs);
-
-    fetch(input, { signal: controller.signal })
-      .then(resolve, reject)
-      .finally(() => clearTimeout(timeoutId));
-  });
-};
-
-const mapWithConcurrency = async <T, R>(
-  items: T[],
-  concurrency: number,
-  mapper: (item: T, index: number) => Promise<R>
-): Promise<R[]> => {
-  const limit = Math.max(1, concurrency);
-  const results: R[] = new Array(items.length);
-  let nextIndex = 0;
-
-  const worker = async () => {
-    while (true) {
-      const currentIndex = nextIndex;
-      nextIndex += 1;
-      if (currentIndex >= items.length) {
-        return;
-      }
-      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
-    }
-  };
-
-  await Promise.all(
-    Array.from({ length: Math.min(limit, items.length) }, () => worker())
-  );
-
-  return results;
-};
+): Promise<Response> =>
+  fetchWithRetry(input, { retries: 0, attemptTimeoutMs: timeoutMs });
 
 type SleeperPlayerStatsResponse = {
   stats?: Record<string, number>;

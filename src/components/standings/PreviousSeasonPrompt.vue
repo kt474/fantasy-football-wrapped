@@ -33,7 +33,7 @@ const isDismissed = ref(false);
 const lastTrackedPrompt = ref("");
 
 const currentLeague = computed(
-  () => store.leagueInfo[store.currentLeagueIndex]
+  () => store.currentLeague
 );
 const previousSeason = computed(() =>
   getPreviousSeasonOption(currentLeague.value, store.leagueInfo)

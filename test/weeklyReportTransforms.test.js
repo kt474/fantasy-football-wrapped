@@ -226,6 +226,52 @@ describe("weekly report transforms", () => {
     ]);
   });
 
+  test("handles preseason rosters without record history", () => {
+    const preseasonTableData = tableData.slice(0, 2).map((entry) => ({
+      ...entry,
+      points: [0],
+      recordByWeek: undefined,
+    }));
+    const preseasonPlayers = playerNames.slice(0, 2);
+    const preseasonBenchPlayers = benchPlayerNames.slice(0, 2);
+
+    const standardReport = buildReportPrompt({
+      tableData: preseasonTableData,
+      playerNames: preseasonPlayers,
+      benchPlayerNames: preseasonBenchPlayers,
+      weekIndex: 0,
+      showUsernames: true,
+      isPlayoffs: false,
+    });
+    const premiumReport = buildPremiumReportPrompt({
+      tableData: preseasonTableData,
+      playerNames: preseasonPlayers,
+      benchPlayerNames: preseasonBenchPlayers,
+      weekIndex: 0,
+      showUsernames: true,
+      isPlayoffs: false,
+      losersBracketIds: [],
+      winnersBracketIds: [],
+    });
+
+    expect(standardReport[0].teams).toMatchObject([
+      { recordAfterWeek: "0-0" },
+      { recordAfterWeek: "0-0" },
+    ]);
+    expect(premiumReport[0].teams).toMatchObject([
+      {
+        recordBeforeWeek: "0-0",
+        recordAfterWeek: "0-0",
+        currentStreak: "N/A",
+      },
+      {
+        recordBeforeWeek: "0-0",
+        recordAfterWeek: "0-0",
+        currentStreak: "N/A",
+      },
+    ]);
+  });
+
   test("adds authoritative playoff context to standard report matchups", () => {
     const result = buildReportPrompt({
       tableData,

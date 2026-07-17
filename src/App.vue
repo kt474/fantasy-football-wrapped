@@ -31,7 +31,7 @@ const store = useStore();
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
 const currentLeague = computed(
-  () => store.leagueInfo[store.currentLeagueIndex]
+  () => store.currentLeague
 );
 const trackFeatureView = createFeatureViewTracker();
 
@@ -74,12 +74,12 @@ watch(
       localStorage.setItem("currentLeagueId", store.currentLeagueId);
       if (
         store.currentTab === "Wrapped" &&
-        store.leagueInfo[store.currentLeagueIndex]?.season !== "2025"
+        store.currentLeague?.season !== "2025"
       ) {
         store.currentTab = "Standings";
       }
       if (store.currentLeagueId !== "undefined") {
-        const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+        const currentLeague = store.currentLeague;
         if (currentLeague?.platform === "espn") {
           router.replace({
             query: {

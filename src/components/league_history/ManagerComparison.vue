@@ -17,9 +17,9 @@ import {
 } from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { useSubscriptionStore } from "@/store/subscription";
-import MarkdownIt from "markdown-it";
-import DOMPurify from "dompurify";
 import { trackPremiumFunnelEvent } from "@/lib/analytics";
+import { renderMarkdown } from "@/lib/markdown";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 
 const store = useStore();
 const subscriptionStore = useSubscriptionStore();
@@ -28,10 +28,6 @@ const manager2 = ref("");
 const isGeneratingReport = ref(false);
 const generatedReport = ref("");
 const generationError = ref("");
-const md = new MarkdownIt({
-  breaks: true,
-});
-
 type PointSeasonEntry = {
   season: string;
   points: number[];
@@ -261,7 +257,7 @@ const getManagerPayload = (
 
 const currentLeagueId = computed(
   () =>
-    store.leagueInfo[store.currentLeagueIndex]?.leagueId ??
+    store.currentLeague?.leagueId ??
     store.currentLeagueId
 );
 
@@ -289,9 +285,7 @@ const visibleReport = computed(() =>
     : lockedReportPreview.value
 );
 
-const renderedReport = computed(() =>
-  DOMPurify.sanitize(md.render(visibleReport.value))
-);
+const renderedReport = computed(() => renderMarkdown(visibleReport.value));
 
 const generateAiReport = async () => {
   if (!subscriptionStore.isPremium) {
@@ -378,7 +372,7 @@ const updateChartColor = () => {
     ...chartOptions.value,
     chart: {
       height: 350,
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       type: "line",
       zoom: {
         enabled: false,
@@ -392,7 +386,7 @@ const updateChartColor = () => {
     },
     colors: ["hsl(var(--chart-1))", "hsl(var(--chart-2))"],
     tooltip: {
-      theme: store.darkMode ? "dark" : "light",
+      theme: getChartTooltipTheme(store.darkMode),
     },
     dataLabels: {
       enabled: true,
@@ -447,7 +441,7 @@ const updateChartColor = () => {
 const chartOptions = ref({
   chart: {
     height: 350,
-    foreColor: "hsl(var(--foreground))",
+    foreColor: getChartTheme().foreground,
     type: "line",
     zoom: {
       enabled: false,
@@ -461,7 +455,7 @@ const chartOptions = ref({
   },
   colors: ["hsl(var(--chart-1))", "hsl(var(--chart-2))"],
   tooltip: {
-    theme: store.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(store.darkMode),
   },
   dataLabels: {
     enabled: true,

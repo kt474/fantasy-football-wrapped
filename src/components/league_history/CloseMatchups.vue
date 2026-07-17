@@ -6,6 +6,7 @@ import Card from "../ui/card/Card.vue";
 import CardContent from "../ui/card/CardContent.vue";
 import CardHeader from "../ui/card/CardHeader.vue";
 import CardTitle from "../ui/card/CardTitle.vue";
+import { getManagerDisplayName } from "@/lib/manager";
 
 const store = useStore();
 
@@ -49,9 +50,7 @@ const props = defineProps<{
 }>();
 
 const displayName = (team: MatchupHistoryRow) =>
-  store.showUsernames
-    ? team.username || "Ghost Roster"
-    : team.name || "Ghost Roster";
+  getManagerDisplayName(team, store.showUsernames);
 
 const formatPoints = (value: number) =>
   value.toLocaleString(undefined, {

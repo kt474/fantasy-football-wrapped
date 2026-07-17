@@ -10,7 +10,9 @@ import { fakeWeeklyPreview } from "../../api/fakeLeague.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatOrdinal } from "@/lib/format";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 
 const store = useStore();
 const props = defineProps<{
@@ -60,7 +62,7 @@ const previewWeek = computed(() => {
 });
 
 const currentLeague = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex];
+  return store.currentLeague;
 });
 
 const matchups = computed<TableDataType[][]>(() => {
@@ -117,8 +119,8 @@ const shouldShowMatchupForecast = computed(() => {
 const getRecord = (recordString: string, index: number) => {
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].medianScoring === 1
+    store.currentLeague &&
+    store.currentLeague.medianScoring === 1
   ) {
     index = index * 2;
   }
@@ -133,7 +135,7 @@ const getRecord = (recordString: string, index: number) => {
 const fetchPlayerNames = async () => {
   if (store.leagueIds.length > 0) {
     loading.value = true;
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     const allPlayerIds = props.tableData
       .map((user) => [user.starters[previewWeek.value]])
       .flat();
@@ -283,7 +285,7 @@ const updateChartColor = () => {
     ...chartOptions.value,
     chart: {
       height: 350,
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       type: "line",
       zoom: {
         enabled: false,
@@ -297,7 +299,7 @@ const updateChartColor = () => {
     },
     colors: ["hsl(var(--chart-1))", "hsl(var(--chart-2))"],
     tooltip: {
-      theme: store.darkMode ? "dark" : "light",
+      theme: getChartTooltipTheme(store.darkMode),
     },
     dataLabels: {
       enabled: true,
@@ -353,7 +355,7 @@ const updateChartColor = () => {
 const chartOptions = ref({
   chart: {
     height: 350,
-    foreColor: "hsl(var(--foreground))",
+    foreColor: getChartTheme().foreground,
     type: "line",
     zoom: {
       enabled: false,
@@ -367,7 +369,7 @@ const chartOptions = ref({
   },
   colors: ["hsl(var(--chart-1))", "hsl(var(--chart-2))"],
   tooltip: {
-    theme: store.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(store.darkMode),
   },
   dataLabels: {
     enabled: true,
@@ -523,17 +525,10 @@ const simulateStandings = (matchups: TableDataType[][], week: number) => {
   return results;
 };
 
-const getOrdinalSuffix = (number: number) => {
-  const suffixes = ["th", "st", "nd", "rd"];
-  const v = number % 100;
-
-  return number + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
-};
-
 const generateString = (recordObj?: ScenarioResult) => {
   if (!recordObj) return "Placement Range: N/A";
-  const bestCase = getOrdinalSuffix(recordObj.bestCase.rank);
-  const worstCase = getOrdinalSuffix(recordObj.worstCase.rank);
+  const bestCase = formatOrdinal(recordObj.bestCase.rank);
+  const worstCase = formatOrdinal(recordObj.worstCase.rank);
   return `Placement Range: ${bestCase} - ${worstCase}`;
 };
 

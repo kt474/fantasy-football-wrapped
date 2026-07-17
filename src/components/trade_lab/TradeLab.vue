@@ -8,16 +8,6 @@ import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { Label } from "../ui/label/index.ts";
-import Button from "../ui/button/Button.vue";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
 import {
   Select,
   SelectContent,
@@ -25,11 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Input } from "@/components/ui/input";
-import { X, Plus } from "lucide-vue-next";
+import { X } from "lucide-vue-next";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import TradeDatabase from "./TradeDatabase.vue";
+import TradeAssetDialog from "./TradeAssetDialog.vue";
 
 type TradeLabPlayer = Player & {
   projection: number;
@@ -75,7 +65,7 @@ const draggedPlayer = ref<{ playerId: string; fromTeam: "A" | "B" } | null>(
 const isMobile = ref(false);
 const activeMode = ref("builder");
 
-const activeLeague = computed(() => store.leagueInfo[store.currentLeagueIndex]);
+const activeLeague = computed(() => store.currentLeague);
 
 const fallbackWeek = computed(() => {
   if (!activeLeague.value) return 1;
@@ -872,92 +862,20 @@ onBeforeUnmount(() => {
                 <p class="text-sm font-semibold">
                   {{ teamA?.managerName }}
                 </p>
-                <Dialog>
-                  <DialogTrigger as-child>
-                    <Button
-                      variant="secondary"
-                      size="xs"
-                      :aria-label="`Add assets for ${teamA?.managerName || 'first team'}`"
-                      class="-mt-1"
-                      @click="openAssetsModal('A')"
-                    >
-                      <Plus class="size-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle> Add Assets </DialogTitle>
-                      <DialogDescription>
-                        Add FAAB or draft picks.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div class="flex flex-wrap sm:flex-nowrap">
-                      <div class="mr-4">
-                        <Label for="faab" class="text-xs">FAAB</Label>
-                        <div class="flex gap-2 mt-0.5">
-                          <Input
-                            class="w-20"
-                            id="faab"
-                            type="number"
-                            min="0"
-                            v-model="teamAFaabInputModel"
-                          />
-                          <DialogClose as-child>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              @click="addFaabToPackage('A')"
-                            >
-                              Add
-                            </Button>
-                          </DialogClose>
-                        </div>
-                      </div>
-                      <div class="">
-                        <Label class="text-xs">Draft Pick</Label>
-                        <div class="flex gap-2 mt-0.5">
-                          <Select v-model="pendingAPickSeasonModel">
-                            <SelectTrigger class="w-24 text-xs">
-                              <SelectValue placeholder="Season" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem
-                                v-for="season in draftSeasons"
-                                :key="`modal-a-season-${season}`"
-                                :value="String(season)"
-                              >
-                                {{ season }}
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Select v-model="pendingAPickRoundModel">
-                            <SelectTrigger class="w-24 text-xs">
-                              <SelectValue placeholder="Round" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem
-                                v-for="round in draftRounds"
-                                :key="`modal-a-round-${round}`"
-                                :value="String(round)"
-                              >
-                                Round {{ round }}
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <DialogClose as-child>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              @click="addDraftPickToPackage('A')"
-                            >
-                              Add
-                            </Button>
-                          </DialogClose>
-                        </div>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <TradeAssetDialog
+                  v-model:faab="teamAFaabInputModel"
+                  v-model:pick-season="pendingAPickSeasonModel"
+                  v-model:pick-round="pendingAPickRoundModel"
+                  :manager-name="teamA?.managerName"
+                  fallback-team-label="first team"
+                  input-id="trade-faab-a"
+                  :draft-seasons="draftSeasons"
+                  :draft-rounds="draftRounds"
+                  trigger-class="-mt-1"
+                  @open="openAssetsModal('A')"
+                  @add-faab="addFaabToPackage('A')"
+                  @add-draft-pick="addDraftPickToPackage('A')"
+                />
               </div>
               <div class="space-y-1">
                 <div class="pt-2 mt-2 border-t border-border">
@@ -1057,92 +975,20 @@ onBeforeUnmount(() => {
                 <p class="mb-2 text-sm font-semibold">
                   {{ teamB?.managerName }}
                 </p>
-                <Dialog>
-                  <DialogTrigger as-child>
-                    <Button
-                      variant="secondary"
-                      size="xs"
-                      :aria-label="`Add assets for ${teamB?.managerName || 'second team'}`"
-                      class="-mt-0.5"
-                      @click="openAssetsModal('B')"
-                    >
-                      <Plus class="size-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle> Add Assets </DialogTitle>
-                      <DialogDescription>
-                        Add FAAB or draft picks.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div class="flex flex-wrap sm:flex-nowrap">
-                      <div class="mr-4">
-                        <Label for="faab-b" class="text-xs">FAAB</Label>
-                        <div class="flex gap-2 mt-0.5">
-                          <Input
-                            class="w-20"
-                            id="faab-b"
-                            type="number"
-                            min="0"
-                            v-model="teamBFaabInputModel"
-                          />
-                          <DialogClose as-child>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              @click="addFaabToPackage('B')"
-                            >
-                              Add
-                            </Button>
-                          </DialogClose>
-                        </div>
-                      </div>
-                      <div class="">
-                        <Label class="text-xs">Draft Pick</Label>
-                        <div class="flex gap-2 mt-0.5">
-                          <Select v-model="pendingBPickSeasonModel">
-                            <SelectTrigger class="w-24 text-xs">
-                              <SelectValue placeholder="Season" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem
-                                v-for="season in draftSeasons"
-                                :key="`modal-b-season-${season}`"
-                                :value="String(season)"
-                              >
-                                {{ season }}
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Select v-model="pendingBPickRoundModel">
-                            <SelectTrigger class="w-24 text-xs">
-                              <SelectValue placeholder="Round" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem
-                                v-for="round in draftRounds"
-                                :key="`modal-b-round-${round}`"
-                                :value="String(round)"
-                              >
-                                Round {{ round }}
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <DialogClose as-child>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              @click="addDraftPickToPackage('B')"
-                            >
-                              Add
-                            </Button>
-                          </DialogClose>
-                        </div>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <TradeAssetDialog
+                  v-model:faab="teamBFaabInputModel"
+                  v-model:pick-season="pendingBPickSeasonModel"
+                  v-model:pick-round="pendingBPickRoundModel"
+                  :manager-name="teamB?.managerName"
+                  fallback-team-label="second team"
+                  input-id="trade-faab-b"
+                  :draft-seasons="draftSeasons"
+                  :draft-rounds="draftRounds"
+                  trigger-class="-mt-0.5"
+                  @open="openAssetsModal('B')"
+                  @add-faab="addFaabToPackage('B')"
+                  @add-draft-pick="addDraftPickToPackage('B')"
+                />
               </div>
               <div class="pt-2 mt-2 border-t border-border">
                 <div class="flex flex-wrap items-center gap-1.5 mb-2">

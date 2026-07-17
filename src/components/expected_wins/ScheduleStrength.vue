@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import cloneDeep from "lodash/cloneDeep";
 import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
 import { Card } from "../ui/card";
 import { mobileCategoricalChartResponsive } from "@/lib/chartResponsive";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 const store = useStore();
 
 const props = defineProps<{
@@ -12,7 +12,7 @@ const props = defineProps<{
 }>();
 
 const tableDataCopy = computed(() => {
-  const result = cloneDeep(props.tableData);
+  const result = [...props.tableData];
   return result.sort((a, b) => b.pointsAgainst - a.pointsAgainst);
 });
 
@@ -48,7 +48,7 @@ const updateChartColor = () => {
     ...chartOptions.value,
     chart: {
       type: "bar",
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       toolbar: {
         show: false,
       },
@@ -60,7 +60,7 @@ const updateChartColor = () => {
       },
     },
     tooltip: {
-      theme: store.darkMode ? "dark" : "light",
+      theme: getChartTooltipTheme(store.darkMode),
       y: {
         show: true,
         formatter: (x: number) => {
@@ -126,7 +126,7 @@ watch(
 const chartOptions = ref({
   responsive: mobileCategoricalChartResponsive(),
   chart: {
-    foreColor: "hsl(var(--foreground))",
+    foreColor: getChartTheme().foreground,
     type: "bar",
     toolbar: {
       show: false,
@@ -148,7 +148,7 @@ const chartOptions = ref({
     enabled: false,
   },
   tooltip: {
-    theme: store.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(store.darkMode),
     y: {
       show: true,
       formatter: (x: number) => {

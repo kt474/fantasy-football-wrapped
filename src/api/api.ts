@@ -29,23 +29,16 @@ import {
   getUsers,
   getWinnersBracket,
 } from "./sleeperApi";
+import { assertOk, parseJson } from "@/lib/http";
+import {
+  getPlayerLookupKey,
+  type PlayerNameTeamLookup,
+} from "@/lib/playerLookup";
 
-const assertOk = (response: Response, context: string) => {
-  if (!response.ok) {
-    throw new Error(`${context} failed with status ${response.status}`);
-  }
-};
-
-const parseJson = async <T>(
-  response: Response,
-  context: string
-): Promise<T> => {
-  try {
-    return (await response.json()) as T;
-  } catch {
-    throw new Error(`${context} returned invalid JSON`);
-  }
-};
+export {
+  getPlayerLookupKey,
+  type PlayerNameTeamLookup,
+} from "@/lib/playerLookup";
 
 export interface ManagerBlurbsPayload {
   league: {
@@ -316,11 +309,6 @@ export const getPlayersByIdsMap = async (
   }
 };
 
-export interface PlayerNameTeamLookup {
-  name: string;
-  team: string;
-}
-
 interface PlayerIdLookupResponse {
   name: string;
   team?: string;
@@ -330,9 +318,6 @@ interface PlayerIdLookupResponse {
 interface PlayerIdLookupListResponse {
   players: PlayerIdLookupResponse[];
 }
-
-const getPlayerLookupKey = ({ name, team }: PlayerNameTeamLookup): string =>
-  `${name.trim().toLowerCase()}::${team.trim().toUpperCase()}`;
 
 export const resolvePlayerIdLookupEndpoint = (
   lookupEndpoint?: string,
@@ -572,32 +557,6 @@ export const generatePremiumReport = async (
     return {
       text: "Unable to generate premium report right now. Please try again later.",
     };
-  }
-};
-
-export const generateWeeklyReportAudio = async (
-  text: string
-): Promise<Blob> => {
-  try {
-    const response = await authenticatedFetch(
-      import.meta.env.VITE_WEEKLY_REPORT_AUDIO,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text,
-        }),
-      }
-    );
-    assertOk(response, "Weekly report audio request");
-    return await response.blob();
-  } catch (error) {
-    console.error("Error:", error);
-    throw new Error(
-      "Unable to generate audio recap right now. Please try again later."
-    );
   }
 };
 

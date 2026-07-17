@@ -3,16 +3,15 @@ import { computed, ref, onMounted } from "vue";
 import { getLeagueKey, useStore } from "../../store/store";
 import { generatePreview } from "../../api/api";
 import { TableDataType, LeagueInfoType } from "../../types/types";
-import MarkdownIt from "markdown-it";
-import DOMPurify from "dompurify";
 import Button from "../ui/button/Button.vue";
+import { renderMarkdown } from "@/lib/markdown";
 
 const preview = ref<string>("");
 const loading = ref<boolean>(false);
 
 onMounted(() => {
   preview.value =
-    store.leagueInfo[store.currentLeagueIndex]?.weeklyPreview ?? "";
+    store.currentLeague?.weeklyPreview ?? "";
 });
 
 const getPreview = async () => {
@@ -20,20 +19,14 @@ const getPreview = async () => {
     loading.value = true;
     const response = await generatePreview(promptData.value);
     preview.value = response.text;
-    const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+    const currentLeague = store.currentLeague;
     store.addWeeklyPreview(getLeagueKey(currentLeague), preview.value);
     loading.value = false;
   }
 };
 
-const md = new MarkdownIt({
-  html: false,
-  linkify: true,
-  breaks: true,
-});
-
 const renderedPreview = computed(() => {
-  return DOMPurify.sanitize(md.render(preview.value));
+  return renderMarkdown(preview.value);
 });
 
 interface PlayerType {
@@ -100,7 +93,7 @@ const promptData = computed(() => {
     return [team1, team2];
   });
 
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   const currentWeek = getPreviewWeek(currentLeague);
 
   const playoffMatchup = currentWeek > currentLeague?.regularSeasonLength;

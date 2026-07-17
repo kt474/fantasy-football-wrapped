@@ -8,7 +8,7 @@ import {
   Share,
   EllipsisVertical,
 } from "lucide-vue-next";
-import capitalize from "lodash/capitalize";
+import { capitalize } from "@/lib/collection";
 
 import { Button } from "@/components/ui/button";
 import Separator from "../ui/separator/Separator.vue";
@@ -66,7 +66,7 @@ defineProps<{
 }>();
 
 const currentLeague = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex];
+  return store.currentLeague;
 });
 
 const currentLeagueId = computed(() => {

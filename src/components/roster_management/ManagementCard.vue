@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import cloneDeep from "lodash/cloneDeep";
-import maxBy from "lodash/maxBy";
-import minBy from "lodash/minBy";
+import { maxBy, minBy } from "@/lib/collection";
 import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
@@ -19,7 +17,7 @@ const props = defineProps<{
 }>();
 
 const tableData = computed(() => {
-  const tableDataCopy = cloneDeep(props.tableData);
+  const tableDataCopy = [...props.tableData];
   if (tableOrder.value === "points") {
     return tableDataCopy.sort((a, b) => {
       return b.pointsFor - a.pointsFor;
@@ -33,6 +31,7 @@ const tableData = computed(() => {
       return b.managerEfficiency - a.managerEfficiency;
     });
   }
+  return tableDataCopy;
 });
 
 const mostPoints = computed(() => {

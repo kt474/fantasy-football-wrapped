@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, type Component } from "vue";
 import type { SidebarProps } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
@@ -41,6 +41,10 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { clearPendingCheckout } from "@/lib/pendingCheckout";
+import {
+  sidebarLeagueFeatures,
+  type LeagueFeature,
+} from "@/lib/features";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -83,7 +87,7 @@ const goBackToHome = () => {
   router.push({ path: "/", query: defaultRouteQuery.value });
 };
 
-const changeTab = (tab: string) => {
+const changeTab = (tab: LeagueFeature) => {
   clearPendingCheckout();
   if (route.path !== "/") {
     goBackToHome();
@@ -95,67 +99,31 @@ const changeTab = (tab: string) => {
   closeMobileSidebar();
 };
 
+const featureIcons: Record<LeagueFeature, Component> = {
+  Home,
+  Standings: ChartColumn,
+  "Power Rankings": ChartNoAxesCombined,
+  "Expected Wins": TicketPercent,
+  "Roster Management": Move3D,
+  "Weekly Report": NotebookPen,
+  Playoffs: Trophy,
+  "Start/Sit": Newspaper,
+  "Season Forecast": Dices,
+  "Trade Lab": FlaskConical,
+  Draft: Users,
+  "League History": FolderClock,
+  "Manager Profiles": IdCard,
+  Wrapped: Gift,
+  ESPN: ChartColumn,
+};
+
 const data = {
   navMain: [
     {
-      items: [
-        {
-          title: "Home",
-          icon: Home,
-        },
-        {
-          title: "Standings",
-          icon: ChartColumn,
-        },
-        {
-          title: "Power Rankings",
-          icon: ChartNoAxesCombined,
-        },
-        {
-          title: "Expected Wins",
-          icon: TicketPercent,
-        },
-        {
-          title: "Roster Management",
-          icon: Move3D,
-        },
-        {
-          title: "Weekly Report",
-          icon: NotebookPen,
-        },
-        {
-          title: "Playoffs",
-          icon: Trophy,
-        },
-        {
-          title: "Start/Sit",
-          icon: Newspaper,
-        },
-        {
-          title: "Season Forecast",
-          icon: Dices,
-        },
-        {
-          title: "Trade Lab",
-          icon: FlaskConical,
-        },
-        {
-          title: "Draft",
-          icon: Users,
-        },
-        {
-          title: "League History",
-          icon: FolderClock,
-        },
-        {
-          title: "Manager Profiles",
-          icon: IdCard,
-        },
-        {
-          title: "Wrapped",
-          icon: Gift,
-        },
-      ],
+      items: sidebarLeagueFeatures.map(({ id: title }) => ({
+        title,
+        icon: featureIcons[title],
+      })),
     },
   ],
 };

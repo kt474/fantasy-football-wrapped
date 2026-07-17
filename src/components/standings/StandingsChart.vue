@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType } from "../../types/types";
 import { Card } from "../ui/card";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 const store = useStore();
 
 const props = defineProps<{
@@ -57,14 +58,14 @@ const chartOptions = ref({});
 const buildChartOptions = () => ({
   chart: {
     type: "bar",
-    foreColor: "hsl(var(--foreground))",
+    foreColor: getChartTheme().foreground,
     toolbar: { show: false },
     zoom: { enabled: false },
     animations: { enabled: false },
   },
   colors: ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))"],
   tooltip: {
-    theme: store.darkMode ? "dark" : "light",
+    theme: getChartTooltipTheme(store.darkMode),
     x: {
       formatter: (
         _label: string,

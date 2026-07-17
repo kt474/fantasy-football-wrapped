@@ -54,7 +54,7 @@ const sortedData = computed(() => {
 });
 
 const getDraftOrder = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   const metadata = (await getDraftMetadata(currentLeague.draftId)) as {
     slot_to_roster_id?: Record<string, number | null>;
     settings?: { reversal_round?: number };
@@ -87,8 +87,8 @@ const getDraftOrder = async () => {
 };
 
 const draftSize = computed(() => {
-  if (store.leagueInfo && store.leagueInfo[store.currentLeagueIndex]) {
-    return store.leagueInfo[store.currentLeagueIndex].rosters.length;
+  if (store.leagueInfo && store.currentLeague) {
+    return store.currentLeague.rosters.length;
   }
   return 10;
 });
@@ -102,8 +102,8 @@ const teamRanks = computed(() => {
 
 const snakeDraftFormat = computed(() => {
   if (
-    store.leagueInfo[store.currentLeagueIndex] &&
-    ((store.leagueInfo[store.currentLeagueIndex].seasonType === "Dynasty" &&
+    store.currentLeague &&
+    ((store.currentLeague.seasonType === "Dynasty" &&
       draftType.value === "linear") ||
       draftType.value === "auction")
   ) {
@@ -145,16 +145,16 @@ const setLeagueDraftState = (league: LeagueInfoType) => {
 onMounted(async () => {
   if (
     store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    !store.leagueInfo[store.currentLeagueIndex].draftPicks &&
-    store.leagueInfo[store.currentLeagueIndex].platform !== "espn"
+    store.currentLeague &&
+    !store.currentLeague.draftPicks &&
+    store.currentLeague.platform !== "espn"
   ) {
     loading.value = true;
     await getDraftOrder();
     await getData();
     loading.value = false;
-  } else if (store.leagueInfo[store.currentLeagueIndex]) {
-    setLeagueDraftState(store.leagueInfo[store.currentLeagueIndex]);
+  } else if (store.currentLeague) {
+    setLeagueDraftState(store.currentLeague);
   } else if (store.leagueInfo.length == 0) {
     data.value = fakeDraftData;
     draftOrder.value = data.value.slice(0, draftSize.value).map((pick) => {
@@ -167,9 +167,9 @@ watch(
   () => store.currentLeagueId,
   async () => {
     if (
-      store.leagueInfo[store.currentLeagueIndex] &&
-      !store.leagueInfo[store.currentLeagueIndex].draftPicks &&
-      store.leagueInfo[store.currentLeagueIndex].platform !== "espn"
+      store.currentLeague &&
+      !store.currentLeague.draftPicks &&
+      store.currentLeague.platform !== "espn"
     ) {
       data.value = [];
       draftOrder.value = [];
@@ -178,14 +178,14 @@ watch(
       await getData();
       loading.value = false;
     }
-    if (store.leagueInfo[store.currentLeagueIndex]) {
-      setLeagueDraftState(store.leagueInfo[store.currentLeagueIndex]);
+    if (store.currentLeague) {
+      setLeagueDraftState(store.currentLeague);
     }
   }
 );
 
 const getData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   const draftPicks = await getDraftPicks(
     currentLeague.draftId,
     currentLeague.season,
@@ -233,8 +233,8 @@ const getData = async () => {
 };
 
 const getTeamName = (userId: string) => {
-  if (store.leagueInfo[store.currentLeagueIndex]) {
-    const userObject = store.leagueInfo[store.currentLeagueIndex].users.find(
+  if (store.currentLeague) {
+    const userObject = store.currentLeague.users.find(
       (user) => user.id === userId
     );
     if (userObject) {
@@ -488,7 +488,7 @@ const getValueColor = (value: number) => {
           </div>
           <p
             v-if="
-              store.leagueInfo[store.currentLeagueIndex]?.seasonType ===
+              store.currentLeague?.seasonType ===
               'Keeper'
             "
             class="mt-4 text-xs text-muted-foreground footer-font"

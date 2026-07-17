@@ -198,7 +198,7 @@ const compareRecords = (a: SimulationTeam, b: SimulationTeam) => {
   return recordDifference || b.pointsFor - a.pointsFor;
 };
 
-const percentile = (sorted: number[], p: number) => {
+export const percentile = (sorted: number[], p: number) => {
   if (sorted.length === 0) return 0;
   const index = Math.min(
     sorted.length - 1,

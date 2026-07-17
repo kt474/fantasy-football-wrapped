@@ -54,7 +54,7 @@ const groupedPlayerData = computed(() => {
 });
 
 const managers = computed(() => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (currentLeague) {
     const currentRosterIds = currentLeague.rosters.map((roster) => roster.id);
     const result = currentLeague.users

@@ -276,7 +276,7 @@ describe("weekly report components", () => {
     );
     expect(html).toContain("&quot;theme&quot;:&quot;light&quot;");
     expect(html).toContain(
-      "&quot;foreColor&quot;:&quot;hsl(var(--foreground))&quot;"
+      "&quot;foreColor&quot;:&quot;#111827&quot;"
     );
   });
 
@@ -326,7 +326,7 @@ describe("weekly report components", () => {
     );
     expect(html).toContain("&quot;theme&quot;:&quot;dark&quot;");
     expect(html).toContain(
-      "&quot;foreColor&quot;:&quot;hsl(var(--foreground))&quot;"
+      "&quot;foreColor&quot;:&quot;#111827&quot;"
     );
     expect(html).toContain(
       "&quot;series&quot;:[{&quot;name&quot;:&quot;Points&quot;,&quot;data&quot;:[90,88]}]"

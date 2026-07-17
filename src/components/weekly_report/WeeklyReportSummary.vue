@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import MarkdownIt from "markdown-it";
-import DOMPurify from "dompurify";
 import { Copy, Download, LoaderCircle, Share2 } from "lucide-vue-next";
+import { renderMarkdown } from "@/lib/markdown";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { useStore } from "@/store/store";
@@ -63,14 +62,8 @@ const premiumAccountRoute = computed(() => ({
   },
 }));
 
-const md = new MarkdownIt({
-  html: false,
-  linkify: true,
-  breaks: true,
-});
-
 const renderedWeeklyReport = computed(() =>
-  DOMPurify.sanitize(md.render(props.rawWeeklyReport))
+  renderMarkdown(props.rawWeeklyReport)
 );
 
 const canGeneratePremium = computed(

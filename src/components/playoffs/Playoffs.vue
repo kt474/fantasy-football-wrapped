@@ -2,7 +2,6 @@
 import FinalPlacements from "./FinalPlacements.vue";
 import PlacementFlowChart from "./PlacementFlowChart.vue";
 import LeagueSummary from "./LeagueSummary.vue";
-import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import { computed } from "vue";
 import { useStore } from "../../store/store";
 import {
@@ -15,25 +14,21 @@ import {
 import { PointsType, TableDataType, UserType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
+import ManagerAvatar from "@/components/shared/ManagerAvatar.vue";
+import { getManagerDisplayName } from "@/lib/manager";
+import {
+  getEspnLoserId,
+  getEspnWinnerId,
+  getFinalPlacements,
+  type EspnPlayoffMatchup,
+  type EspnTeamSide,
+} from "@/lib/seasonFinish";
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
 const store = useStore();
 
-type EspnTeamSide = {
-  teamId?: number;
-  totalPoints?: number;
-  pointsByScoringPeriod?: Record<string, number>;
-};
-
-type EspnMatchup = {
-  id: number;
-  matchupPeriodId: number;
-  playoffTierType: string;
-  winner?: "HOME" | "AWAY" | "UNDECIDED";
-  home?: EspnTeamSide;
-  away?: EspnTeamSide;
-};
+type EspnMatchup = EspnPlayoffMatchup;
 
 type EspnRoundSection = {
   title: string;
@@ -48,12 +43,12 @@ type EspnRoundDisplay = {
 };
 
 const espnWinnersBracket = computed(() => {
-  return (store.leagueInfo[store.currentLeagueIndex]?.espnWinnersBracket ??
+  return (store.currentLeague?.espnWinnersBracket ??
     []) as EspnMatchup[];
 });
 
 const espnLosersBracket = computed(() => {
-  return (store.leagueInfo[store.currentLeagueIndex]?.espnLosersBracket ??
+  return (store.currentLeague?.espnLosersBracket ??
     []) as EspnMatchup[];
 });
 
@@ -105,16 +100,6 @@ const getEspnMatchupTeamIds = (matchup: EspnMatchup) => {
   return [matchup.home?.teamId, matchup.away?.teamId].filter(
     (teamId): teamId is number => teamId != null
   );
-};
-
-const getEspnLoserId = (matchup: EspnMatchup) => {
-  if (matchup.winner === "HOME") {
-    return matchup.away?.teamId;
-  }
-  if (matchup.winner === "AWAY") {
-    return matchup.home?.teamId;
-  }
-  return undefined;
 };
 
 const getEspnSectionTitle = (
@@ -385,45 +370,39 @@ const espnLoserConsolationBracket = computed(() => {
 });
 
 const winnersBracket = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].winnersBracket
-      ? store.leagueInfo[store.currentLeagueIndex].winnersBracket
+  return store.currentLeague
+    ? store.currentLeague.winnersBracket
+      ? store.currentLeague.winnersBracket
       : []
     : fakeWinnersBracket;
 });
 
 const losersBracket = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].losersBracket
-      ? store.leagueInfo[store.currentLeagueIndex].losersBracket
+  return store.currentLeague
+    ? store.currentLeague.losersBracket
+      ? store.currentLeague.losersBracket
       : []
     : fakeLosersBracket;
 });
 
 const totalRosters = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].totalRosters
+  return store.currentLeague
+    ? store.currentLeague.totalRosters
     : 10;
-});
-
-const playoffTeams = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].playoffTeams
-    : 6;
 });
 
 // The logic is different if leagues don't play with the toilet bowl
 // 1 = standard losers bracket, 0 = toilet bowl
 const playoffType = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].playoffType
+  return store.currentLeague
+    ? store.currentLeague.playoffType
     : 0;
 });
 
 // check losers bracket type - true means 3 rounds, false means 2 rounds
 // sleeper api bracket data is confusing
 const bracketType = computed(() => {
-  if (store.leagueInfo[store.currentLeagueIndex]) {
+  if (store.currentLeague) {
     return losersBracket.value.some((obj) => obj["p"] === 5);
   }
   return true;
@@ -453,11 +432,11 @@ const getPointsColor = (team1: number, team2: number) => {
 };
 
 const matchRosterId = (rosterId: number, placement?: number) => {
-  const rosters = store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].rosters
+  const rosters = store.currentLeague
+    ? store.currentLeague.rosters
     : fakeRosters;
-  const users = store.leagueInfo[store.currentLeagueIndex]
-    ? store.leagueInfo[store.currentLeagueIndex].users
+  const users = store.currentLeague
+    ? store.currentLeague.users
     : fakeUsers;
   const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
@@ -481,8 +460,11 @@ const matchRosterId = (rosterId: number, placement?: number) => {
   } as UserType;
 };
 
+const getRosterDisplayName = (rosterId: number) =>
+  getManagerDisplayName(matchRosterId(rosterId), store.showUsernames);
+
 const getPointsScored = (rosterId: number, week: number) => {
-  if (!store.leagueInfo[store.currentLeagueIndex]) {
+  if (!store.currentLeague) {
     const pointsArray = fakePoints.find(
       (roster) => roster.rosterId === rosterId
     );
@@ -493,7 +475,7 @@ const getPointsScored = (rosterId: number, week: number) => {
   ].weeklyPoints.find((roster: PointsType) => roster.rosterId === rosterId);
   if (!pointsArray) return;
   return pointsArray.points[
-    week - 1 + store.leagueInfo[store.currentLeagueIndex].regularSeasonLength
+    week - 1 + store.currentLeague.regularSeasonLength
   ];
 };
 
@@ -519,176 +501,33 @@ const getEspnTeamPoints = (
   );
 };
 
-const getEspnWinnerId = (matchup: EspnMatchup) => {
-  if (matchup.winner === "HOME") {
-    return matchup.home?.teamId;
-  }
-  if (matchup.winner === "AWAY") {
-    return matchup.away?.teamId;
-  }
-  return undefined;
-};
-
-const getEspnFinalMatchups = (matchups: EspnMatchup[]) => {
-  const completedMatchups = matchups.filter((matchup) =>
-    Boolean(getEspnWinnerId(matchup) && getEspnLoserId(matchup))
-  );
-  const finalPeriod = completedMatchups.reduce(
-    (max, matchup) => Math.max(max, matchup.matchupPeriodId),
-    0
-  );
-
-  return completedMatchups
-    .filter((matchup) => matchup.matchupPeriodId === finalPeriod)
-    .sort((a, b) => a.id - b.id);
-};
-
-const getNextOpenPlacement = (usedPlacements: Set<number>) => {
-  for (let placement = 1; placement <= totalRosters.value; placement += 1) {
-    if (!usedPlacements.has(placement)) {
-      return placement;
-    }
-  }
-
-  return totalRosters.value;
-};
-
-const getEspnFinalPlacements = () => {
-  const result: UserType[] = [];
-  const placedRosterIds = new Set<number>();
-  const usedPlacements = new Set<number>();
-
-  const addPlacement = (rosterId: number | undefined, placement: number) => {
-    if (rosterId == null || placedRosterIds.has(rosterId)) {
-      return;
-    }
-
-    result.push(matchRosterId(rosterId, placement));
-    placedRosterIds.add(rosterId);
-    usedPlacements.add(placement);
-  };
-
-  const addMatchupPlacement = (
-    matchup: EspnMatchup,
-    winnerPlacement: number
-  ) => {
-    addPlacement(getEspnWinnerId(matchup), winnerPlacement);
-    addPlacement(getEspnLoserId(matchup), winnerPlacement + 1);
-  };
-
-  getEspnFinalMatchups(espnMainBracket.value).forEach((matchup) => {
-    addMatchupPlacement(matchup, 1);
-  });
-
-  getEspnFinalMatchups(espnConsolationBracket.value).forEach(
-    (matchup, index) => {
-      addMatchupPlacement(matchup, 3 + index * 2);
-    }
-  );
-
-  getEspnFinalMatchups([
-    ...espnLoserMainBracket.value,
-    ...espnLoserConsolationBracket.value,
-  ]).forEach((matchup, index) => {
-    addMatchupPlacement(matchup, playoffTeams.value + 1 + index * 2);
-  });
-
-  props.tableData.forEach((user) => {
-    if (!placedRosterIds.has(user.rosterId)) {
-      addPlacement(user.rosterId, getNextOpenPlacement(usedPlacements));
-    }
-  });
-
-  return result.sort((a, b) => (a.placement ?? 0) - (b.placement ?? 0));
-};
-
 const getEspnLoserHighlightClass = (matchup: EspnMatchup, teamId?: number) => {
   if (teamId == null) return "";
   const comparisonTeamId = getEspnWinnerId(matchup);
   return comparisonTeamId === teamId ? "text-primary" : "";
 };
 
-const finalPlacements = computed(() => {
-  if (
-    store.leagueInfo.length > 0 &&
-    store.leagueInfo[store.currentLeagueIndex] &&
-    store.leagueInfo[store.currentLeagueIndex].status != "complete"
-  ) {
-    return [];
-  }
-  if (
-    store.leagueInfo[store.currentLeagueIndex]?.platform === "espn" &&
-    [...espnWinnersBracket.value, ...espnLosersBracket.value].length > 0
-  ) {
-    return getEspnFinalPlacements();
-  }
-  let result: UserType[] = [];
-  winnersBracket.value.forEach((matchup) => {
-    if (matchup.p === 1) {
-      result.push(matchRosterId(matchup.w, 1));
-      result.push(matchRosterId(matchup.l, 2));
-    } else if (matchup.p === 3) {
-      result.push(matchRosterId(matchup.w, 3));
-      result.push(matchRosterId(matchup.l, 4));
-    } else if (matchup.p === 5) {
-      result.push(matchRosterId(matchup.w, 5));
-      result.push(matchRosterId(matchup.l, 6));
-    }
-  });
+const placementLeague = computed(() =>
+  store.currentLeague
+    ? store.currentLeague
+    : ({
+        status: "complete",
+        platform: "sleeper",
+        rosters: fakeRosters,
+        users: fakeUsers,
+        totalRosters: 10,
+        playoffTeams: 6,
+        playoffType: 0,
+        winnersBracket: fakeWinnersBracket,
+        losersBracket: fakeLosersBracket,
+        espnWinnersBracket: [],
+        espnLosersBracket: [],
+      } as unknown as import("@/types/types").LeagueInfoType)
+);
 
-  // the logic is backwards if losers bracket is consolation bracket vs toilet bowl
-  if (playoffType.value === 1) {
-    losersBracket.value.forEach((matchup) => {
-      if (!bracketType.value) {
-        if (matchup.p === 1) {
-          result.push(matchRosterId(matchup.w, totalRosters.value - 3));
-          result.push(matchRosterId(matchup.l, totalRosters.value - 2));
-        } else if (matchup.p === 3) {
-          result.push(matchRosterId(matchup.w, totalRosters.value - 1));
-          result.push(matchRosterId(matchup.l, totalRosters.value));
-        }
-        // do 10 man leagues have 3 playoff rounds in the losers bracket?
-        // else if (matchup.p === 5) {
-        //   result.push(matchRosterId(matchup.w, totalRosters.value - 1));
-        //   result.push(matchRosterId(matchup.l, totalRosters.value));
-        // }
-      } else {
-        if (matchup.p === 1) {
-          result.push(matchRosterId(matchup.w, totalRosters.value - 5));
-          result.push(matchRosterId(matchup.l, totalRosters.value - 4));
-        } else if (matchup.p === 3) {
-          result.push(matchRosterId(matchup.w, totalRosters.value - 3));
-          result.push(matchRosterId(matchup.l, totalRosters.value - 2));
-        } else if (matchup.p === 5) {
-          result.push(matchRosterId(matchup.w, totalRosters.value - 1));
-          result.push(matchRosterId(matchup.l, totalRosters.value));
-        }
-      }
-    });
-  } else {
-    losersBracket.value.forEach((matchup) => {
-      if (matchup.p === 1) {
-        result.push(matchRosterId(matchup.w, totalRosters.value));
-        result.push(matchRosterId(matchup.l, totalRosters.value - 1));
-      } else if (matchup.p === 3) {
-        result.push(matchRosterId(matchup.w, totalRosters.value - 2));
-        result.push(matchRosterId(matchup.l, totalRosters.value - 3));
-      } else if (matchup.p === 5) {
-        result.push(matchRosterId(matchup.w, totalRosters.value - 4));
-        result.push(matchRosterId(matchup.l, totalRosters.value - 5));
-      }
-    });
-  }
-  // some playoff formats leave teams out
-  props.tableData.forEach((user) => {
-    if (result.every((obj) => obj !== undefined)) {
-      if (!result.find((res) => res.id === user.id)) {
-        result.push(matchRosterId(user.rosterId, totalRosters.value / 2));
-      }
-    }
-  });
-  return result.sort((a, b) => (a.placement ?? 0) - (b.placement ?? 0));
-});
+const finalPlacements = computed(() =>
+  getFinalPlacements(placementLeague.value, props.tableData)
+);
 
 const numberOfWinnerRounds = computed(() => {
   return winnersBracket.value.reduce((acc, curr) => {
@@ -709,7 +548,7 @@ const numberOfLoserRounds = computed(() => {
       <Card class="block w-full p-4 overflow-x-auto lg:w-3/4 md:p-6">
         <p class="mb-4 text-2xl font-semibold tracking-tight">Winner's Bracket</p>
         <div
-          v-if="store.leagueInfo[store.currentLeagueIndex]?.platform !== 'espn'"
+          v-if="store.currentLeague?.platform !== 'espn'"
           class="flex flex-nowrap"
         >
           <div v-for="index in numberOfWinnerRounds">
@@ -741,30 +580,11 @@ const numberOfLoserRounds = computed(() => {
                   class="flex justify-between mb-2"
                 >
                   <div class="flex">
-                    <img
-                      v-if="matchRosterId(matchup.t1).avatarImg"
-                      alt="User avatar"
-                      class="w-8 h-8 rounded-full"
-                      :src="matchRosterId(matchup.t1).avatarImg"
-                    />
-                    <svg
-                      v-else
-                      class="w-8 h-8"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                      />
-                    </svg>
+                    <ManagerAvatar :src="matchRosterId(matchup.t1).avatarImg" />
                     <div class="-mt-0.5">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
                         {{
-                          store.showUsernames
-                            ? matchRosterId(matchup.t1).username
-                            : matchRosterId(matchup.t1).name
+                          getRosterDisplayName(matchup.t1)
                         }}
                       </p>
                       <p class="ml-2 text-xs text-muted-foreground">
@@ -784,30 +604,11 @@ const numberOfLoserRounds = computed(() => {
                 <div>
                   <div class="flex justify-between">
                     <div v-if="matchRosterId(matchup.t2)" class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.t2).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.t2).avatarImg"
-                      />
-                      <svg
-                        v-else
-                        class="w-8 h-8"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                        />
-                      </svg>
+                      <ManagerAvatar :src="matchRosterId(matchup.t2).avatarImg" />
                       <div class="-mt-0.5">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.t2).username
-                              : matchRosterId(matchup.t2).name
+                            getRosterDisplayName(matchup.t2)
                           }}
                         </p>
                         <p class="ml-2 text-xs text-muted-foreground">
@@ -833,30 +634,11 @@ const numberOfLoserRounds = computed(() => {
                   class="flex justify-between mb-2"
                 >
                   <div class="flex">
-                    <img
-                      v-if="matchRosterId(matchup.t1).avatarImg"
-                      alt="User avatar"
-                      class="w-8 h-8 rounded-full"
-                      :src="matchRosterId(matchup.t1).avatarImg"
-                    />
-                    <svg
-                      v-else
-                      class="w-8 h-8"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                      />
-                    </svg>
+                    <ManagerAvatar :src="matchRosterId(matchup.t1).avatarImg" />
                     <div class="-mt-0.5">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
                         {{
-                          store.showUsernames
-                            ? matchRosterId(matchup.t1).username
-                            : matchRosterId(matchup.t1).name
+                          getRosterDisplayName(matchup.t1)
                         }}
                       </p>
                       <p class="ml-2 text-xs text-muted-foreground">
@@ -878,30 +660,11 @@ const numberOfLoserRounds = computed(() => {
                     class="flex justify-between"
                   >
                     <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.t2).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.t2).avatarImg"
-                      />
-                      <svg
-                        v-else
-                        class="w-8 h-8"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                        />
-                      </svg>
+                      <ManagerAvatar :src="matchRosterId(matchup.t2).avatarImg" />
                       <div class="-mt-0.5">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.t2).username
-                              : matchRosterId(matchup.t2).name
+                            getRosterDisplayName(matchup.t2)
                           }}
                         </p>
                         <p class="ml-2 text-xs text-muted-foreground">
@@ -953,31 +716,11 @@ const numberOfLoserRounds = computed(() => {
                     class="flex justify-between mb-2"
                   >
                     <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.home.teamId).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.home.teamId).avatarImg"
-                        @error="handleImageError"
-                      />
-                      <svg
-                        v-else
-                        class="w-8 h-8"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                        />
-                      </svg>
+                      <ManagerAvatar :src="matchRosterId(matchup.home.teamId).avatarImg" />
                       <div class="-mt-0.5">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.home.teamId).username
-                              : matchRosterId(matchup.home.teamId).name
+                            getRosterDisplayName(matchup.home.teamId)
                           }}
                         </p>
                         <p class="ml-2 text-xs text-muted-foreground">
@@ -1006,31 +749,11 @@ const numberOfLoserRounds = computed(() => {
                     class="flex justify-between"
                   >
                     <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.away.teamId).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.away.teamId).avatarImg"
-                        @error="handleImageError"
-                      />
-                      <svg
-                        v-else
-                        class="w-8 h-8"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                        />
-                      </svg>
+                      <ManagerAvatar :src="matchRosterId(matchup.away.teamId).avatarImg" />
                       <div class="-mt-0.5">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.away.teamId).username
-                              : matchRosterId(matchup.away.teamId).name
+                            getRosterDisplayName(matchup.away.teamId)
                           }}
                         </p>
                         <p class="ml-2 text-xs text-muted-foreground">
@@ -1067,7 +790,7 @@ const numberOfLoserRounds = computed(() => {
       <Card class="block w-full p-4 overflow-x-auto lg:mr-4 lg:w-3/4 md:p-6">
         <p class="mb-4 text-2xl font-semibold tracking-tight">Loser's Bracket</p>
         <div
-          v-if="store.leagueInfo[store.currentLeagueIndex]?.platform !== 'espn'"
+          v-if="store.currentLeague?.platform !== 'espn'"
           class="flex flex-nowrap"
         >
           <div v-for="index in numberOfLoserRounds">
@@ -1105,30 +828,11 @@ const numberOfLoserRounds = computed(() => {
                   class="flex justify-between mb-2"
                 >
                   <div class="flex">
-                    <img
-                      v-if="matchRosterId(matchup.t1).avatarImg"
-                      alt="User avatar"
-                      class="w-8 h-8 rounded-full"
-                      :src="matchRosterId(matchup.t1).avatarImg"
-                    />
-                    <svg
-                      v-else
-                      class="w-8 h-8"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                      />
-                    </svg>
+                    <ManagerAvatar :src="matchRosterId(matchup.t1).avatarImg" />
                     <div class="-mt-0.5">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
                         {{
-                          store.showUsernames
-                            ? matchRosterId(matchup.t1).username
-                            : matchRosterId(matchup.t1).name
+                          getRosterDisplayName(matchup.t1)
                         }}
                       </p>
                       <p class="ml-2 text-xs text-muted-foreground">
@@ -1150,30 +854,11 @@ const numberOfLoserRounds = computed(() => {
                     class="flex justify-between"
                   >
                     <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.t2).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.t2).avatarImg"
-                      />
-                      <svg
-                        v-else
-                        class="w-8 h-8"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                        />
-                      </svg>
+                      <ManagerAvatar :src="matchRosterId(matchup.t2).avatarImg" />
                       <div class="-mt-0.5">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.t2).username
-                              : matchRosterId(matchup.t2).name
+                            getRosterDisplayName(matchup.t2)
                           }}
                         </p>
                         <p class="ml-2 text-xs text-muted-foreground">
@@ -1199,30 +884,11 @@ const numberOfLoserRounds = computed(() => {
                   class="flex justify-between mb-2"
                 >
                   <div class="flex">
-                    <img
-                      v-if="matchRosterId(matchup.t1).avatarImg"
-                      alt="User avatar"
-                      class="w-8 h-8 rounded-full"
-                      :src="matchRosterId(matchup.t1).avatarImg"
-                    />
-                    <svg
-                      v-else
-                      class="w-8 h-8"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                      />
-                    </svg>
+                    <ManagerAvatar :src="matchRosterId(matchup.t1).avatarImg" />
                     <div class="-mt-0.5">
                       <p class="mx-2 truncate max-w-20 xl:max-w-32">
                         {{
-                          store.showUsernames
-                            ? matchRosterId(matchup.t1).username
-                            : matchRosterId(matchup.t1).name
+                          getRosterDisplayName(matchup.t1)
                         }}
                       </p>
                       <p class="ml-2 text-xs text-muted-foreground">
@@ -1244,30 +910,11 @@ const numberOfLoserRounds = computed(() => {
                     class="flex justify-between"
                   >
                     <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.t2).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.t2).avatarImg"
-                      />
-                      <svg
-                        v-else
-                        class="w-8 h-8"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                        />
-                      </svg>
+                      <ManagerAvatar :src="matchRosterId(matchup.t2).avatarImg" />
                       <div class="-mt-0.5">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.t2).username
-                              : matchRosterId(matchup.t2).name
+                            getRosterDisplayName(matchup.t2)
                           }}
                         </p>
                         <p class="ml-2 text-xs text-muted-foreground">
@@ -1316,31 +963,11 @@ const numberOfLoserRounds = computed(() => {
                     class="flex justify-between mb-2"
                   >
                     <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.home.teamId).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.home.teamId).avatarImg"
-                        @error="handleImageError"
-                      />
-                      <svg
-                        v-else
-                        class="w-8 h-8"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                        />
-                      </svg>
+                      <ManagerAvatar :src="matchRosterId(matchup.home.teamId).avatarImg" />
                       <div class="-mt-0.5">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.home.teamId).username
-                              : matchRosterId(matchup.home.teamId).name
+                            getRosterDisplayName(matchup.home.teamId)
                           }}
                         </p>
                         <p class="ml-2 text-xs text-muted-foreground">
@@ -1367,31 +994,11 @@ const numberOfLoserRounds = computed(() => {
                     class="flex justify-between"
                   >
                     <div class="flex">
-                      <img
-                        v-if="matchRosterId(matchup.away.teamId).avatarImg"
-                        alt="User avatar"
-                        class="w-8 h-8 rounded-full"
-                        :src="matchRosterId(matchup.away.teamId).avatarImg"
-                        @error="handleImageError"
-                      />
-                      <svg
-                        v-else
-                        class="w-8 h-8"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"
-                        />
-                      </svg>
+                      <ManagerAvatar :src="matchRosterId(matchup.away.teamId).avatarImg" />
                       <div class="-mt-0.5">
                         <p class="mx-2 truncate max-w-20 xl:max-w-32">
                           {{
-                            store.showUsernames
-                              ? matchRosterId(matchup.away.teamId).username
-                              : matchRosterId(matchup.away.teamId).name
+                            getRosterDisplayName(matchup.away.teamId)
                           }}
                         </p>
                         <p class="ml-2 text-xs text-muted-foreground">

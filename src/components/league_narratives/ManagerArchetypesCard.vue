@@ -56,7 +56,7 @@ const getManagerArchetypes = async () => {
       {} as Record<string, string>
     );
     store.addManagerProfiles(
-      getLeagueKey(store.leagueInfo[store.currentLeagueIndex]),
+      getLeagueKey(store.currentLeague),
       blurbsByUserId.value
     );
     trackEvent("Feature Action Completed", {
@@ -64,7 +64,7 @@ const getManagerArchetypes = async () => {
       action: "profiles_generated",
       profile_count: Object.keys(blurbsByUserId.value).length,
       ...getLeagueAnalyticsProperties(
-        store.leagueInfo[store.currentLeagueIndex]
+        store.currentLeague
       ),
     });
   } catch (error) {
@@ -79,7 +79,7 @@ const getManagerArchetypes = async () => {
       error_code: "generation_failed",
       recoverable: true,
       ...getLeagueAnalyticsProperties(
-        store.leagueInfo[store.currentLeagueIndex]
+        store.currentLeague
       ),
     });
   } finally {
@@ -88,7 +88,7 @@ const getManagerArchetypes = async () => {
 };
 
 const storedManagerProfiles = computed(
-  () => store.leagueInfo[store.currentLeagueIndex]?.managerProfiles ?? {}
+  () => store.currentLeague?.managerProfiles ?? {}
 );
 
 const canGenerateArchetypes = computed(

@@ -2,18 +2,9 @@
 import { computed, ref, watch } from "vue";
 import { TableDataType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
-import { getLeagueKey, useStore } from "../../store/store";
+import { useStore } from "../../store/store";
 import {
-  getPlayerPositionsById,
-  getProjections,
-  getWeeklyProjections,
-} from "../../api/sleeperApi";
-import { mapWithConcurrency } from "@/lib/async";
-import {
-  getProjectedStarterTotal,
-  runForecastSimulation,
-  runReplaySimulation,
-  shouldUseLiveSeasonForecast,
+  recordPoints,
 } from "./seasonSimulation";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -24,24 +15,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
-
-type SimulatedTeamRecord = {
-  index: number;
-  name: string;
-  wins: number;
-  losses: number;
-  ties: number;
-  pointsFor: number;
-  pointsAgainst: number;
-  winDelta: number;
-};
+import { getManagerDisplayName } from "@/lib/manager";
+import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
+import { useSeasonForecast } from "./useSeasonForecast";
+import { useSeasonReplay } from "./useSeasonReplay";
+import {
+  buildActualStandings,
+  buildMatchupsByWeek,
+  calculateSimulatedStandings,
+  calculateWeeklyMedians,
+  createOpponentMatrix,
+  runScheduleMonteCarlo,
+  shuffleScheduleWeeks,
+  swapTeamSchedules,
+  type SimulatedTeamRecord,
+} from "./scheduleScenarios";
 
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
 
 const store = useStore();
+const tableData = computed(() => props.tableData);
 const simulatedOpponents = ref<(number | null)[][]>([]);
 const selectedWeekValue = ref("week-1");
 const selectedSwapTeamAValue = ref("0");
@@ -50,8 +45,6 @@ const selectedVolatilityTeamValue = ref("0");
 const activeScenarioValue = ref("swap");
 const activeDetailValue = ref("standings");
 const activeToolValue = ref("season-simulation");
-const replayThroughWeekValue = ref("1");
-const monteCarloRuns = ref(1000);
 const monteCarloDistributions = ref<number[][]>([]);
 const monteCarloSummaryByTeam = ref<
   Record<
@@ -67,47 +60,13 @@ const monteCarloSummaryByTeam = ref<
 >({});
 const monteCarloRunCount = ref(0);
 const scenarioLabel = ref("Original schedule");
-const forecastRuns = ref(5000);
-const forecastRunCount = ref(0);
-const forecastLoadingLeagueKeys = ref<Set<string>>(new Set());
-const forecastWeeklyWinsByTeam = ref<number[][]>([]);
-const forecastSummaryByTeam = ref<
-  Record<
-    number,
-    {
-      averageWins: number;
-      p10Wins: number;
-      p90Wins: number;
-      playoffOdds: number;
-      topSeedOdds: number;
-      averageSeed: number;
-    }
-  >
->({});
-const replayRuns = ref(5000);
-const replayRunCount = ref(0);
-const replayWeeklyWinsByTeam = ref<number[][]>([]);
-const replaySummaryByTeam = ref<
-  Record<
-    number,
-    {
-      averageWins: number;
-      p10Wins: number;
-      p90Wins: number;
-      playoffOdds: number;
-      topSeedOdds: number;
-      averageSeed: number;
-      sameSeedOdds: number;
-    }
-  >
->({});
 
 const dataWeekCount = computed(() => {
   return Math.max(...props.tableData.map((team) => team.points?.length), 0);
 });
 
 const usesMedianScoring = computed(() => {
-  return store.leagueInfo[store.currentLeagueIndex]?.medianScoring === 1;
+  return store.currentLeague?.medianScoring === 1;
 });
 
 const recordWeekCount = computed(() => {
@@ -119,7 +78,7 @@ const recordWeekCount = computed(() => {
 });
 
 const displayedWeekCount = computed(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
+  const league = store.currentLeague;
   const regularSeasonLength =
     league?.regularSeasonLength || dataWeekCount.value;
   const lastScoredWeek = league?.lastScoredWeek || 0;
@@ -145,7 +104,7 @@ const displayedWeekCount = computed(() => {
 
 const regularSeasonWeekCount = computed(() => {
   const configured =
-    store.leagueInfo[store.currentLeagueIndex]?.regularSeasonLength || 0;
+    store.currentLeague?.regularSeasonLength || 0;
   return Math.max(configured, displayedWeekCount.value);
 });
 
@@ -153,107 +112,19 @@ const remainingWeekCount = computed(() =>
   Math.max(regularSeasonWeekCount.value - displayedWeekCount.value, 0)
 );
 
-const isCurrentSeasonLeague = computed(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
-  return shouldUseLiveSeasonForecast({
-    season: league?.season,
-    status: league?.status,
-    remainingWeeks: remainingWeekCount.value,
-  });
-});
-
 const seasonSimulationTabLabel = "Season Forecast";
 
-const weeklyMedians = computed(() => {
-  if (props.tableData[0]?.points) {
-    return Array.from({ length: displayedWeekCount.value }, (_, week) => {
-      const weeklyScores = props.tableData
-        .map((team) => team.points[week])
-        .filter((points): points is number => Number.isFinite(points));
-
-      if (weeklyScores.length === 0) return null;
-
-      const sortedScores = [...weeklyScores].sort((a, b) => a - b);
-      const midpoint = Math.floor(sortedScores.length / 2);
-
-      if (sortedScores.length % 2 === 0) {
-        return (sortedScores[midpoint - 1] + sortedScores[midpoint]) / 2;
-      }
-
-      return sortedScores[midpoint];
-    });
-  }
-  return [];
-});
+const weeklyMedians = computed(() =>
+  calculateWeeklyMedians(props.tableData, displayedWeekCount.value)
+);
 
 const teamName = (team: TableDataType) => {
-  if (store.showUsernames) {
-    return team.username || "Ghost Roster";
-  }
-  return team.name || "Ghost Roster";
+  return getManagerDisplayName(team, store.showUsernames);
 };
 
-const getWeekPoints = (teamIndex: number, week: number) => {
-  const points = props.tableData[teamIndex]?.points?.[week];
-  return Number.isFinite(points) ? points : 0;
-};
-
-const recordPoints = (wins: number, ties = 0) => wins + ties * 0.5;
-
-const compareTeamRecords = (
-  a: Pick<SimulatedTeamRecord, "wins" | "ties" | "pointsFor">,
-  b: Pick<SimulatedTeamRecord, "wins" | "ties" | "pointsFor">
-) => {
-  const recordDifference =
-    recordPoints(b.wins, b.ties) - recordPoints(a.wins, a.ties);
-  if (recordDifference !== 0) return recordDifference;
-  return b.pointsFor - a.pointsFor;
-};
-
-const isValidMatchupNumber = (
-  matchupNumber: number | null | undefined
-): matchupNumber is number => {
-  return Number.isFinite(matchupNumber) && Number(matchupNumber) > 0;
-};
-
-const createOpponentMatrix = (
-  tableData: TableDataType[],
-  weeks = displayedWeekCount.value
-) => {
-  const matrix: (number | null)[][] = tableData.map((team) =>
-    Array.from({ length: weeks }, (_, week) => {
-      const matchupNumber = team.matchups ? team.matchups[week] : null;
-      if (!isValidMatchupNumber(matchupNumber)) return null;
-      return null;
-    })
-  );
-
-  for (let week = 0; week < weeks; week++) {
-    const matchupMap = new Map<number, number[]>();
-    tableData.forEach((team, teamIndex) => {
-      const matchupNumber = team.matchups ? team.matchups[week] : null;
-      if (!isValidMatchupNumber(matchupNumber)) return;
-      const teams = matchupMap.get(matchupNumber) || [];
-      teams.push(teamIndex);
-      matchupMap.set(matchupNumber, teams);
-    });
-
-    matchupMap.forEach((teamIndexes) => {
-      if (teamIndexes.length < 2) return;
-      for (let i = 0; i < teamIndexes.length; i += 2) {
-        const a = teamIndexes[i];
-        const b = teamIndexes[i + 1];
-        if (a === undefined || b === undefined) continue;
-        matrix[a][week] = b;
-        matrix[b][week] = a;
-      }
-    });
-  }
-
-  return matrix;
-};
-
-const originalOpponents = computed(() => createOpponentMatrix(props.tableData));
+const originalOpponents = computed(() =>
+  createOpponentMatrix(props.tableData, displayedWeekCount.value)
+);
 const fullSeasonOpponents = computed(() =>
   createOpponentMatrix(props.tableData, regularSeasonWeekCount.value)
 );
@@ -327,49 +198,14 @@ watch(
   { immediate: true }
 );
 
-const matchupsByWeek = computed(() => {
-  return Array.from({ length: displayedWeekCount.value }, (_, week) => {
-    const rows: {
-      teamA: number;
-      teamB: number;
-      pointsA: number;
-      pointsB: number;
-      winner: number | null;
-      changed: boolean;
-    }[] = [];
-    const seen = new Set<number>();
-
-    props.tableData.forEach((_, teamIndex) => {
-      if (seen.has(teamIndex)) return;
-      const opponent = simulatedOpponents.value[teamIndex]?.[week];
-      if (opponent === null || opponent === undefined) return;
-      if (seen.has(opponent)) return;
-
-      const pointsA = getWeekPoints(teamIndex, week);
-      const pointsB = getWeekPoints(opponent, week);
-      const winner =
-        pointsA === pointsB ? null : pointsA > pointsB ? teamIndex : opponent;
-      const changed = originalOpponents.value[teamIndex]?.[week] !== opponent;
-
-      rows.push({
-        teamA: teamIndex,
-        teamB: opponent,
-        pointsA,
-        pointsB,
-        winner,
-        changed,
-      });
-      seen.add(teamIndex);
-      seen.add(opponent);
-    });
-
-    return {
-      week: week + 1,
-      value: `week-${week + 1}`,
-      rows,
-    };
-  });
-});
+const matchupsByWeek = computed(() =>
+  buildMatchupsByWeek({
+    tableData: props.tableData,
+    opponents: simulatedOpponents.value,
+    originalOpponents: originalOpponents.value,
+    weeks: displayedWeekCount.value,
+  })
+);
 
 const selectedWeekData = computed(() => {
   return (
@@ -384,94 +220,20 @@ const selectedWeekMatchups = computed(() => {
   return selectedWeekData.value.rows;
 });
 
-const simulatedStandings = computed<SimulatedTeamRecord[]>(() => {
-  const weeks = displayedWeekCount.value;
-  const records = props.tableData.map((team, index) => ({
-    index,
-    name: teamName(team),
-    wins: 0,
-    losses: 0,
-    ties: 0,
-    pointsFor: 0,
-    pointsAgainst: 0,
-    winDelta: 0,
-  }));
+const simulatedStandings = computed<SimulatedTeamRecord[]>(() =>
+  calculateSimulatedStandings({
+    tableData: props.tableData,
+    opponents: simulatedOpponents.value,
+    weeks: displayedWeekCount.value,
+    medianScoring: usesMedianScoring.value,
+    weeklyMedians: weeklyMedians.value,
+    teamName,
+  })
+);
 
-  for (let week = 0; week < weeks; week++) {
-    const seen = new Set<number>();
-    for (let teamIndex = 0; teamIndex < props.tableData.length; teamIndex++) {
-      const opponent = simulatedOpponents.value[teamIndex]?.[week];
-      const teamPoints = getWeekPoints(teamIndex, week);
-      records[teamIndex].pointsFor += teamPoints;
-
-      if (opponent === null || opponent === undefined || seen.has(teamIndex)) {
-        continue;
-      }
-      if (seen.has(opponent)) continue;
-
-      const opponentPoints = getWeekPoints(opponent, week);
-      records[teamIndex].pointsAgainst += opponentPoints;
-      records[opponent].pointsAgainst += teamPoints;
-
-      if (teamPoints > opponentPoints) {
-        records[teamIndex].wins += 1;
-        records[opponent].losses += 1;
-      } else if (teamPoints < opponentPoints) {
-        records[teamIndex].losses += 1;
-        records[opponent].wins += 1;
-      } else {
-        records[teamIndex].ties += 1;
-        records[opponent].ties += 1;
-      }
-
-      seen.add(teamIndex);
-      seen.add(opponent);
-    }
-
-    if (usesMedianScoring.value && weeklyMedians.value.length > 0) {
-      const weekMedian = weeklyMedians.value[week];
-      if (weekMedian === null) continue;
-
-      for (let teamIndex = 0; teamIndex < props.tableData.length; teamIndex++) {
-        const teamPoints = getWeekPoints(teamIndex, week);
-        if (teamPoints > weekMedian) {
-          records[teamIndex].wins += 1;
-        } else if (teamPoints < weekMedian) {
-          records[teamIndex].losses += 1;
-        } else {
-          records[teamIndex].ties += 1;
-        }
-      }
-    }
-  }
-
-  records.forEach((record) => {
-    const actualRecordPoints = recordPoints(
-      props.tableData[record.index].wins,
-      props.tableData[record.index].ties ?? 0
-    );
-    record.winDelta = Number(
-      (recordPoints(record.wins, record.ties) - actualRecordPoints).toFixed(1)
-    );
-  });
-
-  return records.sort(compareTeamRecords);
-});
-
-const actualStandings = computed<SimulatedTeamRecord[]>(() => {
-  return props.tableData
-    .map((team, index) => ({
-      index,
-      name: teamName(team),
-      wins: team.wins,
-      losses: team.losses,
-      ties: team.ties ?? 0,
-      pointsFor: team.pointsFor,
-      pointsAgainst: team.pointsAgainst,
-      winDelta: 0,
-    }))
-    .sort(compareTeamRecords);
-});
+const actualStandings = computed<SimulatedTeamRecord[]>(() =>
+  buildActualStandings(props.tableData, teamName)
+);
 
 const seedAndPlayoffByTeam = computed(() => {
   const actualSeedByTeam = new Map<number, number>();
@@ -551,7 +313,7 @@ const selectedVolatilityTeamIndex = computed(() => {
 
 const playoffCutoff = computed(() => {
   const playoffTeams =
-    store.leagueInfo[store.currentLeagueIndex]?.playoffTeams || 0;
+    store.currentLeague?.playoffTeams || 0;
   if (playoffTeams > 0) {
     return Math.min(playoffTeams, props.tableData.length);
   }
@@ -725,36 +487,14 @@ const selectedWeekNumber = computed(() => {
 });
 
 const shuffleWeeks = (weekIndexes: number[], label: string) => {
-  const teamIndexes = props.tableData.map((_, index) => index);
-  const nextOpponents = cloneSimulatedOpponents();
-
-  weekIndexes.forEach((week) => {
-    const originalByes = teamIndexes.filter(
-      (index) => originalOpponents.value[index]?.[week] === null
-    );
-    const activeTeams = teamIndexes.filter(
-      (index) => !originalByes.includes(index)
-    );
-
-    for (let i = activeTeams.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [activeTeams[i], activeTeams[j]] = [activeTeams[j], activeTeams[i]];
-    }
-
-    teamIndexes.forEach((teamIndex) => {
-      nextOpponents[teamIndex][week] = null;
-    });
-
-    for (let i = 0; i < activeTeams.length; i += 2) {
-      const teamA = activeTeams[i];
-      const teamB = activeTeams[i + 1];
-      if (teamA === undefined || teamB === undefined) continue;
-      nextOpponents[teamA][week] = teamB;
-      nextOpponents[teamB][week] = teamA;
-    }
-  });
-
-  applyScenario(nextOpponents, label);
+  applyScenario(
+    shuffleScheduleWeeks({
+      opponents: cloneSimulatedOpponents(),
+      originalOpponents: originalOpponents.value,
+      weekIndexes,
+    }),
+    label
+  );
 };
 
 const shuffleSelectedWeek = () => {
@@ -769,26 +509,13 @@ const swapSelectedTeamSchedules = () => {
   const teamB = selectedSwapTeamBIndex.value;
   if (teamA === teamB || props.tableData.length < 2) return;
 
-  const nextOpponents = cloneSimulatedOpponents();
-
-  for (let week = 0; week < displayedWeekCount.value; week++) {
-    const opponentA = nextOpponents[teamA]?.[week] ?? null;
-    const opponentB = nextOpponents[teamB]?.[week] ?? null;
-
-    if (opponentA === teamB || opponentB === teamA) continue;
-
-    if (opponentA !== null) nextOpponents[opponentA][week] = null;
-    if (opponentB !== null) nextOpponents[opponentB][week] = null;
-
-    nextOpponents[teamA][week] = opponentB;
-    if (opponentB !== null) nextOpponents[opponentB][week] = teamA;
-
-    nextOpponents[teamB][week] = opponentA;
-    if (opponentA !== null) nextOpponents[opponentA][week] = teamB;
-  }
-
   applyScenario(
-    nextOpponents,
+    swapTeamSchedules(
+      cloneSimulatedOpponents(),
+      teamA,
+      teamB,
+      displayedWeekCount.value
+    ),
     `${teamName(props.tableData[teamA])} swapped schedules with ${teamName(
       props.tableData[teamB]
     )}`
@@ -893,7 +620,7 @@ const volatilityChartOptions = computed(() => {
   return {
     chart: {
       type: "area",
-      foreColor: "hsl(var(--foreground))",
+      foreColor: getChartTheme().foreground,
       toolbar: { show: false },
       zoom: { enabled: false },
       animations: { enabled: false },
@@ -925,7 +652,7 @@ const volatilityChartOptions = computed(() => {
       min: 0,
     },
     tooltip: {
-      theme: store.darkMode ? "dark" : "light",
+      theme: getChartTooltipTheme(store.darkMode),
       y: {
         formatter: (value: number) => `${value.toFixed(2)}%`,
       },
@@ -933,725 +660,63 @@ const volatilityChartOptions = computed(() => {
   };
 });
 
-function percentile(sorted: number[], p: number) {
-  if (sorted.length === 0) return 0;
-  const index = Math.min(
-    sorted.length - 1,
-    Math.max(0, Math.floor((sorted.length - 1) * p))
-  );
-  return sorted[index];
-}
-
 function runMonteCarloDistribution() {
-  const teamCount = props.tableData.length;
-  const totalWeeks = displayedWeekCount.value;
-  const runs = Math.max(100, Math.min(10000, Math.floor(monteCarloRuns.value)));
-
-  if (teamCount === 0 || totalWeeks === 0) {
-    monteCarloDistributions.value = [];
-    monteCarloSummaryByTeam.value = {};
-    monteCarloRunCount.value = 0;
-    return;
-  }
-
-  const byesByWeek = Array.from({ length: totalWeeks }, (_, week) =>
-    Array.from({ length: teamCount }, (_, index) => index).filter(
-      (index) => originalOpponents.value[index]?.[week] === null
-    )
-  );
-
-  const valuesByTeam: number[][] = Array.from({ length: teamCount }, () => []);
-
-  for (let run = 0; run < runs; run++) {
-    const wins = Array.from({ length: teamCount }, () => 0);
-    const ties = Array.from({ length: teamCount }, () => 0);
-
-    for (let week = 0; week < totalWeeks; week++) {
-      const byes = byesByWeek[week];
-      const activeTeams = Array.from(
-        { length: teamCount },
-        (_, index) => index
-      ).filter((index) => !byes.includes(index));
-
-      for (let i = activeTeams.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [activeTeams[i], activeTeams[j]] = [activeTeams[j], activeTeams[i]];
-      }
-
-      for (let i = 0; i < activeTeams.length; i += 2) {
-        const teamA = activeTeams[i];
-        const teamB = activeTeams[i + 1];
-        if (teamA === undefined || teamB === undefined) continue;
-
-        const pointsA = props.tableData[teamA]?.points[week] ?? 0;
-        const pointsB = props.tableData[teamB]?.points[week] ?? 0;
-
-        if (pointsA > pointsB) {
-          wins[teamA] += 1;
-        } else if (pointsB > pointsA) {
-          wins[teamB] += 1;
-        } else {
-          ties[teamA] += 1;
-          ties[teamB] += 1;
-        }
-      }
-
-      if (usesMedianScoring.value) {
-        const weekMedian = weeklyMedians.value[week];
-        if (weekMedian === null) continue;
-
-        for (let teamIndex = 0; teamIndex < teamCount; teamIndex++) {
-          const teamPoints = props.tableData[teamIndex]?.points[week] ?? 0;
-          if (teamPoints > weekMedian) {
-            wins[teamIndex] += 1;
-          } else if (teamPoints < weekMedian) {
-            wins[teamIndex] += 0;
-          } else {
-            ties[teamIndex] += 1;
-          }
-        }
-      }
-    }
-
-    for (let index = 0; index < teamCount; index++) {
-      valuesByTeam[index].push(
-        Number((wins[index] + ties[index] * 0.5).toFixed(1))
-      );
-    }
-  }
-
-  const summary: Record<
-    number,
-    {
-      mode: number;
-      average: number;
-      p10: number;
-      p50: number;
-      p90: number;
-    }
-  > = {};
-
-  valuesByTeam.forEach((values, index) => {
-    const sorted = [...values].sort((a, b) => a - b);
-    const freq = new Map<number, number>();
-    sorted.forEach((value) => {
-      freq.set(value, (freq.get(value) || 0) + 1);
-    });
-
-    let mode = 0;
-    let maxCount = -1;
-    freq.forEach((count, value) => {
-      if (count > maxCount) {
-        maxCount = count;
-        mode = value;
-      }
-    });
-
-    const avg =
-      sorted.reduce((total, value) => total + value, 0) /
-      Math.max(sorted.length, 1);
-
-    summary[index] = {
-      mode,
-      average: Number(avg.toFixed(2)),
-      p10: percentile(sorted, 0.1),
-      p50: percentile(sorted, 0.5),
-      p90: percentile(sorted, 0.9),
-    };
-  });
-
-  monteCarloDistributions.value = valuesByTeam;
-  monteCarloSummaryByTeam.value = summary;
-  monteCarloRunCount.value = runs;
-}
-
-const projectionTotalsByTeam = computed(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
-  const rosterById = new Map(
-    (league?.rosters || []).map((roster) => [roster.rosterId, roster])
-  );
-
-  return props.tableData.map((team) => {
-    const projections = rosterById.get(team.rosterId)?.projections || [];
-    return getProjectedStarterTotal(projections, league?.rosterPositions || []);
-  });
-});
-
-const forecastProjectionStartWeek = computed(() =>
-  Math.max(displayedWeekCount.value + 1, 1)
-);
-
-const hasCurrentForecastProjections = computed(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
-  if (!league) return false;
-  return league.rosters.every(
-    (roster) =>
-      !roster.players?.length ||
-      (Boolean(roster.projections?.length) &&
-        roster.projectionStartWeek === forecastProjectionStartWeek.value)
-  );
-});
-
-const currentLeagueKey = computed(() => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
-  return league ? getLeagueKey(league) : "";
-});
-
-const forecastLoadingProjections = computed(() =>
-  forecastLoadingLeagueKeys.value.has(currentLeagueKey.value)
-);
-
-const forecastReady = computed(
-  () => forecastRunCount.value > 0 && !forecastLoadingProjections.value
-);
-
-async function loadForecastProjections() {
-  const league = store.leagueInfo[store.currentLeagueIndex];
-  if (!league) return;
-  const leagueKey = getLeagueKey(league);
-  if (forecastLoadingLeagueKeys.value.has(leagueKey)) return;
-  const projectionStartWeek = forecastProjectionStartWeek.value;
-  if (hasCurrentForecastProjections.value) return;
-
-  forecastLoadingLeagueKeys.value = new Set([
-    ...forecastLoadingLeagueKeys.value,
-    leagueKey,
-  ]);
-  try {
-    const playerIds = [
-      ...new Set(league.rosters.flatMap((roster) => roster.players || [])),
-    ];
-    let positionsByPlayer: Record<string, string> | null = null;
-    try {
-      positionsByPlayer = await getPlayerPositionsById(playerIds);
-    } catch (error) {
-      console.error("Error fetching player positions:", error);
-    }
-    await mapWithConcurrency(league.rosters, 2, async (roster) => {
-      if (!roster.players?.length) return;
-      const projections = await mapWithConcurrency(
-        roster.players,
-        4,
-        (player) =>
-          positionsByPlayer
-            ? getWeeklyProjections(
-                player,
-                league.season,
-                projectionStartWeek,
-                league.scoringType
-              ).then((projection) => ({
-                projection,
-                position: positionsByPlayer?.[player] || "",
-              }))
-            : getProjections(
-                player,
-                league.season,
-                projectionStartWeek,
-                league.scoringType
-              )
-      );
-      store.addProjectionData(
-        leagueKey,
-        roster.id,
-        projections,
-        projectionStartWeek
-      );
-    });
-  } finally {
-    const loadingLeagueKeys = new Set(forecastLoadingLeagueKeys.value);
-    loadingLeagueKeys.delete(leagueKey);
-    forecastLoadingLeagueKeys.value = loadingLeagueKeys;
-
-    if (currentLeagueKey.value !== leagueKey) return;
-    if (projectionStartWeek !== forecastProjectionStartWeek.value) {
-      await loadForecastProjections();
-      return;
-    }
-    runSeasonForecast();
-  }
-}
-
-const historicalTeamAverage = (teamIndex: number) => {
-  const scores = (props.tableData[teamIndex]?.points || [])
-    .slice(0, displayedWeekCount.value)
-    .filter((score) => Number.isFinite(score) && score > 0);
-  if (scores.length === 0) return 100;
-  return scores.reduce((total, score) => total + score, 0) / scores.length;
-};
-
-const historicalTeamDeviation = (teamIndex: number, average: number) => {
-  const scores = (props.tableData[teamIndex]?.points || [])
-    .slice(0, displayedWeekCount.value)
-    .filter((score) => Number.isFinite(score) && score > 0);
-  if (scores.length < 2) return Math.max(12, average * 0.16);
-  const variance =
-    scores.reduce((total, score) => total + (score - average) ** 2, 0) /
-    scores.length;
-  return Math.max(10, Math.sqrt(variance));
-};
-
-const forecastRows = computed(() =>
-  props.tableData
-    .map((team, index) => {
-      const result = forecastSummaryByTeam.value[index] || {
-        averageWins: recordPoints(team.wins, team.ties ?? 0),
-        p10Wins: recordPoints(team.wins, team.ties ?? 0),
-        p90Wins: recordPoints(team.wins, team.ties ?? 0),
-        playoffOdds: 0,
-        topSeedOdds: 0,
-        averageSeed: index + 1,
-      };
-      return { index, name: teamName(team), ...result };
-    })
-    .sort((a, b) =>
-      b.playoffOdds !== a.playoffOdds
-        ? b.playoffOdds - a.playoffOdds
-        : a.averageSeed - b.averageSeed
-    )
-);
-
-function runSeasonForecast() {
-  const teamCount = props.tableData.length;
-  const runs = Math.max(500, Math.min(10000, Math.floor(forecastRuns.value)));
-  if (teamCount === 0) return;
-  const completedWeeks = displayedWeekCount.value;
-  const projectionWeeks = Math.max(18 - completedWeeks, 1);
-  const teams = props.tableData.map((team, index) => {
-    const formAverage = historicalTeamAverage(index);
-    const projectionAverage =
-      projectionTotalsByTeam.value[index] / projectionWeeks;
-    return {
-      index,
-      wins: team.wins,
-      losses: team.losses,
-      ties: team.ties ?? 0,
-      pointsFor: team.pointsFor,
-      mean:
-        projectionAverage > 0
-          ? projectionAverage * 0.7 + formAverage * 0.3
-          : formAverage,
-      deviation: historicalTeamDeviation(index, formAverage),
-    };
-  });
-  const result = runForecastSimulation({
-    teams,
-    opponents: fullSeasonOpponents.value,
-    completedWeeks,
-    regularSeasonWeeks: regularSeasonWeekCount.value,
-    playoffCutoff: playoffCutoff.value,
+  const result = runScheduleMonteCarlo({
+    tableData: props.tableData,
+    originalOpponents: originalOpponents.value,
+    weeks: displayedWeekCount.value,
     medianScoring: usesMedianScoring.value,
-    runs,
+    weeklyMedians: weeklyMedians.value,
+    runs: 1000,
   });
-  forecastSummaryByTeam.value = result.summaryByTeam;
-  forecastWeeklyWinsByTeam.value = result.weeklyWinsByTeam;
-  forecastRunCount.value = result.runCount;
+  monteCarloDistributions.value = result.distributions;
+  monteCarloSummaryByTeam.value = result.summaryByTeam;
+  monteCarloRunCount.value = result.runCount;
 }
 
-const rerunSeasonForecast = () => {
-  runSeasonForecast();
-  if (forecastRunCount.value <= 0) return;
-  trackEvent("Feature Action Completed", {
-    feature: "season_forecast",
-    action: "forecast_run",
-    simulation_count: forecastRunCount.value,
-    ...getLeagueAnalyticsProperties(
-      store.leagueInfo[store.currentLeagueIndex]
-    ),
-  });
-};
-
-const forecastRaceSeries = computed(() =>
-  props.tableData.map((team, index) => ({
-    name: teamName(team),
-    data: [
-      recordPoints(team.wins, team.ties ?? 0),
-      ...(forecastWeeklyWinsByTeam.value[index] || []),
-    ],
-  }))
-);
-
-const forecastRaceChartOptions = computed(() => ({
-  chart: {
-    type: "line",
-    foreColor: "hsl(var(--foreground))",
-    toolbar: { show: false },
-    zoom: { enabled: false },
-    animations: { enabled: false },
-  },
-  colors: Array.from(
-    { length: props.tableData.length },
-    (_, index) => `hsl(var(--chart-rank-${(index % 12) + 1}))`
-  ),
-  stroke: { curve: "smooth", width: 2.5 },
-  markers: { size: 3, hover: { size: 6 } },
-  dataLabels: { enabled: false },
-  xaxis: {
-    categories: [
-      "Now",
-      ...Array.from(
-        { length: remainingWeekCount.value },
-        (_, index) => `Week ${displayedWeekCount.value + index + 1}`
-      ),
-    ],
-    tickAmount: Math.max(0, Math.min(remainingWeekCount.value, 13)),
-    labels: { rotate: -45, rotateAlways: remainingWeekCount.value > 8 },
-  },
-  yaxis: {
-    min: 0,
-    max: usesMedianScoring.value
-      ? regularSeasonWeekCount.value * 2
-      : regularSeasonWeekCount.value,
-    forceNiceScale: true,
-    title: { text: "Average cumulative wins" },
-  },
-  legend: {
-    position: "bottom",
-    horizontalAlign: "center",
-    onItemClick: { toggleDataSeries: true },
-    onItemHover: { highlightDataSeries: true },
-  },
-  grid: { borderColor: "hsl(var(--border))" },
-  tooltip: {
-    shared: true,
-    intersect: false,
-    theme: store.darkMode ? "dark" : "light",
-    y: { formatter: (value: number) => `${value.toFixed(2)} wins` },
-  },
-}));
-
-const forecastComparisonRows = computed(() =>
-  [...forecastRows.value].sort((a, b) => b.averageWins - a.averageWins)
-);
-
-const forecastComparisonSeries = computed(() => [
-  {
-    name: "Current wins",
-    data: forecastComparisonRows.value.map((team) =>
-      recordPoints(
-        props.tableData[team.index]?.wins ?? 0,
-        props.tableData[team.index]?.ties ?? 0
-      )
-    ),
-  },
-  {
-    name: "Projected wins",
-    data: forecastComparisonRows.value.map((team) => team.averageWins),
-  },
-]);
-
-const forecastComparisonChartOptions = computed(() => ({
-  chart: {
-    type: "bar",
-    foreColor: "hsl(var(--foreground))",
-    toolbar: { show: false },
-    animations: { enabled: false },
-  },
-  colors: ["hsl(var(--chart-1))", "hsl(var(--chart-3))"],
-  plotOptions: {
-    bar: { horizontal: true, borderRadius: 3, barHeight: "70%" },
-  },
-  dataLabels: { enabled: false },
-  xaxis: {
-    categories: forecastComparisonRows.value.map((team) => team.name),
-    title: { text: "Wins" },
-    min: 0,
-    max: usesMedianScoring.value
-      ? regularSeasonWeekCount.value * 2
-      : regularSeasonWeekCount.value,
-    tickAmount: usesMedianScoring.value
-      ? Math.min(regularSeasonWeekCount.value * 2, 10)
-      : Math.min(regularSeasonWeekCount.value, 10),
-  },
-  yaxis: { labels: { maxWidth: 180 } },
-  legend: { position: "top", horizontalAlign: "left" },
-  tooltip: {
-    theme: store.darkMode ? "dark" : "light",
-    y: { formatter: (value: number) => `${value.toFixed(2)} wins` },
-  },
-}));
-
-const replayWeekCount = computed(() =>
-  Math.min(displayedWeekCount.value, regularSeasonWeekCount.value)
-);
-
-const replayThroughWeek = computed(() => {
-  const week = Number(replayThroughWeekValue.value);
-  if (!Number.isFinite(week)) return Math.min(1, replayWeekCount.value);
-  return Math.min(Math.max(Math.floor(week), 1), replayWeekCount.value);
+const {
+  forecastComparisonChartOptions,
+  forecastComparisonSeries,
+  forecastLoadingProjections,
+  forecastRaceChartOptions,
+  forecastRaceSeries,
+  forecastReady,
+  forecastRows,
+  forecastRunCount,
+  isCurrentSeasonLeague,
+  rerunSeasonForecast,
+} = useSeasonForecast({
+  tableData,
+  displayedWeekCount,
+  regularSeasonWeekCount,
+  remainingWeekCount,
+  fullSeasonOpponents,
+  playoffCutoff,
+  usesMedianScoring,
+  activeToolValue,
+  teamName,
 });
 
-const replayThroughWeekOptions = computed(() =>
-  Array.from({ length: replayWeekCount.value }, (_, index) => ({
-    value: String(index + 1),
-    label: `After Week ${index + 1}`,
-  }))
-);
-
-const replayRows = computed(() => {
-  const actualSeedByTeam = new Map<number, number>();
-  actualStandings.value.forEach((team, index) => {
-    actualSeedByTeam.set(team.index, index + 1);
-  });
-
-  return props.tableData
-    .map((team, index) => {
-      const actualWins = recordPoints(team.wins, team.ties ?? 0);
-      const result = replaySummaryByTeam.value[index] || {
-        averageWins: actualWins,
-        p10Wins: actualWins,
-        p90Wins: actualWins,
-        playoffOdds: 0,
-        topSeedOdds: 0,
-        averageSeed: actualSeedByTeam.get(index) ?? index + 1,
-        sameSeedOdds: 0,
-      };
-      return {
-        index,
-        name: teamName(team),
-        actualWins,
-        actualSeed: actualSeedByTeam.get(index) ?? index + 1,
-        ...result,
-      };
-    })
-    .sort((a, b) =>
-      b.playoffOdds !== a.playoffOdds
-        ? b.playoffOdds - a.playoffOdds
-        : a.averageSeed - b.averageSeed
-    );
+const {
+  replayComparisonChartOptions,
+  replayComparisonSeries,
+  replayRecordChartOptions,
+  replayRecordSeries,
+  replayRows,
+  replayRunCount,
+  replayThroughWeekOptions,
+  replayThroughWeekValue,
+  rerunSeasonReplay,
+} = useSeasonReplay({
+  tableData,
+  actualStandings,
+  displayedWeekCount,
+  regularSeasonWeekCount,
+  fullSeasonOpponents,
+  playoffCutoff,
+  usesMedianScoring,
+  teamName,
 });
-
-const replayComparisonRows = computed(() =>
-  [...replayRows.value].sort(
-    (a, b) =>
-      Math.abs(b.actualWins - b.averageWins) -
-      Math.abs(a.actualWins - a.averageWins)
-  )
-);
-
-const replayComparisonSeries = computed(() => [
-  {
-    name: "Actual wins",
-    data: replayComparisonRows.value.map((team) => team.actualWins),
-  },
-  {
-    name: "Projected wins",
-    data: replayComparisonRows.value.map((team) => team.averageWins),
-  },
-]);
-
-const replayComparisonChartOptions = computed(() => ({
-  chart: {
-    type: "bar",
-    foreColor: "hsl(var(--foreground))",
-    toolbar: { show: false },
-    animations: { enabled: false },
-  },
-  colors: ["hsl(var(--chart-1))", "hsl(var(--chart-3))"],
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      borderRadius: 3,
-      barHeight: "70%",
-    },
-  },
-  dataLabels: { enabled: false },
-  xaxis: {
-    categories: replayComparisonRows.value.map((team) => team.name),
-    title: { text: "Wins" },
-    min: 0,
-    max: usesMedianScoring.value
-      ? replayWeekCount.value * 2
-      : replayWeekCount.value,
-    tickAmount: usesMedianScoring.value
-      ? Math.min(replayWeekCount.value * 2, 10)
-      : Math.min(replayWeekCount.value, 10),
-  },
-  yaxis: {
-    labels: {
-      maxWidth: 180,
-    },
-  },
-  legend: {
-    position: "top",
-    horizontalAlign: "left",
-  },
-  tooltip: {
-    theme: store.darkMode ? "dark" : "light",
-    y: {
-      formatter: (value: number) => `${value.toFixed(2)} wins`,
-    },
-  },
-}));
-
-const replayRecordSeries = computed(() => {
-  return props.tableData.map((team, index) => ({
-    name: teamName(team),
-    data: replayWeeklyWinsByTeam.value[index] || [],
-  }));
-});
-
-const replayRecordChartOptions = computed(() => ({
-  chart: {
-    type: "line",
-    foreColor: "hsl(var(--foreground))",
-    toolbar: { show: false },
-    zoom: { enabled: false },
-    animations: {
-      enabled: true,
-      easing: "easeinout",
-      speed: 900,
-      animateGradually: { enabled: true, delay: 80 },
-      dynamicAnimation: { enabled: true, speed: 500 },
-    },
-  },
-  colors: Array.from(
-    { length: props.tableData.length },
-    (_, index) => `hsl(var(--chart-rank-${(index % 12) + 1}))`
-  ),
-  stroke: {
-    curve: "smooth",
-    width: 2.5,
-  },
-  markers: {
-    size: 3,
-    hover: { size: 6 },
-  },
-  dataLabels: { enabled: false },
-  xaxis: {
-    categories: Array.from(
-      { length: replayWeekCount.value },
-      (_, index) => `Week ${index + 1}`
-    ),
-    tickAmount: Math.max(0, Math.min(replayWeekCount.value - 1, 13)),
-    labels: { rotate: -45, rotateAlways: replayWeekCount.value > 8 },
-  },
-  yaxis: {
-    min: 0,
-    max: usesMedianScoring.value
-      ? replayWeekCount.value * 2
-      : replayWeekCount.value,
-    forceNiceScale: true,
-    title: { text: "Average cumulative wins" },
-  },
-  legend: {
-    position: "bottom",
-    horizontalAlign: "center",
-    onItemClick: { toggleDataSeries: true },
-    onItemHover: { highlightDataSeries: true },
-  },
-  grid: {
-    borderColor: "hsl(var(--border))",
-  },
-  tooltip: {
-    shared: true,
-    intersect: false,
-    theme: store.darkMode ? "dark" : "light",
-    y: { formatter: (value: number) => `${value.toFixed(2)} wins` },
-  },
-}));
-
-function runSeasonReplay() {
-  const teamCount = props.tableData.length;
-  const weeks = replayWeekCount.value;
-  const runs = Math.max(500, Math.min(10000, Math.floor(replayRuns.value)));
-  if (teamCount === 0 || weeks === 0) {
-    replaySummaryByTeam.value = {};
-    replayWeeklyWinsByTeam.value = [];
-    replayRunCount.value = 0;
-    return;
-  }
-  const actualSeedByTeam = new Map<number, number>();
-  actualStandings.value.forEach((team, index) => {
-    actualSeedByTeam.set(team.index, index + 1);
-  });
-  const result = runReplaySimulation({
-    teams: props.tableData.map((team, index) => ({
-      index,
-      wins: team.wins,
-      losses: team.losses,
-      ties: team.ties ?? 0,
-      pointsFor: team.pointsFor,
-      scores: (team.points || [])
-        .slice(0, weeks)
-        .filter((score) => Number.isFinite(score) && score >= 0),
-      actualSeed: actualSeedByTeam.get(index) ?? index + 1,
-    })),
-    actualScores: props.tableData.map((team) => team.points || []),
-    opponents: fullSeasonOpponents.value,
-    weeks,
-    keepResultsThroughWeek: replayThroughWeek.value,
-    playoffCutoff: playoffCutoff.value,
-    medianScoring: usesMedianScoring.value,
-    runs,
-  });
-  replaySummaryByTeam.value = result.summaryByTeam;
-  replayWeeklyWinsByTeam.value = result.weeklyWinsByTeam;
-  replayRunCount.value = result.runCount;
-}
-
-const rerunSeasonReplay = () => {
-  runSeasonReplay();
-  if (replayRunCount.value <= 0) return;
-  trackEvent("Feature Action Completed", {
-    feature: "season_forecast",
-    action: "replay_run",
-    simulation_count: replayRunCount.value,
-    through_week: replayThroughWeek.value,
-    ...getLeagueAnalyticsProperties(
-      store.leagueInfo[store.currentLeagueIndex]
-    ),
-  });
-};
-
-watch(
-  [() => props.tableData, regularSeasonWeekCount, displayedWeekCount],
-  () => {
-    if (isCurrentSeasonLeague.value && !hasCurrentForecastProjections.value) {
-      return;
-    }
-    runSeasonForecast();
-  },
-  { immediate: true, deep: true }
-);
-
-watch(
-  [activeToolValue, () => store.currentLeagueId, isCurrentSeasonLeague],
-  async () => {
-    if (
-      activeToolValue.value === "season-simulation" &&
-      isCurrentSeasonLeague.value
-    ) {
-      await loadForecastProjections();
-    }
-  },
-  { immediate: true }
-);
-
-watch(
-  [
-    () => props.tableData,
-    replayWeekCount,
-    replayThroughWeek,
-    fullSeasonOpponents,
-  ],
-  () => runSeasonReplay(),
-  { immediate: true, deep: true }
-);
-
-watch(
-  replayWeekCount,
-  (count) => {
-    if (count <= 0) return;
-    const selectedWeek = Number(replayThroughWeekValue.value);
-    const normalizedWeek = Number.isFinite(selectedWeek)
-      ? Math.min(Math.max(Math.floor(selectedWeek), 1), count)
-      : 1;
-    if (normalizedWeek !== selectedWeek) {
-      replayThroughWeekValue.value = String(normalizedWeek);
-    }
-  },
-  { immediate: true }
-);
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { getLeagueKey, useStore } from "../../store/store.ts";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
@@ -20,28 +20,28 @@ import {
   NARRATIVE_BUNDLE_CACHE_TTL_MS,
   setCachedValue,
 } from "@/lib/leagueStorage";
-import type { HistoryLoadStatus } from "@/lib/historyLoad";
 import {
   getPreviousLeagueEntries,
   isLeagueInfoEntry,
 } from "@/lib/previousSeason";
+import { useLeagueHistory } from "@/composables/useLeagueHistory";
+import {
+  buildHistoricalManagerRows,
+  type HistoricalManagerRow,
+} from "@/lib/leagueHistory";
 
 const store = useStore();
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
-const LeagueHistory = defineAsyncComponent(
-  () => import("../league_history/LeagueHistory.vue")
-);
-
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
 const seasons = computed(() =>
-  normalizeHistoricalSeasons(store.leagueInfo[store.currentLeagueIndex])
+  normalizeHistoricalSeasons(store.currentLeague)
 );
 
 const getNarrativeCacheKey = () => {
-  const league = store.leagueInfo[store.currentLeagueIndex];
+  const league = store.currentLeague;
   return league
     ? getNarrativeBundleCacheKey(getLeagueKey(league))
     : null;
@@ -54,16 +54,10 @@ const isNarrativeBundle = (value: unknown): value is NarrativeBundle =>
   Array.isArray(value.managerArchetypes);
 
 const narratives = ref<NarrativeBundle>({ managerArchetypes: [] });
-const leagueHistoryStatus = ref<HistoryLoadStatus>({
-  leagueKey: "",
-  loading: false,
-  settled: false,
-  complete: false,
-  loaded: 0,
-  total: 0,
-  loadingSeason: "",
-  failures: [],
-});
+const {
+  status: leagueHistoryStatus,
+  loadingYear: leagueHistoryLoadingYear,
+} = useLeagueHistory();
 const isLeagueHistoryReady = computed(
   () => leagueHistoryStatus.value.settled
 );
@@ -71,31 +65,9 @@ const isLeagueHistoryComplete = computed(
   () => leagueHistoryStatus.value.complete
 );
 
-type PointSeasonEntry = {
-  season: string;
-  points: number[];
-};
-
-type HistoricalManagerRow = {
-  id: string;
-  name: string;
-  username: string;
-  avatarImg?: string;
-  matchups: (number | null)[];
-  pointsArr: number[];
-  leagueWinner: (number | null)[];
-  rosterId: number;
-  pointSeason: PointSeasonEntry[];
-  wins: number;
-  losses: number;
-  points: number;
-  randomScheduleWins: number;
-  managerEfficiency: number;
-  seasons: string[];
-};
-
-const historicalManagerRows = ref<HistoricalManagerRow[]>([]);
-const leagueHistoryLoadingYear = ref("");
+const historicalManagerRows = computed<HistoricalManagerRow[]>(() =>
+  buildHistoricalManagerRows(props.tableData, store.currentLeague)
+);
 const areNarrativesReady = computed(
   () => narratives.value.managerArchetypes.length > 0
 );
@@ -130,7 +102,7 @@ const hydrateLeagueDraftPicks = async (league: LeagueInfoType) => {
 };
 
 const ensureHistoricalDraftData = async () => {
-  const currentLeague = store.leagueInfo[store.currentLeagueIndex];
+  const currentLeague = store.currentLeague;
   if (!currentLeague) {
     return;
   }
@@ -145,7 +117,7 @@ const ensureHistoricalDraftData = async () => {
 const rebuildNarratives = async (cacheResult = true) => {
   const cacheKey = getNarrativeCacheKey();
   const rebuiltNarratives = await buildNarrativeBundle(
-    normalizeHistoricalSeasons(store.leagueInfo[store.currentLeagueIndex])
+    normalizeHistoricalSeasons(store.currentLeague)
   );
 
   if (cacheKey !== getNarrativeCacheKey()) return;
@@ -307,8 +279,8 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
 
   return {
     league: {
-      leagueId: store.leagueInfo[store.currentLeagueIndex]?.leagueId ?? "",
-      leagueName: store.leagueInfo[store.currentLeagueIndex]?.name ?? "",
+      leagueId: store.currentLeague?.leagueId ?? "",
+      leagueName: store.currentLeague?.name ?? "",
       seasonsAnalyzed: seasons.value.length,
       totalManagers: narratives.value.managerArchetypes.length,
     },
@@ -351,13 +323,6 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
 </script>
 <template>
   <div class="my-4 space-y-4">
-    <LeagueHistory
-      data-only
-      :table-data="props.tableData"
-      @history-status="leagueHistoryStatus = $event"
-      @history-data="historicalManagerRows = $event"
-      @loading-year="leagueHistoryLoadingYear = $event"
-    />
     <ManagerArchetypesCard
       v-if="areNarrativesReady"
       :archetypes="narratives.managerArchetypes"
