@@ -3,6 +3,8 @@ import handler, { isAllowedEspnUrl } from "../api/espn.ts";
 
 const validUrl =
   "https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/2025/segments/0/leagues/123456?view=mSettings";
+const activityUrl =
+  "https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/2025/segments/0/leagues/123456/communication/?view=kona_league_communication";
 
 const createResponse = () => {
   const headers = new Map();
@@ -29,9 +31,17 @@ afterEach(() => {
 describe("ESPN proxy hardening", () => {
   test("allows only supported fantasy league URLs", () => {
     expect(isAllowedEspnUrl(new URL(validUrl))).toBe(true);
+    expect(isAllowedEspnUrl(new URL(activityUrl))).toBe(true);
     expect(
       isAllowedEspnUrl(
         new URL("https://lm-api-reads.fantasy.espn.com/admin?view=mSettings")
+      )
+    ).toBe(false);
+    expect(
+      isAllowedEspnUrl(
+        new URL(
+          `${activityUrl}&view=mSettings`
+        )
       )
     ).toBe(false);
     expect(
@@ -48,6 +58,36 @@ describe("ESPN proxy hardening", () => {
         )
       )
     ).toBe(false);
+  });
+
+  test("adds a fixed trade activity filter for authenticated activity requests", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(createFetchResponse('{"topics":[]}'));
+    vi.stubGlobal("fetch", fetchMock);
+    const res = createResponse();
+
+    await handler(
+      {
+        method: "POST",
+        body: {
+          url: activityUrl,
+          swid: "{abc}",
+          espnS2: "token",
+          activityOffset: 25,
+        },
+      },
+      res
+    );
+
+    expect(res.statusCode).toBe(200);
+    const [, request] = fetchMock.mock.calls[0];
+    const filter = JSON.parse(request.headers["X-Fantasy-Filter"]);
+    expect(filter.topics).toMatchObject({
+      filterType: { value: ["ACTIVITY_TRANSACTIONS"] },
+      offset: 25,
+      filterIncludeMessageTypeIds: { value: [244] },
+    });
   });
 
   test("sets no-store headers and proxies valid JSON", async () => {

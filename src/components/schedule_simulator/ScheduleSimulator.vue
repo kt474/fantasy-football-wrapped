@@ -3,9 +3,7 @@ import { computed, ref, watch } from "vue";
 import { TableDataType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 import { useStore } from "../../store/store";
-import {
-  recordPoints,
-} from "./seasonSimulation";
+import { recordPoints } from "./seasonSimulation";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
@@ -103,8 +101,7 @@ const displayedWeekCount = computed(() => {
 });
 
 const regularSeasonWeekCount = computed(() => {
-  const configured =
-    store.currentLeague?.regularSeasonLength || 0;
+  const configured = store.currentLeague?.regularSeasonLength || 0;
   return Math.max(configured, displayedWeekCount.value);
 });
 
@@ -312,8 +309,7 @@ const selectedVolatilityTeamIndex = computed(() => {
 });
 
 const playoffCutoff = computed(() => {
-  const playoffTeams =
-    store.currentLeague?.playoffTeams || 0;
+  const playoffTeams = store.currentLeague?.playoffTeams || 0;
   if (playoffTeams > 0) {
     return Math.min(playoffTeams, props.tableData.length);
   }
@@ -1179,7 +1175,6 @@ const {
           aria-live="polite"
           class="flex items-center gap-2 p-3 mt-4 text-sm rounded-md bg-muted/35 text-muted-foreground"
         >
-          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
           Updating player projections and rerunning the forecast…
         </div>
         <div

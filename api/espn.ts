@@ -1,6 +1,8 @@
 const ESPN_HOST = "lm-api-reads.fantasy.espn.com";
-const ESPN_PATH_PATTERN =
+const ESPN_LEAGUE_PATH_PATTERN =
   /^\/apis\/v3\/games\/ffl\/seasons\/\d{4}\/segments\/0\/leagues\/\d+$/;
+const ESPN_ACTIVITY_PATH_PATTERN =
+  /^\/apis\/v3\/games\/ffl\/seasons\/\d{4}\/segments\/0\/leagues\/\d+\/communication\/?$/;
 const ALLOWED_QUERY_KEYS = new Set(["view", "scoringPeriodId"]);
 const ALLOWED_VIEWS = new Set([
   "mSettings",
@@ -11,6 +13,9 @@ const ALLOWED_VIEWS = new Set([
   "mScoreboard",
   "mTransactions2",
 ]);
+const ESPN_ACTIVITY_VIEW = "kona_league_communication";
+const ESPN_ACTIVITY_PAGE_SIZE = 25;
+const MAX_ACTIVITY_OFFSET = 250;
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_URL_LENGTH = 4_096;
 const MAX_SWID_LENGTH = 256;
@@ -22,6 +27,7 @@ type EspnProxyBody = {
   url?: unknown;
   swid?: unknown;
   espnS2?: unknown;
+  activityOffset?: unknown;
 };
 
 type ApiRequest = {
@@ -57,6 +63,9 @@ const hasValidCredentialFormat = (value: string, maxLength: number) =>
   !CONTROL_CHARACTER_PATTERN.test(value);
 
 export const isAllowedEspnUrl = (parsedUrl: URL) => {
+  const isLeagueRequest = ESPN_LEAGUE_PATH_PATTERN.test(parsedUrl.pathname);
+  const isActivityRequest = ESPN_ACTIVITY_PATH_PATTERN.test(parsedUrl.pathname);
+
   if (
     parsedUrl.protocol !== "https:" ||
     parsedUrl.hostname !== ESPN_HOST ||
@@ -64,7 +73,7 @@ export const isAllowedEspnUrl = (parsedUrl: URL) => {
     parsedUrl.username ||
     parsedUrl.password ||
     parsedUrl.hash ||
-    !ESPN_PATH_PATTERN.test(parsedUrl.pathname)
+    (!isLeagueRequest && !isActivityRequest)
   ) {
     return false;
   }
@@ -73,7 +82,10 @@ export const isAllowedEspnUrl = (parsedUrl: URL) => {
     if (!ALLOWED_QUERY_KEYS.has(key)) {
       return false;
     }
-    if (key === "view" && !ALLOWED_VIEWS.has(value)) {
+    if (
+      key === "view" &&
+      !(isLeagueRequest ? ALLOWED_VIEWS.has(value) : value === ESPN_ACTIVITY_VIEW)
+    ) {
       return false;
     }
     if (
@@ -84,8 +96,30 @@ export const isAllowedEspnUrl = (parsedUrl: URL) => {
     }
   }
 
-  return parsedUrl.searchParams.has("view");
+  return (
+    parsedUrl.searchParams.has("view") &&
+    (!isActivityRequest ||
+      (parsedUrl.searchParams.getAll("view").length === 1 &&
+        parsedUrl.searchParams.get("view") === ESPN_ACTIVITY_VIEW &&
+        !parsedUrl.searchParams.has("scoringPeriodId")))
+  );
 };
+
+const isEspnActivityUrl = (parsedUrl: URL) =>
+  ESPN_ACTIVITY_PATH_PATTERN.test(parsedUrl.pathname);
+
+const getActivityFilter = (offset: number) =>
+  JSON.stringify({
+    topics: {
+      filterType: { value: ["ACTIVITY_TRANSACTIONS"] },
+      limit: ESPN_ACTIVITY_PAGE_SIZE,
+      limitPerMessageSet: { value: ESPN_ACTIVITY_PAGE_SIZE },
+      offset,
+      sortMessageDate: { sortPriority: 1, sortAsc: false },
+      sortFor: { sortPriority: 2, sortAsc: false },
+      filterIncludeMessageTypeIds: { value: [244] },
+    },
+  });
 
 const readLimitedResponse = async (response: Response) => {
   const contentLength = Number(response.headers.get("content-length") ?? 0);
@@ -132,7 +166,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return;
   }
 
-  const { url, swid, espnS2 } = req.body ?? {};
+  const { url, swid, espnS2, activityOffset } = req.body ?? {};
 
   if (
     typeof url !== "string" ||
@@ -159,15 +193,35 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return;
   }
 
+  const isActivityRequest = isEspnActivityUrl(parsedUrl);
+  const normalizedActivityOffset = activityOffset ?? 0;
+  if (
+    (isActivityRequest &&
+      (!Number.isInteger(normalizedActivityOffset) ||
+        Number(normalizedActivityOffset) < 0 ||
+        Number(normalizedActivityOffset) > MAX_ACTIVITY_OFFSET)) ||
+    (!isActivityRequest && activityOffset !== undefined)
+  ) {
+    sendJson(res, 400, { error: "Invalid ESPN activity offset" });
+    return;
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const response = await fetch(parsedUrl.toString(), {
-      headers: {
+    const headers: Record<string, string> = {
         Accept: "application/json",
         Cookie: `SWID=${swid}; espn_s2=${espnS2}`,
-      },
+    };
+    if (isActivityRequest) {
+      headers["X-Fantasy-Filter"] = getActivityFilter(
+        Number(normalizedActivityOffset)
+      );
+    }
+
+    const response = await fetch(parsedUrl.toString(), {
+      headers,
       redirect: "error",
       signal: controller.signal,
     });

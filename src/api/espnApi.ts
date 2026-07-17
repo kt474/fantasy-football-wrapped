@@ -1,4 +1,9 @@
-import type { DraftPick } from "@/types/apiTypes";
+import {
+  WaiverStatus,
+  WaiverType,
+  type DraftPick,
+  type WeeklyWaiver,
+} from "@/types/apiTypes";
 import type {
   LeagueDraftMetadata,
   LeagueInfoType,
@@ -6,10 +11,7 @@ import type {
   RosterType,
   UserType,
 } from "@/types/types";
-import {
-  getPlayerIdLookupMap,
-  getPlayerIdsByNameTeamMap,
-} from "@/api/api";
+import { getPlayerIdLookupMap, getPlayerIdsByNameTeamMap } from "@/api/api";
 import {
   getPlayerLookupKey,
   type PlayerNameTeamLookup,
@@ -26,6 +28,8 @@ import {
 } from "@/lib/request";
 
 const ESPN_BASE_URL = "https://lm-api-reads.fantasy.espn.com";
+const ESPN_ACTIVITY_PAGE_SIZE = 25;
+const ESPN_ACTIVITY_MAX_PAGES = 10;
 
 export type EspnAuth = {
   swid: string;
@@ -221,7 +225,7 @@ const safeJson = async (response: Response) => {
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
       throw new EspnLeagueError(
-        "This ESPN league appears to be private. Please enter your ESPN SWID and espn_2 credentials.",
+        "This ESPN league appears to be private. Please enter your ESPN SWID and espn_s2 credentials.",
         "private"
       );
     }
@@ -242,7 +246,8 @@ const safeJson = async (response: Response) => {
 const fetchEspnJson = async (
   url: string,
   auth?: EspnAuth,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  proxyOptions: { activityOffset?: number } = {}
 ) => {
   if (!auth) {
     return safeJson(await fetchWithRetry(url, { signal }));
@@ -257,6 +262,7 @@ const fetchEspnJson = async (
       url,
       swid: auth.swid,
       espnS2: auth.espnS2,
+      ...proxyOptions,
     }),
     signal,
   });
@@ -279,6 +285,62 @@ const assertArray = <T = unknown>(value: unknown, message: string): T[] => {
     throw new EspnLeagueError(message, "invalid_response");
   }
   return value as T[];
+};
+
+interface EspnActivityMessage extends Record<string, unknown> {
+  messageTypeId?: number;
+  from?: number;
+  to?: number;
+  targetId?: number | string;
+  scoringPeriodId?: number;
+}
+
+interface EspnActivityTopic extends Record<string, unknown> {
+  id?: string;
+  date?: number;
+  scoringPeriodId?: number;
+  messages?: EspnActivityMessage[];
+}
+
+type EspnTradeActivityResult = {
+  activities: EspnActivityTopic[];
+  available: boolean;
+};
+
+const getEspnTradeActivities = async (
+  season: string,
+  leagueId: string,
+  auth: EspnAuth,
+  signal: AbortSignal
+): Promise<EspnTradeActivityResult> => {
+  const url = `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${leagueId}/communication/?view=kona_league_communication`;
+  const activities: EspnActivityTopic[] = [];
+
+  try {
+    for (let page = 0; page < ESPN_ACTIVITY_MAX_PAGES; page += 1) {
+      const response = assertRecord(
+        await fetchEspnJson(url, auth, signal, {
+          activityOffset: page * ESPN_ACTIVITY_PAGE_SIZE,
+        }),
+        "ESPN trade activity data is invalid."
+      );
+      const topics = assertArray<EspnActivityTopic>(
+        response.topics ?? [],
+        "ESPN trade activity data is invalid."
+      );
+      activities.push(...topics);
+
+      if (topics.length < ESPN_ACTIVITY_PAGE_SIZE) {
+        break;
+      }
+    }
+
+    return { activities, available: true };
+  } catch (error) {
+    if (isRequestCancellation(error) || signal.aborted) throw error;
+    console.error("Unable to load ESPN trade activity:", error);
+    return { activities: [], available: false };
+  }
 };
 
 const getTeamRecord = (team: Record<string, unknown>) => {
@@ -417,6 +479,121 @@ const mergeTeams = (
   });
 
   return Array.from(merged.values());
+};
+
+const getEspnTradeWeek = (
+  activity: EspnActivityTopic,
+  transactionWeeks: Array<Array<Record<string, unknown>>>,
+  lastScoredWeek: number
+) => {
+  const messages = Array.isArray(activity.messages) ? activity.messages : [];
+  const explicitWeek = Number(
+    activity.scoringPeriodId ??
+      messages.find((message) => message.scoringPeriodId != null)
+        ?.scoringPeriodId ??
+      0
+  );
+  if (explicitWeek > 0) return explicitWeek;
+
+  const activityDate = Number(activity.date ?? 0);
+  const closestTransaction = transactionWeeks
+    .flat()
+    .filter((transaction) =>
+      String(transaction.type ?? "").startsWith("TRADE")
+    )
+    .map((transaction) => {
+      const transactionDate = Number(
+        transaction.processDate ??
+          transaction.acceptedDate ??
+          transaction.proposedDate ??
+          0
+      );
+      return {
+        week: Number(transaction.scoringPeriodId ?? 0),
+        distance:
+          activityDate > 0 && transactionDate > 0
+            ? Math.abs(activityDate - transactionDate)
+            : Number.POSITIVE_INFINITY,
+      };
+    })
+    .filter(({ week }) => week > 0)
+    .sort((a, b) => a.distance - b.distance)[0];
+
+  return closestTransaction?.week ?? Math.max(lastScoredWeek, 1);
+};
+
+const getEspnTrades = (
+  activities: EspnActivityTopic[],
+  transactionWeeks: Array<Array<Record<string, unknown>>>,
+  teams: Array<Record<string, unknown>>,
+  sleeperPlayerIdByEspnId: Map<string, string>,
+  lastScoredWeek: number
+): WeeklyWaiver[] => {
+  const teamById = new Map(
+    teams.map((team) => [Number(team.id ?? 0), team] as const)
+  );
+  const seenActivityIds = new Set<string>();
+
+  return activities.flatMap((activity) => {
+    const messages = (Array.isArray(activity.messages)
+      ? activity.messages
+      : []
+    ).filter((message) => Number(message.messageTypeId ?? 0) === 244);
+    const activityId =
+      String(activity.id ?? "").trim() ||
+      `${String(activity.date ?? 0)}:${messages
+        .map(
+          (message) =>
+            `${String(message.from ?? "")}-${String(message.to ?? "")}-${String(message.targetId ?? "")}`
+        )
+        .join("|")}`;
+    if (seenActivityIds.has(activityId)) return [];
+    seenActivityIds.add(activityId);
+
+    const adds: Record<string, number> = {};
+    const drops: Record<string, number> = {};
+    const rosterIds = new Set<number>();
+
+    messages.forEach((message) => {
+      const fromTeamId = Number(message.from ?? 0);
+      const toTeamId = Number(message.to ?? 0);
+      const sleeperPlayerId = sleeperPlayerIdByEspnId.get(
+        String(message.targetId ?? "")
+      );
+      if (fromTeamId > 0) rosterIds.add(fromTeamId);
+      if (toTeamId > 0) rosterIds.add(toTeamId);
+      if (!sleeperPlayerId || fromTeamId <= 0 || toTeamId <= 0) return;
+      adds[sleeperPlayerId] = toTeamId;
+      drops[sleeperPlayerId] = fromTeamId;
+    });
+
+    const normalizedRosterIds = Array.from(rosterIds);
+    if (normalizedRosterIds.length < 2 || Object.keys(adds).length === 0) {
+      return [];
+    }
+
+    const created = Number(activity.date ?? 0);
+    const creatorTeam = teamById.get(normalizedRosterIds[0]);
+    return [
+      {
+        status: WaiverStatus.Complete,
+        type: WaiverType.Trade,
+        metadata: null,
+        created,
+        settings: null,
+        leg: getEspnTradeWeek(activity, transactionWeeks, lastScoredWeek),
+        draft_picks: [],
+        creator: getEspnPrimaryOwnerId(creatorTeam ?? {}),
+        transaction_id: activityId,
+        adds,
+        consenter_ids: normalizedRosterIds,
+        drops,
+        roster_ids: normalizedRosterIds,
+        status_updated: created,
+        waiver_budget: [],
+      },
+    ];
+  });
 };
 
 const getRosterEntries = (team: Record<string, unknown>) => {
@@ -914,11 +1091,13 @@ const getDraftPicks = async (
         sleeperPlayerId == null
           ? Promise.resolve(null)
           : (playerStatsCache.get(sleeperPlayerId) ??
-            getStats(sleeperPlayerId, season, scoringType, signal).catch((error) => {
-              if (isRequestCancellation(error)) throw error;
-              console.error("Error fetching ESPN draft player stats:", error);
-              return null;
-            }));
+            getStats(sleeperPlayerId, season, scoringType, signal).catch(
+              (error) => {
+                if (isRequestCancellation(error)) throw error;
+                console.error("Error fetching ESPN draft player stats:", error);
+                return null;
+              }
+            ));
 
       if (sleeperPlayerId != null) {
         playerStatsCache.set(sleeperPlayerId, playerStatsPromise);
@@ -1415,21 +1594,26 @@ const getEspnLeagueInfoWithSignal = async (
         getEspnScheduleFromWeeklyData(weeklyScoringData, week)
       )
     : schedule;
-  const waivers = await Promise.all(
-    completedWeeks.map(async (week) => {
-      const waiverData = assertRecord(
-        await getWaivers(season, leagueId, week, auth, signal),
-        `ESPN transaction data is missing for week ${week}.`
-      );
-      return assertArray<Record<string, unknown>>(
-        waiverData.transactions ?? [],
-        `ESPN transaction data is invalid for week ${week}.`
-      ).filter(
-        (transaction: any) =>
-          transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
-      );
-    })
-  );
+  const [waivers, tradeActivityResult] = await Promise.all([
+    Promise.all(
+      completedWeeks.map(async (week) => {
+        const waiverData = assertRecord(
+          await getWaivers(season, leagueId, week, auth, signal),
+          `ESPN transaction data is missing for week ${week}.`
+        );
+        return assertArray<Record<string, unknown>>(
+          waiverData.transactions ?? [],
+          `ESPN transaction data is invalid for week ${week}.`
+        ).filter(
+          (transaction: any) =>
+            transaction.status === "EXECUTED" && transaction.type !== "DRAFT"
+        );
+      })
+    ),
+    auth
+      ? getEspnTradeActivities(season, leagueId, auth, signal)
+      : Promise.resolve({ activities: [], available: false }),
+  ]);
   const recordByWeekMap = getRecordByWeekMap(
     teams,
     weeklySchedule,
@@ -1477,6 +1661,13 @@ const getEspnLeagueInfoWithSignal = async (
   const sleeperPlayerIdByEspnId = getSleeperPlayerIdByEspnIdMap(
     allPlayerLookups,
     playerLookupMap
+  );
+  const trades = getEspnTrades(
+    tradeActivityResult.activities,
+    waivers,
+    teams,
+    sleeperPlayerIdByEspnId,
+    lastScoredWeek
   );
   // TODO cleanup this logic
   const enrichedWaivers = waivers
@@ -1593,7 +1784,7 @@ const getEspnLeagueInfoWithSignal = async (
       playerLookupMap
     ),
     transactions: transactions,
-    trades: [],
+    trades,
     waivers: enrichedWaivers as unknown as LeagueInfoType["waivers"],
     previousLeagues:
       (status.previousSeasons as LeagueInfoType[] | undefined) ?? [],
@@ -1606,6 +1797,7 @@ const getEspnLeagueInfoWithSignal = async (
     ),
     playoffTeams: Number(scheduleSettings.playoffTeamCount ?? 0),
     espnPlayoffMatchupPeriods,
+    espnTradeDataAvailable: tradeActivityResult.available,
     playoffType: 0,
     draftId: String(draftData?.id ?? draftData?.draftDetail?.id ?? ""),
     draftPicks,

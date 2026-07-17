@@ -34,6 +34,7 @@ export type LeagueInfoType = {
   rosterPositions: string[];
   playoffTeams: number;
   espnPlayoffMatchupPeriods?: number[][];
+  espnTradeDataAvailable?: boolean;
   playoffProjections?: PlayoffProjection[];
   weeklyReport?: string;
   premiumWeeklyReports?: Record<number, PremiumReport>;

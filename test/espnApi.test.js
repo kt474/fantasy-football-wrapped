@@ -420,6 +420,19 @@ const buildEspnFixture = () => {
         ],
       },
     ],
+    tradeActivity: {
+      topics: [
+        {
+          id: "trade-topic-1",
+          date: 1_700_000_000_000,
+          scoringPeriodId: 2,
+          messages: [
+            { messageTypeId: 244, from: 1, to: 2, targetId: 101 },
+            { messageTypeId: 244, from: 2, to: 1, targetId: 202 },
+          ],
+        },
+      ],
+    },
   };
 };
 
@@ -442,44 +455,52 @@ const installEspnFetchMock = (fixture) => {
       ...fixture.playoffData.schedule,
     ],
   };
-  const fetchMock = vi.fn(async (url) => {
+  const fetchMock = vi.fn(async (url, init = {}) => {
     const urlString = String(url);
+    const requestBody =
+      urlString === "/api/espn" && typeof init.body === "string"
+        ? JSON.parse(init.body)
+        : null;
+    const targetUrl = requestBody?.url ?? urlString;
 
-    if (urlString.includes("view=mSettings")) {
+    if (targetUrl.includes("view=kona_league_communication")) {
+      return mockFetchResponse(200, fixture.tradeActivity ?? { topics: [] });
+    }
+    if (targetUrl.includes("view=mSettings")) {
       return mockFetchResponse(200, fixture.league);
     }
-    if (urlString.includes("view=mTeam")) {
+    if (targetUrl.includes("view=mTeam")) {
       return mockFetchResponse(200, fixture.teamData);
     }
-    if (urlString.includes("view=mRoster")) {
+    if (targetUrl.includes("view=mRoster")) {
       return mockFetchResponse(200, fixture.rosterData);
     }
-    if (urlString.includes("view=mDraftDetail")) {
+    if (targetUrl.includes("view=mDraftDetail")) {
       return mockFetchResponse(200, fixture.draftData);
     }
     if (
-      urlString.includes("view=mMatchupScore") &&
-      urlString.includes("scoringPeriodId=1")
+      targetUrl.includes("view=mMatchupScore") &&
+      targetUrl.includes("scoringPeriodId=1")
     ) {
       return mockFetchResponse(200, fixture.weeklyScoring[0]);
     }
     if (
-      urlString.includes("view=mMatchupScore") &&
-      urlString.includes("scoringPeriodId=2")
+      targetUrl.includes("view=mMatchupScore") &&
+      targetUrl.includes("scoringPeriodId=2")
     ) {
       return mockFetchResponse(200, fixture.weeklyScoring[1]);
     }
-    if (urlString.includes("view=mTransactions2&scoringPeriodId=1")) {
+    if (targetUrl.includes("view=mTransactions2&scoringPeriodId=1")) {
       return mockFetchResponse(200, fixture.waivers[0]);
     }
-    if (urlString.includes("view=mTransactions2&scoringPeriodId=2")) {
+    if (targetUrl.includes("view=mTransactions2&scoringPeriodId=2")) {
       return mockFetchResponse(200, fixture.waivers[1]);
     }
-    if (urlString.includes("view=mMatchupScore")) {
+    if (targetUrl.includes("view=mMatchupScore")) {
       return mockFetchResponse(200, fullScoreboardData);
     }
 
-    throw new Error(`Unhandled ESPN fixture URL: ${urlString}`);
+    throw new Error(`Unhandled ESPN fixture URL: ${targetUrl}`);
   });
 
   vi.stubGlobal("fetch", fetchMock);
@@ -623,6 +644,7 @@ describe("ESPN API transforms", () => {
       rosterPositions: ["RB", "WR"],
       playoffTeams: 2,
       espnPlayoffMatchupPeriods: [[3]],
+      espnTradeDataAvailable: false,
       playoffType: 0,
       draftId: "draft-123",
       waiverType: 2,
@@ -784,6 +806,60 @@ describe("ESPN API transforms", () => {
     expect(league.espnWinnersBracket).toHaveLength(1);
     expect(league.espnLosersBracket).toEqual([]);
     expect(league.previousLeagues).toEqual(["2024", "2023"]);
+  });
+
+  test("normalizes authenticated ESPN trade activity", async () => {
+    const fixture = buildEspnFixture();
+    const fetchMock = installEspnFetchMock(fixture);
+    const playerIdMap = new Map([
+      ["alpha runner::ATL", "s-alpha-runner"],
+      ["alpha receiver::BUF", "s-alpha-receiver"],
+      ["alpha bench::ATL", "s-alpha-bench"],
+      ["beta runner::BUF", "s-beta-runner"],
+      ["beta receiver::ATL", "s-beta-receiver"],
+    ]);
+
+    mocks.getPlayerIdLookupMap.mockResolvedValue(playerIdMap);
+    mocks.getPlayerIdsByNameTeamMap.mockImplementation(async (players) =>
+      players.map(
+        ({ name, team }) =>
+          playerIdMap.get(`${name.trim().toLowerCase()}::${team}`) ?? null
+      )
+    );
+    mocks.getStats.mockResolvedValue({ rank: 8, ppg: 12 });
+
+    const league = await getEspnLeagueInfo("2025", "12345", {
+      swid: "{abc}",
+      espnS2: "secret",
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(8);
+    expect(league.espnTradeDataAvailable).toBe(true);
+    expect(league.trades).toEqual([
+      expect.objectContaining({
+        status: "complete",
+        type: "trade",
+        leg: 2,
+        transaction_id: "trade-topic-1",
+        roster_ids: [1, 2],
+        adds: {
+          "s-alpha-runner": 2,
+          "s-beta-receiver": 1,
+        },
+        drops: {
+          "s-alpha-runner": 1,
+          "s-beta-receiver": 2,
+        },
+      }),
+    ]);
+    const activityRequest = fetchMock.mock.calls.find(([, init]) =>
+      String(init?.body ?? "").includes("kona_league_communication")
+    );
+    expect(JSON.parse(activityRequest[1].body)).toMatchObject({
+      activityOffset: 0,
+      swid: "{abc}",
+      espnS2: "secret",
+    });
   });
 
   test("falls back to weekly ESPN rosters when current roster entries are empty", async () => {

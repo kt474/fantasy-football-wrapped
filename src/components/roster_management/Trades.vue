@@ -495,20 +495,13 @@ watch(
       v-else-if="
         store.leagueInfo.length > 0 &&
         store.currentLeague &&
-        store.currentLeague.platform == 'espn'
+        store.currentLeague.platform == 'espn' &&
+        !store.currentLeague.espnTradeDataAvailable
       "
     >
       <p class="text-muted-foreground">
-        ESPN API does not return trades. Join our
-        <a
-          aria-label="Discord link"
-          class="font-medium text-primary hover:underline"
-          href="https://discord.gg/sSVwNhyv7U"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Discord</a
-        >
-        for more information.
+        ESPN trade history is available for leagues loaded with ESPN
+        credentials.
       </p>
     </div>
     <div
