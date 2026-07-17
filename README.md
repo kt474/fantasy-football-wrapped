@@ -71,7 +71,6 @@ No environment variables are required to run the project locally, though some fe
 
 - [Sleeper API](https://docs.sleeper.com/)
 - [Avatars](https://getavataaars.com/)
-- [Icon](https://www.flaticon.com/free-icons/american-football)
 
 ## Contact
 
