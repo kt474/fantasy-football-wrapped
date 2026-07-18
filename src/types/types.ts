@@ -136,12 +136,22 @@ export type WeeklyRecapVideoProps = {
   };
 };
 
-export type WeeklyRecapVideoRender = {
-  renderId: string;
-  status: "queued" | "rendering" | "complete" | "failed";
+export type WeeklyRecapVideoJobStatus =
+  | "starting"
+  | "queued"
+  | "rendering"
+  | "complete"
+  | "failed"
+  | "cancelled"
+  | "expired";
+
+export type WeeklyRecapVideoJob = {
+  jobId: string;
+  status: WeeklyRecapVideoJobStatus;
   progress: number;
-  videoUrl?: string;
-  error?: string;
+  createdAt: string;
+  expiresAt: string | null;
+  videoUrl: string | null;
 };
 
 export type RosterType = {

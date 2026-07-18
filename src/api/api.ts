@@ -11,8 +11,8 @@ import {
 import {
   LeagueInfoType,
   PremiumReport,
+  type WeeklyRecapVideoJob,
   type WeeklyRecapVideoProps,
-  type WeeklyRecapVideoRender,
 } from "../types/types";
 import { authenticatedFetch } from "@/lib/authFetch";
 import { mapWithConcurrency } from "@/lib/async";
@@ -263,7 +263,7 @@ export const getSharedReport = async (
 
 export const startWeeklyRecapVideo = async (
   inputProps: WeeklyRecapVideoProps
-): Promise<WeeklyRecapVideoRender> => {
+): Promise<WeeklyRecapVideoJob> => {
   const response = await authenticatedFetch(
     getBackendApiUrl("/api/reportVideo"),
     {
@@ -273,25 +273,49 @@ export const startWeeklyRecapVideo = async (
     }
   );
   assertOk(response, "Weekly recap video request");
-  return parseJson<WeeklyRecapVideoRender>(
+  return parseJson<WeeklyRecapVideoJob>(
     response,
     "Weekly recap video request"
   );
 };
 
 export const getWeeklyRecapVideo = async (
-  renderId: string
-): Promise<WeeklyRecapVideoRender> => {
+  jobId: string
+): Promise<WeeklyRecapVideoJob> => {
   const origin =
     typeof window === "undefined" ? "http://localhost" : window.location.origin;
   const endpoint = new URL(getBackendApiUrl("/api/reportVideo"), origin);
-  endpoint.searchParams.set("renderId", renderId);
+  endpoint.searchParams.set("jobId", jobId);
 
   const response = await authenticatedFetch(endpoint);
   assertOk(response, "Weekly recap video status");
-  return parseJson<WeeklyRecapVideoRender>(
+  return parseJson<WeeklyRecapVideoJob>(
     response,
     "Weekly recap video status"
+  );
+};
+
+export const getLatestWeeklyRecapVideo = async (
+  leagueId: string,
+  season: string,
+  week: number
+): Promise<WeeklyRecapVideoJob | null> => {
+  const origin =
+    typeof window === "undefined" ? "http://localhost" : window.location.origin;
+  const endpoint = new URL(getBackendApiUrl("/api/reportVideo"), origin);
+  endpoint.searchParams.set("leagueId", leagueId);
+  endpoint.searchParams.set("season", season);
+  endpoint.searchParams.set("week", String(week));
+
+  const response = await authenticatedFetch(endpoint);
+  if (response.status === 404) {
+    return null;
+  }
+
+  assertOk(response, "Latest weekly recap video");
+  return parseJson<WeeklyRecapVideoJob>(
+    response,
+    "Latest weekly recap video"
   );
 };
 

@@ -3,6 +3,7 @@ import {
   TableDataType,
   LeagueInfoType,
   PremiumReport,
+  type WeeklyRecapVideoJob,
 } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
 import {
@@ -17,6 +18,7 @@ import { getLeagueKey, useStore } from "../../store/store";
 import {
   generateReport,
   generatePremiumReport,
+  getLatestWeeklyRecapVideo,
   getWeeklyRecapVideo,
   getPlayersByIdsMap,
   sharePremiumReport,
@@ -63,6 +65,13 @@ import {
   getWeeklyAwards,
   getWeeklyPerformers,
 } from "./weeklyReportTransforms";
+import {
+  getUsableWeeklyRecapVideoUrl,
+  getWeeklyRecapVideoStartErrorMessage,
+  getWeeklyRecapVideoTerminalMessage,
+  isActiveWeeklyRecapVideoJob,
+  WeeklyRecapVideoJobController,
+} from "./weeklyVideoJob";
 
 const store = useStore();
 const props = defineProps<{
@@ -83,13 +92,10 @@ const fetchingPlayers = ref(false);
 const isRenderingVideo = ref(false);
 const videoRenderProgress = ref(0);
 const weeklyVideoUrl = ref("");
-let activeVideoRenderId = "";
-let videoPollTimer: ReturnType<typeof setTimeout> | null = null;
-let videoPollFailures = 0;
+let activeVideoJobId = "";
 let videoRenderGeneration = 0;
-
-const VIDEO_POLL_INTERVAL_MS = 2_000;
-const MAX_VIDEO_POLL_FAILURES = 3;
+let shouldNotifyVideoCompletion = false;
+let videoJobController: WeeklyRecapVideoJobController;
 
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("roast");
@@ -654,93 +660,84 @@ const shareReport = async () => {
   }
 };
 
-const clearVideoPollTimer = () => {
-  if (videoPollTimer) {
-    clearTimeout(videoPollTimer);
-    videoPollTimer = null;
-  }
-};
-
 const resetVideoRender = () => {
   videoRenderGeneration += 1;
-  clearVideoPollTimer();
-  activeVideoRenderId = "";
-  videoPollFailures = 0;
+  videoJobController?.cancel();
+  activeVideoJobId = "";
+  shouldNotifyVideoCompletion = false;
   isRenderingVideo.value = false;
   videoRenderProgress.value = 0;
   weeklyVideoUrl.value = "";
 };
 
-const pollVideoRender = async (renderId: string, renderGeneration: number) => {
-  if (videoRenderGeneration !== renderGeneration) return;
+const applyWeeklyRecapVideoJob = (job: WeeklyRecapVideoJob) => {
+  videoRenderProgress.value = Math.max(
+    0,
+    Math.min(1, Number(job.progress) || 0)
+  );
 
-  try {
-    const render = await getWeeklyRecapVideo(renderId);
-    if (
-      videoRenderGeneration !== renderGeneration ||
-      activeVideoRenderId !== renderId
-    ) {
-      return;
-    }
+  if (isActiveWeeklyRecapVideoJob(job)) {
+    activeVideoJobId = job.jobId;
+    isRenderingVideo.value = true;
+    weeklyVideoUrl.value = "";
+    return;
+  }
 
-    videoPollFailures = 0;
-    videoRenderProgress.value = Math.max(
-      0,
-      Math.min(1, Number(render.progress) || 0)
-    );
-    if (render.status === "complete" && render.videoUrl) {
-      activeVideoRenderId = "";
-      isRenderingVideo.value = false;
-      weeklyVideoUrl.value = render.videoUrl;
+  activeVideoJobId = "";
+  isRenderingVideo.value = false;
+  const videoUrl = getUsableWeeklyRecapVideoUrl(job);
+  weeklyVideoUrl.value = videoUrl ?? "";
+
+  if (videoUrl) {
+    if (shouldNotifyVideoCompletion) {
       trackEvent("Weekly Report Shared", {
         ...getWeeklyReportAnalyticsProperties("video_rendered"),
         method: "video",
         tier: "premium",
       });
       toast.success("Weekly recap video is ready");
-      return;
     }
-    if (render.status === "failed") {
-      activeVideoRenderId = "";
-      isRenderingVideo.value = false;
-      toast.error(render.error || "Unable to render weekly recap video.");
-      return;
-    }
+    shouldNotifyVideoCompletion = false;
+    return;
+  }
 
-    videoPollTimer = setTimeout(
-      () => pollVideoRender(renderId, renderGeneration),
-      VIDEO_POLL_INTERVAL_MS
-    );
-  } catch (error) {
-    if (
-      videoRenderGeneration !== renderGeneration ||
-      activeVideoRenderId !== renderId
-    ) {
-      return;
-    }
-    console.error("Unable to check weekly recap video:", error);
-
-    videoPollFailures += 1;
-    if (videoPollFailures <= MAX_VIDEO_POLL_FAILURES) {
-      videoPollTimer = setTimeout(
-        () => pollVideoRender(renderId, renderGeneration),
-        VIDEO_POLL_INTERVAL_MS * videoPollFailures
-      );
-      return;
-    }
-
-    activeVideoRenderId = "";
-    isRenderingVideo.value = false;
-    toast.error("Unable to check the video render. Please try again.");
+  shouldNotifyVideoCompletion = false;
+  const message = getWeeklyRecapVideoTerminalMessage(job);
+  if (message) {
+    toast.error(message);
   }
 };
 
+videoJobController = new WeeklyRecapVideoJobController({
+  getJob: getWeeklyRecapVideo,
+  getLatestJob: ({ leagueId, season, week }) =>
+    getLatestWeeklyRecapVideo(leagueId, season, week),
+  onJob: applyWeeklyRecapVideoJob,
+  onPollFailure: (error) => {
+    console.error("Unable to check weekly recap video:", error);
+    activeVideoJobId = "";
+    isRenderingVideo.value = false;
+    toast.error("Unable to check the video render. Please try again.");
+  },
+  onRestoreFailure: (error) => {
+    console.error("Unable to restore weekly recap video:", error);
+    toast.error("Unable to restore the latest video render.");
+  },
+});
+
 const generateWeeklyVideo = async () => {
-  if (!premiumWeeklyReport.value || isRenderingVideo.value) return;
+  if (
+    !premiumWeeklyReport.value ||
+    isRenderingVideo.value ||
+    activeVideoJobId
+  ) {
+    return;
+  }
 
   resetVideoRender();
   const renderGeneration = videoRenderGeneration;
   isRenderingVideo.value = true;
+  shouldNotifyVideoCompletion = true;
   try {
     const currentLeague = store.currentLeague;
     const inputProps = buildWeeklyRecapVideoProps({
@@ -756,21 +753,17 @@ const generateWeeklyVideo = async () => {
       topPlayers: exportHotPlayers.value,
       benchPlayers: exportBenchPlayers.value,
     });
-    const render = await startWeeklyRecapVideo(inputProps);
+    const job = await startWeeklyRecapVideo(inputProps);
     if (videoRenderGeneration !== renderGeneration) return;
 
-    activeVideoRenderId = render.renderId;
-    videoRenderProgress.value = render.progress;
-    videoPollTimer = setTimeout(
-      () => pollVideoRender(render.renderId, renderGeneration),
-      1_500
-    );
+    videoJobController.adopt(job, 1_500);
   } catch (error) {
     if (videoRenderGeneration !== renderGeneration) return;
 
     console.error("Unable to start weekly recap video:", error);
+    shouldNotifyVideoCompletion = false;
     isRenderingVideo.value = false;
-    toast.error("Unable to start the video render. Please try again.");
+    toast.error(getWeeklyRecapVideoStartErrorMessage(error));
   }
 };
 
@@ -917,9 +910,29 @@ watch(
   }
 );
 
+watch(
+  () => {
+    const league = store.currentLeague;
+    if (!league || !premiumWeeklyReport.value) {
+      return null;
+    }
+    return {
+      leagueId: league.leagueId,
+      season: league.season,
+      week: currentWeek.value,
+    };
+  },
+  async (context) => {
+    resetVideoRender();
+    if (!context) {
+      return;
+    }
+    await videoJobController.restore(context);
+  }
+);
+
 onBeforeUnmount(() => {
-  clearVideoPollTimer();
-  activeVideoRenderId = "";
+  resetVideoRender();
 });
 </script>
 <template>

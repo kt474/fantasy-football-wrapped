@@ -1,6 +1,16 @@
+export class HttpError extends Error {
+  readonly status: number;
+
+  constructor(context: string, status: number) {
+    super(`${context} failed with status ${status}`);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
+
 export const assertOk = (response: Response, context: string) => {
   if (!response.ok) {
-    throw new Error(`${context} failed with status ${response.status}`);
+    throw new HttpError(context, response.status);
   }
 };
 
