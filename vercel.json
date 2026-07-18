@@ -24,6 +24,26 @@
       "destination": "/sleeper-league-analyzer/index.html"
     },
     {
+      "source": "/espn-league-analyzer",
+      "destination": "/espn-league-analyzer/index.html"
+    },
+    {
+      "source": "/fantasy-football-draft-grades",
+      "destination": "/fantasy-football-draft-grades/index.html"
+    },
+    {
+      "source": "/fantasy-football-playoff-odds-calculator",
+      "destination": "/fantasy-football-playoff-odds-calculator/index.html"
+    },
+    {
+      "source": "/fantasy-football-power-rankings",
+      "destination": "/fantasy-football-power-rankings/index.html"
+    },
+    {
+      "source": "/fantasy-football-league-history",
+      "destination": "/fantasy-football-league-history/index.html"
+    },
+    {
       "source": "/fantasy-football-weekly-recap",
       "destination": "/fantasy-football-weekly-recap/index.html"
     },

@@ -17,75 +17,98 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { premiumReportPreview } from "@/lib/premiumReportSample";
+import {
+  ArrowRight,
+  Calculator,
+  Check,
+  Database,
+  MessageSquareText,
+  ScanSearch,
+} from "lucide-vue-next";
 
-const reportFeatures = [
-  {
-    title: "Every matchup, in context",
-    description:
-      "Close calls, blowouts, standout starters, scoring rank, and the result’s place in the wider week.",
-  },
-  {
-    title: "Manager decisions",
-    description:
-      "Legal bench swaps, points left unused, lineup efficiency, and decisions large enough to change a result.",
-  },
-  {
-    title: "Standings consequences",
-    description:
-      "Records, rank movement, streaks, playoff position, and the season story around every manager.",
-  },
-  {
-    title: "Weekly recognition",
-    description:
-      "Team of the Week, painful losses, one-player carries, lucky escapes, and memorable performances.",
-  },
-  {
-    title: "A voice that fits the league",
-    description:
-      "Roast, neutral, newspaper, or cutthroat commentary without changing the underlying facts.",
-  },
-  {
-    title: "Simple sharing",
-    description:
-      "Copy the recap, save a share card, or publish a report link league mates can open without Premium.",
-  },
-];
-
-const steps = [
+const reportAnatomy = [
   {
     number: "01",
-    title: "Connect the league",
+    title: "Front page",
+    label: "The week in one story",
     description:
-      "Enter a Sleeper league or import an ESPN league. ffwrapped organizes the matchup, roster, standings, and scoring data.",
+      "The lead identifies the result that changed the league most, then connects it to the playoff race, a streak, or a decision that mattered.",
+    contents: "Headline · subheadline · league-wide lead",
   },
   {
     number: "02",
-    title: "Choose the week",
+    title: "Matchup desk",
+    label: "Every result gets its context",
     description:
-      "Open Weekly Report, select a completed week, and choose Standard or a Premium commentary style.",
+      "Each matchup recap covers the score, weekly scoring rank, decisive players, standings effect, and whether the margin was routine or unusual.",
+    contents: "Scores · performers · rank movement · margin",
   },
   {
     number: "03",
-    title: "Generate and share",
+    title: "Decision review",
+    label: "Bench regret, checked for legality",
     description:
-      "Review the finished recap, copy it into the league chat, save the share card, or publish the full report.",
+      "Lineup analysis only calls out swaps that fit the original roster slots, and separates harmless missed points from a choice that flipped the result.",
+    contents: "Eligible swaps · efficiency · points left · result impact",
+  },
+  {
+    number: "04",
+    title: "Closing columns",
+    label: "The performances people remember",
+    description:
+      "Team of the Week rewards the strongest complete performance; lowlights capture collapses, costly moves, and the week’s most painful outliers.",
+    contents: "Team of the Week · lowlights · waiver impact",
   },
 ];
 
-const standardFeatures = [
-  "AI-written weekly summary",
-  "Top and bottom performers",
-  "Bench performers and weekly awards",
-  "Matchup scores and weekly points chart",
+const reportPipeline = [
+  {
+    icon: Database,
+    title: "Import",
+    description:
+      "Completed matchups, starters, benches, standings, scoring rules, and available transaction data arrive from Sleeper or ESPN.",
+  },
+  {
+    icon: ScanSearch,
+    title: "Normalize",
+    description:
+      "Platform-specific data becomes one consistent view of teams, players, roster slots, scores, and completed league activity.",
+  },
+  {
+    icon: Calculator,
+    title: "Calculate",
+    description:
+      "ffwrapped works out scoring rank, lineup efficiency, legal swaps, streaks, season averages, and standings movement before writing begins.",
+  },
+  {
+    icon: MessageSquareText,
+    title: "Write",
+    description:
+      "Structured facts become a Standard summary or a Premium report in the selected voice, ready to copy, publish, or turn into a video recap.",
+  },
 ];
 
-const premiumFeatures = [
-  "League-newspaper presentation",
-  "Detailed matchup-by-matchup reporting",
-  "Lineup efficiency and manager decisions",
-  "Standings movement, streaks, and season averages",
-  "Waiver impact when transaction data is available",
-  "Four commentary styles, report links, and audio recap",
+const reportComparison = [
+  {
+    area: "Weekly overview",
+    standard: "Concise AI summary with scores, chart, and performers",
+    premium: "Front-page story plus a complete league-wide narrative",
+  },
+  {
+    area: "Matchup coverage",
+    standard: "Scores and weekly scoring context",
+    premium: "A written recap for every matchup",
+  },
+  {
+    area: "Manager context",
+    standard: "Bench performers and weekly awards",
+    premium: "Legal lineup swaps, efficiency, standings movement, and streaks",
+  },
+  {
+    area: "Presentation",
+    standard: "Copyable summary and share card",
+    premium: "Four voices, public report link, and video recap",
+  },
 ];
 
 const sampleStorylines = [
@@ -106,25 +129,6 @@ const sampleStorylines = [
   },
 ];
 
-const methodology = [
-  [
-    "Real league context",
-    "Team names, player scoring, records, lineup choices, and completed league activity.",
-  ],
-  [
-    "Legal lineup decisions",
-    "Bench analysis respects roster slots so every suggested swap was actually possible.",
-  ],
-  [
-    "Week and season together",
-    "Results are connected to rank movement, records, streaks, averages, and playoff context.",
-  ],
-  [
-    "Structured before generation",
-    "The underlying facts are normalized and calculated before AI writes the report.",
-  ],
-];
-
 const faqs = [
   {
     question: "Which fantasy football platforms are supported?",
@@ -139,7 +143,7 @@ const faqs = [
   {
     question: "Is the weekly recap generator free?",
     answer:
-      "The Standard weekly report and the core ffwrapped league-analysis experience are free. Premium adds the longer newspaper-style report, deeper manager context, customizable commentary, sharing, and audio options.",
+      "The Standard weekly report and the core ffwrapped league-analysis experience are free. Premium adds the longer newspaper-style report, deeper manager context, customizable commentary, sharing, and video options.",
   },
   {
     question: "What league data goes into a report?",
@@ -161,7 +165,7 @@ const faqs = [
 
 <template>
   <PublicPageShell>
-    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-24">
+    <section class="relative px-5 py-16 mx-auto overflow-hidden max-w-6xl sm:py-24">
       <div
         class="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.9fr)] lg:items-center"
       >
@@ -263,133 +267,106 @@ const faqs = [
       </div>
     </section>
 
-    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
-      <div class="max-w-2xl">
-        <p class="text-sm font-medium text-primary">How it works</p>
-        <h2 class="mt-2 text-3xl font-semibold tracking-tight">
-          From final score to finished report
-        </h2>
+    <section class="border-y">
+      <div class="grid gap-10 px-5 py-16 mx-auto max-w-6xl sm:py-20 lg:grid-cols-[0.68fr_1.32fr]">
+        <div class="lg:sticky lg:top-24 lg:self-start">
+          <p class="text-sm font-medium text-primary">Anatomy of a Premium recap</p>
+          <h2 class="mt-2 text-3xl font-semibold tracking-tight">
+            Each section has a different job
+          </h2>
+          <p class="mt-4 leading-7 text-muted-foreground">
+            The report moves from the week’s central story to matchup evidence, manager choices, and the moments worth carrying into the league chat.
+          </p>
+        </div>
+
+        <ol class="border-t">
+          <li
+            v-for="part in reportAnatomy"
+            :key="part.number"
+            class="grid gap-4 py-7 border-b sm:grid-cols-[3rem_minmax(0,1fr)]"
+          >
+            <p class="pt-1 text-xs font-medium text-muted-foreground">{{ part.number }}</p>
+            <div>
+              <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-5">
+                <h3 class="text-xl font-semibold">{{ part.title }}</h3>
+                <p class="text-xs text-primary">{{ part.contents }}</p>
+              </div>
+              <p class="mt-3 font-medium">{{ part.label }}</p>
+              <p class="mt-2 leading-7 text-muted-foreground">{{ part.description }}</p>
+            </div>
+          </li>
+        </ol>
       </div>
-      <ol class="grid gap-8 mt-10 md:grid-cols-3">
-        <li v-for="step in steps" :key="step.number" class="pt-5 border-t">
-          <p class="text-sm font-medium text-muted-foreground">
-            {{ step.number }}
-          </p>
-          <h3 class="mt-3 text-lg font-semibold">{{ step.title }}</h3>
-          <p class="mt-2 text-sm leading-6 text-muted-foreground">
-            {{ step.description }}
-          </p>
-        </li>
-      </ol>
     </section>
 
-    <section class="border-y">
-      <div class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
+    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div class="max-w-2xl">
-          <p class="text-sm font-medium text-primary">Inside every recap</p>
+          <p class="text-sm font-medium text-primary">Standard and Premium</p>
           <h2 class="mt-2 text-3xl font-semibold tracking-tight">
-            The moments and decisions behind the scores
+            Two report depths, clearly separated
           </h2>
         </div>
-        <div class="grid gap-4 mt-8 md:grid-cols-2 lg:grid-cols-3">
-          <Card
-            v-for="feature in reportFeatures"
-            :key="feature.title"
-            class="shadow-none"
-          >
-            <CardHeader class="pb-3">
-              <CardTitle class="text-lg">{{ feature.title }}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p class="text-sm leading-6 text-muted-foreground">
-                {{ feature.description }}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <p class="max-w-sm text-sm leading-6 text-muted-foreground">
+          Standard covers the weekly snapshot. Premium turns the same verified league data into a publication.
+        </p>
       </div>
-    </section>
 
-    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
-      <div class="max-w-2xl">
-        <p class="text-sm font-medium text-primary">Standard and Premium</p>
-        <h2 class="mt-2 text-3xl font-semibold tracking-tight">
-          Choose how much of the week you want covered
-        </h2>
-      </div>
-      <div class="grid gap-4 mt-8 lg:grid-cols-2">
-        <Card class="shadow-none">
-          <CardHeader>
-            <CardTitle>Standard</CardTitle>
-            <CardDescription
-              >A useful weekly snapshot included in the free
-              experience.</CardDescription
-            >
-          </CardHeader>
-          <CardContent>
-            <ul class="space-y-3 text-sm">
-              <li
-                v-for="feature in standardFeatures"
-                :key="feature"
-                class="pb-3 border-b last:border-0 last:pb-0"
-              >
-                {{ feature }}
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-        <Card class="shadow-none border-primary/40">
-          <CardHeader>
-            <div class="flex items-center justify-between gap-3">
-              <CardTitle>Premium</CardTitle>
-              <Badge>Full report</Badge>
-            </div>
-            <CardDescription
-              >A deeper publication for leagues that want the full
-              story.</CardDescription
-            >
-          </CardHeader>
-          <CardContent>
-            <ul class="space-y-3 text-sm">
-              <li
-                v-for="feature in premiumFeatures"
-                :key="feature"
-                class="pb-3 border-b last:border-0 last:pb-0"
-              >
-                {{ feature }}
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+      <div class="mt-9 overflow-hidden border rounded-card">
+        <div class="hidden grid-cols-[0.55fr_1fr_1fr] border-b bg-muted/40 text-sm font-medium md:grid">
+          <div class="p-4">Coverage</div>
+          <div class="p-4 border-l">Standard · Free</div>
+          <div class="flex items-center justify-between gap-3 p-4 border-l">
+            <span>Premium · Full report</span>
+            <Badge>Most detail</Badge>
+          </div>
+        </div>
+        <div
+          v-for="row in reportComparison"
+          :key="row.area"
+          class="grid border-b last:border-b-0 md:grid-cols-[0.55fr_1fr_1fr]"
+        >
+          <div class="p-4 text-sm font-medium bg-muted/20 md:bg-transparent">{{ row.area }}</div>
+          <div class="p-4 text-sm leading-6 text-muted-foreground md:border-l">
+            <span class="block mb-1 text-xs font-medium md:hidden text-foreground">Standard</span>
+            {{ row.standard }}
+          </div>
+          <div class="p-4 text-sm leading-6 border-t md:border-l md:border-t-0">
+            <span class="block mb-1 text-xs font-medium md:hidden text-primary">Premium</span>
+            {{ row.premium }}
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="border-y bg-muted/30">
-      <div
-        class="grid gap-10 px-5 py-16 mx-auto max-w-6xl lg:grid-cols-[0.8fr_1.2fr] sm:py-20"
-      >
-        <div>
-          <p class="text-sm font-medium text-primary">Methodology</p>
+      <div class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+        <div class="max-w-3xl">
+          <p class="text-sm font-medium text-primary">How a report is made</p>
           <h2 class="mt-2 text-3xl font-semibold tracking-tight">
-            The statistics are calculated before the story is written
+            Calculation first. Commentary second.
           </h2>
           <p class="mt-4 leading-7 text-muted-foreground">
-            ffwrapped prepares the matchup and lineup context first, then sends
-            structured facts for report generation.
+            AI does not decide what the score was, invent a legal lineup swap, or guess who moved in the standings. Those facts are prepared before the writing step.
           </p>
         </div>
-        <dl class="divide-y border-y">
-          <div
-            v-for="item in methodology"
-            :key="item[0]"
-            class="grid gap-2 py-4 sm:grid-cols-[11rem_1fr]"
-          >
-            <dt class="text-sm font-medium">{{ item[0] }}</dt>
-            <dd class="text-sm leading-6 text-muted-foreground">
-              {{ item[1] }}
-            </dd>
-          </div>
-        </dl>
+
+        <ol class="grid mt-10 overflow-hidden border divide-y rounded-card bg-background lg:grid-cols-4 lg:divide-x lg:divide-y-0">
+          <li v-for="(stage, index) in reportPipeline" :key="stage.title" class="relative p-6">
+            <div class="flex items-center justify-between">
+              <component :is="stage.icon" :size="19" class="text-primary" />
+              <ArrowRight v-if="index < reportPipeline.length - 1" :size="16" class="hidden text-muted-foreground lg:block" />
+            </div>
+            <h3 class="mt-5 font-semibold">{{ stage.title }}</h3>
+            <p class="mt-2 text-sm leading-6 text-muted-foreground">{{ stage.description }}</p>
+          </li>
+        </ol>
+
+        <div class="flex flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-muted-foreground">
+          <span class="inline-flex items-center gap-2"><Check :size="15" /> Roster-slot-aware decisions</span>
+          <span class="inline-flex items-center gap-2"><Check :size="15" /> Week and season context</span>
+          <span class="inline-flex items-center gap-2"><Check :size="15" /> Shareable without a reader subscription</span>
+        </div>
       </div>
     </section>
 
@@ -420,24 +397,18 @@ const faqs = [
     </section>
 
     <section class="max-w-6xl px-5 pb-4 mx-auto">
-      <Card class="shadow-none">
-        <CardContent
-          class="flex flex-col items-start gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
-        >
-          <div>
-            <h2 class="text-2xl font-semibold tracking-tight">
-              Give this week the recap it deserves
-            </h2>
-            <p class="max-w-2xl mt-2 leading-7 text-muted-foreground">
-              Connect a Sleeper or ESPN league and turn its latest completed
-              matchups into a report for the whole league.
-            </p>
-          </div>
-          <Button as-child size="lg" class="shrink-0">
-            <RouterLink to="/">Analyze your league</RouterLink>
-          </Button>
-        </CardContent>
-      </Card>
+      <div class="relative flex flex-col items-start gap-6 p-7 overflow-hidden border rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9">
+        <div aria-hidden="true" class="absolute rounded-full -right-20 -top-32 h-72 w-72 bg-white/10"></div>
+        <div class="relative">
+          <h2 class="text-2xl font-semibold tracking-tight">Give this week the recap it deserves</h2>
+          <p class="max-w-2xl mt-2 leading-7 text-primary-foreground/80">
+            Connect a Sleeper or ESPN league and turn its latest completed matchups into a report for the whole league.
+          </p>
+        </div>
+        <Button as-child size="lg" variant="secondary" class="relative shrink-0">
+          <RouterLink to="/">Analyze your league</RouterLink>
+        </Button>
+      </div>
     </section>
   </PublicPageShell>
 </template>

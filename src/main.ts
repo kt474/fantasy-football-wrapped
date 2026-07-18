@@ -27,6 +27,11 @@ const Terms = () => import("./views/Terms.vue");
 const Account = () => import("./views/Account.vue");
 const SharedReport = () => import("./views/SharedReport.vue");
 const SeoLanding = () => import("./views/SeoLanding.vue");
+const EspnLeagueAnalyzer = () => import("./views/EspnLeagueAnalyzer.vue");
+const DraftGradesLanding = () => import("./views/DraftGradesLanding.vue");
+const PlayoffOddsLanding = () => import("./views/PlayoffOddsLanding.vue");
+const PowerRankingsLanding = () => import("./views/PowerRankingsLanding.vue");
+const LeagueHistoryLanding = () => import("./views/LeagueHistoryLanding.vue");
 const WeeklyRecapLanding = () => import("./views/WeeklyRecapLanding.vue");
 const PremiumReportExample = () => import("./views/PremiumReportExample.vue");
 const NotFound = () => import("./views/404.vue");
@@ -91,6 +96,56 @@ const routes = [
       title: "Fantasy Football Weekly Recap Generator | ffwrapped",
       description:
         "Create a personalized fantasy football weekly recap with matchup summaries, league awards, top performers, standings trends, and next-week previews.",
+      standalone: true,
+    },
+  },
+  {
+    path: "/espn-league-analyzer",
+    component: EspnLeagueAnalyzer,
+    meta: {
+      title: "ESPN Fantasy Football League Analyzer | ffwrapped",
+      description:
+        "Analyze an ESPN fantasy football league with power rankings, expected wins, playoff forecasts, draft results, weekly recaps, and manager trends.",
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-draft-grades",
+    component: DraftGradesLanding,
+    meta: {
+      title: "Fantasy Football Draft Grades for Sleeper & ESPN | ffwrapped",
+      description:
+        "Grade a completed fantasy football draft pick by pick using draft position, ADP, projections, and league-relative team scores.",
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-playoff-odds-calculator",
+    component: PlayoffOddsLanding,
+    meta: {
+      title: "Fantasy Football Playoff Odds Calculator | ffwrapped",
+      description:
+        "Simulate your fantasy football season 5,000 times to estimate playoff odds, projected wins, seed ranges, and schedule scenarios.",
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-power-rankings",
+    component: PowerRankingsLanding,
+    meta: {
+      title: "Fantasy Football Power Rankings for Your League | ffwrapped",
+      description:
+        "Create fantasy football power rankings using weekly scoring, consistency, win percentage, ranking history, and positional roster strength.",
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-league-history",
+    component: LeagueHistoryLanding,
+    meta: {
+      title: "Fantasy Football League History & All-Time Records | ffwrapped",
+      description:
+        "Build a fantasy football league history with all-time standings, championships, season finishes, scoring records, and head-to-head rivalries.",
       standalone: true,
     },
   },
