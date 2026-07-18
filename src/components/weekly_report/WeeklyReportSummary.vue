@@ -86,8 +86,26 @@ const canGenerateCurrentPremiumReport = computed(
     !props.reportDataLoading
 );
 
-const showShareButton = computed(
-  () => props.tier === "Premium" && Boolean(props.premiumWeeklyReport)
+const canUsePremiumReportActions = computed(
+  () => canGeneratePremium.value && Boolean(props.premiumWeeklyReport)
+);
+
+const premiumActionTitle = computed(() => {
+  if (!canGeneratePremium.value) {
+    return "Premium subscription required";
+  }
+  if (!props.premiumWeeklyReport) {
+    return "Generate a Premium report first";
+  }
+  return undefined;
+});
+
+const videoActionDisabled = computed(
+  () => !canUsePremiumReportActions.value || props.isRenderingVideo
+);
+
+const shareActionDisabled = computed(
+  () => !canUsePremiumReportActions.value || props.isSharingReport
 );
 
 const videoRenderPercent = computed(() =>
@@ -178,75 +196,110 @@ const trackPremiumCtaClick = (cta: string) => {
     @update:model-value="updateTier(String($event))"
   >
     <div>
-      <div class="flex">
-        <div class="flex flex-wrap sm:flex-nowrap">
-          <p class="mb-2 text-xl font-semibold tracking-tight">Summary</p>
-          <TabsList class="sm:ml-4">
-            <TabsTrigger value="Standard"> Standard </TabsTrigger>
-            <TabsTrigger value="Premium"> Premium </TabsTrigger>
-          </TabsList>
+      <div
+        class="grid grid-cols-[1fr_auto] items-center gap-2 sm:flex sm:flex-wrap"
+      >
+        <p class="mb-1 text-xl font-semibold tracking-tight">Summary</p>
+        <TabsList
+          class="col-span-2 row-start-2 justify-self-start sm:order-none sm:ml-2"
+        >
+          <TabsTrigger value="Standard"> Standard </TabsTrigger>
+          <TabsTrigger value="Premium"> Premium </TabsTrigger>
+        </TabsList>
+        <div
+          :class="
+            tier === 'Premium'
+              ? 'col-span-2 row-start-3 grid grid-flow-col auto-cols-8 justify-self-start gap-2 sm:col-auto sm:row-auto sm:ml-auto sm:flex sm:justify-self-auto'
+              : 'col-start-2 row-start-1 ml-auto flex gap-2 sm:col-auto sm:row-auto'
+          "
+        >
+          <template v-if="tier === 'Premium'">
+            <Button
+              v-if="videoUrl && canUsePremiumReportActions"
+              as-child
+              size="sm"
+              class="h-10 min-w-0 px-2 sm:h-8 sm:w-auto sm:px-3"
+            >
+              <a
+                :href="videoUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+              >
+                <Download class="size-4" />
+                <span class="sm:hidden">Video</span>
+                <span class="hidden sm:inline">Video</span>
+              </a>
+            </Button>
+            <Button
+              v-else
+              @click="emit('generate-video')"
+              :disabled="videoActionDisabled"
+              :title="premiumActionTitle"
+              size="sm"
+              class="h-10 min-w-0 px-2 sm:h-8 sm:w-auto sm:px-3"
+            >
+              <LoaderCircle
+                v-if="isRenderingVideo"
+                class="size-4 animate-spin"
+              />
+              <Clapperboard v-else class="size-4" />
+              <span class="sm:hidden">Video</span>
+              <span class="hidden sm:inline">
+                {{
+                  isRenderingVideo
+                    ? `Rendering ${videoRenderPercent}%`
+                    : "Video"
+                }}
+              </span>
+            </Button>
+            <Button
+              @click="emit('share-report')"
+              :disabled="shareActionDisabled"
+              :title="premiumActionTitle"
+              size="sm"
+              class="h-10 min-w-0 px-2 sm:h-8 sm:w-auto sm:px-3"
+            >
+              <LoaderCircle
+                v-if="isSharingReport"
+                class="size-4 animate-spin"
+              />
+              <Share2 v-else class="size-4" />
+              <span class="sm:hidden">Share</span>
+              <span class="hidden sm:inline">Share</span>
+            </Button>
+          </template>
+          <Button
+            @click="emit('download-image')"
+            :disabled="imageActionDisabled"
+            variant="outline"
+            size="sm"
+            :class="
+              tier === 'Premium'
+                ? 'h-10 w-10 min-w-0 px-2 sm:h-8 sm:w-8 sm:px-1'
+                : 'h-8'
+            "
+            aria-label="Share recap image"
+            title="Share recap image"
+          >
+            <Download />
+          </Button>
+          <Button
+            @click="emit('copy-report')"
+            :disabled="copyActionDisabled"
+            variant="outline"
+            size="sm"
+            :class="
+              tier === 'Premium'
+                ? 'h-10 w-10 min-w-0 px-2 sm:h-8 sm:w-8 sm:px-1'
+                : 'h-8'
+            "
+            aria-label="Copy full report"
+            title="Copy full report"
+          >
+            <Copy class="size-4" />
+          </Button>
         </div>
-        <Button
-          v-if="showShareButton && videoUrl"
-          as-child
-          size="sm"
-          class="ml-auto mr-2"
-        >
-          <a :href="videoUrl" target="_blank" rel="noopener noreferrer" download>
-            <Download class="mr-2 size-4" />
-            Video
-          </a>
-        </Button>
-        <Button
-          v-else-if="showShareButton"
-          @click="emit('generate-video')"
-          :disabled="isRenderingVideo"
-          size="sm"
-          class="ml-auto mr-2"
-        >
-          <LoaderCircle
-            v-if="isRenderingVideo"
-            class="mr-2 size-4 animate-spin"
-          />
-          <Clapperboard v-else class="mr-2 size-4" />
-          {{ isRenderingVideo ? `Rendering ${videoRenderPercent}%` : "Video" }}
-        </Button>
-        <Button
-          v-if="showShareButton"
-          @click="emit('share-report')"
-          :disabled="isSharingReport"
-          size="sm"
-          class="mr-2"
-        >
-          <LoaderCircle
-            v-if="isSharingReport"
-            class="mr-2 size-4 animate-spin"
-          />
-          <Share2 v-else class="mr-2 size-4" />
-          Share
-        </Button>
-        <Button
-          @click="emit('download-image')"
-          :disabled="imageActionDisabled"
-          variant="outline"
-          size="sm"
-          :class="['h-8 mr-2', { 'ml-auto': !showShareButton }]"
-          aria-label="Share recap image"
-          title="Share recap image"
-        >
-          <Download />
-        </Button>
-        <Button
-          @click="emit('copy-report')"
-          :disabled="copyActionDisabled"
-          variant="outline"
-          size="sm"
-          class="h-8"
-          aria-label="Copy full report"
-          title="Copy full report"
-        >
-          <Copy class="size-4" />
-        </Button>
       </div>
       <TabsContent value="Premium">
         <div v-if="hasLeagues">
@@ -286,7 +339,7 @@ const trackPremiumCtaClick = (cta: string) => {
               controls
               playsinline
               preload="metadata"
-              class="w-full max-w-sm mt-6 rounded-card border bg-black"
+              class="w-full max-w-sm mt-6 bg-black border rounded-card"
             >
               Your browser does not support the video element.
             </video>

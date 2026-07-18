@@ -48,7 +48,6 @@ import { toast } from "vue-sonner";
 import { toPng } from "html-to-image";
 import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
 import { normalizePremiumReport } from "@/lib/premiumReport";
-import { premiumReportPreview } from "@/lib/premiumReportSample";
 import {
   buildPremiumReportPrompt,
   buildReportPrompt,
@@ -95,13 +94,6 @@ const MAX_VIDEO_POLL_FAILURES = 3;
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("roast");
 const premiumWeeklyReport = ref<PremiumReport | null>(null);
-const localVideoBypassEnabled =
-  import.meta.env.DEV &&
-  import.meta.env.VITE_LOCAL_VIDEO_BYPASS === "true";
-const videoPremiumReport = computed(() =>
-  premiumWeeklyReport.value ??
-  (localVideoBypassEnabled ? premiumReportPreview : null)
-);
 
 const getWeeklyReportAnalyticsProperties = (action: string) => ({
   feature: "weekly_report",
@@ -744,7 +736,7 @@ const pollVideoRender = async (renderId: string, renderGeneration: number) => {
 };
 
 const generateWeeklyVideo = async () => {
-  if (!videoPremiumReport.value || isRenderingVideo.value) return;
+  if (!premiumWeeklyReport.value || isRenderingVideo.value) return;
 
   resetVideoRender();
   const renderGeneration = videoRenderGeneration;
@@ -758,7 +750,7 @@ const generateWeeklyVideo = async () => {
         season: currentLeague.season,
         week: currentWeek.value,
       },
-      report: videoPremiumReport.value,
+      report: premiumWeeklyReport.value,
       matchups: premiumReportPrompt.value,
       topTeams: exportTopTeams.value,
       topPlayers: exportHotPlayers.value,
@@ -975,7 +967,7 @@ onBeforeUnmount(() => {
             Boolean(store.currentLeague?.lastScoredWeek)
           "
           :raw-weekly-report="rawWeeklyReport"
-          :premium-weekly-report="videoPremiumReport"
+          :premium-weekly-report="premiumWeeklyReport"
           :loading="loading"
           :premium-loading="premiumLoading"
           :report-data-loading="fetchingPlayers"

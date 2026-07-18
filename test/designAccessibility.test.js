@@ -70,6 +70,30 @@ describe("design accessibility contracts", () => {
     expect(recap).toContain('aria-label="Copy league recap"');
   });
 
+  test("premium report actions stay visible and explain why they are disabled", () => {
+    const summary = read(
+      "src/components/weekly_report/WeeklyReportSummary.vue"
+    );
+
+    expect(summary).toContain("const canUsePremiumReportActions = computed");
+    expect(summary).toContain(':disabled="videoActionDisabled"');
+    expect(summary).toContain(':disabled="shareActionDisabled"');
+    expect(summary.match(/:title="premiumActionTitle"/g)).toHaveLength(2);
+    expect(summary).not.toContain('v-if="showShareButton"');
+    expect(summary).toContain("tier === 'Premium'");
+    expect(summary).toContain("grid-cols-[1fr_auto]");
+    expect(summary).toContain("col-span-2 row-start-3");
+    expect(summary).toContain("grid-flow-col auto-cols-8");
+    expect(summary).toContain("justify-self-start");
+    expect(summary).toContain("sm:ml-auto");
+    expect(summary).toContain("sm:col-auto sm:row-auto sm:ml-auto sm:flex");
+    expect(summary).toContain("col-start-2 row-start-1 ml-auto flex gap-2");
+    expect(summary.match(/: 'h-8'/g)).toHaveLength(2);
+    expect(summary.match(/h-10 min-w-0 px-2 sm:h-8 sm:w-auto/g)).toHaveLength(3);
+    expect(summary.match(/h-10 w-10 min-w-0 px-2/g)).toHaveLength(2);
+    expect(summary.match(/<span class="sm:hidden">/g)).toHaveLength(3);
+  });
+
   test("wide data tables advertise keyboard-accessible horizontal scrolling", () => {
     const scrollableTable = read(
       "src/components/layout/ScrollableTableCard.vue"
