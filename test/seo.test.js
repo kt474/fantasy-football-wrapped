@@ -182,6 +182,33 @@ describe("SEO landing pages", () => {
     expect(prerender).toContain('"@type": "Article"');
   });
 
+  test("prerendered pages expose crawlable links to the public tools", () => {
+    const prerender = read("scripts/prerender-seo.mjs");
+
+    expect(prerender).toContain(
+      '<nav aria-label="Fantasy football tools">'
+    );
+    expect(prerender).toContain(
+      '{ href: "/sleeper-league-analyzer", label: "Sleeper analyzer" }'
+    );
+    expect(prerender).toContain(
+      '{ href: "/espn-league-analyzer", label: "ESPN analyzer" }'
+    );
+    expect(prerender).toContain(
+      'href: "/fantasy-football-playoff-odds-calculator"'
+    );
+    expect(prerender).toContain(
+      'href: "/fantasy-football-power-rankings"'
+    );
+    expect(prerender).toContain(
+      'href: "/fantasy-football-league-history"'
+    );
+    expect(prerender).toContain(
+      'href: "/fantasy-football-weekly-recap"'
+    );
+    expect(prerender).toContain('<a href="${escapeHtml(href)}">');
+  });
+
   test("prerenders the existing indexable public pages", () => {
     const prerender = read("scripts/prerender-seo.mjs");
     const vercel = read("vercel.json");

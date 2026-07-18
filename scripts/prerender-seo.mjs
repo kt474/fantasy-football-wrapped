@@ -299,6 +299,43 @@ const escapeHtml = (value) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 
+const toolLinks = [
+  { href: "/sleeper-league-analyzer", label: "Sleeper analyzer" },
+  { href: "/espn-league-analyzer", label: "ESPN analyzer" },
+  { href: "/fantasy-football-draft-grades", label: "Draft grades" },
+  {
+    href: "/fantasy-football-playoff-odds-calculator",
+    label: "Playoff odds",
+  },
+  {
+    href: "/fantasy-football-power-rankings",
+    label: "Power rankings",
+  },
+  {
+    href: "/fantasy-football-league-history",
+    label: "League history",
+  },
+  {
+    href: "/fantasy-football-weekly-recap",
+    label: "Weekly recaps",
+  },
+];
+
+const renderToolNavigation = (page) => `
+  <nav aria-label="Fantasy football tools">
+    <h2>More fantasy football tools</h2>
+    <ul>
+      ${toolLinks
+        .filter(({ href }) => href !== `/${page.path}`)
+        .map(
+          ({ href, label }) =>
+            `<li><a href="${escapeHtml(href)}">${escapeHtml(label)}</a></li>`
+        )
+        .join("")}
+    </ul>
+  </nav>
+`;
+
 const renderStaticPage = (page) => `
   <main data-prerendered="true">
     <article class="container max-w-5xl px-5 py-16 mx-auto">
@@ -320,6 +357,7 @@ const renderStaticPage = (page) => `
             .join("")}
         </ul>
       </section>
+      ${renderToolNavigation(page)}
     </article>
   </main>
 `;
