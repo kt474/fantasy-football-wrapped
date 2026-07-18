@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { Copy, Download, LoaderCircle, Share2 } from "lucide-vue-next";
+import {
+  Clapperboard,
+  Copy,
+  Download,
+  LoaderCircle,
+  Share2,
+} from "lucide-vue-next";
 import { renderMarkdown } from "@/lib/markdown";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
@@ -37,6 +43,9 @@ const props = defineProps<{
   reportDataLoading: boolean;
   isGeneratingImage: boolean;
   isSharingReport: boolean;
+  isRenderingVideo: boolean;
+  videoRenderProgress: number;
+  videoUrl: string;
 }>();
 
 const emit = defineEmits<{
@@ -45,6 +54,7 @@ const emit = defineEmits<{
   "download-image": [];
   "copy-report": [];
   "share-report": [];
+  "generate-video": [];
   "generate-premium": [];
 }>();
 
@@ -78,6 +88,10 @@ const canGenerateCurrentPremiumReport = computed(
 
 const showShareButton = computed(
   () => props.tier === "Premium" && Boolean(props.premiumWeeklyReport)
+);
+
+const videoRenderPercent = computed(() =>
+  Math.round(Math.max(0, Math.min(1, props.videoRenderProgress)) * 100)
 );
 
 const canUseCurrentReport = computed(() =>
@@ -173,11 +187,36 @@ const trackPremiumCtaClick = (cta: string) => {
           </TabsList>
         </div>
         <Button
+          v-if="showShareButton && videoUrl"
+          as-child
+          size="sm"
+          class="ml-auto mr-2"
+        >
+          <a :href="videoUrl" target="_blank" rel="noopener noreferrer" download>
+            <Download class="mr-2 size-4" />
+            Video
+          </a>
+        </Button>
+        <Button
+          v-else-if="showShareButton"
+          @click="emit('generate-video')"
+          :disabled="isRenderingVideo"
+          size="sm"
+          class="ml-auto mr-2"
+        >
+          <LoaderCircle
+            v-if="isRenderingVideo"
+            class="mr-2 size-4 animate-spin"
+          />
+          <Clapperboard v-else class="mr-2 size-4" />
+          {{ isRenderingVideo ? `Rendering ${videoRenderPercent}%` : "Video" }}
+        </Button>
+        <Button
           v-if="showShareButton"
           @click="emit('share-report')"
           :disabled="isSharingReport"
           size="sm"
-          class="ml-auto mr-2"
+          class="mr-2"
         >
           <LoaderCircle
             v-if="isSharingReport"
@@ -241,6 +280,16 @@ const trackPremiumCtaClick = (cta: string) => {
           </div>
           <div v-if="premiumWeeklyReport" class="my-5">
             <PremiumReportContent :report="premiumWeeklyReport" />
+            <video
+              v-if="videoUrl"
+              :src="videoUrl"
+              controls
+              playsinline
+              preload="metadata"
+              class="w-full max-w-sm mt-6 rounded-card border bg-black"
+            >
+              Your browser does not support the video element.
+            </video>
             <p class="mt-4 text-xs text-muted-foreground">
               AI-generated report. Information provided may not always be
               accurate.

@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   buildPremiumReportPrompt,
   buildReportPrompt,
+  buildWeeklyRecapVideoProps,
   buildWeeklyWaiverContext,
   getBenchPerformers,
   getBracketRosterIds,
@@ -830,5 +831,65 @@ describe("weekly report transforms", () => {
         { t1: 3, t2: 4, w: 3, l: 4, r: 1, m: 2 },
       ])
     ).toEqual([1, 2, 3, 4]);
+  });
+
+  test("builds the versioned Remotion payload from report facts", () => {
+    const report = {
+      frontPage: { headline: "Headline", subheadline: "Sub", lead: "Lead" },
+      matchupReports: [],
+      teamOfTheWeek: {
+        teamName: "Alpha Team",
+        pointsScored: 101,
+        headline: "Alpha wins",
+        analysis: "Analysis",
+      },
+      weeklyLowlights: { headline: "Lowlights", entries: [] },
+    };
+    const matchups = [
+      {
+        teams: [
+          {
+            name: "Alpha Team",
+            pointsScored: 101,
+            bestBenchSwap: {
+              benched: { name: "Bench Star", team: "BUF", points: 20 },
+              started: { name: "Starter", team: "NYJ", points: 5 },
+              pointsLost: 15,
+            },
+            rankBeforeWeek: 3,
+            rankAfterWeek: 1,
+          },
+          { name: "Beta Team", pointsScored: 89, bestBenchSwap: null },
+        ],
+      },
+    ];
+
+    const result = buildWeeklyRecapVideoProps({
+      league: { id: "league-1", name: "League", season: "2025", week: 7 },
+      report,
+      matchups,
+      topTeams: [{ name: "Alpha Team", points: 101, avatar: "not-a-url" }],
+      topPlayers: [
+        { name: "Top Player", user: "Alpha Team", points: 25, position: "WR" },
+      ],
+      benchPlayers: [
+        { name: "Bench Star", user: "Alpha Team", points: 20, position: "RB" },
+      ],
+    });
+
+    expect(result.schemaVersion).toBe(1);
+    expect(result.facts.matchups[0]).toMatchObject({
+      matchupNumber: 1,
+      margin: 12,
+      bracket: "regular",
+    });
+    expect(result.facts.topTeams[0].avatarUrl).toBeUndefined();
+    expect(result.facts.benchPain[0]).toMatchObject({
+      startedPlayerName: "Starter",
+      pointsLost: 15,
+    });
+    expect(result.facts.standingsMoves).toEqual([
+      { teamName: "Alpha Team", from: 3, to: 1 },
+    ]);
   });
 });

@@ -8,7 +8,12 @@ import {
   NewLeagueInfoType,
   Player,
 } from "../types/apiTypes";
-import { LeagueInfoType, PremiumReport } from "../types/types";
+import {
+  LeagueInfoType,
+  PremiumReport,
+  type WeeklyRecapVideoProps,
+  type WeeklyRecapVideoRender,
+} from "../types/types";
 import { authenticatedFetch } from "@/lib/authFetch";
 import { mapWithConcurrency } from "@/lib/async";
 import { normalizePremiumReport } from "@/lib/premiumReport";
@@ -254,6 +259,40 @@ export const getSharedReport = async (
   const report = normalizePremiumReport(sharedReport.report);
 
   return report ? { ...sharedReport, report } : null;
+};
+
+export const startWeeklyRecapVideo = async (
+  inputProps: WeeklyRecapVideoProps
+): Promise<WeeklyRecapVideoRender> => {
+  const response = await authenticatedFetch(
+    getBackendApiUrl("/api/reportVideo"),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inputProps }),
+    }
+  );
+  assertOk(response, "Weekly recap video request");
+  return parseJson<WeeklyRecapVideoRender>(
+    response,
+    "Weekly recap video request"
+  );
+};
+
+export const getWeeklyRecapVideo = async (
+  renderId: string
+): Promise<WeeklyRecapVideoRender> => {
+  const origin =
+    typeof window === "undefined" ? "http://localhost" : window.location.origin;
+  const endpoint = new URL(getBackendApiUrl("/api/reportVideo"), origin);
+  endpoint.searchParams.set("renderId", renderId);
+
+  const response = await authenticatedFetch(endpoint);
+  assertOk(response, "Weekly recap video status");
+  return parseJson<WeeklyRecapVideoRender>(
+    response,
+    "Weekly recap video status"
+  );
 };
 
 export const getPlayerNews = async (

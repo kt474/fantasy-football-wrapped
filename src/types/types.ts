@@ -88,6 +88,62 @@ export type PremiumReport = {
   };
 };
 
+export type WeeklyRecapVideoProps = {
+  schemaVersion: 1;
+  templateVersion: "weekly-v1";
+  league: {
+    id?: string;
+    name: string;
+    season: string;
+    week: number;
+  };
+  report: PremiumReport;
+  facts: {
+    matchups: Array<{
+      matchupNumber: number;
+      teams: [
+        { name: string; score: number; avatarUrl?: string },
+        { name: string; score: number; avatarUrl?: string },
+      ];
+      margin: number;
+      bracket: "regular" | "winners" | "losers" | "unknown";
+    }>;
+    topTeams: Array<{ name: string; score: number; avatarUrl?: string }>;
+    topPlayers: Array<{
+      name: string;
+      points: number;
+      teamName: string;
+      position?: string;
+      imageUrl?: string;
+    }>;
+    benchPain: Array<{
+      playerName: string;
+      points: number;
+      teamName: string;
+      startedPlayerName?: string;
+      pointsLost?: number;
+      imageUrl?: string;
+    }>;
+    standingsMoves: Array<{
+      teamName: string;
+      from: number;
+      to: number;
+    }>;
+  };
+  branding: {
+    callToAction: string;
+    destination: string;
+  };
+};
+
+export type WeeklyRecapVideoRender = {
+  renderId: string;
+  status: "queued" | "rendering" | "complete" | "failed";
+  progress: number;
+  videoUrl?: string;
+  error?: string;
+};
+
 export type RosterType = {
   id: string;
   pointsFor: number;

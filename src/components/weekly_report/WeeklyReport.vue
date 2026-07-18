@@ -5,13 +5,22 @@ import {
   PremiumReport,
 } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
-import { computed, ref, watch, onMounted, nextTick } from "vue";
+import {
+  computed,
+  ref,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+} from "vue";
 import { getLeagueKey, useStore } from "../../store/store";
 import {
   generateReport,
   generatePremiumReport,
+  getWeeklyRecapVideo,
   getPlayersByIdsMap,
   sharePremiumReport,
+  startWeeklyRecapVideo,
 } from "../../api/api.ts";
 import SectionCard from "../layout/SectionCard.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,9 +48,11 @@ import { toast } from "vue-sonner";
 import { toPng } from "html-to-image";
 import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
 import { normalizePremiumReport } from "@/lib/premiumReport";
+import { premiumReportPreview } from "@/lib/premiumReportSample";
 import {
   buildPremiumReportPrompt,
   buildReportPrompt,
+  buildWeeklyRecapVideoProps,
   buildWeeklyWaiverContext,
   getBenchPerformers,
   getBracketRosterIds,
@@ -70,10 +81,27 @@ const premiumLoading = ref(false);
 const isSharingReport = ref(false);
 const sharedReportUrl = ref("");
 const fetchingPlayers = ref(false);
+const isRenderingVideo = ref(false);
+const videoRenderProgress = ref(0);
+const weeklyVideoUrl = ref("");
+let activeVideoRenderId = "";
+let videoPollTimer: ReturnType<typeof setTimeout> | null = null;
+let videoPollFailures = 0;
+let videoRenderGeneration = 0;
+
+const VIDEO_POLL_INTERVAL_MS = 2_000;
+const MAX_VIDEO_POLL_FAILURES = 3;
 
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("roast");
 const premiumWeeklyReport = ref<PremiumReport | null>(null);
+const localVideoBypassEnabled =
+  import.meta.env.DEV &&
+  import.meta.env.VITE_LOCAL_VIDEO_BYPASS === "true";
+const videoPremiumReport = computed(() =>
+  premiumWeeklyReport.value ??
+  (localVideoBypassEnabled ? premiumReportPreview : null)
+);
 
 const getWeeklyReportAnalyticsProperties = (action: string) => ({
   feature: "weekly_report",
@@ -245,6 +273,7 @@ const getPremiumReport = async () => {
     const reportPrompt = premiumReportPrompt.value;
     premiumWeeklyReport.value = null;
     sharedReportUrl.value = "";
+    resetVideoRender();
     const currentLeague = store.currentLeague;
     const reportLeagueKey = getLeagueKey(currentLeague);
     let leagueMetadata: Record<string, string | number> = {
@@ -532,6 +561,7 @@ const sortedTableData = computed(() => {
 watch(
   () => store.currentLeagueId,
   async () => {
+    resetVideoRender();
     currentWeek.value = weeks.value[0];
     if (
       store.currentLeague.lastScoredWeek &&
@@ -629,6 +659,126 @@ const shareReport = async () => {
     toast.error("Unable to create the share link. Please try again.");
   } finally {
     isSharingReport.value = false;
+  }
+};
+
+const clearVideoPollTimer = () => {
+  if (videoPollTimer) {
+    clearTimeout(videoPollTimer);
+    videoPollTimer = null;
+  }
+};
+
+const resetVideoRender = () => {
+  videoRenderGeneration += 1;
+  clearVideoPollTimer();
+  activeVideoRenderId = "";
+  videoPollFailures = 0;
+  isRenderingVideo.value = false;
+  videoRenderProgress.value = 0;
+  weeklyVideoUrl.value = "";
+};
+
+const pollVideoRender = async (renderId: string, renderGeneration: number) => {
+  if (videoRenderGeneration !== renderGeneration) return;
+
+  try {
+    const render = await getWeeklyRecapVideo(renderId);
+    if (
+      videoRenderGeneration !== renderGeneration ||
+      activeVideoRenderId !== renderId
+    ) {
+      return;
+    }
+
+    videoPollFailures = 0;
+    videoRenderProgress.value = Math.max(
+      0,
+      Math.min(1, Number(render.progress) || 0)
+    );
+    if (render.status === "complete" && render.videoUrl) {
+      activeVideoRenderId = "";
+      isRenderingVideo.value = false;
+      weeklyVideoUrl.value = render.videoUrl;
+      trackEvent("Weekly Report Shared", {
+        ...getWeeklyReportAnalyticsProperties("video_rendered"),
+        method: "video",
+        tier: "premium",
+      });
+      toast.success("Weekly recap video is ready");
+      return;
+    }
+    if (render.status === "failed") {
+      activeVideoRenderId = "";
+      isRenderingVideo.value = false;
+      toast.error(render.error || "Unable to render weekly recap video.");
+      return;
+    }
+
+    videoPollTimer = setTimeout(
+      () => pollVideoRender(renderId, renderGeneration),
+      VIDEO_POLL_INTERVAL_MS
+    );
+  } catch (error) {
+    if (
+      videoRenderGeneration !== renderGeneration ||
+      activeVideoRenderId !== renderId
+    ) {
+      return;
+    }
+    console.error("Unable to check weekly recap video:", error);
+
+    videoPollFailures += 1;
+    if (videoPollFailures <= MAX_VIDEO_POLL_FAILURES) {
+      videoPollTimer = setTimeout(
+        () => pollVideoRender(renderId, renderGeneration),
+        VIDEO_POLL_INTERVAL_MS * videoPollFailures
+      );
+      return;
+    }
+
+    activeVideoRenderId = "";
+    isRenderingVideo.value = false;
+    toast.error("Unable to check the video render. Please try again.");
+  }
+};
+
+const generateWeeklyVideo = async () => {
+  if (!videoPremiumReport.value || isRenderingVideo.value) return;
+
+  resetVideoRender();
+  const renderGeneration = videoRenderGeneration;
+  isRenderingVideo.value = true;
+  try {
+    const currentLeague = store.currentLeague;
+    const inputProps = buildWeeklyRecapVideoProps({
+      league: {
+        id: currentLeague.leagueId,
+        name: currentLeague.name,
+        season: currentLeague.season,
+        week: currentWeek.value,
+      },
+      report: videoPremiumReport.value,
+      matchups: premiumReportPrompt.value,
+      topTeams: exportTopTeams.value,
+      topPlayers: exportHotPlayers.value,
+      benchPlayers: exportBenchPlayers.value,
+    });
+    const render = await startWeeklyRecapVideo(inputProps);
+    if (videoRenderGeneration !== renderGeneration) return;
+
+    activeVideoRenderId = render.renderId;
+    videoRenderProgress.value = render.progress;
+    videoPollTimer = setTimeout(
+      () => pollVideoRender(render.renderId, renderGeneration),
+      1_500
+    );
+  } catch (error) {
+    if (videoRenderGeneration !== renderGeneration) return;
+
+    console.error("Unable to start weekly recap video:", error);
+    isRenderingVideo.value = false;
+    toast.error("Unable to start the video render. Please try again.");
   }
 };
 
@@ -767,12 +917,18 @@ watch(
       week === weeks.value[0] ? (currentLeague?.weeklyReport ?? "") : "";
     premiumWeeklyReport.value = getSavedPremiumReport(currentLeague, week);
     sharedReportUrl.value = "";
+    resetVideoRender();
     playerNames.value = [];
     benchPlayerNames.value = [];
     weeklyPlayerLookup.value = new Map();
     await fetchPlayerNames();
   }
 );
+
+onBeforeUnmount(() => {
+  clearVideoPollTimer();
+  activeVideoRenderId = "";
+});
 </script>
 <template>
   <SectionCard class="h-full my-4 custom-width">
@@ -819,15 +975,19 @@ watch(
             Boolean(store.currentLeague?.lastScoredWeek)
           "
           :raw-weekly-report="rawWeeklyReport"
-          :premium-weekly-report="premiumWeeklyReport"
+          :premium-weekly-report="videoPremiumReport"
           :loading="loading"
           :premium-loading="premiumLoading"
           :report-data-loading="fetchingPlayers"
           :is-generating-image="isGeneratingImage"
           :is-sharing-report="isSharingReport"
+          :is-rendering-video="isRenderingVideo"
+          :video-render-progress="videoRenderProgress"
+          :video-url="weeklyVideoUrl"
           @download-image="shareOrDownloadReportImage"
           @copy-report="copyReport"
           @share-report="shareReport"
+          @generate-video="generateWeeklyVideo"
           @generate-premium="getPremiumReport"
         />
         <WeeklyMatchups

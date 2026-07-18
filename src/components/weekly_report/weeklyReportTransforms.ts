@@ -1,6 +1,10 @@
 import type { Player, WeeklyWaiver } from "@/types/apiTypes";
 import type { Bracket } from "@/types/apiTypes";
-import type { TableDataType } from "@/types/types";
+import type {
+  PremiumReport,
+  TableDataType,
+  WeeklyRecapVideoProps,
+} from "@/types/types";
 import { getOrdinalSuffix } from "@/lib/format";
 import { getManagerDisplayName } from "@/lib/manager";
 
@@ -1493,3 +1497,144 @@ export const getExportPlayers = (performers: PerformerEntry[]) =>
     player_id: entry.player.player_id,
     position: entry.player.position,
   }));
+
+type VideoTeamInput = {
+  name: string;
+  points: number;
+  avatar?: string;
+};
+
+type VideoPlayerInput = {
+  name: string;
+  user: string;
+  points: number;
+  position?: string;
+};
+
+const optionalHttpUrl = (value?: string) => {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? url.toString()
+      : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const getVideoBracket = (
+  matchup: PremiumReportMatchup
+): WeeklyRecapVideoProps["facts"]["matchups"][number]["bracket"] => {
+  if (matchup.playoffContext?.bracket) {
+    return matchup.playoffContext.bracket;
+  }
+  const firstTeam = matchup.teams[0];
+  return firstTeam && "bracket" in firstTeam ? firstTeam.bracket : "regular";
+};
+
+export const buildWeeklyRecapVideoProps = ({
+  league,
+  report,
+  matchups,
+  topTeams,
+  topPlayers,
+  benchPlayers,
+}: {
+  league: WeeklyRecapVideoProps["league"];
+  report: PremiumReport;
+  matchups: PremiumReportMatchup[];
+  topTeams: VideoTeamInput[];
+  topPlayers: VideoPlayerInput[];
+  benchPlayers: VideoPlayerInput[];
+}): WeeklyRecapVideoProps => {
+  const benchDecisions = new Map<
+    string,
+    { startedPlayerName: string; pointsLost: number }
+  >();
+  const standingsMoves = new Map<
+    string,
+    WeeklyRecapVideoProps["facts"]["standingsMoves"][number]
+  >();
+
+  matchups.forEach((matchup) => {
+    matchup.teams.forEach((team) => {
+      if (team.bestBenchSwap) {
+        benchDecisions.set(
+          `${team.name}:${team.bestBenchSwap.benched.name}`,
+          {
+            startedPlayerName: team.bestBenchSwap.started.name,
+            pointsLost: team.bestBenchSwap.pointsLost,
+          }
+        );
+      }
+      if (
+        "rankBeforeWeek" in team &&
+        "rankAfterWeek" in team &&
+        team.rankBeforeWeek > 0 &&
+        team.rankAfterWeek > 0 &&
+        team.rankBeforeWeek !== team.rankAfterWeek
+      ) {
+        standingsMoves.set(team.name, {
+          teamName: team.name,
+          from: team.rankBeforeWeek,
+          to: team.rankAfterWeek,
+        });
+      }
+    });
+  });
+
+  const videoMatchups = matchups.flatMap((matchup, index) => {
+    const teams = matchup.teams.slice(0, 2).map((team) => ({
+      name: team.name,
+      score: team.pointsScored,
+    }));
+    if (teams.length !== 2) return [];
+
+    return [
+      {
+        matchupNumber: index + 1,
+        teams: teams as WeeklyRecapVideoProps["facts"]["matchups"][number]["teams"],
+        margin: Math.abs(teams[0].score - teams[1].score),
+        bracket: getVideoBracket(matchup),
+      },
+    ];
+  });
+
+  return {
+    schemaVersion: 1,
+    templateVersion: "weekly-v1",
+    league,
+    report,
+    facts: {
+      matchups: videoMatchups,
+      topTeams: topTeams.slice(0, 5).map((team) => ({
+        name: team.name,
+        score: team.points,
+        ...(optionalHttpUrl(team.avatar)
+          ? { avatarUrl: optionalHttpUrl(team.avatar) }
+          : {}),
+      })),
+      topPlayers: topPlayers.slice(0, 5).map((player) => ({
+        name: player.name,
+        points: player.points,
+        teamName: player.user,
+        ...(player.position ? { position: player.position } : {}),
+      })),
+      benchPain: benchPlayers.slice(0, 5).map((player) => {
+        const decision = benchDecisions.get(`${player.user}:${player.name}`);
+        return {
+          playerName: player.name,
+          points: player.points,
+          teamName: player.user,
+          ...(decision ?? {}),
+        };
+      }),
+      standingsMoves: [...standingsMoves.values()].slice(0, 5),
+    },
+    branding: {
+      callToAction: "See the full weekly recap",
+      destination: "ffwrapped.com",
+    },
+  };
+};
