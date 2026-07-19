@@ -1449,6 +1449,16 @@ watch(
                     until canceled.
                   </AccordionContent>
                 </AccordionItem>
+                <AccordionItem value="video-recaps">
+                  <AccordionTrigger class="text-left">
+                    How do Premium video recaps work?
+                  </AccordionTrigger>
+                  <AccordionContent class="leading-6 text-muted-foreground">
+                    Premium includes up to 3 new video generations per rolling 7
+                    days. Finished videos remain available for 15 days, so
+                    download a copy during that window to keep it.
+                  </AccordionContent>
+                </AccordionItem>
                 <AccordionItem value="renewal" class="border-b-0">
                   <AccordionTrigger class="text-left">
                     Do my league mates need Premium to view shared reports?

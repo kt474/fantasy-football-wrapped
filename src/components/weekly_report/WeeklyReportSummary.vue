@@ -111,6 +111,12 @@ const videoActionDisabled = computed(
   () => !canUsePremiumReportActions.value || props.isRenderingVideo
 );
 
+const videoActionTitle = computed(
+  () =>
+    premiumActionTitle.value ??
+    "3 video generations per rolling 7 days; finished videos are available for 15 days"
+);
+
 const shareActionDisabled = computed(
   () => !canUsePremiumReportActions.value || props.isSharingReport
 );
@@ -247,7 +253,7 @@ const trackPremiumCtaClick = (cta: string) => {
               v-else
               @click="emit('generate-video')"
               :disabled="videoActionDisabled"
-              :title="premiumActionTitle"
+              :title="videoActionTitle"
               size="sm"
               class="h-8 min-w-0 px-2 sm:w-auto sm:px-3"
             >
@@ -605,6 +611,10 @@ const trackPremiumCtaClick = (cta: string) => {
       >
         Your browser does not support the video element.
       </video>
+      <p class="text-xs leading-5 text-muted-foreground">
+        Generated videos remain available for 15 days after rendering finishes.
+        Download a copy before this one expires to keep it.
+      </p>
     </DialogContent>
   </Dialog>
 </template>

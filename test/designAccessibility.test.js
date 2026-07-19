@@ -78,7 +78,8 @@ describe("design accessibility contracts", () => {
     expect(summary).toContain("const canUsePremiumReportActions = computed");
     expect(summary).toContain(':disabled="videoActionDisabled"');
     expect(summary).toContain(':disabled="shareActionDisabled"');
-    expect(summary.match(/:title="premiumActionTitle"/g)).toHaveLength(2);
+    expect(summary.match(/:title="premiumActionTitle"/g)).toHaveLength(1);
+    expect(summary).toContain(':title="videoActionTitle"');
     expect(summary).not.toContain('v-if="showShareButton"');
     expect(summary).toContain("tier === 'Premium'");
     expect(summary).toContain("grid-cols-[1fr_auto]");
@@ -97,6 +98,9 @@ describe("design accessibility contracts", () => {
     expect(summary).toContain('@click="videoDialogOpen = true"');
     expect(summary).toContain("<DialogTitle>Weekly recap video</DialogTitle>");
     expect(summary).toContain('v-if="videoDialogOpen && videoUrl"');
+    expect(summary).toContain("3 video generations per rolling 7 days");
+    expect(summary).toContain("remain available for 15 days");
+    expect(summary).toContain("Download a copy before");
     expect(summary).not.toContain(':href="videoUrl"');
     expect(summary).not.toContain("                download\n");
   });

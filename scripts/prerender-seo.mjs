@@ -223,7 +223,7 @@ const pages = [
       },
       {
         title: "Standard and Premium reports",
-        body: "Start with a free weekly summary or generate a detailed league-newspaper report with customizable commentary, sharing, and video options.",
+        body: "Start with a free weekly summary or generate a detailed league-newspaper report with customizable commentary, sharing, and Premium video recaps. Premium includes three video generations per rolling seven days, and finished videos remain available for 15 days.",
       },
       {
         title: "Built for Sleeper and ESPN leagues",

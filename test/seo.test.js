@@ -102,6 +102,8 @@ describe("SEO landing pages", () => {
     expect(landingPage).toContain("Each section has a different job");
     expect(landingPage).toContain("Calculation first. Commentary second.");
     expect(landingPage).toContain("Frequently asked questions");
+    expect(landingPage).toContain("3 new video generations per rolling 7 days");
+    expect(landingPage).toContain("remain available for 15 days");
     expect(landingPage).toContain("13,000+ leagues added");
   });
 

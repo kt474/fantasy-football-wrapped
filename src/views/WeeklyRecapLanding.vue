@@ -146,6 +146,11 @@ const faqs = [
       "The Standard weekly report and the core ffwrapped league-analysis experience are free. Premium adds the longer newspaper-style report, deeper manager context, customizable commentary, sharing, and video options.",
   },
   {
+    question: "How do Premium video recaps work?",
+    answer:
+      "Premium includes up to 3 new video generations per rolling 7 days. Finished videos remain available for 15 days, so download a copy during that window to keep it.",
+  },
+  {
     question: "What league data goes into a report?",
     answer:
       "Reports can use matchup results, starters and bench scoring, weekly scoring rank, records, standings movement, streaks, lineup efficiency, season averages, playoff context, and completed waiver activity when available.",
