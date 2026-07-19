@@ -166,7 +166,9 @@ const data = {
               <SidebarMenuButton
                 v-if="childItem.title !== 'Home'"
                 as-child
-                :is-active="store.currentTab === childItem.title"
+                :is-active="
+                  route.path === '/' && store.currentTab === childItem.title
+                "
                 @click="changeTab(childItem.title)"
                 class="cursor-pointer"
               >
