@@ -89,9 +89,16 @@ describe("design accessibility contracts", () => {
     expect(summary).toContain("sm:col-auto sm:row-auto sm:ml-auto sm:flex");
     expect(summary).toContain("col-start-2 row-start-1 ml-auto flex gap-2");
     expect(summary.match(/class="h-8"/g)).toHaveLength(2);
-    expect(summary.match(/h-10 min-w-0 px-2 sm:h-8 sm:w-auto/g)).toHaveLength(3);
+    expect(summary.match(/h-8 min-w-0 px-2 sm:w-auto/g)).toHaveLength(3);
     expect(summary).not.toContain("h-10 w-10 min-w-0 px-2");
     expect(summary.match(/<span class="sm:hidden">/g)).toHaveLength(3);
+    expect(summary).toContain('aria-label="Watch weekly recap video"');
+    expect(summary).toContain("Watch video");
+    expect(summary).toContain('@click="videoDialogOpen = true"');
+    expect(summary).toContain("<DialogTitle>Weekly recap video</DialogTitle>");
+    expect(summary).toContain('v-if="videoDialogOpen && videoUrl"');
+    expect(summary).not.toContain(':href="videoUrl"');
+    expect(summary).not.toContain("                download\n");
   });
 
   test("rivalry reports use a comfortable reading width and markdown rhythm", () => {

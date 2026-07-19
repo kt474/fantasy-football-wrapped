@@ -6,6 +6,7 @@ import {
   Copy,
   Download,
   LoaderCircle,
+  Play,
   Share2,
 } from "lucide-vue-next";
 import { renderMarkdown } from "@/lib/markdown";
@@ -21,6 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Separator from "../ui/separator/Separator.vue";
 import PremiumReportContent from "./PremiumReportContent.vue";
 import type { PremiumReport } from "@/types/types";
@@ -125,8 +132,18 @@ const imageActionDisabled = computed(
 const copyActionDisabled = computed(() => !canUseCurrentReport.value);
 
 const trackedPremiumPaywallView = ref(false);
+const videoDialogOpen = ref(false);
 const shouldTrackPremiumPaywallView = computed(
   () => props.tier === "Premium" && !canGeneratePremium.value
+);
+
+watch(
+  () => props.videoUrl,
+  (videoUrl) => {
+    if (!videoUrl) {
+      videoDialogOpen.value = false;
+    }
+  }
 );
 
 watch(
@@ -216,20 +233,15 @@ const trackPremiumCtaClick = (cta: string) => {
           <template v-if="tier === 'Premium'">
             <Button
               v-if="videoUrl && canUsePremiumReportActions"
-              as-child
+              type="button"
               size="sm"
-              class="h-10 min-w-0 px-2 sm:h-8 sm:w-auto sm:px-3"
+              class="h-8 min-w-0 px-2 sm:w-auto sm:px-3"
+              aria-label="Watch weekly recap video"
+              @click="videoDialogOpen = true"
             >
-              <a
-                :href="videoUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-                download
-              >
-                <Download class="size-4" />
-                <span class="sm:hidden">Video</span>
-                <span class="hidden sm:inline">Video</span>
-              </a>
+              <Play class="size-4" />
+              <span class="sm:hidden">Watch</span>
+              <span class="hidden sm:inline">Watch video</span>
             </Button>
             <Button
               v-else
@@ -237,7 +249,7 @@ const trackPremiumCtaClick = (cta: string) => {
               :disabled="videoActionDisabled"
               :title="premiumActionTitle"
               size="sm"
-              class="h-10 min-w-0 px-2 sm:h-8 sm:w-auto sm:px-3"
+              class="h-8 min-w-0 px-2 sm:w-auto sm:px-3"
             >
               <LoaderCircle
                 v-if="isRenderingVideo"
@@ -258,7 +270,7 @@ const trackPremiumCtaClick = (cta: string) => {
               :disabled="shareActionDisabled"
               :title="premiumActionTitle"
               size="sm"
-              class="h-10 min-w-0 px-2 sm:h-8 sm:w-auto sm:px-3"
+              class="h-8 min-w-0 px-2 sm:w-auto sm:px-3"
             >
               <LoaderCircle
                 v-if="isSharingReport"
@@ -325,16 +337,6 @@ const trackPremiumCtaClick = (cta: string) => {
           </div>
           <div v-if="premiumWeeklyReport" class="my-5">
             <PremiumReportContent :report="premiumWeeklyReport" />
-            <video
-              v-if="videoUrl"
-              :src="videoUrl"
-              controls
-              playsinline
-              preload="metadata"
-              class="w-full max-w-sm mt-6 bg-black border rounded-card"
-            >
-              Your browser does not support the video element.
-            </video>
             <p class="mt-4 text-xs text-muted-foreground">
               AI-generated report. Information provided may not always be
               accurate.
@@ -587,6 +589,24 @@ const trackPremiumCtaClick = (cta: string) => {
       <Separator class="h-px mt-4 mb-2" />
     </div>
   </Tabs>
+
+  <Dialog v-model:open="videoDialogOpen">
+    <DialogContent class="max-w-sm">
+      <DialogHeader class="pr-6">
+        <DialogTitle>Weekly recap video</DialogTitle>
+      </DialogHeader>
+      <video
+        v-if="videoDialogOpen && videoUrl"
+        :src="videoUrl"
+        controls
+        playsinline
+        preload="metadata"
+        class="w-full max-h-[70dvh] bg-black rounded-card"
+      >
+        Your browser does not support the video element.
+      </video>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <style scoped>

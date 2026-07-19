@@ -165,7 +165,9 @@ const faqs = [
 
 <template>
   <PublicPageShell>
-    <section class="relative px-5 py-16 mx-auto overflow-hidden max-w-6xl sm:py-24">
+    <section
+      class="relative max-w-6xl px-5 py-16 mx-auto overflow-hidden sm:py-24"
+    >
       <div
         class="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.9fr)] lg:items-center"
       >
@@ -178,8 +180,8 @@ const faqs = [
           </h1>
           <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
             Turn matchup results, lineup decisions, standings changes, and the
-            week’s best performances into a polished report built from your
-            league data.
+            week’s best performances into a polished report and short form video
+            built from your league data.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
             <Button as-child size="lg">
@@ -268,14 +270,20 @@ const faqs = [
     </section>
 
     <section class="border-y">
-      <div class="grid gap-10 px-5 py-16 mx-auto max-w-6xl sm:py-20 lg:grid-cols-[0.68fr_1.32fr]">
+      <div
+        class="grid gap-10 px-5 py-16 mx-auto max-w-6xl sm:py-20 lg:grid-cols-[0.68fr_1.32fr]"
+      >
         <div class="lg:sticky lg:top-24 lg:self-start">
-          <p class="text-sm font-medium text-primary">Anatomy of a Premium recap</p>
+          <p class="text-sm font-medium text-primary">
+            Anatomy of a Premium recap
+          </p>
           <h2 class="mt-2 text-3xl font-semibold tracking-tight">
             Each section has a different job
           </h2>
           <p class="mt-4 leading-7 text-muted-foreground">
-            The report moves from the week’s central story to matchup evidence, manager choices, and the moments worth carrying into the league chat.
+            The report moves from the week’s central story to matchup evidence,
+            manager choices, and the moments worth carrying into the league
+            chat.
           </p>
         </div>
 
@@ -285,14 +293,20 @@ const faqs = [
             :key="part.number"
             class="grid gap-4 py-7 border-b sm:grid-cols-[3rem_minmax(0,1fr)]"
           >
-            <p class="pt-1 text-xs font-medium text-muted-foreground">{{ part.number }}</p>
+            <p class="pt-1 text-xs font-medium text-muted-foreground">
+              {{ part.number }}
+            </p>
             <div>
-              <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-5">
+              <div
+                class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-5"
+              >
                 <h3 class="text-xl font-semibold">{{ part.title }}</h3>
                 <p class="text-xs text-primary">{{ part.contents }}</p>
               </div>
               <p class="mt-3 font-medium">{{ part.label }}</p>
-              <p class="mt-2 leading-7 text-muted-foreground">{{ part.description }}</p>
+              <p class="mt-2 leading-7 text-muted-foreground">
+                {{ part.description }}
+              </p>
             </div>
           </li>
         </ol>
@@ -300,7 +314,9 @@ const faqs = [
     </section>
 
     <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div
+        class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+      >
         <div class="max-w-2xl">
           <p class="text-sm font-medium text-primary">Standard and Premium</p>
           <h2 class="mt-2 text-3xl font-semibold tracking-tight">
@@ -308,12 +324,15 @@ const faqs = [
           </h2>
         </div>
         <p class="max-w-sm text-sm leading-6 text-muted-foreground">
-          Standard covers the weekly snapshot. Premium turns the same verified league data into a publication.
+          Standard covers the weekly snapshot. Premium turns the same verified
+          league data into a publication.
         </p>
       </div>
 
-      <div class="mt-9 overflow-hidden border rounded-card">
-        <div class="hidden grid-cols-[0.55fr_1fr_1fr] border-b bg-muted/40 text-sm font-medium md:grid">
+      <div class="overflow-hidden border mt-9 rounded-card">
+        <div
+          class="hidden grid-cols-[0.55fr_1fr_1fr] border-b bg-muted/40 text-sm font-medium md:grid"
+        >
           <div class="p-4">Coverage</div>
           <div class="p-4 border-l">Standard · Free</div>
           <div class="flex items-center justify-between gap-3 p-4 border-l">
@@ -326,13 +345,20 @@ const faqs = [
           :key="row.area"
           class="grid border-b last:border-b-0 md:grid-cols-[0.55fr_1fr_1fr]"
         >
-          <div class="p-4 text-sm font-medium bg-muted/20 md:bg-transparent">{{ row.area }}</div>
+          <div class="p-4 text-sm font-medium bg-muted/20 md:bg-transparent">
+            {{ row.area }}
+          </div>
           <div class="p-4 text-sm leading-6 text-muted-foreground md:border-l">
-            <span class="block mb-1 text-xs font-medium md:hidden text-foreground">Standard</span>
+            <span
+              class="block mb-1 text-xs font-medium md:hidden text-foreground"
+              >Standard</span
+            >
             {{ row.standard }}
           </div>
           <div class="p-4 text-sm leading-6 border-t md:border-l md:border-t-0">
-            <span class="block mb-1 text-xs font-medium md:hidden text-primary">Premium</span>
+            <span class="block mb-1 text-xs font-medium md:hidden text-primary"
+              >Premium</span
+            >
             {{ row.premium }}
           </div>
         </div>
@@ -340,32 +366,54 @@ const faqs = [
     </section>
 
     <section class="border-y bg-muted/30">
-      <div class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+      <div class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
         <div class="max-w-3xl">
           <p class="text-sm font-medium text-primary">How a report is made</p>
           <h2 class="mt-2 text-3xl font-semibold tracking-tight">
             Calculation first. Commentary second.
           </h2>
           <p class="mt-4 leading-7 text-muted-foreground">
-            AI does not decide what the score was, invent a legal lineup swap, or guess who moved in the standings. Those facts are prepared before the writing step.
+            AI does not decide what the score was, invent a legal lineup swap,
+            or guess who moved in the standings. Those facts are prepared before
+            the writing step.
           </p>
         </div>
 
-        <ol class="grid mt-10 overflow-hidden border divide-y rounded-card bg-background lg:grid-cols-4 lg:divide-x lg:divide-y-0">
-          <li v-for="(stage, index) in reportPipeline" :key="stage.title" class="relative p-6">
+        <ol
+          class="grid mt-10 overflow-hidden border divide-y rounded-card bg-background lg:grid-cols-4 lg:divide-x lg:divide-y-0"
+        >
+          <li
+            v-for="(stage, index) in reportPipeline"
+            :key="stage.title"
+            class="relative p-6"
+          >
             <div class="flex items-center justify-between">
               <component :is="stage.icon" :size="19" class="text-primary" />
-              <ArrowRight v-if="index < reportPipeline.length - 1" :size="16" class="hidden text-muted-foreground lg:block" />
+              <ArrowRight
+                v-if="index < reportPipeline.length - 1"
+                :size="16"
+                class="hidden text-muted-foreground lg:block"
+              />
             </div>
             <h3 class="mt-5 font-semibold">{{ stage.title }}</h3>
-            <p class="mt-2 text-sm leading-6 text-muted-foreground">{{ stage.description }}</p>
+            <p class="mt-2 text-sm leading-6 text-muted-foreground">
+              {{ stage.description }}
+            </p>
           </li>
         </ol>
 
-        <div class="flex flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-muted-foreground">
-          <span class="inline-flex items-center gap-2"><Check :size="15" /> Roster-slot-aware decisions</span>
-          <span class="inline-flex items-center gap-2"><Check :size="15" /> Week and season context</span>
-          <span class="inline-flex items-center gap-2"><Check :size="15" /> Shareable without a reader subscription</span>
+        <div
+          class="flex flex-wrap mt-6 text-sm gap-x-6 gap-y-2 text-muted-foreground"
+        >
+          <span class="inline-flex items-center gap-2"
+            ><Check :size="15" /> Roster-slot-aware decisions</span
+          >
+          <span class="inline-flex items-center gap-2"
+            ><Check :size="15" /> Week and season context</span
+          >
+          <span class="inline-flex items-center gap-2"
+            ><Check :size="15" /> Shareable without a reader subscription</span
+          >
         </div>
       </div>
     </section>
@@ -397,15 +445,28 @@ const faqs = [
     </section>
 
     <section class="max-w-6xl px-5 pb-4 mx-auto">
-      <div class="relative flex flex-col items-start gap-6 p-7 overflow-hidden border rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9">
-        <div aria-hidden="true" class="absolute rounded-full -right-20 -top-32 h-72 w-72 bg-white/10"></div>
+      <div
+        class="relative flex flex-col items-start gap-6 overflow-hidden border p-7 rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9"
+      >
+        <div
+          aria-hidden="true"
+          class="absolute rounded-full -right-20 -top-32 h-72 w-72 bg-white/10"
+        ></div>
         <div class="relative">
-          <h2 class="text-2xl font-semibold tracking-tight">Give this week the recap it deserves</h2>
+          <h2 class="text-2xl font-semibold tracking-tight">
+            Give this week the recap it deserves
+          </h2>
           <p class="max-w-2xl mt-2 leading-7 text-primary-foreground/80">
-            Connect a Sleeper or ESPN league and turn its latest completed matchups into a report for the whole league.
+            Connect a Sleeper or ESPN league and turn its latest completed
+            matchups into a report for the whole league.
           </p>
         </div>
-        <Button as-child size="lg" variant="secondary" class="relative shrink-0">
+        <Button
+          as-child
+          size="lg"
+          variant="secondary"
+          class="relative shrink-0"
+        >
           <RouterLink to="/">Analyze your league</RouterLink>
         </Button>
       </div>
