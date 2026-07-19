@@ -4,6 +4,7 @@ import {
   getUsableWeeklyRecapVideoUrl,
   getWeeklyRecapVideoStartErrorMessage,
   getWeeklyRecapVideoTerminalMessage,
+  hashWeeklyRecapVideoInput,
   WeeklyRecapVideoJobController,
 } from "../src/components/weekly_report/weeklyVideoJob.ts";
 
@@ -38,6 +39,44 @@ afterEach(() => {
 });
 
 describe("weekly recap video job lifecycle", () => {
+  test("hashes the exact video input independent of object key order", async () => {
+    const first = {
+      schemaVersion: 1,
+      templateVersion: "weekly-v1",
+      league: { id: "league-1", name: "League", season: "2025", week: 7 },
+      report: { headline: "Roast report" },
+      facts: {
+        matchups: [],
+        topTeams: [],
+        topPlayers: [],
+        benchPain: [],
+        standingsMoves: [],
+      },
+      branding: { callToAction: "Read it", destination: "ffwrapped.com" },
+    };
+    const reordered = {
+      branding: first.branding,
+      facts: first.facts,
+      report: first.report,
+      league: first.league,
+      templateVersion: first.templateVersion,
+      schemaVersion: first.schemaVersion,
+    };
+
+    await expect(hashWeeklyRecapVideoInput(first)).resolves.toBe(
+      "2f4749eb39293ae00921fd2a16cabd138afa339276601e175238a07449d36932"
+    );
+    await expect(hashWeeklyRecapVideoInput(reordered)).resolves.toBe(
+      await hashWeeklyRecapVideoInput(first)
+    );
+    await expect(
+      hashWeeklyRecapVideoInput({
+        ...first,
+        report: { headline: "Documentary report" },
+      })
+    ).resolves.not.toBe(await hashWeeklyRecapVideoInput(first));
+  });
+
   test("continues polling starting, queued, and rendering jobs", async () => {
     vi.useFakeTimers();
     const getJob = vi
@@ -133,7 +172,12 @@ describe("weekly recap video job lifecycle", () => {
       .mockResolvedValueOnce(active);
     const getJob = vi.fn().mockResolvedValue(makeJob("complete"));
     const { controller, onJob } = makeController({ getLatestJob, getJob });
-    const context = { leagueId: "league-1", season: "2025", week: 7 };
+    const context = {
+      leagueId: "league-1",
+      season: "2025",
+      week: 7,
+      inputHash: "a".repeat(64),
+    };
 
     await controller.restore(context);
     expect(onJob).toHaveBeenLastCalledWith(completed);
@@ -151,7 +195,12 @@ describe("weekly recap video job lifecycle", () => {
       getLatestJob,
     });
 
-    await controller.restore({ leagueId: "league-1", season: "2025", week: 7 });
+    await controller.restore({
+      leagueId: "league-1",
+      season: "2025",
+      week: 7,
+      inputHash: "a".repeat(64),
+    });
 
     expect(onJob).not.toHaveBeenCalled();
     expect(onRestoreFailure).not.toHaveBeenCalled();

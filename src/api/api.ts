@@ -298,7 +298,8 @@ export const getWeeklyRecapVideo = async (
 export const getLatestWeeklyRecapVideo = async (
   leagueId: string,
   season: string,
-  week: number
+  week: number,
+  inputHash: string
 ): Promise<WeeklyRecapVideoJob | null> => {
   const origin =
     typeof window === "undefined" ? "http://localhost" : window.location.origin;
@@ -306,6 +307,7 @@ export const getLatestWeeklyRecapVideo = async (
   endpoint.searchParams.set("leagueId", leagueId);
   endpoint.searchParams.set("season", season);
   endpoint.searchParams.set("week", String(week));
+  endpoint.searchParams.set("inputHash", inputHash);
 
   const response = await authenticatedFetch(endpoint);
   if (response.status === 404) {

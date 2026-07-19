@@ -61,7 +61,7 @@ describe("weekly recap video job API", () => {
     authenticatedFetch.mockResolvedValue(response(200, job));
 
     await expect(
-      getLatestWeeklyRecapVideo("league-1", "2025", 7)
+      getLatestWeeklyRecapVideo("league-1", "2025", 7, "a".repeat(64))
     ).resolves.toEqual(job);
 
     const endpoint = authenticatedFetch.mock.calls[0][0];
@@ -69,6 +69,7 @@ describe("weekly recap video job API", () => {
       leagueId: "league-1",
       season: "2025",
       week: "7",
+      inputHash: "a".repeat(64),
     });
   });
 
@@ -76,7 +77,7 @@ describe("weekly recap video job API", () => {
     authenticatedFetch.mockResolvedValue(response(404, {}));
 
     await expect(
-      getLatestWeeklyRecapVideo("league-1", "2025", 7)
+      getLatestWeeklyRecapVideo("league-1", "2025", 7, "a".repeat(64))
     ).resolves.toBeNull();
   });
 });

@@ -69,6 +69,7 @@ import {
   getUsableWeeklyRecapVideoUrl,
   getWeeklyRecapVideoStartErrorMessage,
   getWeeklyRecapVideoTerminalMessage,
+  hashWeeklyRecapVideoInput,
   isActiveWeeklyRecapVideoJob,
   WeeklyRecapVideoJobController,
 } from "./weeklyVideoJob";
@@ -710,8 +711,8 @@ const applyWeeklyRecapVideoJob = (job: WeeklyRecapVideoJob) => {
 
 videoJobController = new WeeklyRecapVideoJobController({
   getJob: getWeeklyRecapVideo,
-  getLatestJob: ({ leagueId, season, week }) =>
-    getLatestWeeklyRecapVideo(leagueId, season, week),
+  getLatestJob: ({ leagueId, season, week, inputHash }) =>
+    getLatestWeeklyRecapVideo(leagueId, season, week, inputHash),
   onJob: applyWeeklyRecapVideoJob,
   onPollFailure: (error) => {
     console.error("Unable to check weekly recap video:", error);
@@ -726,8 +727,9 @@ videoJobController = new WeeklyRecapVideoJobController({
 });
 
 const generateWeeklyVideo = async () => {
+  const inputProps = weeklyRecapVideoProps.value;
   if (
-    !premiumWeeklyReport.value ||
+    !inputProps ||
     isRenderingVideo.value ||
     activeVideoJobId
   ) {
@@ -739,20 +741,6 @@ const generateWeeklyVideo = async () => {
   isRenderingVideo.value = true;
   shouldNotifyVideoCompletion = true;
   try {
-    const currentLeague = store.currentLeague;
-    const inputProps = buildWeeklyRecapVideoProps({
-      league: {
-        id: currentLeague.leagueId,
-        name: currentLeague.name,
-        season: currentLeague.season,
-        week: currentWeek.value,
-      },
-      report: premiumWeeklyReport.value,
-      matchups: premiumReportPrompt.value,
-      topTeams: exportTopTeams.value,
-      topPlayers: exportHotPlayers.value,
-      benchPlayers: exportBenchPlayers.value,
-    });
     const job = await startWeeklyRecapVideo(inputProps);
     if (videoRenderGeneration !== renderGeneration) return;
 
@@ -788,6 +776,28 @@ const exportColdPlayers = computed(() => {
 
 const exportBenchPlayers = computed(() => {
   return getExportPlayers(benchPerformers.value);
+});
+
+const weeklyRecapVideoProps = computed(() => {
+  const report = premiumWeeklyReport.value;
+  const currentLeague = store.currentLeague;
+  if (!report || !currentLeague) {
+    return null;
+  }
+
+  return buildWeeklyRecapVideoProps({
+    league: {
+      id: currentLeague.leagueId,
+      name: currentLeague.name,
+      season: currentLeague.season,
+      week: currentWeek.value,
+    },
+    report,
+    matchups: premiumReportPrompt.value,
+    topTeams: exportTopTeams.value,
+    topPlayers: exportHotPlayers.value,
+    benchPlayers: exportBenchPlayers.value,
+  });
 });
 
 const exportSummary = computed(() => {
@@ -911,23 +921,31 @@ watch(
 );
 
 watch(
-  () => {
-    const league = store.currentLeague;
-    if (!league || !premiumWeeklyReport.value) {
-      return null;
-    }
-    return {
-      leagueId: league.leagueId,
-      season: league.season,
-      week: currentWeek.value,
-    };
-  },
-  async (context) => {
+  weeklyRecapVideoProps,
+  async (inputProps) => {
     resetVideoRender();
-    if (!context) {
+    if (!inputProps) {
       return;
     }
-    await videoJobController.restore(context);
+
+    const restoreGeneration = videoRenderGeneration;
+    try {
+      const inputHash = await hashWeeklyRecapVideoInput(inputProps);
+      if (restoreGeneration !== videoRenderGeneration) {
+        return;
+      }
+      await videoJobController.restore({
+        leagueId: inputProps.league.id ?? "",
+        season: inputProps.league.season,
+        week: inputProps.league.week,
+        inputHash,
+      });
+    } catch (error) {
+      if (restoreGeneration === videoRenderGeneration) {
+        console.error("Unable to identify the weekly recap video:", error);
+        toast.error("Unable to restore the matching video render.");
+      }
+    }
   }
 );
 

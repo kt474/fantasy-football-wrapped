@@ -1,8 +1,50 @@
 import type {
   WeeklyRecapVideoJob,
   WeeklyRecapVideoJobStatus,
+  WeeklyRecapVideoProps,
 } from "@/types/types";
 import { HttpError } from "@/lib/http";
+
+const canonicalizeJson = (value: unknown): string => {
+  if (
+    value === null ||
+    typeof value === "boolean" ||
+    typeof value === "string"
+  ) {
+    return JSON.stringify(value);
+  }
+
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) {
+      throw new Error("Video input contains a non-finite number");
+    }
+    return JSON.stringify(value);
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map(canonicalizeJson).join(",")}]`;
+  }
+
+  if (typeof value === "object") {
+    const object = value as Record<string, unknown>;
+    const entries = Object.keys(object)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalizeJson(object[key])}`);
+    return `{${entries.join(",")}}`;
+  }
+
+  throw new Error("Video input is not valid JSON");
+};
+
+export const hashWeeklyRecapVideoInput = async (
+  inputProps: WeeklyRecapVideoProps
+) => {
+  const bytes = new TextEncoder().encode(canonicalizeJson(inputProps));
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+};
 
 export const ACTIVE_WEEKLY_RECAP_VIDEO_STATUSES = new Set<WeeklyRecapVideoJobStatus>([
   "starting",
@@ -64,6 +106,7 @@ type VideoJobContext = {
   leagueId: string;
   season: string;
   week: number;
+  inputHash: string;
 };
 
 type Timer = ReturnType<typeof setTimeout>;
