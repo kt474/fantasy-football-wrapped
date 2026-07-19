@@ -40,6 +40,7 @@ export type LeagueInfoType = {
   premiumWeeklyReports?: Record<number, PremiumReport>;
   weeklyPreview?: string;
   managerProfiles?: Record<string, string>;
+  rivalryReports?: Record<string, string>;
   yearEndReport?: string;
   currentTrends?: string[];
   playoffType: number;

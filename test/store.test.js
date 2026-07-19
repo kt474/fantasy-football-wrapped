@@ -187,4 +187,25 @@ describe("main store", () => {
       report
     );
   });
+
+  test("stores rivalry reports and preserves them when league data refreshes", () => {
+    const store = useStore();
+    const league = buildLeague("league-1");
+
+    store.updateLeagueInfo(league);
+    store.addRivalryReport(
+      getLeagueKey(league),
+      "manager-a:manager-b",
+      "A storied rivalry"
+    );
+    store.updateLeagueInfo({
+      ...buildLeague("league-1"),
+      name: "Refreshed League",
+      lastUpdated: league.lastUpdated + 1,
+    });
+
+    expect(store.leagueInfo[0].rivalryReports).toEqual({
+      "manager-a:manager-b": "A storied rivalry",
+    });
+  });
 });

@@ -94,6 +94,8 @@ export const useStore = defineStore("main", {
           premiumWeeklyReports:
             payload.premiumWeeklyReports ??
             existingLeague.premiumWeeklyReports,
+          rivalryReports:
+            payload.rivalryReports ?? existingLeague.rivalryReports,
         };
       });
     },
@@ -160,6 +162,15 @@ export const useStore = defineStore("main", {
       const item = this.findLeague(leagueId);
       if (item) {
         item.managerProfiles = payload;
+      }
+    },
+    addRivalryReport(leagueId: string, pairKey: string, report: string) {
+      const item = this.findLeague(leagueId);
+      if (item) {
+        item.rivalryReports = {
+          ...item.rivalryReports,
+          [pairKey]: report,
+        };
       }
     },
     addCurrentTrends(leagueId: string, payload: string[]) {

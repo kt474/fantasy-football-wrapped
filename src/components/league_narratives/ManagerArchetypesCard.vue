@@ -91,12 +91,19 @@ const storedManagerProfiles = computed(
   () => store.currentLeague?.managerProfiles ?? {}
 );
 
+const allManagerProfilesGenerated = computed(
+  () =>
+    props.payload.managers.length > 0 &&
+    props.payload.managers.every((manager) =>
+      Boolean(blurbsByUserId.value[manager.userId]?.trim())
+    )
+);
+
 const canGenerateArchetypes = computed(
   () =>
     props.payload.managers.length > 0 &&
     !isLoading.value &&
-    (Object.keys(blurbsByUserId.value).length === 0 ||
-      subscriptionStore.isPremium)
+    !allManagerProfilesGenerated.value
 );
 
 const generateButtonLabel = computed(() => {

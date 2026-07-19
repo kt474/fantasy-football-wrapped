@@ -274,11 +274,7 @@ const trackPremiumCtaClick = (cta: string) => {
             :disabled="imageActionDisabled"
             variant="outline"
             size="sm"
-            :class="
-              tier === 'Premium'
-                ? 'h-10 w-10 min-w-0 px-2 sm:h-8 sm:w-8 sm:px-1'
-                : 'h-8'
-            "
+            class="h-8"
             aria-label="Share recap image"
             title="Share recap image"
           >
@@ -289,11 +285,7 @@ const trackPremiumCtaClick = (cta: string) => {
             :disabled="copyActionDisabled"
             variant="outline"
             size="sm"
-            :class="
-              tier === 'Premium'
-                ? 'h-10 w-10 min-w-0 px-2 sm:h-8 sm:w-8 sm:px-1'
-                : 'h-8'
-            "
+            class="h-8"
             aria-label="Copy full report"
             title="Copy full report"
           >

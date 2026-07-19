@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { useStore } from "../../store/store";
+import { getLeagueKey, useStore } from "../../store/store";
 import Card from "../ui/card/Card.vue";
 import {
   Select,
@@ -20,6 +20,7 @@ import { useSubscriptionStore } from "@/store/subscription";
 import { trackPremiumFunnelEvent } from "@/lib/analytics";
 import { renderMarkdown } from "@/lib/markdown";
 import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
+import { getRivalryReportPairKey } from "@/lib/rivalryReport";
 
 const store = useStore();
 const subscriptionStore = useSubscriptionStore();
@@ -256,10 +257,45 @@ const getManagerPayload = (
 });
 
 const currentLeagueId = computed(
-  () =>
-    store.currentLeague?.leagueId ??
-    store.currentLeagueId
+  () => store.currentLeague?.leagueId ?? store.currentLeagueId
 );
+
+const currentLeagueKey = computed(() =>
+  store.currentLeague
+    ? getLeagueKey(store.currentLeague)
+    : store.currentLeagueId
+);
+
+const rivalryReportPairKey = computed(() => {
+  const managerOneId = currentManager1.value.id;
+  const managerTwoId = currentManager2.value.id;
+  if (!managerOneId || !managerTwoId) return null;
+
+  return getRivalryReportPairKey([managerOneId, managerTwoId]);
+});
+
+const rivalryReportSelectionKey = computed(() => {
+  const leagueKey = currentLeagueKey.value;
+  const pairKey = rivalryReportPairKey.value;
+  if (!leagueKey || !pairKey) return null;
+
+  return `${encodeURIComponent(leagueKey)}:${pairKey}`;
+});
+
+const isSavedRivalryReport = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+const loadSavedRivalryReport = () => {
+  const pairKey = rivalryReportPairKey.value;
+  generatedReport.value = "";
+  generationError.value = "";
+  if (!pairKey) return;
+
+  const savedReport = store.currentLeague?.rivalryReports?.[pairKey];
+  generatedReport.value = isSavedRivalryReport(savedReport)
+    ? savedReport
+    : "";
+};
 
 const aiComparisonPayload = computed<ManagerComparisonPayload>(() => ({
   managers: [
@@ -288,7 +324,7 @@ const visibleReport = computed(() =>
 const renderedReport = computed(() => renderMarkdown(visibleReport.value));
 
 const generateAiReport = async () => {
-  if (!subscriptionStore.isPremium) {
+  if (!subscriptionStore.isPremium || generatedReport.value) {
     return;
   }
 
@@ -305,11 +341,19 @@ const generateAiReport = async () => {
   try {
     isGeneratingReport.value = true;
     generationError.value = "";
+    const leagueKey = currentLeagueKey.value;
+    const pairKey = rivalryReportPairKey.value;
+    const selectionKey = rivalryReportSelectionKey.value;
     const result = await generateManagerComparison(
       currentLeagueId.value,
       aiComparisonPayload.value
     );
-    generatedReport.value = result.text;
+    if (leagueKey && pairKey && isSavedRivalryReport(result.text)) {
+      store.addRivalryReport(leagueKey, pairKey, result.text);
+    }
+    if (selectionKey === rivalryReportSelectionKey.value) {
+      generatedReport.value = result.text;
+    }
   } catch (error) {
     generationError.value =
       error instanceof Error
@@ -358,10 +402,13 @@ watch(
   { immediate: true }
 );
 
-watch([manager1, manager2], () => {
-  generatedReport.value = "";
-  generationError.value = "";
-});
+watch(
+  rivalryReportSelectionKey,
+  () => {
+    loadSavedRivalryReport();
+  },
+  { immediate: true }
+);
 
 watch([() => store.currentLeagueId, () => store.darkMode], () =>
   updateChartColor()
@@ -853,17 +900,23 @@ const chartOptions = ref({
         </tbody>
       </table>
     </div>
-    <div class="p-4 mt-4 border-b">
+    <div class="p-4 mt-4 border-b sm:p-6">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p class="text-lg font-semibold">Rivalry Report</p>
+          <p class="text-xl font-semibold tracking-tight">Rivalry Report</p>
         </div>
         <Button
           v-if="subscriptionStore.isPremium"
-          :disabled="isGeneratingReport"
+          :disabled="isGeneratingReport || Boolean(generatedReport)"
           @click="generateAiReport"
         >
-          {{ isGeneratingReport ? "Generating..." : "Generate report" }}
+          {{
+            isGeneratingReport
+              ? "Generating..."
+              : generatedReport
+                ? "Report generated"
+                : "Generate report"
+          }}
         </Button>
       </div>
       <div v-if="subscriptionStore.isPremium">
@@ -873,15 +926,20 @@ const chartOptions = ref({
         <div
           v-if="generatedReport"
           v-html="renderedReport"
-          class="mt-3 text-sm leading-relaxed"
+          class="rivalry-report mt-4 max-w-[86ch] text-base leading-7 text-foreground/90 dark:text-foreground/85"
         ></div>
-        <p v-else-if="!generationError" class="mt-3 text-muted-foreground">
+        <p
+          v-else-if="!generationError"
+          class="mt-3 max-w-[60ch] leading-7 text-muted-foreground"
+        >
           Generate a comparison using the selected managers' performance
           throughout every season.
         </p>
       </div>
-      <div v-else class="max-w-4xl mt-3">
-        <p class="max-w-3xl mb-4 text-sm text-muted-foreground sm:text-base">
+      <div v-else class="mt-3 max-w-[86ch]">
+        <p
+          class="mb-4 max-w-[60ch] text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7"
+        >
           Premium rivalry reports turn the manager comparison into a
           personalized short story about the selected managers' history, style,
           and bragging rights.
@@ -889,7 +947,10 @@ const chartOptions = ref({
         <div
           class="relative p-4 mt-3 overflow-hidden border max-h-48 rounded-card sm:p-5"
         >
-          <div v-html="renderedReport" class="leading-relaxed"></div>
+          <div
+            v-html="renderedReport"
+            class="text-base leading-7 rivalry-report text-foreground/90 dark:text-foreground/85"
+          ></div>
           <div
             class="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-background via-background/95 to-transparent"
           ></div>
@@ -932,3 +993,74 @@ const chartOptions = ref({
     ></apexchart>
   </Card>
 </template>
+
+<style scoped>
+.rivalry-report :deep(p) {
+  margin: 0;
+}
+
+.rivalry-report :deep(p + p) {
+  margin-top: 1rem;
+}
+
+.rivalry-report :deep(h1),
+.rivalry-report :deep(h2),
+.rivalry-report :deep(h3) {
+  margin: 1.5rem 0 0.625rem;
+  color: hsl(var(--foreground));
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+
+.rivalry-report :deep(h1:first-child),
+.rivalry-report :deep(h2:first-child),
+.rivalry-report :deep(h3:first-child) {
+  margin-top: 0;
+}
+
+.rivalry-report :deep(h1) {
+  font-size: 1.375rem;
+}
+
+.rivalry-report :deep(h2),
+.rivalry-report :deep(h3) {
+  font-size: 1.125rem;
+}
+
+.rivalry-report :deep(strong) {
+  color: hsl(var(--foreground));
+  font-weight: 700;
+}
+
+.rivalry-report :deep(ul),
+.rivalry-report :deep(ol) {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.rivalry-report :deep(ul) {
+  list-style: disc;
+}
+
+.rivalry-report :deep(ol) {
+  list-style: decimal;
+}
+
+.rivalry-report :deep(li + li) {
+  margin-top: 0.375rem;
+}
+
+.rivalry-report :deep(blockquote) {
+  margin: 1rem 0;
+  border-left: 3px solid hsl(var(--border));
+  padding-left: 1rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.rivalry-report :deep(a) {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+</style>

@@ -88,10 +88,25 @@ describe("design accessibility contracts", () => {
     expect(summary).toContain("sm:ml-auto");
     expect(summary).toContain("sm:col-auto sm:row-auto sm:ml-auto sm:flex");
     expect(summary).toContain("col-start-2 row-start-1 ml-auto flex gap-2");
-    expect(summary.match(/: 'h-8'/g)).toHaveLength(2);
+    expect(summary.match(/class="h-8"/g)).toHaveLength(2);
     expect(summary.match(/h-10 min-w-0 px-2 sm:h-8 sm:w-auto/g)).toHaveLength(3);
-    expect(summary.match(/h-10 w-10 min-w-0 px-2/g)).toHaveLength(2);
+    expect(summary).not.toContain("h-10 w-10 min-w-0 px-2");
     expect(summary.match(/<span class="sm:hidden">/g)).toHaveLength(3);
+  });
+
+  test("rivalry reports use a comfortable reading width and markdown rhythm", () => {
+    const comparison = read(
+      "src/components/league_history/ManagerComparison.vue"
+    );
+
+    expect(comparison).toContain("max-w-[86ch]");
+    expect(comparison).toContain("text-base leading-7");
+    expect(comparison).toContain("rivalry-report");
+    expect(comparison).not.toContain(
+      "rivalry-report mt-4 max-w-[86ch] rounded-card"
+    );
+    expect(comparison).toContain(".rivalry-report :deep(p + p)");
+    expect(comparison).toContain(".rivalry-report :deep(blockquote)");
   });
 
   test("wide data tables advertise keyboard-accessible horizontal scrolling", () => {

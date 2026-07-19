@@ -99,12 +99,26 @@ describe("league IndexedDB storage", () => {
     } = await import("../src/lib/leagueStorage.ts");
 
     await loadSavedLeagues();
-    scheduleLeaguePersistence([buildLeague("one"), buildLeague("two")], 0);
+    scheduleLeaguePersistence(
+      [
+        buildLeague("one", {
+          rivalryReports: {
+            "manager-a:manager-b": "A storied rivalry",
+          },
+        }),
+        buildLeague("two"),
+      ],
+      0
+    );
     await flushLeaguePersistence();
-    expect((await loadSavedLeagues()).map((league) => league.leagueId)).toEqual([
+    const initiallySaved = await loadSavedLeagues();
+    expect(initiallySaved.map((league) => league.leagueId)).toEqual([
       "one",
       "two",
     ]);
+    expect(initiallySaved[0].rivalryReports).toEqual({
+      "manager-a:manager-b": "A storied rivalry",
+    });
 
     scheduleLeaguePersistence(
       [buildLeague("two", { name: "Updated league" })],
