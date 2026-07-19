@@ -99,8 +99,8 @@ describe("design accessibility contracts", () => {
     expect(summary).toContain("<DialogTitle>Weekly recap video</DialogTitle>");
     expect(summary).toContain('v-if="videoDialogOpen && videoUrl"');
     expect(summary).toContain("3 video generations per rolling 7 days");
-    expect(summary).toContain("remain available for 15 days");
-    expect(summary).toContain("Download a copy before");
+    expect(summary).toContain("Videos remain available for 15");
+    expect(summary).toContain("Download to share.");
     expect(summary).not.toContain(':href="videoUrl"');
     expect(summary).not.toContain("                download\n");
   });

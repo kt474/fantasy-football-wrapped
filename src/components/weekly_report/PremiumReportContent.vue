@@ -18,14 +18,13 @@ defineProps<{
 <template>
   <div class="space-y-4">
     <header class="max-w-5xl">
-      <h2
-        class="max-w-4xl text-3xl font-bold sm:text-4xl text-pretty"
-      >
+      <h2 class="max-w-4xl text-3xl font-bold sm:text-4xl text-pretty">
         {{ report.frontPage.headline }}
       </h2>
-      <p class="max-w-3xl mt-2 text-lg text-muted-foreground">
-        {{ report.frontPage.subheadline }}
-      </p>
+      <div
+        v-html="renderMarkdown(report.frontPage.subheadline)"
+        class="max-w-3xl mt-2 text-lg text-muted-foreground"
+      ></div>
       <div
         v-html="renderMarkdown(report.frontPage.lead)"
         class="max-w-3xl mt-5 text-base leading-7 text-foreground/90 dark:text-foreground/85"
@@ -36,7 +35,7 @@ defineProps<{
 
     <section class="space-y-3">
       <div>
-        <h3 class="text-lg font-semibold">Matchup Reports</h3>
+        <h3 class="text-2xl font-semibold">Matchup Reports</h3>
         <p class="text-sm text-muted-foreground">
           This week's head-to-head action.
         </p>
@@ -53,7 +52,9 @@ defineProps<{
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p class="text-base leading-7 text-foreground/90 dark:text-foreground/85">
+            <p
+              class="text-base leading-7 text-foreground/90 dark:text-foreground/85"
+            >
               {{ matchup.recap }}
             </p>
           </CardContent>
@@ -63,7 +64,7 @@ defineProps<{
 
     <section class="space-y-3">
       <div>
-        <h3 class="text-lg font-semibold">Team of the Week</h3>
+        <h3 class="text-2xl font-semibold">Team of the Week</h3>
         <p class="text-sm text-muted-foreground">
           The team that defined the week.
         </p>
@@ -85,16 +86,16 @@ defineProps<{
               <p class="text-2xl font-bold tabular-nums">
                 {{ report.teamOfTheWeek.pointsScored }}
               </p>
-              <p
-                class="text-xs font-medium uppercase text-muted-foreground"
-              >
+              <p class="text-xs font-medium uppercase text-muted-foreground">
                 Points
               </p>
             </div>
           </div>
         </CardHeader>
         <CardContent class="p-4 pt-0">
-          <p class="text-base leading-7 text-foreground/90 dark:text-foreground/85">
+          <p
+            class="text-base leading-7 text-foreground/90 dark:text-foreground/85"
+          >
             {{ report.teamOfTheWeek.analysis }}
           </p>
         </CardContent>
@@ -103,7 +104,7 @@ defineProps<{
 
     <section class="space-y-3">
       <div>
-        <h3 class="text-lg font-semibold">
+        <h3 class="max-w-xl text-2xl font-semibold">
           {{ report.weeklyLowlights.headline }}
         </h3>
         <p class="text-sm text-muted-foreground">
@@ -125,7 +126,9 @@ defineProps<{
             </CardDescription>
           </CardHeader>
           <CardContent class="p-4 pt-0">
-            <p class="text-base leading-7 text-foreground/90 dark:text-foreground/85">
+            <p
+              class="text-base leading-7 text-foreground/90 dark:text-foreground/85"
+            >
               {{ entry.analysis }}
             </p>
           </CardContent>

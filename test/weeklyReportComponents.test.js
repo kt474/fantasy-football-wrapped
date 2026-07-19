@@ -167,12 +167,12 @@ describe("weekly report components", () => {
     expect(html).toContain("Premium weekly report");
   });
 
-  test("PremiumReportContent renders bold team names in the front page lead", async () => {
+  test("PremiumReportContent renders bold team names in the front page subtitle and lead", async () => {
     const html = await renderComponent(PremiumReportContent, {
       report: {
         frontPage: {
           headline: "Week 7 Headline",
-          subheadline: "Week 7 subheadline",
+          subheadline: "**Alpha Team** takes control of Week 7",
           lead: "**Alpha Team** beat **Beta Team** in the game of the week.",
         },
         matchupReports: [],

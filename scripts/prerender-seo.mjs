@@ -289,6 +289,43 @@ const pages = [
       articleSection: "Fantasy Football Weekly Recaps",
     },
   },
+  {
+    path: "fantasy-football-video-recap-example",
+    title: "Fantasy Football Video Recap Example | ffwrapped",
+    description:
+      "Watch a 25-second fantasy football video recap example with league storylines, matchup scores, narration, and team-by-team results.",
+    heading: "Weekly Video Recap Example",
+    introduction:
+      "A 25-second sample built from league storylines, matchup scores, and team performances.",
+    video: {
+      src: "/video/ffwrapped-marketing-demo-week-11.mp4",
+      poster: "/video/ffwrapped-video-recap-poster.png",
+      label:
+        "Play the ffwrapped Week 11 fantasy football video recap example",
+      disclaimer:
+        "Sample league and team names are fictional. Video created with ffwrapped Premium for product demonstration.",
+    },
+    ogImage:
+      "https://ffwrapped.com/video/ffwrapped-video-recap-poster.png",
+    ogVideo:
+      "https://ffwrapped.com/video/ffwrapped-marketing-demo-week-11.mp4",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "VideoObject",
+      name: "Fantasy football Week 11 video recap example",
+      description:
+        "A 25-second ffwrapped Premium fantasy football video recap example with narration, league storylines, matchup scores, and team results.",
+      thumbnailUrl:
+        "https://ffwrapped.com/video/ffwrapped-video-recap-poster.png",
+      uploadDate: "2026-07-19",
+      duration: "PT25S",
+      contentUrl:
+        "https://ffwrapped.com/video/ffwrapped-marketing-demo-week-11.mp4",
+      embedUrl:
+        "https://ffwrapped.com/fantasy-football-video-recap-example",
+      isFamilyFriendly: true,
+    },
+  },
 ];
 
 const escapeHtml = (value) =>
@@ -319,6 +356,10 @@ const toolLinks = [
     href: "/fantasy-football-weekly-recap",
     label: "Weekly recaps",
   },
+  {
+    href: "/fantasy-football-video-recap-example",
+    label: "Video recap example",
+  },
 ];
 
 const renderToolNavigation = (page) => `
@@ -336,31 +377,52 @@ const renderToolNavigation = (page) => `
   </nav>
 `;
 
-const renderStaticPage = (page) => `
-  <main data-prerendered="true">
-    <article class="container max-w-5xl px-5 py-16 mx-auto">
-      <header>
-        <h1>${escapeHtml(page.heading)}</h1>
-        <p>${escapeHtml(page.introduction)}</p>
-        <p><a href="${escapeHtml(page.ctaHref ?? "/")}">${escapeHtml(page.ctaLabel ?? "Analyze your fantasy football league")}</a></p>
-      </header>
-      <section aria-labelledby="prerendered-page-features">
-        <h2 id="prerendered-page-features">${escapeHtml(page.sectionHeading ?? "Explore your league")}</h2>
-        <ul>
-          ${page.sections
-            .map((section) => {
-              const title =
-                typeof section === "string" ? section : section.title;
-              const body = typeof section === "string" ? "" : section.body;
-              return `<li><h3>${escapeHtml(title)}</h3>${body ? `<p>${escapeHtml(body)}</p>` : ""}</li>`;
-            })
-            .join("")}
-        </ul>
-      </section>
-      ${renderToolNavigation(page)}
-    </article>
-  </main>
-`;
+const renderStaticPage = (page) => {
+  if (page.video) {
+    return `
+      <main data-prerendered="true">
+        <article class="container max-w-4xl px-5 py-4 mx-auto">
+          <header>
+            <h1>${escapeHtml(page.heading)}</h1>
+            <p>${escapeHtml(page.introduction)}</p>
+          </header>
+          <video controls playsinline preload="metadata" poster="${escapeHtml(page.video.poster)}" aria-label="${escapeHtml(page.video.label)}">
+            <source src="${escapeHtml(page.video.src)}" type="video/mp4" />
+            Your browser does not support the video element.
+          </video>
+          <p>${escapeHtml(page.video.disclaimer)}</p>
+          ${renderToolNavigation(page)}
+        </article>
+      </main>
+    `;
+  }
+
+  return `
+    <main data-prerendered="true">
+      <article class="container max-w-5xl px-5 py-16 mx-auto">
+        <header>
+          <h1>${escapeHtml(page.heading)}</h1>
+          <p>${escapeHtml(page.introduction)}</p>
+          <p><a href="${escapeHtml(page.ctaHref ?? "/")}">${escapeHtml(page.ctaLabel ?? "Analyze your fantasy football league")}</a></p>
+        </header>
+        <section aria-labelledby="prerendered-page-features">
+          <h2 id="prerendered-page-features">${escapeHtml(page.sectionHeading ?? "Explore your league")}</h2>
+          <ul>
+            ${page.sections
+              .map((section) => {
+                const title =
+                  typeof section === "string" ? section : section.title;
+                const body = typeof section === "string" ? "" : section.body;
+                return `<li><h3>${escapeHtml(title)}</h3>${body ? `<p>${escapeHtml(body)}</p>` : ""}</li>`;
+              })
+              .join("")}
+          </ul>
+        </section>
+        ${renderToolNavigation(page)}
+      </article>
+    </main>
+  `;
+};
 
 const template = await readFile(resolve("dist/index.html"), "utf8");
 
@@ -370,6 +432,10 @@ for (const page of pages) {
   const structuredData = page.structuredData
     ? `<script type="application/ld+json">${JSON.stringify(page.structuredData).replaceAll("<", "\\u003c")}</script>`
     : "";
+  const videoMeta = page.ogVideo
+    ? `<meta property="og:video" content="${escapeHtml(page.ogVideo)}" /><meta property="og:video:secure_url" content="${escapeHtml(page.ogVideo)}" /><meta property="og:video:type" content="video/mp4" /><meta property="og:video:width" content="720" /><meta property="og:video:height" content="1280" />`
+    : "";
+  const imageUrl = page.ogImage ?? "https://ffwrapped.com/homepage.webp";
   const html = template
     .replace(
       /<title>[^<]*<\/title>/,
@@ -404,6 +470,14 @@ for (const page of pages) {
       `<meta property="og:title" content="${escapeHtml(page.title)}" />`
     )
     .replace(
+      /<meta property="og:image" content="[^"]*"\s*\/>/,
+      `<meta property="og:image" content="${escapeHtml(imageUrl)}" />`
+    )
+    .replace(
+      /<meta itemprop="image" content="[^"]*"\s*\/>/,
+      `<meta itemprop="image" content="${escapeHtml(imageUrl)}" />`
+    )
+    .replace(
       /<meta\s+property="og:description"\s+content="[^"]*"\s*\/>/,
       `<meta property="og:description" content="${escapeHtml(page.description)}" />`
     )
@@ -415,8 +489,12 @@ for (const page of pages) {
       /<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/>/,
       `<meta name="twitter:description" content="${escapeHtml(page.description)}" />`
     )
+    .replace(
+      /<meta name="twitter:image" content="[^"]*"\s*\/>/,
+      `<meta name="twitter:image" content="${escapeHtml(imageUrl)}" />`
+    )
     .replace('<div id="app"></div>', `<div id="app">${staticPage}</div>`)
-    .replace("</head>", `${structuredData}</head>`);
+    .replace("</head>", `${videoMeta}${structuredData}</head>`);
 
   const outputDirectory = resolve("dist", page.path);
   await mkdir(outputDirectory, { recursive: true });

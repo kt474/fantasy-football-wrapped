@@ -403,14 +403,23 @@ const trackPremiumCtaClick = (cta: string) => {
                 They're longer, more detailed, packed with richer league
                 context, and aware of past matchups and rivalries.
               </p>
-              <a
-                href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="font-medium text-primary hover:underline"
-              >
-                View full sample report</a
-              >.
+              <div class="flex flex-wrap mt-3 gap-x-4 gap-y-1">
+                <a
+                  href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-medium text-primary hover:underline"
+                >
+                  View full sample report →
+                </a>
+                <RouterLink
+                  to="/fantasy-football-video-recap-example"
+                  class="font-medium text-primary hover:underline"
+                  @click="trackPremiumCtaClick('watch_sample_video')"
+                >
+                  Watch sample video →
+                </RouterLink>
+              </div>
             </div>
 
             <div
@@ -442,14 +451,23 @@ const trackPremiumCtaClick = (cta: string) => {
               They're longer, more detailed, packed with richer league context,
               and aware of past matchups and rivalries.
             </p>
-            <a
-              href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="font-medium text-primary hover:underline"
-            >
-              View full sample report</a
-            >.
+            <div class="flex flex-wrap mt-3 gap-x-4 gap-y-1">
+              <a
+                href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-medium text-primary hover:underline"
+              >
+                View full sample report →
+              </a>
+              <RouterLink
+                to="/fantasy-football-video-recap-example"
+                class="font-medium text-primary hover:underline"
+                @click="trackPremiumCtaClick('watch_sample_video')"
+              >
+                Watch sample video →
+              </RouterLink>
+            </div>
           </div>
           <div
             class="relative max-h-[400px] overflow-hidden rounded-card border p-4 sm:p-6"
@@ -612,8 +630,8 @@ const trackPremiumCtaClick = (cta: string) => {
         Your browser does not support the video element.
       </video>
       <p class="text-xs leading-5 text-muted-foreground">
-        Generated videos remain available for 15 days after rendering finishes.
-        Download a copy before this one expires to keep it.
+        3 video generations permitted every week. Videos remain available for 15
+        days. Download to share.
       </p>
     </DialogContent>
   </Dialog>

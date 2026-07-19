@@ -131,20 +131,6 @@ const premiumDescription = computed(() => {
   return "Get shareable weekly newsletters and video recaps, manager profiles, and rivalry reports for every league you manage.";
 });
 
-const showPremiumReportSample = computed(
-  () =>
-    upgradeIntent.value === "premium_report" &&
-    upgradeSource.value === "weekly_report"
-);
-
-const trackPremiumReportSampleClick = () => {
-  trackPremiumFunnelEvent("premium_sample_clicked", {
-    feature: upgradeIntent.value,
-    upgrade_source: upgradeSource.value,
-    authenticated: authStore.isAuthenticated,
-  });
-};
-
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
   /\/$/,
   ""
@@ -1272,15 +1258,6 @@ watch(
             <CardTitle>Unlock Premium</CardTitle>
             <CardDescription>
               {{ premiumDescription }}
-              <a
-                v-if="showPremiumReportSample"
-                href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="font-medium text-primary underline-offset-4 hover:underline"
-                @click="trackPremiumReportSampleClick"
-                >View sample report →</a
-              >
             </CardDescription>
           </CardHeader>
           <CardContent class="text-sm">

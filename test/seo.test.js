@@ -17,11 +17,11 @@ describe("SEO landing pages", () => {
     expect(router).toContain('path: "/fantasy-football-power-rankings"');
     expect(router).toContain('path: "/fantasy-football-league-history"');
     expect(router).toContain('path: "/fantasy-football-weekly-recap"');
-    expect(router).toContain(
-      'path: "/fantasy-football-weekly-recap-example"'
-    );
+    expect(router).toContain('path: "/fantasy-football-weekly-recap-example"');
+    expect(router).toContain('path: "/fantasy-football-video-recap-example"');
     expect(router).toContain("component: WeeklyRecapLanding");
     expect(router).toContain("component: PremiumReportExample");
+    expect(router).toContain("component: VideoRecapExample");
     expect(router).toContain(
       "Sleeper Fantasy Football League Analyzer | ffwrapped"
     );
@@ -31,11 +31,18 @@ describe("SEO landing pages", () => {
     expect(router).toContain(
       "Fantasy Football Weekly Recap Example | ffwrapped"
     );
-    expect(router).toContain("ESPN Fantasy Football League Analyzer | ffwrapped");
+    expect(router).toContain(
+      "Fantasy Football Video Recap Example | ffwrapped"
+    );
+    expect(router).toContain(
+      "ESPN Fantasy Football League Analyzer | ffwrapped"
+    );
     expect(router).toContain(
       "Fantasy Football Draft Grades for Sleeper & ESPN | ffwrapped"
     );
-    expect(router).toContain("Fantasy Football Playoff Odds Calculator | ffwrapped");
+    expect(router).toContain(
+      "Fantasy Football Playoff Odds Calculator | ffwrapped"
+    );
     expect(router).toContain(
       "Fantasy Football Power Rankings for Your League | ffwrapped"
     );
@@ -75,7 +82,9 @@ describe("SEO landing pages", () => {
     expect(examplePage).toContain("PremiumReportContent");
     expect(examplePage).toContain("Anonymized published example");
     expect(examplePage).toContain("In this report");
-    expect(examplePage).toContain("Real enough to evaluate, private enough to publish");
+    expect(examplePage).toContain(
+      "Real enough to evaluate, private enough to publish"
+    );
     expect(examplePage).toContain("Analyze your league");
     expect(example.leagueId).toBeUndefined();
     expect(example.leagueName).toBe("Sample ffwrapped league");
@@ -105,6 +114,31 @@ describe("SEO landing pages", () => {
     expect(landingPage).toContain("3 new video generations per rolling 7 days");
     expect(landingPage).toContain("remain available for 15 days");
     expect(landingPage).toContain("13,000+ leagues added");
+    expect(landingPage).toContain("VideoRecapPreview");
+    expect(landingPage).toContain("Watch the full example");
+  });
+
+  test("publishes a durable Premium video recap example", () => {
+    const examplePage = read("src/views/VideoRecapExample.vue");
+    const player = read("src/components/weekly_report/VideoRecapPreview.vue");
+    const prerender = read("scripts/prerender-seo.mjs");
+
+    expect(examplePage).toContain("VideoRecapPreview");
+    expect(examplePage).toContain("Weekly Video Recap Example");
+    expect(examplePage).not.toContain(
+      "A finished recap, not a slideshow export"
+    );
+    expect(examplePage).not.toContain("previewDetails");
+    expect(player).toContain("/video/ffwrapped-marketing-demo-week-11.mp4");
+    expect(player).toContain("controls");
+    expect(player).toContain("playsinline");
+    expect(player).toContain('preload="metadata"');
+    expect(prerender).toContain('heading: "Weekly Video Recap Example"');
+    expect(prerender).toContain("if (page.video)");
+    expect(prerender).toContain("<video controls playsinline");
+    expect(prerender).not.toContain(
+      'sectionHeading: "What the video includes"'
+    );
   });
 
   test("uses one restrained public shell across the focused SEO pages", () => {
@@ -118,6 +152,7 @@ describe("SEO landing pages", () => {
       read("src/views/LeagueHistoryLanding.vue"),
       read("src/views/WeeklyRecapLanding.vue"),
       read("src/views/PremiumReportExample.vue"),
+      read("src/views/VideoRecapExample.vue"),
     ];
 
     for (const page of pages) {
@@ -132,6 +167,9 @@ describe("SEO landing pages", () => {
     );
     expect(router).toMatch(
       /path: "\/fantasy-football-weekly-recap-example"[\s\S]*?standalone: true/
+    );
+    expect(router).toMatch(
+      /path: "\/fantasy-football-video-recap-example"[\s\S]*?standalone: true/
     );
   });
 
@@ -158,6 +196,9 @@ describe("SEO landing pages", () => {
     expect(sitemap).toContain(
       "https://ffwrapped.com/fantasy-football-weekly-recap-example"
     );
+    expect(sitemap).toContain(
+      "https://ffwrapped.com/fantasy-football-video-recap-example"
+    );
     expect(sitemap).not.toContain("leagueId=");
   });
 
@@ -174,6 +215,7 @@ describe("SEO landing pages", () => {
     expect(prerender).toContain(
       'path: "fantasy-football-weekly-recap-example"'
     );
+    expect(prerender).toContain('path: "fantasy-football-video-recap-example"');
     expect(prerender).toContain('path: "espn-league-analyzer"');
     expect(prerender).toContain('path: "fantasy-football-draft-grades"');
     expect(prerender).toContain(
@@ -187,9 +229,7 @@ describe("SEO landing pages", () => {
   test("prerendered pages expose crawlable links to the public tools", () => {
     const prerender = read("scripts/prerender-seo.mjs");
 
-    expect(prerender).toContain(
-      '<nav aria-label="Fantasy football tools">'
-    );
+    expect(prerender).toContain('<nav aria-label="Fantasy football tools">');
     expect(prerender).toContain(
       '{ href: "/sleeper-league-analyzer", label: "Sleeper analyzer" }'
     );
@@ -199,15 +239,9 @@ describe("SEO landing pages", () => {
     expect(prerender).toContain(
       'href: "/fantasy-football-playoff-odds-calculator"'
     );
-    expect(prerender).toContain(
-      'href: "/fantasy-football-power-rankings"'
-    );
-    expect(prerender).toContain(
-      'href: "/fantasy-football-league-history"'
-    );
-    expect(prerender).toContain(
-      'href: "/fantasy-football-weekly-recap"'
-    );
+    expect(prerender).toContain('href: "/fantasy-football-power-rankings"');
+    expect(prerender).toContain('href: "/fantasy-football-league-history"');
+    expect(prerender).toContain('href: "/fantasy-football-weekly-recap"');
     expect(prerender).toContain('<a href="${escapeHtml(href)}">');
   });
 
@@ -222,6 +256,9 @@ describe("SEO landing pages", () => {
     expect(vercel).toContain('"destination": "/changelog/index.html"');
     expect(vercel).toContain(
       '"destination": "/fantasy-football-weekly-recap-example/index.html"'
+    );
+    expect(vercel).toContain(
+      '"destination": "/fantasy-football-video-recap-example/index.html"'
     );
     expect(vercel).toContain(
       '"destination": "/espn-league-analyzer/index.html"'

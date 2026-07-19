@@ -52,6 +52,10 @@
       "destination": "/fantasy-football-weekly-recap-example/index.html"
     },
     {
+      "source": "/fantasy-football-video-recap-example",
+      "destination": "/fantasy-football-video-recap-example/index.html"
+    },
+    {
       "source": "/report/:token",
       "destination": "/api/report-page?token=:token"
     },

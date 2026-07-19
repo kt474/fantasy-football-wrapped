@@ -34,6 +34,7 @@ const PowerRankingsLanding = () => import("./views/PowerRankingsLanding.vue");
 const LeagueHistoryLanding = () => import("./views/LeagueHistoryLanding.vue");
 const WeeklyRecapLanding = () => import("./views/WeeklyRecapLanding.vue");
 const PremiumReportExample = () => import("./views/PremiumReportExample.vue");
+const VideoRecapExample = () => import("./views/VideoRecapExample.vue");
 const NotFound = () => import("./views/404.vue");
 
 const siteUrl = "https://ffwrapped.com";
@@ -157,6 +158,17 @@ const routes = [
       description:
         "Read a complete fantasy football weekly recap example with championship analysis, matchup summaries, Team of the Week, and weekly lowlights.",
       ogType: "article",
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-video-recap-example",
+    component: VideoRecapExample,
+    meta: {
+      title: "Fantasy Football Video Recap Example | ffwrapped",
+      description:
+        "Watch a 25-second fantasy football video recap example with league storylines, matchup scores, narration, and team-by-team results.",
+      image: `${siteUrl}/video/ffwrapped-video-recap-poster.png`,
       standalone: true,
     },
   },
@@ -308,6 +320,7 @@ router.afterEach((to) => {
   const robots = String(to.meta.robots ?? "index, follow");
   const ogType = String(to.meta.ogType ?? "website");
   const canonicalUrl = `${siteUrl}${to.path === "/" ? "/" : to.path}`;
+  const imageUrl = String(to.meta.image ?? `${siteUrl}/homepage.webp`);
 
   document.title = title;
 
@@ -322,8 +335,11 @@ router.afterEach((to) => {
   setMetaContent('meta[property="og:description"]', description);
   setMetaContent('meta[property="og:url"]', canonicalUrl);
   setMetaContent('meta[property="og:type"]', ogType);
+  setMetaContent('meta[property="og:image"]', imageUrl);
+  setMetaContent('meta[itemprop="image"]', imageUrl);
   setMetaContent('meta[name="twitter:title"]', title);
   setMetaContent('meta[name="twitter:description"]', description);
+  setMetaContent('meta[name="twitter:image"]', imageUrl);
 
   let robotsMeta = document.querySelector<HTMLMetaElement>(
     'meta[name="robots"]'

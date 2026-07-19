@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
 import PremiumReportContent from "@/components/weekly_report/PremiumReportContent.vue";
+import VideoRecapPreview from "@/components/weekly_report/VideoRecapPreview.vue";
 import {
   Accordion,
   AccordionContent,
@@ -270,6 +271,52 @@ const faqs = [
               </Button>
             </div>
           </Card>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-slate-950 text-white border-y border-slate-800">
+      <div
+        class="grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-20 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-center"
+      >
+        <div class="max-w-2xl">
+          <Badge
+            variant="outline"
+            class="border-blue-400/40 bg-blue-400/10 text-blue-200"
+          >
+            Premium video preview
+          </Badge>
+          <h2 class="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
+            Don’t just describe the recap. Press play.
+          </h2>
+          <p class="mt-4 text-lg leading-8 text-slate-300">
+            See how Week 11 scores, storylines, and team performances become a
+            narrated 25-second video ready for the league chat.
+          </p>
+          <div class="flex flex-wrap gap-3 mt-8">
+            <Button as-child size="lg" variant="secondary">
+              <RouterLink to="/fantasy-football-video-recap-example">
+                Watch the full example
+              </RouterLink>
+            </Button>
+            <Button
+              as-child
+              size="lg"
+              variant="outline"
+              class="border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            >
+              <RouterLink to="/">Create your recap</RouterLink>
+            </Button>
+          </div>
+          <p class="mt-5 text-sm text-slate-400">
+            Vertical format · Narration and music · No editing required
+          </p>
+        </div>
+
+        <div
+          class="w-full max-w-[19rem] mx-auto overflow-hidden border border-white/15 shadow-2xl rounded-[1.75rem] bg-slate-950 ring-1 ring-white/10"
+        >
+          <VideoRecapPreview source="weekly_recap_landing" />
         </div>
       </div>
     </section>
