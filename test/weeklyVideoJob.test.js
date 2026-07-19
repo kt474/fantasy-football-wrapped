@@ -177,7 +177,7 @@ describe("weekly recap video job lifecycle", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  test("maps a 409 to the active-render message without exposing server errors", () => {
+  test("maps render conflicts and quotas without exposing server errors", () => {
     expect(
       getWeeklyRecapVideoStartErrorMessage(
         new HttpError("Weekly recap video request", 409)
@@ -185,6 +185,11 @@ describe("weekly recap video job lifecycle", () => {
     ).toBe(
       "Another video render is already active. Please try again when it finishes."
     );
+    expect(
+      getWeeklyRecapVideoStartErrorMessage(
+        new HttpError("Weekly recap video request", 429)
+      )
+    ).toBe("You’ve reached your video render limit. Please try again later.");
     expect(getWeeklyRecapVideoStartErrorMessage(new Error("renderer secret"))).toBe(
       "Unable to start the video render. Please try again."
     );

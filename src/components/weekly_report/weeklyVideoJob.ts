@@ -50,10 +50,15 @@ export const getWeeklyRecapVideoTerminalMessage = (
   return null;
 };
 
-export const getWeeklyRecapVideoStartErrorMessage = (error: unknown) =>
-  error instanceof HttpError && error.status === 409
-    ? "Another video render is already active. Please try again when it finishes."
-    : "Unable to start the video render. Please try again.";
+export const getWeeklyRecapVideoStartErrorMessage = (error: unknown) => {
+  if (error instanceof HttpError && error.status === 409) {
+    return "Another video render is already active. Please try again when it finishes.";
+  }
+  if (error instanceof HttpError && error.status === 429) {
+    return "You’ve reached your video render limit. Please try again later.";
+  }
+  return "Unable to start the video render. Please try again.";
+};
 
 type VideoJobContext = {
   leagueId: string;
