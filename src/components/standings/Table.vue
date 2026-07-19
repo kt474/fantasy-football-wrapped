@@ -112,7 +112,7 @@ const showLeagueNews = ref(false);
 const leagueNewsTrigger = ref<HTMLElement | null>(null);
 const leagueNewsIsVisible = useElementVisibility(leagueNewsTrigger);
 let leagueNewsIdleCallback: number | undefined;
-let leagueNewsFallbackTimer: ReturnType<typeof window.setTimeout> | undefined;
+let leagueNewsFallbackTimer: number | undefined;
 
 const cancelPendingLeagueNews = () => {
   if (leagueNewsIdleCallback !== undefined) {

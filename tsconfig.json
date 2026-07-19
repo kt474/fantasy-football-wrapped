@@ -3,7 +3,8 @@
     "target": "ES2020",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "types": ["node"],
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -25,6 +26,11 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "api/**/*.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

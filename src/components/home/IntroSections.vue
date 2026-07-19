@@ -63,7 +63,7 @@ const activeTestimonialIndex = ref(0);
 const testimonialDeck = ref<HTMLElement | null>(null);
 const documentVisibility = useDocumentVisibility();
 const testimonialDeckIsVisible = useElementVisibility(testimonialDeck);
-let testimonialInterval: ReturnType<typeof window.setInterval> | undefined;
+let testimonialInterval: number | undefined;
 
 const getTestimonialPosition = (index: number) =>
   (index - activeTestimonialIndex.value + testimonials.length) %
