@@ -108,11 +108,11 @@ import PageHeader from "@/components/layout/PageHeader.vue";
 
         <p class="my-3 text-xl font-semibold">Third-Party Services</p>
         The Service relies on third-party providers for fantasy football data,
-        authentication, billing, hosting, analytics, email, and AI or audio
-        generation. These providers include services such as ESPN, Sleeper,
-        Supabase, Stripe, Vercel, PostHog, and Umami. Third-party services are
-        outside our control, may change or become unavailable, and are subject
-        to their own terms and privacy policies.
+        authentication, billing, hosting, analytics, email, and AI, audio, or
+        video generation. These providers include services such as ESPN,
+        Sleeper, Supabase, Stripe, Vercel, PostHog, and Umami. Third-party
+        services are outside our control, may change or become unavailable,
+        and are subject to their own terms and privacy policies.
 
         <p class="my-3 text-xl font-semibold">Disclaimers</p>
         The Service and all generated content are provided "as is" and "as

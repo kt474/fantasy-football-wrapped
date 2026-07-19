@@ -11,6 +11,17 @@ const badgeVariant = (type: string): BadgeVariants["variant"] => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/18/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "Premium weekly reports can now be exported in a short form video format.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/17/26",
     content: [
       {

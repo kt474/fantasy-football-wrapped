@@ -120,7 +120,7 @@ const upgradeSource = computed(() => {
 
 const premiumDescription = computed(() => {
   if (upgradeIntent.value === "premium_report") {
-    return "Create shareable weekly newsletters with custom commentary styles for every league you manage.";
+    return "Create shareable weekly newsletters and video recaps with custom commentary styles for every league you manage.";
   }
   if (upgradeIntent.value === "manager_profiles") {
     return "Discover each manager’s tendencies, strengths, and identity across your league history.";
@@ -128,7 +128,7 @@ const premiumDescription = computed(() => {
   if (upgradeIntent.value === "rivalry_report") {
     return "Turn your league history into personalized rivalry stories and bragging rights.";
   }
-  return "Get shareable weekly newsletters, manager profiles, and rivalry reports for every league you manage.";
+  return "Get shareable weekly newsletters and video recaps, manager profiles, and rivalry reports for every league you manage.";
 });
 
 const showPremiumReportSample = computed(
@@ -1292,8 +1292,9 @@ watch(
                 <div class="flex align-middle">
                   <Check class="w-5 h-5 mr-2 shrink-0" />
                   <p class="text-muted-foreground max-w-96">
-                    Smarter, shareable, newsletter style weekly recaps with
-                    customizable commentary tones and more league context
+                    Smarter, shareable weekly recaps with customizable
+                    commentary, richer league context, and short-form video
+                    exports
                   </p>
                 </div>
                 <div class="flex mt-3 align-middle">

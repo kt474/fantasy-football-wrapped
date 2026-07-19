@@ -301,11 +301,11 @@ const toolSummaries: ToolSummary[] = [
                 >
                   Premium
                 </router-link>
-                features turn every week into a shareable league newspaper,
-                reveal what your league's full history says about every manager,
-                and give you the receipts to settle old rivalries. Everything
-                else from the past three seasons, plus plenty more, is still
-                free.
+                features turn every week into a shareable league newspaper and
+                video recap, reveal what your league's full history says about
+                every manager, and give you the receipts to settle old
+                rivalries. Everything else from the past three seasons, plus
+                plenty more, is still free.
               </p>
             </div>
           </div>

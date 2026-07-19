@@ -22,9 +22,9 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         ESPN, such as league IDs, usernames, rosters, matchups, transactions,
         and standings. This data may be stored in your browser and sent to our
         service providers to generate analyses, AI-assisted reports, manager
-        profiles, or audio recaps. If you access a private ESPN league, the ESPN
-        credentials you provide are transmitted through our service to ESPN to
-        retrieve the requested league data.
+        profiles, audio recaps, or video recaps. If you access a private ESPN
+        league, the ESPN credentials you provide are transmitted through our
+        service to ESPN to retrieve the requested league data.
 
         <p class="my-3 text-xl font-semibold">Paid Plans and Billing</p>
         If you purchase or manage a paid plan, billing is processed by Stripe.
@@ -54,9 +54,9 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         <p class="my-3 text-xl font-semibold">Third-Party Services</p>
         Our website may include links to third-party services and relies on
         providers for fantasy league data, authentication, billing, analytics,
-        email delivery, hosting, and AI or audio generation. These providers
-        process information as needed to perform services for us and have their
-        own privacy policies.
+        email delivery, hosting, and AI, audio, or video generation. These
+        providers process information as needed to perform services for us and
+        have their own privacy policies.
 
         <p class="my-3 text-xl font-semibold">
           Data Retention and Your Choices

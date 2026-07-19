@@ -204,7 +204,7 @@ const pages = [
     path: "fantasy-football-weekly-recap",
     title: "Fantasy Football Weekly Recap Generator | ffwrapped",
     description:
-      "Create a personalized fantasy football weekly recap with matchup summaries, league awards, top performers, standings trends, and next-week previews.",
+      "Create personalized fantasy football weekly reports with matchup stories, league awards, manager context, and shareable Premium video recaps.",
     heading: "Create a fantasy football weekly recap your league will read",
     introduction:
       "Turn the week’s matchups into a polished league recap with summaries, awards, top and bottom performers, standings context, and a preview of what comes next.",

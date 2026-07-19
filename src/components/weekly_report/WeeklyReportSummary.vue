@@ -387,12 +387,14 @@ const trackPremiumCtaClick = (cta: string) => {
             Choose a commentary style and generate your premium weekly report.
           </p>
           <div v-else class="max-w-4xl">
-            <p class="max-w-3xl mb-4">
-              Premium weekly reports turn each week into a shareable league
-              newsletter with headline stories, matchup recaps, manager
-              highlights, and your choice of commentary style. They're longer,
-              more detailed, packed with richer league context, and aware of
-              past matchups and rivalries.
+            <div class="mb-4">
+              <p class="max-w-3xl">
+                Premium weekly reports turn each week into a shareable league
+                newsletter and video recap, featuring headline stories, matchup
+                recaps, manager highlights, and your choice of commentary style.
+                They're longer, more detailed, packed with richer league
+                context, and aware of past matchups and rivalries.
+              </p>
               <a
                 href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
                 target="_blank"
@@ -401,7 +403,7 @@ const trackPremiumCtaClick = (cta: string) => {
               >
                 View full sample report</a
               >.
-            </p>
+            </div>
 
             <div
               class="relative max-h-[400px] overflow-hidden rounded-card border p-4 sm:p-6"
@@ -424,12 +426,14 @@ const trackPremiumCtaClick = (cta: string) => {
           </div>
         </div>
         <div v-else class="max-w-4xl">
-          <p class="max-w-3xl mb-4">
-            Premium weekly reports turn each week into a shareable league
-            newsletter with headline stories, matchup recaps, manager
-            highlights, and your choice of commentary style. They're longer,
-            more detailed, packed with richer league context, and aware of past
-            matchups and rivalries.
+          <div class="mb-4">
+            <p class="max-w-3xl">
+              Premium weekly reports turn each week into a shareable league
+              newsletter and video recap, featuring headline stories, matchup
+              recaps, manager highlights, and your choice of commentary style.
+              They're longer, more detailed, packed with richer league context,
+              and aware of past matchups and rivalries.
+            </p>
             <a
               href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
               target="_blank"
@@ -438,7 +442,7 @@ const trackPremiumCtaClick = (cta: string) => {
             >
               View full sample report</a
             >.
-          </p>
+          </div>
           <div
             class="relative max-h-[400px] overflow-hidden rounded-card border p-4 sm:p-6"
           >
