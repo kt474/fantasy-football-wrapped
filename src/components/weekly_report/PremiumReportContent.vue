@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Separator from "@/components/ui/separator/Separator.vue";
+import { renderMarkdown } from "@/lib/markdown";
 import type { PremiumReport } from "@/types/types";
 
 defineProps<{
@@ -25,11 +26,10 @@ defineProps<{
       <p class="max-w-3xl mt-2 text-lg text-muted-foreground">
         {{ report.frontPage.subheadline }}
       </p>
-      <p
+      <div
+        v-html="renderMarkdown(report.frontPage.lead)"
         class="max-w-3xl mt-5 text-base leading-7 text-foreground/90 dark:text-foreground/85"
-      >
-        {{ report.frontPage.lead }}
-      </p>
+      ></div>
     </header>
 
     <Separator />

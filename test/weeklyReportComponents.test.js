@@ -1,8 +1,15 @@
 import { createSSRApp, defineComponent, h } from "vue";
 import { renderToString } from "@vue/server-renderer";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
+
+vi.mock("@/lib/markdown", () => ({
+  renderMarkdown: (value) =>
+    `<p>${value.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</p>`,
+}));
+
 import WeeklyMatchups from "../src/components/weekly_report/WeeklyMatchups.vue";
 import WeeklyPointsChart from "../src/components/weekly_report/WeeklyPointsChart.vue";
+import PremiumReportContent from "../src/components/weekly_report/PremiumReportContent.vue";
 import WeeklyShareCard from "../src/components/weekly_report/WeeklyShareCard.vue";
 
 const team = ({
@@ -158,6 +165,33 @@ describe("weekly report components", () => {
     );
     expect(html).not.toContain("Flattened premium report text");
     expect(html).toContain("Premium weekly report");
+  });
+
+  test("PremiumReportContent renders bold team names in the front page lead", async () => {
+    const html = await renderComponent(PremiumReportContent, {
+      report: {
+        frontPage: {
+          headline: "Week 7 Headline",
+          subheadline: "Week 7 subheadline",
+          lead: "**Alpha Team** beat **Beta Team** in the game of the week.",
+        },
+        matchupReports: [],
+        teamOfTheWeek: {
+          teamName: "Alpha Team",
+          pointsScored: 141.2,
+          headline: "Team of the Week",
+          analysis: "Alpha Team led the league in scoring.",
+        },
+        weeklyLowlights: {
+          headline: "Weekly Lowlights",
+          entries: [],
+        },
+      },
+    });
+
+    expect(html).toContain("<strong>Alpha Team</strong>");
+    expect(html).toContain("<strong>Beta Team</strong>");
+    expect(html).not.toContain("**Alpha Team**");
   });
 
   test("WeeklyMatchups renders manager names, median records, and winner highlight", async () => {
