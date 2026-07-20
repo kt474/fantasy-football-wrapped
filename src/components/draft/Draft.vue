@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { fakeDraftData } from "../../api/draft.ts";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, shallowRef, watch } from "vue";
 import { getDraftPicks, getDraftMetadata } from "../../api/sleeperApi";
 import { LeagueInfoType } from "../../types/types.ts";
 import { getLeagueKey, useStore } from "../../store/store";
-import { fakeUsers } from "../../api/fakeLeague.ts";
 import DraftGrades from "./DraftGrades.vue";
 import { DraftPick } from "../../types/apiTypes.ts";
 import SectionCard from "../layout/SectionCard.vue";
@@ -20,6 +18,11 @@ import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
 import { Skeleton } from "@/components/ui/skeleton";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
+import {
+  loadDemoDraft,
+  loadDemoLeague,
+  type DemoLeagueFixtures,
+} from "@/data/demo/loaders";
 
 const store = useStore();
 const data = ref<DraftPick[]>([]);
@@ -37,8 +40,21 @@ const draftType = ref<string>("snake");
 const roundReversal = ref<number>(0);
 const sortOrder = ref("Draft Order");
 const scoringType = ref(""); // idp
+const demoUsers = shallowRef<DemoLeagueFixtures["fakeUsers"]>([]);
 
 const activeTab = ref("Recap");
+
+const loadDemoData = async () => {
+  const [league, draft] = await Promise.all([
+    loadDemoLeague(),
+    loadDemoDraft(),
+  ]);
+  demoUsers.value = league.fakeUsers;
+  data.value = draft.fakeDraftData;
+  draftOrder.value = data.value.slice(0, draftSize.value).map((pick) => {
+    return getTeamName(pick.userId);
+  }) as DraftOrderUser[];
+};
 
 const sortedData = computed(() => {
   if (sortOrder.value === "Draft Order") {
@@ -156,16 +172,17 @@ onMounted(async () => {
   } else if (store.currentLeague) {
     setLeagueDraftState(store.currentLeague);
   } else if (store.leagueInfo.length == 0) {
-    data.value = fakeDraftData;
-    draftOrder.value = data.value.slice(0, draftSize.value).map((pick) => {
-      return getTeamName(pick.userId);
-    }) as DraftOrderUser[];
+    await loadDemoData();
   }
 });
 
 watch(
   () => store.currentLeagueId,
   async () => {
+    if (!store.currentLeague) {
+      await loadDemoData();
+      return;
+    }
     if (
       store.currentLeague &&
       !store.currentLeague.draftPicks &&
@@ -244,7 +261,7 @@ const getTeamName = (userId: string) => {
       } as DraftOrderUser;
     }
   } else {
-    const userObject = fakeUsers.find((user) => user.id === userId);
+    const userObject = demoUsers.value.find((user) => user.id === userId);
     if (userObject) {
       return {
         ...userObject,

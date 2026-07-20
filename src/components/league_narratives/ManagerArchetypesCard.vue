@@ -9,7 +9,6 @@ import Separator from "../ui/separator/Separator.vue";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { fakeProfileText } from "@/api/fakeLeague";
 import {
   getLeagueAnalyticsProperties,
   trackEvent,
@@ -23,6 +22,7 @@ const props = defineProps<{
   archetypes: ManagerArchetype[];
   payload: ManagerBlurbsPayload;
   preparePayload?: () => Promise<ManagerBlurbsPayload>;
+  demoProfileText?: string;
 }>();
 
 const isLoading = ref(false);
@@ -510,7 +510,7 @@ watch(
           v-else-if="store.leagueInfo.length === 0"
           class="mt-2 text-sm leading-relaxed"
         >
-          {{ fakeProfileText }}
+          {{ props.demoProfileText }}
         </p>
         <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-muted-foreground">
           <div class="px-3 py-2 rounded-md bg-secondary">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { maxBy, sum } from "@/lib/collection";
 import { getLeagueKey, useStore } from "../../store/store";
 import {
@@ -9,17 +9,29 @@ import {
   PlayoffProjection,
 } from "../../types/types";
 import { getProjections } from "../../api/sleeperApi";
-import { fakePlayoffData } from "../../api/fakeLeague";
 import Card from "../ui/card/Card.vue";
 import { formatOrdinal } from "@/lib/format";
+import {
+  loadDemoPlayoffs,
+  type DemoPlayoffFixtures,
+} from "@/data/demo/loaders";
 const store = useStore();
 const loading = ref(false);
 const playoffOdds = ref<PlayoffProjection[]>([]);
 const showData = ref(false);
+const demoPlayoffData = shallowRef<
+  DemoPlayoffFixtures["fakePlayoffData"]
+>([]);
 
 const props = defineProps<{
   propsTableData: TableDataType[];
 }>();
+
+onMounted(async () => {
+  if (store.leagueInfo.length !== 0) return;
+  const { fakePlayoffData } = await loadDemoPlayoffs();
+  demoPlayoffData.value = fakePlayoffData;
+});
 
 const hasProjectionData = (league: LeagueInfoType) =>
   league.rosters.every(
@@ -262,7 +274,7 @@ const calculatePowerScore = (
 const tableData = computed(() => {
   return store.leagueInfo.length > 0
     ? store.currentLeague.playoffProjections
-    : fakePlayoffData;
+    : demoPlayoffData.value;
 });
 </script>
 <template>

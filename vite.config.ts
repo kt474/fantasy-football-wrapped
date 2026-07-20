@@ -39,7 +39,23 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         cleanupOutdatedCaches: true,
-        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        // Keep installation lightweight. Feature bundles are cached only after
+        // a user visits them instead of downloading the entire app up front.
+        // The plugin adds the manifest, its icons, and includeAssets entries.
+        globPatterns: ["index.html"],
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/.*\.(?:js|css|webp)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "app-assets",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
+          },
+        ],
       },
     }),
   ],

@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { mean } from "@/lib/collection";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, shallowRef, watch } from "vue";
 import { getDraftProjections } from "../../api/sleeperApi";
 import { DraftPick, PickObj } from "../../types/apiTypes.ts";
 import { getLeagueKey, useStore } from "../../store/store";
 import { standardDeviation } from "../../api/helper";
-import { fakeUsers } from "../../api/fakeLeague";
-import { fakeDraftGrades } from "../../api/draft.ts";
 import {
   Select,
   SelectContent,
@@ -16,6 +14,11 @@ import {
 } from "../ui/select";
 import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
+import {
+  loadDemoDraftGrades,
+  loadDemoLeague,
+  type DemoLeagueFixtures,
+} from "@/data/demo/loaders";
 const store = useStore();
 
 type DraftProjectionEntry = PickObj & {
@@ -29,6 +32,7 @@ type DraftGradeSummary = {
 };
 
 const projectionData = ref<DraftGradeSummary[]>([]);
+const demoUsers = shallowRef<DemoLeagueFixtures["fakeUsers"]>([]);
 const props = defineProps<{
   draftData: DraftPick[];
   scoringType: string;
@@ -45,12 +49,23 @@ const managers = computed(() => {
         id: user.id,
       }));
   } else if (store.leagueInfo.length == 0) {
-    return fakeUsers.map((user) => ({ name: user.name, id: user.id }));
+    return demoUsers.value.map((user) => ({ name: user.name, id: user.id }));
   }
   return [];
 });
 
 const currentManager = ref(managers.value[0]);
+
+const loadDemoData = async () => {
+  const [league, draftGrades] = await Promise.all([
+    loadDemoLeague(),
+    loadDemoDraftGrades(),
+  ]);
+  demoUsers.value = league.fakeUsers;
+  projectionData.value =
+    draftGrades.fakeDraftGrades as DraftGradeSummary[];
+  currentManager.value = managers.value[0];
+};
 
 const getProjections = async () => {
   const currentLeague = store.currentLeague;
@@ -211,13 +226,17 @@ onMounted(async () => {
     projectionData.value =
       store.currentLeague.draftGrades ?? [];
   } else if (store.leagueInfo.length === 0) {
-    projectionData.value = fakeDraftGrades as DraftGradeSummary[];
+    await loadDemoData();
   }
 });
 
 watch(
   () => store.currentLeagueId,
   async () => {
+    if (!store.currentLeague) {
+      await loadDemoData();
+      return;
+    }
     if (
       store.currentLeague &&
       !store.currentLeague.draftGrades

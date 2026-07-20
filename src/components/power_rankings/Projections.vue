@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, shallowRef, watch, onMounted } from "vue";
 import { getLeagueKey, useStore } from "../../store/store";
 import { RosterType, LeagueInfoType } from "../../types/types";
-import { fakeProjectionData } from "../../api/fakeLeague";
 import { getProjections } from "../../api/sleeperApi";
 import HeatMap from "./HeatMap.vue";
 import Card from "../ui/card/Card.vue";
 import { mapWithConcurrency } from "@/lib/async";
 import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
+import { loadDemoProjections } from "@/data/demo/loaders";
 
 const store = useStore();
 const loading = ref(false);
@@ -17,6 +17,12 @@ type FormattedProjectionRoster = {
   username?: string;
   data: ProjectionByPosition[];
   total: number;
+};
+const demoProjectionData = shallowRef<FormattedProjectionRoster[]>([]);
+
+const loadDemoData = async () => {
+  const { fakeProjectionData } = await loadDemoProjections();
+  demoProjectionData.value = fakeProjectionData as FormattedProjectionRoster[];
 };
 
 const hasProjectionData = (league: LeagueInfoType) =>
@@ -37,6 +43,11 @@ const categories = computed(() => {
 });
 
 onMounted(async () => {
+  if (!store.currentLeague) {
+    await loadDemoData();
+    updateChartColor();
+    return;
+  }
   if (
     store.leagueInfo.length > 0 &&
     store.currentLeague &&
@@ -57,6 +68,8 @@ watch(
   async () => {
     const currentLeague = store.currentLeague;
     if (!currentLeague) {
+      await loadDemoData();
+      updateChartColor();
       return;
     }
 
@@ -121,7 +134,7 @@ const formattedData = computed(() => {
     store.leagueInfo.length == 0 ||
     !store.currentLeague
   ) {
-    return fakeProjectionData as FormattedProjectionRoster[];
+    return demoProjectionData.value;
   }
   const topPositions: string[] = ["RB", "WR"];
   const rosterPositions = new Set(

@@ -2,7 +2,6 @@
 import { computed, ref } from "vue";
 import { useStore } from "../../store/store";
 import { TableDataType, PlayerType } from "../../types/types";
-import { fakeUsers } from "../../api/fakeLeague";
 import {
   Select,
   SelectContent,
@@ -65,7 +64,7 @@ const managers = computed(() => {
     result.unshift("All Managers");
     return result;
   } else if (store.leagueInfo.length == 0) {
-    return fakeUsers.map((user) => user.name);
+    return props.tableData.map((user) => user.name);
   }
   return [];
 });

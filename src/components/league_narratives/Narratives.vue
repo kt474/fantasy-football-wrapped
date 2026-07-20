@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { getLeagueKey, useStore } from "../../store/store.ts";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
@@ -12,7 +12,6 @@ import {
 } from "@/lib/narratives";
 import type { ManagerBlurbsPayload } from "@/api/api";
 import { getDraftMetadata, getDraftPicks } from "@/api/sleeperApi";
-import { fakeManagerProfiles } from "@/api/fakeLeague.ts";
 import ManagerComparison from "../league_history/ManagerComparison.vue";
 import {
   getCachedValue,
@@ -29,6 +28,7 @@ import {
   buildHistoricalManagerRows,
   type HistoricalManagerRow,
 } from "@/lib/leagueHistory";
+import { loadDemoManagerProfiles } from "@/data/demo/loaders";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -54,6 +54,17 @@ const isNarrativeBundle = (value: unknown): value is NarrativeBundle =>
   Array.isArray(value.managerArchetypes);
 
 const narratives = ref<NarrativeBundle>({ managerArchetypes: [] });
+const demoManagerProfiles = shallowRef<NarrativeBundle["managerArchetypes"]>(
+  []
+);
+const demoProfileText = ref("");
+
+onMounted(async () => {
+  if (store.leagueInfo.length !== 0) return;
+  const fixtures = await loadDemoManagerProfiles();
+  demoManagerProfiles.value = fixtures.fakeManagerProfiles;
+  demoProfileText.value = fixtures.fakeProfileText;
+});
 const {
   status: leagueHistoryStatus,
   loadingYear: leagueHistoryLoadingYear,
@@ -330,9 +341,10 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
       :prepare-payload="prepareManagerPayload"
     />
     <ManagerArchetypesCard
-      v-else-if="store.leagueInfo.length === 0"
-      :archetypes="fakeManagerProfiles"
+      v-else-if="store.leagueInfo.length === 0 && demoManagerProfiles.length"
+      :archetypes="demoManagerProfiles"
       :payload="managerPayload"
+      :demo-profile-text="demoProfileText"
     />
     <div
       v-else-if="showNoCompletedSeasonData"

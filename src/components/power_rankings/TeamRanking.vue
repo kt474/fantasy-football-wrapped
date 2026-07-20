@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, shallowRef, watch } from "vue";
 import { groupBy } from "@/lib/collection";
 import {
   TableDataType,
@@ -9,8 +9,6 @@ import {
 } from "../../types/types";
 import { getStats } from "../../api/sleeperApi";
 import { getLeagueKey, useStore } from "../../store/store";
-import { fakePlayerRankings, fakeRosterData } from "../../api/playerRanks";
-import { fakeUsers } from "../../api/fakeLeague";
 import Roster from "./Roster.vue";
 import Card from "../ui/card/Card.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +16,12 @@ import {
   attachRosterIdsToStats,
   hasUsablePlayerRankingData,
 } from "./teamRankingData";
+import {
+  loadDemoLeague,
+  loadDemoPlayerRankings,
+  loadDemoRosterRankings,
+  type DemoLeagueFixtures,
+} from "@/data/demo/loaders";
 
 const store = useStore();
 const props = defineProps<{
@@ -30,6 +34,26 @@ const data = ref<Record<string, RankingPlayer[]>>({});
 const allData = ref<Record<string, WeeklyEntry[]>>({});
 const loading = ref(false);
 const tab = ref("QB");
+const demoUsers = shallowRef<DemoLeagueFixtures["fakeUsers"]>([]);
+
+const loadDemoData = async () => {
+  loading.value = true;
+  try {
+    const [league, playerRankings, rosterRankings] = await Promise.all([
+      loadDemoLeague(),
+      loadDemoPlayerRankings(),
+      loadDemoRosterRankings(),
+    ]);
+    demoUsers.value = league.fakeUsers;
+    data.value = playerRankings.fakePlayerRankings as unknown as Record<
+      string,
+      RankingPlayer[]
+    >;
+    allData.value = rosterRankings.fakeRosterData;
+  } finally {
+    loading.value = false;
+  }
+};
 
 const hasPlayerRankingData = (league: LeagueInfoType) =>
   hasUsablePlayerRankingData(league.playerRankings);
@@ -97,7 +121,9 @@ const getTeamName = (playerId: string) => {
     }
     return "";
   } else {
-    return fakeUsers[Math.floor(Math.random() * fakeUsers.length)].name;
+    const user =
+      demoUsers.value[Math.floor(Math.random() * demoUsers.value.length)];
+    return user?.name ?? "";
   }
 };
 
@@ -120,17 +146,17 @@ onMounted(async () => {
     allData.value =
       store.currentLeague.rosterRankings ?? {};
   } else if (store.leagueInfo.length === 0) {
-    data.value = fakePlayerRankings as unknown as Record<
-      string,
-      RankingPlayer[]
-    >;
-    allData.value = fakeRosterData;
+    await loadDemoData();
   }
 });
 
 watch(
   () => store.currentLeagueId,
   async () => {
+    if (!store.currentLeague) {
+      await loadDemoData();
+      return;
+    }
     if (!hasPlayerRankingData(store.currentLeague)) {
       data.value = {};
       allData.value = {};

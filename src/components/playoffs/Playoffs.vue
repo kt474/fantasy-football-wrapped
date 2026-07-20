@@ -2,15 +2,8 @@
 import FinalPlacements from "./FinalPlacements.vue";
 import PlacementFlowChart from "./PlacementFlowChart.vue";
 import LeagueSummary from "./LeagueSummary.vue";
-import { computed } from "vue";
+import { computed, onMounted, shallowRef } from "vue";
 import { useStore } from "../../store/store";
-import {
-  fakeWinnersBracket,
-  fakeLosersBracket,
-  fakeRosters,
-  fakeUsers,
-  fakePoints,
-} from "../../api/fakeLeague";
 import { PointsType, TableDataType, UserType } from "../../types/types";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
@@ -23,10 +16,28 @@ import {
   type EspnPlayoffMatchup,
   type EspnTeamSide,
 } from "@/lib/seasonFinish";
+import {
+  loadDemoLeague,
+  loadDemoPlayoffs,
+  type DemoLeagueFixtures,
+  type DemoPlayoffFixtures,
+} from "@/data/demo/loaders";
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
 const store = useStore();
+const demoLeague = shallowRef<DemoLeagueFixtures | null>(null);
+const demoPlayoffs = shallowRef<DemoPlayoffFixtures | null>(null);
+
+onMounted(async () => {
+  if (store.currentLeague) return;
+  const [league, playoffs] = await Promise.all([
+    loadDemoLeague(),
+    loadDemoPlayoffs(),
+  ]);
+  demoLeague.value = league;
+  demoPlayoffs.value = playoffs;
+});
 
 type EspnMatchup = EspnPlayoffMatchup;
 
@@ -374,7 +385,7 @@ const winnersBracket = computed(() => {
     ? store.currentLeague.winnersBracket
       ? store.currentLeague.winnersBracket
       : []
-    : fakeWinnersBracket;
+    : (demoPlayoffs.value?.fakeWinnersBracket ?? []);
 });
 
 const losersBracket = computed(() => {
@@ -382,7 +393,7 @@ const losersBracket = computed(() => {
     ? store.currentLeague.losersBracket
       ? store.currentLeague.losersBracket
       : []
-    : fakeLosersBracket;
+    : (demoPlayoffs.value?.fakeLosersBracket ?? []);
 });
 
 const totalRosters = computed(() => {
@@ -434,10 +445,10 @@ const getPointsColor = (team1: number, team2: number) => {
 const matchRosterId = (rosterId: number, placement?: number) => {
   const rosters = store.currentLeague
     ? store.currentLeague.rosters
-    : fakeRosters;
+    : (demoLeague.value?.fakeRosters ?? []);
   const users = store.currentLeague
     ? store.currentLeague.users
-    : fakeUsers;
+    : (demoLeague.value?.fakeUsers ?? []);
   const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
     const userObject = users.find((user) => user.id === userId.id) as
@@ -466,7 +477,7 @@ const getRosterDisplayName = (rosterId: number) =>
 const getPointsScored = (rosterId: number, week: number) => {
   const currentLeague = store.currentLeague;
   if (!currentLeague) {
-    const pointsArray = fakePoints.find(
+    const pointsArray = demoLeague.value?.fakePoints.find(
       (roster) => roster.rosterId === rosterId
     );
     return pointsArray?.playoffPoints[week - 1];
@@ -514,13 +525,13 @@ const placementLeague = computed(() =>
     : ({
         status: "complete",
         platform: "sleeper",
-        rosters: fakeRosters,
-        users: fakeUsers,
+        rosters: demoLeague.value?.fakeRosters ?? [],
+        users: demoLeague.value?.fakeUsers ?? [],
         totalRosters: 10,
         playoffTeams: 6,
         playoffType: 0,
-        winnersBracket: fakeWinnersBracket,
-        losersBracket: fakeLosersBracket,
+        winnersBracket: demoPlayoffs.value?.fakeWinnersBracket ?? [],
+        losersBracket: demoPlayoffs.value?.fakeLosersBracket ?? [],
         espnWinnersBracket: [],
         espnLosersBracket: [],
       } as unknown as import("@/types/types").LeagueInfoType)

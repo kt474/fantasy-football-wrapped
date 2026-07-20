@@ -5,11 +5,11 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
+  shallowRef,
 } from "vue";
 
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
 import UserLeagueList from "../components/home/UserLeagueList.vue";
-import { fakePoints, fakeRosters, fakeUsers } from "../api/fakeLeague";
 import Input from "@/components/ui/input/Input.vue";
 import { Button } from "@/components/ui/button";
 import { getLeagueKey, useStore } from "../store/store";
@@ -39,6 +39,10 @@ import {
   getLeagueLoadErrorMessage,
   isRequestCancellation,
 } from "@/lib/request";
+import {
+  loadDemoLeague,
+  type DemoLeagueFixtures,
+} from "@/data/demo/loaders";
 
 const Table = defineAsyncComponent(
   () => import("../components/standings/Table.vue")
@@ -54,6 +58,11 @@ const storageUnavailable = computed(
 );
 const homeInitializationRequests = createLatestRequestGuard();
 const cachedGoogleSitelinks = ["1218604624068497408", "1057743221285101568"];
+const demoLeague = shallowRef<DemoLeagueFixtures | null>(null);
+
+const ensureDemoLeague = async () => {
+  demoLeague.value ??= await loadDemoLeague();
+};
 
 const systemDarkMode = window.matchMedia(
   "(prefers-color-scheme: dark)"
@@ -271,6 +280,9 @@ const initializeHome = async () => {
   } finally {
     if (homeInitializationRequests.finish(controller)) {
       store.updateLoadingLeague("");
+      if (!store.currentLeagueId && !storageUnavailable.value) {
+        await ensureDemoLeague();
+      }
       isInitialLoading.value = false;
     }
   }
@@ -353,10 +365,12 @@ const checkSystemTheme = () => {
           :class="store.currentTab === 'Home' ? '' : 'container mx-auto'"
         >
           <Table
-            :users="fakeUsers"
-            :rosters="fakeRosters"
-            :points="fakePoints"
+            v-if="demoLeague"
+            :users="demoLeague.fakeUsers"
+            :rosters="demoLeague.fakeRosters"
+            :points="demoLeague.fakePoints"
           />
+          <SkeletonLoading v-else />
         </div>
       </div>
     </div>

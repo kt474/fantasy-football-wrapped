@@ -6,13 +6,13 @@ import { useStore } from "../../store/store";
 import { getPlayersByIdsMap } from "../../api/api.ts";
 import { getSingleWeekProjection } from "../../api/sleeperApi.ts";
 import { getWinProbability } from "../../api/helper.ts";
-import { fakeWeeklyPreview } from "../../api/fakeLeague.ts";
 import { Player } from "../../types/apiTypes.ts";
 import Card from "../ui/card/Card.vue";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatOrdinal } from "@/lib/format";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
 import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
+import { loadDemoWeeklyReport } from "@/data/demo/loaders";
 
 const store = useStore();
 const props = defineProps<{
@@ -189,17 +189,23 @@ const fetchPlayerNames = async () => {
     playerNames.value = result;
     loading.value = false;
   } else {
-    playerNames.value = fakeWeeklyPreview.map((row) => ({
-      id: row.id,
-      players: row.players.map((player) => ({
-        name: player.name ?? "",
-        player_id: player.player_id ?? "",
-        position: player.position ?? "",
-        team: player.team ?? "",
-        projection: player.projection ?? 0,
-      })),
-      total: row.total ?? 0,
-    }));
+    loading.value = true;
+    try {
+      const { fakeWeeklyPreview } = await loadDemoWeeklyReport();
+      playerNames.value = fakeWeeklyPreview.map((row) => ({
+        id: row.id,
+        players: row.players.map((player) => ({
+          name: player.name ?? "",
+          player_id: player.player_id ?? "",
+          position: player.position ?? "",
+          team: player.team ?? "",
+          projection: player.projection ?? 0,
+        })),
+        total: row.total ?? 0,
+      }));
+    } finally {
+      loading.value = false;
+    }
   }
 };
 
@@ -533,7 +539,7 @@ const generateString = (recordObj?: ScenarioResult) => {
 };
 
 onMounted(async () => {
-  fetchPlayerNames();
+  await fetchPlayerNames();
 });
 
 watch([() => props.currentWeek, () => store.currentLeagueId], () =>

@@ -1,13 +1,33 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, shallowRef, ref, watch } from "vue";
 import { useStore } from "../../store/store";
-import { fakeUsers, fakeTransactions } from "../../api/fakeLeague";
 import type { WeeklyWaiver } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 import { mobileCategoricalChartResponsive } from "@/lib/chartResponsive";
 import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
+import {
+  loadDemoLeague,
+  loadDemoRosterManagement,
+  type DemoLeagueFixtures,
+  type DemoRosterManagementFixtures,
+} from "@/data/demo/loaders";
 
 const store = useStore();
+const demoUsers = shallowRef<DemoLeagueFixtures["fakeUsers"]>([]);
+const demoTransactions = shallowRef<
+  DemoRosterManagementFixtures["fakeTransactions"]
+>([]);
+
+onMounted(async () => {
+  if (store.currentLeague) return;
+  const [league, rosterManagement] = await Promise.all([
+    loadDemoLeague(),
+    loadDemoRosterManagement(),
+  ]);
+  demoUsers.value = league.fakeUsers;
+  demoTransactions.value = rosterManagement.fakeTransactions;
+  updateChartColor();
+});
 
 const transactionData = computed(() => {
   const currentLeague = store.currentLeague;
@@ -102,8 +122,8 @@ const transactionData = computed(() => {
     return { series, categories };
   } else {
     return {
-      series: fakeTransactions,
-      categories: fakeUsers.map((user) => user.username),
+      series: demoTransactions.value,
+      categories: demoUsers.value.map((user) => user.username),
     };
   }
 });

@@ -13,6 +13,7 @@ import {
   onMounted,
   onBeforeUnmount,
   nextTick,
+  shallowRef,
 } from "vue";
 import { getLeagueKey, useStore } from "../../store/store";
 import {
@@ -33,11 +34,6 @@ import {
   SelectItem,
   SelectValue,
 } from "../ui/select";
-import {
-  fakeTopPerformers,
-  fakeBottomPerformers,
-  fakeBenchPerformers,
-} from "../../api/fakeLeague.ts";
 import WeeklyPreview from "./WeeklyPreview.vue";
 import WeeklyShareCard from "./WeeklyShareCard.vue";
 import WeeklyAwards from "./WeeklyAwards.vue";
@@ -73,6 +69,10 @@ import {
   isActiveWeeklyRecapVideoJob,
   WeeklyRecapVideoJobController,
 } from "./weeklyVideoJob";
+import {
+  loadDemoWeeklyReport,
+  type DemoWeeklyReportFixtures,
+} from "@/data/demo/loaders";
 
 const store = useStore();
 const props = defineProps<{
@@ -101,6 +101,7 @@ let videoJobController: WeeklyRecapVideoJobController;
 const activeTab = ref("Report");
 const premiumCommentaryStyle = ref("roast");
 const premiumWeeklyReport = ref<PremiumReport | null>(null);
+const demoWeeklyReport = shallowRef<DemoWeeklyReportFixtures | null>(null);
 
 const getWeeklyReportAnalyticsProperties = (action: string) => ({
   feature: "weekly_report",
@@ -393,6 +394,13 @@ onMounted(async () => {
       currentWeek.value
     );
     loading.value = false;
+  } else if (store.leagueInfo.length === 0) {
+    loading.value = true;
+    try {
+      demoWeeklyReport.value = await loadDemoWeeklyReport();
+    } finally {
+      loading.value = false;
+    }
   }
 });
 
@@ -429,7 +437,7 @@ const bestPerformers = computed(() => {
       sortDirection: "desc",
     });
   } else if (store.leagueInfo.length === 0) {
-    return fakeTopPerformers;
+    return demoWeeklyReport.value?.fakeTopPerformers ?? [];
   }
   return [];
 });
@@ -447,7 +455,7 @@ const worstPerformers = computed(() => {
       sortDirection: "asc",
     });
   } else if (store.leagueInfo.length === 0) {
-    return fakeBottomPerformers;
+    return demoWeeklyReport.value?.fakeBottomPerformers ?? [];
   }
   return [];
 });
@@ -465,7 +473,7 @@ const benchPerformers = computed(() => {
       showUsernames: store.showUsernames,
     });
   } else if (store.leagueInfo.length === 0) {
-    return fakeBenchPerformers;
+    return demoWeeklyReport.value?.fakeBenchPerformers ?? [];
   }
   return [];
 });

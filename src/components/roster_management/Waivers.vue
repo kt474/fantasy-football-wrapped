@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed, ComputedRef } from "vue";
+import {
+  ref,
+  onMounted,
+  shallowRef,
+  watch,
+  computed,
+  ComputedRef,
+} from "vue";
 import { WaiverMove } from "../../types/types.ts";
 import { getPlayersByIdsMap } from "../../api/api.ts";
 import { getTradeValue } from "../../api/sleeperApi.ts";
 import { getLeagueKey, useStore } from "../../store/store";
-import { fakeRosters, fakeUsers, fakeWaiverMoves } from "../../api/fakeLeague";
 import { WeeklyWaiver } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
 import {
@@ -20,11 +26,26 @@ import {
   getTransactionRatingClass as getValueColor,
   getTransactionRatingLabel as getRatingLabel,
 } from "@/lib/transactionRating";
+import {
+  loadDemoLeague,
+  loadDemoRosterManagement,
+  type DemoLeagueFixtures,
+} from "@/data/demo/loaders";
 
 type WaiverData = Record<string | number, WaiverMove[]>;
 
 const store = useStore();
 const rawData = ref<WaiverMove[]>([]);
+const demoLeague = shallowRef<DemoLeagueFixtures | null>(null);
+
+const loadDemoData = async () => {
+  const [league, rosterManagement] = await Promise.all([
+    loadDemoLeague(),
+    loadDemoRosterManagement(),
+  ]);
+  demoLeague.value = league;
+  rawData.value = rosterManagement.fakeWaiverMoves;
+};
 type LeagueWaiverMove = Pick<
   WeeklyWaiver,
   "roster_ids" | "adds" | "leg" | "settings" | "status"
@@ -175,7 +196,7 @@ const managers = computed(() => {
     result.unshift("All Managers");
     return result;
   } else if (store.leagueInfo.length == 0) {
-    return fakeUsers.map((user) => user.name);
+    return (demoLeague.value?.fakeUsers ?? []).map((user) => user.name);
   }
   return [];
 });
@@ -185,10 +206,10 @@ const currentManager = ref(managers.value[1]);
 const getRosterName = (rosterId: number) => {
   const rosters = store.currentLeague
     ? store.currentLeague.rosters
-    : fakeRosters;
+    : (demoLeague.value?.fakeRosters ?? []);
   const users = store.currentLeague
     ? store.currentLeague.users
-    : fakeUsers;
+    : (demoLeague.value?.fakeUsers ?? []);
   const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
     const userObject = users.find((user) => user.id === userId.id);
@@ -219,7 +240,8 @@ onMounted(async () => {
   ) {
     await getData();
   } else if (store.leagueInfo.length == 0) {
-    rawData.value = fakeWaiverMoves;
+    await loadDemoData();
+    currentManager.value = managers.value[1];
   } else if (store.currentLeague) {
     rawData.value =
       store.currentLeague.waiverMoves ?? [];
@@ -229,6 +251,11 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
+    if (!store.currentLeague) {
+      await loadDemoData();
+      currentManager.value = managers.value[0];
+      return;
+    }
     if (!store.currentLeague.waiverMoves) {
       rawData.value = [];
       await getData();

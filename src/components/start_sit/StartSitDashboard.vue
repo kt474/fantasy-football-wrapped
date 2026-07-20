@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, shallowRef, watch } from "vue";
 import { ChevronDown, ChevronUp } from "lucide-vue-next";
 import { getLeagueKey, useStore } from "../../store/store";
 import { getPlayerNews, getPlayersByIdsMap } from "../../api/api";
@@ -8,7 +8,6 @@ import {
   getSingleWeekStats,
 } from "../../api/sleeperApi";
 import { TableDataType } from "../../types/types";
-import { fakePosts, fakeStartSit, fakeUsers } from "../../api/fakeLeague";
 import { max, min } from "@/lib/collection";
 import { Player, SingleWeekProjection } from "../../types/apiTypes";
 import Card from "../ui/card/Card.vue";
@@ -35,6 +34,11 @@ import {
 } from "./startSitLoader";
 import PlayerNewsFeed from "./PlayerNewsFeed.vue";
 import { mapWithConcurrency } from "@/lib/async";
+import {
+  loadDemoLeague,
+  loadDemoStartSit,
+  type DemoLeagueFixtures,
+} from "@/data/demo/loaders";
 
 type NewsPost = {
   author: {
@@ -92,9 +96,22 @@ const store = useStore();
 const playerDirectoryCache = new Map<string, Player>();
 const playerDataCache = new Map<string, Promise<StartSitPlayer>>();
 let loadRequestId = 0;
+const demoUsers = shallowRef<DemoLeagueFixtures["fakeUsers"]>([]);
+const demoRosters = shallowRef<StartSitRoster[]>([]);
+const demoPosts = shallowRef<NewsPost[]>([]);
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
+
+const loadDemoData = async () => {
+  const [league, startSit] = await Promise.all([
+    loadDemoLeague(),
+    loadDemoStartSit(),
+  ]);
+  demoUsers.value = league.fakeUsers;
+  demoRosters.value = startSit.fakeStartSit as StartSitRoster[];
+  demoPosts.value = startSit.fakePosts;
+};
 
 const toggle = (id: string) => {
   expanded.value[id] = !expanded.value[id];
@@ -274,7 +291,7 @@ const managers = computed(() => {
       };
     });
   } else {
-    return fakeUsers.map((user) => ({
+    return demoUsers.value.map((user) => ({
       name: user.name,
       rosterId: Number(user.id),
     }));
@@ -367,11 +384,15 @@ const loadSelectedRoster = async () => {
 
   try {
     if (store.leagueIds.length === 0) {
+      if (demoRosters.value.length === 0) {
+        await loadDemoData();
+        currentManager.value = managers.value[0];
+      }
       currentRoster.value =
-        (fakeStartSit as StartSitRoster[]).find(
+        demoRosters.value.find(
           (roster) => roster.id === currentManager.value?.rosterId
         ) ?? null;
-      data.value = fakePosts;
+      data.value = demoPosts.value;
       return;
     }
 
@@ -484,6 +505,10 @@ function getMin(arr: Array<number | string | undefined>) {
 }
 
 onMounted(async () => {
+  if (store.leagueIds.length === 0) {
+    await loadDemoData();
+    currentManager.value = managers.value[0];
+  }
   await loadSelectedRoster();
 });
 

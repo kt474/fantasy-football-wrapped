@@ -5,8 +5,8 @@ import { getDraftProjections, getDraftPicks } from "../../api/sleeperApi";
 import { TableDataType, LeagueInfoType } from "../../types/types";
 import { DraftPick, Player } from "../../types/apiTypes";
 import { getLeagueKey, useStore } from "../../store/store";
-import { fakeHighlights } from "../../api/fakeLeague";
 import { Card, CardTitle, CardHeader } from "../ui/card";
+import { loadDemoCurrentTrends } from "@/data/demo/loaders";
 
 const store = useStore();
 const props = defineProps<{
@@ -647,6 +647,7 @@ onMounted(async () => {
   ) {
     await getPreseasonData();
   } else if (store.leagueInfo.length == 0) {
+    const { fakeHighlights } = await loadDemoCurrentTrends();
     currentTrends.value = fakeHighlights;
   } else if (
     store.leagueInfo.length > 0 &&

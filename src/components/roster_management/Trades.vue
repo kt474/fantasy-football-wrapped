@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, shallowRef, watch, computed } from "vue";
 import { getPlayersByIdsMap } from "../../api/api.ts";
 import { getTradeValue } from "../../api/sleeperApi.ts";
-import { fakeRosters, fakeTrades, fakeUsers } from "../../api/fakeLeague";
 import { roundToOneDecimal } from "../../api/helper";
 import { getLeagueKey, useStore } from "../../store/store";
 import { Player } from "../../types/apiTypes.ts";
@@ -16,6 +15,12 @@ import {
   getTransactionRatingClass as getValueColor,
   getTransactionRatingLabel as getRatingLabel,
 } from "@/lib/transactionRating";
+import {
+  loadDemoLeague,
+  loadDemoRosterManagement,
+  type DemoLeagueFixtures,
+  type DemoRosterManagementFixtures,
+} from "@/data/demo/loaders";
 
 const store = useStore();
 type TradePick = { owner_id: number; season: string; round: number };
@@ -55,8 +60,20 @@ type TradeCard = {
     value: Array<number | null>;
   };
 };
-type TradeRow = TradeCard | (typeof fakeTrades)[number];
+type TradeRow =
+  | TradeCard
+  | DemoRosterManagementFixtures["fakeTrades"][number];
 const tradeData = ref<TradeRow[]>([]);
+const demoLeague = shallowRef<DemoLeagueFixtures | null>(null);
+
+const loadDemoData = async () => {
+  const [league, rosterManagement] = await Promise.all([
+    loadDemoLeague(),
+    loadDemoRosterManagement(),
+  ]);
+  demoLeague.value = league;
+  tradeData.value = rosterManagement.fakeTrades;
+};
 const showAllTrades = ref(false);
 
 const toggleTrades = () => {
@@ -200,10 +217,10 @@ const getData = async () => {
 const getRosterName = (rosterId: number) => {
   const rosters = store.currentLeague
     ? store.currentLeague.rosters
-    : fakeRosters;
+    : (demoLeague.value?.fakeRosters ?? []);
   const users = store.currentLeague
     ? store.currentLeague.users
-    : fakeUsers;
+    : (demoLeague.value?.fakeUsers ?? []);
   const userId = rosters.find((roster) => roster.rosterId === rosterId);
   if (userId) {
     const userObject = users.find((user) => user.id === userId.id);
@@ -233,7 +250,7 @@ onMounted(async () => {
   ) {
     await getData();
   } else if (store.leagueInfo.length == 0) {
-    tradeData.value = fakeTrades;
+    await loadDemoData();
   } else if (store.currentLeague) {
     tradeData.value =
       (store.currentLeague.tradeNames as TradeRow[]) ??
@@ -244,6 +261,10 @@ onMounted(async () => {
 watch(
   () => store.currentLeagueId,
   async () => {
+    if (!store.currentLeague) {
+      await loadDemoData();
+      return;
+    }
     if (!store.currentLeague.tradeNames) {
       tradeData.value = [];
       await getData();
