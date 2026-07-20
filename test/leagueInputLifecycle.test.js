@@ -56,6 +56,24 @@ describe("league input lifecycle", () => {
     );
   });
 
+  test("loads the demo league after the last saved league is removed", () => {
+    const currentLeagueWatcher = homeSource.indexOf(
+      "() => store.currentLeagueId"
+    );
+    const emptyLeagueCheck = homeSource.indexOf(
+      "if (!currentLeagueId && !storageUnavailable.value)",
+      currentLeagueWatcher
+    );
+    const demoLeagueLoad = homeSource.indexOf(
+      "void ensureDemoLeague()",
+      emptyLeagueCheck
+    );
+
+    expect(currentLeagueWatcher).toBeGreaterThanOrEqual(0);
+    expect(emptyLeagueCheck).toBeGreaterThan(currentLeagueWatcher);
+    expect(demoLeagueLoad).toBeGreaterThan(emptyLeagueCheck);
+  });
+
   test("keeps the header add dialog mounted across loading and route changes", () => {
     expect(cardContainerSource).toContain('v-show="showLeagueSwitcher"');
     expect(cardContainerSource).toContain(

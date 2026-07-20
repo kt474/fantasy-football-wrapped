@@ -6,6 +6,7 @@ import {
   onMounted,
   ref,
   shallowRef,
+  watch,
 } from "vue";
 
 import SkeletonLoading from "../components/util/SkeletonLoading.vue";
@@ -63,6 +64,15 @@ const demoLeague = shallowRef<DemoLeagueFixtures | null>(null);
 const ensureDemoLeague = async () => {
   demoLeague.value ??= await loadDemoLeague();
 };
+
+watch(
+  () => store.currentLeagueId,
+  (currentLeagueId) => {
+    if (!currentLeagueId && !storageUnavailable.value) {
+      void ensureDemoLeague();
+    }
+  }
+);
 
 const systemDarkMode = window.matchMedia(
   "(prefers-color-scheme: dark)"
