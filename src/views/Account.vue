@@ -128,7 +128,7 @@ const premiumDescription = computed(() => {
   if (upgradeIntent.value === "rivalry_report") {
     return "Turn your league history into personalized rivalry stories and bragging rights.";
   }
-  return "Get shareable weekly newsletters and video recaps, manager profiles, and rivalry reports for every league you manage.";
+  return "Get shareable weekly newsletters, video recaps, manager profiles, and rivalry reports for every league you manage.";
 });
 
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
@@ -1426,6 +1426,15 @@ watch(
                     until canceled.
                   </AccordionContent>
                 </AccordionItem>
+                <AccordionItem value="renewal" class="border-b-0">
+                  <AccordionTrigger class="text-left">
+                    Do my league mates need Premium to view shared reports?
+                  </AccordionTrigger>
+                  <AccordionContent class="leading-6 text-muted-foreground">
+                    No. You can share a Premium report with the entire league,
+                    and they can open it without purchasing their own plan.
+                  </AccordionContent>
+                </AccordionItem>
                 <AccordionItem value="video-recaps">
                   <AccordionTrigger class="text-left">
                     How do Premium video recaps work?
@@ -1434,15 +1443,6 @@ watch(
                     Premium includes up to 3 new video generations per rolling 7
                     days. Finished videos remain available for 15 days, so
                     download a copy during that window to keep it.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="renewal" class="border-b-0">
-                  <AccordionTrigger class="text-left">
-                    Do my league mates need Premium to view shared reports?
-                  </AccordionTrigger>
-                  <AccordionContent class="leading-6 text-muted-foreground">
-                    No. You can share a Premium report with the entire league,
-                    and they can open it without purchasing their own plan.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
