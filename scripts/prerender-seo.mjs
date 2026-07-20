@@ -293,7 +293,7 @@ const pages = [
     path: "fantasy-football-video-recap-example",
     title: "Fantasy Football Video Recap Example | ffwrapped",
     description:
-      "Watch a 25-second fantasy football video recap example with league storylines, matchup scores, narration, and team-by-team results.",
+      "Watch a 25-second fantasy football video recap example with league storylines, matchup scores, and team-by-team results.",
     heading: "Weekly Video Recap Example",
     introduction:
       "A 25-second sample built from league storylines, matchup scores, and team performances.",
@@ -316,7 +316,7 @@ const pages = [
       "@type": "VideoObject",
       name: "Fantasy football Week 11 video recap example",
       description:
-        "A 25-second ffwrapped Premium fantasy football video recap example with narration, league storylines, matchup scores, and team results.",
+        "A 25-second ffwrapped Premium fantasy football video recap example with league storylines, matchup scores, and team results.",
       thumbnailUrl:
         "https://ffwrapped.com/video/ffwrapped-video-recap-poster.png",
       uploadDate: "2026-07-19",
@@ -394,7 +394,7 @@ const renderStaticPage = (page) => {
           </video>
           <section>
             <h2>Make next week your league’s story</h2>
-            <p>Connect a Sleeper or ESPN league, generate a Premium report, and turn it into a narrated video recap.</p>
+            <p>Connect a Sleeper or ESPN league, generate a Premium report, and turn it into a shareable video recap.</p>
             <p><a href="${escapeHtml(page.video.ctaHref)}">${escapeHtml(page.video.ctaLabel)}</a></p>
           </section>
           <p>${escapeHtml(page.video.disclaimer)}</p>

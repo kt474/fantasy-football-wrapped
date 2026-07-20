@@ -25,11 +25,11 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         under your account.
 
         <p class="my-3 text-xl font-semibold">Service Description</p>
-        ffwrapped provides fantasy football analysis, reports, generated audio
-        and video recaps, sharing tools, and related features. Some features are
-        free and some are available only with a paid plan. ffwrapped is an
-        independent service and is not sponsored, endorsed, or operated by the
-        NFL, ESPN, Sleeper, or their affiliates.
+        ffwrapped provides fantasy football analysis, reports, generated video
+        recaps, sharing tools, and related features. Some features are free and
+        some are available only with a paid plan. ffwrapped is an independent
+        service and is not sponsored, endorsed, or operated by the NFL, ESPN,
+        Sleeper, or their affiliates.
 
         <p class="my-3 text-xl font-semibold">League Data and User Content</p>
         You retain any rights you have in information or content you submit to
@@ -138,8 +138,8 @@ import PageHeader from "@/components/layout/PageHeader.vue";
 
         <p class="my-3 text-xl font-semibold">Third-Party Services</p>
         The Service relies on third-party providers for fantasy football data,
-        authentication, billing, hosting, analytics, email, and AI, audio, or
-        video generation. These providers include services such as ESPN,
+        authentication, billing, hosting, analytics, email, and AI or video
+        generation. These providers include services such as ESPN,
         Sleeper, Supabase, Stripe, Vercel, OpenAI, PostHog, and Umami.
         Third-party services are outside our control, may change or become
         unavailable, and are subject to their own terms and privacy policies.

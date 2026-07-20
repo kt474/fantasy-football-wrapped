@@ -22,9 +22,9 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         ESPN, such as league IDs, usernames, rosters, matchups, transactions,
         and standings. This data may be stored in your browser and sent to our
         service providers to generate analyses, AI-assisted reports, manager
-        profiles, audio recaps, or video recaps. If you access a private ESPN
-        league, the ESPN credentials you provide are transmitted through our
-        service to ESPN to retrieve the requested league data.
+        profiles, or video recaps. If you access a private ESPN league, the ESPN
+        credentials you provide are transmitted through our service to ESPN to
+        retrieve the requested league data.
 
         <p class="my-3 text-xl font-semibold">Generated Video Recaps</p>
         When you request a video recap, we process a render snapshot that may
@@ -75,7 +75,7 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         <p class="my-3 text-xl font-semibold">Third-Party Services</p>
         Our website may include links to third-party services and relies on
         providers for fantasy league data, authentication, billing, analytics,
-        email delivery, hosting, and AI, audio, or video generation. These
+        email delivery, hosting, and AI or video generation. These
         providers include Sleeper, ESPN, Supabase, Stripe, Vercel, OpenAI,
         PostHog, and Umami. They process information as needed to perform
         services for us and have their own privacy policies.

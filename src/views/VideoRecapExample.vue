@@ -39,7 +39,7 @@ const trackCreateRecap = () => {
         </h2>
         <p class="mt-2 text-sm leading-6 text-slate-300">
           Connect a Sleeper or ESPN league, generate a Premium report, and turn
-          it into a narrated video recap.
+          it into a shareable video recap.
         </p>
         <Button as-child size="lg" variant="secondary" class="w-full mt-4">
           <RouterLink to="/" @click="trackCreateRecap">

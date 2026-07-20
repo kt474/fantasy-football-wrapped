@@ -291,7 +291,7 @@ const faqs = [
           </h2>
           <p class="mt-4 text-lg leading-8 text-slate-300">
             See how Week 11 scores, storylines, and team performances become a
-            narrated 25-second video ready for the league chat.
+            25-second video ready for the league chat.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
             <Button as-child size="lg" variant="secondary">

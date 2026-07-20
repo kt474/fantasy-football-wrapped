@@ -104,7 +104,6 @@ describe("design accessibility contracts", () => {
     expect(summary).toContain(':href="videoDownloadUrl"');
     expect(summary).toContain('@click="trackVideoDownload"');
     expect(summary).toContain('url.searchParams.set("download", "1")');
-    expect(summary).toContain("download a copy during that window");
     expect(summary).not.toContain(':href="videoUrl"');
   });
 

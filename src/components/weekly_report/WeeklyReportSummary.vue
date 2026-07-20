@@ -652,7 +652,7 @@ const trackVideoDownload = () => {
       </Button>
       <p class="text-xs leading-5 text-muted-foreground">
         3 video generations permitted every week. Videos remain available for 15
-        days, so download a copy during that window to keep and share it.
+        days.
       </p>
     </DialogContent>
   </Dialog>
