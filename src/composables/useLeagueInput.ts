@@ -152,8 +152,14 @@ export const useLeagueInput = (
     clearError();
     const currentPlatform = unref(platform);
     const attemptStartedAt = Date.now();
+    const routeSource = Array.isArray(route.query.source)
+      ? route.query.source[0]
+      : route.query.source;
     const attemptProperties: AnalyticsProperties = {
-      source,
+      source:
+        typeof routeSource === "string" && routeSource.trim()
+          ? routeSource
+          : source,
       input_type:
         currentPlatform === "espn"
           ? "league_id"

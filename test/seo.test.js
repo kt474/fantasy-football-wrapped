@@ -59,8 +59,26 @@ describe("SEO landing pages", () => {
     expect(espnPage).toContain("SWID + espn_s2");
     expect(draftPage).toContain("Pick-by-pick grades");
     expect(draftPage).toContain("Grading methodology");
+    expect(draftPage).toContain("Sleeper fantasy football draft grades");
+    expect(draftPage).toContain("ESPN fantasy football draft grades");
+    expect(draftPage).toContain("draft_grades_landing");
+    expect(espnPage).toContain("espn_analyzer_landing");
     expect(oddsPage).toContain("5,000 seasons");
     expect(oddsPage).toContain("Schedule scenarios");
+  });
+
+  test("answers preseason platform questions and preserves landing attribution", () => {
+    const sleeperPage = read("src/views/SeoLanding.vue");
+    const intro = read("src/components/home/Intro.vue");
+    const leagueInput = read("src/composables/useLeagueInput.ts");
+    const prerender = read("scripts/prerender-seo.mjs");
+
+    expect(sleeperPage).toContain("Sleeper league analyzer questions");
+    expect(sleeperPage).toContain("before the season starts");
+    expect(sleeperPage).toContain("sleeper_analyzer_landing");
+    expect(intro).toContain("route.query.platform");
+    expect(leagueInput).toContain("route.query.source");
+    expect(prerender).toContain('id="prerendered-page-faqs"');
   });
 
   test("publishes distinct power ranking and league history pages", () => {

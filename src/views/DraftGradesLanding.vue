@@ -85,7 +85,17 @@ const faqs = [
     answer:
       "Yes. The Draft area includes the full recap and a manager-level grade view, with pick number, ADP, and an individual grade shown for supported drafts.",
   },
+  {
+    question: "When are draft grades available?",
+    answer:
+      "Draft grades are available after the draft is complete and the platform exposes its finished picks. Connect the league again after your draft if it was first added during the preseason.",
+  },
 ];
+
+const analysisRoute = {
+  path: "/",
+  query: { source: "draft_grades_landing" },
+};
 </script>
 
 <template>
@@ -102,8 +112,8 @@ const faqs = [
             Grade a completed fantasy football draft using pick position, ADP, projections, and the performance of the entire draft room—not a mystery score with no explanation.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
-            <Button as-child size="lg"><RouterLink to="/">Grade your draft</RouterLink></Button>
-            <Button as-child size="lg" variant="outline"><RouterLink to="/sleeper-league-analyzer">Explore the league analyzer</RouterLink></Button>
+            <Button as-child size="lg"><RouterLink :to="analysisRoute">Grade your draft</RouterLink></Button>
+            <Button as-child size="lg" variant="outline"><RouterLink to="/sleeper-league-analyzer">Sleeper draft grades</RouterLink></Button>
           </div>
           <div class="flex flex-wrap gap-x-5 gap-y-2 mt-6 text-sm text-muted-foreground">
             <span class="inline-flex items-center gap-1.5"><Check :size="14" /> Completed drafts</span>
@@ -186,6 +196,28 @@ const faqs = [
       </div>
     </section>
 
+    <section class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+      <div class="max-w-3xl">
+        <p class="text-sm font-medium text-primary">Sleeper and ESPN</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-tight">Use the draft already attached to your league</h2>
+        <p class="mt-4 leading-7 text-muted-foreground">
+          There is no draft board to rebuild. Connect the platform that hosted your league, then open Draft after the completed picks load.
+        </p>
+      </div>
+      <div class="grid gap-4 mt-9 sm:grid-cols-2">
+        <RouterLink to="/sleeper-league-analyzer" class="p-6 transition-colors border rounded-card bg-background hover:border-primary/50 sm:p-7">
+          <h3 class="text-lg font-semibold">Sleeper fantasy football draft grades</h3>
+          <p class="mt-2 text-sm leading-6 text-muted-foreground">Connect by Sleeper username or league ID and review the completed snake or auction draft data available for that league.</p>
+          <p class="mt-5 text-sm font-medium text-primary">Analyze a Sleeper league →</p>
+        </RouterLink>
+        <RouterLink to="/espn-league-analyzer" class="p-6 transition-colors border rounded-card bg-background hover:border-primary/50 sm:p-7">
+          <h3 class="text-lg font-semibold">ESPN fantasy football draft grades</h3>
+          <p class="mt-2 text-sm leading-6 text-muted-foreground">Connect the correct ESPN league and season, including private leagues, to load the draft results ESPN makes available.</p>
+          <p class="mt-5 text-sm font-medium text-primary">Analyze an ESPN league →</p>
+        </RouterLink>
+      </div>
+    </section>
+
     <section class="max-w-4xl px-5 py-16 mx-auto sm:py-20">
       <p class="text-sm font-medium text-primary">Frequently asked questions</p>
       <h2 class="mt-2 text-3xl font-semibold tracking-tight">Fantasy football draft grade questions</h2>
@@ -204,7 +236,7 @@ const faqs = [
           <h2 class="text-2xl font-semibold tracking-tight">Put your draft room under review</h2>
           <p class="max-w-2xl mt-2 leading-7 text-primary-foreground/80">Connect the league, open Draft, and compare every manager’s picks with the value available at the time.</p>
         </div>
-        <Button as-child size="lg" variant="secondary" class="relative shrink-0"><RouterLink to="/">Analyze your draft</RouterLink></Button>
+        <Button as-child size="lg" variant="secondary" class="relative shrink-0"><RouterLink :to="analysisRoute">Analyze your draft</RouterLink></Button>
       </div>
     </section>
   </PublicPageShell>

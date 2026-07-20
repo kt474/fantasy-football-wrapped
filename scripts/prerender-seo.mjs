@@ -59,10 +59,36 @@ const pages = [
     introduction:
       "Turn your Sleeper league data into power rankings, expected wins, playoff odds, draft grades, matchup recaps, manager profiles, and shareable season stories.",
     sections: [
-      "Power rankings and expected wins",
-      "Weekly league recaps",
-      "Draft and roster analysis",
-      "League history",
+      {
+        title: "Power rankings and expected wins",
+        body: "Compare record, all-play results, schedule strength, scoring, and roster projections to see which Sleeper teams are stronger than the standings suggest.",
+      },
+      {
+        title: "Weekly league recaps",
+        body: "Turn completed Sleeper matchups into weekly summaries, awards, lineup analysis, previews, and shareable league stories.",
+      },
+      {
+        title: "Draft and roster analysis",
+        body: "Review completed draft grades, roster projections, lineup decisions, trades, and waiver activity using the data attached to the league.",
+      },
+      {
+        title: "League history",
+        body: "Follow linked Sleeper seasons to compare final placements, head-to-head records, scoring milestones, and manager trends over time.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Where do I find my Sleeper fantasy football league ID?",
+        answer: "Open the league in Sleeper on the web and copy the numeric league ID from the URL. You can also enter a Sleeper username and select a season.",
+      },
+      {
+        question: "Can I analyze a Sleeper league before the season starts?",
+        answer: "Yes. Preseason views use the league settings, rosters, projections, and completed draft data currently available. Results-based views appear after matchups are scored.",
+      },
+      {
+        question: "Does ffwrapped support dynasty and redraft leagues?",
+        answer: "ffwrapped supports Sleeper NFL leagues across common redraft, keeper, and dynasty setups, subject to the data available for that league.",
+      },
     ],
   },
   {
@@ -91,6 +117,20 @@ const pages = [
         body: "Revisit draft results, manager decisions, scoring trends, and the season story around every team.",
       },
     ],
+    faqs: [
+      {
+        question: "Where do I find my ESPN fantasy football league ID?",
+        answer: "Open the league in ESPN and use the number following leagueId= in the page URL, then select the matching season in ffwrapped.",
+      },
+      {
+        question: "Can ffwrapped analyze a private ESPN league?",
+        answer: "Yes. Private leagues require the SWID and espn_s2 values from the signed-in ESPN browser session in addition to the league ID and season.",
+      },
+      {
+        question: "Can I grade my ESPN fantasy football draft?",
+        answer: "Yes. After a completed ESPN draft is available to import, the Draft area shows the board and supported pick and team grades.",
+      },
+    ],
   },
   {
     path: "fantasy-football-draft-grades",
@@ -116,6 +156,20 @@ const pages = [
       {
         title: "Transparent grading methodology",
         body: "See how pick cost, ADP, projections, league format, and the distribution of team scores contribute to the final grade.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Which platforms can I use for draft grades?",
+        answer: "ffwrapped loads completed draft data from connected Sleeper and ESPN fantasy football leagues when that draft data is available.",
+      },
+      {
+        question: "What goes into a fantasy football draft grade?",
+        answer: "Individual grades compare pick number with average draft position. Team grades combine ADP value and projected points, then compare the result with the rest of the draft room.",
+      },
+      {
+        question: "When are draft grades available?",
+        answer: "Draft grades are available after the draft is complete and the platform exposes its finished picks.",
       },
     ],
   },
@@ -425,6 +479,21 @@ const renderStaticPage = (page) => {
               .join("")}
           </ul>
         </section>
+        ${
+          page.faqs?.length
+            ? `<section aria-labelledby="prerendered-page-faqs">
+          <h2 id="prerendered-page-faqs">Frequently asked questions</h2>
+          <dl>
+            ${page.faqs
+              .map(
+                ({ question, answer }) =>
+                  `<div><dt>${escapeHtml(question)}</dt><dd>${escapeHtml(answer)}</dd></div>`
+              )
+              .join("")}
+          </dl>
+        </section>`
+            : ""
+        }
         ${renderToolNavigation(page)}
       </article>
     </main>

@@ -82,6 +82,34 @@ const workflow = [
     description: "Return after scoring updates to see which rankings, probabilities, and season narratives actually changed.",
   },
 ];
+
+const faqs = [
+  {
+    question: "Where do I find my Sleeper fantasy football league ID?",
+    answer:
+      "Open the league in Sleeper on the web and copy the numeric league ID from the URL. You can also enter a Sleeper username and select a season to choose from that user’s leagues.",
+  },
+  {
+    question: "Can I analyze a Sleeper league before the season starts?",
+    answer:
+      "Yes. Preseason views depend on the data currently available, such as league settings, rosters, projections, and a completed draft. Weekly reports and results-based analysis become available after matchups are scored.",
+  },
+  {
+    question: "Does the Sleeper league need to be public?",
+    answer:
+      "Sleeper league data used by ffwrapped is available through Sleeper’s league APIs, so you can normally connect with a username or league ID without entering Sleeper account credentials.",
+  },
+  {
+    question: "Does ffwrapped support dynasty and redraft leagues?",
+    answer:
+      "ffwrapped supports Sleeper NFL leagues across common redraft, keeper, and dynasty setups. Some analysis depends on the scoring, roster, schedule, and history data available for that specific league.",
+  },
+];
+
+const sleeperAnalysisRoute = {
+  path: "/",
+  query: { platform: "sleeper", source: "sleeper_analyzer_landing" },
+};
 </script>
 
 <template>
@@ -101,7 +129,7 @@ const workflow = [
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
             <Button as-child size="lg">
-              <RouterLink to="/">Analyze a Sleeper league</RouterLink>
+              <RouterLink :to="sleeperAnalysisRoute">Analyze a Sleeper league</RouterLink>
             </Button>
             <Button as-child size="lg" variant="outline">
               <RouterLink to="/fantasy-football-weekly-recap">See weekly reports</RouterLink>
@@ -245,6 +273,17 @@ const workflow = [
       </ol>
     </section>
 
+    <section class="max-w-4xl px-5 py-16 mx-auto sm:py-20">
+      <p class="text-sm font-medium text-primary">Frequently asked questions</p>
+      <h2 class="mt-2 text-3xl font-semibold tracking-tight">Sleeper league analyzer questions</h2>
+      <dl class="mt-8 border-t">
+        <div v-for="faq in faqs" :key="faq.question" class="grid gap-2 py-5 border-b sm:grid-cols-[15rem_1fr]">
+          <dt class="font-medium">{{ faq.question }}</dt>
+          <dd class="text-sm leading-6 text-muted-foreground">{{ faq.answer }}</dd>
+        </div>
+      </dl>
+    </section>
+
     <section class="px-5 pb-4 mx-auto max-w-6xl">
       <div class="relative flex flex-col items-start gap-6 p-7 overflow-hidden border rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9">
         <div aria-hidden="true" class="absolute rounded-full -right-20 -top-32 h-72 w-72 bg-white/10"></div>
@@ -255,7 +294,7 @@ const workflow = [
           </p>
         </div>
         <Button as-child size="lg" variant="secondary" class="relative shrink-0">
-          <RouterLink to="/">Analyze your league</RouterLink>
+          <RouterLink :to="sleeperAnalysisRoute">Analyze your league</RouterLink>
         </Button>
       </div>
     </section>

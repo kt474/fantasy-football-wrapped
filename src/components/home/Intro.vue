@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import LeagueInputForm from "@/components/shared/LeagueInputForm.vue";
 import {
   useLeagueInput,
@@ -13,12 +14,25 @@ import { useMediaQuery } from "@vueuse/core";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const store = useStore();
+const route = useRoute();
 const isDark = computed(() => store.darkMode);
 // The showcase contains several ApexCharts. CSS `display: none` still lets Vue
 // mount and update them, which is particularly expensive on mobile Safari.
 const showDesktopShowcase = useMediaQuery("(min-width: 1240px)");
 
-const activeTab = ref<"Sleeper" | "Espn">("Sleeper");
+const requestedPlatform = computed(() =>
+  Array.isArray(route.query.platform)
+    ? route.query.platform[0]
+    : route.query.platform
+);
+const activeTab = ref<"Sleeper" | "Espn">(
+  requestedPlatform.value === "espn" ? "Espn" : "Sleeper"
+);
+
+watch(requestedPlatform, (platform) => {
+  if (platform === "espn") activeTab.value = "Espn";
+  if (platform === "sleeper") activeTab.value = "Sleeper";
+});
 const platform = computed<LeaguePlatform>(() =>
   activeTab.value === "Espn" ? "espn" : "sleeper"
 );

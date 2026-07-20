@@ -40,6 +40,7 @@ const calculatedViews = [
     icon: History,
     title: "Draft and season review",
     description: "Revisit the draft, manager decisions, scoring trends, and the story the season produced.",
+    href: "/fantasy-football-draft-grades",
   },
 ];
 
@@ -73,7 +74,16 @@ const faqs = [
     question: "Does the ESPN analyzer replace the ESPN app?",
     answer: "No. ESPN remains the league platform. ffwrapped adds analysis, simulations, history views, and reports around the imported league data.",
   },
+  {
+    question: "Can I grade my ESPN fantasy football draft?",
+    answer: "Yes. After a completed ESPN draft is available to import, open the Draft area to review the board, individual pick grades, and league-relative team grades supported by the imported data.",
+  },
 ];
+
+const espnAnalysisRoute = {
+  path: "/",
+  query: { platform: "espn", source: "espn_analyzer_landing" },
+};
 </script>
 
 <template>
@@ -90,7 +100,7 @@ const faqs = [
             Import a public or private ESPN league, then explore power rankings, expected wins, playoff forecasts, draft results, weekly recaps, and manager trends in one place.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
-            <Button as-child size="lg"><RouterLink to="/">Analyze an ESPN league</RouterLink></Button>
+            <Button as-child size="lg"><RouterLink :to="espnAnalysisRoute">Analyze an ESPN league</RouterLink></Button>
             <Button as-child size="lg" variant="outline"><RouterLink to="/fantasy-football-weekly-recap">Explore weekly recaps</RouterLink></Button>
           </div>
           <div class="flex flex-wrap gap-x-5 gap-y-2 mt-6 text-sm text-muted-foreground">
@@ -150,6 +160,9 @@ const faqs = [
             <component :is="view.icon" :size="18" class="text-primary" />
             <h3 class="mt-4 font-semibold">{{ view.title }}</h3>
             <p class="mt-2 text-sm leading-6 text-muted-foreground">{{ view.description }}</p>
+            <RouterLink v-if="view.href" :to="view.href" class="inline-block mt-4 text-sm font-medium text-primary hover:underline">
+              See how it works →
+            </RouterLink>
           </article>
         </div>
       </div>
@@ -196,7 +209,7 @@ const faqs = [
           <h2 class="text-2xl font-semibold tracking-tight">Give your ESPN league a deeper view</h2>
           <p class="max-w-2xl mt-2 leading-7 text-primary-foreground/80">Choose ESPN on the homepage, connect the right season, and explore the league tools available for its imported data.</p>
         </div>
-        <Button as-child size="lg" variant="secondary" class="relative shrink-0"><RouterLink to="/">Connect ESPN</RouterLink></Button>
+        <Button as-child size="lg" variant="secondary" class="relative shrink-0"><RouterLink :to="espnAnalysisRoute">Connect ESPN</RouterLink></Button>
       </div>
     </section>
   </PublicPageShell>
