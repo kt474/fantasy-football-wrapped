@@ -143,6 +143,14 @@ const shouldTrackPremiumPaywallView = computed(
   () => props.tier === "Premium" && !canGeneratePremium.value
 );
 
+const videoDownloadUrl = computed(() => {
+  if (!props.videoUrl) return "";
+
+  const url = new URL(props.videoUrl);
+  url.searchParams.set("download", "1");
+  return url.toString();
+});
+
 watch(
   () => props.videoUrl,
   (videoUrl) => {
@@ -209,6 +217,13 @@ const trackPremiumCtaClick = (cta: string) => {
     authenticated: authStore.isAuthenticated,
   });
   store.currentTab = "";
+};
+
+const trackVideoDownload = () => {
+  trackEvent("Weekly Recap Video Downloaded", {
+    source: "weekly_report",
+    week: props.currentWeek,
+  });
 };
 </script>
 
@@ -629,9 +644,15 @@ const trackPremiumCtaClick = (cta: string) => {
       >
         Your browser does not support the video element.
       </video>
+      <Button as-child class="w-full">
+        <a :href="videoDownloadUrl" download @click="trackVideoDownload">
+          <Download class="size-4" />
+          Download MP4
+        </a>
+      </Button>
       <p class="text-xs leading-5 text-muted-foreground">
         3 video generations permitted every week. Videos remain available for 15
-        days. Download to share.
+        days, so download a copy during that window to keep and share it.
       </p>
     </DialogContent>
   </Dialog>

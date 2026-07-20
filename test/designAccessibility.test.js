@@ -100,9 +100,12 @@ describe("design accessibility contracts", () => {
     expect(summary).toContain('v-if="videoDialogOpen && videoUrl"');
     expect(summary).toContain("3 video generations per rolling 7 days");
     expect(summary).toContain("Videos remain available for 15");
-    expect(summary).toContain("Download to share.");
+    expect(summary).toContain("Download MP4");
+    expect(summary).toContain(':href="videoDownloadUrl"');
+    expect(summary).toContain('@click="trackVideoDownload"');
+    expect(summary).toContain('url.searchParams.set("download", "1")');
+    expect(summary).toContain("download a copy during that window");
     expect(summary).not.toContain(':href="videoUrl"');
-    expect(summary).not.toContain("                download\n");
   });
 
   test("rivalry reports use a comfortable reading width and markdown rhythm", () => {

@@ -304,6 +304,8 @@ const pages = [
         "Play the ffwrapped Week 11 fantasy football video recap example",
       disclaimer:
         "Sample league and team names are fictional. Video created with ffwrapped Premium for product demonstration.",
+      ctaHref: "/",
+      ctaLabel: "Create your own recap",
     },
     ogImage:
       "https://ffwrapped.com/video/ffwrapped-video-recap-poster.png",
@@ -390,6 +392,11 @@ const renderStaticPage = (page) => {
             <source src="${escapeHtml(page.video.src)}" type="video/mp4" />
             Your browser does not support the video element.
           </video>
+          <section>
+            <h2>Make next week your league’s story</h2>
+            <p>Connect a Sleeper or ESPN league, generate a Premium report, and turn it into a narrated video recap.</p>
+            <p><a href="${escapeHtml(page.video.ctaHref)}">${escapeHtml(page.video.ctaLabel)}</a></p>
+          </section>
           <p>${escapeHtml(page.video.disclaimer)}</p>
           ${renderToolNavigation(page)}
         </article>

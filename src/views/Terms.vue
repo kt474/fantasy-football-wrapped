@@ -25,10 +25,11 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         under your account.
 
         <p class="my-3 text-xl font-semibold">Service Description</p>
-        ffwrapped provides fantasy football analysis, reports, and related
-        features. Some features are free and some are available only with a paid
-        plan. ffwrapped is an independent service and is not sponsored,
-        endorsed, or operated by the NFL, ESPN, Sleeper, or their affiliates.
+        ffwrapped provides fantasy football analysis, reports, generated audio
+        and video recaps, sharing tools, and related features. Some features are
+        free and some are available only with a paid plan. ffwrapped is an
+        independent service and is not sponsored, endorsed, or operated by the
+        NFL, ESPN, Sleeper, or their affiliates.
 
         <p class="my-3 text-xl font-semibold">League Data and User Content</p>
         You retain any rights you have in information or content you submit to
@@ -49,6 +50,30 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         a report is appropriate to share and for ensuring that you have the
         right to share names, league activity, and other information it
         contains.
+
+        <p class="my-3 text-xl font-semibold">
+          Generated Videos and Sharing
+        </p>
+        Video recaps may include league, manager, team, and player names;
+        images; scores; standings information; and AI-generated report text.
+        You are responsible for reviewing a generated video and deciding
+        whether its content is appropriate to download or share.
+        <br /><br />
+        Finished videos are stored temporarily at an unlisted public file URL.
+        The URL is not access-controlled, so anyone who obtains it may be able
+        to view or download the video. Hosted videos normally remain available
+        for 15 days. You are responsible for downloading any video you want to
+        keep. We may remove a video sooner when reasonably necessary for
+        security, legal compliance, abuse prevention, or Service operations,
+        and we cannot delete copies that you or another person downloaded or
+        shared elsewhere.
+        <br /><br />
+        You may use and share generated videos for personal, noncommercial
+        fantasy-league purposes, subject to applicable law, these Terms, and
+        any rights in the source data, names, images, marks, or other included
+        materials. You may not use generated media to impersonate another
+        person, mislead others about its source, infringe rights, expose
+        confidential information, or engage in unlawful or abusive activity.
 
         <p class="my-3 text-xl font-semibold">Paid Plans and Billing</p>
         Paid features are billed through Stripe. We may offer recurring
@@ -73,7 +98,12 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         Paid plans are intended for personal use in leagues you participate in.
         Please do not abuse paid access by generating premium reports for
         unrelated leagues, sharing or reselling access, or using the Service to
-        provide reports to others at scale.
+        provide reports or videos to others at scale. Video generation is
+        subject to rolling usage limits, concurrent-job limits, and other
+        reasonable cost or abuse controls. The current standard limit is up to
+        three new video generations per rolling seven days. Limits may change,
+        and the limits displayed in the Service control if they differ from
+        this description.
 
         <p class="my-3 text-xl font-semibold">Cancellation and Refunds</p>
         Recurring subscriptions may be canceled at any time through the billing
@@ -110,20 +140,21 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         The Service relies on third-party providers for fantasy football data,
         authentication, billing, hosting, analytics, email, and AI, audio, or
         video generation. These providers include services such as ESPN,
-        Sleeper, Supabase, Stripe, Vercel, PostHog, and Umami. Third-party
-        services are outside our control, may change or become unavailable,
-        and are subject to their own terms and privacy policies.
+        Sleeper, Supabase, Stripe, Vercel, OpenAI, PostHog, and Umami.
+        Third-party services are outside our control, may change or become
+        unavailable, and are subject to their own terms and privacy policies.
 
         <p class="my-3 text-xl font-semibold">Disclaimers</p>
         The Service and all generated content are provided "as is" and "as
         available" without warranties of any kind, express or implied.
         Analytical outputs and AI-generated content may contain errors or
-        omissions and should be independently validated. Rankings, projections,
-        reports, player news, and recommendations are provided for
-        informational and entertainment purposes only. They do not guarantee
-        fantasy results and are not financial, gambling, legal, or other
-        professional advice. You are responsible for decisions you make based
-        on the Service.
+        omissions and should be independently validated. Video rendering may
+        fail, be delayed, or become unavailable, and temporary output URLs are
+        not permanent storage. Rankings, projections, reports, player news, and
+        recommendations are provided for informational and entertainment
+        purposes only. They do not guarantee fantasy results and are not
+        financial, gambling, legal, or other professional advice. You are
+        responsible for decisions you make based on the Service.
 
         <p class="my-3 text-xl font-semibold">Limitation of Liability</p>
         To the maximum extent permitted by law, ffwrapped and its operators are
@@ -180,7 +211,7 @@ import PageHeader from "@/components/layout/PageHeader.vue";
           class="font-medium text-primary hover:underline"
           >kevin@ffwrapped.com</a
         >. <br /><br />
-        Last updated: July 9, 2026.
+        Last updated: July 19, 2026.
       </div>
   </PageContainer>
 </template>

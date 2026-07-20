@@ -125,6 +125,9 @@ describe("SEO landing pages", () => {
 
     expect(examplePage).toContain("VideoRecapPreview");
     expect(examplePage).toContain("Weekly Video Recap Example");
+    expect(examplePage).toContain("Create your own recap");
+    expect(examplePage).toContain('to="/"');
+    expect(examplePage).toContain("Video Recap CTA Clicked");
     expect(examplePage).not.toContain(
       "A finished recap, not a slideshow export"
     );
@@ -136,6 +139,8 @@ describe("SEO landing pages", () => {
     expect(prerender).toContain('heading: "Weekly Video Recap Example"');
     expect(prerender).toContain("if (page.video)");
     expect(prerender).toContain("<video controls playsinline");
+    expect(prerender).toContain('ctaLabel: "Create your own recap"');
+    expect(prerender).toContain("page.video.ctaHref");
     expect(prerender).not.toContain(
       'sectionHeading: "What the video includes"'
     );

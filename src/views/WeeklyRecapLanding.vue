@@ -275,14 +275,14 @@ const faqs = [
       </div>
     </section>
 
-    <section class="bg-slate-950 text-white border-y border-slate-800">
+    <section class="text-white bg-slate-950 border-y border-slate-800">
       <div
         class="grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-20 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-center"
       >
         <div class="max-w-2xl">
           <Badge
             variant="outline"
-            class="border-blue-400/40 bg-blue-400/10 text-blue-200"
+            class="text-blue-200 border-blue-400/40 bg-blue-400/10"
           >
             Premium video preview
           </Badge>
@@ -303,14 +303,11 @@ const faqs = [
               as-child
               size="lg"
               variant="outline"
-              class="border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              class="text-white bg-transparent border-white/25 hover:bg-white/10 hover:text-white"
             >
               <RouterLink to="/">Create your recap</RouterLink>
             </Button>
           </div>
-          <p class="mt-5 text-sm text-slate-400">
-            Vertical format · Narration and music · No editing required
-          </p>
         </div>
 
         <div

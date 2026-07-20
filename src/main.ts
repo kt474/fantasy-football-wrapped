@@ -195,7 +195,7 @@ const routes = [
     meta: {
       title: "Privacy Policy | ffwrapped",
       description:
-        "Read the ffwrapped privacy policy and learn how league, account, and billing data are handled.",
+        "Read the ffwrapped privacy policy and learn how league, account, billing, and generated media data are handled.",
     },
   },
   {
@@ -204,7 +204,7 @@ const routes = [
     meta: {
       title: "Terms of Service | ffwrapped",
       description:
-        "Read the ffwrapped terms of service for using the fantasy football league analysis app.",
+        "Read the ffwrapped terms of service for league analysis, generated reports, sharing, and video recaps.",
     },
   },
   {
