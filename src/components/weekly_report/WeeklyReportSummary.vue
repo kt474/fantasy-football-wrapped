@@ -403,7 +403,7 @@ const trackPremiumCtaClick = (cta: string) => {
                 They're longer, more detailed, packed with richer league
                 context, and aware of past matchups and rivalries.
               </p>
-              <div class="flex flex-wrap mt-3 gap-x-4 gap-y-1">
+              <div class="flex flex-wrap mt-1 gap-x-4 gap-y-1">
                 <a
                   href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
                   target="_blank"
@@ -451,7 +451,7 @@ const trackPremiumCtaClick = (cta: string) => {
               They're longer, more detailed, packed with richer league context,
               and aware of past matchups and rivalries.
             </p>
-            <div class="flex flex-wrap mt-3 gap-x-4 gap-y-1">
+            <div class="flex flex-wrap mt-1 gap-x-4 gap-y-1">
               <a
                 href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
                 target="_blank"

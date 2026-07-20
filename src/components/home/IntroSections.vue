@@ -301,11 +301,24 @@ const toolSummaries: ToolSummary[] = [
                 >
                   Premium
                 </router-link>
-                features turn every week into a shareable league newspaper and
-                video recap, reveal what your league's full history says about
-                every manager, and give you the receipts to settle old
-                rivalries. Everything else from the past three seasons, plus
-                plenty more, is still free.
+                features turn every week into a shareable
+                <a
+                  href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-medium text-primary hover:underline"
+                  >league newsletter</a
+                >
+                and
+                <RouterLink
+                  to="/fantasy-football-video-recap-example"
+                  class="font-medium text-primary hover:underline"
+                >
+                  video recap</RouterLink
+                >, reveal what your league's full history says about every
+                manager, and give you the receipts to settle old rivalries.
+                Everything else from the past three seasons, plus plenty more,
+                is still free.
               </p>
             </div>
           </div>
