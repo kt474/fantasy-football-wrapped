@@ -9,6 +9,7 @@ import {
 import Separator from "@/components/ui/separator/Separator.vue";
 import { renderMarkdown } from "@/lib/markdown";
 import type { PremiumReport } from "@/types/types";
+import PremiumTeamAvatar from "./PremiumTeamAvatar.vue";
 
 defineProps<{
   report: PremiumReport;
@@ -47,6 +48,25 @@ defineProps<{
           class="shadow-sm"
         >
           <CardHeader class="pb-3">
+            <div
+              v-if="matchup.teams?.length"
+              class="flex flex-wrap gap-x-4 gap-y-2 pb-1"
+            >
+              <div
+                v-for="team in matchup.teams"
+                :key="team.teamName"
+                class="flex min-w-0 items-center gap-2"
+              >
+                <PremiumTeamAvatar
+                  :src="team.avatarUrl"
+                  :team-name="team.teamName"
+                  size="sm"
+                />
+                <span class="max-w-40 truncate text-sm font-medium">
+                  {{ team.teamName }}
+                </span>
+              </div>
+            </div>
             <CardTitle class="text-base">
               {{ matchup.headline }}
             </CardTitle>
@@ -74,13 +94,20 @@ defineProps<{
           <div
             class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
           >
-            <div class="space-y-0.5">
-              <CardTitle class="text-xl">
-                {{ report.teamOfTheWeek.teamName }}
-              </CardTitle>
-              <CardDescription class="text-base">
-                {{ report.teamOfTheWeek.headline }}
-              </CardDescription>
+            <div class="flex min-w-0 items-center gap-3">
+              <PremiumTeamAvatar
+                :src="report.teamOfTheWeek.avatarUrl"
+                :team-name="report.teamOfTheWeek.teamName"
+                size="lg"
+              />
+              <div class="min-w-0 space-y-0.5">
+                <CardTitle class="truncate text-xl">
+                  {{ report.teamOfTheWeek.teamName }}
+                </CardTitle>
+                <CardDescription class="text-base">
+                  {{ report.teamOfTheWeek.headline }}
+                </CardDescription>
+              </div>
             </div>
             <div class="shrink-0 sm:text-right">
               <p class="text-2xl font-bold tabular-nums">
@@ -117,13 +144,21 @@ defineProps<{
           :key="`${entry.teamName}-${entry.category}`"
           class="shadow-sm"
         >
-          <CardHeader class="gap-y-0.5 p-4 pb-3">
-            <CardTitle class="text-xl">
-              {{ entry.teamName }}
-            </CardTitle>
-            <CardDescription class="text-base">
-              {{ entry.headline }}
-            </CardDescription>
+          <CardHeader class="p-4 pb-3">
+            <div class="flex min-w-0 items-center gap-3">
+              <PremiumTeamAvatar
+                :src="entry.avatarUrl"
+                :team-name="entry.teamName"
+              />
+              <div class="min-w-0 space-y-0.5">
+                <CardTitle class="truncate text-xl">
+                  {{ entry.teamName }}
+                </CardTitle>
+                <CardDescription class="text-base">
+                  {{ entry.headline }}
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent class="p-4 pt-0">
             <p

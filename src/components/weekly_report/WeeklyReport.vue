@@ -45,7 +45,10 @@ import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
 import { toPng } from "html-to-image";
 import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
-import { normalizePremiumReport } from "@/lib/premiumReport";
+import {
+  addPremiumReportTeamAvatars,
+  normalizePremiumReport,
+} from "@/lib/premiumReport";
 import {
   buildPremiumReportPrompt,
   buildReportPrompt,
@@ -114,7 +117,15 @@ const getSavedPremiumReport = (
   week: number
 ): PremiumReport | null => {
   const weeklyReport = league?.premiumWeeklyReports?.[week];
-  return normalizePremiumReport(weeklyReport);
+  const report = normalizePremiumReport(weeklyReport);
+  if (!report) return null;
+
+  return addPremiumReportTeamAvatars({
+    report,
+    tableData: props.tableData,
+    weekIndex: week - 1,
+    showUsernames: store.showUsernames,
+  });
 };
 
 const premiumReportText = computed(() => {
@@ -307,12 +318,18 @@ const getPremiumReport = async () => {
       premiumLoading.value = false;
       return;
     }
+    const reportWithAvatars = addPremiumReportTeamAvatars({
+      report: response.report,
+      tableData: props.tableData,
+      weekIndex: reportWeek - 1,
+      showUsernames: store.showUsernames,
+    });
     premiumLoading.value = false;
     if (
       store.currentLeagueId === reportLeagueKey &&
       currentWeek.value === reportWeek
     ) {
-      premiumWeeklyReport.value = response.report;
+      premiumWeeklyReport.value = reportWithAvatars;
       sharedReportUrl.value = "";
     }
     trackEvent("Weekly Report Generated", {
@@ -320,7 +337,7 @@ const getPremiumReport = async () => {
       tier: "premium",
       week: reportWeek,
     });
-    store.addPremiumWeeklyReport(reportLeagueKey, reportWeek, response.report);
+    store.addPremiumWeeklyReport(reportLeagueKey, reportWeek, reportWithAvatars);
   }
 };
 

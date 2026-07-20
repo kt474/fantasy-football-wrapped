@@ -194,6 +194,50 @@ describe("weekly report components", () => {
     expect(html).not.toContain("**Alpha Team**");
   });
 
+  test("PremiumReportContent renders team avatars throughout premium report cards", async () => {
+    const html = await renderComponent(PremiumReportContent, {
+      report: {
+        frontPage: { headline: "Week 7", subheadline: "Big week", lead: "Lead" },
+        matchupReports: [
+          {
+            matchupNumber: 1,
+            bracket: "regular",
+            headline: "Alpha beats Beta",
+            recap: "A close matchup.",
+            teams: [
+              { teamName: "Alpha Team", avatarUrl: "alpha.png" },
+              { teamName: "Beta Team", avatarUrl: "beta.png" },
+            ],
+          },
+        ],
+        teamOfTheWeek: {
+          teamName: "Alpha Team",
+          avatarUrl: "alpha.png",
+          pointsScored: 141.2,
+          headline: "Team of the Week",
+          analysis: "Alpha led the league.",
+        },
+        weeklyLowlights: {
+          headline: "Weekly Lowlights",
+          entries: [
+            {
+              teamName: "Beta Team",
+              avatarUrl: "beta.png",
+              category: "weekly_low",
+              headline: "A rough week",
+              analysis: "Nothing clicked.",
+            },
+          ],
+        },
+      },
+    });
+
+    expect(html).toContain('alt="Alpha Team avatar"');
+    expect(html).toContain('alt="Beta Team avatar"');
+    expect(html).toContain('src="alpha.png"');
+    expect(html).toContain('src="beta.png"');
+  });
+
   test("WeeklyMatchups renders manager names, median records, and winner highlight", async () => {
     const html = await renderComponent(WeeklyMatchups, {
       sortedTableData: [

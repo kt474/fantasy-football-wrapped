@@ -65,9 +65,11 @@ export type PremiumReport = {
     bracket: "regular" | "winners" | "losers" | "unknown";
     headline: string;
     recap: string;
+    teams?: PremiumReportTeamIdentity[];
   }>;
   teamOfTheWeek: {
     teamName: string;
+    avatarUrl?: string;
     pointsScored: number;
     headline: string;
     analysis: string;
@@ -76,6 +78,7 @@ export type PremiumReport = {
     headline: string;
     entries: Array<{
       teamName: string;
+      avatarUrl?: string;
       category:
         | "bench_burn"
         | "starter_disaster"
@@ -87,6 +90,11 @@ export type PremiumReport = {
       analysis: string;
     }>;
   };
+};
+
+export type PremiumReportTeamIdentity = {
+  teamName: string;
+  avatarUrl?: string;
 };
 
 export type WeeklyRecapVideoProps = {
