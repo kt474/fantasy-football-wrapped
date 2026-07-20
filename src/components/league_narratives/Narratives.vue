@@ -4,7 +4,8 @@ import { getLeagueKey, useStore } from "../../store/store.ts";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription.ts";
 import ManagerArchetypesCard from "./ManagerArchetypesCard.vue";
-import { LeagueInfoType, TableDataType } from "@/types/types.ts";
+import DraftFingerprintsCard from "./DraftFingerprintsCard.vue";
+import { TableDataType } from "@/types/types.ts";
 import {
   buildNarrativeBundle,
   type NarrativeBundle,
@@ -29,6 +30,7 @@ import {
   type HistoricalManagerRow,
 } from "@/lib/leagueHistory";
 import { loadDemoManagerProfiles } from "@/data/demo/loaders";
+import { createHistoricalDraftHydrator } from "@/lib/draftHistoryHydration";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -89,28 +91,20 @@ const showNoCompletedSeasonData = computed(
     isLeagueHistoryReady.value &&
     !hasCompletedSeasonData.value
 );
-
-const hydrateLeagueDraftPicks = async (league: LeagueInfoType) => {
-  if (
-    league.platform === "espn" ||
-    !league.draftId ||
-    league.draftPicks?.length
-  ) {
-    return;
+const profileArchetypes = computed(() => {
+  if (areNarrativesReady.value) {
+    return narratives.value.managerArchetypes;
   }
+  if (store.leagueInfo.length === 0) {
+    return demoManagerProfiles.value;
+  }
+  return [];
+});
 
-  const draftMetadata = await getDraftMetadata(league.draftId);
-  const draftType =
-    typeof draftMetadata.type === "string" ? draftMetadata.type : undefined;
-
-  league.draftPicks = await getDraftPicks(
-    league.draftId,
-    league.season,
-    league.scoringType,
-    league.seasonType,
-    draftType
-  );
-};
+const hydrateLeagueDraftPicks = createHistoricalDraftHydrator({
+  loadMetadata: getDraftMetadata,
+  loadPicks: getDraftPicks,
+});
 
 const ensureHistoricalDraftData = async () => {
   const currentLeague = store.currentLeague;
@@ -376,6 +370,10 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
         >season...
       </p>
     </div>
+    <DraftFingerprintsCard
+      v-if="profileArchetypes.length"
+      :archetypes="profileArchetypes"
+    />
     <ManagerComparison
       v-if="isLeagueHistoryReady && historicalManagerRows.length > 1"
       :table-data="historicalManagerRows"

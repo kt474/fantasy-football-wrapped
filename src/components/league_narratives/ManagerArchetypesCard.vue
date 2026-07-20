@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue";
 import Card from "../ui/card/Card.vue";
 import { generateManagerArchetype, type ManagerBlurbsPayload } from "@/api/api";
-import type { ManagerArchetype } from "@/lib/narratives";
+import { getDraftGrade, type ManagerArchetype } from "@/lib/narratives";
 import { toast } from "vue-sonner";
 import { getLeagueKey, useStore } from "@/store/store";
 import Separator from "../ui/separator/Separator.vue";
@@ -63,9 +63,7 @@ const getManagerArchetypes = async () => {
       feature: "manager_profiles",
       action: "profiles_generated",
       profile_count: Object.keys(blurbsByUserId.value).length,
-      ...getLeagueAnalyticsProperties(
-        store.currentLeague
-      ),
+      ...getLeagueAnalyticsProperties(store.currentLeague),
     });
   } catch (error) {
     const message =
@@ -78,9 +76,7 @@ const getManagerArchetypes = async () => {
       action: "profiles_generated",
       error_code: "generation_failed",
       recoverable: true,
-      ...getLeagueAnalyticsProperties(
-        store.currentLeague
-      ),
+      ...getLeagueAnalyticsProperties(store.currentLeague),
     });
   } finally {
     isLoading.value = false;
@@ -223,27 +219,6 @@ const tradeGrade = (manager: ManagerArchetype) => {
   return academicGrade(standardizedScore);
 };
 
-const draftGrade = (manager: ManagerArchetype) => {
-  const score = manager.averageDraftPickRank;
-  if (score === null) return null;
-
-  // Draft pick performance is a delta centered near zero, not a 0–100 score.
-  // These fixed bands refine the thresholds already used by the Draft page.
-  if (score >= 2.5) return "A+";
-  if (score >= 2.1) return "A";
-  if (score >= 1.75) return "A-";
-  if (score >= 1.4) return "B+";
-  if (score >= 1.1) return "B";
-  if (score >= 0.75) return "B-";
-  if (score >= 0.5) return "C+";
-  if (score >= 0.25) return "C";
-  if (score >= 0) return "C-";
-  if (score >= -0.6) return "D+";
-  if (score >= -1.2) return "D";
-  if (score >= -1.75) return "D-";
-  return "F";
-};
-
 const gradeIs = (grade: string | null, prefixes: string[]) =>
   grade !== null && prefixes.some((prefix) => grade.startsWith(prefix));
 
@@ -311,22 +286,31 @@ const getManagerBadges = (manager: ManagerArchetype): ManagerBadge[] => {
   }
 
   const managerTradeGrade = tradeGrade(manager);
-  const managerDraftGrade = draftGrade(manager);
+  const managerDraftGrade = getDraftGrade(manager.averageDraftPickRank);
 
   if (gradeIs(managerTradeGrade, ["A"])) {
     add("Deal Maker", "Owns an A-range standardized trade value grade");
   }
   if (gradeIs(managerTradeGrade, ["D", "F"])) {
-    add("Trade Regret Collector", "Owns a D- or F-range standardized trade value grade");
+    add(
+      "Trade Regret Collector",
+      "Owns a D- or F-range standardized trade value grade"
+    );
   }
   if (gradeIs(managerDraftGrade, ["A"])) {
     add("Draft Day Dealer", "Owns an A-range standardized draft ability grade");
   }
   if (gradeIs(managerDraftGrade, ["D", "F"])) {
-    add("Autodraft Advocate", "Owns a D- or F-range standardized draft ability grade");
+    add(
+      "Autodraft Advocate",
+      "Owns a D- or F-range standardized draft ability grade"
+    );
   }
   if (Math.abs(manager.winRate - 0.5) <= 0.03) {
-    add("Coin Flip Commander", "Has a career win rate within three points of .500");
+    add(
+      "Coin Flip Commander",
+      "Has a career win rate within three points of .500"
+    );
   }
   if (
     manager.seasons >= 3 &&
@@ -591,30 +575,6 @@ watch(
               {{ archetype.averageWaiversPerSeason.toFixed(1) }}
               <span class="text-xs text-muted-foreground"
                 >({{ archetype.totalWaivers }} total)</span
-              >
-            </p>
-          </div>
-          <div class="px-3 py-2 rounded-md bg-secondary">
-            <p class="text-xs uppercase">Trade Value</p>
-            <p class="mt-1 font-medium text-foreground">
-              <template v-if="tradeGrade(archetype)"
-                >{{ tradeGrade(archetype) }}
-                <span class="text-xs text-muted-foreground"
-                  >#{{ rankMaps.tradeValue[archetype.userId] }}</span
-                ></template
-              >
-              <span v-else class="text-muted-foreground">No grade</span>
-            </p>
-          </div>
-          <div
-            v-if="archetype.averageDraftPickRank !== null"
-            class="px-3 py-2 rounded-md bg-secondary"
-          >
-            <p class="text-xs uppercase">Draft Ability</p>
-            <p class="mt-1 font-medium text-foreground">
-              {{ draftGrade(archetype) }}
-              <span class="text-xs text-muted-foreground"
-                >#{{ rankMaps.draft[archetype.userId] }}</span
               >
             </p>
           </div>

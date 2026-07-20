@@ -11,6 +11,17 @@ const badgeVariant = (type: string): BadgeVariants["variant"] => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/20/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "There is a new draft tendencies component in the manager profiles tab that shows the history of how every manager drafts.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/18/26",
     content: [
       {
@@ -764,8 +775,8 @@ const data = [
           rel="noopener noreferrer"
           >Discord</a
         >
-        for more updates, feature requests, or bug reports. The entire codebase
-        is also available on
+        for more updates, feature requests, or bug reports. The frontend
+        codebase is also available on
         <a
           aria-label="Github link"
           class="font-medium text-primary hover:underline"

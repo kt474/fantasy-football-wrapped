@@ -21,6 +21,35 @@ export const fakeManagerProfiles = [
     winRate: 0.6428,
     weeklyScoreStdDev: 18.958548818573867,
     averageDraftPickRank: null,
+    draftHistory: [
+      {
+        season: "2025",
+        positions: ["RB", "RB", "WR", "TE", "QB"],
+        seasonType: "Redraft",
+        draftLabel: "Redraft",
+        firstQBRound: 5,
+        firstTERound: 4,
+        requiresTightEnd: true,
+      },
+      {
+        season: "2024",
+        positions: ["RB", "RB", "WR", "WR", "QB"],
+        seasonType: "Redraft",
+        draftLabel: "Redraft",
+        firstQBRound: 5,
+        firstTERound: 8,
+        requiresTightEnd: true,
+      },
+      {
+        season: "2023",
+        positions: ["RB", "WR", "RB", "QB", "TE"],
+        seasonType: "Redraft",
+        draftLabel: "Redraft",
+        firstQBRound: 4,
+        firstTERound: 5,
+        requiresTightEnd: true,
+      },
+    ],
   },
 ];
 

@@ -13,18 +13,18 @@ describe("manager profiles", () => {
   });
 
   test("hydrates draft data before rebuilding profile metrics", () => {
-    const narratives = read(
-      "src/components/league_narratives/Narratives.vue"
-    );
+    const narratives = read("src/components/league_narratives/Narratives.vue");
     const refresh = narratives.slice(
       narratives.indexOf("const refreshNarratives"),
       narratives.indexOf("const prepareManagerPayload")
     );
 
-    expect(refresh.indexOf("await ensureHistoricalDraftData()"))
-      .toBeGreaterThan(-1);
-    expect(refresh.indexOf("await rebuildNarratives()"))
-      .toBeGreaterThan(refresh.indexOf("await ensureHistoricalDraftData()"));
+    expect(
+      refresh.indexOf("await ensureHistoricalDraftData()")
+    ).toBeGreaterThan(-1);
+    expect(refresh.indexOf("await rebuildNarratives()")).toBeGreaterThan(
+      refresh.indexOf("await ensureHistoricalDraftData()")
+    );
     expect(narratives).toContain("await refreshNarratives()");
   });
 
