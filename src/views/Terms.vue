@@ -76,19 +76,17 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         confidential information, or engage in unlawful or abusive activity.
 
         <p class="my-3 text-xl font-semibold">Paid Plans and Billing</p>
-        Paid features are billed through Stripe. We may offer recurring
-        subscription plans, one-time seasonal passes, or both. By purchasing a
-        paid plan, you authorize the charges shown at checkout for the plan you
-        selected. For recurring plans, you authorize recurring charges at the
-        billing interval shown at checkout until canceled. Prices, billing
-        intervals, and access periods are shown at checkout and on the account
-        page. Applicable taxes may be added where required. If a payment fails,
-        we or Stripe may retry the charge, and paid access may be limited or
-        suspended until payment is completed.
+        Paid features are billed through Stripe. We offer recurring monthly and
+        annual subscription plans. By purchasing a paid plan, you authorize the
+        charges shown at checkout for the plan you selected and recurring
+        charges at the billing interval shown at checkout until canceled.
+        Prices, billing intervals, and access periods are shown at checkout and
+        on the account page. Applicable taxes may be added where required. If a
+        payment fails, we or Stripe may retry the charge, and paid access may be
+        limited or suspended until payment is completed.
         <br /><br />
-        If a seasonal pass or other one-time plan is offered, access lasts for
-        the period described at checkout and ends automatically without renewal
-        unless otherwise stated.
+        Previously purchased seasonal passes remain active for the access
+        period shown at purchase and end automatically without renewal.
         <br /><br />
         We may change prices for future billing periods by providing reasonable
         advance notice. Any price change will apply no earlier than your next
@@ -108,13 +106,13 @@ import PageHeader from "@/components/layout/PageHeader.vue";
         <p class="my-3 text-xl font-semibold">Cancellation and Refunds</p>
         Recurring subscriptions may be canceled at any time through the billing
         portal and remain active through the end of the then-current billing
-        period unless otherwise stated. One-time seasonal passes and other
-        one-time purchases are not recurring subscriptions and do not require
-        cancellation. Unless stated otherwise at checkout or required by law,
-        payments are non-refundable and partial billing periods are not
-        prorated. Deleting your ffwrapped account does not automatically cancel
-        a recurring subscription; cancel it through the billing portal before
-        deleting your account.
+        period unless otherwise stated. Previously purchased seasonal passes
+        are not recurring subscriptions and do not require cancellation. Unless
+        stated otherwise at checkout or required by law, payments are
+        non-refundable and partial billing periods are not prorated. Deleting
+        your ffwrapped account does not automatically cancel a recurring
+        subscription; cancel it through the billing portal before deleting your
+        account.
 
         <p class="my-3 text-xl font-semibold">Acceptable Use</p>
         You agree not to misuse the Service, including by attempting to access

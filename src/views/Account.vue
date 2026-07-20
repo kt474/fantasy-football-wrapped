@@ -281,11 +281,9 @@ const accountSummaryContainerClass = computed(() => {
 const getCheckoutButtonText = (plan: CheckoutPlan) => {
   if (checkoutLoadingPlan.value === plan) return "Redirecting...";
   if (!authStore.isAuthenticated) {
-    return plan === "season_pass"
-      ? "Sign in to buy season pass"
-      : "Sign in to subscribe";
+    return "Sign in to subscribe";
   }
-  if (plan === "season_pass") return "Buy season pass";
+  if (plan === "annual") return "Subscribe annually";
   return "Subscribe monthly";
 };
 
@@ -296,24 +294,24 @@ const guideToAuthentication = async (plan: CheckoutPlan) => {
     preventScroll: true,
   });
   toast.info(
-    plan === "season_pass"
-      ? "Sign in to continue with the Season Pass."
+    plan === "annual"
+      ? "Sign in to continue with an annual subscription."
       : "Sign in to continue with a monthly subscription."
   );
 };
 
 const getPlanAnalytics = (plan: CheckoutPlan) =>
-  plan === "season_pass"
+  plan === "annual"
     ? {
         plan,
-        billing_interval: "season",
-        price_usd: 18,
+        billing_interval: "annual",
+        price_usd: 39.99,
         best_value: true,
       }
     : {
         plan,
         billing_interval: "monthly",
-        price_usd: 6,
+        price_usd: 7.99,
         best_value: false,
       };
 
@@ -1269,6 +1267,12 @@ watch(
                 <div class="flex align-middle">
                   <Check class="w-5 h-5 mr-2 shrink-0" />
                   <p class="text-muted-foreground max-w-96">
+                    Unlimited Sleeper and ESPN leagues under one subscription
+                  </p>
+                </div>
+                <div class="flex mt-3 align-middle">
+                  <Check class="w-5 h-5 mr-2 shrink-0" />
+                  <p class="text-muted-foreground max-w-96">
                     Smarter, shareable weekly recaps with customizable
                     commentary, richer league context, and short-form video
                     exports
@@ -1291,8 +1295,7 @@ watch(
                 <div class="flex mt-3 align-middle">
                   <Check class="w-5 h-5 mr-2 shrink-0" />
                   <p class="text-muted-foreground max-w-96">
-                    Access to all premium features across every league you
-                    manage, including all future premium features
+                    New Premium features added during your subscription
                   </p>
                 </div>
               </div>
@@ -1309,30 +1312,29 @@ watch(
                 <p
                   class="-mt-2 text-sm font-semibold uppercase text-muted-foreground"
                 >
-                  Season Pass
+                  Annual
                 </p>
-                <p class="mt-2 text-5xl font-medium">
-                  $18
+                <p class="mt-2 text-4xl font-semibold">
+                  $39.99
                   <span
                     class="-ml-1 text-base font-normal text-muted-foreground"
                   >
-                    /season
+                    /year
                   </span>
                 </p>
                 <p class="mt-3 mb-4 min-h-[2.5rem] text-muted-foreground">
-                  One payment for Premium access through Feb 15, 2027. Does not
-                  renew.
+                  Complete Premium access all year. Renews annually. Cancel
+                  anytime.
                 </p>
-                <!-- TODO remove this after week 1 -->
                 <p class="mb-3 text-xs text-muted-foreground">
-                  Get the most from your Season Pass by joining before Week 1.
+                  The price of about five monthly payments for a full year.
                 </p>
                 <Button
                   class="w-full mt-auto"
                   :disabled="checkoutLoadingPlan !== null"
-                  @click="startCheckout('season_pass')"
+                  @click="startCheckout('annual')"
                 >
-                  {{ getCheckoutButtonText("season_pass") }}
+                  {{ getCheckoutButtonText("annual") }}
                 </Button>
               </div>
               <div class="flex flex-col flex-1 p-5 border rounded-xl">
@@ -1341,8 +1343,8 @@ watch(
                 >
                   Monthly
                 </p>
-                <p class="mt-2 text-5xl font-medium">
-                  $6
+                <p class="mt-2 text-4xl font-semibold">
+                  $7.99
                   <span
                     class="-ml-1 text-base font-normal text-muted-foreground"
                   >
@@ -1392,38 +1394,35 @@ watch(
               >
                 <AccordionItem value="leagues">
                   <AccordionTrigger class="text-left">
-                    Does one pass cover all of my leagues?
+                    Does one subscription cover all of my leagues?
                   </AccordionTrigger>
                   <AccordionContent class="leading-6 text-muted-foreground">
-                    Yes. Your plan follows your account, so one purchase unlocks
-                    Premium across every league you manage. Adding another
-                    league never adds another charge.
+                    Yes. Your subscription follows your account and unlocks
+                    Premium across every Sleeper and ESPN league you manage.
+                    Adding another league never adds another charge.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="pricing">
                   <AccordionTrigger class="text-left">
-                    Why is the Season Pass only $18?
+                    What does the annual subscription include?
                   </AccordionTrigger>
                   <AccordionContent class="leading-6 text-muted-foreground">
-                    I’ve been building ffwrapped on my own for nearly three
-                    years with the simple goal of making fantasy football more
-                    fun and engaging for everyone. Because it’s a solo operation
-                    with low overhead, I can offer Premium for $18 across every
-                    league you manage. I want Premium to help me keep improving
-                    ffwrapped while remaining accessible to the community it was
-                    built for.
+                    The annual subscription includes every Premium feature
+                    across unlimited leagues for one year, including weekly
+                    reports, video recaps, manager profiles, rivalry reports,
+                    and new Premium features added during your subscription. It
+                    renews annually until canceled.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="complete-plan">
                   <AccordionTrigger class="text-left">
-                    Is the Season Pass different from the monthly plan?
+                    Is the annual plan different from the monthly plan?
                   </AccordionTrigger>
                   <AccordionContent class="leading-6 text-muted-foreground">
                     Both plans include the same Premium features across every
                     league you manage. The only difference is billing. The
-                    Season Pass is a one-time payment for access through
-                    February 15, 2027, while the monthly plan renews each month
-                    until canceled.
+                    annual plan renews once per year, while the monthly plan
+                    renews each month. You can cancel either plan anytime.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="renewal" class="border-b-0">

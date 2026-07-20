@@ -24,7 +24,7 @@ const createStorage = () => {
 describe("pending checkout", () => {
   test("clears a pending checkout when the user cancels the upgrade flow", () => {
     const storage = createStorage();
-    savePendingCheckout("season_pass", storage, 1_000);
+    savePendingCheckout("annual", storage, 1_000);
 
     clearPendingCheckout(storage);
 
@@ -38,9 +38,9 @@ describe("pending checkout", () => {
   });
 
   test("stores and consumes the selected plan exactly once", () => {
-    savePendingCheckout("season_pass", storage, 1_000);
+    savePendingCheckout("annual", storage, 1_000);
 
-    expect(consumePendingCheckout(storage, 2_000)).toBe("season_pass");
+    expect(consumePendingCheckout(storage, 2_000)).toBe("annual");
     expect(consumePendingCheckout(storage, 2_000)).toBeNull();
   });
 
@@ -59,7 +59,7 @@ describe("pending checkout", () => {
 
     storage.setItem(
       PENDING_CHECKOUT_KEY,
-      JSON.stringify({ plan: "annual", createdAt: Date.now() })
+      JSON.stringify({ plan: "season_pass", createdAt: Date.now() })
     );
     expect(consumePendingCheckout(storage)).toBeNull();
   });

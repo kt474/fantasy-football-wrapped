@@ -1,4 +1,4 @@
-export type CheckoutPlan = "monthly" | "season_pass";
+export type CheckoutPlan = "annual" | "monthly";
 
 type PendingCheckout = {
   plan: CheckoutPlan;
@@ -9,7 +9,7 @@ export const PENDING_CHECKOUT_KEY = "pending-premium-checkout";
 export const PENDING_CHECKOUT_TTL_MS = 30 * 60 * 1000;
 
 const isCheckoutPlan = (value: unknown): value is CheckoutPlan =>
-  value === "monthly" || value === "season_pass";
+  value === "annual" || value === "monthly";
 
 export const savePendingCheckout = (
   plan: CheckoutPlan,
