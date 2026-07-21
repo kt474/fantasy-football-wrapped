@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Accordion,
   AccordionContent,
@@ -69,6 +69,7 @@ const trackedAccountPaywallView = ref(false);
 const authenticationSection = ref<HTMLElement | null>(null);
 const pricingSection = ref<HTMLElement | null>(null);
 const selectedCheckoutPlan = ref<CheckoutPlan | null>(null);
+const displayedCheckoutPlan = ref<CheckoutPlan>("annual");
 const lastAutoScrolledUpgradeRoute = ref("");
 
 const waitForRouteScroll = () =>
@@ -281,11 +282,28 @@ const accountSummaryContainerClass = computed(() => {
 const getCheckoutButtonText = (plan: CheckoutPlan) => {
   if (checkoutLoadingPlan.value === plan) return "Redirecting...";
   if (!authStore.isAuthenticated) {
-    return "Sign in to subscribe";
+    return "Sign in to continue";
   }
-  if (plan === "annual") return "Subscribe annually";
-  return "Subscribe monthly";
+  return "Get Premium";
 };
+
+const displayedPlanDetails = computed(() =>
+  displayedCheckoutPlan.value === "annual"
+    ? {
+        eyebrow: "Best value",
+        price: "$39.99",
+        interval: "/year",
+        description: "Save 58% for a full year of Premium.",
+        valueNote: "$3.33/month, billed annually.",
+      }
+    : {
+        eyebrow: "",
+        price: "$7.99",
+        interval: "/month",
+        description: "Premium access with monthly flexibility.",
+        valueNote: "Billed monthly.",
+      }
+);
 
 const guideToAuthentication = async (plan: CheckoutPlan) => {
   await nextTick();
@@ -1251,118 +1269,97 @@ watch(
             : 'order-2 mt-4',
         ]"
       >
-        <Card class="min-w-0">
+        <Card class="min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle>Unlock Premium</CardTitle>
             <CardDescription>
               {{ premiumDescription }}
             </CardDescription>
           </CardHeader>
-          <CardContent class="text-sm">
-            <div class="p-4 mb-5 border rounded-xl">
-              <p class="mb-3 text-sm font-semibold">
-                Every paid plan includes:
-              </p>
-              <div>
-                <div class="flex align-middle">
-                  <Check class="w-5 h-5 mr-2 shrink-0" />
-                  <p class="text-muted-foreground max-w-96">
-                    Unlimited Sleeper and ESPN leagues under one subscription
-                  </p>
+          <CardContent>
+            <div class="max-w-sm">
+              <Tabs v-model="displayedCheckoutPlan" class="w-full">
+                <TabsList class="grid w-full h-10 grid-cols-2 rounded-control">
+                  <TabsTrigger value="annual" class="gap-1.5 rounded-sm">
+                    Annual
+                  </TabsTrigger>
+                  <TabsTrigger value="monthly" class="rounded-sm">
+                    Monthly
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              <div class="py-4">
+                <p
+                  class="mb-2 text-xs font-semibold uppercase min-h-4 text-primary"
+                >
+                  {{ displayedPlanDetails.eyebrow }}
+                </p>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-5xl font-semibold tracking-tight">
+                    {{ displayedPlanDetails.price }}
+                  </span>
+                  <span class="text-lg text-muted-foreground">
+                    {{ displayedPlanDetails.interval }}
+                  </span>
                 </div>
-                <div class="flex mt-3 align-middle">
-                  <Check class="w-5 h-5 mr-2 shrink-0" />
-                  <p class="text-muted-foreground max-w-96">
-                    Smarter, shareable weekly recaps with customizable
-                    commentary, richer league context, and short-form video
-                    exports
-                  </p>
-                </div>
-                <div class="flex mt-3 align-middle">
-                  <Check class="w-5 h-5 mr-2 shrink-0" />
-                  <p class="text-muted-foreground max-w-96">
-                    Custom manager profiles highlighting tendencies and league
-                    identity
-                  </p>
-                </div>
-                <div class="flex mt-3 align-middle">
-                  <Check class="w-5 h-5 mr-2 shrink-0" />
-                  <p class="text-muted-foreground max-w-96">
-                    Rivalry reports that turn manager comparisons into
-                    personalized league stories
-                  </p>
-                </div>
-                <div class="flex mt-3 align-middle">
-                  <Check class="w-5 h-5 mr-2 shrink-0" />
-                  <p class="text-muted-foreground max-w-96">
-                    New Premium features added during your subscription
-                  </p>
-                </div>
+                <p
+                  class="max-w-xs mt-3 text-sm leading-relaxed text-muted-foreground"
+                >
+                  {{ displayedPlanDetails.description }}
+                </p>
+                <p class="text-sm leading-relaxed text-muted-foreground">
+                  {{ displayedPlanDetails.valueNote }}
+                </p>
               </div>
-            </div>
-            <div class="flex flex-col gap-4 sm:flex-row">
-              <div
-                class="relative flex flex-col flex-1 p-5 border pt-7 rounded-xl bg-muted/40"
+
+              <Button
+                class="w-full"
+                size="lg"
+                :disabled="checkoutLoadingPlan !== null"
+                @click="startCheckout(displayedCheckoutPlan)"
               >
-                <Badge
-                  class="absolute top-0 px-2 -translate-x-1/2 -translate-y-1/2 left-1/2 hover:bg-primary"
-                >
-                  Best value
-                </Badge>
-                <p
-                  class="-mt-2 text-sm font-semibold uppercase text-muted-foreground"
-                >
-                  Annual
-                </p>
-                <p class="mt-2 text-4xl font-semibold">
-                  $39.99
+                {{ getCheckoutButtonText(displayedCheckoutPlan) }}
+              </Button>
+            </div>
+
+            <Separator class="my-7" />
+
+            <div>
+              <p class="mb-4 text-sm font-medium">Everything included:</p>
+              <ul
+                class="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2 sm:gap-x-6"
+              >
+                <li class="flex gap-2.5">
+                  <Check class="mt-0.5 size-4 shrink-0 text-primary" />
                   <span
-                    class="-ml-1 text-base font-normal text-muted-foreground"
+                    >Premium features for all leagues you manage, including new
+                    Premium features added during your subscription</span
                   >
-                    /year
-                  </span>
-                </p>
-                <p class="mt-3 mb-4 min-h-[2.5rem] text-muted-foreground">
-                  Complete Premium access all year. Renews annually. Cancel
-                  anytime.
-                </p>
-                <p class="mb-3 text-xs text-muted-foreground">
-                  The price of about five monthly payments for a full year.
-                </p>
-                <Button
-                  class="w-full mt-auto"
-                  :disabled="checkoutLoadingPlan !== null"
-                  @click="startCheckout('annual')"
-                >
-                  {{ getCheckoutButtonText("annual") }}
-                </Button>
-              </div>
-              <div class="flex flex-col flex-1 p-5 border rounded-xl">
-                <p
-                  class="text-sm font-semibold uppercase text-muted-foreground"
-                >
-                  Monthly
-                </p>
-                <p class="mt-2 text-4xl font-semibold">
-                  $7.99
+                </li>
+                <li class="flex gap-2.5">
+                  <Check class="mt-0.5 size-4 shrink-0 text-primary" />
                   <span
-                    class="-ml-1 text-base font-normal text-muted-foreground"
+                    >Smarter, shareable weekly recaps with customizable
+                    commentary, richer league context, and short-form video
+                    exports</span
                   >
-                    /month
-                  </span>
-                </p>
-                <p class="mt-3 mb-8 min-h-[2.5rem] text-muted-foreground">
-                  Same Premium access with monthly flexibility. Cancel anytime.
-                </p>
-                <Button
-                  class="w-full mt-auto"
-                  :disabled="checkoutLoadingPlan !== null"
-                  variant="outline"
-                  @click="startCheckout('monthly')"
-                >
-                  {{ getCheckoutButtonText("monthly") }}
-                </Button>
-              </div>
+                </li>
+                <li class="flex gap-2.5">
+                  <Check class="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span
+                    >Custom manager profiles highlighting tendencies and league
+                    identity</span
+                  >
+                </li>
+                <li class="flex gap-2.5">
+                  <Check class="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span
+                    >Rivalry reports that turn manager comparisons into
+                    personalized league stories</span
+                  >
+                </li>
+              </ul>
             </div>
           </CardContent>
         </Card>
@@ -1399,21 +1396,11 @@ watch(
                   <AccordionContent class="leading-6 text-muted-foreground">
                     Yes. Your subscription follows your account and unlocks
                     Premium across every Sleeper and ESPN league you manage.
-                    Adding another league never adds another charge.
+                    Using Premium features in a new league you manage never adds
+                    another charge.
                   </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="pricing">
-                  <AccordionTrigger class="text-left">
-                    What does the annual subscription include?
-                  </AccordionTrigger>
-                  <AccordionContent class="leading-6 text-muted-foreground">
-                    The annual subscription includes every Premium feature
-                    across unlimited leagues for one year, including weekly
-                    reports, video recaps, manager profiles, rivalry reports,
-                    and new Premium features added during your subscription. It
-                    renews annually until canceled.
-                  </AccordionContent>
-                </AccordionItem>
+
                 <AccordionItem value="complete-plan">
                   <AccordionTrigger class="text-left">
                     Is the annual plan different from the monthly plan?
@@ -1422,7 +1409,9 @@ watch(
                     Both plans include the same Premium features across every
                     league you manage. The only difference is billing. The
                     annual plan renews once per year, while the monthly plan
-                    renews each month. You can cancel either plan anytime.
+                    renews each month. You can cancel either plan anytime and
+                    access will continue through the end of your current billing
+                    period.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="renewal" class="border-b-0">
