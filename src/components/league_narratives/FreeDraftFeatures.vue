@@ -16,6 +16,7 @@ import Card from "@/components/ui/card/Card.vue";
 
 const props = defineProps<{
   archetypes: ManagerArchetype[];
+  embedded?: boolean;
 }>();
 
 const showAll = ref(false);
@@ -78,8 +79,8 @@ const getDraftLabel = (draft: ManagerArchetype["draftHistory"][number]) => {
 
 <template>
   <div v-if="managersWithDraftHistory.length">
-    <Card class="p-4 md:p-6">
-      <div>
+    <component :is="embedded ? 'div' : Card" :class="embedded ? '' : 'p-4 md:p-6'">
+      <div v-if="!embedded">
         <p class="text-2xl font-semibold tracking-tight">Draft Tendencies</p>
         <p class="mt-4 text-sm text-muted-foreground sm:max-w-2xl sm:text-base">
           Each manager’s draft day habits, favorite early round positions, and
@@ -247,6 +248,6 @@ const getDraftLabel = (draft: ManagerArchetype["draftHistory"][number]) => {
           }}
         </Button>
       </div>
-    </Card>
+    </component>
   </div>
 </template>

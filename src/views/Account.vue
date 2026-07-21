@@ -90,7 +90,8 @@ const isUpgradeFlow = computed(() => {
   return (
     intent === "premium_report" ||
     intent === "manager_profiles" ||
-    intent === "rivalry_report"
+    intent === "rivalry_report" ||
+    intent === "draft_room"
   );
 });
 
@@ -107,7 +108,8 @@ const upgradeIntent = computed(() => {
     : route.query.intent;
   return value === "premium_report" ||
     value === "manager_profiles" ||
-    value === "rivalry_report"
+    value === "rivalry_report" ||
+    value === "draft_room"
     ? value
     : "premium";
 });
@@ -129,7 +131,10 @@ const premiumDescription = computed(() => {
   if (upgradeIntent.value === "rivalry_report") {
     return "Turn your league history into personalized rivalry stories and bragging rights.";
   }
-  return "Get shareable weekly newsletters, video recaps, manager profiles, and rivalry reports for every league you manage.";
+  if (upgradeIntent.value === "draft_room") {
+    return "Use your league’s draft history to plan each round and scout every manager’s tendencies before you are on the clock.";
+  }
+  return "Get shareable weekly newsletters, video recaps, history powered draft scouting, manager profiles, and rivalry reports for every league you manage.";
 });
 
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
@@ -1355,8 +1360,8 @@ watch(
                 <li class="flex gap-2.5">
                   <Check class="mt-0.5 size-4 shrink-0 text-primary" />
                   <span
-                    >Custom manager profiles highlighting tendencies and league
-                    identity</span
+                    >Custom manager profiles highlighting strengths, habits, and
+                    league identity</span
                   >
                 </li>
                 <li class="flex gap-2.5">
@@ -1365,6 +1370,10 @@ watch(
                     >Rivalry reports that turn manager comparisons into
                     personalized league stories</span
                   >
+                </li>
+                <li class="flex gap-2.5">
+                  <Check class="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span>History powered draft room scouting</span>
                 </li>
               </ul>
             </div>

@@ -383,7 +383,10 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
       </p>
     </div>
     <DraftFingerprintsCard
-      v-if="profileArchetypes.length"
+      v-if="
+        profileArchetypes.length ||
+        (store.leagueInfo.length > 0 && isLeagueHistoryReady)
+      "
       :archetypes="profileArchetypes"
       :draft-room-archetypes="draftRoomArchetypes"
       :league-size="store.currentLeague?.totalRosters"

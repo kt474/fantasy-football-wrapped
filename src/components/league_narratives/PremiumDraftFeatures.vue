@@ -31,6 +31,7 @@ const props = defineProps<{
   archetypes: ManagerArchetype[];
   draftRoomArchetypes?: ManagerArchetype[];
   leagueSize?: number;
+  embedded?: boolean;
 }>();
 
 const draftRoomManagers = computed(
@@ -160,13 +161,20 @@ const formatExpectedPositionPicks = (
 </script>
 
 <template>
-  <Card v-if="cheatSheetRows.length" class="p-4 md:p-6">
-    <div class="flex flex-wrap items-start justify-between gap-4">
+  <component
+    :is="embedded ? 'div' : Card"
+    v-if="cheatSheetRows.length"
+    :class="embedded ? '' : 'p-4 md:p-6'"
+  >
+    <div
+      v-if="!embedded"
+      class="flex flex-wrap items-start justify-between gap-4"
+    >
       <div class="flex min-w-0 gap-3">
         <div>
           <h2 class="heading-section">Draft Room</h2>
           <p class="mt-4 text-sm sm:text-base text-muted-foreground">
-            Plan your draft and scout every opponent from one league-specific
+            Plan your draft and scout every league mate from one specific
             workspace.
           </p>
         </div>
@@ -185,10 +193,9 @@ const formatExpectedPositionPicks = (
             <p
               class="max-w-lg mt-1 text-sm leading-relaxed text-muted-foreground"
             >
-              Estimates which positions may thin out before each pick using this
-              league’s
+              Estimates of which positions may thin out before each pick using
+              this league’s
               {{ positionalDraftPlan.draftLabel.toLowerCase() }} draft history.
-              It does not account for specific player availability.
             </p>
           </div>
 
@@ -366,14 +373,21 @@ const formatExpectedPositionPicks = (
                         {{ row.manager.displayName }}
                       </p>
                     </div>
-                    <p class="text-sm text-muted-foreground">
-                      {{ row.summary.trackedDrafts }}
-                      {{ row.summary.trackedDrafts === 1 ? "draft" : "drafts" }}
-                    </p>
+                    <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                      <span class="text-sm text-muted-foreground">
+                        {{ row.summary.trackedDrafts }}
+                        {{
+                          row.summary.trackedDrafts === 1 ? "draft" : "drafts"
+                        }}
+                      </span>
+                      <Badge variant="outline">
+                        {{ row.summary.patternStrength }}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
 
-                <div class="min-w-0 col-span-2 sm:col-span-1">
+                <div class="min-w-0 col-span-2 mt-1 sm:col-span-1">
                   <p class="text-xs text-muted-foreground">Projected</p>
                   <p
                     v-if="row.summary.projectedPositions"
@@ -391,7 +405,7 @@ const formatExpectedPositionPicks = (
                   </p>
                 </div>
 
-                <div class="min-w-0">
+                <div class="min-w-0 mt-1">
                   <p class="text-xs text-muted-foreground">Early lean</p>
                   <p
                     v-if="row.summary.dominantPosition"
@@ -406,7 +420,7 @@ const formatExpectedPositionPicks = (
                   <p v-else class="mt-0.5 text-sm text-muted-foreground">—</p>
                 </div>
 
-                <div class="min-w-0">
+                <div class="min-w-0 mt-1">
                   <p class="text-xs text-muted-foreground">First QB</p>
                   <p
                     v-if="row.summary.averageFirstQBRound !== null"
@@ -489,5 +503,11 @@ const formatExpectedPositionPicks = (
         </Accordion>
       </Card>
     </div>
-  </Card>
+
+    <p class="mt-4 text-xs leading-relaxed text-muted-foreground">
+      History-powered estimates vary with available comparable drafts. One-draft
+      and sparse-history leagues may only show early or limited signals. V1 does
+      not predict specific player availability.
+    </p>
+  </component>
 </template>

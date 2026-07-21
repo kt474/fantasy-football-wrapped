@@ -79,15 +79,18 @@ const pages = [
     faqs: [
       {
         question: "Where do I find my Sleeper fantasy football league ID?",
-        answer: "Open the league in Sleeper on the web and copy the numeric league ID from the URL. You can also enter a Sleeper username and select a season.",
+        answer:
+          "Open the league in Sleeper on the web and copy the numeric league ID from the URL. You can also enter a Sleeper username and select a season.",
       },
       {
         question: "Can I analyze a Sleeper league before the season starts?",
-        answer: "Yes. Preseason views use the league settings, rosters, projections, and completed draft data currently available. Results-based views appear after matchups are scored.",
+        answer:
+          "Yes. Preseason views use the league settings, rosters, projections, and completed draft data currently available. Results-based views appear after matchups are scored.",
       },
       {
         question: "Does ffwrapped support dynasty and redraft leagues?",
-        answer: "ffwrapped supports Sleeper NFL leagues across common redraft, keeper, and dynasty setups, subject to the data available for that league.",
+        answer:
+          "ffwrapped supports Sleeper NFL leagues across common redraft, keeper, and dynasty setups, subject to the data available for that league.",
       },
     ],
   },
@@ -96,7 +99,8 @@ const pages = [
     title: "ESPN Fantasy Football League Analyzer | ffwrapped",
     description:
       "Analyze an ESPN fantasy football league with power rankings, expected wins, playoff forecasts, draft results, weekly recaps, and manager trends.",
-    heading: "An ESPN fantasy football league analyzer built for the whole season",
+    heading:
+      "An ESPN fantasy football league analyzer built for the whole season",
     introduction:
       "Import a public or private ESPN league, then explore power rankings, expected wins, playoff forecasts, draft results, weekly recaps, and manager trends in one place.",
     sections: [
@@ -120,15 +124,18 @@ const pages = [
     faqs: [
       {
         question: "Where do I find my ESPN fantasy football league ID?",
-        answer: "Open the league in ESPN and use the number following leagueId= in the page URL, then select the matching season in ffwrapped.",
+        answer:
+          "Open the league in ESPN and use the number following leagueId= in the page URL, then select the matching season in ffwrapped.",
       },
       {
         question: "Can ffwrapped analyze a private ESPN league?",
-        answer: "Yes. Private leagues require the SWID and espn_s2 values from the signed-in ESPN browser session in addition to the league ID and season.",
+        answer:
+          "Yes. Private leagues require the SWID and espn_s2 values from the signed-in ESPN browser session in addition to the league ID and season.",
       },
       {
         question: "Can I grade my ESPN fantasy football draft?",
-        answer: "Yes. After a completed ESPN draft is available to import, the Draft area shows the board and supported pick and team grades.",
+        answer:
+          "Yes. After a completed ESPN draft is available to import, the Draft area shows the board and supported pick and team grades.",
       },
     ],
   },
@@ -161,15 +168,18 @@ const pages = [
     faqs: [
       {
         question: "Which platforms can I use for draft grades?",
-        answer: "ffwrapped loads completed draft data from connected Sleeper and ESPN fantasy football leagues when that draft data is available.",
+        answer:
+          "ffwrapped loads completed draft data from connected Sleeper and ESPN fantasy football leagues when that draft data is available.",
       },
       {
         question: "What goes into a fantasy football draft grade?",
-        answer: "Individual grades compare pick number with average draft position. Team grades combine ADP value and projected points, then compare the result with the rest of the draft room.",
+        answer:
+          "Individual grades compare pick number with average draft position. Team grades combine ADP value and projected points, then compare the result with the rest of the draft room.",
       },
       {
         question: "When are draft grades available?",
-        answer: "Draft grades are available after the draft is complete and the platform exposes its finished picks.",
+        answer:
+          "Draft grades are available after the draft is complete and the platform exposes its finished picks.",
       },
     ],
   },
@@ -183,7 +193,7 @@ const pages = [
       "Simulate the remaining schedule 5,000 times to estimate playoff probability, projected wins, likely seed, and the range of finishes still open to every team.",
     sections: [
       {
-        title: "League-specific season forecast",
+        title: "League specific season forecast",
         body: "Use current records, completed scoring, the playoff cutoff, roster projections, and the imported remaining schedule when available.",
       },
       {
@@ -232,7 +242,8 @@ const pages = [
     title: "Fantasy Football League History & All-Time Records | ffwrapped",
     description:
       "Build a fantasy football league history with all-time standings, championships, season finishes, scoring records, and head-to-head rivalries.",
-    heading: "Fantasy football league history built from every available season",
+    heading:
+      "Fantasy football league history built from every available season",
     introduction:
       "Turn years of standings and matchups into all-time records, championship history, scoring milestones, and head-to-head receipts across the connected archive.",
     sections: [
@@ -354,17 +365,14 @@ const pages = [
     video: {
       src: "/video/ffwrapped-marketing-demo-week-11.mp4",
       poster: "/video/ffwrapped-video-recap-poster.png",
-      label:
-        "Play the ffwrapped Week 11 fantasy football video recap example",
+      label: "Play the ffwrapped Week 11 fantasy football video recap example",
       disclaimer:
         "Sample league and team names are fictional. Video created with ffwrapped Premium for product demonstration.",
       ctaHref: "/",
       ctaLabel: "Create your own recap",
     },
-    ogImage:
-      "https://ffwrapped.com/video/ffwrapped-video-recap-poster.png",
-    ogVideo:
-      "https://ffwrapped.com/video/ffwrapped-marketing-demo-week-11.mp4",
+    ogImage: "https://ffwrapped.com/video/ffwrapped-video-recap-poster.png",
+    ogVideo: "https://ffwrapped.com/video/ffwrapped-marketing-demo-week-11.mp4",
     structuredData: {
       "@context": "https://schema.org",
       "@type": "VideoObject",
@@ -377,8 +385,7 @@ const pages = [
       duration: "PT25S",
       contentUrl:
         "https://ffwrapped.com/video/ffwrapped-marketing-demo-week-11.mp4",
-      embedUrl:
-        "https://ffwrapped.com/fantasy-football-video-recap-example",
+      embedUrl: "https://ffwrapped.com/fantasy-football-video-recap-example",
       isFamilyFriendly: true,
     },
   },
