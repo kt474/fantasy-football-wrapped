@@ -24,6 +24,7 @@ export const getSupabaseClient = () => {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
+        flowType: "pkce",
       },
     });
   }

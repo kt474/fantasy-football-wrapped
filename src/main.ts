@@ -308,6 +308,15 @@ router.beforeEach(async (to) => {
   if (!authStore.initialized) {
     await authStore.initialize();
   }
+  if (to.path === "/account" && to.query.code && authStore.isAuthenticated) {
+    const { code: _authCode, ...query } = to.query;
+    return {
+      path: to.path,
+      query,
+      hash: to.hash,
+      replace: true,
+    };
+  }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { path: "/" };
   }

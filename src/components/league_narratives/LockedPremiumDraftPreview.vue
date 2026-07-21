@@ -11,10 +11,6 @@ import {
 } from "@/lib/analytics";
 import { useStore } from "@/store/store";
 
-defineProps<{
-  embedded?: boolean;
-}>();
-
 const store = useStore();
 
 const samplePulse = [
@@ -119,31 +115,8 @@ const trackUnlockClick = () => {
 </script>
 
 <template>
-  <component
-    :is="embedded ? 'div' : Card"
-    :class="embedded ? '' : 'p-4 overflow-hidden md:p-6'"
-  >
-    <div
-      v-if="!embedded"
-      class="flex flex-wrap items-start justify-between gap-3"
-    >
-      <div class="max-w-2xl">
-        <div class="flex flex-wrap items-center gap-2">
-          <h2 class="heading-section">Draft Room</h2>
-          <Badge variant="secondary">
-            <LockKeyhole class="mr-1 size-3" aria-hidden="true" />
-            Premium
-          </Badge>
-          <Badge variant="outline">Sample data</Badge>
-        </div>
-        <p class="mt-3 text-sm leading-relaxed text-muted-foreground">
-          A sample of the history-powered planning and opponent scouting
-          available with Premium.
-        </p>
-      </div>
-    </div>
-
-    <div :class="embedded ? 'space-y-4' : 'mt-4 space-y-4'">
+  <div>
+    <div class="space-y-4">
       <Card class="overflow-hidden shadow-none">
         <div class="p-4 bg-background sm:p-5">
           <div class="flex flex-wrap items-start justify-between gap-3">
@@ -314,5 +287,5 @@ const trackUnlockClick = () => {
         </router-link>
       </Button>
     </div>
-  </component>
+  </div>
 </template>

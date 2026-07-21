@@ -6,6 +6,11 @@ import {
   getDraftRoomCheatSheetSummary,
   type ManagerArchetype,
 } from "@/lib/narratives";
+import {
+  getLeagueAnalyticsProperties,
+  trackPremiumFunnelEvent,
+} from "@/lib/analytics";
+import { useStore } from "@/store/store";
 import Card from "@/components/ui/card/Card.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FreeDraftFeatures from "./FreeDraftFeatures.vue";
@@ -21,6 +26,7 @@ const props = withDefaults(
   }>(),
   { isPremium: false }
 );
+const store = useStore();
 
 const hasDraftHistory = computed(() =>
   props.archetypes.some((manager) => manager.draftHistory?.length)
@@ -50,8 +56,26 @@ const activeDescription = computed(() => {
   if (props.isPremium) {
     return "Plan your draft and scout every league mate from one specific workspace.";
   }
-  return "Preview with sample data to show how draft history can be used to plan your next draft and scout your league mates. Available with a Premium subscription.";
+  return "Preview with sample data to show how draft history can be used to plan your next draft and scout your league mates.";
 });
+
+const showPremiumSubscriptionCta = computed(
+  () =>
+    activeView.value === "draft-room" &&
+    hasDraftRoomData.value &&
+    !props.isPremium
+);
+
+const trackPremiumSubscriptionClick = () => {
+  trackPremiumFunnelEvent("premium_cta_clicked", {
+    cta: "unlock_draft_room_scouting",
+    feature: "draft_room",
+    source: "draft_room_locked_preview",
+    preview_type: "sample_data",
+    ...getLeagueAnalyticsProperties(store.currentLeague),
+  });
+  store.currentTab = "";
+};
 
 watch(
   () => props.isPremium,
@@ -85,6 +109,23 @@ watch(
             class="max-w-2xl mt-4 text-sm leading-relaxed sm:text-base text-muted-foreground"
           >
             {{ activeDescription }}
+            <template v-if="showPremiumSubscriptionCta">
+              Available with a
+              <router-link
+                :to="{
+                  path: '/account',
+                  query: {
+                    ...$route.query,
+                    intent: 'draft_room',
+                    upgrade_source: 'draft_room_locked_preview',
+                  },
+                }"
+                class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                @click="trackPremiumSubscriptionClick"
+              >
+                Premium subscription</router-link
+              >.
+            </template>
           </p>
         </div>
         <TabsList class="self-start">
@@ -129,7 +170,6 @@ watch(
         />
         <LockedPremiumDraftPreview
           v-else-if="activeView === 'draft-room' && hasDraftRoomData"
-          embedded
         />
       </TabsContent>
     </Tabs>
