@@ -16,7 +16,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "There is a new draft tendencies component in the manager profiles tab that shows the history of how every manager drafts.",
+          "There is a new draft tendencies component in the manager profiles tab that shows the history of how every manager drafts. There are also premium draft features that use draft history to create a personalized draft day scouting report.",
         ],
       },
     ],

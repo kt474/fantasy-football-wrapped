@@ -11,6 +11,7 @@ const CACHE_STORE_NAME = "cache";
 const LEGACY_LEAGUE_STORAGE_KEY = "leagueInfo";
 const LEAGUE_FALLBACK_MARKER_KEY = "leagueInfoFallback";
 const NARRATIVE_BUNDLE_CACHE_PREFIX = "narrative-bundle:";
+const NARRATIVE_BUNDLE_CACHE_VERSION = "v2:";
 export const NARRATIVE_BUNDLE_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const CACHE_RECORD_VERSION = 1;
@@ -313,7 +314,7 @@ const evictOldCacheRecords = async (now = Date.now()) => {
 };
 
 export const getNarrativeBundleCacheKey = (leagueKey: string) =>
-  `${NARRATIVE_BUNDLE_CACHE_PREFIX}${leagueKey}`;
+  `${NARRATIVE_BUNDLE_CACHE_PREFIX}${NARRATIVE_BUNDLE_CACHE_VERSION}${leagueKey}`;
 
 export const getCachedValue = async <T>(
   key: string,

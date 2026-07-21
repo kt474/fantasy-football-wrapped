@@ -6,10 +6,7 @@ import {
   WaiverStatus,
   WaiverType,
 } from "../types/apiTypes";
-import {
-  getPreviousLeagueEntries,
-  isLeagueInfoEntry,
-} from "./previousSeason";
+import { getPreviousLeagueEntries, isLeagueInfoEntry } from "./previousSeason";
 
 type PlayoffParticipantMatchup = {
   t1?: number | null;
@@ -28,6 +25,7 @@ type EspnPlayoffMatchup = {
 export type HistoricalSeasonInput = {
   season: string;
   seasonType: string;
+  status?: string;
   leagueId: string;
   leagueWinner: string | null;
   scoringType: number;
@@ -50,6 +48,95 @@ export type ManagerDraftHistory = {
   firstQBRound?: number | null;
   firstTERound?: number | null;
   requiresTightEnd?: boolean;
+  madePlayoffs?: boolean;
+  pointsFor?: number;
+};
+
+export const DRAFT_HISTORY_PICK_LIMIT = 8;
+export const DRAFT_INSIGHT_PICK_LIMIT = 5;
+export const DRAFT_OPENING_PICK_LIMIT = 3;
+
+export type DraftPositionWindows = {
+  opening: string[];
+  insights: string[];
+  planning: string[];
+};
+
+export const getDraftPositionWindows = (
+  draft: ManagerDraftHistory
+): DraftPositionWindows => {
+  const planning = draft.positions.slice(0, DRAFT_HISTORY_PICK_LIMIT);
+  return {
+    opening: planning.slice(0, DRAFT_OPENING_PICK_LIMIT),
+    insights: planning.slice(0, DRAFT_INSIGHT_PICK_LIMIT),
+    planning,
+  };
+};
+
+const getDraftInsightPositions = (draft: ManagerDraftHistory) =>
+  getDraftPositionWindows(draft).insights;
+
+export type DraftPrediction = {
+  positions: string[];
+  observedCount: number;
+  eligibleDraftCount: number;
+  draftLabel: string;
+};
+
+export type DraftStrategyResult = {
+  opening: string;
+  seasons: number;
+  playoffAppearances: number;
+  playoffRate: number;
+  averagePoints: number | null;
+  draftLabel: string;
+};
+
+export type DraftRoomCheatSheetSummary = {
+  draftLabel: string;
+  trackedDrafts: number;
+  projectedPositions: string[] | null;
+  projectedObservedCount: number;
+  dominantPosition: string | null;
+  dominantPositionShare: number;
+  averageFirstQBRound: number | null;
+  firstQBDraftCount: number;
+  patternStrength:
+    | "Strong pattern"
+    | "Consistent"
+    | "Early signal"
+    | "Mixed openings"
+    | "Limited history";
+};
+
+export type DraftRoomPulseInsight = {
+  label: string;
+  value: string;
+  detail: string;
+};
+
+export type DraftPlanPressure = {
+  position: string;
+  expectedPicks: number;
+};
+
+export type PositionalDraftPlanRound = {
+  round: number;
+  overallPick: number;
+  picksBeforePick: number;
+  pressure: DraftPlanPressure[];
+  pressureLevel: "High" | "Medium" | "Low" | "Unknown";
+  threats: string[];
+  guidance: string;
+};
+
+export type PositionalDraftPlan = {
+  managerId: string;
+  managerName: string;
+  draftLabel: string;
+  draftSlot: number;
+  leagueSize: number;
+  rounds: PositionalDraftPlanRound[];
 };
 
 export type DraftRoundMetric = {
@@ -263,7 +350,8 @@ const isKeeperPick = (keeper: unknown) =>
 
 export const getDraftHistoryForManager = (
   season: HistoricalSeasonInput,
-  userId: string
+  userId: string,
+  outcome?: Pick<ManagerDraftHistory, "madePlayoffs" | "pointsFor">
 ): ManagerDraftHistory | undefined => {
   if (
     !season.draftPicks?.length ||
@@ -278,7 +366,7 @@ export const getDraftHistoryForManager = (
   const positions = managerPicks
     .map((pick) => pick.position?.trim().toUpperCase() ?? "")
     .filter((position) => position && position !== "NA")
-    .slice(0, 5);
+    .slice(0, DRAFT_HISTORY_PICK_LIMIT);
 
   const isRookieDraft =
     season.seasonType?.toLowerCase() === "dynasty" &&
@@ -301,8 +389,790 @@ export const getDraftHistoryForManager = (
         requiresTightEnd: (season.rosterPositions ?? []).some(
           (position) => position.trim().toUpperCase() === "TE"
         ),
+        ...outcome,
       }
     : undefined;
+};
+
+const getDraftLabel = (draft: ManagerDraftHistory) =>
+  draft.draftLabel ?? draft.seasonType ?? "Draft";
+
+const getPrimaryDraftGroup = (history: ManagerDraftHistory[]) => {
+  const groups = new Map<string, ManagerDraftHistory[]>();
+  history.forEach((draft) => {
+    const label = getDraftLabel(draft);
+    groups.set(label, [...(groups.get(label) ?? []), draft]);
+  });
+
+  return (
+    [...groups.entries()].sort(
+      (left, right) => right[1].length - left[1].length
+    )[0] ?? ["Draft", []]
+  );
+};
+
+export const getDraftPrediction = (
+  history: ManagerDraftHistory[]
+): DraftPrediction | null => {
+  const [draftLabel, drafts] = getPrimaryDraftGroup(history);
+  if (drafts.length < 2) return null;
+
+  for (const prefixLength of [2, 1]) {
+    const counts = new Map<string, number>();
+    drafts.forEach(({ positions }) => {
+      if (positions.length < prefixLength) return;
+      const key = positions.slice(0, prefixLength).join("|");
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+
+    const mostCommon = [...counts.entries()].sort(
+      (left, right) => right[1] - left[1]
+    )[0];
+    if (
+      mostCommon &&
+      mostCommon[1] >= 2 &&
+      mostCommon[1] / drafts.length >= 0.5
+    ) {
+      return {
+        positions: mostCommon[0].split("|"),
+        observedCount: mostCommon[1],
+        eligibleDraftCount: drafts.length,
+        draftLabel,
+      };
+    }
+  }
+
+  return null;
+};
+
+const getAverageRound = (
+  drafts: ManagerDraftHistory[],
+  key: "firstQBRound" | "firstTERound"
+) => {
+  const rounds = drafts
+    .map((draft) => draft[key])
+    .filter(
+      (round): round is number =>
+        typeof round === "number" && Number.isFinite(round) && round > 0
+    );
+  return rounds.length
+    ? rounds.reduce((sum, round) => sum + round, 0) / rounds.length
+    : null;
+};
+
+export const getDraftRoomCheatSheetSummary = (
+  history: ManagerDraftHistory[]
+): DraftRoomCheatSheetSummary | null => {
+  const [draftLabel, drafts] = getPrimaryDraftGroup(history);
+  if (!drafts.length) return null;
+
+  const prediction = getDraftPrediction(history);
+  const positions = drafts.flatMap(getDraftInsightPositions);
+  const positionCounts = new Map<string, number>();
+  positions.forEach((position) =>
+    positionCounts.set(position, (positionCounts.get(position) ?? 0) + 1)
+  );
+  const dominantPosition = [...positionCounts.entries()].sort(
+    (left, right) => right[1] - left[1]
+  )[0];
+  const firstQBRounds = drafts
+    .map((draft) => draft.firstQBRound)
+    .filter(
+      (round): round is number =>
+        typeof round === "number" && Number.isFinite(round) && round > 0
+    );
+
+  let patternStrength: DraftRoomCheatSheetSummary["patternStrength"];
+  if (drafts.length < 2) {
+    patternStrength = "Limited history";
+  } else if (!prediction) {
+    patternStrength = "Mixed openings";
+  } else if (drafts.length === 2) {
+    patternStrength = "Early signal";
+  } else if (prediction.observedCount / drafts.length >= 0.75) {
+    patternStrength = "Strong pattern";
+  } else {
+    patternStrength = "Consistent";
+  }
+
+  return {
+    draftLabel,
+    trackedDrafts: drafts.length,
+    projectedPositions: prediction?.positions ?? null,
+    projectedObservedCount: prediction?.observedCount ?? 0,
+    dominantPosition: dominantPosition?.[0] ?? null,
+    dominantPositionShare:
+      dominantPosition && positions.length
+        ? dominantPosition[1] / positions.length
+        : 0,
+    averageFirstQBRound: getAverageRound(drafts, "firstQBRound"),
+    firstQBDraftCount: firstQBRounds.length,
+    patternStrength,
+  };
+};
+
+const getPositionShares = (drafts: ManagerDraftHistory[]) => {
+  const positions = drafts.flatMap(getDraftInsightPositions);
+  const shares = new Map<string, number>();
+  if (!positions.length) return shares;
+
+  new Set(positions).forEach((position) => {
+    shares.set(
+      position,
+      positions.filter((candidate) => candidate === position).length /
+        positions.length
+    );
+  });
+  return shares;
+};
+
+export const getDraftStrategyShifts = (
+  history: ManagerDraftHistory[]
+): string[] => {
+  const [, drafts] = getPrimaryDraftGroup(history);
+  if (drafts.length < 3) return [];
+
+  const recentDrafts = drafts.slice(0, 2);
+  const priorDrafts = drafts.slice(2);
+  const recentShares = getPositionShares(recentDrafts);
+  const priorShares = getPositionShares(priorDrafts);
+  const positionChanges = [
+    ...new Set([...recentShares.keys(), ...priorShares.keys()]),
+  ]
+    .map((position) => ({
+      position,
+      recentShare: recentShares.get(position) ?? 0,
+      priorShare: priorShares.get(position) ?? 0,
+    }))
+    .map((change) => ({
+      ...change,
+      difference: change.recentShare - change.priorShare,
+    }))
+    .sort(
+      (left, right) => Math.abs(right.difference) - Math.abs(left.difference)
+    );
+
+  const insights: string[] = [];
+  const biggestPositionChange = positionChanges[0];
+  if (
+    biggestPositionChange &&
+    Math.abs(biggestPositionChange.difference) >= 0.25
+  ) {
+    const recentPercent = Math.round(biggestPositionChange.recentShare * 100);
+    const priorPercent = Math.round(biggestPositionChange.priorShare * 100);
+    insights.push(
+      biggestPositionChange.difference > 0
+        ? "Leaning more " +
+            biggestPositionChange.position +
+            " lately (" +
+            recentPercent +
+            "% of recent early picks, up from " +
+            priorPercent +
+            "%)."
+        : "Using fewer " +
+            biggestPositionChange.position +
+            "s early lately (" +
+            recentPercent +
+            "%, down from " +
+            priorPercent +
+            "%)."
+    );
+  }
+
+  const recentQbRounds = recentDrafts
+    .map((draft) => draft.firstQBRound)
+    .filter(
+      (round): round is number =>
+        typeof round === "number" && Number.isFinite(round) && round > 0
+    );
+  const priorQbRounds = priorDrafts
+    .map((draft) => draft.firstQBRound)
+    .filter(
+      (round): round is number =>
+        typeof round === "number" && Number.isFinite(round) && round > 0
+    );
+  if (recentQbRounds.length === 2 && priorQbRounds.length) {
+    const recentAverage =
+      recentQbRounds.reduce((sum, round) => sum + round, 0) /
+      recentQbRounds.length;
+    const priorAverage =
+      priorQbRounds.reduce((sum, round) => sum + round, 0) /
+      priorQbRounds.length;
+    const difference = recentAverage - priorAverage;
+    if (Math.abs(difference) >= 1.5) {
+      insights.push(
+        "Taking the first QB " +
+          Math.abs(difference).toFixed(1) +
+          " rounds " +
+          (difference < 0 ? "earlier" : "later") +
+          " lately (R" +
+          recentAverage.toFixed(1) +
+          " vs R" +
+          priorAverage.toFixed(1) +
+          ")."
+      );
+    }
+  }
+
+  return insights.slice(0, 2);
+};
+
+export const getDraftRoomPulse = (
+  managers: ManagerArchetype[]
+): DraftRoomPulseInsight[] => {
+  const rows = managers.flatMap((manager) => {
+    const summary = getDraftRoomCheatSheetSummary(manager.draftHistory);
+    return summary ? [{ manager, summary }] : [];
+  });
+  if (!rows.length) return [];
+
+  const labelCounts = new Map<string, number>();
+  rows.forEach(({ summary }) =>
+    labelCounts.set(
+      summary.draftLabel,
+      (labelCounts.get(summary.draftLabel) ?? 0) + 1
+    )
+  );
+  const primaryLabel = [...labelCounts.entries()].sort(
+    (left, right) => right[1] - left[1]
+  )[0]?.[0];
+  const comparableRows = rows.filter(
+    ({ summary }) => summary.draftLabel === primaryLabel
+  );
+  const insights: DraftRoomPulseInsight[] = [];
+
+  const leanCounts = new Map<string, number>();
+  comparableRows.forEach(({ summary }) => {
+    if (!summary.dominantPosition) return;
+    leanCounts.set(
+      summary.dominantPosition,
+      (leanCounts.get(summary.dominantPosition) ?? 0) + 1
+    );
+  });
+  const roomLean = [...leanCounts.entries()].sort(
+    (left, right) => right[1] - left[1]
+  )[0];
+  if (roomLean && roomLean[1] >= 2) {
+    insights.push({
+      label: "Room lean",
+      value: roomLean[0] + " early",
+      detail:
+        roomLean[1] +
+        " of " +
+        comparableRows.length +
+        " " +
+        primaryLabel +
+        " managers emphasize " +
+        roomLean[0] +
+        " most.",
+    });
+  }
+
+  const qbRows = comparableRows.filter(
+    ({ summary }) => summary.averageFirstQBRound !== null
+  );
+  if (qbRows.length >= 2) {
+    const maxRound = Math.max(
+      ...qbRows.map(({ summary }) =>
+        Math.ceil(summary.averageFirstQBRound ?? 0)
+      )
+    );
+    const windows = Array.from(
+      { length: Math.max(1, maxRound) },
+      (_, index) => {
+        const start = index + 1;
+        const end = start + 2;
+        const count = qbRows.filter(({ summary }) => {
+          const round = summary.averageFirstQBRound ?? 0;
+          return round >= start && round <= end;
+        }).length;
+        return { start, end, count };
+      }
+    );
+    const busiestWindow = windows.sort(
+      (left, right) => right.count - left.count || left.start - right.start
+    )[0];
+    if (busiestWindow?.count >= 2) {
+      insights.push({
+        label: "QB pressure",
+        value: "Rounds " + busiestWindow.start + "–" + busiestWindow.end,
+        detail:
+          busiestWindow.count +
+          " of " +
+          qbRows.length +
+          " managers typically enter the QB market here.",
+      });
+    }
+  }
+
+  const predictableRows = comparableRows
+    .filter(
+      ({ summary }) =>
+        summary.trackedDrafts >= 3 &&
+        summary.projectedPositions &&
+        summary.projectedObservedCount >= 2
+    )
+    .sort((left, right) => {
+      const leftRate =
+        left.summary.projectedObservedCount / left.summary.trackedDrafts;
+      const rightRate =
+        right.summary.projectedObservedCount / right.summary.trackedDrafts;
+      return (
+        rightRate - leftRate ||
+        right.summary.trackedDrafts - left.summary.trackedDrafts
+      );
+    });
+  const mostPredictable = predictableRows[0];
+  if (mostPredictable) {
+    insights.push({
+      label: "Most predictable",
+      value: mostPredictable.manager.displayName,
+      detail:
+        "Repeated " +
+        mostPredictable.summary.projectedPositions?.join(" → ") +
+        " in " +
+        mostPredictable.summary.projectedObservedCount +
+        " of " +
+        mostPredictable.summary.trackedDrafts +
+        " drafts.",
+    });
+  }
+
+  const shiftingManagerNames = comparableRows
+    .filter(
+      ({ manager }) => getDraftStrategyShifts(manager.draftHistory).length
+    )
+    .map(({ manager }) => manager.displayName);
+  if (shiftingManagerNames.length) {
+    const visibleNames = shiftingManagerNames.slice(0, 3);
+
+    insights.push({
+      label: "Changing approach",
+      value: visibleNames.join(", "),
+      detail:
+        shiftingManagerNames.length === 1
+          ? "This manager's recent early-round behavior differs materially from older drafts."
+          : "These managers' recent early-round behavior differs materially from older drafts.",
+    });
+  }
+
+  return insights.slice(0, 4);
+};
+
+const DRAFT_PLAN_POSITIONS = ["RB", "WR", "QB", "TE"];
+const DRAFT_PLAN_ROUND_LIMIT = 4;
+const DRAFT_PLAN_MEDIUM_PRESSURE_MIN_PICKS = 2;
+const DRAFT_PLAN_MEDIUM_PRESSURE_MIN_SHARE = 0.35;
+const DRAFT_PLAN_HIGH_PRESSURE_MIN_PICKS = 3;
+const DRAFT_PLAN_HIGH_PRESSURE_MIN_SHARE = 0.45;
+
+export const getDraftPressureLevel = (
+  expectedPicks: number,
+  picksBeforePick: number,
+  hasProjection = true
+): PositionalDraftPlanRound["pressureLevel"] => {
+  if (picksBeforePick > 0 && !hasProjection) return "Unknown";
+  if (picksBeforePick === 0) return "Low";
+
+  const projectedShare = expectedPicks / picksBeforePick;
+  if (
+    expectedPicks >= DRAFT_PLAN_HIGH_PRESSURE_MIN_PICKS &&
+    projectedShare >= DRAFT_PLAN_HIGH_PRESSURE_MIN_SHARE
+  ) {
+    return "High";
+  }
+  if (
+    expectedPicks >= DRAFT_PLAN_MEDIUM_PRESSURE_MIN_PICKS &&
+    projectedShare >= DRAFT_PLAN_MEDIUM_PRESSURE_MIN_SHARE
+  ) {
+    return "Medium";
+  }
+  return "Low";
+};
+
+const formatProjectedSelections = (position: string, expectedPicks: number) => {
+  if (expectedPicks < 1) return `Fewer than 1 ${position} pick`;
+
+  const lower = Math.floor(expectedPicks);
+  const upper = Math.ceil(expectedPicks);
+  const estimate = lower === upper ? String(lower) : `${lower}–${upper}`;
+  return `About ${estimate} ${position} ${upper === 1 ? "pick" : "picks"}`;
+};
+
+const formatProjectedPickRange = (expectedPicks: number) => {
+  if (expectedPicks < 1) return "fewer than 1";
+  const lower = Math.floor(expectedPicks);
+  const upper = Math.ceil(expectedPicks);
+  return lower === upper ? String(lower) : `${lower}–${upper}`;
+};
+
+const getRoundPositionCounts = (
+  drafts: ManagerDraftHistory[],
+  roundIndex: number
+) => {
+  const counts = new Map<string, number>();
+  let observations = 0;
+  drafts.forEach((draft) => {
+    const position = getDraftPositionWindows(draft).planning[roundIndex];
+    if (!DRAFT_PLAN_POSITIONS.includes(position)) return;
+    counts.set(position, (counts.get(position) ?? 0) + 1);
+    observations += 1;
+  });
+  return { counts, observations };
+};
+
+export const getPositionalDraftPlan = (
+  manager: ManagerArchetype,
+  managers: ManagerArchetype[],
+  requestedDraftSlot: number,
+  requestedLeagueSize = managers.length
+): PositionalDraftPlan | null => {
+  const [draftLabel, managerDrafts] = getPrimaryDraftGroup(
+    manager.draftHistory
+  );
+  if (!managerDrafts.length || managers.length < 2) return null;
+
+  const leagueSize = Math.max(
+    2,
+    Math.round(requestedLeagueSize) || managers.length
+  );
+  const draftSlot = Math.min(
+    leagueSize,
+    Math.max(1, Math.round(requestedDraftSlot) || 1)
+  );
+  const opponents = managers
+    .filter((candidate) => candidate.userId !== manager.userId)
+    .map((candidate) => ({
+      manager: candidate,
+      drafts: candidate.draftHistory.filter(
+        (draft) => getDraftLabel(draft) === draftLabel
+      ),
+    }))
+    .filter(({ drafts }) => drafts.length);
+  if (!opponents.length) return null;
+
+  const roundCount = Math.min(
+    DRAFT_PLAN_ROUND_LIMIT,
+    Math.max(
+      ...managerDrafts.map(
+        (draft) => getDraftPositionWindows(draft).planning.length
+      ),
+      ...opponents.flatMap(({ drafts }) =>
+        drafts.map((draft) => getDraftPositionWindows(draft).planning.length)
+      )
+    )
+  );
+
+  const rounds = Array.from(
+    { length: roundCount },
+    (_, roundIndex): PositionalDraftPlanRound => {
+      const round = roundIndex + 1;
+      const isOddRound = round % 2 === 1;
+      const overallPick =
+        roundIndex * leagueSize +
+        (isOddRound ? draftSlot : leagueSize - draftSlot + 1);
+      const halfWait =
+        round === 1
+          ? draftSlot - 1
+          : isOddRound
+            ? draftSlot - 1
+            : leagueSize - draftSlot;
+      const picksBeforePick = round === 1 ? halfWait : halfWait * 2;
+      const relevantRounds =
+        round === 1
+          ? [{ index: roundIndex, picks: halfWait }]
+          : [
+              { index: roundIndex - 1, picks: halfWait },
+              { index: roundIndex, picks: halfWait },
+            ];
+      const expectedByPosition = new Map<string, number>();
+      let observations = 0;
+
+      relevantRounds.forEach(({ index, picks }) => {
+        const roundDrafts = opponents.flatMap(({ drafts }) => drafts);
+        const roundCounts = getRoundPositionCounts(roundDrafts, index);
+        observations += roundCounts.observations;
+        if (!roundCounts.observations || !picks) return;
+        DRAFT_PLAN_POSITIONS.forEach((position) => {
+          const share =
+            (roundCounts.counts.get(position) ?? 0) / roundCounts.observations;
+          expectedByPosition.set(
+            position,
+            (expectedByPosition.get(position) ?? 0) + share * picks
+          );
+        });
+      });
+
+      const pressure = DRAFT_PLAN_POSITIONS.map((position) => ({
+        position,
+        expectedPicks: expectedByPosition.get(position) ?? 0,
+      }))
+        .filter(({ expectedPicks }) => expectedPicks >= 0.25)
+        .sort(
+          (left, right) =>
+            right.expectedPicks - left.expectedPicks ||
+            DRAFT_PLAN_POSITIONS.indexOf(left.position) -
+              DRAFT_PLAN_POSITIONS.indexOf(right.position)
+        )
+        .slice(0, 2);
+      const watchPosition = pressure[0]?.position;
+      const expectedWatchPicks = pressure[0]?.expectedPicks ?? 0;
+      const pressureLevel = getDraftPressureLevel(
+        expectedWatchPicks,
+        picksBeforePick,
+        Boolean(watchPosition)
+      );
+      const sampleTarget = opponents.length * relevantRounds.length * 2;
+      const hasThinHistory = observations < sampleTarget * 0.75;
+
+      const threats = watchPosition
+        ? opponents
+            .map(({ manager: opponent, drafts }) => {
+              let matches = 0;
+              let eligible = 0;
+              relevantRounds.forEach(({ index }) => {
+                drafts.forEach((draft) => {
+                  const position =
+                    getDraftPositionWindows(draft).planning[index];
+                  if (!DRAFT_PLAN_POSITIONS.includes(position)) return;
+                  eligible += 1;
+                  if (position === watchPosition) matches += 1;
+                });
+              });
+              return {
+                name: opponent.displayName,
+                probability: eligible ? matches / eligible : 0,
+              };
+            })
+            .filter(({ probability }) => probability >= 0.5)
+            .sort((left, right) => right.probability - left.probability)
+            .slice(0, 3)
+            .map(({ name }) => name)
+        : [];
+
+      const managerRoundCounts = getRoundPositionCounts(
+        managerDrafts,
+        roundIndex
+      );
+      const managerPreferenceEntry = [
+        ...managerRoundCounts.counts.entries(),
+      ].sort((left, right) => right[1] - left[1])[0];
+      const managerPreference =
+        managerPreferenceEntry &&
+        managerRoundCounts.observations >= 2 &&
+        managerPreferenceEntry[1] / managerRoundCounts.observations >= 0.6
+          ? managerPreferenceEntry[0]
+          : null;
+      const secondaryPressure = pressure[1];
+      const hasSplitDemand = Boolean(
+        secondaryPressure &&
+        secondaryPressure.expectedPicks >= expectedWatchPicks * 0.75
+      );
+
+      let guidance: string;
+      if (picksBeforePick === 0) {
+        guidance =
+          round === 1
+            ? "You pick first. Build around your preferred opening."
+            : "No opponent picks between your two selections.";
+      } else if (!watchPosition) {
+        guidance = `${picksBeforePick} picks before #${overallPick}. Not enough history for a reliable position read.`;
+      } else if (hasThinHistory) {
+        guidance = `Thin history makes #${overallPick} hard to read. ${watchPosition} is the early lean, but keep the plan flexible.`;
+      } else if (pressureLevel === "High") {
+        guidance = `${watchPosition} run alert: ${formatProjectedPickRange(
+          expectedWatchPicks
+        )} of the next ${picksBeforePick} picks project at ${watchPosition}. ${
+          round === 1
+            ? "Queue alternatives for this slot."
+            : `Prioritize ${watchPosition} on the previous turn if it matters to your build.`
+        }`;
+      } else if (managerPreference && managerPreference !== watchPosition) {
+        guidance = `${manager.displayName} usually drafts ${managerPreference} in Round ${round}; opponents lean ${watchPosition} before #${overallPick}. Keep both paths open.`;
+      } else if (hasSplitDemand && secondaryPressure) {
+        const primaryEstimate = formatProjectedPickRange(expectedWatchPicks);
+        const secondaryEstimate = formatProjectedPickRange(
+          secondaryPressure.expectedPicks
+        );
+        guidance =
+          round <= 2
+            ? `${watchPosition} and ${secondaryPressure.position} demand is nearly even before #${overallPick}: ${primaryEstimate} vs ${secondaryEstimate} projected picks. Stay flexible.`
+            : `No single pressure point before #${overallPick}. Expect roughly ${primaryEstimate} ${watchPosition} and ${secondaryEstimate} ${secondaryPressure.position} picks.`;
+      } else if (pressureLevel === "Medium" && threats.length >= 2) {
+        guidance = `${threats.slice(0, 2).join(" and ")} show the strongest ${watchPosition} lean near this turn. Expect ${formatProjectedPickRange(
+          expectedWatchPicks
+        )} ${watchPosition} picks before #${overallPick}.`;
+      } else if (picksBeforePick <= 2) {
+        guidance = `Only ${picksBeforePick} ${
+          picksBeforePick === 1 ? "pick" : "picks"
+        } until #${overallPick}; ${watchPosition} demand looks manageable.`;
+      } else if (pressureLevel === "Medium") {
+        guidance = `${formatProjectedSelections(
+          watchPosition,
+          expectedWatchPicks
+        )} expected before #${overallPick}. Queue another ${watchPosition} option and a fallback.`;
+      } else {
+        guidance = `${watchPosition} demand is spread out: ${formatProjectedPickRange(
+          expectedWatchPicks
+        )} projected across ${picksBeforePick} picks before #${overallPick}. Waiting is reasonable.`;
+      }
+
+      return {
+        round,
+        overallPick,
+        picksBeforePick,
+        pressure,
+        pressureLevel,
+        threats,
+        guidance,
+      };
+    }
+  );
+
+  return {
+    managerId: manager.userId,
+    managerName: manager.displayName,
+    draftLabel,
+    draftSlot,
+    leagueSize,
+    rounds,
+  };
+};
+
+export const getLeagueRelativeDraftInsights = (
+  manager: ManagerArchetype,
+  managers: ManagerArchetype[]
+): string[] => {
+  const [draftLabel, managerDrafts] = getPrimaryDraftGroup(
+    manager.draftHistory
+  );
+  if (managerDrafts.length < 2) return [];
+
+  const comparableManagers = managers
+    .map((candidate) => ({
+      manager: candidate,
+      drafts: candidate.draftHistory.filter(
+        (draft) => getDraftLabel(draft) === draftLabel
+      ),
+    }))
+    .filter(({ drafts }) => drafts.length >= 2);
+  if (comparableManagers.length < 2) return [];
+
+  const insights: string[] = [];
+  const managerPositions = managerDrafts.flatMap(getDraftInsightPositions);
+  const positionCounts = new Map<string, number>();
+  managerPositions.forEach((position) =>
+    positionCounts.set(position, (positionCounts.get(position) ?? 0) + 1)
+  );
+  const dominantPosition = [...positionCounts.entries()].sort(
+    (left, right) => right[1] - left[1]
+  )[0];
+
+  if (dominantPosition && managerPositions.length) {
+    const [position, positionCount] = dominantPosition;
+    const share = positionCount / managerPositions.length;
+    const ranked = comparableManagers
+      .map(({ manager: candidate, drafts }) => {
+        const positions = drafts.flatMap(getDraftInsightPositions);
+        return {
+          userId: candidate.userId,
+          share: positions.length
+            ? positions.filter((value) => value === position).length /
+              positions.length
+            : 0,
+        };
+      })
+      .sort((left, right) => right.share - left.share);
+    const higherShares = ranked.filter(
+      (candidate) => candidate.share > share
+    ).length;
+    const tiedShares = ranked.filter(
+      (candidate) => candidate.share === share
+    ).length;
+    const rank = higherShares + 1;
+    if (share >= 0.3) {
+      insights.push(
+        rank === 1 && tiedShares === 1
+          ? `League's most ${position}-heavy early drafter (${Math.round(
+              share * 100
+            )}% of first-five picks).`
+          : rank === 1
+            ? `Tied for the league lead in early ${position} emphasis (${Math.round(
+                share * 100
+              )}% of first-five picks).`
+            : `Ranks #${rank} in early ${position} emphasis (${Math.round(
+                share * 100
+              )}% of first-five picks).`
+      );
+    }
+  }
+
+  const managerQbRound = getAverageRound(managerDrafts, "firstQBRound");
+  const otherQbRounds = comparableManagers
+    .filter(({ manager: candidate }) => candidate.userId !== manager.userId)
+    .map(({ drafts }) => getAverageRound(drafts, "firstQBRound"))
+    .filter((round): round is number => round !== null);
+  if (managerQbRound !== null && otherQbRounds.length) {
+    const leagueQbRound =
+      otherQbRounds.reduce((sum, round) => sum + round, 0) /
+      otherQbRounds.length;
+    const difference = managerQbRound - leagueQbRound;
+    if (Math.abs(difference) >= 1) {
+      insights.push(
+        `Takes a first QB ${Math.abs(difference).toFixed(1)} rounds ${
+          difference > 0 ? "later" : "earlier"
+        } than the league.`
+      );
+    }
+  }
+
+  return insights.slice(0, 2);
+};
+
+export const getDraftStrategyResult = (
+  history: ManagerDraftHistory[]
+): DraftStrategyResult | null => {
+  const completedDrafts = history.filter(
+    (draft) =>
+      typeof draft.madePlayoffs === "boolean" && draft.positions.length >= 2
+  );
+  if (completedDrafts.length < 2) return null;
+
+  const groups = new Map<string, ManagerDraftHistory[]>();
+  completedDrafts.forEach((draft) => {
+    const opening = draft.positions.slice(0, 2).join(" → ");
+    const key = `${getDraftLabel(draft)}|${opening}`;
+    groups.set(key, [...(groups.get(key) ?? []), draft]);
+  });
+  const repeated = [...groups.entries()]
+    .filter(([, drafts]) => drafts.length >= 2)
+    .sort((left, right) => right[1].length - left[1].length)[0];
+  if (!repeated) return null;
+
+  const [key, drafts] = repeated;
+  const separatorIndex = key.indexOf("|");
+  const draftLabel = key.slice(0, separatorIndex);
+  const opening = key.slice(separatorIndex + 1);
+  const playoffAppearances = drafts.filter(
+    (draft) => draft.madePlayoffs
+  ).length;
+  const points = drafts
+    .map((draft) => draft.pointsFor)
+    .filter(
+      (value): value is number =>
+        typeof value === "number" && Number.isFinite(value)
+    );
+
+  return {
+    opening,
+    seasons: drafts.length,
+    playoffAppearances,
+    playoffRate: playoffAppearances / drafts.length,
+    averagePoints: points.length
+      ? points.reduce((sum, value) => sum + value, 0) / points.length
+      : null,
+    draftLabel,
+  };
 };
 
 export const getDraftTendency = (
@@ -356,7 +1226,7 @@ export const getDraftRoundSummaries = (
 ): DraftRoundSummary[] => {
   const groups = new Map<string, ManagerDraftHistory[]>();
   history.forEach((draft) => {
-    const label = draft.draftLabel ?? draft.seasonType ?? "Draft";
+    const label = getDraftLabel(draft);
     groups.set(label, [...(groups.get(label) ?? []), draft]);
   });
 
@@ -437,7 +1307,7 @@ export const getDraftStrategyLabel = (
     if (averageQbRound >= 6) return "Waits on QB";
   }
 
-  const positions = history.flatMap((draft) => draft.positions);
+  const positions = history.flatMap(getDraftInsightPositions);
   const shareFor = (position: string) =>
     positions.filter((candidate) => candidate === position).length /
     positions.length;
@@ -513,7 +1383,21 @@ const buildSeasonRecords = async (
         season.draftPicks,
         user.id
       );
-      const draftHistory = getDraftHistoryForManager(season, user.id);
+      const hasPlayoffResults =
+        season.status?.toLowerCase() === "complete" &&
+        season.playoffs.length > 0;
+      const madePlayoffs = season.playoffs.some(
+        (obj) =>
+          Number(obj.t1) === roster.rosterId ||
+          Number(obj.t2) === roster.rosterId
+      );
+      const draftHistory = getDraftHistoryForManager(
+        season,
+        user.id,
+        hasPlayoffResults
+          ? { madePlayoffs, pointsFor: roster.pointsFor }
+          : undefined
+      );
 
       return {
         userId: user.id,
@@ -529,11 +1413,7 @@ const buildSeasonRecords = async (
         pointsAgainst: roster.pointsAgainst,
         managerEfficiency: roster.managerEfficiency,
         weeklyScores: points.points,
-        madePlayoffs: season.playoffs.some(
-          (obj) =>
-            Number(obj.t1) === roster.rosterId ||
-            Number(obj.t2) === roster.rosterId
-        ),
+        madePlayoffs,
         matchupIds: points.matchups ?? [],
         tradeCount: countTransactionsForManager(
           season.trades,
@@ -688,6 +1568,7 @@ export const normalizeHistoricalSeasons = (
   return seasons.map((season) => ({
     season: season.season,
     seasonType: season.seasonType,
+    status: season.status,
     leagueId: season.leagueId,
     leagueWinner:
       season.leagueWinner !== null && season.leagueWinner !== undefined

@@ -108,10 +108,10 @@ const generateButtonLabel = computed(() => {
 });
 
 const visibleArchetypes = computed(() =>
-  showAllProfiles.value ? props.archetypes : props.archetypes.slice(0, 6)
+  showAllProfiles.value ? props.archetypes : props.archetypes.slice(0, 3)
 );
 
-const hasHiddenProfiles = computed(() => props.archetypes.length > 6);
+const hasHiddenProfiles = computed(() => props.archetypes.length > 3);
 
 const toggleProfiles = () => {
   showAllProfiles.value = !showAllProfiles.value;

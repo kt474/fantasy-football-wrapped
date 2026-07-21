@@ -100,6 +100,20 @@ const profileArchetypes = computed(() => {
   }
   return [];
 });
+const draftRoomArchetypes = computed(() => {
+  const currentLeague = store.currentLeague;
+  if (!currentLeague) return profileArchetypes.value;
+
+  const currentManagerIds = new Set(
+    currentLeague.rosters.map((roster) => roster.id)
+  );
+  return profileArchetypes.value.filter((manager) =>
+    currentManagerIds.has(manager.userId)
+  );
+});
+const hasPremiumAccess = computed(
+  () => authStore.isAuthenticated && subscriptionStore.isPremium
+);
 
 const hydrateLeagueDraftPicks = createHistoricalDraftHydrator({
   loadMetadata: getDraftMetadata,
@@ -276,9 +290,7 @@ const relativeRanks = computed(() => {
 });
 
 const managerPayload = computed<ManagerBlurbsPayload>(() => {
-  const hasPremiumAccess =
-    authStore.isAuthenticated && subscriptionStore.isPremium;
-  const managers = hasPremiumAccess
+  const managers = hasPremiumAccess.value
     ? narratives.value.managerArchetypes
     : narratives.value.managerArchetypes.slice(0, 1);
 
@@ -373,6 +385,9 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
     <DraftFingerprintsCard
       v-if="profileArchetypes.length"
       :archetypes="profileArchetypes"
+      :draft-room-archetypes="draftRoomArchetypes"
+      :league-size="store.currentLeague?.totalRosters"
+      :is-premium="hasPremiumAccess"
     />
     <ManagerComparison
       v-if="isLeagueHistoryReady && historicalManagerRows.length > 1"

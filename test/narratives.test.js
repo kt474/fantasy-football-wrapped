@@ -3,9 +3,18 @@ import { describe, expect, test } from "vitest";
 import {
   getDraftHistoryForManager,
   getDraftGrade,
+  getDraftPrediction,
+  getDraftPressureLevel,
+  getDraftPositionWindows,
+  getDraftRoomPulse,
+  getDraftRoomCheatSheetSummary,
   getDraftRoundSummaries,
+  getDraftStrategyResult,
+  getDraftStrategyShifts,
   getDraftStrategyLabel,
   getDraftTendency,
+  getLeagueRelativeDraftInsights,
+  getPositionalDraftPlan,
   normalizeHistoricalSeasons,
 } from "../src/lib/narratives.ts";
 
@@ -105,6 +114,60 @@ describe("manager draft tendencies", () => {
       firstQBRound: 1,
       firstTERound: null,
       requiresTightEnd: true,
+    });
+  });
+
+  test("retains the first eight non-keeper picks for deeper planning", () => {
+    const positions = [
+      "RB",
+      "WR",
+      "QB",
+      "TE",
+      "RB",
+      "WR",
+      "RB",
+      "WR",
+      "DEF",
+      "K",
+    ];
+    const draftPicks = positions.map((position, index) => ({
+      userId: "manager-1",
+      pickNumber: index + 1,
+      round: index + 1,
+      position,
+      keeper: false,
+    }));
+
+    const history = getDraftHistoryForManager(
+      {
+        season: "2025",
+        seasonType: "Redraft",
+        draftType: "snake",
+        draftPicks,
+        rosterPositions: ["QB", "RB", "WR", "TE", "FLEX"],
+      },
+      "manager-1"
+    );
+
+    expect(history?.positions).toEqual(positions.slice(0, 8));
+    expect(getDraftPositionWindows(history)).toEqual({
+      opening: positions.slice(0, 3),
+      insights: positions.slice(0, 5),
+      planning: positions.slice(0, 8),
+    });
+  });
+
+  test("keeps existing insights scoped to the first five picks", () => {
+    const history = ["2025", "2024"].map((season) => ({
+      season,
+      seasonType: "Redraft",
+      positions: ["RB", "RB", "RB", "WR", "WR", "WR", "WR", "WR"],
+    }));
+
+    expect(getDraftStrategyLabel(history)).toBe("RB Heavy");
+    expect(getDraftRoomCheatSheetSummary(history)).toMatchObject({
+      dominantPosition: "RB",
+      dominantPositionShare: 0.6,
     });
   });
 
@@ -236,5 +299,366 @@ describe("manager draft tendencies", () => {
     expect(getDraftGrade(1.5)).toBe("B+");
     expect(getDraftGrade(0.3)).toBe("C");
     expect(getDraftGrade(null)).toBeNull();
+  });
+
+  test("projects only repeated openings from comparable draft formats", () => {
+    const prediction = getDraftPrediction([
+      {
+        season: "2025",
+        seasonType: "Redraft",
+        positions: ["WR", "RB", "WR"],
+      },
+      {
+        season: "2024",
+        seasonType: "Redraft",
+        positions: ["WR", "RB", "TE"],
+      },
+      {
+        season: "2023",
+        seasonType: "Redraft",
+        positions: ["RB", "WR", "RB"],
+      },
+      {
+        season: "2022",
+        seasonType: "Dynasty",
+        draftLabel: "Rookie",
+        positions: ["QB", "WR"],
+      },
+    ]);
+
+    expect(prediction).toEqual({
+      positions: ["WR", "RB"],
+      observedCount: 2,
+      eligibleDraftCount: 3,
+      draftLabel: "Redraft",
+    });
+  });
+
+  test("builds league-relative position and quarterback scouting", () => {
+    const manager = {
+      userId: "manager-1",
+      draftHistory: [
+        {
+          season: "2025",
+          seasonType: "Redraft",
+          positions: ["WR", "WR", "RB"],
+          firstQBRound: 7,
+        },
+        {
+          season: "2024",
+          seasonType: "Redraft",
+          positions: ["WR", "WR", "TE"],
+          firstQBRound: 8,
+        },
+      ],
+    };
+    const otherManager = {
+      userId: "manager-2",
+      draftHistory: [
+        {
+          season: "2025",
+          seasonType: "Redraft",
+          positions: ["RB", "RB", "WR"],
+          firstQBRound: 3,
+        },
+        {
+          season: "2024",
+          seasonType: "Redraft",
+          positions: ["RB", "WR", "QB"],
+          firstQBRound: 4,
+        },
+      ],
+    };
+
+    expect(
+      getLeagueRelativeDraftInsights(manager, [manager, otherManager])
+    ).toEqual([
+      "League's most WR-heavy early drafter (67% of first-five picks).",
+      "Takes a first QB 4.0 rounds later than the league.",
+    ]);
+  });
+
+  test("summarizes each opponent for the league draft room cheat sheet", () => {
+    const summary = getDraftRoomCheatSheetSummary([
+      {
+        season: "2025",
+        seasonType: "Redraft",
+        positions: ["WR", "RB", "WR"],
+        firstQBRound: 6,
+      },
+      {
+        season: "2024",
+        seasonType: "Redraft",
+        positions: ["WR", "RB", "TE"],
+        firstQBRound: 5,
+      },
+      {
+        season: "2023",
+        seasonType: "Redraft",
+        positions: ["WR", "RB", "QB"],
+        firstQBRound: null,
+      },
+      {
+        season: "2022",
+        seasonType: "Redraft",
+        positions: ["RB", "WR", "RB"],
+        firstQBRound: 4,
+      },
+    ]);
+
+    expect(summary).toEqual({
+      draftLabel: "Redraft",
+      trackedDrafts: 4,
+      projectedPositions: ["WR", "RB"],
+      projectedObservedCount: 3,
+      dominantPosition: "WR",
+      dominantPositionShare: 5 / 12,
+      averageFirstQBRound: 5,
+      firstQBDraftCount: 3,
+      patternStrength: "Strong pattern",
+    });
+  });
+
+  test("identifies recent position and quarterback strategy shifts", () => {
+    const shifts = getDraftStrategyShifts([
+      {
+        season: "2025",
+        seasonType: "Redraft",
+        positions: ["WR", "WR", "RB"],
+        firstQBRound: 3,
+      },
+      {
+        season: "2024",
+        seasonType: "Redraft",
+        positions: ["WR", "WR", "RB"],
+        firstQBRound: 4,
+      },
+      {
+        season: "2023",
+        seasonType: "Redraft",
+        positions: ["RB", "RB", "WR"],
+        firstQBRound: 6,
+      },
+      {
+        season: "2022",
+        seasonType: "Redraft",
+        positions: ["RB", "RB", "WR"],
+        firstQBRound: 7,
+      },
+    ]);
+
+    expect(shifts).toEqual([
+      "Leaning more WR lately (67% of recent early picks, up from 33%).",
+      "Taking the first QB 3.0 rounds earlier lately (R3.5 vs R6.5).",
+    ]);
+  });
+
+  test("builds a format-aware league draft room pulse", () => {
+    const buildDraft = (season, positions, firstQBRound) => ({
+      season,
+      seasonType: "Redraft",
+      positions,
+      firstQBRound,
+    });
+    const managers = [
+      {
+        userId: "manager-a",
+        displayName: "Alex",
+        draftHistory: [
+          buildDraft("2025", ["WR", "WR", "RB"], 3),
+          buildDraft("2024", ["WR", "WR", "RB"], 4),
+          buildDraft("2023", ["RB", "RB", "WR"], 6),
+          buildDraft("2022", ["RB", "RB", "WR"], 7),
+        ],
+      },
+      {
+        userId: "manager-b",
+        displayName: "Blake",
+        draftHistory: [
+          buildDraft("2025", ["WR", "RB", "WR"], 4),
+          buildDraft("2024", ["WR", "RB", "WR"], 5),
+          buildDraft("2023", ["WR", "RB", "WR"], 6),
+        ],
+      },
+      {
+        userId: "manager-c",
+        displayName: "Casey",
+        draftHistory: [
+          buildDraft("2025", ["RB", "WR", "RB"], 2),
+          buildDraft("2024", ["RB", "WR", "RB"], 3),
+          buildDraft("2023", ["RB", "WR", "RB"], 4),
+        ],
+      },
+    ];
+
+    expect(getDraftRoomPulse(managers)).toEqual([
+      {
+        label: "Room lean",
+        value: "WR early",
+        detail: "2 of 3 Redraft managers emphasize WR most.",
+      },
+      {
+        label: "QB pressure",
+        value: "Rounds 3–5",
+        detail: "3 of 3 managers typically enter the QB market here.",
+      },
+      {
+        label: "Most predictable",
+        value: "Blake",
+        detail: "Repeated WR → RB in 3 of 3 drafts.",
+      },
+      {
+        label: "Changing approach",
+        value: "Alex, Blake, Casey",
+        detail:
+          "These managers' recent early-round behavior differs materially from older drafts.",
+      },
+    ]);
+  });
+
+  test("builds a slot-aware four-round positional draft plan", () => {
+    const buildHistory = (first, second) =>
+      ["2025", "2024", "2023"].map((season) => ({
+        season,
+        seasonType: "Redraft",
+        positions: [first, second, "RB", "WR", "QB", "TE", "RB", "WR"],
+      }));
+    const managers = [
+      {
+        userId: "manager-a",
+        displayName: "Alex",
+        draftHistory: buildHistory("WR", "RB"),
+      },
+      {
+        userId: "manager-b",
+        displayName: "Blake",
+        draftHistory: buildHistory("RB", "WR"),
+      },
+      {
+        userId: "manager-c",
+        displayName: "Casey",
+        draftHistory: buildHistory("RB", "WR"),
+      },
+      {
+        userId: "manager-d",
+        displayName: "Drew",
+        draftHistory: buildHistory("RB", "WR"),
+      },
+    ];
+
+    const plan = getPositionalDraftPlan(managers[0], managers, 2);
+
+    expect(plan).toMatchObject({
+      managerId: "manager-a",
+      managerName: "Alex",
+      draftLabel: "Redraft",
+      draftSlot: 2,
+      leagueSize: 4,
+    });
+    expect(plan?.rounds).toHaveLength(4);
+    expect(plan?.rounds[0]).toMatchObject({
+      round: 1,
+      overallPick: 2,
+      picksBeforePick: 1,
+      pressure: [{ position: "RB", expectedPicks: 1 }],
+      pressureLevel: "Low",
+      threats: ["Blake", "Casey", "Drew"],
+      guidance:
+        "Alex usually drafts WR in Round 1; opponents lean RB before #2. Keep both paths open.",
+    });
+    expect(plan?.rounds[1]).toMatchObject({
+      round: 2,
+      overallPick: 7,
+      picksBeforePick: 4,
+      pressure: [
+        { position: "RB", expectedPicks: 2 },
+        { position: "WR", expectedPicks: 2 },
+      ],
+      pressureLevel: "Medium",
+      guidance:
+        "RB and WR demand is nearly even before #7: 2 vs 2 projected picks. Stay flexible.",
+    });
+    expect(plan?.rounds[2]).toMatchObject({
+      round: 3,
+      overallPick: 10,
+      picksBeforePick: 2,
+    });
+  });
+
+  test("normalizes draft pressure for the number of picks before the turn", () => {
+    expect(getDraftPressureLevel(1, 1)).toBe("Low");
+    expect(getDraftPressureLevel(6, 18)).toBe("Low");
+    expect(getDraftPressureLevel(7, 20)).toBe("Medium");
+    expect(getDraftPressureLevel(9, 20)).toBe("High");
+    expect(getDraftPressureLevel(0, 8, false)).toBe("Unknown");
+  });
+
+  test("uses the current league size instead of the historical manager count", () => {
+    const buildHistory = (position) => [
+      {
+        season: "2025",
+        seasonType: "Redraft",
+        positions: [position, "WR", "RB", "QB"],
+      },
+    ];
+    const managers = [
+      {
+        userId: "manager-a",
+        displayName: "Alex",
+        draftHistory: buildHistory("WR"),
+      },
+      {
+        userId: "manager-b",
+        displayName: "Blake",
+        draftHistory: buildHistory("RB"),
+      },
+    ];
+
+    const plan = getPositionalDraftPlan(managers[0], managers, 13, 12);
+
+    expect(plan).toMatchObject({ leagueSize: 12, draftSlot: 12 });
+    expect(plan?.rounds[0]).toMatchObject({ overallPick: 12 });
+  });
+
+  test("connects a repeated opening to completed-season results", () => {
+    const result = getDraftStrategyResult([
+      {
+        season: "2025",
+        seasonType: "Redraft",
+        positions: ["RB", "WR", "TE"],
+        madePlayoffs: true,
+        pointsFor: 1700,
+      },
+      {
+        season: "2024",
+        seasonType: "Redraft",
+        positions: ["RB", "WR", "QB"],
+        madePlayoffs: false,
+        pointsFor: 1500,
+      },
+      {
+        season: "2023",
+        seasonType: "Redraft",
+        positions: ["RB", "WR", "RB"],
+        madePlayoffs: true,
+        pointsFor: 1750,
+      },
+      {
+        season: "2022",
+        seasonType: "Redraft",
+        positions: ["WR", "WR", "RB"],
+        madePlayoffs: true,
+        pointsFor: 1800,
+      },
+    ]);
+
+    expect(result).toEqual({
+      opening: "RB → WR",
+      seasons: 3,
+      playoffAppearances: 2,
+      playoffRate: 2 / 3,
+      averagePoints: 1650,
+      draftLabel: "Redraft",
+    });
   });
 });
