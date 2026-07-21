@@ -316,9 +316,10 @@ const toolSummaries: ToolSummary[] = [
                 >
                   video recap</RouterLink
                 >, reveal what your league's full history says about every
-                manager, and give you the receipts to settle old rivalries.
-                Everything else from the past three seasons, plus plenty more,
-                is still free.
+                manager, turn draft history into positional plans and league
+                mate scouting, and give you the receipts to settle old
+                rivalries. Everything else from the past three seasons, plus
+                plenty more, is still free.
               </p>
             </div>
           </div>

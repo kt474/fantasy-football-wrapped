@@ -143,7 +143,7 @@ const pages = [
     path: "fantasy-football-draft-grades",
     title: "Fantasy Football Draft Grades for Sleeper & ESPN | ffwrapped",
     description:
-      "Grade a completed fantasy football draft pick by pick using draft position, ADP, projections, and league-relative team scores.",
+      "Grade a completed fantasy football draft, then use league history for manager tendencies, positional plans, and Premium draft-room scouting.",
     heading: "Fantasy football draft grades with the picks behind the score",
     introduction:
       "Grade a completed fantasy football draft using pick position, ADP, projections, and the performance of the entire draft room.",
@@ -163,6 +163,10 @@ const pages = [
       {
         title: "Transparent grading methodology",
         body: "See how pick cost, ADP, projections, league format, and the distribution of team scores contribute to the final grade.",
+      },
+      {
+        title: "Draft tendencies and Premium planning",
+        body: "Review each manager’s historical position patterns for free, then use Premium for round-by-round positional plans, projected room pressure, strategy shifts, and league-relative scouting.",
       },
     ],
     faqs: [

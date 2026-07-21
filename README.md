@@ -14,7 +14,8 @@ Fantasy Football Wrapped ([ffwrapped](https://ffwrapped.com/)) is a production V
 - AI-generated weekly reports with matchup recaps, awards, top and bottom performers, shareable images, and Premium video recaps
 - Weekly matchup previews
 - Start/sit stats with latest player news
-- Draft grades and recap
+- Draft grades, recap, and historical manager tendencies
+- Premium positional draft plans and league-mate scouting based on league draft history
 - Schedule simulator and trade calculator
 - Manager profiles highlighting tendencies, strengths, and overall identity
 - League history stats

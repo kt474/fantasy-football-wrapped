@@ -506,8 +506,7 @@ const formatExpectedPositionPicks = (
 
     <p class="mt-4 text-xs leading-relaxed text-muted-foreground">
       History-powered estimates vary with available comparable drafts. One-draft
-      and sparse-history leagues may only show early or limited signals. V1 does
-      not predict specific player availability.
+      and sparse-history leagues may only show early or limited signals.
     </p>
   </component>
 </template>

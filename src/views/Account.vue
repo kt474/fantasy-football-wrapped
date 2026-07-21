@@ -1373,7 +1373,10 @@ watch(
                 </li>
                 <li class="flex gap-2.5">
                   <Check class="mt-0.5 size-4 shrink-0 text-primary" />
-                  <span>History powered draft room scouting</span>
+                  <span
+                    >History powered positional draft plans and league mate
+                    scouting</span
+                  >
                 </li>
               </ul>
             </div>

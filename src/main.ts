@@ -116,7 +116,7 @@ const routes = [
     meta: {
       title: "Fantasy Football Draft Grades for Sleeper & ESPN | ffwrapped",
       description:
-        "Grade a completed fantasy football draft pick by pick using draft position, ADP, projections, and league-relative team scores.",
+        "Grade a completed fantasy football draft, then use league history for manager tendencies, positional plans, and Premium draft-room scouting.",
       standalone: true,
     },
   },

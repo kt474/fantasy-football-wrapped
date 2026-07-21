@@ -59,6 +59,8 @@ describe("SEO landing pages", () => {
     expect(espnPage).toContain("SWID + espn_s2");
     expect(draftPage).toContain("Pick-by-pick grades");
     expect(draftPage).toContain("Grading methodology");
+    expect(draftPage).toContain("Grade what happened, then prepare for what comes next");
+    expect(draftPage).toContain("Round-by-round positional draft plan");
     expect(draftPage).toContain("Sleeper fantasy football draft grades");
     expect(draftPage).toContain("ESPN fantasy football draft grades");
     expect(draftPage).toContain("draft_grades_landing");

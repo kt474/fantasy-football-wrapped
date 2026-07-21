@@ -64,6 +64,31 @@ const methodology = [
   },
 ];
 
+const draftPlanningOptions = [
+  {
+    tier: "Free",
+    title: "Understand each manager’s draft tendencies",
+    description:
+      "Use completed league history to review favorite early-round positions, opening strategies, quarterback and tight end timing, and historical draft rankings.",
+    features: [
+      "Early-round position patterns",
+      "Average first QB and TE timing",
+      "Historical draft results",
+    ],
+  },
+  {
+    tier: "Premium",
+    title: "Prepare for your next draft room",
+    description:
+      "Turn those tendencies into a positional plan for your manager and snake-draft slot, with projected room pressure and scouting for every league mate.",
+    features: [
+      "Round-by-round positional draft plan",
+      "Projected position demand before each pick",
+      "Strategy shifts, league-relative scouting, and results",
+    ],
+  },
+];
+
 const faqs = [
   {
     question: "Which platforms can I use for draft grades?",
@@ -193,6 +218,66 @@ const analysisRoute = {
             <p class="mt-2 text-sm leading-6 text-muted-foreground">{{ step.description }}</p>
           </li>
         </ol>
+      </div>
+    </section>
+
+    <section class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+      <div class="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
+        <div>
+          <p class="text-sm font-medium text-primary">Plan the next draft</p>
+          <h2 class="mt-2 text-3xl font-semibold tracking-tight">
+            Grade what happened, then prepare for what comes next
+          </h2>
+          <p class="mt-4 leading-7 text-muted-foreground">
+            Completed drafts do more than produce a grade. In Manager Profiles,
+            ffwrapped turns your league’s history into draft tendencies for
+            everyone and a Premium Draft Room built for pre-draft planning.
+          </p>
+        </div>
+
+        <div class="grid overflow-hidden border divide-y rounded-card bg-background sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+          <article
+            v-for="option in draftPlanningOptions"
+            :key="option.tier"
+            class="p-6 sm:p-7"
+          >
+            <Badge :variant="option.tier === 'Premium' ? 'default' : 'secondary'">
+              {{ option.tier }}
+            </Badge>
+            <h3 class="mt-5 text-xl font-semibold">{{ option.title }}</h3>
+            <p class="mt-3 text-sm leading-6 text-muted-foreground">
+              {{ option.description }}
+            </p>
+            <ul class="grid gap-2.5 mt-5 text-sm">
+              <li
+                v-for="feature in option.features"
+                :key="feature"
+                class="flex gap-2.5"
+              >
+                <Check :size="16" class="mt-0.5 shrink-0 text-primary" />
+                <span>{{ feature }}</span>
+              </li>
+            </ul>
+            <Button
+              v-if="option.tier === 'Premium'"
+              as-child
+              variant="outline"
+              class="mt-6"
+            >
+              <RouterLink
+                :to="{
+                  path: '/account',
+                  query: {
+                    intent: 'draft_room',
+                    upgrade_source: 'draft_grades_landing',
+                  },
+                }"
+              >
+                Explore Premium
+              </RouterLink>
+            </Button>
+          </article>
+        </div>
       </div>
     </section>
 

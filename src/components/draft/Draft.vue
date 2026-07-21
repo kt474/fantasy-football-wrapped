@@ -18,6 +18,7 @@ import Separator from "../ui/separator/Separator.vue";
 import Label from "../ui/label/Label.vue";
 import { Skeleton } from "@/components/ui/skeleton";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
+import { scrollAppToTop } from "@/lib/appScroll";
 import {
   loadDemoDraft,
   loadDemoLeague,
@@ -43,6 +44,12 @@ const scoringType = ref(""); // idp
 const demoUsers = shallowRef<DemoLeagueFixtures["fakeUsers"]>([]);
 
 const activeTab = ref("Recap");
+
+const openManagerProfiles = () => {
+  store.currentTab = "Manager Profiles";
+  localStorage.setItem("currentTab", "Manager Profiles");
+  scrollAppToTop("smooth");
+};
 
 const loadDemoData = async () => {
   const [league, draft] = await Promise.all([
@@ -334,9 +341,7 @@ const getValueColor = (value: number) => {
   <SectionCard class="w-full">
     <Tabs default-value="Recap" v-model="activeTab">
       <div class="flex flex-col gap-2 mb-2 sm:flex-row sm:justify-between">
-        <h2 class="heading-section">
-          Draft {{ activeTab }}
-        </h2>
+        <h2 class="heading-section">Draft {{ activeTab }}</h2>
         <div class="inline-flex p-1" role="tablist">
           <TabsList>
             <TabsTrigger value="Grades"> Grades </TabsTrigger>
@@ -349,7 +354,16 @@ const getValueColor = (value: number) => {
           <p class="max-w-3xl mb-2 text-sm text-muted-foreground sm:text-base">
             Draft pick scores are calculated based on each player's current
             positional rank compared to where they were drafted. The sum of
-            these scores is listed by each manager's name.
+            these scores is listed by each manager's name. Review historical
+            draft tendencies in the
+            <button
+              type="button"
+              class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              @click="openManagerProfiles"
+            >
+              Manager Profiles
+            </button>
+            tab.
           </p>
           <div v-if="snakeDraftFormat" class="max-w-sm mb-4">
             <Label for="sort-order" class="block text-sm mb-0.5"
@@ -504,10 +518,7 @@ const getValueColor = (value: number) => {
             </div>
           </div>
           <p
-            v-if="
-              store.currentLeague?.seasonType ===
-              'Keeper'
-            "
+            v-if="store.currentLeague?.seasonType === 'Keeper'"
             class="mt-4 text-xs text-muted-foreground footer-font"
           >
             Picks with a red top border are keepers.

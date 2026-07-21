@@ -54,7 +54,7 @@ const activeDescription = computed(() => {
     return "Draft Room scouting becomes available after completed draft history is imported for a current league manager.";
   }
   if (props.isPremium) {
-    return "Plan your draft and scout every league mate from one specific workspace.";
+    return "Plan your draft and scout every league mate from one workspace.";
   }
   return "Preview with sample data to show how draft history can be used to plan your next draft and scout your league mates.";
 });
