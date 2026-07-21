@@ -177,7 +177,7 @@ const toolSummaries: ToolSummary[] = [
           </h2>
           <p class="mt-4 leading-7 sm:text-lg text-muted-foreground">
             Turn matchups, manager trends, power rankings, and league history
-            into shareable stories. All for free.
+            into shareable stories. Get started for free.
           </p>
 
           <div class="grid max-w-lg grid-cols-3 mt-6 divide-x divide-border">

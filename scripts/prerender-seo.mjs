@@ -502,6 +502,13 @@ const renderStaticPage = (page) => {
 
 const template = await readFile(resolve("dist/index.html"), "utf8");
 
+// The static article gives non-JavaScript crawlers and visitors meaningful
+// content, but it is not the same DOM tree as the Vue application. Hide it
+// before the browser's first paint when JavaScript is available so it does not
+// flash immediately before Vue replaces it. If the app fails to start, reveal
+// the fallback again instead of leaving the page blank.
+const prerenderPaintGuard = `<style>html.prerender-pending [data-prerendered="true"]{display:none}</style><script>document.documentElement.classList.add("prerender-pending");window.setTimeout(function(){document.documentElement.classList.remove("prerender-pending")},5000)</script>`;
+
 for (const page of pages) {
   const canonical = `https://ffwrapped.com/${page.path}`;
   const staticPage = renderStaticPage(page);
@@ -570,7 +577,10 @@ for (const page of pages) {
       `<meta name="twitter:image" content="${escapeHtml(imageUrl)}" />`
     )
     .replace('<div id="app"></div>', `<div id="app">${staticPage}</div>`)
-    .replace("</head>", `${videoMeta}${structuredData}</head>`);
+    .replace(
+      "</head>",
+      `${prerenderPaintGuard}${videoMeta}${structuredData}</head>`
+    );
 
   const outputDirectory = resolve("dist", page.path);
   await mkdir(outputDirectory, { recursive: true });

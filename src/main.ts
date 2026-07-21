@@ -397,4 +397,5 @@ app.component("apexchart", ApexChart);
 app.use(router);
 registerSW({ immediate: true });
 app.mount("#app");
+document.documentElement.classList.remove("prerender-pending");
 initializeAnalytics();

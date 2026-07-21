@@ -204,7 +204,7 @@ const subscriptionStatusBadgeClass = computed(() => {
     return "bg-muted text-muted-foreground border-border";
   }
   if (status === "canceled" || subscriptionStore.cancelDate) {
-    return "border-warning/30 bg-warning/15 text-warning-foreground";
+    return "border-warning/30 bg-warning/15";
   }
 
   return "border-border bg-muted text-muted-foreground";
@@ -284,7 +284,9 @@ const getCheckoutButtonText = (plan: CheckoutPlan) => {
   if (!authStore.isAuthenticated) {
     return "Sign in to continue";
   }
-  return "Get Premium";
+  return displayedCheckoutPlan.value === "annual"
+    ? "Subscribe annually"
+    : "Subscribe monthly";
 };
 
 const displayedPlanDetails = computed(() =>
@@ -297,7 +299,7 @@ const displayedPlanDetails = computed(() =>
         valueNote: "$3.33/month, billed annually.",
       }
     : {
-        eyebrow: "",
+        eyebrow: "No annual commitment",
         price: "$7.99",
         interval: "/month",
         description: "Premium access with monthly flexibility.",
@@ -1289,9 +1291,14 @@ watch(
                 </TabsList>
               </Tabs>
 
-              <div class="py-4">
+              <div class="py-5">
                 <p
-                  class="mb-2 text-xs font-semibold uppercase min-h-4 text-primary"
+                  class="mb-2 text-xs font-semibold uppercase min-h-4"
+                  :class="[
+                    displayedCheckoutPlan === 'annual'
+                      ? 'text-primary'
+                      : 'text-muted-foreground',
+                  ]"
                 >
                   {{ displayedPlanDetails.eyebrow }}
                 </p>
@@ -1333,8 +1340,8 @@ watch(
                 <li class="flex gap-2.5">
                   <Check class="mt-0.5 size-4 shrink-0 text-primary" />
                   <span
-                    >Premium features for all leagues you manage, including new
-                    Premium features added during your subscription</span
+                    >Premium across every league you manage, including future
+                    Premium features.</span
                   >
                 </li>
                 <li class="flex gap-2.5">
@@ -1414,7 +1421,7 @@ watch(
                     period.
                   </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="renewal" class="border-b-0">
+                <AccordionItem value="renewal">
                   <AccordionTrigger class="text-left">
                     Do my league mates need Premium to view shared reports?
                   </AccordionTrigger>
@@ -1423,7 +1430,7 @@ watch(
                     and they can open it without purchasing their own plan.
                   </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="video-recaps">
+                <AccordionItem value="video-recaps" class="border-b-0">
                   <AccordionTrigger class="text-left">
                     How do Premium video recaps work?
                   </AccordionTrigger>
