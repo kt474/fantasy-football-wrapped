@@ -90,6 +90,81 @@ export type PremiumReport = {
       analysis: string;
     }>;
   };
+  sharedCards?: SharedReportCards;
+};
+
+export type SharedReportCardId =
+  | "matchup_results"
+  | "weekly_awards"
+  | "player_leaders"
+  | "team_scoring"
+  | "standings_movers"
+  | "waiver_impact"
+  | "closest_matchup"
+  | "biggest_blowout"
+  | "team_of_week"
+  | "weekly_lowlights";
+
+export type SharedReportTeamScore = {
+  name: string;
+  points: number;
+  avatar?: string;
+};
+
+export type SharedReportPlayerScore = {
+  name: string;
+  user: string;
+  points: number;
+  position?: string;
+  playerId?: string;
+};
+
+export type SharedReportMatchup = {
+  matchupNumber: number;
+  teams: SharedReportTeamScore[];
+  margin: number;
+};
+
+export type SharedReportAward = {
+  id: string;
+  title: string;
+  teamName: string;
+  description: string;
+  metricLabel: string;
+  metricValue: string;
+};
+
+export type SharedReportStandingMove = {
+  teamName: string;
+  from: number;
+  to: number;
+  change: number;
+  avatar?: string;
+};
+
+export type SharedReportWaiverImpact = {
+  teamName: string;
+  playerName: string;
+  acquisitionType: "waiver" | "free_agent";
+  faabBid?: number;
+  startedThisWeek: boolean;
+  pointsScored: number | null;
+  avatar?: string;
+};
+
+export type SharedReportCards = {
+  version: 1;
+  selected: SharedReportCardId[];
+  matchups?: SharedReportMatchup[];
+  weeklyAwards?: SharedReportAward[];
+  teamScores?: SharedReportTeamScore[];
+  standingsMoves?: SharedReportStandingMove[];
+  waiverImpact?: SharedReportWaiverImpact[];
+  playerLeaders?: {
+    top: SharedReportPlayerScore[];
+    bottom: SharedReportPlayerScore[];
+    bench: SharedReportPlayerScore[];
+  };
 };
 
 export type PremiumReportTeamIdentity = {

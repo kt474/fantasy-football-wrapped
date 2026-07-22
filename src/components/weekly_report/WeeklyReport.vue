@@ -3,6 +3,7 @@ import {
   TableDataType,
   LeagueInfoType,
   PremiumReport,
+  type SharedReportCardId,
   type WeeklyRecapVideoJob,
 } from "../../types/types.ts";
 import { Player } from "../../types/apiTypes.ts";
@@ -36,6 +37,7 @@ import {
 } from "../ui/select";
 import WeeklyPreview from "./WeeklyPreview.vue";
 import WeeklyShareCard from "./WeeklyShareCard.vue";
+import ShareReportDialog from "./ShareReportDialog.vue";
 import WeeklyAwards from "./WeeklyAwards.vue";
 import WeeklyPerformers from "./WeeklyPerformers.vue";
 import WeeklyReportSummary from "./WeeklyReportSummary.vue";
@@ -59,11 +61,19 @@ import {
   getExportPlayers,
   getExportTopTeams,
   getMatchupNumbers,
+  getManagerName,
   getPlayoffRoundMetadata,
   getSortedTableData,
   getWeeklyAwards,
   getWeeklyPerformers,
 } from "./weeklyReportTransforms";
+import {
+  buildSharedReportCards,
+  getAvailableSharedReportCardIds,
+  getTopStandingsMoves,
+  getTopStartedWaiverImpact,
+  type SharedReportCardSource,
+} from "@/lib/sharedReportCards";
 import {
   getUsableWeeklyRecapVideoUrl,
   getWeeklyRecapVideoStartErrorMessage,
@@ -91,7 +101,10 @@ const loading = ref(false);
 const tier = ref("Standard");
 const premiumLoading = ref(false);
 const isSharingReport = ref(false);
-const sharedReportUrl = ref("");
+const shareDialogOpen = ref(false);
+const activeSharedReportUrl = ref("");
+const activeSharedCardIds = ref<SharedReportCardId[]>([]);
+const sharedReportUrls = ref(new Map<string, string>());
 const fetchingPlayers = ref(false);
 const isRenderingVideo = ref(false);
 const videoRenderProgress = ref(0);
@@ -271,7 +284,7 @@ const getPremiumReport = async () => {
     const reportWeek = currentWeek.value;
     const reportPrompt = premiumReportPrompt.value;
     premiumWeeklyReport.value = null;
-    sharedReportUrl.value = "";
+    sharedReportUrls.value = new Map();
     resetVideoRender();
     const currentLeague = store.currentLeague;
     const reportLeagueKey = getLeagueKey(currentLeague);
@@ -319,7 +332,7 @@ const getPremiumReport = async () => {
       currentWeek.value === reportWeek
     ) {
       premiumWeeklyReport.value = reportWithAvatars;
-      sharedReportUrl.value = "";
+      sharedReportUrls.value = new Map();
     }
     trackEvent("Weekly Report Generated", {
       ...getWeeklyReportAnalyticsProperties("report_generated"),
@@ -559,6 +572,8 @@ const sortedTableData = computed(() => {
 watch(
   () => store.currentLeagueId,
   async () => {
+    shareDialogOpen.value = false;
+    sharedReportUrls.value = new Map();
     resetVideoRender();
     currentWeek.value = weeks.value[0];
     if (
@@ -583,6 +598,13 @@ watch(
   }
 );
 
+watch(
+  () => store.showUsernames,
+  () => {
+    sharedReportUrls.value = new Map();
+  }
+);
+
 const copyReport = () => {
   const reportText =
     tier.value === "Standard" ? rawWeeklyReport.value : premiumReportText.value;
@@ -602,56 +624,109 @@ const copyReport = () => {
   toast.success("Full report copied to clipboard");
 };
 
-const shareReport = async () => {
+const openShareDialog = () => {
+  if (!premiumWeeklyReport.value || isSharingReport.value) return;
+  activeSharedReportUrl.value = "";
+  activeSharedCardIds.value = [];
+  shareDialogOpen.value = true;
+  trackEvent("Weekly Report Share Customizer Opened", {
+    ...getWeeklyReportAnalyticsProperties("share_customizer_opened"),
+    tier: "premium",
+  });
+};
+
+const shareReport = async (selectedCards: SharedReportCardId[]) => {
   if (!premiumWeeklyReport.value || isSharingReport.value) {
     return;
   }
 
   isSharingReport.value = true;
   try {
-    if (!sharedReportUrl.value) {
+    const configurationKey = [...selectedCards].sort().join(",");
+    let sharedReportUrl = sharedReportUrls.value.get(configurationKey) ?? "";
+
+    if (!sharedReportUrl) {
       const currentLeague = store.currentLeague;
+      const report: PremiumReport = {
+        ...premiumWeeklyReport.value,
+        sharedCards: buildSharedReportCards({
+          selected: selectedCards,
+          source: sharedReportCardSource.value,
+        }),
+      };
       const response = await sharePremiumReport({
         leagueId: currentLeague.leagueId,
         platform: currentLeague.platform === "espn" ? "espn" : "sleeper",
         leagueName: currentLeague.name,
         season: currentLeague.season,
         week: currentWeek.value,
-        report: premiumWeeklyReport.value,
+        report,
       });
-      sharedReportUrl.value = response.url;
+      sharedReportUrl = response.url;
+      sharedReportUrls.value.set(configurationKey, response.url);
     }
 
-    const shareData = {
-      title: `${store.currentLeague.name} Week ${currentWeek.value} Report`,
-      url: sharedReportUrl.value,
-    };
-
-    if (navigator.share) {
-      await navigator.share(shareData);
-      trackEvent("Weekly Report Shared", {
-        ...getWeeklyReportAnalyticsProperties("report_shared"),
-        method: "native",
-        tier: "premium",
-      });
-      return;
-    }
-
-    await navigator.clipboard.writeText(sharedReportUrl.value);
-    trackEvent("Weekly Report Shared", {
-      ...getWeeklyReportAnalyticsProperties("report_shared"),
-      method: "clipboard",
+    activeSharedReportUrl.value = sharedReportUrl;
+    activeSharedCardIds.value = selectedCards;
+    trackEvent("Weekly Report Share Link Created", {
+      ...getWeeklyReportAnalyticsProperties("share_link_created"),
       tier: "premium",
+      extra_cards_count: selectedCards.length,
+      extra_cards: configurationKey,
     });
-    toast.success("Share link copied to clipboard!");
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return;
-    }
     console.error("Unable to share premium report:", error);
     toast.error("Unable to create the share link. Please try again.");
   } finally {
     isSharingReport.value = false;
+  }
+};
+
+const getActiveShareAnalytics = () => ({
+  extra_cards_count: activeSharedCardIds.value.length,
+  extra_cards: [...activeSharedCardIds.value].sort().join(","),
+});
+
+const copySharedReportLink = async () => {
+  if (!activeSharedReportUrl.value) return;
+
+  try {
+    await navigator.clipboard.writeText(activeSharedReportUrl.value);
+    trackEvent("Weekly Report Shared", {
+      ...getWeeklyReportAnalyticsProperties("report_shared"),
+      method: "clipboard",
+      tier: "premium",
+      ...getActiveShareAnalytics(),
+    });
+    toast.success("Share link copied to clipboard!");
+  } catch (error) {
+    console.error("Unable to copy premium report link:", error);
+    toast.error("Unable to copy the share link. Please try again.");
+  }
+};
+
+const shareSharedReportLink = async () => {
+  if (!activeSharedReportUrl.value) return;
+  if (!navigator.share) {
+    await copySharedReportLink();
+    return;
+  }
+
+  try {
+    await navigator.share({
+      title: `${store.currentLeague.name} Week ${currentWeek.value} Report`,
+      url: activeSharedReportUrl.value,
+    });
+    trackEvent("Weekly Report Shared", {
+      ...getWeeklyReportAnalyticsProperties("report_shared"),
+      method: "native",
+      tier: "premium",
+      ...getActiveShareAnalytics(),
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") return;
+    console.error("Unable to share premium report:", error);
+    toast.error("Unable to share this report. Please try again.");
   }
 };
 
@@ -766,6 +841,118 @@ const exportColdPlayers = computed(() => {
 
 const exportBenchPlayers = computed(() => {
   return getExportPlayers(benchPerformers.value);
+});
+
+const sharedReportCardSource = computed<SharedReportCardSource>(() => {
+  const weekIndex = currentWeek.value - 1;
+  const matchups = numOfMatchups.value.flatMap((matchupNumber, index) => {
+    if (matchupNumber == null) return [];
+
+    const matchupTeams = sortedTableData.value
+      .filter((team) => team.matchups[weekIndex] === matchupNumber)
+      .map((team) => ({
+        name: getManagerName(team, store.showUsernames),
+        points: team.points[weekIndex],
+        ...(team.avatarImg ? { avatar: team.avatarImg } : {}),
+      }))
+      .sort((a, b) => b.points - a.points);
+    if (matchupTeams.length < 2) return [];
+
+    const scores = matchupTeams.map((team) => team.points);
+    return [
+      {
+        matchupNumber: index + 1,
+        teams: matchupTeams,
+        margin: Math.max(...scores) - Math.min(...scores),
+      },
+    ];
+  });
+
+  const mapPlayers = (
+    players: ReturnType<typeof getExportPlayers>
+  ): SharedReportCardSource["playerLeaders"]["top"] =>
+    players.map((player) => ({
+      name: player.name,
+      user: player.user,
+      points: player.points,
+      ...(player.position ? { position: player.position } : {}),
+      ...(player.player_id ? { playerId: player.player_id } : {}),
+    }));
+
+  const avatarByTeamName = new Map(
+    sortedTableData.value.map((team) => [
+      getManagerName(team, store.showUsernames),
+      team.avatarImg,
+    ])
+  );
+  const premiumTeams = premiumReportPrompt.value.flatMap(
+    (matchup) => matchup.teams
+  );
+  const standingsMoves = getTopStandingsMoves(
+    premiumTeams.flatMap((team) => {
+      if (
+        !("rankBeforeWeek" in team) ||
+        team.rankBeforeWeek === team.rankAfterWeek
+      ) {
+        return [];
+      }
+
+      const avatar = avatarByTeamName.get(team.name);
+      return [
+        {
+          teamName: team.name,
+          from: team.rankBeforeWeek,
+          to: team.rankAfterWeek,
+          change: team.rankBeforeWeek - team.rankAfterWeek,
+          ...(avatar ? { avatar } : {}),
+        },
+      ];
+    })
+  );
+  const waiverImpact = getTopStartedWaiverImpact(
+    premiumTeams.flatMap((team) => {
+      const avatar = avatarByTeamName.get(team.name);
+      return (team.waiverMoves ?? []).map((move) => ({
+        teamName: team.name,
+        playerName: move.playerName,
+        acquisitionType: move.acquisitionType,
+        ...(move.faabBid != null ? { faabBid: move.faabBid } : {}),
+        startedThisWeek: move.startedThisWeek,
+        pointsScored: move.pointsScored,
+        ...(avatar ? { avatar } : {}),
+      }));
+    })
+  );
+
+  return {
+    matchups,
+    weeklyAwards: weeklyAwards.value,
+    teamScores: sortedTableData.value
+      .filter((team) => team.matchups[weekIndex] != null)
+      .map((team) => ({
+        name: getManagerName(team, store.showUsernames),
+        points: team.points[weekIndex],
+        ...(team.avatarImg ? { avatar: team.avatarImg } : {}),
+      }))
+      .sort((a, b) => b.points - a.points),
+    standingsMoves,
+    waiverImpact,
+    playerLeaders: {
+      top: mapPlayers(exportHotPlayers.value),
+      bottom: mapPlayers(exportColdPlayers.value),
+      bench: mapPlayers(exportBenchPlayers.value),
+    },
+  };
+});
+
+const availableSharedReportCardIds = computed<SharedReportCardId[]>(() => {
+  const report = premiumWeeklyReport.value;
+  if (!report) return [];
+
+  return getAvailableSharedReportCardIds({
+    report,
+    source: sharedReportCardSource.value,
+  });
 });
 
 const weeklyRecapVideoProps = computed(() => {
@@ -901,7 +1088,7 @@ watch(
     rawWeeklyReport.value =
       week === weeks.value[0] ? (currentLeague?.weeklyReport ?? "") : "";
     premiumWeeklyReport.value = getSavedPremiumReport(currentLeague, week);
-    sharedReportUrl.value = "";
+    sharedReportUrls.value = new Map();
     resetVideoRender();
     playerNames.value = [];
     benchPlayerNames.value = [];
@@ -994,7 +1181,7 @@ onBeforeUnmount(() => {
           :video-url="weeklyVideoUrl"
           @download-image="shareOrDownloadReportImage"
           @copy-report="copyReport"
-          @share-report="shareReport"
+          @share-report="openShareDialog"
           @generate-video="generateWeeklyVideo"
           @generate-premium="getPremiumReport"
         />
@@ -1048,6 +1235,16 @@ onBeforeUnmount(() => {
       </TabsContent>
     </Tabs>
   </SectionCard>
+  <ShareReportDialog
+    v-model:open="shareDialogOpen"
+    :loading="isSharingReport"
+    :league-id="store.currentLeague?.leagueId ?? ''"
+    :share-url="activeSharedReportUrl"
+    :available-card-ids="availableSharedReportCardIds"
+    @share="shareReport"
+    @copy="copySharedReportLink"
+    @native-share="shareSharedReportLink"
+  />
   <div class="fixed top-0 left-[-10000px] pointer-events-none">
     <div ref="shareCardRef">
       <WeeklyShareCard

@@ -16,7 +16,7 @@ const data = [
       {
         type: "Feature",
         text: [
-          "In the account settings, there is now an option to hide certain tabs.",
+          "The shared Premium weekly reports now have the option to add more insights/data. Also, in the account settings, there is now an option to hide certain tabs.",
         ],
       },
     ],

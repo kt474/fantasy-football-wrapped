@@ -78,7 +78,8 @@ describe("design accessibility contracts", () => {
     expect(summary).toContain("const canUsePremiumReportActions = computed");
     expect(summary).toContain(':disabled="videoActionDisabled"');
     expect(summary).toContain(':disabled="shareActionDisabled"');
-    expect(summary.match(/:title="premiumActionTitle"/g)).toHaveLength(1);
+    expect(summary).toContain(':title="shareActionTitle"');
+    expect(summary).toContain("const shareActionTitle = computed");
     expect(summary).toContain(':title="videoActionTitle"');
     expect(summary).not.toContain('v-if="showShareButton"');
     expect(summary).toContain("tier === 'Premium'");

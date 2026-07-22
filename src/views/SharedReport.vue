@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { ArrowLeft, CalendarDays, MoonStar, Sun } from "lucide-vue-next";
 import { getSharedReport, type SharedReportResponse } from "@/api/api";
 import PremiumReportContent from "@/components/weekly_report/PremiumReportContent.vue";
+import SharedReportHighlights from "@/components/weekly_report/SharedReportHighlights.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -210,6 +211,7 @@ watch(() => route.params.token, loadReport);
       </header>
 
       <PremiumReportContent :report="sharedReport.report" />
+      <SharedReportHighlights :report="sharedReport.report" />
       <section
         class="p-5 mt-4 mb-8 border rounded-lg bg-card text-card-foreground sm:p-6"
         aria-label="Try ffwrapped"

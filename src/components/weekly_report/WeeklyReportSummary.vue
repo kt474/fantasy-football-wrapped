@@ -118,7 +118,16 @@ const videoActionTitle = computed(
 );
 
 const shareActionDisabled = computed(
-  () => !canUsePremiumReportActions.value || props.isSharingReport
+  () =>
+    !canUsePremiumReportActions.value ||
+    props.isSharingReport ||
+    props.reportDataLoading
+);
+
+const shareActionTitle = computed(() =>
+  props.reportDataLoading
+    ? "Preparing weekly report cards"
+    : premiumActionTitle.value
 );
 
 const videoRenderPercent = computed(() =>
@@ -289,7 +298,7 @@ const trackVideoDownload = () => {
             <Button
               @click="emit('share-report')"
               :disabled="shareActionDisabled"
-              :title="premiumActionTitle"
+              :title="shareActionTitle"
               size="sm"
               class="h-8 min-w-0 px-2 sm:w-auto sm:px-3"
             >
