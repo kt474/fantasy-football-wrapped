@@ -11,7 +11,6 @@ import {
   getMatchupNumbers,
   getMatchupWinner,
   getPlayoffRoundMetadata,
-  getRecordForWeek,
   getSortedTableData,
   getWeeklyAwards,
   getWeeklyPerformers,
@@ -820,8 +819,6 @@ describe("weekly report transforms", () => {
         position: "WR",
       },
     ]);
-    expect(getRecordForWeek("WWLL", 2, false)).toBe("2 - 0");
-    expect(getRecordForWeek("WLWL", 1, true)).toBe("1 - 1");
   });
 
   test("extracts bracket roster ids", () => {

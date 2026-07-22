@@ -95,6 +95,8 @@ export type PremiumReport = {
 export type PremiumReportTeamIdentity = {
   teamName: string;
   avatarUrl?: string;
+  record?: string;
+  pointsScored?: number;
 };
 
 export type WeeklyRecapVideoProps = {

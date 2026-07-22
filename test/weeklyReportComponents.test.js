@@ -205,8 +205,18 @@ describe("weekly report components", () => {
             headline: "Alpha beats Beta",
             recap: "A close matchup.",
             teams: [
-              { teamName: "Alpha Team", avatarUrl: "alpha.png" },
-              { teamName: "Beta Team", avatarUrl: "beta.png" },
+              {
+                teamName: "Alpha Team",
+                avatarUrl: "alpha.png",
+                record: "5 - 2",
+                pointsScored: 141.2,
+              },
+              {
+                teamName: "Beta Team",
+                avatarUrl: "beta.png",
+                record: "3 - 4",
+                pointsScored: 137.8,
+              },
             ],
           },
         ],
@@ -236,6 +246,11 @@ describe("weekly report components", () => {
     expect(html).toContain('alt="Beta Team avatar"');
     expect(html).toContain('src="alpha.png"');
     expect(html).toContain('src="beta.png"');
+    expect(html).toContain("141.2");
+    expect(html).toContain("137.8");
+    expect(html).toContain("(5 - 2)");
+    expect(html).toContain("(3 - 4)");
+    expect(html).toContain("Alpha Team scored 141.2 points");
   });
 
   test("WeeklyMatchups renders manager names, median records, and winner highlight", async () => {

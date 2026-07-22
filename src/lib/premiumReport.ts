@@ -4,6 +4,7 @@ import type {
   PremiumReportTeamIdentity,
   TableDataType,
 } from "@/types/types";
+import { getRecordForWeek } from "@/lib/record";
 
 export function normalizePremiumReport(value: unknown): PremiumReport | null {
   if (!value || typeof value !== "object") return null;
@@ -35,19 +36,31 @@ export function addPremiumReportTeamAvatars({
   tableData,
   weekIndex,
   showUsernames,
+  medianScoring,
 }: {
   report: PremiumReport;
   tableData: TableDataType[];
   weekIndex: number;
   showUsernames: boolean;
+  medianScoring: boolean;
 }): PremiumReport {
-  const identities = tableData.map((team) => ({
-    team,
-    identity: {
-      teamName: getManagerDisplayName(team, showUsernames),
-      ...(team.avatarImg ? { avatarUrl: team.avatarImg } : {}),
-    } satisfies PremiumReportTeamIdentity,
-  }));
+  const identities = tableData.map((team) => {
+    const pointsScored = team.points[weekIndex];
+
+    return {
+      team,
+      identity: {
+        teamName: getManagerDisplayName(team, showUsernames),
+        ...(team.avatarImg ? { avatarUrl: team.avatarImg } : {}),
+        record: getRecordForWeek(
+          team.recordByWeek,
+          weekIndex + 1,
+          medianScoring
+        ),
+        ...(Number.isFinite(pointsScored) ? { pointsScored } : {}),
+      } satisfies PremiumReportTeamIdentity,
+    };
+  });
   const identitiesByName = new Map<string, PremiumReportTeamIdentity>();
 
   identities.forEach(({ team, identity }) => {

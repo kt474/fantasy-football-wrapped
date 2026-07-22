@@ -8,7 +8,18 @@ const report = {
     subheadline: "Subheadline",
     lead: "Lead",
   },
-  matchupReports: [],
+  matchupReports: [
+    {
+      matchupNumber: 1,
+      bracket: "regular",
+      headline: "Team One wins",
+      recap: "A close matchup.",
+      teams: [
+        { teamName: "Team One", pointsScored: 140, record: "2 - 0" },
+        { teamName: "Team Two", pointsScored: 135, record: "1 - 1" },
+      ],
+    },
+  ],
   teamOfTheWeek: {
     teamName: "Team One",
     pointsScored: 140,
@@ -60,6 +71,16 @@ describe("shared report API", () => {
     expect(JSON.parse(request.body)).toMatchObject({
       leagueId: "123456789",
       platform: "sleeper",
+      report: {
+        matchupReports: [
+          {
+            teams: [
+              { teamName: "Team One", pointsScored: 140, record: "2 - 0" },
+              { teamName: "Team Two", pointsScored: 135, record: "1 - 1" },
+            ],
+          },
+        ],
+      },
     });
   });
 

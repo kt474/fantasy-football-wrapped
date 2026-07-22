@@ -652,20 +652,6 @@ const getPreviousHeadToHeadResult = ({
   return null;
 };
 
-export const getRecordForWeek = (
-  recordString: string,
-  week: number,
-  medianScoring: boolean
-) => {
-  const recordIndex = medianScoring ? week * 2 : week;
-  if (recordString) {
-    const numWins = recordString.slice(0, recordIndex).split("W").length - 1;
-    const numLosses = recordString.slice(0, recordIndex).split("L").length - 1;
-    return `${numWins} - ${numLosses}`;
-  }
-  return "0-0";
-};
-
 export const getSortedTableData = (
   tableData: TableDataType[],
   weekIndex: number

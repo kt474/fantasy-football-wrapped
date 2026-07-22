@@ -125,6 +125,7 @@ const getSavedPremiumReport = (
     tableData: props.tableData,
     weekIndex: week - 1,
     showUsernames: store.showUsernames,
+    medianScoring: league?.medianScoring === 1,
   });
 };
 
@@ -160,22 +161,12 @@ const premiumReportText = computed(() => {
 });
 
 const weeks = computed(() => {
-  if (
-    store.leagueInfo.length == 0 ||
-    !store.currentLeague
-  ) {
+  if (store.leagueInfo.length == 0 || !store.currentLeague) {
     return [...Array(15).keys()].slice(1).reverse();
   }
-  if (
-    props.tableData[0].matchups &&
-    store.currentLeague.lastScoredWeek
-  ) {
+  if (props.tableData[0].matchups && store.currentLeague.lastScoredWeek) {
     const recordLength = props.tableData[0].matchups.length + 1;
-    const weeksList = [
-      ...Array(
-        store.currentLeague.lastScoredWeek + 1
-      ).keys(),
-    ]
+    const weeksList = [...Array(store.currentLeague.lastScoredWeek + 1).keys()]
       .slice(1)
       .reverse();
 
@@ -195,10 +186,7 @@ const weeks = computed(() => {
 });
 
 const playoffWeeks = computed(() => {
-  if (
-    store.leagueInfo.length > 0 &&
-    store.currentLeague
-  ) {
+  if (store.leagueInfo.length > 0 && store.currentLeague) {
     const currentLeague = store.currentLeague;
     const result: number[] = [];
     for (let i = currentLeague.regularSeasonLength + 1; i <= 18; i++) {
@@ -323,6 +311,7 @@ const getPremiumReport = async () => {
       tableData: props.tableData,
       weekIndex: reportWeek - 1,
       showUsernames: store.showUsernames,
+      medianScoring: currentLeague.medianScoring === 1,
     });
     premiumLoading.value = false;
     if (
@@ -337,7 +326,11 @@ const getPremiumReport = async () => {
       tier: "premium",
       week: reportWeek,
     });
-    store.addPremiumWeeklyReport(reportLeagueKey, reportWeek, reportWithAvatars);
+    store.addPremiumWeeklyReport(
+      reportLeagueKey,
+      reportWeek,
+      reportWithAvatars
+    );
   }
 };
 
@@ -430,22 +423,15 @@ const isPlayoffs = computed(() => {
 });
 
 const losersBracketIDs = computed(() => {
-  return getBracketRosterIds(
-    store.currentLeague.losersBracket
-  );
+  return getBracketRosterIds(store.currentLeague.losersBracket);
 });
 
 const winnersBracketIDs = computed(() => {
-  return getBracketRosterIds(
-    store.currentLeague.winnersBracket
-  );
+  return getBracketRosterIds(store.currentLeague.winnersBracket);
 });
 
 const bestPerformers = computed(() => {
-  if (
-    playerNames.value.length > 0 &&
-    store.currentLeague?.lastScoredWeek
-  ) {
+  if (playerNames.value.length > 0 && store.currentLeague?.lastScoredWeek) {
     return getWeeklyPerformers({
       tableData: props.tableData,
       playerNames: playerNames.value,
@@ -460,10 +446,7 @@ const bestPerformers = computed(() => {
 });
 
 const worstPerformers = computed(() => {
-  if (
-    playerNames.value.length > 0 &&
-    store.currentLeague?.lastScoredWeek
-  ) {
+  if (playerNames.value.length > 0 && store.currentLeague?.lastScoredWeek) {
     return getWeeklyPerformers({
       tableData: props.tableData,
       playerNames: playerNames.value,
@@ -507,8 +490,7 @@ const weeklyAwards = computed(() => {
       benchPlayerNames: benchPlayerNames.value,
       weekIndex: currentWeek.value - 1,
       showUsernames: store.showUsernames,
-      rosterPositions:
-        store.currentLeague?.rosterPositions ?? [],
+      rosterPositions: store.currentLeague?.rosterPositions ?? [],
     });
   }
   return [];
@@ -522,14 +504,10 @@ const reportPrompt = computed(() => {
     weekIndex: currentWeek.value - 1,
     showUsernames: store.showUsernames,
     isPlayoffs: isPlayoffs.value,
-    losersBracket:
-      store.currentLeague?.losersBracket ?? [],
-    winnersBracket:
-      store.currentLeague?.winnersBracket ?? [],
-    espnLosersBracket:
-      store.currentLeague?.espnLosersBracket ?? [],
-    espnWinnersBracket:
-      store.currentLeague?.espnWinnersBracket ?? [],
+    losersBracket: store.currentLeague?.losersBracket ?? [],
+    winnersBracket: store.currentLeague?.winnersBracket ?? [],
+    espnLosersBracket: store.currentLeague?.espnLosersBracket ?? [],
+    espnWinnersBracket: store.currentLeague?.espnWinnersBracket ?? [],
     medianScoring: medianScoring.value,
   });
 });
@@ -552,14 +530,10 @@ const premiumReportPrompt = computed(() => {
     isPlayoffs: isPlayoffs.value,
     losersBracketIds: losersBracketIDs.value,
     winnersBracketIds: winnersBracketIDs.value,
-    losersBracket:
-      store.currentLeague?.losersBracket ?? [],
-    winnersBracket:
-      store.currentLeague?.winnersBracket ?? [],
-    espnLosersBracket:
-      store.currentLeague?.espnLosersBracket ?? [],
-    espnWinnersBracket:
-      store.currentLeague?.espnWinnersBracket ?? [],
+    losersBracket: store.currentLeague?.losersBracket ?? [],
+    winnersBracket: store.currentLeague?.winnersBracket ?? [],
+    espnLosersBracket: store.currentLeague?.espnLosersBracket ?? [],
+    espnWinnersBracket: store.currentLeague?.espnWinnersBracket ?? [],
     rosterPositions: currentLeague?.rosterPositions ?? [],
     medianScoring: medianScoring.value,
     waiverMovesByRoster,
@@ -598,14 +572,10 @@ watch(
       await fetchPlayerNames();
       await getReport();
       loading.value = false;
-    } else if (
-      store.currentLeague.lastScoredWeek &&
-      weeks.value.length > 0
-    ) {
+    } else if (store.currentLeague.lastScoredWeek && weeks.value.length > 0) {
       await fetchPlayerNames();
     }
-    rawWeeklyReport.value =
-      store.currentLeague.weeklyReport ?? "";
+    rawWeeklyReport.value = store.currentLeague.weeklyReport ?? "";
     premiumWeeklyReport.value = getSavedPremiumReport(
       store.currentLeague,
       currentWeek.value
@@ -654,7 +624,6 @@ const shareReport = async () => {
 
     const shareData = {
       title: `${store.currentLeague.name} Week ${currentWeek.value} Report`,
-      text: "Check out this ffwrapped premium weekly report.",
       url: sharedReportUrl.value,
     };
 
@@ -753,11 +722,7 @@ videoJobController = new WeeklyRecapVideoJobController({
 
 const generateWeeklyVideo = async () => {
   const inputProps = weeklyRecapVideoProps.value;
-  if (
-    !inputProps ||
-    isRenderingVideo.value ||
-    activeVideoJobId
-  ) {
+  if (!inputProps || isRenderingVideo.value || activeVideoJobId) {
     return;
   }
 
@@ -945,34 +910,31 @@ watch(
   }
 );
 
-watch(
-  weeklyRecapVideoProps,
-  async (inputProps) => {
-    resetVideoRender();
-    if (!inputProps) {
+watch(weeklyRecapVideoProps, async (inputProps) => {
+  resetVideoRender();
+  if (!inputProps) {
+    return;
+  }
+
+  const restoreGeneration = videoRenderGeneration;
+  try {
+    const inputHash = await hashWeeklyRecapVideoInput(inputProps);
+    if (restoreGeneration !== videoRenderGeneration) {
       return;
     }
-
-    const restoreGeneration = videoRenderGeneration;
-    try {
-      const inputHash = await hashWeeklyRecapVideoInput(inputProps);
-      if (restoreGeneration !== videoRenderGeneration) {
-        return;
-      }
-      await videoJobController.restore({
-        leagueId: inputProps.league.id ?? "",
-        season: inputProps.league.season,
-        week: inputProps.league.week,
-        inputHash,
-      });
-    } catch (error) {
-      if (restoreGeneration === videoRenderGeneration) {
-        console.error("Unable to identify the weekly recap video:", error);
-        toast.error("Unable to restore the matching video render.");
-      }
+    await videoJobController.restore({
+      leagueId: inputProps.league.id ?? "",
+      season: inputProps.league.season,
+      week: inputProps.league.week,
+      inputHash,
+    });
+  } catch (error) {
+    if (restoreGeneration === videoRenderGeneration) {
+      console.error("Unable to identify the weekly recap video:", error);
+      toast.error("Unable to restore the matching video render.");
     }
   }
-);
+});
 
 onBeforeUnmount(() => {
   resetVideoRender();
@@ -1019,9 +981,7 @@ onBeforeUnmount(() => {
           :current-week="currentWeek"
           :is-latest-week="currentWeek === weeks[0]"
           :has-leagues="store.leagueIds.length !== 0"
-          :has-last-scored-week="
-            Boolean(store.currentLeague?.lastScoredWeek)
-          "
+          :has-last-scored-week="Boolean(store.currentLeague?.lastScoredWeek)"
           :raw-weekly-report="rawWeeklyReport"
           :premium-weekly-report="premiumWeeklyReport"
           :loading="loading"
@@ -1078,10 +1038,7 @@ onBeforeUnmount(() => {
       </TabsContent>
       <TabsContent
         value="Preview"
-        v-if="
-          store.currentLeague?.seasonType !==
-          'Guillotine'
-        "
+        v-if="store.currentLeague?.seasonType !== 'Guillotine'"
       >
         <WeeklyPreview
           :table-data="sortedTableData"

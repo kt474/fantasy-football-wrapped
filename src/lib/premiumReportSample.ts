@@ -11,6 +11,10 @@ export const premiumReportPreview: PremiumReport = {
     {
       matchupNumber: 1,
       bracket: "regular",
+      teams: [
+        { teamName: "Breece's Puffs", pointsScored: 132.6 },
+        { teamName: "Goal Line Stand", pointsScored: 128.8 },
+      ],
       headline: "Breece's Puffs Survived the Week's Most Expensive 3.8 Points",
       recap:
         "Breece's Puffs did not dominate so much as survive a 132.60 to 128.80 stress test. Ja'Marr Chase supplied 28.4 points, and the escape pushed Breece's Puffs up two places into sixth, directly onto the playoff cutoff. Goal Line Stand posted the week's third-highest score and still got nothing but a loss and a worse view of the standings. That is fantasy football's favorite customer-service policy: excellent effort, no refund.",
@@ -18,6 +22,10 @@ export const premiumReportPreview: PremiumReport = {
     {
       matchupNumber: 2,
       bracket: "regular",
+      teams: [
+        { teamName: "Bijan Mustard", pointsScored: 156.42 },
+        { teamName: "CeeDeez Nuts", pointsScored: 101.18 },
+      ],
       headline: "Bijan Mustard Turned a Matchup Into a Warning Label",
       recap:
         "Bijan Mustard detonated for 156.42 and beat CeeDeez Nuts by 55.24, the kind of margin that makes the Monday stat corrections feel purely decorative. Josh Allen opened the runway with 31.8, and Bijan Robinson added 27.6 while the rest of the lineup refused to supply a weak spot. The win extended the streak to three and moved Bijan Mustard into third. This was not just a weekly high. It was a contender announcing that the polite part of the schedule is over.",

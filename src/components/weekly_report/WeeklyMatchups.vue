@@ -4,11 +4,8 @@ import type { TableDataType } from "@/types/types";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { handleImageFallback as handleImageError } from "@/lib/imageFallback";
-import {
-  getManagerName,
-  getMatchupWinner,
-  getRecordForWeek,
-} from "./weeklyReportTransforms";
+import { getRecordForWeek } from "@/lib/record";
+import { getManagerName, getMatchupWinner } from "./weeklyReportTransforms";
 
 const props = defineProps<{
   sortedTableData: TableDataType[];
