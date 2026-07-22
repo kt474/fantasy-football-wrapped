@@ -33,7 +33,7 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
-import { Check } from "lucide-vue-next";
+import { ArrowRight, Check, CircleCheck } from "lucide-vue-next";
 import Separator from "@/components/ui/separator/Separator.vue";
 import Switch from "@/components/ui/switch/Switch.vue";
 import PageContainer from "@/components/layout/PageContainer.vue";
@@ -50,6 +50,10 @@ import {
   readPremiumCheckoutAttribution,
   savePremiumCheckoutAttribution,
 } from "@/lib/premiumFunnel";
+import {
+  getPostPurchaseActivation,
+  type PostPurchaseActivation,
+} from "@/lib/postPurchaseActivation";
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
@@ -77,6 +81,7 @@ const pricingSection = ref<HTMLElement | null>(null);
 const selectedCheckoutPlan = ref<CheckoutPlan | null>(null);
 const displayedCheckoutPlan = ref<CheckoutPlan>("annual");
 const lastAutoScrolledUpgradeRoute = ref("");
+const postPurchaseActivation = ref<PostPurchaseActivation | null>(null);
 
 const waitForRouteScroll = () =>
   new Promise<void>((resolve) => {
@@ -755,6 +760,10 @@ const handleCheckoutQuery = async () => {
   const checkoutState = route.query.checkout;
 
   if (checkoutState === "success") {
+    const checkoutAttribution = readPremiumCheckoutAttribution();
+    postPurchaseActivation.value = getPostPurchaseActivation(
+      checkoutAttribution?.feature ?? upgradeIntent.value
+    );
     trackEvent("Checkout Succeeded", { source: "stripe", status: "success" });
     trackPremiumFunnelEvent("checkout_succeeded", {
       source: "stripe",
@@ -780,6 +789,30 @@ const handleCheckoutQuery = async () => {
     delete newQuery.session_id;
     router.replace({ path: route.path, query: newQuery });
   }
+};
+
+const openPostPurchaseDestination = async () => {
+  const activation = postPurchaseActivation.value;
+  if (!activation) return;
+
+  trackPremiumFunnelEvent("post_purchase_activation_clicked", {
+    source: "account_checkout_success",
+    ...getFunnelAnalytics(),
+    destination_tab: activation.destinationTab,
+    cta: activation.actionLabel,
+  });
+
+  store.currentTab = activation.destinationTab;
+  window.localStorage.setItem("currentTab", activation.destinationTab);
+
+  const {
+    intent: _intent,
+    upgrade_source: _upgradeSource,
+    checkout: _checkout,
+    session_id: _sessionId,
+    ...query
+  } = route.query;
+  await router.push({ path: "/", query });
 };
 
 const ensureLeagueIdQueryParam = async () => {
@@ -1219,6 +1252,35 @@ watch(
         v-else-if="authStore.isAuthenticated"
         :class="['order-1', accountSummaryContainerClass]"
       >
+        <Card
+          v-if="postPurchaseActivation"
+          role="status"
+          class="mb-4 overflow-hidden border-success/30 bg-success/10"
+        >
+          <CardContent
+            class="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div class="flex min-w-0 gap-3">
+              <CircleCheck
+                class="mt-0.5 size-5 shrink-0 text-success"
+                aria-hidden="true"
+              />
+              <div>
+                <p class="font-semibold">{{ postPurchaseActivation.title }}</p>
+                <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  {{ postPurchaseActivation.description }}
+                </p>
+              </div>
+            </div>
+            <Button
+              class="w-full shrink-0 sm:w-auto"
+              @click="openPostPurchaseDestination"
+            >
+              {{ postPurchaseActivation.actionLabel }}
+              <ArrowRight class="size-4" aria-hidden="true" />
+            </Button>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Account Summary</CardTitle>
