@@ -111,6 +111,17 @@ const draftRoomArchetypes = computed(() => {
     currentManagerIds.has(manager.userId)
   );
 });
+const narrativeDraftType = computed(() => {
+  const currentLeague = store.currentLeague;
+  if (!currentLeague) return "snake";
+
+  return (
+    currentLeague.draftMetadata?.draftType ??
+    (currentLeague.draftPicks?.some((pick) => Number(pick.amount ?? 0) > 0)
+      ? "auction"
+      : "snake")
+  );
+});
 const hasPremiumAccess = computed(
   () => authStore.isAuthenticated && subscriptionStore.isPremium
 );
@@ -390,6 +401,8 @@ const managerPayload = computed<ManagerBlurbsPayload>(() => {
       :archetypes="profileArchetypes"
       :draft-room-archetypes="draftRoomArchetypes"
       :league-size="store.currentLeague?.totalRosters"
+      :draft-type="narrativeDraftType"
+      :auction-budget="store.currentLeague?.draftMetadata?.auctionBudget"
       :is-premium="hasPremiumAccess"
     />
     <ManagerComparison

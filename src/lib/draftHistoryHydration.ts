@@ -24,10 +24,14 @@ export const createHistoricalDraftHydrator = ({
   const inFlightDrafts = new Map<string, Promise<void>>();
 
   return async (league: LeagueInfoType) => {
+    const hasDraftPicks = Boolean(league.draftPicks?.length);
+    const needsAuctionBudget =
+      league.draftMetadata?.draftType === "auction" &&
+      league.draftMetadata.auctionBudget == null;
     if (
       league.platform === "espn" ||
       !league.draftId ||
-      league.draftPicks?.length
+      (hasDraftPicks && !needsAuctionBudget)
     ) {
       return;
     }
@@ -42,19 +46,29 @@ export const createHistoricalDraftHydrator = ({
 
       try {
         let draftType = league.draftMetadata?.draftType;
-        if (!draftType) {
+        let auctionBudget = league.draftMetadata?.auctionBudget;
+        if (!draftType || needsAuctionBudget) {
           const metadata = await loadMetadata(league.draftId);
-          draftType =
-            typeof metadata.type === "string" ? metadata.type : undefined;
+          if (typeof metadata.type === "string") draftType = metadata.type;
+          const settings =
+            typeof metadata.settings === "object" && metadata.settings !== null
+              ? (metadata.settings as Record<string, unknown>)
+              : undefined;
+          const loadedBudget = Number(settings?.budget);
+          if (Number.isFinite(loadedBudget) && loadedBudget > 0) {
+            auctionBudget = loadedBudget;
+          }
         }
 
-        const draftPicks = await loadPicks(
-          league.draftId,
-          league.season,
-          league.scoringType,
-          league.seasonType,
-          draftType
-        );
+        const draftPicks = hasDraftPicks
+          ? (league.draftPicks ?? [])
+          : await loadPicks(
+              league.draftId,
+              league.season,
+              league.scoringType,
+              league.seasonType,
+              draftType
+            );
 
         // Set picks before metadata so reactive consumers immediately satisfy
         // the existing-data guard if either assignment schedules a refresh.
@@ -63,6 +77,7 @@ export const createHistoricalDraftHydrator = ({
           order: league.draftMetadata?.order ?? [],
           roundReversal: league.draftMetadata?.roundReversal ?? 0,
           draftType: draftType ?? "snake",
+          auctionBudget,
         };
       } catch (error) {
         attemptedDrafts.delete(draftKey);

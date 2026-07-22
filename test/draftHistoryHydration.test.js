@@ -72,4 +72,30 @@ describe("historical draft hydration", () => {
     expect(loadPicks).toHaveBeenCalledOnce();
     expect(loadPicks.mock.calls[0][4]).toBe("linear");
   });
+
+  test("backfills an auction budget without reloading existing picks", async () => {
+    const loadMetadata = vi.fn().mockResolvedValue({
+      type: "auction",
+      settings: { budget: 200 },
+    });
+    const loadPicks = vi.fn();
+    const hydrate = createHistoricalDraftHydrator({
+      loadMetadata,
+      loadPicks,
+    });
+    const league = buildLeague({
+      draftPicks: [{ position: "RB" }],
+      draftMetadata: {
+        order: [],
+        roundReversal: 0,
+        draftType: "auction",
+      },
+    });
+
+    await hydrate(league);
+
+    expect(loadMetadata).toHaveBeenCalledOnce();
+    expect(loadPicks).not.toHaveBeenCalled();
+    expect(league.draftMetadata.auctionBudget).toBe(200);
+  });
 });

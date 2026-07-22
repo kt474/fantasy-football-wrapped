@@ -17,6 +17,14 @@ import {
   getPositionalDraftPlan,
   normalizeHistoricalSeasons,
 } from "../src/lib/narratives.ts";
+import {
+  getAuctionBudgetPlan,
+  getAuctionHistoryForManager,
+  getAuctionPositionPriceBands,
+  getAuctionRoomBenchmarks,
+  getAuctionTendency,
+  getAuctionTendencySummary,
+} from "../src/lib/auctionNarratives.ts";
 
 const buildLeague = (season, overrides = {}) => ({
   leagueId: "league-1",
@@ -660,5 +668,217 @@ describe("manager draft tendencies", () => {
       averagePoints: 1650,
       draftLabel: "Redraft",
     });
+  });
+});
+
+describe("manager auction tendencies", () => {
+  const buildAuctionHistory = (season, purchases, overrides = {}) => ({
+    season,
+    seasonType: "Redraft",
+    draftLabel: "Redraft",
+    purchases: purchases.map(([position, amount]) => ({
+      position,
+      amount,
+    })),
+    totalSpent: purchases.reduce((sum, [, amount]) => sum + amount, 0),
+    ...overrides,
+  });
+
+  test("builds auction history from winning bids while excluding keepers", () => {
+    const history = getAuctionHistoryForManager(
+      {
+        season: "2025",
+        seasonType: "Keeper",
+        draftType: "auction",
+        draftPicks: [
+          {
+            userId: "manager-1",
+            playerId: "keeper",
+            firstName: "Kept",
+            lastName: "Player",
+            position: "RB",
+            amount: 40,
+            pickNumber: 1,
+            keeper: true,
+          },
+          {
+            userId: "manager-1",
+            playerId: "wr-1",
+            firstName: "Wide",
+            lastName: "Receiver",
+            position: "wr",
+            amount: 31,
+            pickNumber: 3,
+          },
+          {
+            userId: "manager-1",
+            playerId: "qb-1",
+            firstName: "Quarter",
+            lastName: "Back",
+            position: "QB",
+            amount: 17,
+            pickNumber: 2,
+          },
+        ],
+      },
+      "manager-1"
+    );
+
+    expect(history).toMatchObject({
+      draftLabel: "Keeper",
+      totalSpent: 48,
+      purchases: [
+        { position: "QB", amount: 17 },
+        { position: "WR", amount: 31 },
+      ],
+    });
+  });
+
+  test("normalizes spend shares across auctions with different totals", () => {
+    const history = [
+      buildAuctionHistory("2025", [
+        ["WR", 34],
+        ["WR", 33],
+        ["WR", 33],
+        ["RB", 25],
+        ["RB", 25],
+        ["QB", 15],
+        ["QB", 10],
+        ["TE", 15],
+        ["TE", 10],
+      ]),
+      buildAuctionHistory("2024", [
+        ["WR", 17],
+        ["WR", 16],
+        ["WR", 17],
+        ["RB", 13],
+        ["RB", 12],
+        ["QB", 8],
+        ["QB", 7],
+        ["TE", 5],
+        ["TE", 5],
+      ]),
+    ];
+
+    expect(getAuctionTendencySummary(history)).toMatchObject({
+      trackedDrafts: 2,
+      averageTotalSpent: 150,
+      dominantPosition: "WR",
+      dominantPositionShare: 0.5,
+      strategyLabel: "WR Investor",
+    });
+    expect(getAuctionTendency(history)).toContain("50% of auction spend to WR");
+  });
+
+  test("creates a budget plan whose allocations add up to the requested budget", () => {
+    const manager = {
+      userId: "manager-a",
+      displayName: "Alex",
+      auctionHistory: [
+        buildAuctionHistory("2025", [
+          ["RB", 80],
+          ["WR", 70],
+          ["QB", 25],
+          ["TE", 15],
+          ["DEF", 10],
+        ]),
+      ],
+    };
+
+    const plan = getAuctionBudgetPlan(manager, 250);
+
+    expect(plan).toMatchObject({ budget: 250 });
+    expect(
+      plan.allocations.reduce((sum, allocation) => sum + allocation.amount, 0)
+    ).toBe(250);
+    expect(
+      plan.allocations.find(({ position }) => position === "RB")
+    ).toMatchObject({ amount: 100, share: 0.4 });
+  });
+
+  test("benchmarks position budgets across the room", () => {
+    const managers = [
+      {
+        displayName: "Alex",
+        auctionHistory: [
+          buildAuctionHistory("2025", [
+            ["RB", 80],
+            ["WR", 70],
+            ["QB", 25],
+            ["TE", 15],
+            ["DEF", 10],
+          ]),
+        ],
+      },
+      {
+        displayName: "Blake",
+        auctionHistory: [
+          buildAuctionHistory("2025", [
+            ["RB", 40],
+            ["WR", 100],
+            ["QB", 30],
+            ["TE", 20],
+            ["DEF", 10],
+          ]),
+        ],
+      },
+    ];
+
+    expect(getAuctionRoomBenchmarks(managers, 200)).toContainEqual({
+      position: "WR",
+      averageShare: 0.425,
+      averageAmount: 85,
+      likelySpenders: ["Blake", "Alex"],
+    });
+  });
+
+  test("builds first- and second-purchase price bands by position", () => {
+    const managers = [
+      {
+        displayName: "Alex",
+        auctionHistory: [
+          buildAuctionHistory("2025", [
+            ["QB", 50],
+            ["QB", 20],
+          ]),
+          buildAuctionHistory("2024", [
+            ["QB", 40],
+            ["QB", 10],
+          ]),
+        ],
+      },
+      {
+        displayName: "Blake",
+        auctionHistory: [
+          buildAuctionHistory("2025", [
+            ["QB", 60],
+            ["QB", 30],
+          ]),
+          buildAuctionHistory("2024", [
+            ["QB", 45],
+            ["QB", 15],
+          ]),
+        ],
+      },
+    ];
+
+    expect(getAuctionPositionPriceBands(managers)).toEqual([
+      {
+        position: "QB",
+        tier: 1,
+        medianAmount: 48,
+        lowAmount: 44,
+        highAmount: 53,
+        sampleSize: 4,
+      },
+      {
+        position: "QB",
+        tier: 2,
+        medianAmount: 18,
+        lowAmount: 14,
+        highAmount: 23,
+        sampleSize: 4,
+      },
+    ]);
   });
 });

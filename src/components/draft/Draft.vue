@@ -80,7 +80,7 @@ const getDraftOrder = async () => {
   const currentLeague = store.currentLeague;
   const metadata = (await getDraftMetadata(currentLeague.draftId)) as {
     slot_to_roster_id?: Record<string, number | null>;
-    settings?: { reversal_round?: number };
+    settings?: { reversal_round?: number; budget?: number };
     type?: string;
     metadata?: { scoring_type?: string };
   };
@@ -106,6 +106,7 @@ const getDraftOrder = async () => {
     order: draftOrder.value,
     roundReversal: roundReversal.value,
     draftType: draftType.value,
+    auctionBudget: metadata.settings?.budget,
   });
 };
 

@@ -6,6 +6,7 @@ import {
   getDraftRoomCheatSheetSummary,
   type ManagerArchetype,
 } from "@/lib/narratives";
+import { getAuctionTendencySummary } from "@/lib/auctionNarratives";
 import {
   getLeagueAnalyticsProperties,
   trackPremiumFunnelEvent,
@@ -14,7 +15,9 @@ import { useStore } from "@/store/store";
 import Card from "@/components/ui/card/Card.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FreeDraftFeatures from "./FreeDraftFeatures.vue";
+import AuctionDraftFeatures from "./AuctionDraftFeatures.vue";
 import LockedPremiumDraftPreview from "./LockedPremiumDraftPreview.vue";
+import PremiumAuctionDraftFeatures from "./PremiumAuctionDraftFeatures.vue";
 import PremiumDraftFeatures from "./PremiumDraftFeatures.vue";
 
 const props = withDefaults(
@@ -22,41 +25,64 @@ const props = withDefaults(
     archetypes: ManagerArchetype[];
     draftRoomArchetypes?: ManagerArchetype[];
     leagueSize?: number;
+    draftType?: string;
+    auctionBudget?: number;
     isPremium?: boolean;
   }>(),
   { isPremium: false }
 );
 const store = useStore();
+const isAuction = computed(() => props.draftType?.toLowerCase() === "auction");
 
 const hasDraftHistory = computed(() =>
-  props.archetypes.some((manager) => manager.draftHistory?.length)
+  props.archetypes.some((manager) =>
+    isAuction.value
+      ? manager.auctionHistory?.length
+      : manager.draftHistory?.length
+  )
 );
 const draftRoomManagers = computed(
   () => props.draftRoomArchetypes ?? props.archetypes
 );
 const hasDraftRoomData = computed(() =>
   draftRoomManagers.value.some((manager) =>
-    getDraftRoomCheatSheetSummary(manager.draftHistory ?? [])
+    isAuction.value
+      ? getAuctionTendencySummary(manager.auctionHistory ?? [])
+      : getDraftRoomCheatSheetSummary(manager.draftHistory ?? [])
   )
 );
 
 const activeView = ref(props.isPremium ? "draft-room" : "tendencies");
 
 const activeTitle = computed(() =>
-  activeView.value === "draft-room" ? "Draft Room" : "Draft Tendencies"
+  activeView.value === "draft-room"
+    ? isAuction.value
+      ? "Auction Draft Room"
+      : "Draft Room"
+    : isAuction.value
+      ? "Auction Tendencies"
+      : "Draft Tendencies"
 );
 
 const activeDescription = computed(() => {
   if (activeView.value === "tendencies") {
-    return "Each manager’s draft day habits, favorite early-round positions, and historical draft rankings.";
+    return isAuction.value
+      ? "Each manager’s budget allocation, premium-player appetite, position spending, and endgame habits."
+      : "Each manager’s draft day habits, favorite early-round positions, and historical draft rankings.";
   }
   if (!hasDraftRoomData.value) {
-    return "Draft Room scouting becomes available after completed draft history is imported for a current league manager.";
+    return isAuction.value
+      ? "Auction scouting becomes available after completed auction history is imported for a current league manager."
+      : "Draft Room scouting becomes available after completed draft history is imported for a current league manager.";
   }
   if (props.isPremium) {
-    return "Plan your draft and scout every league mate from one workspace.";
+    return isAuction.value
+      ? "Build a budget plan and scout how every league mate spends."
+      : "Plan your draft and scout every league mate from one workspace.";
   }
-  return "Preview with sample data to show how draft history can be used to plan your next draft and scout your league mates.";
+  return isAuction.value
+    ? "Preview how auction history can shape a budget plan and identify position competition."
+    : "Preview with sample data to show how draft history can be used to plan your next draft and scout your league mates.";
 });
 
 const showPremiumSubscriptionCta = computed(
@@ -88,13 +114,24 @@ watch(
 <template>
   <Card class="p-4 md:p-6">
     <div v-if="!hasDraftHistory">
-      <h2 class="heading-section">Draft Room</h2>
+      <h2 class="heading-section">
+        {{ isAuction ? "Auction Draft Room" : "Draft Room" }}
+      </h2>
       <div class="max-w-2xl p-4 mt-4 border rounded-card bg-muted/30">
-        <p class="font-semibold">Draft history needed</p>
+        <p class="font-semibold">
+          {{ isAuction ? "Auction history needed" : "Draft history needed" }}
+        </p>
         <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Once this league has at least one completed imported draft, ffwrapped
-          can identify positional runs and manager tendencies. Check back after
-          the draft is complete.
+          <template v-if="isAuction">
+            Once this league has at least one completed imported auction,
+            ffwrapped can identify spending patterns and budget tendencies.
+            Check back after the auction is complete.
+          </template>
+          <template v-else>
+            Once this league has at least one completed imported draft,
+            ffwrapped can identify positional runs and manager tendencies.
+            Check back after the draft is complete.
+          </template>
         </p>
       </div>
     </div>
@@ -129,7 +166,9 @@ watch(
           </p>
         </div>
         <TabsList class="self-start">
-          <TabsTrigger value="tendencies">Draft Tendencies</TabsTrigger>
+          <TabsTrigger value="tendencies">
+            {{ isAuction ? "Auction Tendencies" : "Draft Tendencies" }}
+          </TabsTrigger>
           <TabsTrigger value="draft-room" class="gap-1.5">
             Draft Room
             <LockKeyhole
@@ -142,8 +181,13 @@ watch(
       </div>
 
       <TabsContent value="tendencies" class="mt-4">
+        <AuctionDraftFeatures
+          v-if="activeView === 'tendencies' && isAuction"
+          :archetypes="archetypes"
+          embedded
+        />
         <FreeDraftFeatures
-          v-if="activeView === 'tendencies'"
+          v-else-if="activeView === 'tendencies'"
           :archetypes="archetypes"
           embedded
         />
@@ -161,6 +205,14 @@ watch(
             Check back after a current manager completes an imported draft.
           </p>
         </div>
+        <PremiumAuctionDraftFeatures
+          v-else-if="
+            activeView === 'draft-room' && isPremium && isAuction
+          "
+          :archetypes="draftRoomManagers"
+          :auction-budget="auctionBudget"
+          embedded
+        />
         <PremiumDraftFeatures
           v-else-if="activeView === 'draft-room' && isPremium"
           :archetypes="archetypes"
@@ -170,6 +222,7 @@ watch(
         />
         <LockedPremiumDraftPreview
           v-else-if="activeView === 'draft-room' && hasDraftRoomData"
+          :is-auction="isAuction"
         />
       </TabsContent>
     </Tabs>

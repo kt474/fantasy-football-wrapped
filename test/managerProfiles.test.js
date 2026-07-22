@@ -28,6 +28,19 @@ describe("manager profiles", () => {
     expect(narratives).toContain("await refreshNarratives()");
   });
 
+  test("routes auction leagues through format-specific draft features", () => {
+    const narratives = read("src/components/league_narratives/Narratives.vue");
+    const fingerprints = read(
+      "src/components/league_narratives/DraftFingerprintsCard.vue"
+    );
+
+    expect(narratives).toContain('const narrativeDraftType = computed');
+    expect(narratives).toContain(':draft-type="narrativeDraftType"');
+    expect(fingerprints).toContain("AuctionDraftFeatures");
+    expect(fingerprints).toContain("PremiumAuctionDraftFeatures");
+    expect(fingerprints).toContain(':is-auction="isAuction"');
+  });
+
   test("disables profile generation after every eligible manager has a profile", () => {
     const card = read(
       "src/components/league_narratives/ManagerArchetypesCard.vue"

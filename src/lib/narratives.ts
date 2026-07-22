@@ -7,6 +7,10 @@ import {
   WaiverType,
 } from "../types/apiTypes";
 import { getPreviousLeagueEntries, isLeagueInfoEntry } from "./previousSeason";
+import {
+  getAuctionHistoryForManager,
+  type AuctionDraftHistory,
+} from "./auctionNarratives";
 
 type PlayoffParticipantMatchup = {
   t1?: number | null;
@@ -172,6 +176,7 @@ export type ManagerSeasonRecord = {
   draftPickRankTotal: number;
   draftPickCount: number;
   draftHistory?: ManagerDraftHistory;
+  auctionHistory?: AuctionDraftHistory;
   isChampion: boolean;
   madePlayoffs: boolean;
 };
@@ -199,6 +204,7 @@ export type ManagerArchetype = {
   playoffAppearances: number;
   averageDraftPickRank: number | null;
   draftHistory: ManagerDraftHistory[];
+  auctionHistory?: AuctionDraftHistory[];
 };
 
 export type NarrativeBundle = {
@@ -225,6 +231,7 @@ type ManagerAggregate = {
   draftPickRankTotal: number;
   draftPickCount: number;
   draftHistory: ManagerDraftHistory[];
+  auctionHistory: AuctionDraftHistory[];
 };
 
 const average = (values: number[]) => {
@@ -1391,12 +1398,17 @@ const buildSeasonRecords = async (
           Number(obj.t1) === roster.rosterId ||
           Number(obj.t2) === roster.rosterId
       );
+      const draftOutcome = hasPlayoffResults
+        ? { madePlayoffs, pointsFor: roster.pointsFor }
+        : undefined;
       const draftHistory = getDraftHistoryForManager(
         season,
         user.id,
-        hasPlayoffResults
-          ? { madePlayoffs, pointsFor: roster.pointsFor }
-          : undefined
+        draftOutcome
+      );
+      const auctionHistory = getAuctionHistoryForManager(
+        season,
+        user.id
       );
 
       return {
@@ -1434,6 +1446,7 @@ const buildSeasonRecords = async (
         draftPickRankTotal: draftSummary.draftPickRankTotal,
         draftPickCount: draftSummary.draftPickCount,
         draftHistory,
+        auctionHistory,
         isChampion: championRosterId === roster.rosterId,
       } satisfies ManagerSeasonRecord;
     })
@@ -1471,6 +1484,7 @@ const aggregateManagers = (records: ManagerSeasonRecord[]) => {
         draftPickRankTotal: record.draftPickRankTotal,
         draftPickCount: record.draftPickCount,
         draftHistory: record.draftHistory ? [record.draftHistory] : [],
+        auctionHistory: record.auctionHistory ? [record.auctionHistory] : [],
       });
       return;
     }
@@ -1490,6 +1504,8 @@ const aggregateManagers = (records: ManagerSeasonRecord[]) => {
     existing.draftPickRankTotal += record.draftPickRankTotal;
     existing.draftPickCount += record.draftPickCount;
     if (record.draftHistory) existing.draftHistory.push(record.draftHistory);
+    if (record.auctionHistory)
+      existing.auctionHistory.push(record.auctionHistory);
     existing.avgEfficiency =
       (existing.avgEfficiency * (totalSeasons - 1) + record.managerEfficiency) /
       totalSeasons;
@@ -1542,6 +1558,9 @@ const buildManagerArchetypes = (records: ManagerSeasonRecord[]) => {
         weeklyScoreStdDev: manager.scoreVariance,
         averageDraftPickRank,
         draftHistory: [...manager.draftHistory].sort(
+          (left, right) => Number(right.season) - Number(left.season)
+        ),
+        auctionHistory: [...manager.auctionHistory].sort(
           (left, right) => Number(right.season) - Number(left.season)
         ),
       } satisfies ManagerArchetype;

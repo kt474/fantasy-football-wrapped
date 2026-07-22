@@ -314,6 +314,7 @@ export interface LeagueDraftMetadata {
   order: Order[];
   roundReversal: number;
   draftType: string;
+  auctionBudget?: number;
 }
 
 export interface Order {
