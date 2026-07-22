@@ -50,23 +50,25 @@ defineProps<{
           <CardHeader class="pb-3">
             <div
               v-if="matchup.teams?.length"
-              class="grid grid-cols-2 gap-2 pb-1"
+              class="grid grid-cols-1 gap-2 pb-1 sm:grid-cols-2"
             >
               <div
                 v-for="team in matchup.teams"
                 :key="team.teamName"
-                class="flex min-w-0 items-center gap-1.5 rounded-md bg-muted/40 px-2 py-1.5"
+                class="flex min-w-0 items-center gap-2 rounded-md bg-muted/40 px-2 py-1.5"
               >
                 <PremiumTeamAvatar
                   :src="team.avatarUrl"
                   :team-name="team.teamName"
                   size="xs"
                 />
-                <span class="flex items-baseline min-w-0 gap-1 text-sm">
-                  <span class="min-w-0 truncate">{{ team.teamName }}</span>
+                <span class="flex-1 min-w-0 text-sm">
+                  <span class="block leading-tight break-words">
+                    {{ team.teamName }}
+                  </span>
                   <span
                     v-if="team.record"
-                    class="shrink-0 text-[10px] text-muted-foreground"
+                    class="block mt-0.5 text-xs leading-none text-muted-foreground"
                   >
                     ({{ team.record }})
                   </span>
