@@ -134,7 +134,7 @@ const premiumDescription = computed(() => {
   if (upgradeIntent.value === "draft_room") {
     return "Use your league’s draft history to plan each round and scout every manager’s tendencies before you are on the clock.";
   }
-  return "Get shareable weekly newsletters, video recaps, history powered draft scouting, manager profiles, and rivalry reports for every league you manage.";
+  return "Get shareable weekly newsletters, video recaps, draft scouting, manager profiles, and rivalry reports for every league you manage.";
 });
 
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
@@ -311,6 +311,15 @@ const displayedPlanDetails = computed(() =>
         valueNote: "Billed monthly.",
       }
 );
+
+const trackPremiumExampleClick = (example: string) => {
+  trackPremiumFunnelEvent("premium_example_clicked", {
+    source: "account_faq",
+    upgrade_source: upgradeSource.value,
+    feature: upgradeIntent.value,
+    example,
+  });
+};
 
 const guideToAuthentication = async (plan: CheckoutPlan) => {
   await nextTick();
@@ -1278,7 +1287,7 @@ watch(
       >
         <Card class="min-w-0 overflow-hidden">
           <CardHeader>
-            <CardTitle>Unlock Premium</CardTitle>
+            <CardTitle>Unlock Premium for all your leagues</CardTitle>
             <CardDescription>
               {{ premiumDescription }}
             </CardDescription>
@@ -1345,13 +1354,6 @@ watch(
                 <li class="flex gap-2.5">
                   <Check class="mt-0.5 size-4 shrink-0 text-primary" />
                   <span
-                    >Premium across every league you manage, including future
-                    Premium features.</span
-                  >
-                </li>
-                <li class="flex gap-2.5">
-                  <Check class="mt-0.5 size-4 shrink-0 text-primary" />
-                  <span
                     >Smarter, shareable weekly recaps with customizable
                     commentary, richer league context, and short-form video
                     exports</span
@@ -1360,22 +1362,22 @@ watch(
                 <li class="flex gap-2.5">
                   <Check class="mt-0.5 size-4 shrink-0 text-primary" />
                   <span
-                    >Custom manager profiles highlighting strengths, habits, and
-                    league identity</span
+                    >History powered draft plans showing positional draft pick
+                    pressure and manager tendencies</span
                   >
                 </li>
                 <li class="flex gap-2.5">
                   <Check class="mt-0.5 size-4 shrink-0 text-primary" />
                   <span
-                    >Rivalry reports that turn manager comparisons into
-                    personalized league stories</span
+                    >Manager profiles and rivalry stories built from your
+                    league's history</span
                   >
                 </li>
                 <li class="flex gap-2.5">
                   <Check class="mt-0.5 size-4 shrink-0 text-primary" />
                   <span
-                    >History powered positional draft plans and league mate
-                    scouting</span
+                    >Premium across every Sleeper and ESPN league you manage,
+                    including future Premium features</span
                   >
                 </li>
               </ul>
@@ -1383,7 +1385,6 @@ watch(
           </CardContent>
         </Card>
       </div>
-
       <div
         v-if="
           !subscriptionStore.isPremium &&
@@ -1431,6 +1432,42 @@ watch(
                     renews each month. You can cancel either plan anytime and
                     access will continue through the end of your current billing
                     period.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="examples">
+                  <AccordionTrigger class="text-left">
+                    Can I see the Premium features in action?
+                  </AccordionTrigger>
+                  <AccordionContent class="leading-6 text-muted-foreground">
+                    <p>
+                      Yes. You can explore finished examples before you
+                      subscribe:
+                    </p>
+                    <div class="flex flex-col items-start gap-1 mt-2">
+                      <a
+                        href="https://ffwrapped.com/report/1BJ_ktCJQl1Ocjwy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-medium text-primary hover:underline"
+                        @click="trackPremiumExampleClick('weekly_report')"
+                      >
+                        Read a complete weekly report
+                      </a>
+                      <RouterLink
+                        to="/fantasy-football-video-recap-example"
+                        class="font-medium text-primary hover:underline"
+                        @click="trackPremiumExampleClick('video_recap')"
+                      >
+                        Watch a 25-second video recap
+                      </RouterLink>
+                      <RouterLink
+                        to="/fantasy-football-draft-room-example"
+                        class="font-medium text-primary hover:underline"
+                        @click="trackPremiumExampleClick('draft_room')"
+                      >
+                        Preview Draft Room scouting
+                      </RouterLink>
+                    </div>
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="renewal">

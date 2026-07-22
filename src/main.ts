@@ -29,6 +29,7 @@ const SharedReport = () => import("./views/SharedReport.vue");
 const SeoLanding = () => import("./views/SeoLanding.vue");
 const EspnLeagueAnalyzer = () => import("./views/EspnLeagueAnalyzer.vue");
 const DraftGradesLanding = () => import("./views/DraftGradesLanding.vue");
+const DraftRoomExample = () => import("./views/DraftRoomExample.vue");
 const PlayoffOddsLanding = () => import("./views/PlayoffOddsLanding.vue");
 const PowerRankingsLanding = () => import("./views/PowerRankingsLanding.vue");
 const LeagueHistoryLanding = () => import("./views/LeagueHistoryLanding.vue");
@@ -117,6 +118,16 @@ const routes = [
       title: "Fantasy Football Draft Grades for Sleeper & ESPN | ffwrapped",
       description:
         "Grade a completed fantasy football draft, then use league history for manager tendencies, positional plans, and Premium draft-room scouting.",
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-draft-room-example",
+    component: DraftRoomExample,
+    meta: {
+      title: "Fantasy Football Draft Room Scouting Example | ffwrapped",
+      description:
+        "Preview a fantasy football positional draft plan with projected room pressure, manager tendencies, and league-history scouting.",
       standalone: true,
     },
   },

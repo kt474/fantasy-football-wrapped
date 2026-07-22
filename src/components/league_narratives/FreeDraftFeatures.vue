@@ -79,7 +79,10 @@ const getDraftLabel = (draft: ManagerArchetype["draftHistory"][number]) => {
 
 <template>
   <div v-if="managersWithDraftHistory.length">
-    <component :is="embedded ? 'div' : Card" :class="embedded ? '' : 'p-4 md:p-6'">
+    <component
+      :is="embedded ? 'div' : Card"
+      :class="embedded ? '' : 'p-4 md:p-6'"
+    >
       <div v-if="!embedded">
         <p class="text-2xl font-semibold tracking-tight">Draft Tendencies</p>
         <p class="mt-4 text-sm text-muted-foreground sm:max-w-2xl sm:text-base">
@@ -240,7 +243,43 @@ const getDraftLabel = (draft: ManagerArchetype["draftHistory"][number]) => {
               : 'Show all draft tendencies'
           "
           @click="showAll = !showAll"
-        >
+          variant="outline"
+          ><svg
+            v-if="showAll"
+            class="w-5 h-5 mr-1.5"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m5 15 7-7 7 7"
+            />
+          </svg>
+          <svg
+            v-else
+            class="w-5 h-5 mr-1.5"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m19 9-7 7-7-7"
+            />
+          </svg>
           {{
             showAll
               ? "Show Fewer Tendencies"

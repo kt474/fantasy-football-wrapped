@@ -586,6 +586,7 @@ watch(
         @click="toggleProfiles"
         aria-label="Button to show all manager profiles"
         class="flex"
+        variant="outline"
       >
         <svg
           v-if="showAllProfiles"

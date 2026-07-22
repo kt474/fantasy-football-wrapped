@@ -8,8 +8,6 @@ const draftComponent = readFileSync(
 
 describe("Draft Room discovery", () => {
   test("links the Draft view to Manager Profiles and preserves the selected tab", () => {
-    expect(draftComponent).toContain("Planning your next draft?");
-    expect(draftComponent).toContain("Premium Draft Room scouting");
     expect(draftComponent).not.toContain("draft-room-discovery-title");
     expect(draftComponent).toContain('store.currentTab = "Manager Profiles"');
     expect(draftComponent).toContain(

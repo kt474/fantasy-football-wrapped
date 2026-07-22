@@ -265,15 +265,9 @@ const analysisRoute = {
               class="mt-6"
             >
               <RouterLink
-                :to="{
-                  path: '/account',
-                  query: {
-                    intent: 'draft_room',
-                    upgrade_source: 'draft_grades_landing',
-                  },
-                }"
+                to="/fantasy-football-draft-room-example"
               >
-                Explore Premium
+                View Draft Room example
               </RouterLink>
             </Button>
           </article>

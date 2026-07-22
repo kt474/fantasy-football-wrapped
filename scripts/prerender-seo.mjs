@@ -188,6 +188,37 @@ const pages = [
     ],
   },
   {
+    path: "fantasy-football-draft-room-example",
+    title: "Fantasy Football Draft Room Scouting Example | ffwrapped",
+    description:
+      "Preview a fantasy football positional draft plan with projected room pressure, manager tendencies, and league-history scouting.",
+    heading:
+      "See what your draft room usually does before you are on the clock",
+    introduction:
+      "A complete Premium Draft Room sample built from several seasons of manager draft tendencies and adjusted to one team and snake-draft slot.",
+    sectionHeading: "What the Draft Room sample shows",
+    ctaHref: "/account?intent=draft_room&upgrade_source=draft_room_example",
+    ctaLabel: "Explore ffwrapped Premium",
+    sections: [
+      {
+        title: "Round-by-round positional plan",
+        body: "Estimate which positions may thin out before each pick and where historical room pressure is strongest.",
+      },
+      {
+        title: "Draft-slot context",
+        body: "Build the plan around a specific manager and snake-draft slot instead of following one generic strategy.",
+      },
+      {
+        title: "Manager draft patterns",
+        body: "Compare opening strategies, early position lean, quarterback timing, recent shifts, and league-relative tendencies.",
+      },
+      {
+        title: "History-based estimates",
+        body: "Use completed drafts from the connected league while treating every pattern as an estimate rather than a prediction.",
+      },
+    ],
+  },
+  {
     path: "fantasy-football-playoff-odds-calculator",
     title: "Fantasy Football Playoff Odds Calculator | ffwrapped",
     description:
@@ -407,6 +438,10 @@ const toolLinks = [
   { href: "/sleeper-league-analyzer", label: "Sleeper analyzer" },
   { href: "/espn-league-analyzer", label: "ESPN analyzer" },
   { href: "/fantasy-football-draft-grades", label: "Draft grades" },
+  {
+    href: "/fantasy-football-draft-room-example",
+    label: "Draft Room example",
+  },
   {
     href: "/fantasy-football-playoff-odds-calculator",
     label: "Playoff odds",

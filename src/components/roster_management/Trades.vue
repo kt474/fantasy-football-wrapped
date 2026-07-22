@@ -60,9 +60,7 @@ type TradeCard = {
     value: Array<number | null>;
   };
 };
-type TradeRow =
-  | TradeCard
-  | DemoRosterManagementFixtures["fakeTrades"][number];
+type TradeRow = TradeCard | DemoRosterManagementFixtures["fakeTrades"][number];
 const tradeData = ref<TradeRow[]>([]);
 const demoLeague = shallowRef<DemoLeagueFixtures | null>(null);
 
@@ -252,9 +250,7 @@ onMounted(async () => {
   } else if (store.leagueInfo.length == 0) {
     await loadDemoData();
   } else if (store.currentLeague) {
-    tradeData.value =
-      (store.currentLeague.tradeNames as TradeRow[]) ??
-      [];
+    tradeData.value = (store.currentLeague.tradeNames as TradeRow[]) ?? [];
   }
 });
 
@@ -269,9 +265,7 @@ watch(
       tradeData.value = [];
       await getData();
     }
-    tradeData.value =
-      (store.currentLeague.tradeNames as TradeRow[]) ??
-      [];
+    tradeData.value = (store.currentLeague.tradeNames as TradeRow[]) ?? [];
   }
 );
 </script>
@@ -466,6 +460,7 @@ watch(
           @click="toggleTrades()"
           aria-label="Button to show all trades"
           class="flex"
+          variant="outline"
         >
           <svg
             v-if="showAllTrades"
@@ -538,7 +533,7 @@ watch(
       <div
         v-for="x in 3"
         role="status"
-        class="max-w-sm p-4 mt-4 mr-4 border border-border rounded-lg bg-card shadow-sm animate-pulse"
+        class="max-w-sm p-4 mt-4 mr-4 border rounded-lg shadow-sm border-border bg-card animate-pulse"
       >
         <div class="flex items-center mb-4">
           <svg
@@ -553,24 +548,15 @@ watch(
             />
           </svg>
           <div>
-            <p v-if="x === 1" class="mb-1 text-foreground">
-              Loading trades...
-            </p>
-            <div
-              v-else
-              class="h-2.5 bg-muted rounded-full w-32 mb-2"
-            ></div>
-            <div
-              class="h-2.5 bg-muted rounded-full w-32 mb-2"
-            ></div>
+            <p v-if="x === 1" class="mb-1 text-foreground">Loading trades...</p>
+            <div v-else class="h-2.5 bg-muted rounded-full w-32 mb-2"></div>
+            <div class="h-2.5 bg-muted rounded-full w-32 mb-2"></div>
           </div>
         </div>
-        <div
-          class="h-2.5 bg-muted rounded-full w-48 mb-4"
-        ></div>
+        <div class="h-2.5 bg-muted rounded-full w-48 mb-4"></div>
         <div class="h-2 bg-muted rounded-full mb-2.5"></div>
         <div class="h-2 bg-muted rounded-full mb-2.5"></div>
-        <div class="h-2 bg-muted rounded-full"></div>
+        <div class="h-2 rounded-full bg-muted"></div>
 
         <span class="sr-only">Loading...</span>
       </div>
