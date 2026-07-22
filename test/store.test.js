@@ -96,6 +96,46 @@ afterEach(() => {
 });
 
 describe("main store", () => {
+  test("shows every optional league feature by default", () => {
+    const store = useStore();
+
+    expect(store.hiddenLeagueFeatures).toEqual([]);
+    expect(store.isLeagueFeatureVisible("Expected Wins")).toBe(true);
+  });
+
+  test("persists hidden optional features and keeps roster management visible", () => {
+    const store = useStore();
+    store.currentTab = "Trade Lab";
+
+    store.updateLeagueFeatureVisibility("Trade Lab", false);
+    store.updateLeagueFeatureVisibility("Roster Management", false);
+
+    expect(store.isLeagueFeatureVisible("Trade Lab")).toBe(false);
+    expect(store.isLeagueFeatureVisible("Roster Management")).toBe(true);
+    expect(store.currentTab).toBe("Standings");
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      "hiddenLeagueFeatures",
+      JSON.stringify(["Trade Lab"])
+    );
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      "currentTab",
+      "Standings"
+    );
+  });
+
+  test("resets hidden league features to the default", () => {
+    const store = useStore();
+    store.updateLeagueFeatureVisibility("Expected Wins", false);
+
+    store.resetLeagueFeatureVisibility();
+
+    expect(store.hiddenLeagueFeatures).toEqual([]);
+    expect(store.isLeagueFeatureVisible("Expected Wins")).toBe(true);
+    expect(localStorage.removeItem).toHaveBeenCalledWith(
+      "hiddenLeagueFeatures"
+    );
+  });
+
   test("updateLeagueInfo replaces duplicate league ids", () => {
     const store = useStore();
     const league = buildLeague("league-1");

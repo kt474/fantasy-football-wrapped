@@ -12,6 +12,13 @@ import {
 } from "../types/types";
 import { DraftGrades, DraftPick } from "../types/apiTypes";
 import { getParsedStorageItem, isBoolean } from "@/lib/storage";
+import {
+  isCustomizableLeagueFeature,
+  type LeagueFeature,
+} from "@/lib/features";
+
+const isHiddenLeagueFeatures = (value: unknown): value is LeagueFeature[] =>
+  Array.isArray(value) && value.every(isCustomizableLeagueFeature);
 
 export const getLeagueKey = ({
   leagueId,
@@ -38,6 +45,11 @@ export const useStore = defineStore("main", {
     showUsernames: getParsedStorageItem("showUsernames", false, {
       isValid: isBoolean,
     }),
+    hiddenLeagueFeatures: getParsedStorageItem<LeagueFeature[]>(
+      "hiddenLeagueFeatures",
+      [],
+      { isValid: isHiddenLeagueFeatures }
+    ),
   }),
   getters: {
     leagueIds: (state) =>
@@ -66,6 +78,29 @@ export const useStore = defineStore("main", {
     updateShowUsernames(payload: boolean) {
       this.showUsernames = payload;
       localStorage.setItem("showUsernames", JSON.stringify(payload));
+    },
+    isLeagueFeatureVisible(feature: LeagueFeature) {
+      return !this.hiddenLeagueFeatures.includes(feature);
+    },
+    updateLeagueFeatureVisibility(feature: LeagueFeature, visible: boolean) {
+      if (!isCustomizableLeagueFeature(feature)) return;
+
+      this.hiddenLeagueFeatures = visible
+        ? this.hiddenLeagueFeatures.filter((item) => item !== feature)
+        : [...new Set([...this.hiddenLeagueFeatures, feature])];
+      localStorage.setItem(
+        "hiddenLeagueFeatures",
+        JSON.stringify(this.hiddenLeagueFeatures)
+      );
+
+      if (!visible && this.currentTab === feature) {
+        this.currentTab = "Standings";
+        localStorage.setItem("currentTab", "Standings");
+      }
+    },
+    resetLeagueFeatureVisibility() {
+      this.hiddenLeagueFeatures = [];
+      localStorage.removeItem("hiddenLeagueFeatures");
     },
     updateLoadingUserLeagues(payload: boolean) {
       this.loadingUserLeagues = payload;

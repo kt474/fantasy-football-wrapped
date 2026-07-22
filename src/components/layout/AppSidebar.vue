@@ -117,16 +117,18 @@ const featureIcons: Record<LeagueFeature, Component> = {
   ESPN: ChartColumn,
 };
 
-const data = {
+const data = computed(() => ({
   navMain: [
     {
-      items: sidebarLeagueFeatures.map(({ id: title }) => ({
-        title,
-        icon: featureIcons[title],
-      })),
+      items: sidebarLeagueFeatures
+        .filter(({ id }) => store.isLeagueFeatureVisible(id))
+        .map(({ id: title }) => ({
+          title,
+          icon: featureIcons[title],
+        })),
     },
   ],
-};
+}));
 </script>
 
 <template>

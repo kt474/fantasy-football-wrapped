@@ -18,6 +18,42 @@ export const leagueFeatures = [
 
 export type LeagueFeature = (typeof leagueFeatures)[number]["id"];
 
+export const customizableLeagueFeatures = [
+  {
+    id: "Expected Wins",
+    description: "Expected records, luck, and schedule analysis.",
+  },
+  {
+    id: "Start/Sit",
+    description: "Weekly lineup recommendations.",
+  },
+  {
+    id: "Season Forecast",
+    description: "Rest-of-season schedule simulations.",
+  },
+  {
+    id: "Trade Lab",
+    description: "Trade comparisons and analysis.",
+  },
+  {
+    id: "Manager Profiles",
+    description: "Detailed manager tendencies and identities.",
+  },
+] as const satisfies ReadonlyArray<{
+  id: LeagueFeature;
+  description: string;
+}>;
+
+const customizableLeagueFeatureIds = new Set<LeagueFeature>(
+  customizableLeagueFeatures.map(({ id }) => id)
+);
+
+export const isCustomizableLeagueFeature = (
+  value: unknown
+): value is (typeof customizableLeagueFeatures)[number]["id"] =>
+  typeof value === "string" &&
+  customizableLeagueFeatureIds.has(value as LeagueFeature);
+
 const leagueFeatureIds = new Set<string>(
   leagueFeatures.map((feature) => feature.id)
 );

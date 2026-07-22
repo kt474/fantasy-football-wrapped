@@ -44,8 +44,12 @@ const scoringType = ref(""); // idp
 const demoUsers = shallowRef<DemoLeagueFixtures["fakeUsers"]>([]);
 
 const activeTab = ref("Recap");
+const showManagerProfilesLink = computed(() =>
+  store.isLeagueFeatureVisible("Manager Profiles")
+);
 
 const openManagerProfiles = () => {
+  if (!showManagerProfilesLink.value) return;
   store.currentTab = "Manager Profiles";
   localStorage.setItem("currentTab", "Manager Profiles");
   scrollAppToTop("smooth");
@@ -355,16 +359,18 @@ const getValueColor = (value: number) => {
           <p class="max-w-3xl mb-2 text-sm text-muted-foreground sm:text-base">
             Draft pick scores are calculated based on each player's current
             positional rank compared to where they were drafted. The sum of
-            these scores is listed by each manager's name. Review historical
-            draft tendencies in the
-            <button
-              type="button"
-              class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              @click="openManagerProfiles"
-            >
-              Manager Profiles
-            </button>
-            tab.
+            these scores is listed by each manager's name.
+            <template v-if="showManagerProfilesLink">
+              Review historical draft tendencies in the
+              <button
+                type="button"
+                class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                @click="openManagerProfiles"
+              >
+                Manager Profiles
+              </button>
+              tab.
+            </template>
           </p>
           <div v-if="snakeDraftFormat" class="max-w-sm mb-4">
             <Label for="sort-order" class="block text-sm mb-0.5"

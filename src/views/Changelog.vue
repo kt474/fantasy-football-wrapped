@@ -11,6 +11,17 @@ const badgeVariant = (type: string): BadgeVariants["variant"] => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/22/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "In the account settings, there is now an option to hide certain tabs.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/20/26",
     content: [
       {

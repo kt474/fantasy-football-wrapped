@@ -12,6 +12,7 @@ import { authenticatedFetch } from "@/lib/authFetch";
 import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
 import { loadSavedLeagues } from "@/lib/leagueStorage";
 import { scrollAppToTop } from "@/lib/appScroll";
+import { customizableLeagueFeatures } from "@/lib/features";
 import {
   Card,
   CardContent,
@@ -82,6 +83,9 @@ const selectedCheckoutPlan = ref<CheckoutPlan | null>(null);
 const displayedCheckoutPlan = ref<CheckoutPlan>("annual");
 const lastAutoScrolledUpgradeRoute = ref("");
 const postPurchaseActivation = ref<PostPurchaseActivation | null>(null);
+
+const getFeatureSettingId = (feature: string) =>
+  `feature-${feature.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
 const waitForRouteScroll = () =>
   new Promise<void>((resolve) => {
@@ -514,6 +518,7 @@ const signOut = async () => {
   const currentUserId = authStore.user?.id;
   try {
     await authStore.signOut();
+    store.resetLeagueFeatureVisibility();
     toast.success("Signed out");
     subscriptionStore.clearSubscriptionStatusCache(currentUserId);
     subscriptionStore.resetSubscriptionState();
@@ -1360,6 +1365,55 @@ watch(
                     @update:model-value="store.updateShowUsernames"
                   />
                 </div>
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="feature-visibility" class="border-b-0">
+                    <AccordionTrigger
+                      class="px-3 py-3 text-left hover:no-underline"
+                    >
+                      <div class="min-w-0">
+                        <p class="text-sm font-medium">Feature visibility</p>
+                        <p class="mt-0.5 text-xs font-normal text-muted-foreground">
+                          Hide optional features to simplify the sidebar.
+                          Everything is shown by default.
+                        </p>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent class="px-3">
+                      <div class="space-y-3">
+                        <div
+                          v-for="feature in customizableLeagueFeatures"
+                          :key="feature.id"
+                          class="flex items-center justify-between gap-4"
+                        >
+                          <div class="min-w-0">
+                            <label
+                              :for="getFeatureSettingId(feature.id)"
+                              class="block text-sm font-medium cursor-pointer"
+                            >
+                              {{ feature.id }}
+                            </label>
+                            <p class="mt-0.5 text-xs text-muted-foreground">
+                              {{ feature.description }}
+                            </p>
+                          </div>
+                          <Switch
+                            :id="getFeatureSettingId(feature.id)"
+                            :model-value="
+                              store.isLeagueFeatureVisible(feature.id)
+                            "
+                            class="shrink-0"
+                            @update:model-value="
+                              store.updateLeagueFeatureVisibility(
+                                feature.id,
+                                $event
+                              )
+                            "
+                          />
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
             </div>
             <Separator />

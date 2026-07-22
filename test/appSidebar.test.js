@@ -15,4 +15,10 @@ describe("app sidebar", () => {
       "route.path === '/' && store.currentTab === childItem.title",
     );
   });
+
+  test("filters hidden league features from navigation", () => {
+    expect(sidebarSource).toContain(
+      ".filter(({ id }) => store.isLeagueFeatureVisible(id))",
+    );
+  });
 });

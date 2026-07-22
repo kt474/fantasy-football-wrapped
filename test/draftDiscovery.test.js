@@ -15,4 +15,16 @@ describe("Draft Room discovery", () => {
     );
     expect(draftComponent).toContain('scrollAppToTop("smooth")');
   });
+
+  test("hides the Manager Profiles link when that feature is hidden", () => {
+    expect(draftComponent).toContain(
+      'store.isLeagueFeatureVisible("Manager Profiles")'
+    );
+    expect(draftComponent).toContain(
+      '<template v-if="showManagerProfilesLink">'
+    );
+    expect(draftComponent).toContain(
+      "if (!showManagerProfilesLink.value) return;"
+    );
+  });
 });
