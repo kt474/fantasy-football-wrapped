@@ -379,8 +379,9 @@ router.afterEach((to) => {
 });
 
 watch(
-  () => authStore.user,
-  (user) => {
+  () => ({ initialized: authStore.initialized, user: authStore.user }),
+  ({ initialized, user }) => {
+    if (!initialized) return;
     if (!user) {
       resetAnalytics();
       return;

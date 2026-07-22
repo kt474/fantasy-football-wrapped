@@ -44,6 +44,12 @@ import {
   savePendingCheckout,
   type CheckoutPlan,
 } from "@/lib/pendingCheckout";
+import {
+  clearPremiumCheckoutAttribution,
+  createPremiumFunnelId,
+  readPremiumCheckoutAttribution,
+  savePremiumCheckoutAttribution,
+} from "@/lib/premiumFunnel";
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
@@ -81,6 +87,7 @@ const waitForRouteScroll = () =>
 
 onBeforeRouteLeave(() => {
   clearPendingCheckout();
+  clearPremiumCheckoutAttribution();
 });
 
 const isUpgradeFlow = computed(() => {
@@ -120,6 +127,43 @@ const upgradeSource = computed(() => {
     : route.query.upgrade_source;
   return typeof value === "string" ? value : "account";
 });
+
+const checkoutReturnState = Array.isArray(route.query.checkout)
+  ? route.query.checkout[0]
+  : route.query.checkout;
+const storedCheckoutAttribution = readPremiumCheckoutAttribution();
+const shouldReuseStoredFunnel = Boolean(
+  storedCheckoutAttribution &&
+    (checkoutReturnState ||
+      (storedCheckoutAttribution.funnelSource === upgradeSource.value &&
+        storedCheckoutAttribution.feature === upgradeIntent.value))
+);
+const premiumFunnelId = shouldReuseStoredFunnel
+  ? storedCheckoutAttribution!.funnelId
+  : createPremiumFunnelId();
+
+const getFunnelAnalytics = () => ({
+  funnel_id: premiumFunnelId,
+  funnel_source: upgradeSource.value,
+  upgrade_source: upgradeSource.value,
+  feature: upgradeIntent.value,
+});
+
+const getCheckoutReturnAnalytics = () => {
+  const attribution = readPremiumCheckoutAttribution();
+  if (!attribution) return getFunnelAnalytics();
+
+  return {
+    funnel_id: attribution.funnelId,
+    funnel_source: attribution.funnelSource,
+    upgrade_source: attribution.funnelSource,
+    feature: attribution.feature,
+    plan: attribution.plan,
+    billing_interval: attribution.billingInterval,
+    price_usd: attribution.priceUsd,
+    best_value: attribution.bestValue,
+  };
+};
 
 const premiumDescription = computed(() => {
   if (upgradeIntent.value === "premium_report") {
@@ -315,8 +359,7 @@ const displayedPlanDetails = computed(() =>
 const trackPremiumExampleClick = (example: string) => {
   trackPremiumFunnelEvent("premium_example_clicked", {
     source: "account_faq",
-    upgrade_source: upgradeSource.value,
-    feature: upgradeIntent.value,
+    ...getFunnelAnalytics(),
     example,
   });
 };
@@ -348,6 +391,16 @@ const getPlanAnalytics = (plan: CheckoutPlan) =>
         price_usd: 7.99,
         best_value: false,
       };
+
+watch(displayedCheckoutPlan, (plan, previousPlan) => {
+  if (plan === previousPlan) return;
+  trackPremiumFunnelEvent("pricing_plan_changed", {
+    source: "account",
+    ...getFunnelAnalytics(),
+    previous_plan: previousPlan,
+    ...getPlanAnalytics(plan),
+  });
+});
 
 const showPasswordRecoveryForm = computed(() => {
   const mode = Array.isArray(route.query.mode)
@@ -570,15 +623,13 @@ const beginAuthenticatedCheckout = async (
   if (resumedAfterAuth) {
     trackPremiumFunnelEvent("checkout_resumed", {
       source: "account",
-      upgrade_source: upgradeSource.value,
-      feature: upgradeIntent.value,
+      ...getFunnelAnalytics(),
       ...getPlanAnalytics(plan),
     });
   }
   trackPremiumFunnelEvent("checkout_started", {
     source: "account",
-    upgrade_source: upgradeSource.value,
-    feature: upgradeIntent.value,
+    ...getFunnelAnalytics(),
     resumed_after_auth: resumedAfterAuth,
     ...getPlanAnalytics(plan),
   });
@@ -606,8 +657,7 @@ const beginAuthenticatedCheckout = async (
     trackEvent("Checkout Redirected", { plan, source: "account" });
     trackPremiumFunnelEvent("checkout_redirected", {
       source: "account",
-      upgrade_source: upgradeSource.value,
-      feature: upgradeIntent.value,
+      ...getFunnelAnalytics(),
       ...getPlanAnalytics(plan),
     });
     window.location.assign(payload.url);
@@ -616,8 +666,7 @@ const beginAuthenticatedCheckout = async (
     trackEvent("Checkout Failed", { plan, reason: "request_failed" });
     trackPremiumFunnelEvent("checkout_failed", {
       source: "account",
-      upgrade_source: upgradeSource.value,
-      feature: upgradeIntent.value,
+      ...getFunnelAnalytics(),
       reason: "request_failed",
       ...getPlanAnalytics(plan),
     });
@@ -626,12 +675,22 @@ const beginAuthenticatedCheckout = async (
 };
 
 const startCheckout = async (plan: CheckoutPlan) => {
+  const planAnalytics = getPlanAnalytics(plan);
+  savePremiumCheckoutAttribution({
+    funnelId: premiumFunnelId,
+    funnelSource: upgradeSource.value,
+    feature: upgradeIntent.value,
+    plan,
+    billingInterval: planAnalytics.billing_interval,
+    priceUsd: planAnalytics.price_usd,
+    bestValue: planAnalytics.best_value,
+  });
+
   trackPremiumFunnelEvent("plan_selected", {
     source: "account",
-    upgrade_source: upgradeSource.value,
-    feature: upgradeIntent.value,
+    ...getFunnelAnalytics(),
     authenticated: authStore.isAuthenticated,
-    ...getPlanAnalytics(plan),
+    ...planAnalytics,
   });
 
   if (!authStore.isAuthenticated) {
@@ -640,10 +699,9 @@ const startCheckout = async (plan: CheckoutPlan) => {
     trackEvent("Checkout Failed", { plan, reason: "signed_out" });
     trackPremiumFunnelEvent("checkout_blocked", {
       source: "account",
-      upgrade_source: upgradeSource.value,
-      feature: upgradeIntent.value,
+      ...getFunnelAnalytics(),
       reason: "signed_out",
-      ...getPlanAnalytics(plan),
+      ...planAnalytics,
     });
     await guideToAuthentication(plan);
     return;
@@ -701,6 +759,7 @@ const handleCheckoutQuery = async () => {
     trackPremiumFunnelEvent("checkout_succeeded", {
       source: "stripe",
       status: "success",
+      ...getCheckoutReturnAnalytics(),
     });
     toast.success("Checkout completed. Refreshing subscription status...");
     await subscriptionStore.fetchSubscriptionStatus({ showErrorToast: true });
@@ -709,11 +768,13 @@ const handleCheckoutQuery = async () => {
     trackPremiumFunnelEvent("checkout_canceled", {
       source: "stripe",
       status: "canceled",
+      ...getCheckoutReturnAnalytics(),
     });
     toast.error("Checkout canceled.");
   }
 
   if (checkoutState) {
+    clearPremiumCheckoutAttribution();
     const newQuery = { ...route.query };
     delete newQuery.checkout;
     delete newQuery.session_id;
@@ -777,8 +838,7 @@ watch(
     trackEvent("Paywall Viewed", { source: "account", feature: "premium" });
     trackPremiumFunnelEvent("paywall_viewed", {
       source: "account",
-      upgrade_source: upgradeSource.value,
-      feature: upgradeIntent.value,
+      ...getFunnelAnalytics(),
       authenticated: authStore.isAuthenticated,
       is_premium: isPremium,
     });
