@@ -1589,6 +1589,17 @@ watch(
                       >
                         Preview Draft Room scouting
                       </RouterLink>
+                      <RouterLink
+                        to="/fantasy-football-manager-profiles-rivalry-report-example"
+                        class="font-medium text-primary hover:underline"
+                        @click="
+                          trackPremiumExampleClick(
+                            'manager_profiles_rivalry_report'
+                          )
+                        "
+                      >
+                        Preview manager profiles and rivalry reports
+                      </RouterLink>
                     </div>
                   </AccordionContent>
                 </AccordionItem>

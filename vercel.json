@@ -32,6 +32,10 @@
       "destination": "/fantasy-football-draft-grades/index.html"
     },
     {
+      "source": "/fantasy-football-manager-profiles-rivalry-report-example",
+      "destination": "/fantasy-football-manager-profiles-rivalry-report-example/index.html"
+    },
+    {
       "source": "/fantasy-football-playoff-odds-calculator",
       "destination": "/fantasy-football-playoff-odds-calculator/index.html"
     },

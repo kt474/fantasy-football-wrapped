@@ -12,6 +12,9 @@ describe("SEO landing pages", () => {
     expect(router).toContain('path: "/espn-league-analyzer"');
     expect(router).toContain('path: "/fantasy-football-draft-grades"');
     expect(router).toContain(
+      'path: "/fantasy-football-manager-profiles-rivalry-report-example"'
+    );
+    expect(router).toContain(
       'path: "/fantasy-football-playoff-odds-calculator"'
     );
     expect(router).toContain('path: "/fantasy-football-power-rankings"');
@@ -22,6 +25,7 @@ describe("SEO landing pages", () => {
     expect(router).toContain("component: WeeklyRecapLanding");
     expect(router).toContain("component: PremiumReportExample");
     expect(router).toContain("component: VideoRecapExample");
+    expect(router).toContain("component: ManagerProfilesRivalryExample");
     expect(router).toContain(
       "Sleeper Fantasy Football League Analyzer | ffwrapped"
     );
@@ -48,6 +52,9 @@ describe("SEO landing pages", () => {
     );
     expect(router).toContain(
       "Fantasy Football League History & All-Time Records | ffwrapped"
+    );
+    expect(router).toContain(
+      "Fantasy Football Manager Profiles & Rivalry Reports | ffwrapped"
     );
   });
 
@@ -93,6 +100,9 @@ describe("SEO landing pages", () => {
     expect(historyPage).toContain("All-time standings");
     expect(historyPage).toContain("Season finish history");
     expect(historyPage).toContain("Head-to-head matchups");
+    expect(historyPage).toContain(
+      "/fantasy-football-manager-profiles-rivalry-report-example"
+    );
   });
 
   test("publishes a substantive anonymized Premium report example", () => {
@@ -166,6 +176,25 @@ describe("SEO landing pages", () => {
     );
   });
 
+  test("publishes a substantive manager profile and rivalry report example", () => {
+    const examplePage = read(
+      "src/views/ManagerProfilesRivalryExample.vue"
+    );
+    const accountPage = read("src/views/Account.vue");
+
+    expect(examplePage).toContain("Manager profile sample");
+    expect(examplePage).toContain("Rivalry report sample");
+    expect(examplePage).toContain("Saquondo");
+    expect(examplePage).toContain("league’s model of sustained menace");
+    expect(examplePage).toContain("The Regular-Season Reckoning");
+    expect(examplePage).toContain("impulsive");
+    expect(examplePage).toContain("chaos goblin");
+    expect(examplePage).toContain("manager_profiles_rivalry_example");
+    expect(accountPage).toContain(
+      "Preview manager profiles and rivalry reports"
+    );
+  });
+
   test("uses one restrained public shell across the focused SEO pages", () => {
     const router = read("src/main.ts");
     const pages = [
@@ -178,6 +207,7 @@ describe("SEO landing pages", () => {
       read("src/views/WeeklyRecapLanding.vue"),
       read("src/views/PremiumReportExample.vue"),
       read("src/views/VideoRecapExample.vue"),
+      read("src/views/ManagerProfilesRivalryExample.vue"),
     ];
 
     for (const page of pages) {
@@ -195,6 +225,9 @@ describe("SEO landing pages", () => {
     );
     expect(router).toMatch(
       /path: "\/fantasy-football-video-recap-example"[\s\S]*?standalone: true/
+    );
+    expect(router).toMatch(
+      /path: "\/fantasy-football-manager-profiles-rivalry-report-example"[\s\S]*?standalone: true/
     );
   });
 
@@ -224,6 +257,9 @@ describe("SEO landing pages", () => {
     expect(sitemap).toContain(
       "https://ffwrapped.com/fantasy-football-video-recap-example"
     );
+    expect(sitemap).toContain(
+      "https://ffwrapped.com/fantasy-football-manager-profiles-rivalry-report-example"
+    );
     expect(sitemap).not.toContain("leagueId=");
   });
 
@@ -241,6 +277,9 @@ describe("SEO landing pages", () => {
       'path: "fantasy-football-weekly-recap-example"'
     );
     expect(prerender).toContain('path: "fantasy-football-video-recap-example"');
+    expect(prerender).toContain(
+      'path: "fantasy-football-manager-profiles-rivalry-report-example"'
+    );
     expect(prerender).toContain('path: "espn-league-analyzer"');
     expect(prerender).toContain('path: "fantasy-football-draft-grades"');
     expect(prerender).toContain(
@@ -284,6 +323,9 @@ describe("SEO landing pages", () => {
     );
     expect(vercel).toContain(
       '"destination": "/fantasy-football-video-recap-example/index.html"'
+    );
+    expect(vercel).toContain(
+      '"destination": "/fantasy-football-manager-profiles-rivalry-report-example/index.html"'
     );
     expect(vercel).toContain(
       '"destination": "/espn-league-analyzer/index.html"'

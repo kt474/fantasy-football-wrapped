@@ -219,6 +219,37 @@ const pages = [
     ],
   },
   {
+    path: "fantasy-football-manager-profiles-rivalry-report-example",
+    title: "Fantasy Football Manager Profiles & Rivalry Reports | ffwrapped",
+    description:
+      "Preview fantasy football manager profiles and rivalry reports built from career records, tendencies, head-to-head history, and league milestones.",
+    heading: "Fantasy football manager profiles and rivalry reports",
+    introduction:
+      "See how several seasons of league history become a distinct profile for every manager, then a personalized rivalry story for any two league mates.",
+    sectionHeading: "What manager profiles and rivalry reports show",
+    ctaHref:
+      "/account?intent=manager_profiles&upgrade_source=manager_profiles_rivalry_example",
+    ctaLabel: "Explore ffwrapped Premium",
+    sections: [
+      {
+        title: "Career manager profiles",
+        body: "Combine career records, scoring, lineup efficiency, playoff appearances, titles, transactions, and draft habits into a league-specific manager identity.",
+      },
+      {
+        title: "Personalized profile commentary",
+        body: "Turn the calculated record into a readable description of each manager’s strengths, tendencies, and long-term style while keeping the supporting numbers visible.",
+      },
+      {
+        title: "Head-to-head rivalry history",
+        body: "Compare any two managers across every available season using matchup records, closest games, biggest blowouts, scoring, efficiency, and championships.",
+      },
+      {
+        title: "Rivalry stories and bragging rights",
+        body: "Connect the shared history into a personalized report that explains what makes the matchup distinct and which manager owns the stronger claim.",
+      },
+    ],
+  },
+  {
     path: "fantasy-football-playoff-odds-calculator",
     title: "Fantasy Football Playoff Odds Calculator | ffwrapped",
     description:
@@ -441,6 +472,10 @@ const toolLinks = [
   {
     href: "/fantasy-football-draft-room-example",
     label: "Draft Room example",
+  },
+  {
+    href: "/fantasy-football-manager-profiles-rivalry-report-example",
+    label: "Manager profiles & rivalries",
   },
   {
     href: "/fantasy-football-playoff-odds-calculator",

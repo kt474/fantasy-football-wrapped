@@ -30,6 +30,8 @@ const SeoLanding = () => import("./views/SeoLanding.vue");
 const EspnLeagueAnalyzer = () => import("./views/EspnLeagueAnalyzer.vue");
 const DraftGradesLanding = () => import("./views/DraftGradesLanding.vue");
 const DraftRoomExample = () => import("./views/DraftRoomExample.vue");
+const ManagerProfilesRivalryExample = () =>
+  import("./views/ManagerProfilesRivalryExample.vue");
 const PlayoffOddsLanding = () => import("./views/PlayoffOddsLanding.vue");
 const PowerRankingsLanding = () => import("./views/PowerRankingsLanding.vue");
 const LeagueHistoryLanding = () => import("./views/LeagueHistoryLanding.vue");
@@ -128,6 +130,16 @@ const routes = [
       title: "Fantasy Football Draft Room Scouting Example | ffwrapped",
       description:
         "Preview a fantasy football positional draft plan with projected room pressure, manager tendencies, and league-history scouting.",
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-manager-profiles-rivalry-report-example",
+    component: ManagerProfilesRivalryExample,
+    meta: {
+      title: "Fantasy Football Manager Profiles & Rivalry Reports | ffwrapped",
+      description:
+        "Preview fantasy football manager profiles and rivalry reports built from career records, tendencies, head-to-head history, and league milestones.",
       standalone: true,
     },
   },

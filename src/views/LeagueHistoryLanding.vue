@@ -218,7 +218,10 @@ const faqs = [
       <div class="relative flex flex-col items-start gap-6 p-7 overflow-hidden border rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9">
         <div aria-hidden="true" class="absolute rounded-full -right-20 -top-32 h-72 w-72 bg-white/10"></div>
         <div class="relative"><h2 class="text-2xl font-semibold tracking-tight">Build the record book your league never kept</h2><p class="max-w-2xl mt-2 leading-7 text-primary-foreground/80">Connect the league, open League History, and turn every available season into permanent bragging rights.</p></div>
-        <Button as-child size="lg" variant="secondary" class="relative shrink-0"><RouterLink to="/">Explore league history</RouterLink></Button>
+        <div class="relative flex flex-wrap gap-3">
+          <Button as-child size="lg" variant="secondary"><RouterLink to="/">Explore league history</RouterLink></Button>
+          <Button as-child size="lg" variant="outline" class="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary"><RouterLink to="/fantasy-football-manager-profiles-rivalry-report-example">View profiles &amp; rivalry example</RouterLink></Button>
+        </div>
       </div>
     </section>
   </PublicPageShell>
