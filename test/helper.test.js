@@ -324,6 +324,49 @@ describe("helper utilities", () => {
     });
   });
 
+  test("createTableData handles preseason rosters without matchup data", () => {
+    const tableData = createTableData(
+      [buildUser("u1", "Alpha")],
+      [
+        buildRoster({
+          id: "u1",
+          rosterId: 1,
+          wins: 0,
+          losses: 0,
+          pointsFor: 0,
+          recordByWeek: "",
+        }),
+        buildRoster({
+          id: null,
+          rosterId: 2,
+          wins: 0,
+          losses: 0,
+          pointsFor: 0,
+          recordByWeek: "",
+        }),
+      ],
+      [],
+      false
+    );
+
+    expect(tableData).toHaveLength(2);
+    tableData.forEach((team) => {
+      expect(team).toMatchObject({
+        points: [],
+        matchups: [],
+        starters: [],
+        starterPoints: [],
+        benchPlayers: [],
+        benchPoints: [],
+        rating: 0,
+        randomScheduleWins: 0,
+        expectedWinsSTD: 0,
+        winsAgainstAll: 0,
+        lossesAgainstAll: 0,
+      });
+    });
+  });
+
   test("getWeeklyPoints consolidates starters and bench values by roster", async () => {
     vi.spyOn(sleeperApi, "getMatchup")
       .mockResolvedValueOnce([

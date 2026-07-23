@@ -147,10 +147,23 @@ export const createTableData = (
       combined.push(...ghostRosters);
     }
     const filtered: RosterType[] = combined.filter((a) => a !== null);
-    const combinedPoints = filtered.map((a: RosterType) => ({
-      ...a,
-      ...points.find((b: PointsType) => b.rosterId === a.rosterId),
-    })) as TableDataType[];
+    const combinedPoints = filtered.map((a: RosterType) => {
+      const matchupData = points.find(
+        (b: PointsType) => b.rosterId === a.rosterId
+      );
+
+      return {
+        ...a,
+        ...(matchupData ?? {
+          points: [],
+          matchups: [],
+          starters: [],
+          starterPoints: [],
+          benchPlayers: [],
+          benchPoints: [],
+        }),
+      };
+    }) as TableDataType[];
 
     const pointsArr: number[][] = [];
     combinedPoints.forEach((value) => {
@@ -211,12 +224,16 @@ export const createTableData = (
         if (medianScoring) {
           value.randomScheduleWins = 2 * scheduleWins;
         }
-        value.rating = getPowerRanking(
-          mean(value.points),
-          Number(max(value.points)),
-          Number(min(value.points)),
-          value.wins / (value.wins + value.losses)
-        );
+        const gamesPlayed = value.wins + value.losses;
+        value.rating =
+          value.points.length === 0
+            ? 0
+            : getPowerRanking(
+                mean(value.points),
+                Number(max(value.points)),
+                Number(min(value.points)),
+                gamesPlayed > 0 ? value.wins / gamesPlayed : 0
+              );
         if (!medianScoring) {
           const weekLength = value.recordByWeek ? value.recordByWeek.length : 0;
           const pointsList = value.points ? value.points : [];
