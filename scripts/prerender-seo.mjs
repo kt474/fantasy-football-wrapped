@@ -335,7 +335,7 @@ const pages = [
     path: "fantasy-football-weekly-recap",
     title: "Fantasy Football Weekly Recap Generator | ffwrapped",
     description:
-      "Create personalized fantasy football weekly reports with matchup stories, league awards, manager context, and shareable Premium video recaps.",
+      "Create fantasy football weekly recaps with matchup stories, league awards, customizable shared reports, and Premium video recaps.",
     heading: "Create a fantasy football weekly recap your league will read",
     introduction:
       "Turn the week’s matchups into a polished league recap with summaries, awards, top and bottom performers, standings context, and a preview of what comes next.",
@@ -354,7 +354,7 @@ const pages = [
       },
       {
         title: "Standard and Premium reports",
-        body: "Start with a free weekly summary or generate a detailed league-newspaper report with customizable commentary, sharing, and Premium video recaps. Premium includes three video generations per rolling seven days, and finished videos remain available for 15 days.",
+        body: "Start with a free weekly summary or generate a detailed league-newspaper report with customizable commentary. Publish the full Premium report with your choice of scoreboards, awards, player leaders, team scoring, standings movers, and waiver impact, or turn it into a video recap. Premium includes three video generations per rolling seven days, and finished videos remain available for 15 days.",
       },
       {
         title: "Built for Sleeper and ESPN leagues",
@@ -363,6 +363,43 @@ const pages = [
       {
         title: "Calculated before it is written",
         body: "ffwrapped normalizes league data and calculates the underlying matchup and lineup facts before AI turns the structured context into a report.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Which fantasy football platforms are supported?",
+        answer:
+          "ffwrapped supports Sleeper and ESPN fantasy football leagues. Sleeper leagues can be added by league ID or username, while ESPN leagues can be imported through the ESPN flow in the app.",
+      },
+      {
+        question: "When is a weekly recap available?",
+        answer:
+          "A recap can be generated after the selected fantasy week has completed scoring and the league platform has finalized its matchup data.",
+      },
+      {
+        question: "Is the weekly recap generator free?",
+        answer:
+          "The Standard weekly report and the core ffwrapped league-analysis experience are free. Premium adds the longer newspaper-style report, deeper manager context, customizable commentary, selectable shared-report insights, and video options.",
+      },
+      {
+        question: "How do Premium video recaps work?",
+        answer:
+          "Premium includes up to 3 new video generations per rolling 7 days. Finished videos remain available for 15 days, so download a copy during that window to keep it.",
+      },
+      {
+        question: "What league data goes into a report?",
+        answer:
+          "Reports can use matchup results, starters and bench scoring, weekly scoring rank, records, standings movement, streaks, lineup efficiency, season averages, playoff context, and completed waiver activity when available.",
+      },
+      {
+        question: "Do league mates need Premium to read a shared report?",
+        answer:
+          "No. A Premium user can publish a report link and choose which extra insights to include, such as the scoreboard, awards, player leaders, standings movers, and waiver impact. Recipients can read it without purchasing Premium.",
+      },
+      {
+        question: "Does AI calculate the matchup statistics?",
+        answer:
+          "No. The application calculates and normalizes the underlying league facts first. AI turns that structured context into the written report.",
       },
     ],
   },

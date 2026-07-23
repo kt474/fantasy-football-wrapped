@@ -422,10 +422,12 @@ const trackVideoDownload = () => {
             <div class="mb-4">
               <p class="max-w-3xl">
                 Premium weekly reports turn each week into a shareable league
-                newsletter and video recap, featuring headline stories, matchup
+                newsletter and video recap, with headline stories, matchup
                 recaps, manager highlights, and your choice of commentary style.
-                They're longer, more detailed, packed with richer league
-                context, and aware of past matchups and rivalries.
+                Customize each share link with the scoreboards, awards,
+                standings, and player insights your league cares about. Reports
+                are longer, more detailed, packed with richer league context,
+                and aware of past matchups and rivalries.
               </p>
               <div class="flex flex-wrap mt-1 gap-x-4 gap-y-1">
                 <a
@@ -470,10 +472,12 @@ const trackVideoDownload = () => {
           <div class="mb-4">
             <p class="max-w-3xl">
               Premium weekly reports turn each week into a shareable league
-              newsletter and video recap, featuring headline stories, matchup
-              recaps, manager highlights, and your choice of commentary style.
-              They're longer, more detailed, packed with richer league context,
-              and aware of past matchups and rivalries.
+              newsletter and video recap, with headline stories, matchup recaps,
+              manager highlights, and your choice of commentary style. Customize
+              each share link with the scoreboards, awards, standings, and player
+              insights your league cares about. Reports are longer, more
+              detailed, packed with richer league context, and aware of past
+              matchups and rivalries.
             </p>
             <div class="flex flex-wrap mt-1 gap-x-4 gap-y-1">
               <a

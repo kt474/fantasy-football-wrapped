@@ -143,9 +143,9 @@ const checkoutReturnState = Array.isArray(route.query.checkout)
 const storedCheckoutAttribution = readPremiumCheckoutAttribution();
 const shouldReuseStoredFunnel = Boolean(
   storedCheckoutAttribution &&
-    (checkoutReturnState ||
-      (storedCheckoutAttribution.funnelSource === upgradeSource.value &&
-        storedCheckoutAttribution.feature === upgradeIntent.value))
+  (checkoutReturnState ||
+    (storedCheckoutAttribution.funnelSource === upgradeSource.value &&
+      storedCheckoutAttribution.feature === upgradeIntent.value))
 );
 const premiumFunnelId = shouldReuseStoredFunnel
   ? storedCheckoutAttribution!.funnelId
@@ -187,7 +187,7 @@ const premiumDescription = computed(() => {
   if (upgradeIntent.value === "draft_room") {
     return "Use your league’s draft history to plan each round and scout every manager’s tendencies before you are on the clock.";
   }
-  return "Get shareable weekly newsletters, video recaps, draft scouting, manager profiles, and rivalry reports for every league you manage.";
+  return "Get customizable shared weekly newsletters, video recaps, draft scouting, manager profiles, and rivalry reports for every league you manage.";
 });
 
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
@@ -1372,7 +1372,9 @@ watch(
                     >
                       <div class="min-w-0">
                         <p class="text-sm font-medium">Feature visibility</p>
-                        <p class="mt-0.5 text-xs font-normal text-muted-foreground">
+                        <p
+                          class="mt-0.5 text-xs font-normal text-muted-foreground"
+                        >
                           Hide optional features to simplify the sidebar.
                           Everything is shown by default.
                         </p>
@@ -1662,8 +1664,9 @@ watch(
                     Do my league mates need Premium to view shared reports?
                   </AccordionTrigger>
                   <AccordionContent class="leading-6 text-muted-foreground">
-                    No. You can share a Premium report with the entire league,
-                    and they can open it without purchasing their own plan.
+                    No. You can choose which extra insights appear with the full
+                    Premium report, share the link with the entire league, and
+                    they can open it without purchasing their own plan.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="video-recaps" class="border-b-0">

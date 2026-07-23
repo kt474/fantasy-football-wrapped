@@ -60,6 +60,14 @@ const reportAnatomy = [
       "Team of the Week rewards the strongest complete performance; lowlights capture collapses, costly moves, and the week’s most painful outliers.",
     contents: "Team of the Week · lowlights · waiver impact",
   },
+  {
+    number: "05",
+    title: "Shared edition",
+    label: "Choose the extra insights your league sees",
+    description:
+      "Publish the full report, then add any combination of the weekly scoreboard, awards, player leaders, team scoring, standings movers, and waiver impact.",
+    contents: "Optional insight cards · public link",
+  },
 ];
 
 const reportPipeline = [
@@ -85,7 +93,7 @@ const reportPipeline = [
     icon: MessageSquareText,
     title: "Write",
     description:
-      "Structured facts become a Standard summary or a Premium report in the selected voice, ready to copy, publish, or turn into a video recap.",
+      "Structured facts become a Standard summary or a Premium report in the selected voice, ready to copy, publish with selected insights, or turn into a video recap.",
   },
 ];
 
@@ -108,7 +116,7 @@ const reportComparison = [
   {
     area: "Presentation",
     standard: "Copyable summary and share card",
-    premium: "Four voices, public report link, and video recap",
+    premium: "Four voices, customizable public report, and video recap",
   },
 ];
 
@@ -144,7 +152,7 @@ const faqs = [
   {
     question: "Is the weekly recap generator free?",
     answer:
-      "The Standard weekly report and the core ffwrapped league-analysis experience are free. Premium adds the longer newspaper-style report, deeper manager context, customizable commentary, sharing, and video options.",
+      "The Standard weekly report and the core ffwrapped league-analysis experience are free. Premium adds the longer newspaper-style report, deeper manager context, customizable commentary, selectable shared-report insights, and video options.",
   },
   {
     question: "How do Premium video recaps work?",
@@ -159,7 +167,7 @@ const faqs = [
   {
     question: "Do league mates need Premium to read a shared report?",
     answer:
-      "No. A Premium user can publish a report link and share it with the entire league. Recipients can read that report without purchasing Premium.",
+      "No. A Premium user can publish a report link and choose which extra insights to include, such as the scoreboard, awards, player leaders, standings movers, and waiver impact. Recipients can read it without purchasing Premium.",
   },
   {
     question: "Does AI calculate the matchup statistics?",
@@ -186,8 +194,8 @@ const faqs = [
           </h1>
           <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
             Turn matchup results, lineup decisions, standings changes, and the
-            week’s best performances into a polished report and short form video
-            built from your league data.
+            week’s best performances into a polished report you can tailor for
+            the league chat, plus a short-form video built from your league data.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
             <Button as-child size="lg">
@@ -252,7 +260,8 @@ const faqs = [
             </h2>
             <p class="mt-4 leading-7 text-muted-foreground">
               The structure keeps the biggest story, matchup details, standout
-              team, and manager decisions easy to scan and share.
+              team, and manager decisions easy to scan. When you share it, you
+              choose which extra weekly insights appear after the full report.
             </p>
           </div>
           <Card class="relative max-h-[400px] overflow-hidden shadow-none">

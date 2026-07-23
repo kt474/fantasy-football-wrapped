@@ -99,7 +99,7 @@ const routes = [
     meta: {
       title: "Fantasy Football Weekly Recap Generator | ffwrapped",
       description:
-        "Create personalized fantasy football weekly reports with matchup stories, league awards, manager context, and shareable Premium video recaps.",
+        "Create fantasy football weekly recaps with matchup stories, league awards, customizable shared reports, and Premium video recaps.",
       standalone: true,
     },
   },

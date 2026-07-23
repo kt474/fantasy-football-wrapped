@@ -32,7 +32,7 @@ const activationByFeature: Record<string, PostPurchaseActivation> = {
   premium_report: {
     title: "Premium Reports are unlocked",
     description:
-      "Create a shareable weekly newsletter or video recap for your league.",
+      "Create a weekly newsletter, choose the insights in its share link, or export a video recap.",
     actionLabel: "Open Weekly Report",
     destinationTab: "Weekly Report",
   },

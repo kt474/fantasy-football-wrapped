@@ -16,7 +16,13 @@ const data = [
       {
         type: "Feature",
         text: [
-          "The shared Premium weekly reports now have the option to add more insights/data. Also, in the account settings, there is now an option to hide certain tabs.",
+          "Shared Premium weekly reports can now include a custom mix of scoreboards, awards, player leaders, team scoring, standings movers, and waiver impact.",
+        ],
+      },
+      {
+        type: "Update",
+        text: [
+          "Account settings now let you hide optional league tabs and keep the sidebar focused on the features you use.",
         ],
       },
     ],
