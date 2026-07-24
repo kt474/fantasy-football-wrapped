@@ -136,9 +136,7 @@ const formatValueMatch = (value: number) =>
 const formatPlayerNames = (players: TradeSuggestion["teamASends"]) =>
   players.map((player) => player.name).join(" + ");
 const formatIncomingPlayers = (players: TradeSuggestion["teamASends"]) =>
-  players
-    .map((player) => `${player.name} (${player.position})`)
-    .join(" and ");
+  players.map((player) => `${player.name} (${player.position})`).join(" and ");
 const improvementBasis = computed(() =>
   props.valuationMode === "season results"
     ? "estimated lineup output based on season results"
@@ -255,6 +253,9 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
         and your league format.
       </p>
       <div class="shrink-0">
+        <label class="block mb-1 text-xs font-medium text-muted-foreground">
+          Manager
+        </label>
         <Select v-model="selectedRosterModel">
           <SelectTrigger class="w-full sm:w-52">
             <SelectValue placeholder="Select a manager">
@@ -309,7 +310,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
       class="flex min-h-[60vh] flex-col items-center justify-center px-5 py-10 text-center border rounded-lg bg-muted/20 border-border"
     >
       <p class="font-medium">Trade Finder is a Premium feature</p>
-      <p class="max-w-lg mx-auto mt-1 text-sm text-muted-foreground">
+      <p class="max-w-sm mx-auto mt-1 text-sm text-muted-foreground">
         Upgrade to compare league adjusted packages and find deals that improve
         both starting lineups.
       </p>

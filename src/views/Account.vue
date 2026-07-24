@@ -1671,16 +1671,6 @@ watch(
                     they can open it without purchasing their own plan.
                   </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="video-recaps" class="border-b-0">
-                  <AccordionTrigger class="text-left">
-                    How do Premium video recaps work?
-                  </AccordionTrigger>
-                  <AccordionContent class="leading-6 text-muted-foreground">
-                    Premium includes up to 3 new video generations per rolling 7
-                    days. Finished videos remain available for 15 days, so
-                    download a copy during that window to keep it.
-                  </AccordionContent>
-                </AccordionItem>
               </Accordion>
             </section>
           </CardContent>
