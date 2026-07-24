@@ -16,6 +16,7 @@ import {
   type TradeFinderRoster,
   type TradeValuationMode,
 } from "@/lib/tradeFinder";
+import { mapWithConcurrency } from "@/lib/async";
 import type { Player } from "@/types/apiTypes";
 import type { LeagueInfoType, TableDataType } from "@/types/types";
 
@@ -265,6 +266,8 @@ type TradeBuilderBasicRanking = {
   dynastyAdp: number | null;
 };
 
+const TRADE_BUILDER_RANKING_CONCURRENCY = 8;
+
 export const mergeTradeBuilderRankings = (
   rosters: TradeBuilderRoster[],
   rankings: TradeFinderPlayer[]
@@ -325,8 +328,10 @@ export const loadTradeBuilderRosters = async (options: {
     "NT",
     "S",
   ]);
-  const basicRankingEntries = await Promise.all(
-    playerIds.map(async (playerId): Promise<
+  const basicRankingEntries = await mapWithConcurrency(
+    playerIds,
+    TRADE_BUILDER_RANKING_CONCURRENCY,
+    async (playerId): Promise<
       readonly [string, TradeBuilderBasicRanking]
     > => {
       if (dynasty) {
@@ -362,7 +367,7 @@ export const loadTradeBuilderRosters = async (options: {
           dynastyAdp: null,
         },
       ] as const;
-    })
+    }
   );
   const basicRankingById = new Map(basicRankingEntries);
   return request.rosters.map((roster) => ({

@@ -77,10 +77,12 @@ const fetchPlayerValues = async () => {
 watch(
   [
     () => store.currentLeagueId,
+    () => activeLeague.value?.lastUpdated,
     () => store.showUsernames,
     () => dynastyPerspective.value,
   ],
-  fetchPlayerValues
+  fetchPlayerValues,
+  { flush: "post" }
 );
 
 onMounted(fetchPlayerValues);

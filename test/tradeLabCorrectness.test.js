@@ -33,6 +33,36 @@ describe("Trade Lab correctness boundaries", () => {
     expect(tradeLab).not.toContain("() => rosters.value,\n  () => syncTeamSelections()");
   });
 
+  test("same-league refreshes reload rankings and Trade Lab data", () => {
+    const playerValues = read(
+      "src/components/player_values/PlayerValues.vue"
+    );
+    const tradeLab = read("src/components/trade_lab/TradeLab.vue");
+
+    expect(playerValues).toContain(
+      "() => activeLeague.value?.lastUpdated"
+    );
+    expect(tradeLab).toContain("() => activeLeague.value?.lastUpdated");
+  });
+
+  test("Trade Lab initializes once and bounds roster ranking requests", () => {
+    const tradeLab = read("src/components/trade_lab/TradeLab.vue");
+    const leagueTradeValues = read("src/lib/leagueTradeValues.ts");
+
+    expect(tradeLab).not.toContain(
+      "selectedWeek.value = fallbackWeek.value;\n  await fetchPlayers();"
+    );
+    expect(leagueTradeValues).toContain(
+      "const TRADE_BUILDER_RANKING_CONCURRENCY = 8"
+    );
+    expect(leagueTradeValues).toContain(
+      "const basicRankingEntries = await mapWithConcurrency("
+    );
+    expect(leagueTradeValues).not.toContain(
+      "const basicRankingEntries = await Promise.all("
+    );
+  });
+
   test("rankings and Finder have distinct retry and entitlement states", () => {
     const playerValues = read(
       "src/components/player_values/PlayerValues.vue"

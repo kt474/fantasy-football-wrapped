@@ -620,7 +620,11 @@ const openTradeSuggestion = (suggestion: TradeSuggestion) => {
 };
 
 watch(
-  () => store.currentLeagueId,
+  [
+    () => store.currentLeagueId,
+    () => activeLeague.value?.lastUpdated,
+    () => store.showUsernames,
+  ],
   () => {
     ++rosterRequestId;
     ++quoteRequestId;
@@ -633,7 +637,8 @@ watch(
     } else {
       selectedWeek.value = nextWeek;
     }
-  }
+  },
+  { flush: "post" }
 );
 
 watch(
@@ -679,11 +684,15 @@ watch(
   { immediate: true }
 );
 
-onMounted(async () => {
+onMounted(() => {
   updateMobileState();
   window.addEventListener("resize", updateMobileState);
-  selectedWeek.value = fallbackWeek.value;
-  await fetchPlayers();
+  const nextWeek = fallbackWeek.value;
+  if (selectedWeek.value === nextWeek) {
+    void fetchPlayers();
+  } else {
+    selectedWeek.value = nextWeek;
+  }
 });
 
 onBeforeUnmount(() => {
