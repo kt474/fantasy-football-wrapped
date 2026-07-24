@@ -342,11 +342,20 @@ export const getPlayerNews = async (
 export const getPlayersByIdsMap = async (
   playerIds: string[] | string[][]
 ): Promise<Map<string, Player>> => {
-  if (playerIds.length === 0) {
+  const flattenedPlayerIds = playerIds.flatMap((playerId) =>
+    Array.isArray(playerId) ? playerId : [playerId]
+  );
+  if (flattenedPlayerIds.length === 0) {
     return new Map();
   }
   try {
-    const url = `${import.meta.env.VITE_PLAYERS_URL}${playerIds.join(",")}`;
+    const endpoint = (
+      import.meta.env.VITE_PLAYERS_URL || getBackendApiUrl("/api/getPlayer")
+    ).split("?")[0];
+    const params = new URLSearchParams({
+      player_ids: flattenedPlayerIds.join(","),
+    });
+    const url = `${endpoint}?${params.toString()}`;
     const response = await fetch(url);
     assertOk(response, "Players by IDs request");
     const result = await parseJson<Record<string, unknown>>(
@@ -367,6 +376,33 @@ export const getPlayersByIdsMap = async (
     console.error("Error fetching players by IDs:", error);
     return new Map();
   }
+};
+
+export const searchPlayers = async (
+  query: string,
+  limit = 8,
+  signal?: AbortSignal
+): Promise<Player[]> => {
+  const normalizedQuery = query.trim();
+  if (normalizedQuery.length < 2) {
+    return [];
+  }
+
+  const endpoint = (
+    import.meta.env.VITE_PLAYERS_URL || getBackendApiUrl("/api/getPlayer")
+  ).split("?")[0];
+  const requestUrl =
+    `${endpoint}?query=${encodeURIComponent(normalizedQuery)}` +
+    `&limit=${encodeURIComponent(String(limit))}`;
+  const response = await fetch(requestUrl, { signal });
+  assertOk(response, "Player search request");
+  const result = await parseJson<{ players?: Player[] }>(
+    response,
+    "Player search"
+  );
+  return Array.isArray(result.players)
+    ? result.players.filter((player) => Boolean(player?.player_id))
+    : [];
 };
 
 interface PlayerIdLookupResponse {

@@ -3,6 +3,7 @@ import {
   getData,
   getPlayerIdsByNameTeamMap,
   getPlayersByIdsMap,
+  searchPlayers,
   generatePremiumReport,
   getLeagueDataWeekCount,
 } from "../src/api/api.ts";
@@ -113,6 +114,7 @@ describe("Sleeper API data transforms", () => {
       previousLeagueId: "863906396951990272",
       status: "complete",
       scoringType: 1,
+      scoringSettings: { rec: 1 },
       rosterPositions: ["QB", "RB", "WR", "TE", "FLEX", "BN"],
       playoffTeams: 6,
       playoffType: 1,
@@ -186,6 +188,7 @@ describe("Sleeper API data transforms", () => {
       lastScoredWeek: 0,
       status: "",
       scoringType: 1,
+      scoringSettings: {},
       rosterPositions: [],
       playoffTeams: 0,
       playoffType: 0,
@@ -266,6 +269,50 @@ describe("Sleeper API data transforms", () => {
       first_name: "A",
       last_name: "B",
     });
+  });
+
+  test("searches the backend player endpoint with a bounded result set", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      mockFetchResponse(200, {
+        players: [
+          {
+            player_id: "7564",
+            name: "Ja'Marr Chase",
+            position: "WR",
+            team: "CIN",
+          },
+        ],
+      })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const players = await searchPlayers("chase", 8);
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock.mock.calls[0][0]).toContain(
+      "/api/getPlayer?query=chase&limit=8"
+    );
+    expect(players).toEqual([
+      {
+        player_id: "7564",
+        name: "Ja'Marr Chase",
+        position: "WR",
+        team: "CIN",
+      },
+    ]);
+  });
+
+  test("encodes multi-word player searches without literal plus signs", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      mockFetchResponse(200, { players: [] })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await searchPlayers("justin jefferson", 8);
+
+    expect(fetchMock.mock.calls[0][0]).toContain(
+      "query=justin%20jefferson&limit=8"
+    );
   });
 
   test("returns player ids by requested name and team in order", async () => {

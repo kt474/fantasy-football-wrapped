@@ -5,9 +5,25 @@ export type PostPurchaseActivation = {
   description: string;
   actionLabel: string;
   destinationTab: LeagueFeature;
+  destinationMode?: "finder";
 };
 
 const activationByFeature: Record<string, PostPurchaseActivation> = {
+  player_values: {
+    title: "Complete Player Values are unlocked",
+    description:
+      "Open the full league adjusted rankings used by the Trade Lab.",
+    actionLabel: "Open Player Values",
+    destinationTab: "Player Values",
+  },
+  trade_finder: {
+    title: "Trade Finder is unlocked",
+    description:
+      "Generate league specific trade ideas designed to improve both lineups.",
+    actionLabel: "Open Trade Finder",
+    destinationTab: "Trade Lab",
+    destinationMode: "finder",
+  },
   draft_room: {
     title: "Your Draft Room is unlocked",
     description:
@@ -48,5 +64,4 @@ const defaultActivation: PostPurchaseActivation = {
 
 export const getPostPurchaseActivation = (
   feature: string
-): PostPurchaseActivation =>
-  activationByFeature[feature] ?? defaultActivation;
+): PostPurchaseActivation => activationByFeature[feature] ?? defaultActivation;

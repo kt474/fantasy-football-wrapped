@@ -150,6 +150,7 @@ const FEATURE_NAMES = {
   "Weekly Report": "weekly_report",
   Playoffs: "playoffs",
   "Start/Sit": "start_sit",
+  "Player Values": "player_values",
   "Season Forecast": "season_forecast",
   "Trade Lab": "trade_lab",
   Draft: "draft",

@@ -212,6 +212,7 @@ export interface LeagueOriginal {
   lastScoredWeek: number;
   status: string;
   scoringType: number;
+  scoringSettings?: Record<string, number>;
   rosterPositions: string[];
   playoffTeams: number;
   playoffType: number;

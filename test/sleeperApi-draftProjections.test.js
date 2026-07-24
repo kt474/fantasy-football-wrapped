@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   getDraftProjections,
-  getPlayerPositionsById,
   getProjections,
   getWeeklyProjections,
 } from "../src/api/sleeperApi.ts";
@@ -115,22 +114,6 @@ describe("getProjections", () => {
       projection: 0,
       position: "",
     });
-  });
-
-  test("loads player positions from one shared directory request", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      mockFetchResponse(200, {
-        p1: { position: "QB" },
-        p2: { fantasy_positions: ["WR"] },
-      })
-    );
-    vi.stubGlobal("fetch", fetchMock);
-
-    await expect(getPlayerPositionsById(["p1", "p2"])).resolves.toEqual({
-      p1: "QB",
-      p2: "WR",
-    });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   test("shares weekly projection requests for the same forecast input", async () => {

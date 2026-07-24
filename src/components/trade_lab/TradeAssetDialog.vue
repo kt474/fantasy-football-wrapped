@@ -27,12 +27,17 @@ const props = defineProps<{
   inputId: string;
   draftSeasons: number[];
   draftRounds: number[];
+  availableDraftPicks?: Array<{
+    id: string;
+    label: string;
+  }>;
   triggerClass?: string;
 }>();
 
 const faab = defineModel<string>("faab", { required: true });
 const pickSeason = defineModel<string>("pickSeason", { required: true });
 const pickRound = defineModel<string>("pickRound", { required: true });
+const pickId = defineModel<string>("pickId", { default: "" });
 
 defineEmits<{
   open: [];
@@ -80,7 +85,24 @@ defineEmits<{
         <div>
           <Label class="text-xs">Draft Pick</Label>
           <div class="flex gap-2 mt-0.5">
-            <Select v-model="pickSeason">
+            <Select
+              v-if="props.availableDraftPicks !== undefined"
+              v-model="pickId"
+            >
+              <SelectTrigger class="w-56 text-xs">
+                <SelectValue placeholder="Select an owned pick" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="pick in props.availableDraftPicks"
+                  :key="pick.id"
+                  :value="pick.id"
+                >
+                  {{ pick.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Select v-else v-model="pickSeason">
               <SelectTrigger class="w-24 text-xs">
                 <SelectValue placeholder="Season" />
               </SelectTrigger>
@@ -94,7 +116,10 @@ defineEmits<{
                 </SelectItem>
               </SelectContent>
             </Select>
-            <Select v-model="pickRound">
+            <Select
+              v-if="props.availableDraftPicks === undefined"
+              v-model="pickRound"
+            >
               <SelectTrigger class="w-24 text-xs">
                 <SelectValue placeholder="Round" />
               </SelectTrigger>
@@ -112,6 +137,9 @@ defineEmits<{
               <Button
                 type="button"
                 variant="outline"
+                :disabled="
+                  props.availableDraftPicks !== undefined ? !pickId : false
+                "
                 @click="$emit('addDraftPick')"
               >
                 Add

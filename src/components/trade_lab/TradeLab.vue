@@ -1,11 +1,28 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
-import { getPlayersByIdsMap } from "../../api/api.ts";
-import { getStats } from "../../api/sleeperApi.ts";
-import { Player } from "../../types/apiTypes.ts";
+import { type TradeSuggestion } from "@/lib/tradeFinder";
+import {
+  getPlayerValues,
+  getTradeQuote,
+  type TradeQuoteResponse,
+  type TradeValueRequestPayload,
+} from "@/api/tradeValuesApi";
+import { useDynastyTradePerspective } from "@/composables/useDynastyTradePerspective";
+import {
+  applyTradeBuilderRankingResponse,
+  buildTradeValueRequest,
+  getTradeValueWeek,
+  isDynastyLeague,
+  loadDynastyDraftPickAssets,
+  loadTradeBuilderRosters,
+  type DynastyDraftPickAsset,
+  type TradeBuilderRoster,
+} from "@/lib/leagueTradeValues";
 import Card from "../ui/card/Card.vue";
+import { Button } from "@/components/ui/button";
 import Separator from "../ui/separator/Separator.vue";
 import { Label } from "../ui/label/index.ts";
 import {
@@ -19,31 +36,34 @@ import { X } from "lucide-vue-next";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import TradeDatabase from "./TradeDatabase.vue";
+import TradeFinder from "./TradeFinder.vue";
 import TradeAssetDialog from "./TradeAssetDialog.vue";
 
-type TradeLabPlayer = Player & {
-  projection: number;
-  overallRank: number;
-};
-
-type TradeLabRoster = {
-  id: number;
-  managerName: string;
-  players: TradeLabPlayer[];
-};
+type TradeLabRoster = TradeBuilderRoster;
 
 type TradeDraftPickAsset = {
   id: string;
   season: number;
   round: number;
+  originalRosterId?: number;
+  ownerRosterId?: number;
+  label?: string;
 };
 
 const store = useStore();
+const route = useRoute();
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
 const rosters = ref<TradeLabRoster[]>([]);
+const dynastyPickAssets = ref<DynastyDraftPickAsset[]>([]);
 const loading = ref(false);
+const tradeValueRequest = ref<TradeValueRequestPayload | null>(null);
+const tradeQuote = ref<TradeQuoteResponse | null>(null);
+const quoteLoading = ref(false);
+const quoteError = ref("");
+const quoteRetryNonce = ref(0);
+const dynastyPerspective = useDynastyTradePerspective();
 const selectedWeek = ref(1);
 const selectedTeamAId = ref<number | null>(null);
 const selectedTeamBId = ref<number | null>(null);
@@ -59,27 +79,52 @@ const pendingAPickSeason = ref<number | null>(null);
 const pendingAPickRound = ref<number | null>(null);
 const pendingBPickSeason = ref<number | null>(null);
 const pendingBPickRound = ref<number | null>(null);
+const pendingAPickId = ref("");
+const pendingBPickId = ref("");
 const draggedPlayer = ref<{ playerId: string; fromTeam: "A" | "B" } | null>(
   null
 );
 const isMobile = ref(false);
-const activeMode = ref("builder");
+const activeMode = ref(
+  route.query.tradeMode === "finder" ? "finder" : "builder"
+);
 
 const activeLeague = computed(() => store.currentLeague);
+const dynasty = computed(() => isDynastyLeague(activeLeague.value));
 
 const fallbackWeek = computed(() => {
   if (!activeLeague.value) return 1;
-  const nextWeek = Math.min((activeLeague.value.lastScoredWeek || 0) + 1, 18);
-  return Math.max(1, nextWeek);
+  return getTradeValueWeek(activeLeague.value);
 });
 
+const usesCompletedSeasonValues = computed(
+  () => activeLeague.value?.status === "complete"
+);
+
+const remainingWeeks = computed(() =>
+  usesCompletedSeasonValues.value
+    ? 18
+    : Math.max(1, 18 - selectedWeek.value + 1)
+);
+
 const draftSeasons = computed(() => {
+  if (dynasty.value && dynastyPickAssets.value.length > 0) {
+    return [
+      ...new Set(dynastyPickAssets.value.map((pick) => pick.season)),
+    ].sort((a, b) => a - b);
+  }
   const baseYear =
     Number(activeLeague.value?.season) || new Date().getFullYear();
   return [baseYear, baseYear + 1, baseYear + 2];
 });
 
 const draftRounds = computed(() => {
+  if (dynasty.value && dynastyPickAssets.value.length > 0) {
+    const maxRound = Math.max(
+      ...dynastyPickAssets.value.map((pick) => pick.round)
+    );
+    return Array.from({ length: maxRound }, (_, idx) => idx + 1);
+  }
   const picks = activeLeague.value?.draftPicks || [];
   const maxRoundFromLeague = picks.reduce((maxRound, pick) => {
     return Math.max(maxRound, Number(pick.round || 0));
@@ -136,6 +181,20 @@ const teamA = computed(() =>
 const teamB = computed(() =>
   rosters.value.find((team) => team.id === selectedTeamBId.value)
 );
+const availableTeamAPicks = computed(() =>
+  dynastyPickAssets.value.filter(
+    (pick) =>
+      pick.ownerRosterId === selectedTeamAId.value &&
+      !teamAPicks.value.some((selected) => selected.id === pick.id)
+  )
+);
+const availableTeamBPicks = computed(() =>
+  dynastyPickAssets.value.filter(
+    (pick) =>
+      pick.ownerRosterId === selectedTeamBId.value &&
+      !teamBPicks.value.some((selected) => selected.id === pick.id)
+  )
+);
 
 const teamAOutgoingPlayers = computed(() => {
   if (!teamA.value) return [];
@@ -161,99 +220,74 @@ const isTradePackageEmpty = computed(
     teamBFaab.value === 0
 );
 
-const getWeekLineup = (team: TableDataType, weekIndex: number) => {
-  const starters =
-    Array.isArray(team.starters?.[weekIndex]) && team.starters[weekIndex]
-      ? team.starters[weekIndex]
-      : [];
-  const benchByWeek = Array.isArray(team.benchPlayers?.[weekIndex])
-    ? team.benchPlayers[weekIndex]
-    : [];
-  const bench =
-    benchByWeek.length > 0
-      ? benchByWeek
-      : (team.players || []).filter((id) => !starters.includes(id));
+const teamAHasAssets = computed(
+  () =>
+    teamASends.value.length > 0 ||
+    teamAPicks.value.length > 0 ||
+    teamAFaab.value > 0
+);
+const teamBHasAssets = computed(
+  () =>
+    teamBSends.value.length > 0 ||
+    teamBPicks.value.length > 0 ||
+    teamBFaab.value > 0
+);
 
-  return { starters, bench };
-};
-
+let rosterRequestId = 0;
 const fetchPlayers = async () => {
+  const currentRequestId = ++rosterRequestId;
   if (store.leagueIds.length === 0 || !activeLeague.value) {
     rosters.value = [];
+    dynastyPickAssets.value = [];
+    tradeValueRequest.value = null;
+    loading.value = false;
     return;
   }
 
   loading.value = true;
-  const weekIndex = selectedWeek.value - 1;
   const currentLeague = activeLeague.value;
 
   try {
-    const uniquePlayerIds = Array.from(
-      new Set(
-        props.tableData
-          .map((team) => {
-            const lineup = getWeekLineup(team, weekIndex);
-            return [...lineup.starters, ...lineup.bench];
-          })
-          .flat()
-      )
-    );
-
-    const playerMap =
-      uniquePlayerIds.length > 0
-        ? await getPlayersByIdsMap(uniquePlayerIds)
-        : new Map<string, Player>();
-
-    const projectionEntries = await Promise.all(
-      uniquePlayerIds.map(async (playerId) => {
-        const projection = await getStats(
-          playerId,
-          currentLeague.season,
-          currentLeague.scoringType
-        );
-        return [
-          playerId,
-          {
-            rank: Number(projection?.rank || 0),
-            overallRank: Number(projection?.overallRank || 0),
-          },
-        ] as const;
-      })
-    );
-    const projectionMap = new Map<
-      string,
-      { rank: number; overallRank: number }
-    >(projectionEntries);
-
-    rosters.value = props.tableData.map((team) => {
-      const { starters, bench } = getWeekLineup(team, weekIndex);
-      const allPlayers = [...starters, ...bench]
-        .map((playerId) => {
-          const playerMeta = playerMap.get(playerId);
-          if (!playerMeta) return null;
-          const playerProjection = projectionMap.get(playerId);
-
-          return {
-            ...playerMeta,
-            projection: Number(playerProjection?.rank || 0),
-            overallRank: Number(playerProjection?.overallRank || 0),
-          };
-        })
-        .filter((player): player is TradeLabPlayer => player !== null)
-        .sort((a, b) => a.overallRank - b.overallRank);
-
-      const managerName = store.showUsernames
-        ? team.username || team.name
-        : team.name || team.username;
-
-      return {
-        id: team.rosterId,
-        managerName: managerName || `Roster ${team.rosterId}`,
-        players: allPlayers,
-      };
+    const request = buildTradeValueRequest({
+      league: currentLeague,
+      tableData: props.tableData,
+      selectedWeek: selectedWeek.value,
+      showUsernames: store.showUsernames,
+      dynastyPerspective: dynastyPerspective.value,
     });
+    tradeValueRequest.value = request;
+    const nextRosters = await loadTradeBuilderRosters({
+      league: currentLeague,
+      tableData: props.tableData,
+      selectedWeek: selectedWeek.value,
+      showUsernames: store.showUsernames,
+    });
+    if (currentRequestId !== rosterRequestId) return;
+    rosters.value = nextRosters;
+    syncTeamSelections();
+    const nextDraftPicks = await loadDynastyDraftPickAssets({
+      league: currentLeague,
+      rosters: nextRosters,
+    });
+    if (currentRequestId !== rosterRequestId) return;
+    dynastyPickAssets.value = nextDraftPicks;
+    void getPlayerValues(request)
+      .then((values) => {
+        if (
+          currentRequestId !== rosterRequestId ||
+          tradeValueRequest.value !== request
+        ) {
+          return;
+        }
+        rosters.value = applyTradeBuilderRankingResponse(nextRosters, values);
+      })
+      .catch((error) => {
+        console.error("Unable to load ranking preview:", error);
+      });
   } finally {
-    loading.value = false;
+    if (currentRequestId === rosterRequestId) {
+      loading.value = false;
+    }
   }
 };
 
@@ -268,13 +302,23 @@ const resetTrade = () => {
   pendingBPickSeason.value = draftSeasons.value[0] ?? null;
   pendingAPickRound.value = draftRounds.value[0] ?? null;
   pendingBPickRound.value = draftRounds.value[0] ?? null;
+  pendingAPickId.value = "";
+  pendingBPickId.value = "";
 };
 
 const syncTeamSelections = () => {
+  const previousTeamAId = selectedTeamAId.value;
+  const previousTeamBId = selectedTeamBId.value;
+
   if (rosters.value.length < 2) {
     selectedTeamAId.value = rosters.value[0]?.id ?? null;
     selectedTeamBId.value = null;
-    resetTrade();
+    if (
+      selectedTeamAId.value !== previousTeamAId ||
+      selectedTeamBId.value !== previousTeamBId
+    ) {
+      resetTrade();
+    }
     return;
   }
 
@@ -298,7 +342,12 @@ const syncTeamSelections = () => {
       null;
   }
 
-  resetTrade();
+  if (
+    selectedTeamAId.value !== previousTeamAId ||
+    selectedTeamBId.value !== previousTeamBId
+  ) {
+    resetTrade();
+  }
 };
 
 const handleTeamSelectionChange = (team: "A" | "B", rosterId: number) => {
@@ -360,6 +409,23 @@ const removeFromPackage = (targetTeam: "A" | "B", playerId: string) => {
 };
 
 const addDraftPickToPackage = (team: "A" | "B") => {
+  if (dynasty.value && dynastyPickAssets.value.length > 0) {
+    const pickId = team === "A" ? pendingAPickId.value : pendingBPickId.value;
+    const availablePicks =
+      team === "A" ? availableTeamAPicks.value : availableTeamBPicks.value;
+    const pick = availablePicks.find((entry) => entry.id === pickId);
+    if (!pick) return;
+
+    if (team === "A") {
+      teamAPicks.value.push(pick);
+      pendingAPickId.value = "";
+    } else {
+      teamBPicks.value.push(pick);
+      pendingBPickId.value = "";
+    }
+    return;
+  }
+
   const season =
     team === "A" ? pendingAPickSeason.value : pendingBPickSeason.value;
   const round =
@@ -449,151 +515,149 @@ const overallRankClass = (rank: number) => {
   return waiverPaletteClass(5);
 };
 
-const positionWeights: Record<string, number> = {
-  QB: 0.82,
-  RB: 1.3,
-  WR: 1.16,
-  TE: 1.08,
-  K: 0.35,
-  DEF: 0.45,
-};
-
-const depthMultipliers = [1, 0.64, 0.38, 0.2];
-const faabValuePerDollar = 0.17;
-
-const rankToScore = (rank: number) => {
-  if (!rank || rank <= 0) return 0;
-  return 100 / Math.sqrt(rank + 2);
-};
-
-const getPlayerTradeScore = (player: TradeLabPlayer) => {
-  const posScore = rankToScore(player.projection);
-  const overallScore = rankToScore(player.overallRank);
-  const baseScore = posScore * 0.67 + overallScore * 0.33;
-  const positionWeight = positionWeights[player.position] ?? 1;
-  return baseScore * positionWeight;
-};
-
-const getPackageTradeValue = (players: TradeLabPlayer[]) => {
-  if (players.length === 0) return 0;
-  const sortedScores = players
-    .map((player) => getPlayerTradeScore(player))
-    .sort((a, b) => b - a);
-
-  const total = sortedScores.reduce((sum, score, index) => {
-    const multiplier =
-      depthMultipliers[index] ?? depthMultipliers[depthMultipliers.length - 1];
-    return sum + score * multiplier;
-  }, 0);
-
-  return Number(total.toFixed(2));
-};
-
-const getDraftPickTradeValue = (pick: TradeDraftPickAsset) => {
-  const roundBaseValue =
-    {
-      1: 38,
-      2: 24,
-      3: 14,
-      4: 8,
-      5: 5,
-      6: 3.2,
-      7: 2.2,
-      8: 1.6,
-      9: 1.2,
-      10: 0.9,
-      11: 0.7,
-      12: 0.55,
-    }[pick.round] ?? Math.max(0.4, 7 / (pick.round + 1));
-
-  const seasonGap = Math.max(0, pick.season - draftSeasons.value[0]);
-  const seasonMultiplier = Math.max(0.74, 1 - seasonGap * 0.1);
-
-  return Number((roundBaseValue * seasonMultiplier).toFixed(2));
-};
-
-const teamAPlayerValue = computed(() =>
-  getPackageTradeValue(teamAOutgoingPlayers.value)
-);
-const teamBPlayerValue = computed(() =>
-  getPackageTradeValue(teamBOutgoingPlayers.value)
-);
-
-const teamADraftPickValue = computed(() =>
-  Number(
-    teamAPicks.value
-      .reduce((sum, pick) => sum + getDraftPickTradeValue(pick), 0)
-      .toFixed(2)
-  )
-);
-const teamBDraftPickValue = computed(() =>
-  Number(
-    teamBPicks.value
-      .reduce((sum, pick) => sum + getDraftPickTradeValue(pick), 0)
-      .toFixed(2)
-  )
-);
-
-const teamAFaabValue = computed(() =>
-  Number((teamAFaab.value * faabValuePerDollar).toFixed(2))
-);
-const teamBFaabValue = computed(() =>
-  Number((teamBFaab.value * faabValuePerDollar).toFixed(2))
-);
-
-const teamATradeValue = computed(() =>
-  Number(
-    (
-      teamAPlayerValue.value +
-      teamADraftPickValue.value +
-      teamAFaabValue.value
-    ).toFixed(2)
-  )
-);
-const teamBTradeValue = computed(() =>
-  Number(
-    (
-      teamBPlayerValue.value +
-      teamBDraftPickValue.value +
-      teamBFaabValue.value
-    ).toFixed(2)
-  )
-);
-
-const tradeDelta = computed(() =>
-  Number((teamATradeValue.value - teamBTradeValue.value).toFixed(2))
-);
-
-const fairnessPercent = computed(() => {
-  const maxSide = Math.max(teamATradeValue.value, teamBTradeValue.value, 1);
-  return Number(((Math.abs(tradeDelta.value) / maxSide) * 100).toFixed(1));
+const fairnessLabel = computed(() => {
+  if (isTradePackageEmpty.value) return "No assets selected";
+  if (!teamAHasAssets.value || !teamBHasAssets.value) {
+    return "Add assets to both sides";
+  }
+  return tradeQuote.value?.fairnessLabel ?? "Waiting for estimate";
 });
 
-const fairnessLabel = computed(() => {
-  if (teamATradeValue.value === 0 && teamBTradeValue.value === 0) {
-    return "No assets selected";
-  }
-  if (fairnessPercent.value <= 10) return "Very fair";
-  if (fairnessPercent.value <= 22) return "Reasonably fair";
-  if (fairnessPercent.value <= 35) return "Slightly uneven";
-  return "Very uneven";
+const favoredLabel = computed(() => {
+  if (!tradeQuote.value) return "";
+  if (tradeQuote.value.favoredSide === "even") return "Even trade";
+  const manager =
+    tradeQuote.value.favoredSide === "team_a"
+      ? teamA.value?.managerName
+      : teamB.value?.managerName;
+  return manager ? `${manager} favored` : "One side favored";
+});
+
+const gapBandLabel = computed(() => {
+  const gapBand = tradeQuote.value?.gapBand;
+  if (gapBand === "within_10_percent") return "Within 10%";
+  if (gapBand === "10_to_20_percent") return "10–20%";
+  if (gapBand === "20_to_35_percent") return "20–35%";
+  if (gapBand === "greater_than_35_percent") return "Greater than 35%";
+  return "";
 });
 
 const fairnessPillClass = computed(() => {
-  if (teamATradeValue.value === 0 && teamBTradeValue.value === 0) {
+  if (!tradeQuote.value) {
     return "bg-muted text-muted-foreground";
   }
-  if (fairnessPercent.value <= 10) return waiverPaletteClass(1);
-  if (fairnessPercent.value <= 22) return waiverPaletteClass(2);
-  if (fairnessPercent.value <= 35) return waiverPaletteClass(4);
+  if (tradeQuote.value.gapBand === "within_10_percent") {
+    return waiverPaletteClass(1);
+  }
+  if (tradeQuote.value.gapBand === "10_to_20_percent") {
+    return waiverPaletteClass(2);
+  }
+  if (tradeQuote.value.gapBand === "20_to_35_percent") {
+    return waiverPaletteClass(4);
+  }
   return waiverPaletteClass(5);
 });
+
+let quoteRequestId = 0;
+watch(
+  [
+    tradeValueRequest,
+    teamASends,
+    teamBSends,
+    teamAPicks,
+    teamBPicks,
+    teamAFaab,
+    teamBFaab,
+    selectedTeamAId,
+    selectedTeamBId,
+    quoteRetryNonce,
+  ],
+  (_values, _oldValues, onCleanup) => {
+    const currentRequestId = ++quoteRequestId;
+    const request = tradeValueRequest.value;
+    quoteLoading.value = false;
+    quoteError.value = "";
+    if (
+      !request ||
+      selectedTeamAId.value == null ||
+      selectedTeamBId.value == null ||
+      !teamAHasAssets.value ||
+      !teamBHasAssets.value
+    ) {
+      tradeQuote.value = null;
+      return;
+    }
+
+    const quote = {
+      teamARosterId: selectedTeamAId.value,
+      teamBRosterId: selectedTeamBId.value,
+      teamAPlayerIds: [...teamASends.value],
+      teamBPlayerIds: [...teamBSends.value],
+      teamAPicks: teamAPicks.value.map(({ season, round }) => ({
+        season,
+        round,
+      })),
+      teamBPicks: teamBPicks.value.map(({ season, round }) => ({
+        season,
+        round,
+      })),
+      teamAFaab: teamAFaab.value,
+      teamBFaab: teamBFaab.value,
+      firstDraftSeason: draftSeasons.value[0] ?? new Date().getFullYear(),
+    };
+
+    const timer = window.setTimeout(async () => {
+      if (currentRequestId !== quoteRequestId) return;
+      quoteLoading.value = true;
+      try {
+        const result = await getTradeQuote(request, quote);
+        if (currentRequestId === quoteRequestId) {
+          tradeQuote.value = result;
+        }
+      } catch (error) {
+        if (currentRequestId === quoteRequestId) {
+          console.error("Unable to update trade quote:", error);
+          tradeQuote.value = null;
+          quoteError.value = "Unable to evaluate this trade right now.";
+        }
+      } finally {
+        if (currentRequestId === quoteRequestId) {
+          quoteLoading.value = false;
+        }
+      }
+    }, 250);
+    onCleanup(() => window.clearTimeout(timer));
+  },
+  { deep: true }
+);
+
+const retryTradeQuote = () => {
+  quoteRetryNonce.value += 1;
+};
+
+const openTradeSuggestion = (suggestion: TradeSuggestion) => {
+  selectedTeamAId.value = suggestion.teamAId;
+  selectedTeamBId.value = suggestion.teamBId;
+  resetTrade();
+  teamASends.value = suggestion.teamASends.map((player) => player.playerId);
+  teamBSends.value = suggestion.teamBSends.map((player) => player.playerId);
+  activeMode.value = "builder";
+};
 
 watch(
   () => store.currentLeagueId,
   () => {
-    selectedWeek.value = fallbackWeek.value;
-    fetchPlayers();
+    ++rosterRequestId;
+    ++quoteRequestId;
+    selectedTeamAId.value = null;
+    selectedTeamBId.value = null;
+    resetTrade();
+    const nextWeek = fallbackWeek.value;
+    if (selectedWeek.value === nextWeek) {
+      fetchPlayers();
+    } else {
+      selectedWeek.value = nextWeek;
+    }
   }
 );
 
@@ -602,10 +666,9 @@ watch(
   () => fetchPlayers()
 );
 
-watch(
-  () => rosters.value,
-  () => syncTeamSelections()
-);
+watch(dynastyPerspective, () => {
+  if (dynasty.value) fetchPlayers();
+});
 
 watch(
   () => draftSeasons.value,
@@ -660,22 +723,58 @@ onBeforeUnmount(() => {
   <Card class="w-full h-full p-4 mt-4 md:p-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <h2 class="heading-section">Trade Lab</h2>
-      <Tabs v-model="activeMode">
-        <TabsList>
-          <TabsTrigger value="builder">Builder</TabsTrigger>
-          <TabsTrigger value="database">Database</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <Select v-if="dynasty" v-model="dynastyPerspective">
+          <SelectTrigger class="w-36" aria-label="Dynasty team direction">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="balanced">Balanced</SelectItem>
+            <SelectItem value="contender">Contender</SelectItem>
+            <SelectItem value="rebuilder">Rebuilder</SelectItem>
+          </SelectContent>
+        </Select>
+        <Tabs v-model="activeMode">
+          <TabsList>
+            <TabsTrigger value="builder">Builder</TabsTrigger>
+            <TabsTrigger value="finder">Finder</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
     </div>
     <TradeDatabase v-if="activeMode === 'database'" class="mt-4" />
+    <TradeFinder
+      v-else-if="activeMode === 'finder'"
+      :rosters="rosters"
+      :request="tradeValueRequest"
+      :roster-positions="activeLeague?.rosterPositions || []"
+      :remaining-weeks="remainingWeeks"
+      :loading="loading"
+      :valuation-mode="
+        dynasty
+          ? 'dynasty'
+          : usesCompletedSeasonValues
+            ? 'season-results'
+            : 'ros-projection'
+      "
+      :dynasty-perspective="dynastyPerspective"
+      @open-suggestion="openTradeSuggestion"
+    />
     <div v-else>
       <p
         v-if="!isMobile"
         class="max-w-3xl my-4 text-muted-foreground text-balance"
       >
         Drag players into each team's package to brainstorm offers. The trade
-        value estimate combines player rank strength, position scarcity, and
-        depth discounts.
+        value estimate combines
+        {{
+          dynasty
+            ? "dynasty ADP and league specific projected value"
+            : usesCompletedSeasonValues
+              ? "full-season performance"
+              : "rest-of-season projections"
+        }}, league specific replacement value, and package depth discounts.
       </p>
       <p v-if="isMobile" class="mt-4 mb-2 text-sm text-muted-foreground">
         Click/tap players to add or remove from each package.
@@ -831,10 +930,10 @@ onBeforeUnmount(() => {
                     <span
                       :class="[
                         'rounded-md px-2 py-1 text-xs font-semibold',
-                        posRankClass(player.projection),
+                        posRankClass(player.positionRank),
                       ]"
                     >
-                      POS {{ rankLabel(player.projection) }}
+                      POS {{ rankLabel(player.positionRank) }}
                     </span>
                     <span
                       :class="[
@@ -866,11 +965,15 @@ onBeforeUnmount(() => {
                   v-model:faab="teamAFaabInputModel"
                   v-model:pick-season="pendingAPickSeasonModel"
                   v-model:pick-round="pendingAPickRoundModel"
+                  v-model:pick-id="pendingAPickId"
                   :manager-name="teamA?.managerName"
                   fallback-team-label="first team"
                   input-id="trade-faab-a"
                   :draft-seasons="draftSeasons"
                   :draft-rounds="draftRounds"
+                  :available-draft-picks="
+                    dynasty ? availableTeamAPicks : undefined
+                  "
                   trigger-class="-mt-1"
                   @open="openAssetsModal('A')"
                   @add-faab="addFaabToPackage('A')"
@@ -898,7 +1001,7 @@ onBeforeUnmount(() => {
                       :key="`a-pill-${pick.id}`"
                       class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
                     >
-                      {{ pick.season }} R{{ pick.round }}
+                      {{ pick.label || `${pick.season} R${pick.round}` }}
                       <button
                         type="button"
                         :aria-label="`Remove ${pick.season} round ${pick.round} pick from first trade package`"
@@ -939,10 +1042,10 @@ onBeforeUnmount(() => {
                       <span
                         :class="[
                           'rounded-md px-2 py-1 text-xs font-semibold',
-                          posRankClass(player.projection),
+                          posRankClass(player.positionRank),
                         ]"
                       >
-                        POS {{ rankLabel(player.projection) }}
+                        POS {{ rankLabel(player.positionRank) }}
                       </span>
                       <span
                         :class="[
@@ -979,11 +1082,15 @@ onBeforeUnmount(() => {
                   v-model:faab="teamBFaabInputModel"
                   v-model:pick-season="pendingBPickSeasonModel"
                   v-model:pick-round="pendingBPickRoundModel"
+                  v-model:pick-id="pendingBPickId"
                   :manager-name="teamB?.managerName"
                   fallback-team-label="second team"
                   input-id="trade-faab-b"
                   :draft-seasons="draftSeasons"
                   :draft-rounds="draftRounds"
+                  :available-draft-picks="
+                    dynasty ? availableTeamBPicks : undefined
+                  "
                   trigger-class="-mt-0.5"
                   @open="openAssetsModal('B')"
                   @add-faab="addFaabToPackage('B')"
@@ -1010,7 +1117,7 @@ onBeforeUnmount(() => {
                     :key="`b-pill-${pick.id}`"
                     class="inline-flex items-center gap-1 px-2 py-1 text-xs border rounded-md border-border bg-background"
                   >
-                    {{ pick.season }} R{{ pick.round }}
+                    {{ pick.label || `${pick.season} R${pick.round}` }}
                     <button
                       type="button"
                       :aria-label="`Remove ${pick.season} round ${pick.round} pick from second trade package`"
@@ -1052,10 +1159,10 @@ onBeforeUnmount(() => {
                       <span
                         :class="[
                           'rounded-md px-2 py-1 text-xs font-semibold',
-                          posRankClass(player.projection),
+                          posRankClass(player.positionRank),
                         ]"
                       >
-                        POS {{ rankLabel(player.projection) }}
+                        POS {{ rankLabel(player.positionRank) }}
                       </span>
                       <span
                         :class="[
@@ -1081,22 +1188,6 @@ onBeforeUnmount(() => {
             <Separator class="h-px my-3" />
             <div class="p-1">
               <p class="mb-2 text-sm font-semibold">Trade Value Estimate</p>
-              <div class="flex items-center justify-between mb-1.5 text-sm">
-                <span>{{ teamA?.managerName }}</span>
-                <span class="font-semibold">{{ teamATradeValue }}</span>
-              </div>
-              <div class="mb-2 text-xs text-muted-foreground">
-                Players: {{ teamAPlayerValue }} | Picks:
-                {{ teamADraftPickValue }} | FAAB: {{ teamAFaabValue }}
-              </div>
-              <div class="flex items-center justify-between mb-1.5 text-sm">
-                <span>{{ teamB?.managerName }}</span>
-                <span class="font-semibold">{{ teamBTradeValue }}</span>
-              </div>
-              <div class="mb-2 text-xs text-muted-foreground">
-                Players: {{ teamBPlayerValue }} | Picks:
-                {{ teamBDraftPickValue }} | FAAB: {{ teamBFaabValue }}
-              </div>
               <div class="flex items-center justify-between">
                 <span
                   :class="[
@@ -1106,9 +1197,24 @@ onBeforeUnmount(() => {
                 >
                   {{ fairnessLabel }}
                 </span>
-                <span class="text-xs text-muted-foreground">
-                  gap: {{ fairnessPercent }}%
+                <span v-if="quoteLoading" class="text-xs text-muted-foreground">
+                  Updating…
                 </span>
+                <span
+                  v-else-if="tradeQuote"
+                  class="text-xs text-muted-foreground"
+                >
+                  {{ favoredLabel }} · {{ gapBandLabel }} gap
+                </span>
+              </div>
+              <div
+                v-if="quoteError"
+                class="flex items-center justify-between gap-3 p-3 mt-3 border rounded-md border-destructive/30"
+              >
+                <p class="text-xs text-destructive">{{ quoteError }}</p>
+                <Button variant="outline" size="sm" @click="retryTradeQuote">
+                  Retry
+                </Button>
               </div>
               <Separator class="h-px mt-3" />
             </div>
@@ -1182,10 +1288,10 @@ onBeforeUnmount(() => {
                     <span
                       :class="[
                         'rounded-md px-2 py-1 text-xs font-semibold',
-                        posRankClass(player.projection),
+                        posRankClass(player.positionRank),
                       ]"
                     >
-                      POS {{ rankLabel(player.projection) }}
+                      POS {{ rankLabel(player.positionRank) }}
                     </span>
                     <span
                       :class="[
@@ -1201,6 +1307,12 @@ onBeforeUnmount(() => {
             </div>
           </Card>
         </div>
+      </div>
+      <div
+        class="pt-3 mt-4 text-xs border-t border-border text-muted-foreground"
+      >
+        POS/OVR badges use standard Sleeper season rankings. Player Values adds
+        rankings adjusted for your league's scoring and roster format.
       </div>
     </div>
   </Card>

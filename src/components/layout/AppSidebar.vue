@@ -34,6 +34,7 @@ import {
   Dices,
   FlaskConical,
   IdCard,
+  ListOrdered,
 } from "lucide-vue-next";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
@@ -108,6 +109,7 @@ const featureIcons: Record<LeagueFeature, Component> = {
   "Weekly Report": NotebookPen,
   Playoffs: Trophy,
   "Start/Sit": Newspaper,
+  "Player Values": ListOrdered,
   "Season Forecast": Dices,
   "Trade Lab": FlaskConical,
   Draft: Users,

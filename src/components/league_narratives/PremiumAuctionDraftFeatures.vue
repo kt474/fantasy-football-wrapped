@@ -213,18 +213,22 @@ const formatRoomDifference = (position: string, amount: number) => {
                 {{ formatPercent(allocation.share) }}
               </p>
               <p
-                v-if="formatRoomDifference(allocation.position, allocation.amount)"
+                v-if="
+                  formatRoomDifference(allocation.position, allocation.amount)
+                "
                 class="pt-2 mt-2 text-xs border-t text-muted-foreground"
               >
-                {{ formatRoomDifference(allocation.position, allocation.amount) }}
+                {{
+                  formatRoomDifference(allocation.position, allocation.amount)
+                }}
               </p>
             </div>
           </div>
         </template>
 
         <p class="mt-4 text-xs leading-relaxed text-muted-foreground">
-          Based on completed non-keeper purchases. Unspent dollars and
-          league-specific rules can change the final allocation.
+          Based on completed non-keeper purchases. Unspent dollars and league
+          specific rules can change the final allocation.
         </p>
       </Card>
     </div>

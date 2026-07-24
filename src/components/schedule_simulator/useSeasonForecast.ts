@@ -1,10 +1,7 @@
 import { computed, ref, watch, type ComputedRef, type Ref } from "vue";
 
-import {
-  getPlayerPositionsById,
-  getProjections,
-  getWeeklyProjections,
-} from "@/api/sleeperApi";
+import { getPlayersByIdsMap } from "@/api/api";
+import { getProjections, getWeeklyProjections } from "@/api/sleeperApi";
 import { mapWithConcurrency } from "@/lib/async";
 import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
 import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
@@ -194,7 +191,16 @@ export const useSeasonForecast = ({
       ];
       let positionsByPlayer: Record<string, string> | null = null;
       try {
-        positionsByPlayer = await getPlayerPositionsById(playerIds);
+        const playersById = await getPlayersByIdsMap(playerIds);
+        if (playersById.size !== playerIds.length) {
+          throw new Error("Player metadata response was incomplete");
+        }
+        positionsByPlayer = Object.fromEntries(
+          playerIds.map((playerId) => [
+            playerId,
+            playersById.get(playerId)?.position || "",
+          ])
+        );
       } catch (error) {
         console.error("Error fetching player positions:", error);
       }

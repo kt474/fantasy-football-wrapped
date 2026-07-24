@@ -233,7 +233,7 @@ const pages = [
     sections: [
       {
         title: "Career manager profiles",
-        body: "Combine career records, scoring, lineup efficiency, playoff appearances, titles, transactions, and draft habits into a league-specific manager identity.",
+        body: "Combine career records, scoring, lineup efficiency, playoff appearances, titles, transactions, and draft habits into a league specific manager identity.",
       },
       {
         title: "Personalized profile commentary",

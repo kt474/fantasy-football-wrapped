@@ -55,6 +55,11 @@ import {
   getPostPurchaseActivation,
   type PostPurchaseActivation,
 } from "@/lib/postPurchaseActivation";
+import {
+  getPremiumUpgradeDescription,
+  isPremiumUpgradeIntent,
+  normalizePremiumUpgradeIntent,
+} from "@/lib/premiumUpgradeIntent";
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
@@ -103,12 +108,7 @@ const isUpgradeFlow = computed(() => {
   const intent = Array.isArray(route.query.intent)
     ? route.query.intent[0]
     : route.query.intent;
-  return (
-    intent === "premium_report" ||
-    intent === "manager_profiles" ||
-    intent === "rivalry_report" ||
-    intent === "draft_room"
-  );
+  return isPremiumUpgradeIntent(intent);
 });
 
 const shouldShowAuthentication = computed(
@@ -122,12 +122,7 @@ const upgradeIntent = computed(() => {
   const value = Array.isArray(route.query.intent)
     ? route.query.intent[0]
     : route.query.intent;
-  return value === "premium_report" ||
-    value === "manager_profiles" ||
-    value === "rivalry_report" ||
-    value === "draft_room"
-    ? value
-    : "premium";
+  return normalizePremiumUpgradeIntent(value);
 });
 
 const upgradeSource = computed(() => {
@@ -174,21 +169,9 @@ const getCheckoutReturnAnalytics = () => {
   };
 };
 
-const premiumDescription = computed(() => {
-  if (upgradeIntent.value === "premium_report") {
-    return "Create shareable weekly newsletters and video recaps with custom commentary styles for every league you manage.";
-  }
-  if (upgradeIntent.value === "manager_profiles") {
-    return "Discover each manager’s tendencies, strengths, and identity across your league history.";
-  }
-  if (upgradeIntent.value === "rivalry_report") {
-    return "Turn your league history into personalized rivalry stories and bragging rights.";
-  }
-  if (upgradeIntent.value === "draft_room") {
-    return "Use your league’s draft history to plan each round and scout every manager’s tendencies before you are on the clock.";
-  }
-  return "Get customizable shared weekly newsletters, video recaps, draft scouting, manager profiles, and rivalry reports for every league you manage.";
-});
+const premiumDescription = computed(() =>
+  getPremiumUpgradeDescription(upgradeIntent.value)
+);
 
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
   /\/$/,
@@ -817,7 +800,12 @@ const openPostPurchaseDestination = async () => {
     session_id: _sessionId,
     ...query
   } = route.query;
-  await router.push({ path: "/", query });
+  await router.push({
+    path: "/",
+    query: activation.destinationMode
+      ? { ...query, tradeMode: activation.destinationMode }
+      : query,
+  });
 };
 
 const ensureLeagueIdQueryParam = async () => {

@@ -197,7 +197,7 @@ describe("league IndexedDB storage", () => {
       expect(getLeagueKey(store.currentLeague)).toBe(leagueKey);
     });
 
-    const now = new Date("2026-07-16T12:00:00Z").getTime();
+    const now = Date.now();
     for (const [index, leagueKey] of leagueKeys.entries()) {
       await setCachedValue(
         getNarrativeBundleCacheKey(leagueKey),

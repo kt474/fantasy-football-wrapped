@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { ArrowLeftRight, ArrowRight, Search } from "lucide-vue-next";
 import {
   getPlayerTradeDatabase,
   getPlayersByIdsMap,
+  searchPlayers,
   type TradeDatabaseAsset,
   type TradeDatabaseResult,
 } from "@/api/api";
-import {
-  getSearchablePlayers,
-  type SearchableSleeperPlayer,
-} from "@/api/sleeperApi";
 import type { Player } from "@/types/apiTypes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,15 +22,17 @@ import {
 } from "@/components/ui/select";
 
 const PAGE_SIZE = 20;
+const PLAYER_SEARCH_DELAY_MS = 250;
 
 const query = ref("");
-const directory = ref<SearchableSleeperPlayer[]>([]);
-const selectedPlayer = ref<SearchableSleeperPlayer | null>(null);
+const searchResults = ref<Player[]>([]);
+const selectedPlayer = ref<Player | null>(null);
 const trades = ref<TradeDatabaseResult[]>([]);
 const playerLookup = ref(new Map<string, Player>());
-const loadingDirectory = ref(false);
+const loadingPlayerSearch = ref(false);
 const loadingTrades = ref(false);
 const errorMessage = ref("");
+const playerSearchError = ref("");
 const totalTrades = ref(0);
 const hasMore = ref(false);
 const searchFocused = ref(false);
@@ -47,31 +46,64 @@ const suggestions = computed(() => {
   const normalizedQuery = query.value.trim().toLowerCase();
   if (normalizedQuery.length < 2 || selectedPlayer.value) return [];
 
-  return directory.value
-    .filter((player) => {
-      const searchable =
-        `${player.name} ${player.team} ${player.position}`.toLowerCase();
-      return searchable.includes(normalizedQuery);
-    })
-    .slice(0, 8);
+  return searchResults.value;
 });
 
 const showSuggestions = computed(
   () => searchFocused.value && suggestions.value.length > 0
 );
 
-const loadDirectory = async () => {
-  if (directory.value.length || loadingDirectory.value) return;
-  loadingDirectory.value = true;
-  try {
-    directory.value = await getSearchablePlayers();
-  } catch (error) {
-    console.error("Unable to load player directory:", error);
-    errorMessage.value = "Player search is unavailable right now.";
-  } finally {
-    loadingDirectory.value = false;
+watch(query, (value, _previousValue, onCleanup) => {
+  searchResults.value = [];
+  playerSearchError.value = "";
+
+  const normalizedQuery = value.trim();
+  if (
+    selectedPlayer.value &&
+    normalizedQuery !== selectedPlayer.value.name
+  ) {
+    selectedPlayer.value = null;
+    trades.value = [];
+    totalTrades.value = 0;
+    hasMore.value = false;
   }
-};
+
+  if (
+    normalizedQuery.length < 2 ||
+    selectedPlayer.value?.name === normalizedQuery
+  ) {
+    loadingPlayerSearch.value = false;
+    return;
+  }
+
+  let controller: AbortController | null = null;
+  const timer = window.setTimeout(async () => {
+    controller = new AbortController();
+    loadingPlayerSearch.value = true;
+    try {
+      const players = await searchPlayers(
+        normalizedQuery,
+        8,
+        controller.signal
+      );
+      searchResults.value = players;
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        console.error("Unable to search players:", error);
+        playerSearchError.value = "Player search is unavailable right now.";
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        loadingPlayerSearch.value = false;
+      }
+    }
+  }, PLAYER_SEARCH_DELAY_MS);
+
+  onCleanup(() => {
+    window.clearTimeout(timer);
+    controller?.abort();
+  });
+});
 
 const loadPlayerNames = async (results: TradeDatabaseResult[]) => {
   const missingIds = Array.from(
@@ -133,7 +165,7 @@ const fetchTrades = async (append = false) => {
   }
 };
 
-const selectPlayer = async (player: SearchableSleeperPlayer) => {
+const selectPlayer = async (player: Player) => {
   selectedPlayer.value = player;
   query.value = player.name;
   searchFocused.value = false;
@@ -142,18 +174,23 @@ const selectPlayer = async (player: SearchableSleeperPlayer) => {
   await fetchTrades();
 };
 
-const handleQueryInput = () => {
-  if (selectedPlayer.value && query.value !== selectedPlayer.value.name) {
-    selectedPlayer.value = null;
-    trades.value = [];
-    totalTrades.value = 0;
-    hasMore.value = false;
+let closeSuggestionsTimer: number | undefined;
+
+const openSuggestions = () => {
+  if (closeSuggestionsTimer !== undefined) {
+    window.clearTimeout(closeSuggestionsTimer);
+    closeSuggestionsTimer = undefined;
   }
+  searchFocused.value = true;
 };
 
 const closeSuggestions = () => {
-  window.setTimeout(() => {
+  if (closeSuggestionsTimer !== undefined) {
+    window.clearTimeout(closeSuggestionsTimer);
+  }
+  closeSuggestionsTimer = window.setTimeout(() => {
     searchFocused.value = false;
+    closeSuggestionsTimer = undefined;
   }, 150);
 };
 
@@ -185,7 +222,7 @@ const playerImageUrl = (playerId: string) =>
 const defenseImageUrl = (playerId: string) =>
   `https://sleepercdn.com/images/team_logos/nfl/${playerId.toLowerCase()}.png`;
 
-const searchablePlayerImageUrl = (player: SearchableSleeperPlayer) =>
+const searchablePlayerImageUrl = (player: Player) =>
   player.position === "DEF"
     ? defenseImageUrl(player.player_id)
     : playerImageUrl(player.player_id);
@@ -269,11 +306,8 @@ const leagueTypeLabel = (type: string | null) => {
           class="pl-9"
           placeholder="Search players..."
           autocomplete="off"
-          @focus="
-            searchFocused = true;
-            loadDirectory();
-          "
-          @input="handleQueryInput"
+          @focus="openSuggestions"
+          @input="openSuggestions"
           @blur="closeSuggestions"
         />
         <div
@@ -306,8 +340,17 @@ const leagueTypeLabel = (type: string | null) => {
           </button>
         </div>
       </div>
-      <p v-if="loadingDirectory" class="mt-2 text-xs text-muted-foreground">
-        Loading player search…
+      <p
+        v-if="loadingPlayerSearch"
+        class="mt-2 text-xs text-muted-foreground"
+      >
+        Searching players…
+      </p>
+      <p
+        v-else-if="playerSearchError"
+        class="mt-2 text-xs text-destructive"
+      >
+        {{ playerSearchError }}
       </p>
     </div>
 

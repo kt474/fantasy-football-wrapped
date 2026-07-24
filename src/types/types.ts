@@ -31,6 +31,7 @@ export type LeagueInfoType = {
   status: string;
   currentWeek: number;
   scoringType: number;
+  scoringSettings?: Record<string, number>;
   rosterPositions: string[];
   playoffTeams: number;
   espnPlayoffMatchupPeriods?: number[][];

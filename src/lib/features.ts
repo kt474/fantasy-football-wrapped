@@ -7,6 +7,7 @@ export const leagueFeatures = [
   { id: "Weekly Report", unavailableForGuillotine: true },
   { id: "Playoffs" },
   { id: "Start/Sit" },
+  { id: "Player Values" },
   { id: "Season Forecast", unavailableForGuillotine: true },
   { id: "Trade Lab" },
   { id: "Draft" },

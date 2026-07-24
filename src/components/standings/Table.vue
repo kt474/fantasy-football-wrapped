@@ -106,6 +106,9 @@ const ScheduleSimulator = defineAsyncComponent(
 const TradeLab = defineAsyncComponent(
   () => import("../trade_lab/TradeLab.vue")
 );
+const PlayerValues = defineAsyncComponent(
+  () => import("../player_values/PlayerValues.vue")
+);
 
 const tableOrder = ref("wins");
 const showLeagueNews = ref(false);
@@ -759,6 +762,9 @@ const getTeamName = (tableDataItem: TableDataType) => {
     </div>
     <div v-if="store.currentTab === 'Trade Lab'">
       <TradeLab class="my-4" :tableData="tableData" />
+    </div>
+    <div v-if="store.currentTab === 'Player Values'">
+      <PlayerValues :tableData="tableData" />
     </div>
     <div v-if="store.currentTab === 'Draft'">
       <Draft class="my-4" />

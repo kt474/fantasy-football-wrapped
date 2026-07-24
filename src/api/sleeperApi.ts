@@ -51,97 +51,11 @@ type SleeperWeekProjectionMap = Record<
 >;
 
 const PROJECTION_FETCH_TIMEOUT_MS = 8000;
-let searchablePlayersCache: SearchableSleeperPlayer[] | null = null;
-let sleeperPlayerDirectoryPromise: Promise<
-  Record<string, SleeperPlayerDirectoryEntry>
-> | null = null;
 const weeklyProjectionCache = new Map<string, Promise<number>>();
-
-export type SearchableSleeperPlayer = {
-  player_id: string;
-  name: string;
-  position: string;
-  team: string;
-};
-
-type SleeperPlayerDirectoryEntry = {
-  player_id?: string;
-  full_name?: string;
-  first_name?: string;
-  last_name?: string;
-  position?: string;
-  team?: string | null;
-  active?: boolean;
-  fantasy_positions?: string[] | null;
-};
-
-const getSleeperPlayerDirectory = async () => {
-  if (!sleeperPlayerDirectoryPromise) {
-    sleeperPlayerDirectoryPromise = (async () => {
-      const response = await fetch("https://api.sleeper.app/v1/players/nfl");
-      assertOk(response, "Sleeper player directory request");
-      return parseJson<Record<string, SleeperPlayerDirectoryEntry>>(
-        response,
-        "Sleeper player directory"
-      );
-    })().catch((error) => {
-      sleeperPlayerDirectoryPromise = null;
-      throw error;
-    });
-  }
-  return sleeperPlayerDirectoryPromise;
-};
-
-export const getPlayerPositionsById = async (playerIds: string[]) => {
-  const directory = await getSleeperPlayerDirectory();
-  return playerIds.reduce<Record<string, string>>((positions, playerId) => {
-    const player = directory[playerId];
-    positions[playerId] =
-      player?.position ?? player?.fantasy_positions?.[0] ?? "";
-    return positions;
-  }, {});
-};
-
-export const getSearchablePlayers = async (): Promise<
-  SearchableSleeperPlayer[]
-> => {
-  if (searchablePlayersCache) {
-    return searchablePlayersCache;
-  }
-
-  const directory = await getSleeperPlayerDirectory();
-  const fantasyPositions = new Set(["QB", "RB", "WR", "TE", "K", "DEF"]);
-
-  searchablePlayersCache = Object.entries(directory)
-    .map(([id, player]) => {
-      const position =
-        player.position ?? player.fantasy_positions?.[0] ?? "";
-      const name =
-        (player.full_name ??
-          [player.first_name, player.last_name].filter(Boolean).join(" ")) ||
-        (position === "DEF" && player.team
-          ? `${player.team} Defense`
-          : "");
-
-      return {
-        player_id: player.player_id ?? id,
-        name,
-        position,
-        team: player.team ?? "FA",
-        active: player.active !== false,
-      };
-    })
-    .filter(
-      (player) =>
-        player.active &&
-        player.name &&
-        fantasyPositions.has(player.position)
-    )
-    .map(({ active: _active, ...player }) => player)
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  return searchablePlayersCache;
-};
+const draftProjectionCache = new Map<
+  string,
+  Promise<{ adp: number | null; projectedPoints: number | null }>
+>();
 
 type SleeperLeagueResponse = {
   name?: string;
@@ -433,57 +347,127 @@ export const getDraftProjections = async (
   superFlex: boolean = false,
   idp: boolean = false
 ) => {
-  try {
-    let adpName;
-    let ptsName = "pts_ppr";
-    if (scoringType === 0.5) {
-      ptsName = "pts_half_ppr";
-    } else if (scoringType === 0) {
-      ptsName = "pts_std";
-    }
-    const baseMap: Record<number, string> = {
-      0: "adp_std",
-      0.5: "adp_half_ppr",
-      1: "adp_ppr",
-    };
+  const cacheKey = [
+    player,
+    year,
+    scoringType,
+    leagueType,
+    superFlex ? "sf" : "1qb",
+    idp ? "idp" : "offense",
+  ].join(":");
+  const cached = draftProjectionCache.get(cacheKey);
+  if (cached) return cached;
 
-    const dynastyMap: Record<number, string> = {
-      0: "adp_dynasty_std",
-      0.5: "adp_dynasty_half_ppr",
-      1: "adp_dynasty_ppr",
-    };
-    if (idp) {
-      adpName = "adp_idp";
-    } else {
-      if (leagueType === "Dynasty") {
+  const request = (async () => {
+    try {
+      let adpName;
+      let ptsName = "pts_ppr";
+      if (scoringType === 0.5) {
+        ptsName = "pts_half_ppr";
+      } else if (scoringType === 0) {
+        ptsName = "pts_std";
+      }
+      const baseMap: Record<number, string> = {
+        0: "adp_std",
+        0.5: "adp_half_ppr",
+        1: "adp_ppr",
+      };
+
+      const dynastyMap: Record<number, string> = {
+        0: "adp_dynasty_std",
+        0.5: "adp_dynasty_half_ppr",
+        1: "adp_dynasty_ppr",
+      };
+      if (idp) {
+        adpName = "adp_idp";
+      } else if (leagueType === "Dynasty") {
         if (superFlex) {
           adpName = "adp_dynasty_2qb";
-        } else adpName = dynastyMap[scoringType] || "adp_dynasty_ppr";
+        } else {
+          adpName = dynastyMap[scoringType] || "adp_dynasty_ppr";
+        }
       } else {
         if (superFlex) {
           adpName = "adp_2qb";
-        } else adpName = baseMap[scoringType] || "adp_ppr";
+        } else {
+          adpName = baseMap[scoringType] || "adp_ppr";
+        }
       }
+      const response = await fetchWithTimeout(
+        `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`,
+        PROJECTION_FETCH_TIMEOUT_MS
+      );
+      assertOk(response, "Draft projections request");
+      const playerInfo = await parseJson<SleeperPlayerStatsResponse>(
+        response,
+        "Draft projections"
+      );
+      const adp = Number(playerInfo?.stats?.[adpName]);
+      const projectedPoints = Number(playerInfo?.stats?.[ptsName]);
+      // ESPN league defenses still have ESPN player ids.
+      return {
+        adp: Number.isFinite(adp) && adp > 0 ? adp : null,
+        projectedPoints:
+          Number.isFinite(projectedPoints) && projectedPoints > 0
+            ? projectedPoints
+            : null,
+      };
+    } catch (e) {
+      console.error(e);
+      return {
+        adp: null,
+        projectedPoints: null,
+      };
     }
-    const response = await fetch(
-      `https://api.sleeper.com/projections/nfl/player/${player}?season_type=regular&season=${year}`
+  })();
+  draftProjectionCache.set(cacheKey, request);
+  return request;
+};
+
+export type SleeperTradedPick = {
+  season: string;
+  round: number;
+  rosterId: number;
+  previousOwnerId: number;
+  ownerId: number;
+};
+
+export const getTradedPicks = async (
+  leagueId: string
+): Promise<SleeperTradedPick[]> => {
+  try {
+    const response = await fetchWithRetry(
+      `https://api.sleeper.app/v1/league/${leagueId}/traded_picks`
     );
-    assertOk(response, "Draft projections request");
-    const playerInfo = await parseJson<SleeperPlayerStatsResponse>(
-      response,
-      "Draft projections"
-    );
-    // espn league defenses still have espn player id
-    return {
-      adp: playerInfo?.stats?.[adpName],
-      projectedPoints: playerInfo?.stats?.[ptsName],
-    };
-  } catch (e) {
-    console.error(e);
-    return {
-      adp: null,
-      projectedPoints: null,
-    };
+    assertOk(response, "Traded picks request");
+    const picks = await parseJson<
+      Array<{
+        season?: string;
+        round?: number;
+        roster_id?: number;
+        previous_owner_id?: number;
+        owner_id?: number;
+      }>
+    >(response, "Traded picks");
+
+    return picks
+      .filter(
+        (pick) =>
+          pick.season &&
+          Number(pick.round) > 0 &&
+          Number(pick.roster_id) > 0 &&
+          Number(pick.owner_id) > 0
+      )
+      .map((pick) => ({
+        season: String(pick.season),
+        round: Number(pick.round),
+        rosterId: Number(pick.roster_id),
+        previousOwnerId: Number(pick.previous_owner_id || pick.roster_id),
+        ownerId: Number(pick.owner_id),
+      }));
+  } catch (error) {
+    console.error("Error fetching traded picks:", error);
+    return [];
   }
 };
 
@@ -699,6 +683,7 @@ export const getLeague = async (
       lastScoredWeek: 0,
       status: "",
       scoringType: 1,
+      scoringSettings: {},
       rosterPositions: [],
       playoffTeams: 0,
       playoffType: 0,
@@ -729,6 +714,7 @@ export const getLeague = async (
     previousLeagueId: league["previous_league_id"] ?? "",
     status: league["status"] ?? "",
     scoringType: scoringSettings["rec"] ?? 1,
+    scoringSettings,
     rosterPositions: Array.isArray(league["roster_positions"])
       ? league["roster_positions"]
       : [],

@@ -16,11 +16,20 @@ describe("post-purchase activation", () => {
     ["manager_profiles", "Open Manager Profiles", "Manager Profiles"],
     ["rivalry_report", "Open Rivalry Reports", "Manager Profiles"],
     ["premium_report", "Open Weekly Report", "Weekly Report"],
+    ["player_values", "Open Player Values", "Player Values"],
+    ["trade_finder", "Open Trade Finder", "Trade Lab"],
   ])("maps %s to its relevant feature", (feature, actionLabel, tab) => {
     const activation = getPostPurchaseActivation(feature);
 
     expect(activation.actionLabel).toBe(actionLabel);
     expect(activation.destinationTab).toBe(tab);
+  });
+
+  test("opens the Finder mode after a Trade Finder purchase", () => {
+    expect(getPostPurchaseActivation("trade_finder")).toMatchObject({
+      destinationTab: "Trade Lab",
+      destinationMode: "finder",
+    });
   });
 
   test("falls back to a safe Premium landing action", () => {
