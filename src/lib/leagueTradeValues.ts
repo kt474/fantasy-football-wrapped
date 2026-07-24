@@ -262,6 +262,28 @@ type TradeBuilderBasicRanking = {
 
 const TRADE_BUILDER_RANKING_CONCURRENCY = 8;
 
+export const sortTradeBuilderPlayers = (
+  players: TradeBuilderPlayer[]
+): TradeBuilderPlayer[] => {
+  const useOverallRank = players.some((player) => player.overallRank > 0);
+  const rankValue = (player: TradeBuilderPlayer) => {
+    const value = useOverallRank ? player.overallRank : player.dynastyAdp;
+    return Number.isFinite(value) && Number(value) > 0
+      ? Number(value)
+      : Number.POSITIVE_INFINITY;
+  };
+
+  return [...players].sort(
+    (a, b) =>
+      rankValue(a) - rankValue(b) ||
+      (a.positionRank > 0 ? a.positionRank : Number.POSITIVE_INFINITY) -
+        (b.positionRank > 0 ? b.positionRank : Number.POSITIVE_INFINITY) ||
+      (a.name || `${a.team} Defense`).localeCompare(
+        b.name || `${b.team} Defense`
+      )
+  );
+};
+
 export const mergeTradeBuilderRankings = (
   rosters: TradeBuilderRoster[],
   rankings: TradeFinderPlayer[]
@@ -271,14 +293,16 @@ export const mergeTradeBuilderRankings = (
   );
   return rosters.map((roster) => ({
     ...roster,
-    players: roster.players.map((player) => {
-      const ranking = rankingById.get(player.playerId);
-      return {
-        ...player,
-        positionRank: ranking?.positionRank ?? player.positionRank,
-        overallRank: ranking?.overallRank ?? player.overallRank,
-      };
-    }),
+    players: sortTradeBuilderPlayers(
+      roster.players.map((player) => {
+        const ranking = rankingById.get(player.playerId);
+        return {
+          ...player,
+          positionRank: ranking?.positionRank ?? player.positionRank,
+          overallRank: ranking?.overallRank ?? player.overallRank,
+        };
+      })
+    ),
   }));
 };
 
@@ -356,19 +380,21 @@ export const loadTradeBuilderRosters = async (options: {
   return request.rosters.map((roster) => ({
     id: roster.id,
     managerName: roster.managerName,
-    players: roster.playerIds
-      .map((playerId) => {
-        const player = playerMap.get(playerId);
-        if (!player) return null;
-        const basicRanking = basicRankingById.get(playerId);
-        return {
-          ...player,
-          playerId,
-          positionRank: basicRanking?.positionRank ?? 0,
-          overallRank: basicRanking?.overallRank ?? 0,
-          dynastyAdp: basicRanking?.dynastyAdp ?? null,
-        };
-      })
-      .filter((player): player is TradeBuilderPlayer => player !== null),
+    players: sortTradeBuilderPlayers(
+      roster.playerIds
+        .map((playerId) => {
+          const player = playerMap.get(playerId);
+          if (!player) return null;
+          const basicRanking = basicRankingById.get(playerId);
+          return {
+            ...player,
+            playerId,
+            positionRank: basicRanking?.positionRank ?? 0,
+            overallRank: basicRanking?.overallRank ?? 0,
+            dynastyAdp: basicRanking?.dynastyAdp ?? null,
+          };
+        })
+        .filter((player): player is TradeBuilderPlayer => player !== null)
+    ),
   }));
 };

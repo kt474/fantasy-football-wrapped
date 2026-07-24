@@ -39,6 +39,7 @@ const dynastyPerspective = defineModel<DynastyPerspective>(
 const playerSearch = ref("");
 const selectedManagerId = ref("ALL");
 const selectedPosition = ref("ALL");
+const expandedPlayerId = ref<string | null>(null);
 const currentPage = ref(1);
 const PAGE_SIZE = 25;
 
@@ -152,6 +153,7 @@ watch(
 
 watch(players, () => {
   currentPage.value = 1;
+  expandedPlayerId.value = null;
 });
 
 const valueTier = (value: number) => {
@@ -177,6 +179,31 @@ const buildTrade = (player: TradeFinderPlayer) => {
   const rosterId = rosterIdByPlayerId.value.get(player.playerId);
   if (rosterId === undefined) return;
   emit("buildTrade", { playerId: player.playerId, rosterId });
+};
+
+const toggleValueExplanation = (playerId: string) => {
+  expandedPlayerId.value =
+    expandedPlayerId.value === playerId ? null : playerId;
+};
+
+const getValueExplanation = (player: TradeFinderPlayer) => {
+  const playerName = player.name || `${player.team} Defense`;
+  const productionContext =
+    player.vorp > 0
+      ? `projects ${formatNumber(player.vorp)} points above the ${player.position} replacement baseline`
+      : `projects near the ${player.position} replacement baseline`;
+  const rankContext = `${player.position}${player.positionRank} and #${player.overallRank} overall`;
+
+  if (props.valuationMode === "dynasty") {
+    const marketContext = player.dynastyAdp
+      ? `Dynasty market ADP ${formatNumber(player.dynastyAdp)} is also included`
+      : "Long-term dynasty market value is also included";
+    return `${playerName} ${productionContext}, ranking ${rankContext}. ${marketContext} using the ${dynastyPerspective.value} team direction.`;
+  }
+
+  const tierLabel = valueTier(player.tradeValue).label.toLowerCase();
+  const tierArticle = tierLabel === "elite" ? "an" : "a";
+  return `${playerName} ${productionContext}, ranking ${rankContext}. That league-specific production and positional scarcity produce ${tierArticle} ${tierLabel} trade value of ${formatNumber(player.tradeValue)}.`;
 };
 </script>
 
@@ -367,79 +394,113 @@ const buildTrade = (player: TradeFinderPlayer) => {
               </tr>
             </thead>
             <tbody>
-              <tr
+              <template
                 v-for="player in paginatedPlayers"
                 :key="player.playerId"
-                class="border-t border-border bg-background"
               >
-                <td class="px-4 py-3 font-semibold">
-                  #{{ player.overallRank }}
-                </td>
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-3">
-                    <img
-                      v-if="player.position !== 'DEF'"
-                      class="object-cover rounded-full size-9"
-                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.playerId}.jpg`"
-                      alt=""
-                    />
-                    <img
-                      v-else
-                      class="object-contain rounded-full size-9"
-                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.playerId.toLowerCase()}.png`"
-                      alt=""
-                    />
-                    <div>
-                      <p class="font-medium">
-                        {{ player.name || `${player.team} Defense` }}
-                      </p>
-                      <p class="text-xs text-muted-foreground">
-                        {{ player.position }} · {{ player.team }}
-                      </p>
+                <tr class="border-t border-border bg-background">
+                  <td class="px-4 py-3 font-semibold">
+                    #{{ player.overallRank }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <img
+                        v-if="player.position !== 'DEF'"
+                        class="object-cover rounded-full size-9"
+                        :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.playerId}.jpg`"
+                        alt=""
+                      />
+                      <img
+                        v-else
+                        class="object-contain rounded-full size-9"
+                        :src="`https://sleepercdn.com/images/team_logos/nfl/${player.playerId.toLowerCase()}.png`"
+                        alt=""
+                      />
+                      <div>
+                        <p class="font-medium">
+                          {{ player.name || `${player.team} Defense` }}
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                          {{ player.position }} · {{ player.team }}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td class="px-4 py-3 font-medium">
-                  {{ player.position }}{{ player.positionRank }}
-                </td>
-                <td
-                  v-if="valuationMode === 'dynasty'"
-                  class="px-4 py-3 text-right text-muted-foreground"
-                >
-                  {{
-                    player.dynastyAdp ? formatNumber(player.dynastyAdp, 1) : "—"
-                  }}
-                </td>
-                <td class="px-4 py-3 text-right">
-                  <div class="flex items-center justify-end gap-2">
-                    <Badge :variant="valueTier(player.tradeValue).variant">
-                      {{ valueTier(player.tradeValue).label }}
-                    </Badge>
-                    <span class="font-semibold min-w-10">
-                      {{ formatNumber(player.tradeValue, 1) }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-right">
-                  {{ formatNumber(player.projectedPoints) }}
-                </td>
-                <td class="px-4 py-3 text-right text-muted-foreground">
-                  {{ formatNumber(player.replacementPoints) }}
-                </td>
-                <td class="px-4 py-3 font-medium text-right">
-                  {{ formatNumber(player.vorp) }}
-                </td>
-                <td class="sticky right-0 px-4 py-3 text-right bg-background">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    @click="buildTrade(player)"
+                  </td>
+                  <td class="px-4 py-3 font-medium">
+                    {{ player.position }}{{ player.positionRank }}
+                  </td>
+                  <td
+                    v-if="valuationMode === 'dynasty'"
+                    class="px-4 py-3 text-right text-muted-foreground"
                   >
-                    Build trade
-                  </Button>
-                </td>
-              </tr>
+                    {{
+                      player.dynastyAdp
+                        ? formatNumber(player.dynastyAdp, 1)
+                        : "—"
+                    }}
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="xs"
+                        :aria-expanded="expandedPlayerId === player.playerId"
+                        :aria-controls="`player-value-explanation-${player.playerId}`"
+                        @click="toggleValueExplanation(player.playerId)"
+                      >
+                        Why?
+                      </Button>
+                      <Badge :variant="valueTier(player.tradeValue).variant">
+                        {{ valueTier(player.tradeValue).label }}
+                      </Badge>
+                      <span class="font-semibold min-w-10">
+                        {{ formatNumber(player.tradeValue, 1) }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    {{ formatNumber(player.projectedPoints) }}
+                  </td>
+                  <td class="px-4 py-3 text-right text-muted-foreground">
+                    {{ formatNumber(player.replacementPoints) }}
+                  </td>
+                  <td class="px-4 py-3 font-medium text-right">
+                    {{ formatNumber(player.vorp) }}
+                  </td>
+                  <td
+                    class="sticky right-0 px-4 py-3 text-right bg-background"
+                  >
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      @click="buildTrade(player)"
+                    >
+                      Build trade
+                    </Button>
+                  </td>
+                </tr>
+                <tr
+                  v-if="expandedPlayerId === player.playerId"
+                  class="border-t border-border bg-muted/20"
+                >
+                  <td
+                    :colspan="valuationMode === 'dynasty' ? 9 : 8"
+                    class="px-4 py-3"
+                  >
+                    <p
+                      :id="`player-value-explanation-${player.playerId}`"
+                      class="max-w-4xl text-xs leading-relaxed text-muted-foreground sm:text-sm"
+                    >
+                      <span class="font-medium text-foreground"
+                        >Why this value:</span
+                      >
+                      {{ getValueExplanation(player) }}
+                    </p>
+                  </td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>

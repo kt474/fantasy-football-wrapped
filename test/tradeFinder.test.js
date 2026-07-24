@@ -5,9 +5,81 @@ import {
   buildTradeValueRequest,
   getTradeValuationMode,
   mergeTradeBuilderRankings,
+  sortTradeBuilderPlayers,
 } from "../src/lib/leagueTradeValues";
 
 describe("trade value request boundary", () => {
+  test("orders Trade Builder rosters by overall rank with unranked players last", () => {
+    const players = [
+      {
+        playerId: "p3",
+        player_id: "p3",
+        name: "Unranked Player",
+        position: "WR",
+        team: "MIN",
+        positionRank: 0,
+        overallRank: 0,
+        dynastyAdp: null,
+      },
+      {
+        playerId: "p2",
+        player_id: "p2",
+        name: "Second Player",
+        position: "RB",
+        team: "DET",
+        positionRank: 4,
+        overallRank: 18,
+        dynastyAdp: null,
+      },
+      {
+        playerId: "p1",
+        player_id: "p1",
+        name: "First Player",
+        position: "QB",
+        team: "BUF",
+        positionRank: 2,
+        overallRank: 6,
+        dynastyAdp: null,
+      },
+    ];
+
+    expect(sortTradeBuilderPlayers(players).map((player) => player.playerId)).toEqual([
+      "p1",
+      "p2",
+      "p3",
+    ]);
+  });
+
+  test("uses dynasty ADP when overall ranks are unavailable", () => {
+    const players = [
+      {
+        playerId: "late",
+        player_id: "late",
+        name: "Later ADP",
+        position: "WR",
+        team: "MIN",
+        positionRank: 0,
+        overallRank: 0,
+        dynastyAdp: 42,
+      },
+      {
+        playerId: "early",
+        player_id: "early",
+        name: "Earlier ADP",
+        position: "RB",
+        team: "DET",
+        positionRank: 0,
+        overallRank: 0,
+        dynastyAdp: 8,
+      },
+    ];
+
+    expect(sortTradeBuilderPlayers(players).map((player) => player.playerId)).toEqual([
+      "early",
+      "late",
+    ]);
+  });
+
   test("derives the valuation mode from league settings", () => {
     expect(getTradeValuationMode({ seasonType: "Dynasty" })).toBe("dynasty");
     expect(
