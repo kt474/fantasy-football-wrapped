@@ -29,12 +29,18 @@ export type TradeValueRequestPayload = {
   finderForRosterId?: number | null;
 };
 
-export type PlayerValuesResponse = {
+type TradeValueResponseMetadata = {
   access: "preview" | "premium";
   previewLimit: number;
   totalPlayers: number;
+};
+
+export type PlayerValuesResponse = TradeValueResponseMetadata & {
   rankings: TradeFinderPlayer[];
-  suggestions?: TradeSuggestion[];
+};
+
+export type TradeFinderResponse = TradeValueResponseMetadata & {
+  suggestions: TradeSuggestion[];
 };
 
 export type TradeQuotePayload = {
@@ -100,6 +106,11 @@ const post = async <T>(path: string, body: unknown, label: string) => {
 
 export const getPlayerValues = (payload: TradeValueRequestPayload) =>
   post<PlayerValuesResponse>("/api/playerValues", payload, "Player values");
+
+export const getTradeSuggestions = (
+  payload: TradeValueRequestPayload & { finderForRosterId: number }
+) =>
+  post<TradeFinderResponse>("/api/playerValues", payload, "Trade suggestions");
 
 export const getTradeQuote = (
   payload: TradeValueRequestPayload,

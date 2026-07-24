@@ -91,6 +91,18 @@ describe("Trade Lab correctness boundaries", () => {
     );
   });
 
+  test("Finder keeps the selected manager label reactive across league switches", () => {
+    const tradeFinder = read("src/components/trade_lab/TradeFinder.vue");
+
+    expect(tradeFinder).toContain("const selectedRosterName = computed");
+    expect(tradeFinder).toContain(
+      "props.rosters.find((roster) => roster.id === selectedRosterId.value)"
+    );
+    expect(tradeFinder).toContain(
+      '{{ selectedRosterName || "Select a manager" }}'
+    );
+  });
+
   test("Finder makes lineup impact concrete without guessing a replacement", () => {
     const tradeFinder = read("src/components/trade_lab/TradeFinder.vue");
     const tradeLab = read("src/components/trade_lab/TradeLab.vue");

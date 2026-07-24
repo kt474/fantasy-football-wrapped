@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import * as authFetchModule from "../src/lib/authFetch.ts";
 import {
   getPlayerValues,
+  getTradeSuggestions,
   getTradeQuote,
   TradeValuesAccessError,
 } from "../src/api/tradeValuesApi.ts";
@@ -58,14 +59,32 @@ describe("trade value backend client", () => {
     );
 
     await expect(
-      getPlayerValues({ ...request, finderForRosterId: 1 })
+      getTradeSuggestions({ ...request, finderForRosterId: 1 })
     ).rejects.toMatchObject({
       status: 403,
       message: "Premium subscription required",
     });
     await expect(
-      getPlayerValues({ ...request, finderForRosterId: 1 })
+      getTradeSuggestions({ ...request, finderForRosterId: 1 })
     ).rejects.toBeInstanceOf(TradeValuesAccessError);
+  });
+
+  test("accepts Finder-only responses without a rankings payload", async () => {
+    vi.spyOn(authFetchModule, "authenticatedFetch").mockResolvedValue(
+      response(200, {
+        access: "premium",
+        previewLimit: 10,
+        totalPlayers: 42,
+        suggestions: [],
+      })
+    );
+
+    const result = await getTradeSuggestions({
+      ...request,
+      finderForRosterId: 1,
+    });
+    expect(result.suggestions).toEqual([]);
+    expect(result).not.toHaveProperty("rankings");
   });
 
   test("sends only selected assets to the free quote endpoint", async () => {

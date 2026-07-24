@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  getPlayerValues,
+  getTradeSuggestions,
   TradeValuesAccessError,
   type TradeValueRequestPayload,
 } from "@/api/tradeValuesApi";
@@ -63,6 +63,12 @@ const selectedRosterModel = computed({
   },
 });
 
+const selectedRosterName = computed(
+  () =>
+    props.rosters.find((roster) => roster.id === selectedRosterId.value)
+      ?.managerName ?? ""
+);
+
 const visibleSuggestions = computed(() =>
   suggestions.value.slice(0, visibleSuggestionCount.value)
 );
@@ -86,7 +92,7 @@ watch(
     accessError.value = "";
     finderError.value = "";
     try {
-      const response = await getPlayerValues({
+      const response = await getTradeSuggestions({
         ...request,
         finderForRosterId: rosterId,
       });
@@ -251,7 +257,9 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
       <div class="shrink-0">
         <Select v-model="selectedRosterModel">
           <SelectTrigger class="w-full sm:w-52">
-            <SelectValue placeholder="Select a manager" />
+            <SelectValue placeholder="Select a manager">
+              {{ selectedRosterName || "Select a manager" }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem
