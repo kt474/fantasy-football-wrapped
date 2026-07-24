@@ -26,6 +26,7 @@ const props = defineProps<{
   request: TradeValueRequestPayload | null;
   loading?: boolean;
   valuationMode?: TradeValuationMode;
+  starterPlayerIdsByRoster: Record<number, string[]>;
 }>();
 
 const emit = defineEmits<{
@@ -128,6 +129,10 @@ const formatValueMatch = (value: number) =>
   `${Math.min(100, Math.max(0, Math.round(value / 5) * 5))}%`;
 const formatPlayerNames = (players: TradeSuggestion["teamASends"]) =>
   players.map((player) => player.name).join(" + ");
+const formatIncomingPlayers = (players: TradeSuggestion["teamASends"]) =>
+  players
+    .map((player) => `${player.name} (${player.position})`)
+    .join(" and ");
 const improvementBasis = computed(() =>
   props.valuationMode === "season results"
     ? "estimated lineup output based on season results"
@@ -142,13 +147,66 @@ const describeGain = (value: number) => {
   return `a major ${gain} upgrade`;
 };
 
+const describeTeamImpact = ({
+  receivingRosterId,
+  receives,
+  sends,
+  gain,
+}: {
+  receivingRosterId: number;
+  receives: TradeSuggestion["teamASends"];
+  sends: TradeSuggestion["teamASends"];
+  gain: number;
+}) => {
+  const starterIds = new Set(
+    props.starterPlayerIdsByRoster[receivingRosterId] ?? []
+  );
+  const outgoingStarters = sends.filter((player) =>
+    starterIds.has(player.playerId)
+  );
+  let directSwap:
+    | {
+        incoming: TradeSuggestion["teamASends"][number];
+        outgoing: TradeSuggestion["teamASends"][number];
+      }
+    | undefined;
+
+  for (const incoming of receives) {
+    const outgoing = outgoingStarters.find(
+      (starter) => starter.position === incoming.position
+    );
+    if (outgoing) {
+      directSwap = { incoming, outgoing };
+      break;
+    }
+  }
+
+  const lineupChange = directSwap
+    ? `${directSwap.incoming.name} takes the ${directSwap.incoming.position} spot vacated by ${directSwap.outgoing.name}`
+    : receives.length === 1
+      ? `${receives[0].name} moves into the model's best starting lineup`
+      : "the incoming package creates a stronger starting lineup combination";
+
+  return `adds ${formatIncomingPlayers(receives)}. ${lineupChange}, creating ${describeGain(gain)} in ${improvementBasis.value}.`;
+};
+
 const buildTradeText = (suggestion: TradeSuggestion) =>
   [
     `${suggestion.teamAName} sends ${formatPlayerNames(suggestion.teamASends)} to ${suggestion.teamBName}.`,
     `${suggestion.teamBName} sends ${formatPlayerNames(suggestion.teamBSends)} to ${suggestion.teamAName}.`,
     "",
-    `${suggestion.teamAName} gets ${describeGain(suggestion.teamAGainPerWeek)} in ${improvementBasis.value}.`,
-    `${suggestion.teamBName} gets ${describeGain(suggestion.teamBGainPerWeek)} in ${improvementBasis.value}.`,
+    `${suggestion.teamAName} ${describeTeamImpact({
+      receivingRosterId: suggestion.teamAId,
+      receives: suggestion.teamBSends,
+      sends: suggestion.teamASends,
+      gain: suggestion.teamAGainPerWeek,
+    })}`,
+    `${suggestion.teamBName} ${describeTeamImpact({
+      receivingRosterId: suggestion.teamBId,
+      receives: suggestion.teamASends,
+      sends: suggestion.teamBSends,
+      gain: suggestion.teamBGainPerWeek,
+    })}`,
     `About a ${formatValueMatch(suggestion.fairnessPercent)} league adjusted value match.`,
     "",
     "Created with Fantasy Football Wrapped — https://ffwrapped.com",
@@ -427,17 +485,27 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
                   <span class="font-medium text-foreground">
                     {{ suggestion.teamAName }}:
                   </span>
-                  receives {{ formatPlayerNames(suggestion.teamBSends) }} and
-                  gets {{ describeGain(suggestion.teamAGainPerWeek) }} in
-                  {{ improvementBasis }}.
+                  {{
+                    describeTeamImpact({
+                      receivingRosterId: suggestion.teamAId,
+                      receives: suggestion.teamBSends,
+                      sends: suggestion.teamASends,
+                      gain: suggestion.teamAGainPerWeek,
+                    })
+                  }}
                 </li>
                 <li>
                   <span class="font-medium text-foreground">
                     {{ suggestion.teamBName }}:
                   </span>
-                  receives {{ formatPlayerNames(suggestion.teamASends) }} and
-                  gets {{ describeGain(suggestion.teamBGainPerWeek) }} in
-                  {{ improvementBasis }}.
+                  {{
+                    describeTeamImpact({
+                      receivingRosterId: suggestion.teamBId,
+                      receives: suggestion.teamASends,
+                      sends: suggestion.teamBSends,
+                      gain: suggestion.teamBGainPerWeek,
+                    })
+                  }}
                 </li>
               </ul>
             </div>

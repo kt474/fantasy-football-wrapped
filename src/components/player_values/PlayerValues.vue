@@ -36,9 +36,7 @@ const visiblePlayerCount = computed(
 const selectedWeek = computed(() =>
   activeLeague.value ? getTradeValueWeek(activeLeague.value) : 1
 );
-const valuationMode = computed(() =>
-  getTradeValuationMode(activeLeague.value)
-);
+const valuationMode = computed(() => getTradeValuationMode(activeLeague.value));
 
 let requestId = 0;
 
@@ -128,8 +126,8 @@ onMounted(fetchPlayerValues);
       class="p-4 mt-4 text-center border rounded-lg"
     >
       <p class="font-medium">
-        Preview includes {{ visiblePlayerCount }} of
-        {{ totalPlayers }} rostered players
+        Preview includes {{ visiblePlayerCount }}/{{ totalPlayers }}
+        players
       </p>
       <p class="mt-1 text-sm text-muted-foreground">
         Premium unlocks complete league adjusted rankings and Trade Finder.

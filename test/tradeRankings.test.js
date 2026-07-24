@@ -20,11 +20,13 @@ describe("trade rankings filters", () => {
   });
 
   test("makes preview scope, freshness, and the value scale explicit", () => {
-    expect(source).toContain("League data refreshed");
-    expect(playerValuesSource).toContain(
-      "Preview includes {{ visiblePlayerCount }} of"
+    expect(source).toContain("· Refreshed ${refreshedAt}");
+    expect(source).toContain("text-muted-foreground lg:block");
+    expect(source).toContain("text-muted-foreground lg:hidden");
+    expect(source).toContain('class="max-lg:!mt-1 space-y-3"');
+    expect(playerValuesSource).toMatch(
+      /Preview includes \{\{ visiblePlayerCount \}\}\/\s*\{\{ totalPlayers \}\}/
     );
-    expect(playerValuesSource).toContain("{{ totalPlayers }} rostered players");
     expect(source).toContain("league relative comparison score");
     expect(source).toContain(
       '{ label: "Elite", range: "80+", variant: "success" }'

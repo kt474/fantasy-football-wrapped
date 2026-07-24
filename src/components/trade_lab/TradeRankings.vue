@@ -92,12 +92,7 @@ const pageEnd = computed(() =>
 );
 
 const valueContext = computed(() => {
-  const modeLabel =
-    props.valuationMode === "dynasty"
-      ? "dynasty values"
-      : props.valuationMode === "season results"
-        ? "completed season values"
-        : "rest of season values";
+  const modeLabel = props.valuationMode === "dynasty" ? "Dynasty" : "Season";
   const seasonLabel = props.season ? `${props.season} ` : "";
   const timestamp = props.leagueLastUpdated;
 
@@ -113,7 +108,7 @@ const valueContext = computed(() => {
     minute: "2-digit",
   }).format(timestamp);
 
-  return `${seasonLabel}${modeLabel} · League data refreshed ${refreshedAt}`;
+  return `${seasonLabel}${modeLabel} · Refreshed ${refreshedAt}`;
 });
 
 watch([selectedManagerId, selectedPosition], () => {
@@ -169,7 +164,9 @@ const formatNumber = (value: number, digits = 1) =>
               : "League specific rankings for rostered players. Trade value is derived from value over the starter level replacement player at each position."
           }}
         </p>
-        <p class="mt-4 -mb-3 text-xs font-medium text-muted-foreground">
+        <p
+          class="hidden mt-4 -mb-3 text-xs font-medium text-muted-foreground lg:block"
+        >
           {{ valueContext }}
         </p>
       </div>
@@ -244,9 +241,13 @@ const formatNumber = (value: number, digits = 1) =>
       </div>
     </div>
 
+    <p class="text-xs font-medium text-muted-foreground lg:hidden">
+      {{ valueContext }}
+    </p>
+
     <div
       v-if="loading"
-      class="overflow-hidden border rounded-lg border-border"
+      class="max-lg:!mt-1 overflow-hidden border rounded-lg border-border"
       aria-busy="true"
       aria-live="polite"
     >
@@ -265,7 +266,7 @@ const formatNumber = (value: number, digits = 1) =>
 
     <div
       v-else-if="players.length === 0"
-      class="px-5 py-10 text-center border border-dashed rounded-lg border-border"
+      class="max-lg:!mt-1 px-5 py-10 text-center border border-dashed rounded-lg border-border"
     >
       <p class="font-medium">No player values available</p>
       <p class="mt-1 text-sm text-muted-foreground">
@@ -275,7 +276,7 @@ const formatNumber = (value: number, digits = 1) =>
 
     <div
       v-else-if="filteredPlayers.length === 0"
-      class="px-5 py-10 text-center border border-dashed rounded-lg border-border"
+      class="max-lg:!mt-1 px-5 py-10 text-center border border-dashed rounded-lg border-border"
     >
       <p class="font-medium">No matching players</p>
       <p class="mt-1 text-sm text-muted-foreground">
@@ -283,7 +284,7 @@ const formatNumber = (value: number, digits = 1) =>
       </p>
     </div>
 
-    <div v-else class="space-y-3">
+    <div v-else class="max-lg:!mt-1 space-y-3">
       <div class="overflow-hidden border rounded-lg border-border">
         <div
           class="overflow-x-auto"

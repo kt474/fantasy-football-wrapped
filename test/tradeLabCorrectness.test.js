@@ -90,4 +90,26 @@ describe("Trade Lab correctness boundaries", () => {
       'route.query.tradeMode === "finder" ? "finder" : "builder"'
     );
   });
+
+  test("Finder makes lineup impact concrete without guessing a replacement", () => {
+    const tradeFinder = read("src/components/trade_lab/TradeFinder.vue");
+    const tradeLab = read("src/components/trade_lab/TradeLab.vue");
+
+    expect(tradeLab).toContain("const starterPlayerIdsByRoster = computed");
+    expect(tradeLab).toContain(
+      ':starter-player-ids-by-roster="starterPlayerIdsByRoster"'
+    );
+    expect(tradeFinder).toContain("formatIncomingPlayers(receives)");
+    expect(tradeFinder).toContain("starterIds.has(player.playerId)");
+    expect(tradeFinder).toContain(
+      "starter.position === incoming.position"
+    );
+    expect(tradeFinder).toContain(
+      "spot vacated by ${directSwap.outgoing.name}"
+    );
+    expect(tradeFinder).toContain(
+      "moves into the model's best starting lineup"
+    );
+    expect(tradeFinder).toContain("describeTeamImpact({");
+  });
 });

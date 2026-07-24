@@ -106,6 +106,18 @@ const usesCompletedSeasonValues = computed(
 
 const valuationMode = computed(() => getTradeValuationMode(activeLeague.value));
 
+const starterPlayerIdsByRoster = computed<Record<number, string[]>>(() => {
+  const weekIndex = selectedWeek.value - 1;
+  return Object.fromEntries(
+    props.tableData.map((team) => [
+      team.rosterId,
+      Array.isArray(team.starters?.[weekIndex])
+        ? team.starters[weekIndex]
+        : [],
+    ])
+  );
+});
+
 const draftSeasons = computed(() => {
   if (dynasty.value && dynastyPickAssets.value.length > 0) {
     return [
@@ -732,6 +744,7 @@ onBeforeUnmount(() => {
       :request="tradeValueRequest"
       :loading="loading"
       :valuation-mode="valuationMode"
+      :starter-player-ids-by-roster="starterPlayerIdsByRoster"
       @open-suggestion="openTradeSuggestion"
     />
     <div v-else>
