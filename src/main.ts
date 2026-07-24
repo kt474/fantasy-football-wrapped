@@ -36,6 +36,8 @@ const PlayoffOddsLanding = () => import("./views/PlayoffOddsLanding.vue");
 const PowerRankingsLanding = () => import("./views/PowerRankingsLanding.vue");
 const LeagueHistoryLanding = () => import("./views/LeagueHistoryLanding.vue");
 const WeeklyRecapLanding = () => import("./views/WeeklyRecapLanding.vue");
+const PlayerValuesLanding = () => import("./views/PlayerValuesLanding.vue");
+const TradeFinderLanding = () => import("./views/TradeFinderLanding.vue");
 const PremiumReportExample = () => import("./views/PremiumReportExample.vue");
 const VideoRecapExample = () => import("./views/VideoRecapExample.vue");
 const NotFound = () => import("./views/404.vue");
@@ -170,6 +172,26 @@ const routes = [
       title: "Fantasy Football League History & All-Time Records | ffwrapped",
       description:
         "Build a fantasy football league history with all-time standings, championships, season finishes, scoring records, and head-to-head rivalries.",
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-player-values",
+    component: PlayerValuesLanding,
+    meta: {
+      title: "Fantasy Football Player Values for Your League | ffwrapped",
+      description:
+        "Rank fantasy football players with trade values adjusted for your league size, scoring, lineup requirements, and redraft or dynasty format.",
+      standalone: true,
+    },
+  },
+  {
+    path: "/fantasy-football-trade-finder",
+    component: TradeFinderLanding,
+    meta: {
+      title: "Fantasy Football Trade Finder for Your League | ffwrapped",
+      description:
+        "Scan your fantasy football league for balanced trade ideas projected to improve both starting lineups in redraft and dynasty formats.",
       standalone: true,
     },
   },

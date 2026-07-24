@@ -332,6 +332,60 @@ const pages = [
     ],
   },
   {
+    path: "fantasy-football-player-values",
+    title: "Fantasy Football Player Values for Your League | ffwrapped",
+    description:
+      "Rank fantasy football players with trade values adjusted for your league size, scoring, lineup requirements, and redraft or dynasty format.",
+    heading: "Fantasy football player values built for your league",
+    introduction:
+      "Rank every rostered player using your league’s format, scoring, and lineup requirements instead of relying on one generic trade value chart.",
+    ctaHref: "/?source=player_values_landing",
+    ctaLabel: "Analyze your league",
+    sections: [
+      {
+        title: "Adjusted to your league",
+        body: "Scoring, league size, starting requirements, and positional scarcity shape every player value.",
+      },
+      {
+        title: "Redraft and dynasty rankings",
+        body: "Use rest-of-season production for redraft or blend long-term market value with projected production and team direction in dynasty.",
+      },
+      {
+        title: "Values you can compare",
+        body: "Rank every rostered player together, filter by position, and inspect the production and replacement level behind each value.",
+      },
+    ],
+  },
+  {
+    path: "fantasy-football-trade-finder",
+    title: "Fantasy Football Trade Finder for Your League | ffwrapped",
+    description:
+      "Scan your fantasy football league for balanced trade ideas projected to improve both starting lineups in redraft and dynasty formats.",
+    heading: "Find fantasy football trades that help both teams",
+    introduction:
+      "Trade Finder scans the real rosters in your league for balanced deals projected to improve both teams’ starting lineups.",
+    ctaHref: "/?source=trade_finder_landing",
+    ctaLabel: "Analyze your league",
+    sections: [
+      {
+        title: "Scan the whole league",
+        body: "Compare your roster with every opponent to uncover deals you may not think to build manually.",
+      },
+      {
+        title: "Look for mutual benefit",
+        body: "Suggestions stay reasonably balanced and focus on trades that improve both projected starting lineups.",
+      },
+      {
+        title: "Use league specific values",
+        body: "Each search accounts for league settings, positional needs, player values, and redraft or dynasty format.",
+      },
+      {
+        title: "Go beyond a trade calculator",
+        body: "A calculator evaluates a deal you already have. Trade Finder searches your league for useful starting points that can be adjusted in Trade Lab.",
+      },
+    ],
+  },
+  {
     path: "fantasy-football-weekly-recap",
     title: "Fantasy Football Weekly Recap Generator | ffwrapped",
     description:
@@ -525,6 +579,14 @@ const toolLinks = [
   {
     href: "/fantasy-football-league-history",
     label: "League history",
+  },
+  {
+    href: "/fantasy-football-player-values",
+    label: "Player values",
+  },
+  {
+    href: "/fantasy-football-trade-finder",
+    label: "Trade Finder",
   },
   {
     href: "/fantasy-football-weekly-recap",

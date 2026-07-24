@@ -69,6 +69,8 @@ import logoUrl from "@/assets/logo.webp";
             <RouterLink class="hover:text-foreground" to="/fantasy-football-playoff-odds-calculator">Playoff odds</RouterLink>
             <RouterLink class="hover:text-foreground" to="/fantasy-football-power-rankings">Power rankings</RouterLink>
             <RouterLink class="hover:text-foreground" to="/fantasy-football-league-history">League history</RouterLink>
+            <RouterLink class="hover:text-foreground" to="/fantasy-football-player-values">Player values</RouterLink>
+            <RouterLink class="hover:text-foreground" to="/fantasy-football-trade-finder">Trade finder</RouterLink>
             <RouterLink class="hover:text-foreground" to="/fantasy-football-weekly-recap">Weekly recaps</RouterLink>
           </div>
         </nav>

@@ -12,8 +12,8 @@ import {
 } from "lucide-vue-next";
 
 const sampleOdds = [
-  { team: "Sunday Scaries", record: "8–3", odds: 96, seed: "1.8 avg" },
-  { team: "Fourth & Goal", record: "7–4", odds: 78, seed: "3.4 avg" },
+  { team: "Breece's Puffs", record: "8–3", odds: 96, seed: "1.8 avg" },
+  { team: "Lamario Kart", record: "7–4", odds: 78, seed: "3.4 avg" },
   { team: "Waiver Weather", record: "5–6", odds: 41, seed: "5.9 avg" },
   { team: "Monday Regret", record: "4–7", odds: 12, seed: "8.1 avg" },
 ];
