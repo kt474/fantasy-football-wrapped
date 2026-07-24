@@ -12,6 +12,7 @@ import { useDynastyTradePerspective } from "@/composables/useDynastyTradePerspec
 import Card from "@/components/ui/card/Card.vue";
 import { Button } from "@/components/ui/button";
 import TradeRankings from "@/components/trade_lab/TradeRankings.vue";
+import { loadDemoTradeValues } from "@/data/demo/loaders";
 
 const props = defineProps<{
   tableData: TableDataType[];
@@ -25,6 +26,9 @@ const access = ref<"preview" | "premium">("preview");
 const totalPlayers = ref(0);
 const dynastyPerspective = useDynastyTradePerspective();
 const activeLeague = computed(() => store.currentLeague);
+const isDemoLeague = computed(
+  () => !store.currentLeagueId && store.leagueIds.length === 0
+);
 const visiblePlayerCount = computed(
   () =>
     new Set(
@@ -42,14 +46,32 @@ let requestId = 0;
 
 const fetchPlayerValues = async () => {
   const league = activeLeague.value;
-  if (!league || store.leagueIds.length === 0) {
-    rosters.value = [];
-    return;
-  }
-
   const currentRequestId = ++requestId;
   loading.value = true;
   errorMessage.value = "";
+
+  if (isDemoLeague.value) {
+    try {
+      const demo = await loadDemoTradeValues();
+      if (currentRequestId === requestId) {
+        rosters.value = demo.demoTradeValueRosters;
+        access.value = "premium";
+        totalPlayers.value = demo.demoTradeValuePlayerCount;
+      }
+    } finally {
+      if (currentRequestId === requestId) {
+        loading.value = false;
+      }
+    }
+    return;
+  }
+
+  if (!league || store.leagueIds.length === 0) {
+    rosters.value = [];
+    loading.value = false;
+    return;
+  }
+
   try {
     const result = await loadLeaguePlayerValues({
       league,
@@ -104,7 +126,7 @@ onMounted(fetchPlayerValues);
       :valuation-mode="valuationMode"
       :access="access"
       :total-players="totalPlayers"
-      :season="activeLeague?.season"
+      :season="activeLeague?.season ?? (isDemoLeague ? '2026' : undefined)"
       :league-last-updated="activeLeague?.lastUpdated"
     />
     <div

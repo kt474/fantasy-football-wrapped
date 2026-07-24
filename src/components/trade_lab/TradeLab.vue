@@ -40,8 +40,15 @@ import TradeDatabase from "./TradeDatabase.vue";
 import TradeFinder from "./TradeFinder.vue";
 import TradeAssetDialog from "./TradeAssetDialog.vue";
 import TradePlayerRankBadges from "./TradePlayerRankBadges.vue";
+import { loadDemoTradeValues } from "@/data/demo/loaders";
 
-type TradeLabRoster = TradeBuilderRoster;
+type TradeLabPlayer = TradeBuilderRoster["players"][number] & {
+  tradeValue?: number;
+};
+
+type TradeLabRoster = Omit<TradeBuilderRoster, "players"> & {
+  players: TradeLabPlayer[];
+};
 
 type TradeDraftPickAsset = {
   id: string;
@@ -60,6 +67,10 @@ const props = defineProps<{
 }>();
 const rosters = ref<TradeLabRoster[]>([]);
 const dynastyPickAssets = ref<DynastyDraftPickAsset[]>([]);
+const demoSuggestionsByRoster = ref<
+  Record<number, TradeSuggestion[]> | undefined
+>();
+const demoStarterPlayerIdsByRoster = ref<Record<number, string[]>>({});
 const loading = ref(false);
 const playerValueAccess = ref<"preview" | "premium">("preview");
 const tradeValueRequest = ref<TradeValueRequestPayload | null>(null);
@@ -93,6 +104,9 @@ const activeMode = ref(
 );
 
 const activeLeague = computed(() => store.currentLeague);
+const isDemoLeague = computed(
+  () => !store.currentLeagueId && store.leagueIds.length === 0
+);
 const dynasty = computed(() => isDynastyLeague(activeLeague.value));
 
 const fallbackWeek = computed(() => {
@@ -107,6 +121,9 @@ const usesCompletedSeasonValues = computed(
 const valuationMode = computed(() => getTradeValuationMode(activeLeague.value));
 
 const starterPlayerIdsByRoster = computed<Record<number, string[]>>(() => {
+  if (isDemoLeague.value) {
+    return demoStarterPlayerIdsByRoster.value;
+  }
   const weekIndex = selectedWeek.value - 1;
   return Object.fromEntries(
     props.tableData.map((team) => [
@@ -247,6 +264,30 @@ const teamBHasAssets = computed(
 let rosterRequestId = 0;
 const fetchPlayers = async () => {
   const currentRequestId = ++rosterRequestId;
+  demoSuggestionsByRoster.value = undefined;
+  demoStarterPlayerIdsByRoster.value = {};
+
+  if (isDemoLeague.value) {
+    loading.value = true;
+    try {
+      const demo = await loadDemoTradeValues();
+      if (currentRequestId !== rosterRequestId) return;
+      rosters.value = demo.demoTradeBuilderRosters;
+      demoSuggestionsByRoster.value = demo.demoTradeSuggestionsByRoster;
+      demoStarterPlayerIdsByRoster.value =
+        demo.demoStarterPlayerIdsByRoster;
+      dynastyPickAssets.value = [];
+      playerValueAccess.value = "premium";
+      tradeValueRequest.value = null;
+      syncTeamSelections();
+    } finally {
+      if (currentRequestId === rosterRequestId) {
+        loading.value = false;
+      }
+    }
+    return;
+  }
+
   if (store.leagueIds.length === 0 || !activeLeague.value) {
     rosters.value = [];
     dynastyPickAssets.value = [];
@@ -545,6 +586,49 @@ const fairnessPillClass = computed(() => {
   return waiverPaletteClass(5);
 });
 
+const getDemoTradeQuote = (): TradeQuoteResponse | null => {
+  const teamAValue = teamAOutgoingPlayers.value.reduce(
+    (total, player) => total + (player.tradeValue ?? 0),
+    0
+  );
+  const teamBValue = teamBOutgoingPlayers.value.reduce(
+    (total, player) => total + (player.tradeValue ?? 0),
+    0
+  );
+  if (teamAValue <= 0 || teamBValue <= 0) return null;
+
+  const demoDifferencePercentage =
+    (Math.abs(teamAValue - teamBValue) / Math.max(teamAValue, teamBValue)) *
+    100;
+  const gapBand: TradeQuoteResponse["gapBand"] =
+    demoDifferencePercentage <= 10
+      ? "within_10_percent"
+      : demoDifferencePercentage <= 20
+        ? "10_to_20_percent"
+        : demoDifferencePercentage <= 35
+          ? "20_to_35_percent"
+          : "greater_than_35_percent";
+  const fairnessLabel: TradeQuoteResponse["fairnessLabel"] =
+    demoDifferencePercentage <= 10
+      ? "Very fair"
+      : demoDifferencePercentage <= 20
+        ? "Reasonably fair"
+        : demoDifferencePercentage <= 35
+          ? "Slightly uneven"
+          : "Very uneven";
+
+  return {
+    fairnessLabel,
+    favoredSide:
+      demoDifferencePercentage <= 3
+        ? "even"
+        : teamBValue > teamAValue
+          ? "team_a"
+          : "team_b",
+    gapBand,
+  };
+};
+
 let quoteRequestId = 0;
 watch(
   [
@@ -565,13 +649,16 @@ watch(
     quoteLoading.value = false;
     quoteError.value = "";
     if (
-      !request ||
       selectedTeamAId.value == null ||
       selectedTeamBId.value == null ||
       !teamAHasAssets.value ||
       !teamBHasAssets.value
     ) {
       tradeQuote.value = null;
+      return;
+    }
+    if (!request) {
+      tradeQuote.value = isDemoLeague.value ? getDemoTradeQuote() : null;
       return;
     }
 
@@ -745,6 +832,7 @@ onBeforeUnmount(() => {
       :loading="loading"
       :valuation-mode="valuationMode"
       :starter-player-ids-by-roster="starterPlayerIdsByRoster"
+      :demo-suggestions-by-roster="demoSuggestionsByRoster"
       @open-suggestion="openTradeSuggestion"
     />
     <div v-else>

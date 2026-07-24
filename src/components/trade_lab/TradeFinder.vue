@@ -27,6 +27,7 @@ const props = defineProps<{
   loading?: boolean;
   valuationMode?: TradeValuationMode;
   starterPlayerIdsByRoster: Record<number, string[]>;
+  demoSuggestionsByRoster?: Record<number, TradeSuggestion[]>;
 }>();
 
 const emit = defineEmits<{
@@ -77,10 +78,30 @@ const remainingSuggestionCount = computed(() =>
 );
 
 watch(
-  [selectedRosterId, () => props.request, finderRetryNonce],
-  async ([rosterId, request]) => {
+  [
+    selectedRosterId,
+    () => props.request,
+    () => props.demoSuggestionsByRoster,
+    finderRetryNonce,
+  ],
+  async ([rosterId, request, demoSuggestionsByRoster]) => {
     const currentRequestId = ++finderRequestId;
-    if (rosterId == null || !request) {
+    if (rosterId == null) {
+      suggestions.value = [];
+      finderLoading.value = false;
+      accessError.value = "";
+      finderError.value = "";
+      return;
+    }
+    if (demoSuggestionsByRoster) {
+      suggestions.value = demoSuggestionsByRoster[rosterId] ?? [];
+      visibleSuggestionCount.value = SUGGESTION_PAGE_SIZE;
+      finderLoading.value = false;
+      accessError.value = "";
+      finderError.value = "";
+      return;
+    }
+    if (!request) {
       suggestions.value = [];
       finderLoading.value = false;
       accessError.value = "";

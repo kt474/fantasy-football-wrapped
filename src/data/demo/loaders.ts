@@ -10,6 +10,7 @@ export const loadDemoDraft = () => import("./draft");
 export const loadDemoDraftGrades = () => import("./draft-grades");
 export const loadDemoPlayerRankings = () => import("./player-rankings");
 export const loadDemoRosterRankings = () => import("./roster-rankings");
+export const loadDemoTradeValues = () => import("./trade-values");
 
 export type DemoLeagueFixtures = Awaited<ReturnType<typeof loadDemoLeague>>;
 export type DemoRosterManagementFixtures = Awaited<
