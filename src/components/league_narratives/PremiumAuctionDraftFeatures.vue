@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 
 import {
-  AUCTION_PLAN_POSITIONS,
-  getAuctionBudgetPlan,
-  getAuctionPositionPriceBands,
-  getAuctionRoomBenchmarks,
-  getAuctionTendencySummary,
-} from "@/lib/auctionNarratives";
+  analyzeDraftRoom,
+  type AuctionDraftRoomResponse,
+} from "@/api/draftRoomApi";
+import { AUCTION_PLAN_POSITIONS } from "@/lib/auctionNarratives";
 import type { ManagerArchetype } from "@/lib/narratives";
 import { Badge } from "@/components/ui/badge";
 import Card from "@/components/ui/card/Card.vue";
@@ -27,28 +25,22 @@ const props = defineProps<{
 }>();
 
 const rows = computed(() =>
-  props.archetypes.flatMap((manager) => {
-    const summary = getAuctionTendencySummary(manager.auctionHistory ?? []);
-    return summary ? [{ manager, summary }] : [];
-  })
+  props.archetypes
+    .filter((manager) => manager.auctionHistory?.length)
+    .map((manager) => ({ manager }))
 );
 const selectedManagerId = ref("");
 const plannedBudget = ref<string | number>(props.auctionBudget ?? 200);
-const selectedManager = computed(
-  () =>
-    rows.value.find((row) => row.manager.userId === selectedManagerId.value)
-      ?.manager ?? rows.value[0]?.manager
-);
-const budgetPlan = computed(() =>
-  selectedManager.value
-    ? getAuctionBudgetPlan(selectedManager.value, Number(plannedBudget.value))
-    : null
-);
-const roomBenchmarks = computed(() =>
-  getAuctionRoomBenchmarks(props.archetypes, Number(plannedBudget.value))
-);
+const analysis = ref<AuctionDraftRoomResponse | null>(null);
+const analysisLoading = ref(false);
+const analysisError = ref("");
+let analysisRequestId = 0;
+let analysisTimer: ReturnType<typeof setTimeout> | null = null;
+
+const budgetPlan = computed(() => analysis.value?.budgetPlan ?? null);
+const roomBenchmarks = computed(() => analysis.value?.roomBenchmarks ?? []);
 const priceBandGroups = computed(() => {
-  const priceBands = getAuctionPositionPriceBands(props.archetypes);
+  const priceBands = analysis.value?.priceBands ?? [];
   return AUCTION_PLAN_POSITIONS.map((position) => ({
     position,
     bands: priceBands.filter((band) => band.position === position),
@@ -68,12 +60,66 @@ watch(
   { immediate: true }
 );
 
+const loadDraftRoomAnalysis = async () => {
+  if (!rows.value.length || !selectedManagerId.value) {
+    analysis.value = null;
+    return;
+  }
+
+  const requestId = ++analysisRequestId;
+  analysisLoading.value = true;
+  analysisError.value = "";
+  try {
+    const response = await analyzeDraftRoom({
+      mode: "auction",
+      managers: props.archetypes,
+      selectedManagerId: selectedManagerId.value,
+      budget: Number(plannedBudget.value),
+    });
+    if (requestId !== analysisRequestId) return;
+    if (response.mode !== "auction") {
+      throw new Error("The draft-room response was invalid.");
+    }
+    analysis.value = response;
+  } catch (error) {
+    if (requestId !== analysisRequestId) return;
+    analysisError.value =
+      error instanceof Error
+        ? error.message
+        : "Unable to analyze the draft room right now.";
+  } finally {
+    if (requestId === analysisRequestId) analysisLoading.value = false;
+  }
+};
+
+const queueDraftRoomAnalysis = () => {
+  if (analysisTimer) clearTimeout(analysisTimer);
+  analysisRequestId += 1;
+  analysisLoading.value = true;
+  analysisError.value = "";
+  analysisTimer = setTimeout(() => {
+    analysisTimer = null;
+    void loadDraftRoomAnalysis();
+  }, analysis.value ? 250 : 0);
+};
+
+watch(
+  [rows, selectedManagerId, () => plannedBudget.value],
+  queueDraftRoomAnalysis,
+  { immediate: true }
+);
+
 watch(
   () => props.auctionBudget,
   (auctionBudget) => {
     if (auctionBudget && auctionBudget > 0) plannedBudget.value = auctionBudget;
   }
 );
+
+onBeforeUnmount(() => {
+  if (analysisTimer) clearTimeout(analysisTimer);
+  analysisRequestId += 1;
+});
 
 const formatPercent = (value: number) => `${Math.round(value * 100)}%`;
 const benchmarkFor = (position: string) =>
@@ -94,7 +140,38 @@ const formatRoomDifference = (position: string, amount: number) => {
     :class="embedded ? '' : 'p-4 md:p-6'"
   >
     <div class="space-y-4">
-      <Card class="p-4 shadow-none sm:p-5">
+      <div
+        v-if="analysisError"
+        class="flex flex-wrap items-center justify-between gap-3 p-4 border rounded-card bg-muted/30"
+        role="alert"
+      >
+        <p class="text-sm text-muted-foreground">{{ analysisError }}</p>
+        <button
+          type="button"
+          class="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          @click="loadDraftRoomAnalysis"
+        >
+          Try again
+        </button>
+      </div>
+      <p
+        v-else-if="analysisLoading"
+        class="p-4 text-sm border rounded-card text-muted-foreground"
+        aria-live="polite"
+      >
+        {{
+          analysis
+            ? "Updating your auction draft-room analysis…"
+            : "Building your auction draft-room analysis…"
+        }}
+      </p>
+
+      <Card
+        v-if="analysis"
+        class="p-4 shadow-none sm:p-5"
+        :class="{ 'opacity-60': analysisLoading }"
+        :aria-busy="analysisLoading"
+      >
         <h3 class="heading-card">Room Budget Benchmarks</h3>
         <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
           What this league historically spends at each position, scaled to your
@@ -121,7 +198,12 @@ const formatRoomDifference = (position: string, amount: number) => {
         </div>
       </Card>
 
-      <Card v-if="priceBandGroups.length" class="p-4 shadow-none sm:p-5">
+      <Card
+        v-if="priceBandGroups.length"
+        class="p-4 shadow-none sm:p-5"
+        :class="{ 'opacity-60': analysisLoading }"
+        :aria-busy="analysisLoading"
+      >
         <h3 class="heading-card">Historical Price Bands</h3>
         <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
           Median and middle 50% of this room’s non-keeper winning bids.
@@ -154,7 +236,12 @@ const formatRoomDifference = (position: string, amount: number) => {
         </div>
       </Card>
 
-      <Card class="p-4 shadow-none sm:p-5">
+      <Card
+        v-if="analysis"
+        class="p-4 shadow-none sm:p-5"
+        :class="{ 'opacity-60': analysisLoading }"
+        :aria-busy="analysisLoading"
+      >
         <h3 class="heading-card">Auction Budget Plan</h3>
         <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
           Scale a manager’s historical position spending to your planned budget.

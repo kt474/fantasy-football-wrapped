@@ -2,14 +2,10 @@
 import { computed, ref, watch } from "vue";
 
 import {
-  getDraftRoomPulse,
-  getDraftRoomCheatSheetSummary,
-  getDraftStrategyResult,
-  getDraftStrategyShifts,
-  getLeagueRelativeDraftInsights,
-  getPositionalDraftPlan,
-  type ManagerArchetype,
-} from "@/lib/narratives";
+  analyzeDraftRoom,
+  type SnakeDraftRoomResponse,
+} from "@/api/draftRoomApi";
+import type { ManagerArchetype } from "@/lib/narratives";
 import ManagerAvatar from "@/components/shared/ManagerAvatar.vue";
 import { Badge } from "@/components/ui/badge";
 import Card from "@/components/ui/card/Card.vue";
@@ -44,18 +40,16 @@ const draftRoomLeagueSize = computed(() =>
   )
 );
 
+const analysis = ref<SnakeDraftRoomResponse | null>(null);
+const analysisLoading = ref(false);
+const analysisError = ref("");
+let analysisRequestId = 0;
+
 const premiumInsightsByUserId = computed(() =>
   Object.fromEntries(
-    draftRoomManagers.value.map((manager) => [
+    (analysis.value?.managers ?? []).map((manager) => [
       manager.userId,
-      {
-        relative: getLeagueRelativeDraftInsights(
-          manager,
-          draftRoomManagers.value
-        ),
-        strategyResult: getDraftStrategyResult(manager.draftHistory ?? []),
-        shifts: getDraftStrategyShifts(manager.draftHistory ?? []),
-      },
+      manager,
     ])
   )
 );
@@ -64,58 +58,92 @@ const premiumInsightsFor = (manager: ManagerArchetype) =>
   premiumInsightsByUserId.value[manager.userId];
 
 const cheatSheetRows = computed(() =>
-  draftRoomManagers.value.flatMap((manager) => {
-    const summary = getDraftRoomCheatSheetSummary(manager.draftHistory ?? []);
-    return summary ? [{ manager, summary }] : [];
+  (analysis.value?.managers ?? []).flatMap((insight) => {
+    const manager = draftRoomManagers.value.find(
+      (candidate) => candidate.userId === insight.userId
+    );
+    return manager ? [{ manager, summary: insight.summary }] : [];
   })
 );
 
-const draftRoomPulse = computed(() =>
-  getDraftRoomPulse(draftRoomManagers.value)
-);
+const draftRoomPulse = computed(() => analysis.value?.pulse ?? []);
 const draftRoomPulseGridClass = computed(() => {
   if (draftRoomPulse.value.length >= 4) return "lg:grid-cols-4";
   if (draftRoomPulse.value.length === 3) return "lg:grid-cols-3";
   return "lg:grid-cols-2";
 });
 
-const selectedPlanManagerId = ref(props.archetypes[0]?.userId ?? "");
+const selectedPlanManagerId = ref(
+  draftRoomManagers.value[0]?.userId ?? ""
+);
 const selectedDraftSlot = ref("1");
 const draftSlotOptions = computed(() =>
   Array.from({ length: draftRoomLeagueSize.value }, (_, index) =>
     String(index + 1)
   )
 );
-const selectedPlanManager = computed(
-  () =>
-    draftRoomManagers.value.find(
-      (manager) => manager.userId === selectedPlanManagerId.value
-    ) ?? cheatSheetRows.value[0]?.manager
-);
-const positionalDraftPlan = computed(() => {
-  const manager = selectedPlanManager.value;
-  return manager
-    ? getPositionalDraftPlan(
-        manager,
-        draftRoomManagers.value,
-        Number(selectedDraftSlot.value),
-        draftRoomLeagueSize.value
-      )
-    : null;
-});
+const positionalDraftPlan = computed(() => analysis.value?.plan ?? null);
+
+const loadDraftRoomAnalysis = async () => {
+  if (!draftRoomManagers.value.length || !selectedPlanManagerId.value) {
+    analysis.value = null;
+    return;
+  }
+
+  const requestId = ++analysisRequestId;
+  analysisLoading.value = true;
+  analysisError.value = "";
+  try {
+    const response = await analyzeDraftRoom({
+      mode: "snake",
+      managers: draftRoomManagers.value,
+      selectedManagerId: selectedPlanManagerId.value,
+      leagueSize: draftRoomLeagueSize.value,
+      draftSlot: Number(selectedDraftSlot.value),
+    });
+    if (requestId !== analysisRequestId) return;
+    if (response.mode !== "snake") {
+      throw new Error("The draft-room response was invalid.");
+    }
+    analysis.value = response;
+  } catch (error) {
+    if (requestId !== analysisRequestId) return;
+    analysisError.value =
+      error instanceof Error
+        ? error.message
+        : "Unable to analyze the draft room right now.";
+  } finally {
+    if (requestId === analysisRequestId) analysisLoading.value = false;
+  }
+};
 
 watch(
-  cheatSheetRows,
-  (rows) => {
+  draftRoomManagers,
+  (managers) => {
     if (
-      rows.length &&
-      !rows.some((row) => row.manager.userId === selectedPlanManagerId.value)
+      managers.length &&
+      !managers.some(
+        (manager) => manager.userId === selectedPlanManagerId.value
+      )
     ) {
-      selectedPlanManagerId.value = rows[0].manager.userId;
+      selectedPlanManagerId.value = managers[0].userId;
     }
     if (Number(selectedDraftSlot.value) > draftRoomLeagueSize.value) {
       selectedDraftSlot.value = String(draftRoomLeagueSize.value);
     }
+  },
+  { immediate: true }
+);
+
+watch(
+  [
+    draftRoomManagers,
+    selectedPlanManagerId,
+    selectedDraftSlot,
+    draftRoomLeagueSize,
+  ],
+  () => {
+    void loadDraftRoomAnalysis();
   },
   { immediate: true }
 );
@@ -163,7 +191,7 @@ const formatExpectedPositionPicks = (
 <template>
   <component
     :is="embedded ? 'div' : Card"
-    v-if="cheatSheetRows.length"
+    v-if="draftRoomManagers.length"
     :class="embedded ? '' : 'p-4 md:p-6'"
   >
     <div
@@ -182,7 +210,38 @@ const formatExpectedPositionPicks = (
     </div>
 
     <div class="mt-4 space-y-4">
-      <Card class="overflow-hidden shadow-none">
+      <div
+        v-if="analysisError"
+        class="flex flex-wrap items-center justify-between gap-3 p-4 border rounded-card bg-muted/30"
+        role="alert"
+      >
+        <p class="text-sm text-muted-foreground">{{ analysisError }}</p>
+        <button
+          type="button"
+          class="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          @click="loadDraftRoomAnalysis"
+        >
+          Try again
+        </button>
+      </div>
+      <p
+        v-else-if="analysisLoading"
+        class="p-4 text-sm border rounded-card text-muted-foreground"
+        aria-live="polite"
+      >
+        {{
+          analysis
+            ? "Updating your draft-room analysis…"
+            : "Building your draft-room analysis…"
+        }}
+      </p>
+
+      <Card
+        v-if="analysis && positionalDraftPlan"
+        class="overflow-hidden shadow-none"
+        :class="{ 'opacity-60': analysisLoading }"
+        :aria-busy="analysisLoading"
+      >
         <div
           v-if="positionalDraftPlan"
           class="p-4 bg-background sm:p-5"
@@ -335,7 +394,12 @@ const formatExpectedPositionPicks = (
         </div>
       </Card>
 
-      <Card class="overflow-hidden shadow-none">
+      <Card
+        v-if="analysis"
+        class="overflow-hidden shadow-none"
+        :class="{ 'opacity-60': analysisLoading }"
+        :aria-busy="analysisLoading"
+      >
         <div
           class="flex flex-wrap items-start justify-between gap-3 p-3 sm:px-4 sm:py-3"
         >
@@ -504,7 +568,10 @@ const formatExpectedPositionPicks = (
       </Card>
     </div>
 
-    <p class="mt-4 text-xs leading-relaxed text-muted-foreground">
+    <p
+      v-if="analysis"
+      class="mt-4 text-xs leading-relaxed text-muted-foreground"
+    >
       History-powered estimates vary with available comparable drafts. One-draft
       and sparse-history leagues may only show early or limited signals.
     </p>

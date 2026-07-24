@@ -2,11 +2,7 @@
 import { LockKeyhole } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 
-import {
-  getDraftRoomCheatSheetSummary,
-  type ManagerArchetype,
-} from "@/lib/narratives";
-import { getAuctionTendencySummary } from "@/lib/auctionNarratives";
+import type { ManagerArchetype } from "@/lib/narratives";
 import {
   getLeagueAnalyticsProperties,
   trackPremiumFunnelEvent,
@@ -47,8 +43,8 @@ const draftRoomManagers = computed(
 const hasDraftRoomData = computed(() =>
   draftRoomManagers.value.some((manager) =>
     isAuction.value
-      ? getAuctionTendencySummary(manager.auctionHistory ?? [])
-      : getDraftRoomCheatSheetSummary(manager.draftHistory ?? [])
+      ? Boolean(manager.auctionHistory?.length)
+      : Boolean(manager.draftHistory?.length)
   )
 );
 
