@@ -21,12 +21,17 @@ const props = defineProps<{
   rosters: TradeFinderRoster[];
   loading?: boolean;
   valuationMode?: TradeValuationMode;
+  access: "preview" | "premium";
+  totalPlayers: number;
+  season?: string;
+  leagueLastUpdated?: number;
 }>();
 
 const dynastyPerspective = defineModel<DynastyPerspective>(
   "dynastyPerspective",
   { required: true }
 );
+const selectedManagerId = ref("ALL");
 const selectedPosition = ref("ALL");
 const currentPage = ref(1);
 const PAGE_SIZE = 25;
@@ -53,9 +58,17 @@ const positions = computed(() =>
 );
 
 const filteredPlayers = computed(() => {
-  if (selectedPosition.value === "ALL") return players.value;
-  return players.value.filter(
-    (player) => player.position === selectedPosition.value
+  const managerPlayers =
+    selectedManagerId.value === "ALL"
+      ? players.value
+      : (props.rosters.find(
+          (roster) => String(roster.id) === selectedManagerId.value
+        )?.players ?? []);
+
+  return managerPlayers.filter(
+    (player) =>
+      selectedPosition.value === "ALL" ||
+      player.position === selectedPosition.value
   );
 });
 
@@ -78,9 +91,46 @@ const pageEnd = computed(() =>
   Math.min(currentPage.value * PAGE_SIZE, filteredPlayers.value.length)
 );
 
-watch(selectedPosition, () => {
+const valueContext = computed(() => {
+  const modeLabel =
+    props.valuationMode === "dynasty"
+      ? "dynasty values"
+      : props.valuationMode === "season results"
+        ? "completed season values"
+        : "rest of season values";
+  const seasonLabel = props.season ? `${props.season} ` : "";
+  const timestamp = props.leagueLastUpdated;
+
+  if (!timestamp || !Number.isFinite(timestamp)) {
+    return `${seasonLabel}${modeLabel}`;
+  }
+
+  const refreshedAt = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(timestamp);
+
+  return `${seasonLabel}${modeLabel} · League data refreshed ${refreshedAt}`;
+});
+
+watch([selectedManagerId, selectedPosition], () => {
   currentPage.value = 1;
 });
+
+watch(
+  () => props.rosters,
+  (rosters) => {
+    if (
+      selectedManagerId.value !== "ALL" &&
+      !rosters.some((roster) => String(roster.id) === selectedManagerId.value)
+    ) {
+      selectedManagerId.value = "ALL";
+    }
+  }
+);
 
 watch(players, () => {
   currentPage.value = 1;
@@ -93,6 +143,14 @@ const valueTier = (value: number) => {
   if (value > 0) return { label: "Depth", variant: "outline" as const };
   return { label: "Replacement", variant: "outline" as const };
 };
+
+const valueScaleTiers = [
+  { label: "Elite", range: "80+", variant: "success" },
+  { label: "High", range: "60–79.9", variant: "info" },
+  { label: "Starter", range: "35–59.9", variant: "secondary" },
+  { label: "Depth", range: "0.1–34.9", variant: "outline" },
+  { label: "Replacement", range: "0 or below", variant: "outline" },
+] as const;
 
 const formatNumber = (value: number, digits = 1) =>
   Number.isFinite(value) ? value.toFixed(digits) : "—";
@@ -107,20 +165,47 @@ const formatNumber = (value: number, digits = 1) =>
         <p class="text-sm text-muted-foreground sm:text-base">
           {{
             valuationMode === "dynasty"
-              ? "Long-term rankings that blend dynasty market ADP with league specific projected production, starting lineup requirements, and your selected team direction."
+              ? "Long term rankings that blend dynasty market ADP with league specific projected production, starting lineup requirements, and your selected team direction."
               : "League specific rankings for rostered players. Trade value is derived from value over the starter level replacement player at each position."
           }}
+        </p>
+        <p class="mt-4 -mb-3 text-xs font-medium text-muted-foreground">
+          {{ valueContext }}
         </p>
       </div>
 
       <div
-        class="grid w-full gap-2 sm:w-auto"
+        class="grid w-full grid-cols-2 gap-2 sm:w-auto"
         :class="
           valuationMode === 'dynasty'
-            ? 'grid-cols-2 sm:grid-cols-[9rem_9rem]'
-            : 'grid-cols-1 sm:grid-cols-[9rem]'
+            ? 'sm:grid-cols-[12rem_9rem_9rem]'
+            : 'sm:grid-cols-[12rem_9rem]'
         "
       >
+        <div
+          :class="{
+            'col-span-2 sm:col-span-1': valuationMode === 'dynasty',
+          }"
+        >
+          <label class="block mb-1 text-xs font-medium text-muted-foreground">
+            Manager
+          </label>
+          <Select v-model="selectedManagerId">
+            <SelectTrigger class="w-full" aria-label="Filter by manager">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All managers</SelectItem>
+              <SelectItem
+                v-for="roster in rosters"
+                :key="roster.id"
+                :value="String(roster.id)"
+              >
+                {{ roster.managerName }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div v-if="valuationMode === 'dynasty'">
           <label class="block mb-1 text-xs font-medium text-muted-foreground">
             Team direction
@@ -141,7 +226,7 @@ const formatNumber = (value: number, digits = 1) =>
             Position
           </label>
           <Select v-model="selectedPosition">
-            <SelectTrigger class="w-full">
+            <SelectTrigger class="w-full" aria-label="Filter by position">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -193,7 +278,9 @@ const formatNumber = (value: number, digits = 1) =>
       class="px-5 py-10 text-center border border-dashed rounded-lg border-border"
     >
       <p class="font-medium">No matching players</p>
-      <p class="mt-1 text-sm text-muted-foreground">Try another position.</p>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Try another manager or position.
+      </p>
     </div>
 
     <div v-else class="space-y-3">
@@ -221,7 +308,7 @@ const formatNumber = (value: number, digits = 1) =>
                   {{
                     valuationMode === "dynasty"
                       ? "Projected pts"
-                      : valuationMode === "season-results"
+                      : valuationMode === "season results"
                         ? "Season pts"
                         : "ROS pts"
                   }}
@@ -298,11 +385,12 @@ const formatNumber = (value: number, digits = 1) =>
           </table>
         </div>
         <div
+          v-if="access !== 'preview'"
           class="flex flex-col gap-3 px-4 py-3 text-xs border-t border-border sm:flex-row sm:items-center sm:justify-between"
         >
           <p class="text-muted-foreground">
             Showing {{ pageStart }}–{{ pageEnd }} of
-            {{ filteredPlayers.length }} rostered players.
+            {{ filteredPlayers.length }} rostered players
           </p>
           <nav
             v-if="pageCount > 1"
@@ -333,25 +421,43 @@ const formatNumber = (value: number, digits = 1) =>
           </nav>
         </div>
       </div>
-      <p
-        v-if="valuationMode !== 'dynasty'"
-        class="px-1 text-xs leading-relaxed text-muted-foreground"
-      >
-        <span class="font-medium text-foreground">How rankings work:</span>
-        Redraft values measure projected points above a league specific
-        positional baseline. League size, scoring type, starting lineup
-        requirements, and positional scarcity influence each player’s value.
-        Completed seasons use full-season results instead of projections. Scores
-        are relative to your league.
-      </p>
-      <p v-else class="px-1 text-xs leading-relaxed text-muted-foreground">
-        <span class="font-medium text-foreground">How rankings work:</span>
-        Dynasty values blend long-term market ADP with league specific projected
-        production. League size, scoring type, starting lineup requirements,
-        positional scarcity, and tight end premiums influence each player’s
-        value. Your selected team direction adjusts the balance between market
-        value and current production. Scores are relative to your league.
-      </p>
+      <div class="px-4 py-3 border rounded-lg border-border bg-muted/20">
+        <p class="text-xs leading-relaxed text-muted-foreground">
+          <span class="font-medium text-foreground"
+            >How to read trade value:</span
+          >
+          This is a league relative comparison score, not projected fantasy
+          points or a universal player price. Higher means more valuable within
+          this league.
+        </p>
+        <div
+          class="flex flex-wrap gap-1.5 mt-2"
+          aria-label="Trade value tier scale"
+        >
+          <Badge
+            v-for="tier in valueScaleTiers"
+            :key="tier.label"
+            :variant="tier.variant"
+          >
+            {{ tier.label }} {{ tier.range }}
+          </Badge>
+        </div>
+        <p
+          v-if="valuationMode !== 'dynasty'"
+          class="mt-2 text-xs leading-relaxed text-muted-foreground"
+        >
+          Redraft values measure projected points above a league specific
+          positional baseline. League size, scoring, starting lineup
+          requirements, and positional scarcity influence the result. Completed
+          seasons use full season results instead of projections.
+        </p>
+        <p class="mt-2 text-xs leading-relaxed text-muted-foreground" v-else>
+          Dynasty values blend long term market ADP with league specific
+          projected production. League size, scoring, starting lineup
+          requirements, positional scarcity, tight end premiums, and your
+          selected team direction influence the result.
+        </p>
+      </div>
     </div>
   </div>
 </template>

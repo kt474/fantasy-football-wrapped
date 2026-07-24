@@ -100,10 +100,34 @@ describe("manager draft tendencies", () => {
 
   test("orders picks while excluding keepers", () => {
     const draftPicks = [
-      { userId: "manager-1", pickNumber: 1, round: 1, position: "RB", keeper: true },
-      { userId: "manager-1", pickNumber: 4, round: 2, position: "WR", keeper: false },
-      { userId: "manager-1", pickNumber: 2, round: 1, position: "QB", keeper: false },
-      { userId: "manager-2", pickNumber: 3, round: 2, position: "TE", keeper: false },
+      {
+        userId: "manager-1",
+        pickNumber: 1,
+        round: 1,
+        position: "RB",
+        keeper: true,
+      },
+      {
+        userId: "manager-1",
+        pickNumber: 4,
+        round: 2,
+        position: "WR",
+        keeper: false,
+      },
+      {
+        userId: "manager-1",
+        pickNumber: 2,
+        round: 1,
+        position: "QB",
+        keeper: false,
+      },
+      {
+        userId: "manager-2",
+        pickNumber: 3,
+        round: 2,
+        position: "TE",
+        keeper: false,
+      },
     ];
     const history = getDraftHistoryForManager(
       {
@@ -342,7 +366,7 @@ describe("manager draft tendencies", () => {
     });
   });
 
-  test("builds league-relative position and quarterback scouting", () => {
+  test("builds league relative position and quarterback scouting", () => {
     const manager = {
       userId: "manager-1",
       draftHistory: [

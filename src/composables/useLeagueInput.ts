@@ -30,6 +30,7 @@ import {
   isRequestCancellation,
   isRequestTimeout,
 } from "@/lib/request";
+import { getLeagueFeatureDestinationTab } from "@/lib/leagueFeatureDestination";
 
 export const SEASON_YEAR_OPTIONS = [
   "2026",
@@ -155,6 +156,14 @@ export const useLeagueInput = (
     const routeSource = Array.isArray(route.query.source)
       ? route.query.source[0]
       : route.query.source;
+    const requestedDestinationTab = getLeagueFeatureDestinationTab(
+      route.query.destination
+    );
+    const openRequestedDestinationOrStandings = () => {
+      const nextTab = requestedDestinationTab ?? "Standings";
+      store.currentTab = nextTab;
+      localStorage.setItem("currentTab", nextTab);
+    };
     const attemptProperties: AnalyticsProperties = {
       source:
         typeof routeSource === "string" && routeSource.trim()
@@ -281,8 +290,7 @@ export const useLeagueInput = (
         if (!isActiveLeagueLoad(controller)) return;
         store.updateLeagueInfo(newLeagueInfo);
         store.updateCurrentLeagueId(getLeagueKey(newLeagueInfo));
-        store.currentTab = "Standings";
-        localStorage.setItem("currentTab", "Standings");
+        openRequestedDestinationOrStandings();
         store.leagueSubmitted = true;
         store.updateShowInput(false);
         trackEvent("League Added", {
@@ -372,8 +380,7 @@ export const useLeagueInput = (
           store.updateCurrentLeagueId(getLeagueKey(espnLeague));
           store.leagueSubmitted = true;
           store.updateShowInput(false);
-          store.currentTab = "Standings";
-          localStorage.setItem("currentTab", "Standings");
+          openRequestedDestinationOrStandings();
           trackEvent("League Added", {
             ...attemptProperties,
             ...getLeagueAnalyticsProperties(espnLeague),

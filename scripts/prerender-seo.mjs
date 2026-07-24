@@ -153,7 +153,7 @@ const pages = [
         body: "Compare each selection with average draft position, projected points, and the value available at that point in the draft.",
       },
       {
-        title: "League-relative team grades",
+        title: "League relative team grades",
         body: "Combine ADP value and projected points from the first 13 selections, then grade the result against the other managers in the same draft room.",
       },
       {
@@ -166,7 +166,7 @@ const pages = [
       },
       {
         title: "Draft tendencies and Premium planning",
-        body: "Review each manager’s historical position patterns for free, then use Premium for round-by-round positional plans, projected room pressure, strategy shifts, and league-relative scouting.",
+        body: "Review each manager’s historical position patterns for free, then use Premium for round-by-round positional plans, projected room pressure, strategy shifts, and league relative scouting.",
       },
     ],
     faqs: [
@@ -210,7 +210,7 @@ const pages = [
       },
       {
         title: "Manager draft patterns",
-        body: "Compare opening strategies, early position lean, quarterback timing, recent shifts, and league-relative tendencies.",
+        body: "Compare opening strategies, early position lean, quarterback timing, recent shifts, and league relative tendencies.",
       },
       {
         title: "History-based estimates",
@@ -339,7 +339,7 @@ const pages = [
     heading: "Fantasy football player values built for your league",
     introduction:
       "Rank every rostered player using your league’s format, scoring, and lineup requirements instead of relying on one generic trade value chart.",
-    ctaHref: "/?source=player_values_landing",
+    ctaHref: "/?source=player_values_landing&destination=player_values",
     ctaLabel: "Analyze your league",
     sections: [
       {
@@ -348,7 +348,7 @@ const pages = [
       },
       {
         title: "Redraft and dynasty rankings",
-        body: "Use rest-of-season production for redraft or blend long-term market value with projected production and team direction in dynasty.",
+        body: "Use rest-of-season production for redraft or blend long term market value with projected production and team direction in dynasty.",
       },
       {
         title: "Values you can compare",
@@ -364,7 +364,8 @@ const pages = [
     heading: "Find fantasy football trades that help both teams",
     introduction:
       "Trade Finder scans the real rosters in your league for balanced deals projected to improve both teams’ starting lineups.",
-    ctaHref: "/?source=trade_finder_landing",
+    ctaHref:
+      "/?source=trade_finder_landing&destination=trade_finder&tradeMode=finder",
     ctaLabel: "Analyze your league",
     sections: [
       {

@@ -468,7 +468,7 @@ const formatExpectedPositionPicks = (
                 </div>
 
                 <div v-if="premiumInsightsFor(row.manager)?.relative.length">
-                  <p class="text-sm font-semibold">League-relative scouting</p>
+                  <p class="text-sm font-semibold">League relative scouting</p>
                   <ul
                     class="mt-1.5 space-y-1 text-sm leading-relaxed text-muted-foreground"
                   >
@@ -495,7 +495,7 @@ const formatExpectedPositionPicks = (
                 v-else
                 class="p-3 text-sm leading-relaxed border rounded-card bg-surface-subtle text-muted-foreground"
               >
-                More comparable drafts are needed before showing league-relative
+                More comparable drafts are needed before showing league relative
                 scouting or strategy-result connections.
               </p>
             </AccordionContent>

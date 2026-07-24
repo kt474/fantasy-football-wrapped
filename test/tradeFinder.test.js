@@ -12,10 +12,10 @@ describe("trade value request boundary", () => {
     expect(getTradeValuationMode({ seasonType: "Dynasty" })).toBe("dynasty");
     expect(
       getTradeValuationMode({ seasonType: "Redraft", status: "complete" })
-    ).toBe("season-results");
+    ).toBe("season results");
     expect(
       getTradeValuationMode({ seasonType: "Redraft", status: "in_season" })
-    ).toBe("ros-projection");
+    ).toBe("ros projection");
   });
 
   test("builds the bounded backend snapshot without player values", () => {

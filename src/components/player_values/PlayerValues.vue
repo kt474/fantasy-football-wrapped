@@ -22,10 +22,17 @@ const rosters = ref<LeagueTradeValueRoster[]>([]);
 const loading = ref(false);
 const errorMessage = ref("");
 const access = ref<"preview" | "premium">("preview");
-const previewLimit = ref(10);
 const totalPlayers = ref(0);
 const dynastyPerspective = useDynastyTradePerspective();
 const activeLeague = computed(() => store.currentLeague);
+const visiblePlayerCount = computed(
+  () =>
+    new Set(
+      rosters.value.flatMap((roster) =>
+        roster.players.map((player) => player.playerId)
+      )
+    ).size
+);
 const selectedWeek = computed(() =>
   activeLeague.value ? getTradeValueWeek(activeLeague.value) : 1
 );
@@ -56,7 +63,6 @@ const fetchPlayerValues = async () => {
     if (currentRequestId === requestId) {
       rosters.value = result.rosters;
       access.value = result.access;
-      previewLimit.value = result.previewLimit;
       totalPlayers.value = result.totalPlayers;
     }
   } catch (error) {
@@ -98,6 +104,10 @@ onMounted(fetchPlayerValues);
       :rosters="rosters"
       :loading="loading"
       :valuation-mode="valuationMode"
+      :access="access"
+      :total-players="totalPlayers"
+      :season="activeLeague?.season"
+      :league-last-updated="activeLeague?.lastUpdated"
     />
     <div
       v-if="errorMessage"
@@ -109,11 +119,17 @@ onMounted(fetchPlayerValues);
       </Button>
     </div>
     <div
-      v-if="!loading && access === 'preview' && totalPlayers > previewLimit"
+      v-if="
+        !loading &&
+        access === 'preview' &&
+        visiblePlayerCount > 0 &&
+        totalPlayers > visiblePlayerCount
+      "
       class="p-4 mt-4 text-center border rounded-lg"
     >
       <p class="font-medium">
-        Previewing {{ previewLimit }} out of {{ totalPlayers }} players
+        Preview includes {{ visiblePlayerCount }} of
+        {{ totalPlayers }} rostered players
       </p>
       <p class="mt-1 text-sm text-muted-foreground">
         Premium unlocks complete league adjusted rankings and Trade Finder.

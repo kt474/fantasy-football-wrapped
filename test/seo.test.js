@@ -19,6 +19,8 @@ describe("SEO landing pages", () => {
     );
     expect(router).toContain('path: "/fantasy-football-power-rankings"');
     expect(router).toContain('path: "/fantasy-football-league-history"');
+    expect(router).toContain('path: "/fantasy-football-player-values"');
+    expect(router).toContain('path: "/fantasy-football-trade-finder"');
     expect(router).toContain('path: "/fantasy-football-weekly-recap"');
     expect(router).toContain('path: "/fantasy-football-weekly-recap-example"');
     expect(router).toContain('path: "/fantasy-football-video-recap-example"');
@@ -55,6 +57,22 @@ describe("SEO landing pages", () => {
     );
     expect(router).toContain(
       "Fantasy Football Manager Profiles & Rivalry Reports | ffwrapped"
+    );
+  });
+
+  test("sends Player Values and Trade Finder CTAs to their in-app tools", () => {
+    const playerValuesPage = read("src/views/PlayerValuesLanding.vue");
+    const tradeFinderPage = read("src/views/TradeFinderLanding.vue");
+    const prerender = read("scripts/prerender-seo.mjs");
+
+    expect(playerValuesPage).toContain('destination: "player_values"');
+    expect(tradeFinderPage).toContain('destination: "trade_finder"');
+    expect(tradeFinderPage).toContain('tradeMode: "finder"');
+    expect(prerender).toContain(
+      "source=player_values_landing&destination=player_values"
+    );
+    expect(prerender).toContain(
+      "source=trade_finder_landing&destination=trade_finder&tradeMode=finder"
     );
   });
 

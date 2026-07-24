@@ -3,12 +3,7 @@ import PublicPageShell from "@/components/seo/PublicPageShell.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Check,
-  ListOrdered,
-  RefreshCw,
-  SlidersHorizontal,
-} from "lucide-vue-next";
+import { ListOrdered, RefreshCw, SlidersHorizontal } from "lucide-vue-next";
 
 const rankings = [
   {
@@ -56,7 +51,7 @@ const features = [
     icon: RefreshCw,
     title: "Redraft and dynasty",
     description:
-      "Use rest-of-season production for redraft or blend long-term market value with team direction in dynasty.",
+      "Use rest-of-season production for redraft or blend long term market value with team direction in dynasty.",
   },
   {
     icon: ListOrdered,
@@ -68,7 +63,10 @@ const features = [
 
 const analyzeRoute = {
   path: "/",
-  query: { source: "player_values_landing" },
+  query: {
+    source: "player_values_landing",
+    destination: "player_values",
+  },
 };
 </script>
 

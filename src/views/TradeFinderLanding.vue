@@ -28,7 +28,11 @@ const features = [
 
 const analyzeRoute = {
   path: "/",
-  query: { source: "trade_finder_landing" },
+  query: {
+    source: "trade_finder_landing",
+    destination: "trade_finder",
+    tradeMode: "finder",
+  },
 };
 </script>
 
@@ -63,7 +67,7 @@ const analyzeRoute = {
             class="flex flex-wrap mt-6 text-sm gap-x-5 gap-y-2 text-muted-foreground"
           >
             <span class="inline-flex items-center gap-1.5">
-              <Check :size="14" /> League-specific suggestions
+              <Check :size="14" /> League specific suggestions
             </span>
             <span class="inline-flex items-center gap-1.5">
               <Check :size="14" /> Redraft and dynasty

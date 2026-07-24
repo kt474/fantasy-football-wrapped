@@ -44,6 +44,7 @@ import {
   loadDemoLeague,
   type DemoLeagueFixtures,
 } from "@/data/demo/loaders";
+import { getLeagueFeatureDestinationTab } from "@/lib/leagueFeatureDestination";
 
 const Table = defineAsyncComponent(
   () => import("../components/standings/Table.vue")
@@ -135,6 +136,20 @@ const initializeHome = async () => {
   const routeSource = Array.isArray(routeSnapshot.query.source)
     ? routeSnapshot.query.source[0]
     : routeSnapshot.query.source;
+  const requestedDestinationTab = getLeagueFeatureDestinationTab(
+    routeSnapshot.query.destination
+  );
+  const openRequestedDestination = () => {
+    if (!requestedDestinationTab || !store.currentLeagueId) return false;
+    store.currentTab = requestedDestinationTab;
+    localStorage.setItem("currentTab", requestedDestinationTab);
+    return true;
+  };
+  const openRequestedDestinationOrStandings = () => {
+    if (openRequestedDestination()) return;
+    store.currentTab = "Standings";
+    localStorage.setItem("currentTab", "Standings");
+  };
   const isInitializationActive = () =>
     homeInitializationRequests.isActive(controller);
   const isActive = () =>
@@ -166,6 +181,7 @@ const initializeHome = async () => {
         store.updateCurrentLeagueId(
           localStorage.getItem("currentLeagueId") ?? ""
         );
+        openRequestedDestination();
       }
       isInitialLoading.value = false;
 
@@ -207,8 +223,7 @@ const initializeHome = async () => {
 
           store.updateLeagueInfo(league);
           store.updateCurrentLeagueId(getLeagueKey(league));
-          store.currentTab = "Standings";
-          localStorage.setItem("currentTab", "Standings");
+          openRequestedDestinationOrStandings();
           trackEvent("League Added", {
             platform: "espn",
             source: routeSource || "shared_link",
@@ -247,8 +262,7 @@ const initializeHome = async () => {
           league.season,
           "sleeper"
         );
-        store.currentTab = "Standings";
-        localStorage.setItem("currentTab", "Standings");
+        openRequestedDestinationOrStandings();
         trackEvent("League Added", {
           platform: "sleeper",
           source: routeSource || "shared_link",
@@ -274,6 +288,7 @@ const initializeHome = async () => {
       );
     } else if (routeLeagueKey && store.leagueIds.includes(routeLeagueKey)) {
       store.updateCurrentLeagueId(routeLeagueKey);
+      openRequestedDestination();
     }
   } catch (error) {
     if (isRequestCancellation(error) || !isInitializationActive()) return;

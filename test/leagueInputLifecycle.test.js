@@ -10,6 +10,12 @@ const homeSource = readFileSync(
   fileURLToPath(new URL("../src/views/Home.vue", import.meta.url)),
   "utf8"
 );
+const userLeagueListSource = readFileSync(
+  fileURLToPath(
+    new URL("../src/components/home/UserLeagueList.vue", import.meta.url)
+  ),
+  "utf8"
+);
 const cardContainerSource = readFileSync(
   fileURLToPath(
     new URL("../src/components/util/CardContainer.vue", import.meta.url)
@@ -39,14 +45,31 @@ describe("league input lifecycle", () => {
     const loadCompleted = sleeperBranch.indexOf(
       "const newLeagueInfo = await getData"
     );
-    const switchToStandings = sleeperBranch.indexOf(
-      'store.currentTab = "Standings"'
+    const openRequestedDestination = sleeperBranch.indexOf(
+      "openRequestedDestinationOrStandings()"
     );
 
     expect(sleeperBranchStart).toBeGreaterThanOrEqual(0);
     expect(espnBranchStart).toBeGreaterThan(sleeperBranchStart);
     expect(loadCompleted).toBeGreaterThanOrEqual(0);
-    expect(switchToStandings).toBeGreaterThan(loadCompleted);
+    expect(openRequestedDestination).toBeGreaterThan(loadCompleted);
+  });
+
+  test("opens landing-page destinations after every league entry path", () => {
+    expect(leagueInputSource).toContain(
+      "const requestedDestinationTab = getLeagueFeatureDestinationTab("
+    );
+    expect(leagueInputSource).toContain("route.query.destination");
+    expect(leagueInputSource).toContain(
+      "openRequestedDestinationOrStandings();"
+    );
+    expect(homeSource).toContain(
+      "getLeagueFeatureDestinationTab(\n    routeSnapshot.query.destination"
+    );
+    expect(homeSource).toContain("openRequestedDestination();");
+    expect(userLeagueListSource).toContain(
+      "getLeagueFeatureDestinationTab(route.query.destination)"
+    );
   });
 
   test("keeps the league input mounted while the loading skeleton is visible", () => {

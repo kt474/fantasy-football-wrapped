@@ -21,4 +21,11 @@ describe("app sidebar", () => {
       ".filter(({ id }) => store.isLeagueFeatureVisible(id))",
     );
   });
+
+  test("clears one-time landing destinations after choosing another tab", () => {
+    expect(sidebarSource).toContain("destination,");
+    expect(sidebarSource).toContain("tradeMode,");
+    expect(sidebarSource).toContain("route.query.destination");
+    expect(sidebarSource).toContain("route.query.tradeMode");
+  });
 });

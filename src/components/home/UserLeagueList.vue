@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { useStore } from "../../store/store";
 import { getData, inputLeague } from "../../api/api";
 import { seasonType } from "../../types/apiTypes";
@@ -10,10 +11,12 @@ import { toast } from "vue-sonner";
 import { loadUserLeagues } from "./userLeagueLoader";
 import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";
 import { scrollAppToTop } from "@/lib/appScroll";
+import { getLeagueFeatureDestinationTab } from "@/lib/leagueFeatureDestination";
 
 const checkedLeagues = ref<string[]>([]);
 const duplicateLeagueError = ref(false);
 const store = useStore();
+const route = useRoute();
 
 const showError = computed(() => {
   return checkedLeagues.value.length > 10;
@@ -78,8 +81,11 @@ const addLeagues = async () => {
       if (firstLoadedLeague) {
         store.updateCurrentLeagueId(firstLoadedLeague.leagueId);
         if (isFirstLeague) {
-          store.currentTab = "Standings";
-          localStorage.setItem("currentTab", "Standings");
+          const nextTab =
+            getLeagueFeatureDestinationTab(route.query.destination) ??
+            "Standings";
+          store.currentTab = nextTab;
+          localStorage.setItem("currentTab", nextTab);
         }
         store.updateShowLeaguesList(false);
         store.setLeaguesList([]);

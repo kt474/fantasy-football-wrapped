@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { Copy } from "lucide-vue-next";
+import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -36,7 +38,8 @@ const finderLoading = ref(false);
 const accessError = ref("");
 const finderError = ref("");
 const finderRetryNonce = ref(0);
-const MAX_VISIBLE_SUGGESTIONS = 6;
+const visibleSuggestionCount = ref(4);
+const SUGGESTION_PAGE_SIZE = 4;
 let finderRequestId = 0;
 
 watch(
@@ -59,6 +62,13 @@ const selectedRosterModel = computed({
   },
 });
 
+const visibleSuggestions = computed(() =>
+  suggestions.value.slice(0, visibleSuggestionCount.value)
+);
+const remainingSuggestionCount = computed(() =>
+  Math.max(0, suggestions.value.length - visibleSuggestions.value.length)
+);
+
 watch(
   [selectedRosterId, () => props.request, finderRetryNonce],
   async ([rosterId, request]) => {
@@ -71,6 +81,7 @@ watch(
       return;
     }
     finderLoading.value = true;
+    visibleSuggestionCount.value = SUGGESTION_PAGE_SIZE;
     accessError.value = "";
     finderError.value = "";
     try {
@@ -79,10 +90,7 @@ watch(
         finderForRosterId: rosterId,
       });
       if (currentRequestId === finderRequestId) {
-        suggestions.value = (response.suggestions ?? []).slice(
-          0,
-          MAX_VISIBLE_SUGGESTIONS
-        );
+        suggestions.value = response.suggestions ?? [];
       }
     } catch (error) {
       if (currentRequestId !== finderRequestId) return;
@@ -105,9 +113,56 @@ const retryFinder = () => {
   finderRetryNonce.value += 1;
 };
 
-const formatGain = (value: number) => `+${value.toFixed(2)} pts/wk`;
+const showMoreSuggestions = () => {
+  visibleSuggestionCount.value = Math.min(
+    visibleSuggestionCount.value + SUGGESTION_PAGE_SIZE,
+    suggestions.value.length
+  );
+};
+
+const formatGain = (value: number) =>
+  `${Number.isFinite(value) ? value.toFixed(1) : "—"} pts/wk`;
 const formatValue = (value: number) =>
-  Number.isFinite(value) ? value.toFixed(1) : "—";
+  Number.isFinite(value) ? Math.round(value).toString() : "—";
+const formatValueMatch = (value: number) =>
+  `${Math.min(100, Math.max(0, Math.round(value / 5) * 5))}%`;
+const formatPlayerNames = (players: TradeSuggestion["teamASends"]) =>
+  players.map((player) => player.name).join(" + ");
+const improvementBasis = computed(() =>
+  props.valuationMode === "season results"
+    ? "estimated lineup output based on season results"
+    : "projected starting-lineup output"
+);
+
+const describeGain = (value: number) => {
+  const gain = formatGain(value);
+  if (value < 0.5) return `a modest ${gain} lift`;
+  if (value < 1.5) return `a useful ${gain} boost`;
+  if (value < 3) return `a meaningful ${gain} upgrade`;
+  return `a major ${gain} upgrade`;
+};
+
+const buildTradeText = (suggestion: TradeSuggestion) =>
+  [
+    `${suggestion.teamAName} sends ${formatPlayerNames(suggestion.teamASends)} to ${suggestion.teamBName}.`,
+    `${suggestion.teamBName} sends ${formatPlayerNames(suggestion.teamBSends)} to ${suggestion.teamAName}.`,
+    "",
+    `${suggestion.teamAName} gets ${describeGain(suggestion.teamAGainPerWeek)} in ${improvementBasis.value}.`,
+    `${suggestion.teamBName} gets ${describeGain(suggestion.teamBGainPerWeek)} in ${improvementBasis.value}.`,
+    `About a ${formatValueMatch(suggestion.fairnessPercent)} league adjusted value match.`,
+    "",
+    "Created with Fantasy Football Wrapped — https://ffwrapped.com",
+  ].join("\n");
+
+const copySuggestion = async (suggestion: TradeSuggestion) => {
+  try {
+    await navigator.clipboard.writeText(buildTradeText(suggestion));
+    toast.success("Trade copied to clipboard");
+  } catch (error) {
+    console.error("Unable to copy trade suggestion:", error);
+    toast.error("Unable to copy this trade");
+  }
+};
 </script>
 
 <template>
@@ -122,14 +177,14 @@ const formatValue = (value: number) =>
         {{
           valuationMode === "dynasty"
             ? "their projected lineups while staying close in long term dynasty value"
-            : valuationMode === "season-results"
+            : valuationMode === "season results"
               ? "their season long lineup value"
               : "their projected starting lineups"
         }}. Values are based on
         {{
           valuationMode === "dynasty"
             ? "dynasty ADP, league adjusted projected production,"
-            : valuationMode === "season-results"
+            : valuationMode === "season results"
               ? "full season performance"
               : "rest of season projections"
         }}
@@ -237,9 +292,17 @@ const formatValue = (value: number) =>
     </div>
 
     <section v-else aria-labelledby="trade-finder-results">
+      <div class="flex items-baseline justify-between gap-3 mb-3">
+        <h3 id="trade-finder-results" class="text-sm font-semibold">
+          Recommended trades
+        </h3>
+        <p class="text-xs text-muted-foreground">
+          Showing {{ visibleSuggestions.length }} of {{ suggestions.length }}
+        </p>
+      </div>
       <div class="grid gap-4 md:grid-cols-2">
         <article
-          v-for="suggestion in suggestions"
+          v-for="suggestion in visibleSuggestions"
           :key="suggestion.id"
           class="flex flex-col overflow-hidden transition-shadow border rounded-lg shadow-sm bg-card border-border hover:shadow-md"
         >
@@ -257,7 +320,7 @@ const formatValue = (value: number) =>
                 <dd
                   class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary"
                 >
-                  {{ suggestion.fairnessPercent }}% fair
+                  ~{{ formatValueMatch(suggestion.fairnessPercent) }} match
                 </dd>
               </div>
               <div class="mt-0.5">
@@ -355,30 +418,40 @@ const formatValue = (value: number) =>
               </div>
             </div>
 
-            <div class="flex items-center justify-between gap-3 mt-4">
-              <dl class="flex flex-wrap min-w-0 gap-2">
-                <div
-                  class="inline-flex items-center h-9 min-w-0 gap-1.5 px-2.5 border rounded-md border-border bg-muted/30"
-                >
-                  <dt class="min-w-0 text-xs truncate">
-                    {{ suggestion.teamAName }}
-                  </dt>
-                  <dd class="text-xs font-semibold shrink-0">
-                    {{ formatGain(suggestion.teamAGainPerWeek) }}
-                  </dd>
-                </div>
-                <div
-                  class="inline-flex items-center h-9 min-w-0 gap-1.5 px-2.5 border rounded-md border-border bg-muted/30"
-                >
-                  <dt class="min-w-0 text-xs truncate">
-                    {{ suggestion.teamBName }}
-                  </dt>
-                  <dd class="text-xs font-semibold shrink-0">
-                    {{ formatGain(suggestion.teamBGainPerWeek) }}
-                  </dd>
-                </div>
-              </dl>
+            <div class="p-3 mt-4 border rounded-md border-border bg-muted/20">
+              <p class="text-xs font-semibold">Why it works</p>
+              <ul
+                class="mt-1.5 space-y-1 text-xs leading-relaxed text-muted-foreground"
+              >
+                <li>
+                  <span class="font-medium text-foreground">
+                    {{ suggestion.teamAName }}:
+                  </span>
+                  receives {{ formatPlayerNames(suggestion.teamBSends) }} and
+                  gets {{ describeGain(suggestion.teamAGainPerWeek) }} in
+                  {{ improvementBasis }}.
+                </li>
+                <li>
+                  <span class="font-medium text-foreground">
+                    {{ suggestion.teamBName }}:
+                  </span>
+                  receives {{ formatPlayerNames(suggestion.teamASends) }} and
+                  gets {{ describeGain(suggestion.teamBGainPerWeek) }} in
+                  {{ improvementBasis }}.
+                </li>
+              </ul>
+            </div>
 
+            <div class="flex flex-wrap justify-end gap-2 mt-4">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                @click="copySuggestion(suggestion)"
+              >
+                <Copy class="mr-1.5 size-4" aria-hidden="true" />
+                Copy trade
+              </Button>
               <Button
                 type="button"
                 size="sm"
@@ -390,6 +463,15 @@ const formatValue = (value: number) =>
             </div>
           </div>
         </article>
+      </div>
+      <div v-if="remainingSuggestionCount > 0" class="mt-5 text-center">
+        <Button type="button" variant="outline" @click="showMoreSuggestions">
+          Show {{ Math.min(SUGGESTION_PAGE_SIZE, remainingSuggestionCount) }}
+          more
+          <span class="ml-1 text-muted-foreground">
+            ({{ remainingSuggestionCount }} remaining)
+          </span>
+        </Button>
       </div>
     </section>
   </div>

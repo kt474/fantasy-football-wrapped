@@ -45,8 +45,8 @@ export const getTradeValuationMode = (
   isDynastyLeague(league)
     ? "dynasty"
     : league?.status === "complete"
-      ? "season-results"
-      : "ros-projection";
+      ? "season results"
+      : "ros projection";
 
 export const buildDynastyDraftPickAssets = ({
   league,
@@ -57,8 +57,7 @@ export const buildDynastyDraftPickAssets = ({
   rosters: Array<{ id: number; managerName: string }>;
   tradedPicks: SleeperTradedPick[];
 }): DynastyDraftPickAsset[] => {
-  const leagueSeason =
-    Number(league.season) || new Date().getFullYear();
+  const leagueSeason = Number(league.season) || new Date().getFullYear();
   const firstPickSeason = ["pre_draft", "drafting"].includes(league.status)
     ? leagueSeason
     : leagueSeason + 1;
@@ -105,8 +104,7 @@ export const buildDynastyDraftPickAssets = ({
       Array.from({ length: roundCount }, (_, index) => {
         const round = index + 1;
         const id = `${season}:${round}:${originalRoster.id}`;
-        const ownerRosterId =
-          currentOwnerByPick.get(id) ?? originalRoster.id;
+        const ownerRosterId = currentOwnerByPick.get(id) ?? originalRoster.id;
         const originalManager =
           rosterNameById.get(originalRoster.id) ??
           `Roster ${originalRoster.id}`;
@@ -203,9 +201,7 @@ export const buildTradeValueRequest = ({
     rosters,
     selectedWeek,
     remainingWeeks:
-      league.status === "complete"
-        ? 18
-        : Math.max(1, 18 - selectedWeek + 1),
+      league.status === "complete" ? 18 : Math.max(1, 18 - selectedWeek + 1),
     dynastyPerspective,
     finderForRosterId: null,
   };
@@ -223,9 +219,7 @@ const groupRankingsByRoster = (
     managerName: roster.managerName,
     players: roster.playerIds
       .map((playerId) => rankingById.get(playerId))
-      .filter(
-        (player): player is TradeFinderPlayer => player !== undefined
-      )
+      .filter((player): player is TradeFinderPlayer => player !== undefined)
       .map((player) => ({ ...player }))
       .sort((a, b) => a.overallRank - b.overallRank),
   }));
@@ -318,22 +312,11 @@ export const loadTradeBuilderRosters = async (options: {
     normalizedRosterPositions.some((position) =>
       ["SUPER_FLEX", "OP"].includes(position)
     );
-  const idpPositions = new Set([
-    "DB",
-    "DL",
-    "LB",
-    "CB",
-    "DE",
-    "DT",
-    "NT",
-    "S",
-  ]);
+  const idpPositions = new Set(["DB", "DL", "LB", "CB", "DE", "DT", "NT", "S"]);
   const basicRankingEntries = await mapWithConcurrency(
     playerIds,
     TRADE_BUILDER_RANKING_CONCURRENCY,
-    async (playerId): Promise<
-      readonly [string, TradeBuilderBasicRanking]
-    > => {
+    async (playerId): Promise<readonly [string, TradeBuilderBasicRanking]> => {
       if (dynasty) {
         const player = playerMap.get(playerId);
         const projection = await getDraftProjections(
@@ -386,8 +369,6 @@ export const loadTradeBuilderRosters = async (options: {
           dynastyAdp: basicRanking?.dynastyAdp ?? null,
         };
       })
-      .filter(
-        (player): player is TradeBuilderPlayer => player !== null
-      ),
+      .filter((player): player is TradeBuilderPlayer => player !== null),
   }));
 };

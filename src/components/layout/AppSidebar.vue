@@ -59,7 +59,13 @@ const currentUser = computed(() => {
 });
 
 const defaultRouteQuery = computed(() => {
-  const { intent, upgrade_source, ...query } = route.query;
+  const {
+    intent,
+    upgrade_source,
+    destination,
+    tradeMode,
+    ...query
+  } = route.query;
   return query;
 });
 
@@ -89,7 +95,12 @@ const changeTab = (tab: LeagueFeature) => {
   clearPendingCheckout();
   if (route.path !== "/") {
     goBackToHome();
-  } else if (route.query.intent || route.query.upgrade_source) {
+  } else if (
+    route.query.intent ||
+    route.query.upgrade_source ||
+    route.query.destination ||
+    route.query.tradeMode
+  ) {
     router.replace({ path: "/", query: defaultRouteQuery.value });
   }
   store.currentTab = tab;
