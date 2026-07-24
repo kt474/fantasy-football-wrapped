@@ -195,7 +195,8 @@ const faqs = [
           <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
             Turn matchup results, lineup decisions, standings changes, and the
             week’s best performances into a polished report you can tailor for
-            the league chat, plus a short-form video built from your league data.
+            the league chat, plus a short form video built from your league
+            data.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
             <Button as-child size="lg">

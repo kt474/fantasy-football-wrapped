@@ -227,8 +227,8 @@ const formatValue = (value: number) =>
     >
       <p class="font-medium">No mutually beneficial trades found</p>
       <p class="max-w-2xl mx-auto mt-1 text-sm text-muted-foreground">
-        This finder only shows reasonably balanced one-for-one or two-for-one
-        deals where both projected starting lineups improve.
+        This finder only shows reasonably balanced deals where both projected
+        starting lineups improve.
         <template v-if="valuationMode === 'dynasty'">
           Dynasty Beta currently suggests player-only deals; owned picks can be
           added in the builder.

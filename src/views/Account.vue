@@ -1521,8 +1521,22 @@ watch(
                   <Check class="mt-0.5 size-4 shrink-0 text-primary" />
                   <span
                     >Smarter, shareable weekly recaps with customizable
-                    commentary, richer league context, and short-form video
+                    commentary, richer league context, and short form video
                     exports</span
+                  >
+                </li>
+                <li class="flex gap-2.5">
+                  <Check class="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span
+                    >Complete league adjusted Player Values for every rostered
+                    player, with redraft and dynasty views</span
+                  >
+                </li>
+                <li class="flex gap-2.5">
+                  <Check class="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span
+                    >Trade Finder ideas for balanced player deals projected to
+                    improve both starting lineups</span
                   >
                 </li>
                 <li class="flex gap-2.5">

@@ -26,7 +26,7 @@ export const getPremiumUpgradeDescription = (
   intent: PremiumUpgradeIntent
 ): string => {
   if (intent === "premium_report") {
-    return "Create shareable weekly newsletters and video recaps with custom commentary styles for every league you manage.";
+    return "Create shareable weekly newsletters and video recaps with custom commentary styles.";
   }
   if (intent === "manager_profiles") {
     return "Discover each manager’s tendencies, strengths, and identity across your league history.";
@@ -38,10 +38,10 @@ export const getPremiumUpgradeDescription = (
     return "Use your league’s draft history to plan each round and scout every manager’s tendencies before you are on the clock.";
   }
   if (intent === "player_values") {
-    return "Unlock complete league adjusted player rankings, including dynasty and rest-of-season values, for every league you manage.";
+    return "See complete league adjusted player rankings, including dynasty and rest of season values.";
   }
   if (intent === "trade_finder") {
-    return "Generate league specific one-for-one and two-for-one trade ideas designed to improve both lineups.";
+    return "Find balanced player deals projected to improve both starting lineups.";
   }
-  return "Get customizable shared weekly newsletters, video recaps, draft scouting, manager profiles, rivalry reports, complete player rankings, and Trade Finder for every league you manage.";
+  return "Get access to customizable shared weekly newsletters, video recaps, draft scouting, manager insights, complete player rankings, and a trade finder.";
 };

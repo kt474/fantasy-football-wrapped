@@ -147,9 +147,9 @@ const toolSummaries: ToolSummary[] = [
     icon: Trophy,
   },
   {
-    title: "Trade tools",
+    title: "Player Values and trade tools",
     description:
-      "Explore fair trade ideas and compare deals made in other leagues.",
+      "Rank every rostered player, compare packages, and discover deals projected to help both teams.",
     icon: FlaskConical,
   },
   {
@@ -176,8 +176,8 @@ const toolSummaries: ToolSummary[] = [
             Analysis your league will actually talk about
           </h2>
           <p class="mt-4 leading-7 sm:text-lg text-muted-foreground">
-            Turn matchups, manager trends, power rankings, and league history
-            into shareable stories. Get started for free.
+            Turn rankings, trade ideas, matchups, and manager history into
+            analysis worth sharing. Get started for free.
           </p>
 
           <div class="grid max-w-lg grid-cols-3 mt-6 divide-x divide-border">
@@ -315,11 +315,11 @@ const toolSummaries: ToolSummary[] = [
                   class="font-medium text-primary hover:underline"
                 >
                   video recap</RouterLink
-                >, reveal what your league's full history says about every
-                manager, turn draft history into positional plans and league
-                mate scouting, and give you the receipts to settle old
-                rivalries. Everything else from the past three seasons, plus
-                plenty more, is still free.
+                >. They also use your league's history to create manager
+                profiles, draft scouting plans, and rivalry reports, while
+                unlocking complete Player Values and Trade Finder. Everything
+                else from the past three seasons, plus plenty more, remains
+                free.
               </p>
             </div>
           </div>
