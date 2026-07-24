@@ -14,6 +14,10 @@ import Card from "@/components/ui/card/Card.vue";
 import { Button } from "@/components/ui/button";
 import TradeRankings from "@/components/trade_lab/TradeRankings.vue";
 import { loadDemoTradeValues } from "@/data/demo/loaders";
+import {
+  getLeagueAnalyticsProperties,
+  trackPremiumFunnelEvent,
+} from "@/lib/analytics";
 
 const props = defineProps<{
   tableData: TableDataType[];
@@ -27,6 +31,7 @@ const loading = ref(false);
 const errorMessage = ref("");
 const access = ref<"preview" | "premium">("preview");
 const totalPlayers = ref(0);
+const trackedPreviewPaywall = ref(false);
 const dynastyPerspective = useDynastyTradePerspective();
 const activeLeague = computed(() => store.currentLeague);
 const isDemoLeague = computed(
@@ -44,6 +49,19 @@ const selectedWeek = computed(() =>
   activeLeague.value ? getTradeValueWeek(activeLeague.value) : 1
 );
 const valuationMode = computed(() => getTradeValuationMode(activeLeague.value));
+
+const previewAnalyticsProperties = () => ({
+  feature: "player_values",
+  source: "player_values_preview",
+  preview_player_count: visiblePlayerCount.value,
+  locked_player_count: Math.max(
+    0,
+    totalPlayers.value - visiblePlayerCount.value
+  ),
+  total_player_count: totalPlayers.value,
+  valuation_mode: valuationMode.value,
+  ...getLeagueAnalyticsProperties(activeLeague.value),
+});
 
 let requestId = 0;
 
@@ -135,6 +153,30 @@ watch(
   { flush: "post" }
 );
 
+watch(
+  [access, visiblePlayerCount, totalPlayers],
+  ([currentAccess, visibleCount, currentTotal]) => {
+    if (
+      trackedPreviewPaywall.value ||
+      currentAccess !== "preview" ||
+      visibleCount <= 0 ||
+      currentTotal <= visibleCount
+    ) {
+      return;
+    }
+
+    trackedPreviewPaywall.value = true;
+    trackPremiumFunnelEvent("paywall_viewed", previewAnalyticsProperties());
+  }
+);
+
+const trackPreviewUpgradeClick = () => {
+  trackPremiumFunnelEvent("premium_cta_clicked", {
+    ...previewAnalyticsProperties(),
+    cta: "unlock_complete_player_values",
+  });
+};
+
 onMounted(fetchPlayerValues);
 </script>
 
@@ -170,28 +212,37 @@ onMounted(fetchPlayerValues);
         visiblePlayerCount > 0 &&
         totalPlayers > visiblePlayerCount
       "
-      class="p-4 mt-4 text-center border rounded-lg"
+      class="p-5 mt-4 border rounded-lg bg-muted/20 sm:p-6"
     >
-      <p class="font-medium">
-        Preview includes {{ visiblePlayerCount }}/{{ totalPlayers }}
-        players
-      </p>
-      <p class="mt-1 text-sm text-muted-foreground">
-        Premium unlocks complete league adjusted rankings and Trade Finder.
-      </p>
-      <router-link
-        :to="{
-          path: '/account',
-          query: {
-            ...$route.query,
-            intent: 'player_values',
-            upgrade_source: 'player_values_preview',
-          },
-        }"
-        class="inline-flex items-center justify-center px-4 mt-3 text-sm font-medium rounded-md h-9 bg-primary text-primary-foreground"
+      <div
+        class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"
       >
-        Unlock complete rankings
-      </router-link>
+        <div>
+          <p class="font-semibold">
+            Your preview shows {{ visiblePlayerCount }} of
+            {{ totalPlayers }} player values
+          </p>
+          <p class="max-w-lg mt-1 text-sm leading-6 text-muted-foreground">
+            Unlock every rostered player, filter the complete league, and carry
+            any player into Trade Lab. Premium also includes Trade Finder
+            access.
+          </p>
+        </div>
+        <router-link
+          :to="{
+            path: '/account',
+            query: {
+              ...$route.query,
+              intent: 'player_values',
+              upgrade_source: 'player_values_preview',
+            },
+          }"
+          class="inline-flex items-center justify-center h-10 px-4 text-sm font-medium rounded-md bg-primary text-primary-foreground shrink-0"
+          @click="trackPreviewUpgradeClick"
+        >
+          Unlock all {{ totalPlayers }} player values
+        </router-link>
+      </div>
     </div>
   </Card>
 </template>

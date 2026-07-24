@@ -20,6 +20,11 @@ import {
   type TradeSuggestion,
   type TradeValuationMode,
 } from "@/lib/tradeFinder";
+import {
+  getLeagueAnalyticsProperties,
+  trackPremiumFunnelEvent,
+} from "@/lib/analytics";
+import { useStore } from "@/store/store";
 
 const props = defineProps<{
   rosters: Array<{ id: number; managerName: string }>;
@@ -34,12 +39,14 @@ const emit = defineEmits<{
   openSuggestion: [suggestion: TradeSuggestion];
 }>();
 
+const store = useStore();
 const selectedRosterId = ref<number | null>(null);
 const suggestions = ref<TradeSuggestion[]>([]);
 const finderLoading = ref(false);
 const accessError = ref("");
 const finderError = ref("");
 const finderRetryNonce = ref(0);
+const trackedFinderPaywall = ref(false);
 const visibleSuggestionCount = ref(4);
 const SUGGESTION_PAGE_SIZE = 4;
 let finderRequestId = 0;
@@ -136,6 +143,28 @@ watch(
   },
   { immediate: true }
 );
+
+const finderAnalyticsProperties = () => ({
+  feature: "trade_finder",
+  source: "trade_finder_locked",
+  valuation_mode: props.valuationMode,
+  roster_count: props.rosters.length,
+  ...getLeagueAnalyticsProperties(store.currentLeague),
+});
+
+watch(accessError, (error) => {
+  if (!error || trackedFinderPaywall.value) return;
+
+  trackedFinderPaywall.value = true;
+  trackPremiumFunnelEvent("paywall_viewed", finderAnalyticsProperties());
+});
+
+const trackFinderUpgradeClick = () => {
+  trackPremiumFunnelEvent("premium_cta_clicked", {
+    ...finderAnalyticsProperties(),
+    cta: "unlock_trade_finder_results",
+  });
+};
 
 const retryFinder = () => {
   finderRetryNonce.value += 1;
@@ -330,12 +359,14 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
       v-else-if="accessError"
       class="flex min-h-[60vh] flex-col items-center justify-center px-5 py-10 text-center border rounded-lg bg-muted/20 border-border"
     >
-      <p class="font-medium">Trade Finder is a Premium feature</p>
-      <p class="max-w-sm mx-auto mt-1 text-sm text-muted-foreground">
-        Upgrade to compare league adjusted packages and find deals that improve
-        both starting lineups.
+      <p class="mt-2 text-xl font-semibold sm:max-w-lg max-w-56">
+        Discover trades that make sense
       </p>
-      <Button as-child class="mt-4">
+      <p class="max-w-lg mx-auto mt-2 text-sm leading-6 text-muted-foreground">
+        Trade Finder compares your roster against every opponent and surfaces
+        balanced offers with a projected lineup benefit on each side.
+      </p>
+      <Button as-child class="mt-5" size="lg">
         <router-link
           :to="{
             path: '/account',
@@ -345,6 +376,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
               upgrade_source: 'trade_finder_locked',
             },
           }"
+          @click="trackFinderUpgradeClick"
         >
           Unlock Trade Finder
         </router-link>
