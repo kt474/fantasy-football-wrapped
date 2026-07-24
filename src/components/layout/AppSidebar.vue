@@ -42,10 +42,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { clearPendingCheckout } from "@/lib/pendingCheckout";
-import {
-  sidebarLeagueFeatures,
-  type LeagueFeature,
-} from "@/lib/features";
+import { sidebarLeagueFeatures, type LeagueFeature } from "@/lib/features";
 
 const store = useStore();
 const authStore = useAuthStore();
@@ -108,10 +105,10 @@ const featureIcons: Record<LeagueFeature, Component> = {
   "Roster Management": Move3D,
   "Weekly Report": NotebookPen,
   Playoffs: Trophy,
-  "Start/Sit": Newspaper,
   "Player Values": ListOrdered,
-  "Season Forecast": Dices,
   "Trade Lab": FlaskConical,
+  "Start/Sit": Newspaper,
+  "Season Forecast": Dices,
   Draft: Users,
   "League History": FolderClock,
   "Manager Profiles": IdCard,

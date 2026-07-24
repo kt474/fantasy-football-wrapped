@@ -6,10 +6,10 @@ export const leagueFeatures = [
   { id: "Roster Management" },
   { id: "Weekly Report", unavailableForGuillotine: true },
   { id: "Playoffs" },
-  { id: "Start/Sit" },
   { id: "Player Values" },
-  { id: "Season Forecast", unavailableForGuillotine: true },
   { id: "Trade Lab" },
+  { id: "Start/Sit" },
+  { id: "Season Forecast", unavailableForGuillotine: true },
   { id: "Draft" },
   { id: "League History" },
   { id: "Manager Profiles", unavailableForGuillotine: true },
@@ -39,6 +39,10 @@ export const customizableLeagueFeatures = [
   {
     id: "Manager Profiles",
     description: "Detailed manager tendencies and identities.",
+  },
+  {
+    id: "Player Values",
+    description: "League specific player rankings.",
   },
 ] as const satisfies ReadonlyArray<{
   id: LeagueFeature;

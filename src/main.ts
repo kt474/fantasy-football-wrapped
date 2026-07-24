@@ -87,7 +87,7 @@ const routes = [
           },
           {
             title: "League history",
-            body: "Follow seasons across a Sleeper league chain to compare managers, head-to-head records, finishes, scoring records, and long-term tendencies.",
+            body: "Follow seasons across a Sleeper league chain to compare managers, head-to-head records, finishes, scoring records, and long term tendencies.",
           },
         ],
       },

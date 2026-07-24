@@ -292,9 +292,7 @@ const loadSavedRivalryReport = () => {
   if (!pairKey) return;
 
   const savedReport = store.currentLeague?.rivalryReports?.[pairKey];
-  generatedReport.value = isSavedRivalryReport(savedReport)
-    ? savedReport
-    : "";
+  generatedReport.value = isSavedRivalryReport(savedReport) ? savedReport : "";
 };
 
 const aiComparisonPayload = computed<ManagerComparisonPayload>(() => ({
@@ -312,7 +310,7 @@ const lockedReportPreview = computed(() => {
   const managerOne = getDisplayName(currentManager1.value) || "Manager A";
   const managerTwo = getDisplayName(currentManager2.value) || "Manager B";
 
-  return `**${managerOne}** and **${managerTwo}** have the kind of rivalry that makes the standings feel personal. One manager owns the cleaner long-term resume, but the other keeps hanging around with enough weekly spike scores and matchup weirdness to make every head-to-head feel unstable. The real story is not just who has more wins. It is whether consistency, roster aggression, and late-season timing have actually translated into bragging rights when these two are staring at each other across the schedule.`;
+  return `**${managerOne}** and **${managerTwo}** have the kind of rivalry that makes the standings feel personal. One manager owns the cleaner long term resume, but the other keeps hanging around with enough weekly spike scores and matchup weirdness to make every head-to-head feel unstable. The real story is not just who has more wins. It is whether consistency, roster aggression, and late-season timing have actually translated into bragging rights when these two are staring at each other across the schedule.`;
 });
 
 const visibleReport = computed(() =>

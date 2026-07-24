@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import type {
+  DynastyPerspective,
   TradeFinderPlayer,
   TradeFinderRoster,
   TradeValuationMode,
@@ -22,6 +23,10 @@ const props = defineProps<{
   valuationMode?: TradeValuationMode;
 }>();
 
+const dynastyPerspective = defineModel<DynastyPerspective>(
+  "dynastyPerspective",
+  { required: true }
+);
 const selectedPosition = ref("ALL");
 const currentPage = ref(1);
 const PAGE_SIZE = 25;
@@ -96,34 +101,61 @@ const formatNumber = (value: number, digits = 1) =>
 <template>
   <div class="mt-4 space-y-4">
     <div
-      class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between"
+      class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between"
     >
       <div class="max-w-3xl">
         <p class="text-sm text-muted-foreground sm:text-base">
           {{
             valuationMode === "dynasty"
-              ? "Long-term rankings that blend dynasty market ADP with league specific production value."
+              ? "Long-term rankings that blend dynasty market ADP with league specific projected production, starting lineup requirements, and your selected team direction."
               : "League specific rankings for rostered players. Trade value is derived from value over the starter level replacement player at each position."
           }}
         </p>
       </div>
 
-      <div class="mb-2">
-        <Select v-model="selectedPosition">
-          <SelectTrigger class="w-full sm:w-36">
-            <SelectValue placeholder="Position" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All positions</SelectItem>
-            <SelectItem
-              v-for="position in positions"
-              :key="position"
-              :value="position"
-            >
-              {{ position }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+      <div
+        class="grid w-full gap-2 sm:w-auto"
+        :class="
+          valuationMode === 'dynasty'
+            ? 'grid-cols-2 sm:grid-cols-[9rem_9rem]'
+            : 'grid-cols-1 sm:grid-cols-[9rem]'
+        "
+      >
+        <div v-if="valuationMode === 'dynasty'">
+          <label class="block mb-1 text-xs font-medium text-muted-foreground">
+            Team direction
+          </label>
+          <Select v-model="dynastyPerspective">
+            <SelectTrigger class="w-full" aria-label="Dynasty team direction">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="balanced">Balanced</SelectItem>
+              <SelectItem value="contender">Contender</SelectItem>
+              <SelectItem value="rebuilder">Rebuilder</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label class="block mb-1 text-xs font-medium text-muted-foreground">
+            Position
+          </label>
+          <Select v-model="selectedPosition">
+            <SelectTrigger class="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All positions</SelectItem>
+              <SelectItem
+                v-for="position in positions"
+                :key="position"
+                :value="position"
+              >
+                {{ position }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
 
@@ -161,9 +193,7 @@ const formatNumber = (value: number, digits = 1) =>
       class="px-5 py-10 text-center border border-dashed rounded-lg border-border"
     >
       <p class="font-medium">No matching players</p>
-      <p class="mt-1 text-sm text-muted-foreground">
-        Try another position.
-      </p>
+      <p class="mt-1 text-sm text-muted-foreground">Try another position.</p>
     </div>
 
     <div v-else class="overflow-hidden border rounded-lg border-border">
@@ -298,15 +328,6 @@ const formatNumber = (value: number, digits = 1) =>
             Next
           </Button>
         </nav>
-      </div>
-      <div
-        class="px-4 py-2 text-xs border-t border-border bg-muted/30 text-muted-foreground"
-      >
-        {{
-          valuationMode === "dynasty"
-            ? "Dynasty ADP anchors long-term market value; production, starting slots, Superflex, and TE premium adjust it for this league."
-            : "Replacement is estimated from league size, starting slots, streamability and position eligibility."
-        }}
       </div>
     </div>
   </div>

@@ -60,7 +60,7 @@ const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
             A league résumé with an actual point of view
           </h1>
           <p class="mt-4 leading-7 text-muted-foreground">
-            Each profile combines long-term results, playoff history, lineup
+            Each profile combines long term results, playoff history, lineup
             efficiency, draft habits, trades, and waiver activity. The numbers
             stay visible next to the generated description, so the story can be
             checked against the record.

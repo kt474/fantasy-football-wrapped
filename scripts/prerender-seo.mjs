@@ -237,7 +237,7 @@ const pages = [
       },
       {
         title: "Personalized profile commentary",
-        body: "Turn the calculated record into a readable description of each manager’s strengths, tendencies, and long-term style while keeping the supporting numbers visible.",
+        body: "Turn the calculated record into a readable description of each manager’s strengths, tendencies, and long term style while keeping the supporting numbers visible.",
       },
       {
         title: "Head-to-head rivalry history",

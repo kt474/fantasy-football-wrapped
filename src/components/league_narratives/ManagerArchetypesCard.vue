@@ -360,13 +360,13 @@ const getManagerBadges = (manager: ManagerArchetype): ManagerBadge[] => {
   }
   if (!badges.length) {
     if (manager.seasons <= 1) {
-      add("Small Sample Superstar", "Still building a long-term league resume");
+      add("Small Sample Superstar", "Still building a long term league resume");
     } else if (manager.winRate >= 0.5) {
       add("Quietly Getting It Done", "Owns a winning or even career record");
     } else {
       add(
         "Trust the Process",
-        "The long-term results are still a work in progress"
+        "The long term results are still a work in progress"
       );
     }
   }
@@ -400,7 +400,7 @@ watch(
         </Button>
       </div>
       <p class="mt-4 text-sm sm:max-w-2xl text-muted-foreground sm:text-base">
-        Long-term records, trends, and custom profiles that capture each
+        Long term records, trends, and custom profiles that capture each
         manager’s tendencies, strengths, and overall identity.
       </p>
     </div>

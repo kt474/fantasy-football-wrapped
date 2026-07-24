@@ -123,14 +123,14 @@ const formatValue = (value: number) =>
         Find trades where both teams improve
         {{
           valuationMode === "dynasty"
-            ? "their projected lineups while staying close in long-term dynasty value"
+            ? "their projected lineups while staying close in long term dynasty value"
             : valuationMode === "season-results"
               ? "their season long lineup value"
               : "their projected starting lineups"
         }}. Values are based on
         {{
           valuationMode === "dynasty"
-            ? `dynasty ADP, league format, and the ${dynastyPerspective || "balanced"} team direction`
+            ? `dynasty ADP, team direction,`
             : valuationMode === "season-results"
               ? "full season performance"
               : "rest of season projections"

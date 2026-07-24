@@ -102,9 +102,7 @@ const usesCompletedSeasonValues = computed(
   () => activeLeague.value?.status === "complete"
 );
 
-const valuationMode = computed(() =>
-  getTradeValuationMode(activeLeague.value)
-);
+const valuationMode = computed(() => getTradeValuationMode(activeLeague.value));
 
 const draftSeasons = computed(() => {
   if (dynasty.value && dynastyPickAssets.value.length > 0) {
@@ -719,7 +717,12 @@ onBeforeUnmount(() => {
 });
 </script>
 <template>
-  <Card class="w-full h-full p-4 mt-4 md:p-6">
+  <Card
+    class="w-full h-full p-4 mt-4 md:p-6"
+    :class="{
+      'min-h-[calc(100dvh-6rem)]': activeMode === 'finder',
+    }"
+  >
     <div class="flex flex-wrap items-start justify-between gap-3">
       <h2 class="heading-section">Trade Lab</h2>
       <div class="flex flex-wrap items-center justify-end gap-2">
@@ -761,11 +764,12 @@ onBeforeUnmount(() => {
         value estimate combines
         {{
           dynasty
-            ? "dynasty ADP and league specific projected value"
+            ? "dynasty ADP, league specific projected value"
             : usesCompletedSeasonValues
-              ? "full-season performance"
-              : "rest-of-season projections"
-        }}, league specific replacement value, and package depth discounts.
+              ? "full season performance"
+              : "rest of season projections"
+        }}
+        and replacement value.
       </p>
       <p v-if="isMobile" class="mt-4 mb-2 text-sm text-muted-foreground">
         Click/tap players to add or remove from each package.

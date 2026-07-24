@@ -11,6 +11,23 @@ const badgeVariant = (type: string): BadgeVariants["variant"] => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/23/26",
+    content: [
+      {
+        type: "Feature",
+        text: [
+          "There is a new Player Values tab with league specific rankings for every rostered player. Values account for scoring settings, roster format, league size, and dynasty team direction.",
+        ],
+      },
+      {
+        type: "Update",
+        text: [
+          "Premium users can now use Trade Finder in the Trade Lab to discover balanced trades that improve both teams' projected starting lineups.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/22/26",
     content: [
       {

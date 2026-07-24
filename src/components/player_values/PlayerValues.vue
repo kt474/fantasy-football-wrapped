@@ -5,20 +5,12 @@ import type { TableDataType } from "@/types/types";
 import {
   getTradeValuationMode,
   getTradeValueWeek,
-  isDynastyLeague,
   loadLeaguePlayerValues,
   type LeagueTradeValueRoster,
 } from "@/lib/leagueTradeValues";
 import { useDynastyTradePerspective } from "@/composables/useDynastyTradePerspective";
 import Card from "@/components/ui/card/Card.vue";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import TradeRankings from "@/components/trade_lab/TradeRankings.vue";
 
 const props = defineProps<{
@@ -34,7 +26,6 @@ const previewLimit = ref(10);
 const totalPlayers = ref(0);
 const dynastyPerspective = useDynastyTradePerspective();
 const activeLeague = computed(() => store.currentLeague);
-const dynasty = computed(() => isDynastyLeague(activeLeague.value));
 const selectedWeek = computed(() =>
   activeLeague.value ? getTradeValueWeek(activeLeague.value) : 1
 );
@@ -96,32 +87,12 @@ onMounted(fetchPlayerValues);
 </script>
 
 <template>
-  <Card class="w-full h-full p-4 my-4 md:p-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h2 class="heading-section">Player Values</h2>
-      </div>
-      <div class="flex flex-wrap items-end gap-2">
-        <div v-if="dynasty">
-          <label class="block mb-1 text-xs font-medium text-muted-foreground">
-            Team direction
-          </label>
-          <Select v-model="dynastyPerspective">
-            <SelectTrigger class="w-36" aria-label="Dynasty team direction">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="balanced">Balanced</SelectItem>
-              <SelectItem value="contender">Contender</SelectItem>
-              <SelectItem value="rebuilder">Rebuilder</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </div>
+  <Card class="min-h-[calc(100dvh-6rem)] w-full p-4 my-4 md:p-6">
+    <h2 class="heading-section">Player Values</h2>
 
     <TradeRankings
       v-if="!errorMessage"
+      v-model:dynasty-perspective="dynastyPerspective"
       :rosters="rosters"
       :loading="loading"
       :valuation-mode="valuationMode"
