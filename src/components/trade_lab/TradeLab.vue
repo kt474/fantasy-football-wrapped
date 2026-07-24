@@ -14,6 +14,7 @@ import { useDynastyTradePerspective } from "@/composables/useDynastyTradePerspec
 import {
   applyTradeBuilderRankingResponse,
   buildTradeValueRequest,
+  getTradeValuationMode,
   getTradeValueWeek,
   isDynastyLeague,
   loadDynastyDraftPickAssets,
@@ -101,10 +102,8 @@ const usesCompletedSeasonValues = computed(
   () => activeLeague.value?.status === "complete"
 );
 
-const remainingWeeks = computed(() =>
-  usesCompletedSeasonValues.value
-    ? 18
-    : Math.max(1, 18 - selectedWeek.value + 1)
+const valuationMode = computed(() =>
+  getTradeValuationMode(activeLeague.value)
 );
 
 const draftSeasons = computed(() => {
@@ -748,16 +747,8 @@ onBeforeUnmount(() => {
       v-else-if="activeMode === 'finder'"
       :rosters="rosters"
       :request="tradeValueRequest"
-      :roster-positions="activeLeague?.rosterPositions || []"
-      :remaining-weeks="remainingWeeks"
       :loading="loading"
-      :valuation-mode="
-        dynasty
-          ? 'dynasty'
-          : usesCompletedSeasonValues
-            ? 'season-results'
-            : 'ros-projection'
-      "
+      :valuation-mode="valuationMode"
       :dynasty-perspective="dynastyPerspective"
       @open-suggestion="openTradeSuggestion"
     />

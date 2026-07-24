@@ -17,15 +17,14 @@ import {
 import {
   type DynastyPerspective,
   type TradeSuggestion,
+  type TradeValuationMode,
 } from "@/lib/tradeFinder";
 
 const props = defineProps<{
   rosters: Array<{ id: number; managerName: string }>;
   request: TradeValueRequestPayload | null;
-  rosterPositions: string[];
-  remainingWeeks: number;
   loading?: boolean;
-  valuationMode?: "ros-projection" | "season-results" | "dynasty";
+  valuationMode?: TradeValuationMode;
   dynastyPerspective?: DynastyPerspective;
 }>();
 

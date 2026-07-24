@@ -1,8 +1,12 @@
 export type DynastyPerspective = "balanced" | "contender" | "rebuilder";
 
+export type TradeValuationMode =
+  | "ros-projection"
+  | "season-results"
+  | "dynasty";
+
 export type TradeFinderPlayer = {
   playerId: string;
-  player_id: string;
   position: string;
   name: string;
   team: string;

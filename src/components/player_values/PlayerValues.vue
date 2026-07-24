@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useStore } from "@/store/store";
 import type { TableDataType } from "@/types/types";
 import {
+  getTradeValuationMode,
   getTradeValueWeek,
   isDynastyLeague,
   loadLeaguePlayerValues,
@@ -38,11 +39,7 @@ const selectedWeek = computed(() =>
   activeLeague.value ? getTradeValueWeek(activeLeague.value) : 1
 );
 const valuationMode = computed(() =>
-  dynasty.value
-    ? "dynasty"
-    : activeLeague.value?.status === "complete"
-      ? "season-results"
-      : "ros-projection"
+  getTradeValuationMode(activeLeague.value)
 );
 
 let requestId = 0;
@@ -128,7 +125,6 @@ onMounted(fetchPlayerValues);
       :rosters="rosters"
       :loading="loading"
       :valuation-mode="valuationMode"
-      :dynasty-perspective="dynastyPerspective"
     />
     <div
       v-if="errorMessage"

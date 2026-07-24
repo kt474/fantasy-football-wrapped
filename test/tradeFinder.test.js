@@ -3,15 +3,19 @@ import {
   applyTradeBuilderRankingResponse,
   buildDynastyDraftPickAssets,
   buildTradeValueRequest,
-  isSuperflexLeague,
+  getTradeValuationMode,
   mergeTradeBuilderRankings,
 } from "../src/lib/leagueTradeValues";
 
 describe("trade value request boundary", () => {
-  test("recognizes explicit and two-quarterback Superflex formats", () => {
-    expect(isSuperflexLeague(["QB", "RB", "SUPER_FLEX", "BN"])).toBe(true);
-    expect(isSuperflexLeague(["QB", "QB", "RB", "BN"])).toBe(true);
-    expect(isSuperflexLeague(["QB", "RB", "WR", "FLEX", "BN"])).toBe(false);
+  test("derives the valuation mode from league settings", () => {
+    expect(getTradeValuationMode({ seasonType: "Dynasty" })).toBe("dynasty");
+    expect(
+      getTradeValuationMode({ seasonType: "Redraft", status: "complete" })
+    ).toBe("season-results");
+    expect(
+      getTradeValuationMode({ seasonType: "Redraft", status: "in_season" })
+    ).toBe("ros-projection");
   });
 
   test("builds the bounded backend snapshot without player values", () => {

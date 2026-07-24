@@ -11,16 +11,15 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import type {
-  DynastyPerspective,
   TradeFinderPlayer,
   TradeFinderRoster,
+  TradeValuationMode,
 } from "@/lib/tradeFinder";
 
 const props = defineProps<{
   rosters: TradeFinderRoster[];
   loading?: boolean;
-  valuationMode?: "ros-projection" | "season-results" | "dynasty";
-  dynastyPerspective?: DynastyPerspective;
+  valuationMode?: TradeValuationMode;
 }>();
 
 const selectedPosition = ref("ALL");

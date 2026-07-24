@@ -12,17 +12,13 @@ import {
 import {
   type DynastyPerspective,
   type TradeFinderPlayer,
+  type TradeFinderRoster,
+  type TradeValuationMode,
 } from "@/lib/tradeFinder";
 import type { Player } from "@/types/apiTypes";
 import type { LeagueInfoType, TableDataType } from "@/types/types";
 
-export type LeagueTradeValuePlayer = Player & TradeFinderPlayer;
-
-export type LeagueTradeValueRoster = {
-  id: number;
-  managerName: string;
-  players: LeagueTradeValuePlayer[];
-};
+export type LeagueTradeValueRoster = TradeFinderRoster;
 
 export type LeaguePlayerValuesResult = PlayerValuesResponse & {
   rosters: LeagueTradeValueRoster[];
@@ -41,16 +37,14 @@ export type DynastyDraftPickAsset = {
 export const isDynastyLeague = (league?: LeagueInfoType | null) =>
   league?.seasonType?.toLowerCase() === "dynasty";
 
-export const isSuperflexLeague = (rosterPositions: string[]) => {
-  const normalizedSlots = rosterPositions.map((slot) => slot.toUpperCase());
-  const quarterbackSlots = normalizedSlots.filter(
-    (slot) => slot === "QB"
-  ).length;
-  return (
-    quarterbackSlots > 1 ||
-    normalizedSlots.some((slot) => ["SUPER_FLEX", "OP"].includes(slot))
-  );
-};
+export const getTradeValuationMode = (
+  league?: LeagueInfoType | null
+): TradeValuationMode =>
+  isDynastyLeague(league)
+    ? "dynasty"
+    : league?.status === "complete"
+      ? "season-results"
+      : "ros-projection";
 
 export const buildDynastyDraftPickAssets = ({
   league,
