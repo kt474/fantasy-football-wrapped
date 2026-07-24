@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useStore } from "@/store/store";
 import type { TableDataType } from "@/types/types";
 import {
@@ -19,6 +20,8 @@ const props = defineProps<{
 }>();
 
 const store = useStore();
+const route = useRoute();
+const router = useRouter();
 const rosters = ref<LeagueTradeValueRoster[]>([]);
 const loading = ref(false);
 const errorMessage = ref("");
@@ -43,6 +46,27 @@ const selectedWeek = computed(() =>
 const valuationMode = computed(() => getTradeValuationMode(activeLeague.value));
 
 let requestId = 0;
+
+const openPlayerInTradeBuilder = async ({
+  playerId,
+  rosterId,
+}: {
+  playerId: string;
+  rosterId: number;
+}) => {
+  await router.replace({
+    path: "/",
+    query: {
+      ...route.query,
+      destination: undefined,
+      tradeMode: "builder",
+      tradePlayerId: playerId,
+      tradeRosterId: String(rosterId),
+    },
+  });
+  store.currentTab = "Trade Lab";
+  localStorage.setItem("currentTab", "Trade Lab");
+};
 
 const fetchPlayerValues = async () => {
   const league = activeLeague.value;
@@ -128,6 +152,7 @@ onMounted(fetchPlayerValues);
       :total-players="totalPlayers"
       :season="activeLeague?.season ?? (isDemoLeague ? '2026' : undefined)"
       :league-last-updated="activeLeague?.lastUpdated"
+      @build-trade="openPlayerInTradeBuilder"
     />
     <div
       v-if="errorMessage"

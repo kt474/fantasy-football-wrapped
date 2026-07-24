@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -27,10 +28,15 @@ const props = defineProps<{
   leagueLastUpdated?: number;
 }>();
 
+const emit = defineEmits<{
+  (event: "buildTrade", payload: { playerId: string; rosterId: number }): void;
+}>();
+
 const dynastyPerspective = defineModel<DynastyPerspective>(
   "dynastyPerspective",
   { required: true }
 );
+const playerSearch = ref("");
 const selectedManagerId = ref("ALL");
 const selectedPosition = ref("ALL");
 const currentPage = ref(1);
@@ -57,6 +63,16 @@ const positions = computed(() =>
     .sort()
 );
 
+const rosterIdByPlayerId = computed(() => {
+  const rosterIds = new Map<string, number>();
+  props.rosters.forEach((roster) => {
+    roster.players.forEach((player) => {
+      rosterIds.set(player.playerId, roster.id);
+    });
+  });
+  return rosterIds;
+});
+
 const filteredPlayers = computed(() => {
   const managerPlayers =
     selectedManagerId.value === "ALL"
@@ -64,11 +80,18 @@ const filteredPlayers = computed(() => {
       : (props.rosters.find(
           (roster) => String(roster.id) === selectedManagerId.value
         )?.players ?? []);
+  const search = playerSearch.value.trim().toLocaleLowerCase();
 
   return managerPlayers.filter(
     (player) =>
-      selectedPosition.value === "ALL" ||
-      player.position === selectedPosition.value
+      (selectedPosition.value === "ALL" ||
+        player.position === selectedPosition.value) &&
+      (!search ||
+        [player.name, player.team, player.position]
+          .filter(Boolean)
+          .join(" ")
+          .toLocaleLowerCase()
+          .includes(search))
   );
 });
 
@@ -111,7 +134,7 @@ const valueContext = computed(() => {
   return `${seasonLabel}${modeLabel} · Refreshed ${refreshedAt}`;
 });
 
-watch([selectedManagerId, selectedPosition], () => {
+watch([playerSearch, selectedManagerId, selectedPosition], () => {
   currentPage.value = 1;
 });
 
@@ -149,6 +172,12 @@ const valueScaleTiers = [
 
 const formatNumber = (value: number, digits = 1) =>
   Number.isFinite(value) ? value.toFixed(digits) : "—";
+
+const buildTrade = (player: TradeFinderPlayer) => {
+  const rosterId = rosterIdByPlayerId.value.get(player.playerId);
+  if (rosterId === undefined) return;
+  emit("buildTrade", { playerId: player.playerId, rosterId });
+};
 </script>
 
 <template>
@@ -175,10 +204,24 @@ const formatNumber = (value: number, digits = 1) =>
         class="grid w-full grid-cols-2 gap-2 sm:w-auto"
         :class="
           valuationMode === 'dynasty'
-            ? 'sm:grid-cols-[12rem_9rem_9rem]'
-            : 'sm:grid-cols-[12rem_9rem]'
+            ? 'sm:grid-cols-[14rem_12rem_9rem_9rem]'
+            : 'sm:grid-cols-[14rem_12rem_9rem]'
         "
       >
+        <div class="col-span-2 sm:col-span-1">
+          <label
+            for="player-value-search"
+            class="block mb-1 text-xs font-medium text-muted-foreground"
+          >
+            Player
+          </label>
+          <Input
+            id="player-value-search"
+            v-model="playerSearch"
+            type="search"
+            placeholder="Search players"
+          />
+        </div>
         <div
           :class="{
             'col-span-2 sm:col-span-1': valuationMode === 'dynasty',
@@ -280,7 +323,7 @@ const formatNumber = (value: number, digits = 1) =>
     >
       <p class="font-medium">No matching players</p>
       <p class="mt-1 text-sm text-muted-foreground">
-        Try another manager or position.
+        Try another player, manager, or position.
       </p>
     </div>
 
@@ -292,8 +335,8 @@ const formatNumber = (value: number, digits = 1) =>
           aria-label="League trade value rankings"
           tabindex="0"
         >
-          <table class="w-full min-w-[58rem] text-sm">
-            <thead class="text-xs text-left bg-muted/50 text-muted-foreground">
+          <table class="w-full min-w-[66rem] text-sm">
+            <thead class="text-xs text-left bg-muted text-muted-foreground">
               <tr>
                 <th class="px-4 py-3 font-medium">OVR</th>
                 <th class="px-4 py-3 font-medium">Player</th>
@@ -316,6 +359,11 @@ const formatNumber = (value: number, digits = 1) =>
                 </th>
                 <th class="px-4 py-3 font-medium text-right">Replacement</th>
                 <th class="px-4 py-3 font-medium text-right">VORP</th>
+                <th
+                  class="sticky right-0 z-10 px-4 py-3 font-medium text-right bg-muted"
+                >
+                  <span class="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -380,6 +428,16 @@ const formatNumber = (value: number, digits = 1) =>
                 </td>
                 <td class="px-4 py-3 font-medium text-right">
                   {{ formatNumber(player.vorp) }}
+                </td>
+                <td class="sticky right-0 px-4 py-3 text-right bg-background">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    @click="buildTrade(player)"
+                  >
+                    Build trade
+                  </Button>
                 </td>
               </tr>
             </tbody>

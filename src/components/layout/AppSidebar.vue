@@ -64,6 +64,8 @@ const defaultRouteQuery = computed(() => {
     upgrade_source,
     destination,
     tradeMode,
+    tradePlayerId,
+    tradeRosterId,
     ...query
   } = route.query;
   return query;
@@ -99,7 +101,9 @@ const changeTab = (tab: LeagueFeature) => {
     route.query.intent ||
     route.query.upgrade_source ||
     route.query.destination ||
-    route.query.tradeMode
+    route.query.tradeMode ||
+    route.query.tradePlayerId ||
+    route.query.tradeRosterId
   ) {
     router.replace({ path: "/", query: defaultRouteQuery.value });
   }

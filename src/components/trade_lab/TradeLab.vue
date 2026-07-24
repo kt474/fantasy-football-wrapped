@@ -102,6 +102,16 @@ const isMobile = ref(false);
 const activeMode = ref(
   route.query.tradeMode === "finder" ? "finder" : "builder"
 );
+const requestedPlayerId = computed(() => {
+  const value = route.query.tradePlayerId;
+  return Array.isArray(value) ? value[0] : value;
+});
+const requestedRosterId = computed(() => {
+  const value = route.query.tradeRosterId;
+  const rosterId = Number(Array.isArray(value) ? value[0] : value);
+  return Number.isInteger(rosterId) ? rosterId : null;
+});
+const playerBuildIntentApplied = ref(false);
 
 const activeLeague = computed(() => store.currentLeague);
 const isDemoLeague = computed(
@@ -280,6 +290,7 @@ const fetchPlayers = async () => {
       playerValueAccess.value = "premium";
       tradeValueRequest.value = null;
       syncTeamSelections();
+      applyRequestedPlayerBuildIntent();
     } finally {
       if (currentRequestId === rosterRequestId) {
         loading.value = false;
@@ -319,6 +330,7 @@ const fetchPlayers = async () => {
     if (currentRequestId !== rosterRequestId) return;
     rosters.value = nextRosters;
     syncTeamSelections();
+    applyRequestedPlayerBuildIntent();
     const nextDraftPicks = await loadDynastyDraftPickAssets({
       league: currentLeague,
       rosters: nextRosters,
@@ -398,6 +410,42 @@ const syncTeamSelections = () => {
   ) {
     resetTrade();
   }
+};
+
+const applyRequestedPlayerBuildIntent = () => {
+  if (playerBuildIntentApplied.value || !requestedPlayerId.value) return;
+
+  const requestedRoster = rosters.value.find(
+    (roster) =>
+      (requestedRosterId.value === null ||
+        roster.id === requestedRosterId.value) &&
+      roster.players.some(
+        (player) => player.player_id === requestedPlayerId.value
+      )
+  );
+  const playerRoster =
+    requestedRoster ??
+    rosters.value.find((roster) =>
+      roster.players.some(
+        (player) => player.player_id === requestedPlayerId.value
+      )
+    );
+  if (!playerRoster) return;
+
+  const opponentRoster =
+    rosters.value.find(
+      (roster) =>
+        roster.id === selectedTeamBId.value &&
+        roster.id !== playerRoster.id
+    ) ??
+    rosters.value.find((roster) => roster.id !== playerRoster.id);
+
+  selectedTeamAId.value = playerRoster.id;
+  selectedTeamBId.value = opponentRoster?.id ?? null;
+  resetTrade();
+  teamASends.value = [requestedPlayerId.value];
+  activeMode.value = "builder";
+  playerBuildIntentApplied.value = true;
 };
 
 const handleTeamSelectionChange = (team: "A" | "B", rosterId: number) => {

@@ -91,6 +91,18 @@ describe("Trade Lab correctness boundaries", () => {
     );
   });
 
+  test("prefills the builder from a Player Values action", () => {
+    const tradeLab = read("src/components/trade_lab/TradeLab.vue");
+
+    expect(tradeLab).toContain("route.query.tradePlayerId");
+    expect(tradeLab).toContain("route.query.tradeRosterId");
+    expect(tradeLab).toContain("applyRequestedPlayerBuildIntent();");
+    expect(tradeLab).toContain("selectedTeamAId.value = playerRoster.id");
+    expect(tradeLab).toContain(
+      "teamASends.value = [requestedPlayerId.value]"
+    );
+  });
+
   test("Finder keeps the selected manager label reactive across league switches", () => {
     const tradeFinder = read("src/components/trade_lab/TradeFinder.vue");
 
