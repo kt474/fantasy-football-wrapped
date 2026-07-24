@@ -196,14 +196,15 @@ const formatNumber = (value: number, digits = 1) =>
       <p class="mt-1 text-sm text-muted-foreground">Try another position.</p>
     </div>
 
-    <div v-else class="overflow-hidden border rounded-lg border-border">
-      <div
-        class="overflow-x-auto"
-        role="region"
-        aria-label="League trade value rankings"
-        tabindex="0"
-      >
-        <table class="w-full min-w-[58rem] text-sm">
+    <div v-else class="space-y-3">
+      <div class="overflow-hidden border rounded-lg border-border">
+        <div
+          class="overflow-x-auto"
+          role="region"
+          aria-label="League trade value rankings"
+          tabindex="0"
+        >
+          <table class="w-full min-w-[58rem] text-sm">
           <thead class="text-xs text-left bg-muted/50 text-muted-foreground">
             <tr>
               <th class="px-4 py-3 font-medium">OVR</th>
@@ -292,43 +293,66 @@ const formatNumber = (value: number, digits = 1) =>
               </td>
             </tr>
           </tbody>
-        </table>
-      </div>
-      <div
-        class="flex flex-col gap-3 px-4 py-3 text-xs border-t border-border sm:flex-row sm:items-center sm:justify-between"
-      >
-        <p class="text-muted-foreground">
-          Showing {{ pageStart }}–{{ pageEnd }} of
-          {{ filteredPlayers.length }} rostered players.
-        </p>
-        <nav
-          v-if="pageCount > 1"
-          class="flex items-center gap-2"
-          aria-label="Player rankings pagination"
+          </table>
+        </div>
+        <div
+          class="flex flex-col gap-3 px-4 py-3 text-xs border-t border-border sm:flex-row sm:items-center sm:justify-between"
         >
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            :disabled="currentPage === 1"
-            @click="currentPage -= 1"
+          <p class="text-muted-foreground">
+            Showing {{ pageStart }}–{{ pageEnd }} of
+            {{ filteredPlayers.length }} rostered players.
+          </p>
+          <nav
+            v-if="pageCount > 1"
+            class="flex items-center gap-2"
+            aria-label="Player rankings pagination"
           >
-            Previous
-          </Button>
-          <span class="px-1 tabular-nums text-muted-foreground">
-            Page {{ currentPage }} of {{ pageCount }}
-          </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            :disabled="currentPage === pageCount"
-            @click="currentPage += 1"
-          >
-            Next
-          </Button>
-        </nav>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              :disabled="currentPage === 1"
+              @click="currentPage -= 1"
+            >
+              Previous
+            </Button>
+            <span class="px-1 tabular-nums text-muted-foreground">
+              Page {{ currentPage }} of {{ pageCount }}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              :disabled="currentPage === pageCount"
+              @click="currentPage += 1"
+            >
+              Next
+            </Button>
+          </nav>
+        </div>
       </div>
+      <p
+        v-if="valuationMode !== 'dynasty'"
+        class="px-1 text-xs leading-relaxed text-muted-foreground"
+      >
+        <span class="font-medium text-foreground">How rankings work:</span>
+        Redraft values measure projected points above a league-specific
+        positional baseline. League size, scoring type, starting lineup
+        requirements, and positional scarcity influence each player’s value.
+        Completed seasons use full-season results instead of projections. Scores
+        are relative to your league.
+      </p>
+      <p
+        v-else
+        class="px-1 text-xs leading-relaxed text-muted-foreground"
+      >
+        <span class="font-medium text-foreground">How rankings work:</span>
+        Dynasty values blend long-term market ADP with league-specific projected
+        production. League size, scoring type, starting lineup requirements,
+        positional scarcity, and tight end premiums influence each player’s
+        value. Your selected team direction adjusts the balance between market
+        value and current production. Scores are relative to your league.
+      </p>
     </div>
   </div>
 </template>

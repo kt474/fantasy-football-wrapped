@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { TableDataType } from "../../types/types.ts";
 import { useStore } from "../../store/store";
+import { useSubscriptionStore } from "@/store/subscription";
 import { type TradeSuggestion } from "@/lib/tradeFinder";
 import {
   getPlayerValues,
@@ -33,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { X } from "lucide-vue-next";
+import { LockKeyhole, X } from "lucide-vue-next";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import TradeDatabase from "./TradeDatabase.vue";
@@ -52,6 +53,7 @@ type TradeDraftPickAsset = {
 };
 
 const store = useStore();
+const subscriptionStore = useSubscriptionStore();
 const route = useRoute();
 const props = defineProps<{
   tableData: TableDataType[];
@@ -739,8 +741,15 @@ onBeforeUnmount(() => {
         <Tabs v-model="activeMode">
           <TabsList>
             <TabsTrigger value="builder">Builder</TabsTrigger>
-            <TabsTrigger value="finder">Finder</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
+            <TabsTrigger value="finder" class="gap-1.5">
+              Finder
+              <LockKeyhole
+                v-if="!subscriptionStore.isPremium"
+                class="inline-block mb-0.5 size-3"
+                aria-hidden="true"
+              />
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
