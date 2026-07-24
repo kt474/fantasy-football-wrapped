@@ -1,5 +1,6 @@
 import { getPlayersByIdsMap } from "@/api/api";
 import {
+  getDraftProjections,
   getStats,
   getTradedPicks,
   type SleeperTradedPick,
@@ -249,12 +250,19 @@ export type TradeBuilderPlayer = Player & {
   playerId: string;
   positionRank: number;
   overallRank: number;
+  dynastyAdp: number | null;
 };
 
 export type TradeBuilderRoster = {
   id: number;
   managerName: string;
   players: TradeBuilderPlayer[];
+};
+
+type TradeBuilderBasicRanking = {
+  positionRank: number;
+  overallRank: number;
+  dynastyAdp: number | null;
 };
 
 export const mergeTradeBuilderRankings = (
@@ -296,25 +304,66 @@ export const loadTradeBuilderRosters = async (options: {
     dynastyPerspective: "balanced",
   });
   const playerIds = [...new Set(request.rosters.flatMap((r) => r.playerIds))];
-  const [playerMap, basicRankingEntries] = await Promise.all([
-    getPlayersByIdsMap(playerIds),
-    Promise.all(
-      playerIds.map(async (playerId) => {
-        const stats = await getStats(
+  const playerMap = await getPlayersByIdsMap(playerIds);
+  const dynasty = isDynastyLeague(options.league);
+  const normalizedRosterPositions = options.league.rosterPositions.map(
+    (position) => position.toUpperCase()
+  );
+  const superflex =
+    normalizedRosterPositions.filter((position) => position === "QB").length >
+      1 ||
+    normalizedRosterPositions.some((position) =>
+      ["SUPER_FLEX", "OP"].includes(position)
+    );
+  const idpPositions = new Set([
+    "DB",
+    "DL",
+    "LB",
+    "CB",
+    "DE",
+    "DT",
+    "NT",
+    "S",
+  ]);
+  const basicRankingEntries = await Promise.all(
+    playerIds.map(async (playerId): Promise<
+      readonly [string, TradeBuilderBasicRanking]
+    > => {
+      if (dynasty) {
+        const player = playerMap.get(playerId);
+        const projection = await getDraftProjections(
           playerId,
           options.league.season,
-          options.league.scoringType
+          options.league.scoringType,
+          "Dynasty",
+          superflex,
+          idpPositions.has(player?.position?.toUpperCase() ?? "")
         );
         return [
           playerId,
           {
-            positionRank: Number(stats?.rank || 0),
-            overallRank: Number(stats?.overallRank || 0),
+            positionRank: 0,
+            overallRank: 0,
+            dynastyAdp: projection.adp,
           },
         ] as const;
-      })
-    ),
-  ]);
+      }
+
+      const stats = await getStats(
+        playerId,
+        options.league.season,
+        options.league.scoringType
+      );
+      return [
+        playerId,
+        {
+          positionRank: Number(stats?.rank || 0),
+          overallRank: Number(stats?.overallRank || 0),
+          dynastyAdp: null,
+        },
+      ] as const;
+    })
+  );
   const basicRankingById = new Map(basicRankingEntries);
   return request.rosters.map((roster) => ({
     id: roster.id,
@@ -329,6 +378,7 @@ export const loadTradeBuilderRosters = async (options: {
           playerId,
           positionRank: basicRanking?.positionRank ?? 0,
           overallRank: basicRanking?.overallRank ?? 0,
+          dynastyAdp: basicRanking?.dynastyAdp ?? null,
         };
       })
       .filter(

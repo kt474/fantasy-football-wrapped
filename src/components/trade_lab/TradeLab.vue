@@ -11,7 +11,6 @@ import {
   type TradeQuoteResponse,
   type TradeValueRequestPayload,
 } from "@/api/tradeValuesApi";
-import { useDynastyTradePerspective } from "@/composables/useDynastyTradePerspective";
 import {
   applyTradeBuilderRankingResponse,
   buildTradeValueRequest,
@@ -40,6 +39,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import TradeDatabase from "./TradeDatabase.vue";
 import TradeFinder from "./TradeFinder.vue";
 import TradeAssetDialog from "./TradeAssetDialog.vue";
+import TradePlayerRankBadges from "./TradePlayerRankBadges.vue";
 
 type TradeLabRoster = TradeBuilderRoster;
 
@@ -61,12 +61,12 @@ const props = defineProps<{
 const rosters = ref<TradeLabRoster[]>([]);
 const dynastyPickAssets = ref<DynastyDraftPickAsset[]>([]);
 const loading = ref(false);
+const playerValueAccess = ref<"preview" | "premium">("preview");
 const tradeValueRequest = ref<TradeValueRequestPayload | null>(null);
 const tradeQuote = ref<TradeQuoteResponse | null>(null);
 const quoteLoading = ref(false);
 const quoteError = ref("");
 const quoteRetryNonce = ref(0);
-const dynastyPerspective = useDynastyTradePerspective();
 const selectedWeek = ref(1);
 const selectedTeamAId = ref<number | null>(null);
 const selectedTeamBId = ref<number | null>(null);
@@ -238,12 +238,14 @@ const fetchPlayers = async () => {
   if (store.leagueIds.length === 0 || !activeLeague.value) {
     rosters.value = [];
     dynastyPickAssets.value = [];
+    playerValueAccess.value = "preview";
     tradeValueRequest.value = null;
     loading.value = false;
     return;
   }
 
   loading.value = true;
+  playerValueAccess.value = "preview";
   const currentLeague = activeLeague.value;
 
   try {
@@ -252,7 +254,7 @@ const fetchPlayers = async () => {
       tableData: props.tableData,
       selectedWeek: selectedWeek.value,
       showUsernames: store.showUsernames,
-      dynastyPerspective: dynastyPerspective.value,
+      dynastyPerspective: "balanced",
     });
     tradeValueRequest.value = request;
     const nextRosters = await loadTradeBuilderRosters({
@@ -272,12 +274,8 @@ const fetchPlayers = async () => {
     dynastyPickAssets.value = nextDraftPicks;
     void getPlayerValues(request)
       .then((values) => {
-        if (
-          currentRequestId !== rosterRequestId ||
-          tradeValueRequest.value !== request
-        ) {
-          return;
-        }
+        if (currentRequestId !== rosterRequestId) return;
+        playerValueAccess.value = values.access;
         rosters.value = applyTradeBuilderRankingResponse(nextRosters, values);
       })
       .catch((error) => {
@@ -484,34 +482,12 @@ const isIncluded = (team: "A" | "B", playerId: string) => {
     : teamBSends.value.includes(playerId);
 };
 
-const rankLabel = (rank: number) => {
-  return rank > 0 ? `#${rank}` : "N/A";
-};
-
 const waiverPaletteClass = (tier: number) => {
   if (tier === 1) return "performance-excellent";
   if (tier === 2) return "performance-good";
   if (tier === 3) return "performance-average";
   if (tier === 4) return "performance-poor";
   return "performance-bad";
-};
-
-const posRankClass = (rank: number) => {
-  if (rank <= 0) return "bg-muted text-muted-foreground";
-  if (rank <= 12) return waiverPaletteClass(1);
-  if (rank <= 24) return waiverPaletteClass(2);
-  if (rank <= 36) return waiverPaletteClass(3);
-  if (rank <= 48) return waiverPaletteClass(4);
-  return waiverPaletteClass(5);
-};
-
-const overallRankClass = (rank: number) => {
-  if (rank <= 0) return "bg-muted text-muted-foreground";
-  if (rank <= 24) return waiverPaletteClass(1);
-  if (rank <= 60) return waiverPaletteClass(2);
-  if (rank <= 120) return waiverPaletteClass(3);
-  if (rank <= 180) return waiverPaletteClass(4);
-  return waiverPaletteClass(5);
 };
 
 const fairnessLabel = computed(() => {
@@ -665,10 +641,6 @@ watch(
   () => fetchPlayers()
 );
 
-watch(dynastyPerspective, () => {
-  if (dynasty.value) fetchPlayers();
-});
-
 watch(
   () => draftSeasons.value,
   (newSeasons) => {
@@ -728,16 +700,6 @@ onBeforeUnmount(() => {
     <div class="flex flex-wrap items-start justify-between gap-3">
       <h2 class="heading-section">Trade Lab</h2>
       <div class="flex flex-wrap items-center justify-end gap-2">
-        <Select v-if="dynasty" v-model="dynastyPerspective">
-          <SelectTrigger class="w-36" aria-label="Dynasty team direction">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="balanced">Balanced</SelectItem>
-            <SelectItem value="contender">Contender</SelectItem>
-            <SelectItem value="rebuilder">Rebuilder</SelectItem>
-          </SelectContent>
-        </Select>
         <Tabs v-model="activeMode">
           <TabsList>
             <TabsTrigger value="builder">Builder</TabsTrigger>
@@ -761,7 +723,6 @@ onBeforeUnmount(() => {
       :request="tradeValueRequest"
       :loading="loading"
       :valuation-mode="valuationMode"
-      :dynasty-perspective="dynastyPerspective"
       @open-suggestion="openTradeSuggestion"
     />
     <div v-else>
@@ -930,24 +891,14 @@ onBeforeUnmount(() => {
                       {{ player.position }} - {{ player.team }}
                     </p>
                   </div>
-                  <div class="flex flex-col items-end gap-1 ml-auto">
-                    <span
-                      :class="[
-                        'rounded-md px-2 py-1 text-xs font-semibold',
-                        posRankClass(player.positionRank),
-                      ]"
-                    >
-                      POS {{ rankLabel(player.positionRank) }}
-                    </span>
-                    <span
-                      :class="[
-                        'rounded-md px-2 py-1 text-xs font-semibold',
-                        overallRankClass(player.overallRank),
-                      ]"
-                    >
-                      OVR {{ rankLabel(player.overallRank) }}
-                    </span>
-                  </div>
+                  <TradePlayerRankBadges
+                    :position-rank="player.positionRank"
+                    :overall-rank="player.overallRank"
+                    :dynasty-adp="player.dynastyAdp"
+                    :show-dynasty-adp="
+                      dynasty && playerValueAccess !== 'premium'
+                    "
+                  />
                 </div>
               </button>
             </div>
@@ -1042,24 +993,15 @@ onBeforeUnmount(() => {
                         {{ player.position }} - {{ player.team }}
                       </p>
                     </div>
-                    <div class="flex flex-col items-end gap-1 ml-auto mr-4">
-                      <span
-                        :class="[
-                          'rounded-md px-2 py-1 text-xs font-semibold',
-                          posRankClass(player.positionRank),
-                        ]"
-                      >
-                        POS {{ rankLabel(player.positionRank) }}
-                      </span>
-                      <span
-                        :class="[
-                          'rounded-md px-2 py-1 text-xs font-semibold',
-                          overallRankClass(player.overallRank),
-                        ]"
-                      >
-                        OVR {{ rankLabel(player.overallRank) }}
-                      </span>
-                    </div>
+                    <TradePlayerRankBadges
+                      class="mr-4"
+                      :position-rank="player.positionRank"
+                      :overall-rank="player.overallRank"
+                      :dynasty-adp="player.dynastyAdp"
+                      :show-dynasty-adp="
+                        dynasty && playerValueAccess !== 'premium'
+                      "
+                    />
                   </div>
                   <button
                     type="button"
@@ -1159,24 +1101,15 @@ onBeforeUnmount(() => {
                         {{ player.position }} - {{ player.team }}
                       </p>
                     </div>
-                    <div class="flex flex-col items-end gap-1 ml-auto mr-4">
-                      <span
-                        :class="[
-                          'rounded-md px-2 py-1 text-xs font-semibold',
-                          posRankClass(player.positionRank),
-                        ]"
-                      >
-                        POS {{ rankLabel(player.positionRank) }}
-                      </span>
-                      <span
-                        :class="[
-                          'rounded-md px-2 py-1 text-xs font-semibold',
-                          overallRankClass(player.overallRank),
-                        ]"
-                      >
-                        OVR {{ rankLabel(player.overallRank) }}
-                      </span>
-                    </div>
+                    <TradePlayerRankBadges
+                      class="mr-4"
+                      :position-rank="player.positionRank"
+                      :overall-rank="player.overallRank"
+                      :dynasty-adp="player.dynastyAdp"
+                      :show-dynasty-adp="
+                        dynasty && playerValueAccess !== 'premium'
+                      "
+                    />
                   </div>
                   <button
                     type="button"
@@ -1288,24 +1221,14 @@ onBeforeUnmount(() => {
                       {{ player.position }} - {{ player.team }}
                     </p>
                   </div>
-                  <div class="flex flex-col items-end gap-1 ml-auto">
-                    <span
-                      :class="[
-                        'rounded-md px-2 py-1 text-xs font-semibold',
-                        posRankClass(player.positionRank),
-                      ]"
-                    >
-                      POS {{ rankLabel(player.positionRank) }}
-                    </span>
-                    <span
-                      :class="[
-                        'rounded-md px-2 py-1 text-xs font-semibold',
-                        overallRankClass(player.overallRank),
-                      ]"
-                    >
-                      OVR {{ rankLabel(player.overallRank) }}
-                    </span>
-                  </div>
+                  <TradePlayerRankBadges
+                    :position-rank="player.positionRank"
+                    :overall-rank="player.overallRank"
+                    :dynasty-adp="player.dynastyAdp"
+                    :show-dynasty-adp="
+                      dynasty && playerValueAccess !== 'premium'
+                    "
+                  />
                 </div>
               </button>
             </div>
@@ -1315,8 +1238,18 @@ onBeforeUnmount(() => {
       <div
         class="pt-3 mt-4 text-xs border-t border-border text-muted-foreground"
       >
-        POS/OVR badges use standard Sleeper season rankings. Player Values adds
-        rankings adjusted for your league's scoring and roster format.
+        <template v-if="dynasty && playerValueAccess !== 'premium'">
+          Dynasty ADP is a raw Sleeper market baseline. Premium adds POS/OVR
+          rankings adjusted for your league's scoring and roster format.
+        </template>
+        <template v-else-if="dynasty">
+          POS/OVR badges use balanced dynasty rankings adjusted for your
+          league's scoring and roster format.
+        </template>
+        <template v-else>
+          POS/OVR badges use standard Sleeper season rankings. Premium adds
+          rankings adjusted for your league's scoring and roster format.
+        </template>
       </div>
     </div>
   </Card>

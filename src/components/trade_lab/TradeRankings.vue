@@ -205,94 +205,96 @@ const formatNumber = (value: number, digits = 1) =>
           tabindex="0"
         >
           <table class="w-full min-w-[58rem] text-sm">
-          <thead class="text-xs text-left bg-muted/50 text-muted-foreground">
-            <tr>
-              <th class="px-4 py-3 font-medium">OVR</th>
-              <th class="px-4 py-3 font-medium">Player</th>
-              <th class="px-4 py-3 font-medium">POS rank</th>
-              <th
-                v-if="valuationMode === 'dynasty'"
-                class="px-4 py-3 font-medium text-right"
+            <thead class="text-xs text-left bg-muted/50 text-muted-foreground">
+              <tr>
+                <th class="px-4 py-3 font-medium">OVR</th>
+                <th class="px-4 py-3 font-medium">Player</th>
+                <th class="px-4 py-3 font-medium">POS rank</th>
+                <th
+                  v-if="valuationMode === 'dynasty'"
+                  class="px-4 py-3 font-medium text-right"
+                >
+                  Dynasty ADP
+                </th>
+                <th class="px-4 py-3 font-medium text-right">Trade value</th>
+                <th class="px-4 py-3 font-medium text-right">
+                  {{
+                    valuationMode === "dynasty"
+                      ? "Projected pts"
+                      : valuationMode === "season-results"
+                        ? "Season pts"
+                        : "ROS pts"
+                  }}
+                </th>
+                <th class="px-4 py-3 font-medium text-right">Replacement</th>
+                <th class="px-4 py-3 font-medium text-right">VORP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="player in paginatedPlayers"
+                :key="player.playerId"
+                class="border-t border-border bg-background"
               >
-                Dynasty ADP
-              </th>
-              <th class="px-4 py-3 font-medium text-right">Trade value</th>
-              <th class="px-4 py-3 font-medium text-right">
-                {{
-                  valuationMode === "dynasty"
-                    ? "Projected pts"
-                    : valuationMode === "season-results"
-                      ? "Season pts"
-                      : "ROS pts"
-                }}
-              </th>
-              <th class="px-4 py-3 font-medium text-right">Replacement</th>
-              <th class="px-4 py-3 font-medium text-right">VORP</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="player in paginatedPlayers"
-              :key="player.playerId"
-              class="border-t border-border bg-background"
-            >
-              <td class="px-4 py-3 font-semibold">#{{ player.overallRank }}</td>
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-3">
-                  <img
-                    v-if="player.position !== 'DEF'"
-                    class="object-cover rounded-full size-9"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.playerId}.jpg`"
-                    alt=""
-                  />
-                  <img
-                    v-else
-                    class="object-contain rounded-full size-9"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.playerId.toLowerCase()}.png`"
-                    alt=""
-                  />
-                  <div>
-                    <p class="font-medium">
-                      {{ player.name || `${player.team} Defense` }}
-                    </p>
-                    <p class="text-xs text-muted-foreground">
-                      {{ player.position }} · {{ player.team }}
-                    </p>
+                <td class="px-4 py-3 font-semibold">
+                  #{{ player.overallRank }}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <img
+                      v-if="player.position !== 'DEF'"
+                      class="object-cover rounded-full size-9"
+                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.playerId}.jpg`"
+                      alt=""
+                    />
+                    <img
+                      v-else
+                      class="object-contain rounded-full size-9"
+                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.playerId.toLowerCase()}.png`"
+                      alt=""
+                    />
+                    <div>
+                      <p class="font-medium">
+                        {{ player.name || `${player.team} Defense` }}
+                      </p>
+                      <p class="text-xs text-muted-foreground">
+                        {{ player.position }} · {{ player.team }}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td class="px-4 py-3 font-medium">
-                {{ player.position }}{{ player.positionRank }}
-              </td>
-              <td
-                v-if="valuationMode === 'dynasty'"
-                class="px-4 py-3 text-right text-muted-foreground"
-              >
-                {{
-                  player.dynastyAdp ? formatNumber(player.dynastyAdp, 1) : "—"
-                }}
-              </td>
-              <td class="px-4 py-3 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <Badge :variant="valueTier(player.tradeValue).variant">
-                    {{ valueTier(player.tradeValue).label }}
-                  </Badge>
-                  <span class="font-semibold min-w-10">
-                    {{ formatNumber(player.tradeValue, 1) }}
-                  </span>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-right">
-                {{ formatNumber(player.projectedPoints) }}
-              </td>
-              <td class="px-4 py-3 text-right text-muted-foreground">
-                {{ formatNumber(player.replacementPoints) }}
-              </td>
-              <td class="px-4 py-3 font-medium text-right">
-                {{ formatNumber(player.vorp) }}
-              </td>
-            </tr>
-          </tbody>
+                </td>
+                <td class="px-4 py-3 font-medium">
+                  {{ player.position }}{{ player.positionRank }}
+                </td>
+                <td
+                  v-if="valuationMode === 'dynasty'"
+                  class="px-4 py-3 text-right text-muted-foreground"
+                >
+                  {{
+                    player.dynastyAdp ? formatNumber(player.dynastyAdp, 1) : "—"
+                  }}
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <Badge :variant="valueTier(player.tradeValue).variant">
+                      {{ valueTier(player.tradeValue).label }}
+                    </Badge>
+                    <span class="font-semibold min-w-10">
+                      {{ formatNumber(player.tradeValue, 1) }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  {{ formatNumber(player.projectedPoints) }}
+                </td>
+                <td class="px-4 py-3 text-right text-muted-foreground">
+                  {{ formatNumber(player.replacementPoints) }}
+                </td>
+                <td class="px-4 py-3 font-medium text-right">
+                  {{ formatNumber(player.vorp) }}
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
         <div
@@ -336,18 +338,15 @@ const formatNumber = (value: number, digits = 1) =>
         class="px-1 text-xs leading-relaxed text-muted-foreground"
       >
         <span class="font-medium text-foreground">How rankings work:</span>
-        Redraft values measure projected points above a league-specific
+        Redraft values measure projected points above a league specific
         positional baseline. League size, scoring type, starting lineup
         requirements, and positional scarcity influence each player’s value.
         Completed seasons use full-season results instead of projections. Scores
         are relative to your league.
       </p>
-      <p
-        v-else
-        class="px-1 text-xs leading-relaxed text-muted-foreground"
-      >
+      <p v-else class="px-1 text-xs leading-relaxed text-muted-foreground">
         <span class="font-medium text-foreground">How rankings work:</span>
-        Dynasty values blend long-term market ADP with league-specific projected
+        Dynasty values blend long-term market ADP with league specific projected
         production. League size, scoring type, starting lineup requirements,
         positional scarcity, and tight end premiums influence each player’s
         value. Your selected team direction adjusts the balance between market

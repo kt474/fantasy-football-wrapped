@@ -15,7 +15,6 @@ import {
   type TradeValueRequestPayload,
 } from "@/api/tradeValuesApi";
 import {
-  type DynastyPerspective,
   type TradeSuggestion,
   type TradeValuationMode,
 } from "@/lib/tradeFinder";
@@ -25,7 +24,6 @@ const props = defineProps<{
   request: TradeValueRequestPayload | null;
   loading?: boolean;
   valuationMode?: TradeValuationMode;
-  dynastyPerspective?: DynastyPerspective;
 }>();
 
 const emit = defineEmits<{
@@ -130,7 +128,7 @@ const formatValue = (value: number) =>
         }}. Values are based on
         {{
           valuationMode === "dynasty"
-            ? `dynasty ADP, team direction,`
+            ? "dynasty ADP, league adjusted projected production,"
             : valuationMode === "season-results"
               ? "full season performance"
               : "rest of season projections"
