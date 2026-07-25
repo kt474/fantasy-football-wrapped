@@ -43,5 +43,5 @@ export const getPremiumUpgradeDescription = (
   if (intent === "trade_finder") {
     return "Find balanced player deals projected to improve both starting lineups.";
   }
-  return "Get access to customizable shared weekly newsletters, video recaps, draft scouting, manager insights, complete player rankings, and a trade finder.";
+  return "Bring your league to life with personalized content, smarter insights, and more reasons to stay engaged all season long.";
 };
