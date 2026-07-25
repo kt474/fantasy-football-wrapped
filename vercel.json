@@ -63,7 +63,10 @@
       "source": "/report/:token",
       "destination": "/api/report-page?token=:token"
     },
-    { "source": "/((?!assets/|.*\\..*).*)", "destination": "/" }
+    {
+      "source": "/account",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {

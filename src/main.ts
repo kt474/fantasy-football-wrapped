@@ -44,7 +44,7 @@ const NotFound = () => import("./views/404.vue");
 
 const siteUrl = "https://ffwrapped.com";
 const defaultMeta = {
-  title: "Fantasy Football Wrapped",
+  title: "Fantasy Football League Insights | ffwrapped",
   description:
     "Analyze your fantasy football league with power rankings, roster insights, custom weekly reports, playoff odds, and much more.",
 };

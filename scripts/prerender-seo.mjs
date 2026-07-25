@@ -8,7 +8,7 @@ const premiumReportExample = JSON.parse(
 const pages = [
   {
     path: "",
-    title: "Fantasy Football Wrapped",
+    title: "Fantasy Football League Insights | ffwrapped",
     description:
       "Analyze your fantasy football league with interactive charts, power rankings, roster insights, custom weekly reports, and more.",
     heading: "All your fantasy football league insights in one place",
@@ -48,6 +48,62 @@ const pages = [
       "League history and manager profiles",
       "Trade database and Trade Lab",
       "ESPN fantasy football support",
+    ],
+  },
+  {
+    path: "privacy",
+    title: "Privacy Policy | ffwrapped",
+    description:
+      "Read the ffwrapped privacy policy and learn how league, account, billing, and generated media data are handled.",
+    heading: "Privacy Policy",
+    introduction:
+      "Learn what information ffwrapped processes, how it is used, which service providers support the product, and what choices are available to you.",
+    ctaLabel: "Return to ffwrapped",
+    sections: [
+      {
+        title: "Account and league data",
+        body: "ffwrapped processes account details and the Sleeper or ESPN league information needed to provide league analysis, reports, manager profiles, and video recaps.",
+      },
+      {
+        title: "Billing and analytics",
+        body: "Stripe handles payment details, while Vercel Web Analytics, PostHog, and Umami help us understand traffic and product usage.",
+      },
+      {
+        title: "Storage and retention",
+        body: "League data may be stored in your browser, account and purchase information is retained as needed to operate the service, and generated videos follow the temporary retention period described in the full policy.",
+      },
+      {
+        title: "Your choices",
+        body: "You can clear browser-stored league data and contact ffwrapped to request access to, correction of, or deletion of account information, subject to legal and operational requirements.",
+      },
+    ],
+  },
+  {
+    path: "terms",
+    title: "Terms of Service | ffwrapped",
+    description:
+      "Read the ffwrapped terms of service for league analysis, generated reports, sharing, and video recaps.",
+    heading: "Terms of Service",
+    introduction:
+      "Review the terms that apply to ffwrapped accounts, league data, paid plans, generated reports and videos, sharing, and acceptable use.",
+    ctaLabel: "Return to ffwrapped",
+    sections: [
+      {
+        title: "Using the service",
+        body: "ffwrapped provides fantasy football analysis, reports, generated videos, sharing tools, and related free and paid features.",
+      },
+      {
+        title: "League data and sharing",
+        body: "You must be authorized to access the data you submit and are responsible for deciding whether reports or generated media are appropriate to share.",
+      },
+      {
+        title: "Paid plans",
+        body: "Stripe processes recurring subscriptions and previous seasonal passes remain subject to the access period shown when purchased.",
+      },
+      {
+        title: "Acceptable use and disclaimers",
+        body: "The service may not be misused, and analytical or AI-generated output should be reviewed because it may contain errors or omissions.",
+      },
     ],
   },
   {
@@ -547,6 +603,18 @@ const pages = [
       isFamilyFriendly: true,
     },
   },
+  {
+    path: "404",
+    outputFile: "404.html",
+    notFound: true,
+    robots: "noindex, follow",
+    title: "Page Not Found | ffwrapped",
+    description:
+      "The page you are looking for could not be found on ffwrapped.",
+    heading: "Something's missing.",
+    introduction: "Sorry, we can't find that page.",
+    sections: [],
+  },
 ];
 
 const escapeHtml = (value) =>
@@ -615,6 +683,19 @@ const renderToolNavigation = (page) => `
 `;
 
 const renderStaticPage = (page) => {
+  if (page.notFound) {
+    return `
+      <main data-prerendered="true">
+        <div class="container max-w-xl px-5 py-20 mx-auto text-center">
+          <p>404</p>
+          <h1>${escapeHtml(page.heading)}</h1>
+          <p>${escapeHtml(page.introduction)}</p>
+          <p><a href="/">Return home</a></p>
+        </div>
+      </main>
+    `;
+  }
+
   if (page.video) {
     return `
       <main data-prerendered="true">
@@ -696,6 +777,9 @@ for (const page of pages) {
   const structuredData = page.structuredData
     ? `<script type="application/ld+json">${JSON.stringify(page.structuredData).replaceAll("<", "\\u003c")}</script>`
     : "";
+  const robotsMeta = page.robots
+    ? `<meta name="robots" content="${escapeHtml(page.robots)}" />`
+    : "";
   const videoMeta = page.ogVideo
     ? `<meta property="og:video" content="${escapeHtml(page.ogVideo)}" /><meta property="og:video:secure_url" content="${escapeHtml(page.ogVideo)}" /><meta property="og:video:type" content="video/mp4" /><meta property="og:video:width" content="720" /><meta property="og:video:height" content="1280" />`
     : "";
@@ -760,10 +844,14 @@ for (const page of pages) {
     .replace('<div id="app"></div>', `<div id="app">${staticPage}</div>`)
     .replace(
       "</head>",
-      `${prerenderPaintGuard}${videoMeta}${structuredData}</head>`
+      `${prerenderPaintGuard}${robotsMeta}${videoMeta}${structuredData}</head>`
     );
 
-  const outputDirectory = resolve("dist", page.path);
-  await mkdir(outputDirectory, { recursive: true });
-  await writeFile(resolve(outputDirectory, "index.html"), html);
+  if (page.outputFile) {
+    await writeFile(resolve("dist", page.outputFile), html);
+  } else {
+    const outputDirectory = resolve("dist", page.path);
+    await mkdir(outputDirectory, { recursive: true });
+    await writeFile(resolve(outputDirectory, "index.html"), html);
+  }
 }
