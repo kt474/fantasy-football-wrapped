@@ -77,8 +77,8 @@ const activeDescription = computed(() => {
       : "Plan your draft and scout every league mate from one workspace.";
   }
   return isAuction.value
-    ? "Preview how auction history can shape a budget plan and identify position competition."
-    : "Preview with sample data to show how draft history can be used to plan your next draft and scout your league mates.";
+    ? "Your auction history is ready to shape a budget plan and identify position competition."
+    : "Your draft history is ready to plan your next draft and scout your league mates.";
 });
 
 const showPremiumSubscriptionCta = computed(
@@ -93,7 +93,7 @@ const trackPremiumSubscriptionClick = () => {
     cta: "unlock_draft_room_scouting",
     feature: "draft_room",
     source: "draft_room_locked_preview",
-    preview_type: "sample_data",
+    preview_type: "personalized_history",
     ...getLeagueAnalyticsProperties(store.currentLeague),
   });
   store.currentTab = "";
@@ -218,6 +218,7 @@ watch(
         />
         <LockedPremiumDraftPreview
           v-else-if="activeView === 'draft-room' && hasDraftRoomData"
+          :archetypes="draftRoomManagers"
           :is-auction="isAuction"
         />
       </TabsContent>

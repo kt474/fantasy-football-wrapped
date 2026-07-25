@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 import { Button } from "@/components/ui/button";
 import DraftRoomSample from "@/components/league_narratives/DraftRoomSample.vue";
+import type { ManagerArchetype } from "@/lib/narratives";
 import {
   getLeagueAnalyticsProperties,
   trackPremiumJourneyStep,
@@ -20,15 +21,30 @@ const auctionSampleAllocations = [
 ];
 const props = withDefaults(
   defineProps<{
+    archetypes: ManagerArchetype[];
     isAuction?: boolean;
   }>(),
   { isAuction: false }
 );
 
+const historySummary = computed(() => {
+  const counts = props.archetypes.map((manager) =>
+    props.isAuction
+      ? (manager.auctionHistory?.length ?? 0)
+      : manager.draftHistory.length
+  );
+  return {
+    managers: counts.filter(Boolean).length,
+    drafts: counts.reduce((total, count) => total + count, 0),
+  };
+});
+
 const analyticsProperties = () => ({
   feature: "draft_room",
   source: "draft_room_locked_preview",
-  preview_type: props.isAuction ? "auction_sample_data" : "sample_data",
+  preview_type: "personalized_history",
+  manager_count: historySummary.value.managers,
+  tracked_drafts: historySummary.value.drafts,
   ...getLeagueAnalyticsProperties(store.currentLeague),
 });
 
@@ -47,6 +63,14 @@ const trackUnlockClick = () => {
 
 <template>
   <div>
+    <div v-if="historySummary.managers" class="p-4 mb-4 border rounded-card">
+      <p class="text-xs font-medium uppercase">Personalized for your league</p>
+      <p class="mt-1 font-semibold">
+        {{ historySummary.managers }} managers ·
+        {{ historySummary.drafts }} tracked drafts
+      </p>
+    </div>
+
     <div v-if="isAuction" class="p-4 border rounded-card sm:p-5">
       <div class="flex items-start justify-between gap-3">
         <div>
