@@ -700,9 +700,6 @@ watch(
             <aside class="xl:sticky xl:top-4 xl:col-start-2">
               <div class="mb-3">
                 <h2 class="text-2xl font-semibold">Player Comparisons</h2>
-                <p class="mt-1 text-sm text-muted-foreground">
-                  Only eligible, actionable swaps appear here.
-                </p>
               </div>
               <div v-if="startSitRecommendations.length > 0" class="grid gap-3">
                 <Card
