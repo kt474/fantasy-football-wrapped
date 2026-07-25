@@ -54,15 +54,9 @@ const formatDate = (dateStr?: string) => {
   <section class="max-w-3xl">
     <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
       <div>
-        <h2 class="text-2xl font-semibold">
-          {{ showLatestNews ? "Latest Fantasy News" : "Roster News" }}
-        </h2>
+        <h2 class="text-2xl font-semibold">Roster News</h2>
         <p class="mt-1 text-sm text-muted-foreground">
-          {{
-            showLatestNews
-              ? "The newest updates from fantasy football news accounts."
-              : "Recent updates mentioning players on this roster."
-          }}
+          The newest updates from fantasy football news accounts.
         </p>
       </div>
     </div>

@@ -57,9 +57,7 @@ const isLeagueInfo = (value: unknown): value is LeagueInfoType =>
   "leagueId" in value &&
   "season" in value;
 
-const currentLeague = computed(
-  () => store.currentLeague
-);
+const currentLeague = computed(() => store.currentLeague);
 
 const seasons = computed(() => {
   const league = currentLeague.value;
@@ -290,12 +288,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
           </colgroup>
           <thead class="text-xs bg-muted/50">
             <tr>
-              <th
-                scope="col"
-                class="px-4 py-3 uppercase sm:px-6"
-              >
-                Team Name
-              </th>
+              <th scope="col" class="px-4 py-3 uppercase sm:px-6">Team Name</th>
               <th
                 v-for="(season, index) in seasonHistory"
                 :key="season.season"
@@ -337,7 +330,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
             >
               <th
                 scope="row"
-                class="max-w-40 truncate whitespace-nowrap px-4 font-medium sm:px-6"
+                class="px-4 font-medium truncate max-w-40 whitespace-nowrap sm:px-6"
               >
                 <span class="truncate">{{ getMatrixDisplayName(row) }}</span>
               </th>
@@ -356,11 +349,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
                     >{{ getCellMeta(cell) }}</span
                   >
                 </template>
-                <span
-                  v-else
-                  class="block text-[0.95rem] font-[650]"
-                  >-</span
-                >
+                <span v-else class="block text-[0.95rem] font-[650]">-</span>
               </td>
               <td class="w-20 bg-muted/45 px-2 py-3.5 text-center">
                 <span class="block text-[0.95rem] font-[650]">
@@ -372,7 +361,7 @@ const getPlacementClass = (cell: MatrixCell | null) => {
         </table>
       </div>
       <p class="py-3 ml-2 text-xs sm:ml-6 text-muted-foreground">
-        Final finish by season. Regular-season finish is shown in parentheses.
+        Final finish by season. Regular season finish is shown in parentheses.
       </p>
     </div>
   </Card>

@@ -48,7 +48,6 @@ const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
     source: "manager_profiles_rivalry_example",
   });
 };
-
 </script>
 
 <template>
@@ -174,7 +173,7 @@ const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
               >
                 <div class="flex items-center gap-2">
                   <Swords :size="18" class="text-primary" />
-                  <h3 class="font-semibold">The Regular-Season Reckoning</h3>
+                  <h3 class="font-semibold">The Regular Season Reckoning</h3>
                 </div>
                 <Badge variant="outline">Complete sample</Badge>
               </div>

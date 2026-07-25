@@ -257,22 +257,6 @@ const lineupSummaryMetrics = computed(() => {
   ];
 });
 
-const getRecommendationReason = (recommendation: StartSitRecommendation) => {
-  if (recommendation.valueGap === null) {
-    return "Weekly projection and recent form create the edge.";
-  }
-  if (recommendation.projectionGap >= 0.75 && recommendation.valueGap >= 6) {
-    return "The weekly projection and league adjusted player value agree.";
-  }
-  if (recommendation.projectionGap >= 0.75 && recommendation.valueGap <= -6) {
-    return `${getPlayerLabel(recommendation.sit)} still holds the stronger league adjusted value, so treat this as a matchup play.`;
-  }
-  if (recommendation.valueGap >= 6) {
-    return "The weekly call is close; Premium's league adjusted player value breaks the tie.";
-  }
-  return "Projection, recent form, and league adjusted value point to a narrow edge.";
-};
-
 const trackValuesUpgradeClick = () => {
   trackPremiumJourneyStep("premium_cta_clicked", {
     feature: "start_sit",
@@ -721,7 +705,7 @@ watch(
                         {{ getPlayerLabel(recommendation.start) }}
                       </p>
                       <p class="mt-0.5 text-sm truncate text-muted-foreground">
-                        Start over {{ getPlayerLabel(recommendation.sit) }}
+                        Over {{ getPlayerLabel(recommendation.sit) }}
                       </p>
                     </div>
                     <div class="text-right shrink-0">
@@ -782,11 +766,6 @@ watch(
                       </div>
                     </div>
                   </div>
-                  <p
-                    class="px-4 py-3 text-xs leading-5 border-t text-muted-foreground bg-muted/15"
-                  >
-                    {{ getRecommendationReason(recommendation) }}
-                  </p>
                 </Card>
               </div>
               <Card v-else class="p-4">
@@ -836,25 +815,31 @@ watch(
                     league adjusted player values.
                   </template>
                   <template v-else>
-                    Weekly calls use projections and recent form. Premium adds
-                    league adjusted player value to settle close decisions.
+                    Start/sit recommendations use weekly projections and recent
+                    performance. Premium adds league adjusted player values for
+                    additional context.
                   </template>
                 </p>
-                <router-link
+                <Button
                   v-if="valueAccess === 'preview' && !valuesLoading"
-                  :to="{
-                    path: '/account',
-                    query: {
-                      ...$route.query,
-                      intent: 'player_values',
-                      upgrade_source: 'start_sit_lineup_check',
-                    },
-                  }"
-                  class="inline-flex items-center mt-3 text-xs font-semibold text-primary hover:underline"
-                  @click="trackValuesUpgradeClick"
+                  as-child
+                  size="sm"
+                  class="mt-3"
                 >
-                  Add Premium context
-                </router-link>
+                  <router-link
+                    :to="{
+                      path: '/account',
+                      query: {
+                        ...$route.query,
+                        intent: 'player_values',
+                        upgrade_source: 'start_sit_lineup_check',
+                      },
+                    }"
+                    @click="trackValuesUpgradeClick"
+                  >
+                    Unlock Premium context
+                  </router-link>
+                </Button>
               </section>
             </aside>
             <div class="w-full min-w-0 xl:col-start-1 xl:row-start-1">

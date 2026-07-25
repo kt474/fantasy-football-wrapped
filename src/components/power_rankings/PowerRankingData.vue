@@ -39,9 +39,12 @@ const preseasonRank = computed(() => {
       );
       return {
         rosterId: roster.rosterId,
-        preseasonScore:
-          optimalLineup.total /
-          Math.max(1, optimalLineup.startingSlots.length),
+        preseasonScore: Number(
+          (
+            optimalLineup.total /
+            Math.max(1, optimalLineup.startingSlots.length)
+          ).toFixed(2)
+        ),
       };
     });
     return results;

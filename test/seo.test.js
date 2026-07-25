@@ -84,7 +84,9 @@ describe("SEO landing pages", () => {
     expect(espnPage).toContain("SWID + espn_s2");
     expect(draftPage).toContain("Pick-by-pick grades");
     expect(draftPage).toContain("Grading methodology");
-    expect(draftPage).toContain("Grade what happened, then prepare for what comes next");
+    expect(draftPage).toContain(
+      "Grade what happened, then prepare for what comes next"
+    );
     expect(draftPage).toContain("Round-by-round positional draft plan");
     expect(draftPage).toContain("Sleeper fantasy football draft grades");
     expect(draftPage).toContain("ESPN fantasy football draft grades");
@@ -195,16 +197,14 @@ describe("SEO landing pages", () => {
   });
 
   test("publishes a substantive manager profile and rivalry report example", () => {
-    const examplePage = read(
-      "src/views/ManagerProfilesRivalryExample.vue"
-    );
+    const examplePage = read("src/views/ManagerProfilesRivalryExample.vue");
     const accountPage = read("src/views/Account.vue");
 
     expect(examplePage).toContain("Manager profile sample");
     expect(examplePage).toContain("Rivalry report sample");
     expect(examplePage).toContain("Saquondo");
     expect(examplePage).toContain("league’s model of sustained menace");
-    expect(examplePage).toContain("The Regular-Season Reckoning");
+    expect(examplePage).toContain("The Regular Season Reckoning");
     expect(examplePage).toContain("impulsive");
     expect(examplePage).toContain("chaos goblin");
     expect(examplePage).toContain("manager_profiles_rivalry_example");
