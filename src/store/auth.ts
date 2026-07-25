@@ -3,19 +3,13 @@ import { defineStore } from "pinia";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 import { newUserAlert } from "@/api/api";
-import { authenticatedFetch } from "@/lib/authFetch";
+import { authenticatedBackendFetch } from "@/lib/backendApi";
 
 export const WEEKLY_REPORT_EMAILS_METADATA_KEY = "weekly_report_emails_enabled";
 
 type NotificationPreferencesResponse = {
   weekly_report_emails_enabled?: boolean;
 };
-
-const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
-  /\/$/,
-  ""
-);
-const notificationPreferencesApiPath = `${backendBaseUrl}/api/userPref`;
 
 export const useAuthStore = defineStore("auth", () => {
   const session = ref<Session | null>(null);
@@ -235,18 +229,15 @@ export const useAuthStore = defineStore("auth", () => {
   const updateWeeklyReportEmailsPreference = async (enabled: boolean) => {
     loading.value = true;
     try {
-      const response = await authenticatedFetch(
-        notificationPreferencesApiPath,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            [WEEKLY_REPORT_EMAILS_METADATA_KEY]: enabled,
-          }),
-        }
-      );
+      const response = await authenticatedBackendFetch("/api/userPref", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          [WEEKLY_REPORT_EMAILS_METADATA_KEY]: enabled,
+        }),
+      });
       if (!response.ok) {
         throw new Error("Unable to update notification preferences.");
       }
@@ -262,7 +253,7 @@ export const useAuthStore = defineStore("auth", () => {
   const fetchWeeklyReportEmailsPreference = async () => {
     if (!isAuthenticated.value) return;
 
-    const response = await authenticatedFetch(notificationPreferencesApiPath);
+    const response = await authenticatedBackendFetch("/api/userPref");
     if (!response.ok) {
       throw new Error("Unable to load notification preferences.");
     }

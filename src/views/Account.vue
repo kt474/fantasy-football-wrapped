@@ -8,7 +8,10 @@ import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
 import Checkbox from "@/components/ui/checkbox/Checkbox.vue";
-import { authenticatedFetch } from "@/lib/authFetch";
+import {
+  authenticatedBackendFetch,
+  getBackendBaseUrl,
+} from "@/lib/backendApi";
 import { trackEvent, trackPremiumJourneyStep } from "@/lib/analytics";
 import { loadSavedLeagues } from "@/lib/leagueStorage";
 import { scrollAppToTop } from "@/lib/appScroll";
@@ -179,12 +182,7 @@ const premiumTitle = computed(() =>
   getPremiumUpgradeTitle(upgradeIntent.value)
 );
 
-const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
-  /\/$/,
-  ""
-);
-const checkoutApiPath = `${backendBaseUrl}/api/stripe/createCheckoutSession`;
-const portalApiPath = `${backendBaseUrl}/api/stripe/createPortalSession`;
+const backendBaseUrl = getBackendBaseUrl();
 const stripeRedirectHosts = new Set([
   "checkout.stripe.com",
   "billing.stripe.com",
@@ -630,13 +628,16 @@ const beginAuthenticatedCheckout = async (
   });
   checkoutLoadingPlan.value = plan;
   try {
-    const response = await authenticatedFetch(checkoutApiPath, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ plan }),
-    });
+    const response = await authenticatedBackendFetch(
+      "/api/stripe/createCheckoutSession",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ plan }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Unable to start checkout");
@@ -720,12 +721,15 @@ const openBillingPortal = async () => {
     status: subscriptionStore.status,
   });
   try {
-    const response = await authenticatedFetch(portalApiPath, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await authenticatedBackendFetch(
+      "/api/stripe/createPortalSession",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Unable to open billing portal");

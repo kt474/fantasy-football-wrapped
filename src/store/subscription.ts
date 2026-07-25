@@ -1,6 +1,6 @@
 import { ref, watch } from "vue";
 import { defineStore } from "pinia";
-import { authenticatedFetch } from "@/lib/authFetch";
+import { authenticatedBackendFetch } from "@/lib/backendApi";
 import { useAuthStore } from "@/store/auth";
 import { toast } from "vue-sonner";
 
@@ -42,12 +42,6 @@ export const useSubscriptionStore = defineStore("subscription", () => {
   const seasonPassExpiresAt = ref<string | null>(null);
   const canManageSubscription = ref(false);
   const initialized = ref(false);
-
-  const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
-    /\/$/,
-    ""
-  );
-  const billingApiPath = `${backendBaseUrl}/api/billing/subscriptionStatus`;
 
   const getCacheKey = (userId = authStore.user?.id) => {
     if (!userId) return null;
@@ -140,7 +134,9 @@ export const useSubscriptionStore = defineStore("subscription", () => {
     }
 
     try {
-      const response = await authenticatedFetch(billingApiPath);
+      const response = await authenticatedBackendFetch(
+        "/api/billing/subscriptionStatus"
+      );
       if (!response.ok) {
         if (response.status === 401) {
           clearSubscriptionStatusCache();

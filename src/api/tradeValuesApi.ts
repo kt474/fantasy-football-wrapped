@@ -1,4 +1,4 @@
-import { authenticatedFetch } from "@/lib/authFetch";
+import { authenticatedBackendFetch } from "@/lib/backendApi";
 import { assertOk, parseJson } from "@/lib/http";
 import type {
   DynastyPerspective,
@@ -81,11 +81,8 @@ export class TradeValuesAccessError extends Error {
   }
 }
 
-const backendUrl = (path: string) =>
-  `${(import.meta.env.VITE_BACKEND_URL ?? "").replace(/\/$/, "")}${path}`;
-
 const post = async <T>(path: string, body: unknown, label: string) => {
-  const response = await authenticatedFetch(backendUrl(path), {
+  const response = await authenticatedBackendFetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

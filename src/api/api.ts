@@ -8,13 +8,9 @@ import {
   NewLeagueInfoType,
   Player,
 } from "../types/apiTypes";
-import {
-  LeagueInfoType,
-  PremiumReport,
-  type WeeklyRecapVideoJob,
-  type WeeklyRecapVideoProps,
-} from "../types/types";
+import { LeagueInfoType, PremiumReport } from "../types/types";
 import { authenticatedFetch } from "@/lib/authFetch";
+import { getBackendApiUrl, getBackendBaseUrl } from "@/lib/backendApi";
 import { mapWithConcurrency } from "@/lib/async";
 import { normalizePremiumReport } from "@/lib/premiumReport";
 import {
@@ -39,6 +35,25 @@ import {
   getPlayerLookupKey,
   type PlayerNameTeamLookup,
 } from "@/lib/playerLookup";
+
+export {
+  getLatestWeeklyRecapVideo,
+  getWeeklyRecapVideo,
+  startWeeklyRecapVideo,
+} from "./weeklyRecapVideoApi";
+export {
+  getSharedReport,
+  sharePremiumReport,
+  type SharedReportResponse,
+  type ShareReportPayload,
+} from "./sharedReportsApi";
+export {
+  getPlayerTradeDatabase,
+  type TradeDatabaseAsset,
+  type TradeDatabaseFilters,
+  type TradeDatabaseResponse,
+  type TradeDatabaseResult,
+} from "./tradeDatabaseApi";
 
 export interface ManagerBlurbsPayload {
   league: {
@@ -119,207 +134,6 @@ export interface ManagerComparisonPayload {
 export interface ManagerComparisonResponse {
   text: string;
 }
-
-export type SharedReportResponse = {
-  leagueId?: string | null;
-  platform?: "sleeper" | "espn" | null;
-  leagueName: string;
-  season: string;
-  week: number;
-  report: PremiumReport;
-  createdAt: string;
-};
-
-export type ShareReportPayload = {
-  leagueId: string;
-  platform: "sleeper" | "espn";
-  leagueName: string;
-  season: string;
-  week: number;
-  report: PremiumReport;
-};
-
-const getBackendApiUrl = (path: string) => {
-  const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
-    /\/$/,
-    ""
-  );
-  return `${backendBaseUrl}${path}`;
-};
-
-export type TradeDatabaseAsset = {
-  type: "player" | "draft_pick" | "faab";
-  fromSide: string | null;
-  toSide: string | null;
-  playerId: string | null;
-  pickSeason: number | null;
-  pickRound: number | null;
-  faabAmount: number | null;
-};
-
-export type TradeDatabaseResult = {
-  tradeId: number;
-  season: string | null;
-  week: number;
-  league: {
-    size: number | null;
-    type: string | null;
-  };
-  sides: Array<{
-    side: string;
-    received: TradeDatabaseAsset[];
-  }>;
-};
-
-export type TradeDatabaseResponse = {
-  playerId: string;
-  pagination: {
-    total: number;
-    limit: number;
-    offset: number;
-    hasMore: boolean;
-  };
-  trades: TradeDatabaseResult[];
-};
-
-export type TradeDatabaseFilters = {
-  leagueType?: string;
-  leagueSize?: string;
-  week?: number;
-};
-
-export const getPlayerTradeDatabase = async (
-  playerId: string,
-  offset = 0,
-  limit = 20,
-  filters: TradeDatabaseFilters = {}
-): Promise<TradeDatabaseResponse> => {
-  const origin =
-    typeof window === "undefined" ? "http://localhost" : window.location.origin;
-  const endpoint = new URL(getBackendApiUrl("/api/trades"), origin);
-  endpoint.searchParams.set("playerId", playerId);
-  endpoint.searchParams.set("offset", String(offset));
-  endpoint.searchParams.set("limit", String(limit));
-  if (filters.leagueType) {
-    endpoint.searchParams.set("leagueType", filters.leagueType);
-  }
-  if (filters.leagueSize) {
-    endpoint.searchParams.set("leagueSize", filters.leagueSize);
-  }
-  if (filters.week) {
-    endpoint.searchParams.set("week", String(filters.week));
-  }
-
-  const response = await fetch(endpoint);
-  assertOk(response, "Trade database request");
-  return await parseJson<TradeDatabaseResponse>(
-    response,
-    "Trade database request"
-  );
-};
-
-export const sharePremiumReport = async (
-  payload: ShareReportPayload
-): Promise<{ token: string; url: string }> => {
-  const response = await authenticatedFetch(
-    getBackendApiUrl("/api/shareReport"),
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    }
-  );
-
-  assertOk(response, "Share report request");
-  return await parseJson<{ token: string; url: string }>(
-    response,
-    "Share report"
-  );
-};
-
-export const getSharedReport = async (
-  token: string
-): Promise<SharedReportResponse | null> => {
-  const origin =
-    typeof window === "undefined" ? "http://localhost" : window.location.origin;
-  const endpoint = new URL(getBackendApiUrl("/api/getSharedReport"), origin);
-  endpoint.searchParams.set("token", token);
-
-  const response = await fetch(endpoint);
-  if (response.status === 404) {
-    return null;
-  }
-
-  assertOk(response, "Shared report request");
-  const sharedReport = await parseJson<
-    Omit<SharedReportResponse, "report"> & { report: unknown }
-  >(response, "Shared report");
-  const report = normalizePremiumReport(sharedReport.report);
-
-  return report ? { ...sharedReport, report } : null;
-};
-
-export const startWeeklyRecapVideo = async (
-  inputProps: WeeklyRecapVideoProps
-): Promise<WeeklyRecapVideoJob> => {
-  const response = await authenticatedFetch(
-    getBackendApiUrl("/api/reportVideo"),
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inputProps }),
-    }
-  );
-  assertOk(response, "Weekly recap video request");
-  return parseJson<WeeklyRecapVideoJob>(
-    response,
-    "Weekly recap video request"
-  );
-};
-
-export const getWeeklyRecapVideo = async (
-  jobId: string
-): Promise<WeeklyRecapVideoJob> => {
-  const origin =
-    typeof window === "undefined" ? "http://localhost" : window.location.origin;
-  const endpoint = new URL(getBackendApiUrl("/api/reportVideo"), origin);
-  endpoint.searchParams.set("jobId", jobId);
-
-  const response = await authenticatedFetch(endpoint);
-  assertOk(response, "Weekly recap video status");
-  return parseJson<WeeklyRecapVideoJob>(
-    response,
-    "Weekly recap video status"
-  );
-};
-
-export const getLatestWeeklyRecapVideo = async (
-  leagueId: string,
-  season: string,
-  week: number,
-  inputHash: string
-): Promise<WeeklyRecapVideoJob | null> => {
-  const origin =
-    typeof window === "undefined" ? "http://localhost" : window.location.origin;
-  const endpoint = new URL(getBackendApiUrl("/api/reportVideo"), origin);
-  endpoint.searchParams.set("leagueId", leagueId);
-  endpoint.searchParams.set("season", season);
-  endpoint.searchParams.set("week", String(week));
-  endpoint.searchParams.set("inputHash", inputHash);
-
-  const response = await authenticatedFetch(endpoint);
-  if (response.status === 404) {
-    return null;
-  }
-
-  assertOk(response, "Latest weekly recap video");
-  return parseJson<WeeklyRecapVideoJob>(
-    response,
-    "Latest weekly recap video"
-  );
-};
 
 export type PlayerNewsResult = {
   items: Record<string, unknown>[];
@@ -474,7 +288,7 @@ export const getPlayerIdLookupMap = async (
   try {
     const endpoint = resolvePlayerIdLookupEndpoint(
       import.meta.env.VITE_PLAYER_ID_LOOKUP,
-      import.meta.env.VITE_BACKEND_URL
+      getBackendBaseUrl()
     );
     if (!endpoint) {
       throw new Error("Player ID lookup endpoint is not configured");

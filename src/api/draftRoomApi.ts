@@ -1,5 +1,6 @@
-import { authenticatedFetch } from "@/lib/authFetch";
+import { authenticatedBackendFetch } from "@/lib/backendApi";
 import type { ManagerArchetype } from "@/lib/narratives";
+import { isRequestTimeout } from "@/lib/request";
 
 export type DraftRoomSummary = {
   draftLabel: string;
@@ -93,11 +94,6 @@ type AnalyzeDraftRoomOptions = {
   budget?: number;
 };
 
-const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
-  /\/$/,
-  ""
-);
-const draftRoomAnalyzePath = `${backendBaseUrl}/api/draftRoomAnalyze`;
 export const DRAFT_ROOM_TIMEOUT_MS = 15_000;
 
 const toRequestManager = (manager: ManagerArchetype) => ({
@@ -117,11 +113,8 @@ export const analyzeDraftRoom = async ({
 }: AnalyzeDraftRoomOptions): Promise<
   SnakeDraftRoomResponse | AuctionDraftRoomResponse
 > => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), DRAFT_ROOM_TIMEOUT_MS);
-
   try {
-    const response = await authenticatedFetch(draftRoomAnalyzePath, {
+    const response = await authenticatedBackendFetch("/api/draftRoomAnalyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -132,7 +125,7 @@ export const analyzeDraftRoom = async ({
         draftSlot,
         budget,
       }),
-      signal: controller.signal,
+      timeoutMs: DRAFT_ROOM_TIMEOUT_MS,
     });
 
     if (!response.ok) {
@@ -160,11 +153,9 @@ export const analyzeDraftRoom = async ({
     }
     return payload;
   } catch (error) {
-    if (controller.signal.aborted) {
+    if (isRequestTimeout(error)) {
       throw new Error("Draft-room analysis timed out. Please try again.");
     }
     throw error;
-  } finally {
-    clearTimeout(timeout);
   }
 };
