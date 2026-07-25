@@ -9,10 +9,7 @@ import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
 import Checkbox from "@/components/ui/checkbox/Checkbox.vue";
 import { authenticatedFetch } from "@/lib/authFetch";
-import {
-  trackEvent,
-  trackPremiumJourneyStep,
-} from "@/lib/analytics";
+import { trackEvent, trackPremiumJourneyStep } from "@/lib/analytics";
 import { loadSavedLeagues } from "@/lib/leagueStorage";
 import { scrollAppToTop } from "@/lib/appScroll";
 import { customizableLeagueFeatures } from "@/lib/features";
@@ -331,9 +328,6 @@ const accountSummaryContainerClass = computed(() => {
 
 const getCheckoutButtonText = (plan: CheckoutPlan) => {
   if (checkoutLoadingPlan.value === plan) return "Redirecting...";
-  if (!authStore.isAuthenticated) {
-    return "Create account or sign in";
-  }
   return `Unlock ${premiumTitle.value}`;
 };
 
@@ -371,8 +365,8 @@ const guideToAuthentication = async (plan: CheckoutPlan) => {
   });
   toast.info(
     plan === "annual"
-      ? "Sign in to continue with an annual subscription."
-      : "Sign in to continue with a monthly subscription."
+      ? "Create an account or sign in to continue with an annual subscription."
+      : "Create an account or sign in to continue with a monthly subscription."
   );
 };
 
@@ -699,6 +693,7 @@ const startCheckout = async (plan: CheckoutPlan) => {
 
   if (!authStore.isAuthenticated) {
     selectedCheckoutPlan.value = plan;
+    showSignUp.value = true;
     savePendingCheckout(plan);
     trackPremiumJourneyStep("auth_required", {
       source: upgradeSource.value,
@@ -784,9 +779,7 @@ const handleCheckoutQuery = async () => {
     trackEvent("Checkout Returned", { source: "stripe", status: "success" });
     trackPremiumJourneyStep("checkout_returned", {
       ...getCheckoutReturnAnalytics(),
-      source:
-        checkoutAttribution?.funnelSource ??
-        upgradeSource.value,
+      source: checkoutAttribution?.funnelSource ?? upgradeSource.value,
       feature: checkoutAttribution?.feature ?? upgradeIntent.value,
       status: "success",
     });
@@ -808,9 +801,7 @@ const handleCheckoutQuery = async () => {
     trackEvent("Checkout Canceled", { source: "stripe", status: "canceled" });
     trackPremiumJourneyStep("checkout_canceled", {
       ...getCheckoutReturnAnalytics(),
-      source:
-        checkoutAttribution?.funnelSource ??
-        upgradeSource.value,
+      source: checkoutAttribution?.funnelSource ?? upgradeSource.value,
       feature: checkoutAttribution?.feature ?? upgradeIntent.value,
       status: "canceled",
     });
@@ -1522,7 +1513,9 @@ watch(
       >
         <Card class="min-w-0 overflow-hidden">
           <CardHeader>
-            <CardTitle>Unlock {{ premiumTitle }} for all your leagues</CardTitle>
+            <CardTitle
+              >Unlock {{ premiumTitle }} for all your leagues</CardTitle
+            >
             <CardDescription>
               {{ premiumDescription }}
             </CardDescription>
@@ -1577,6 +1570,12 @@ watch(
               >
                 {{ getCheckoutButtonText(displayedCheckoutPlan) }}
               </Button>
+              <p
+                class="mt-1 text-xs leading-5 text-center text-muted-foreground"
+              >
+                Secure checkout by Stripe · Cancel anytime · All leagues
+                included
+              </p>
             </div>
 
             <Separator class="my-7" />

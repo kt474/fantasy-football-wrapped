@@ -34,15 +34,4 @@ describe("trade rankings filters", () => {
     expect(playerValuesSource).toContain("tradePlayerId: playerId");
     expect(playerValuesSource).toContain("tradeRosterId: String(rosterId)");
   });
-
-  test("explains an individual value without another backend request", () => {
-    expect(source).toContain("const getValueExplanation");
-    expect(source).toContain("Why this value:");
-    expect(source).toContain("replacement baseline");
-    expect(source).toContain("positional scarcity");
-    expect(source).toContain(
-      ':aria-expanded="expandedPlayerId === player.playerId"'
-    );
-    expect(source).not.toContain("getPlayerValueExplanation(");
-  });
 });

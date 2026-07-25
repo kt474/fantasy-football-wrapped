@@ -38,22 +38,22 @@ export const getPremiumUpgradeDescription = (
   intent: PremiumUpgradeIntent
 ): string => {
   if (intent === "premium_report") {
-    return "Create shareable weekly newsletters and video recaps with custom commentary styles.";
+    return "Turn every week into a shareable league story with deeper matchup coverage, custom commentary, and video recaps.";
   }
   if (intent === "manager_profiles") {
-    return "Discover each manager’s tendencies, strengths, and identity across your league history.";
+    return "See what makes every manager unique through the tendencies, strengths, and identity they have built over time.";
   }
   if (intent === "rivalry_report") {
-    return "Turn your league history into personalized rivalry stories and bragging rights.";
+    return "Relive the matchups and milestones behind every rivalry and settle who owns the bragging rights.";
   }
   if (intent === "draft_room") {
-    return "Use your league’s draft history to plan each round and scout every manager’s tendencies before you are on the clock.";
+    return "Walk into your draft with a plan built from your league’s history and every manager’s tendencies.";
   }
   if (intent === "player_values") {
-    return "See complete league adjusted player rankings, including dynasty and rest of season values.";
+    return "Know what every rostered player is worth in your league so you can compare options and make smarter moves.";
   }
   if (intent === "trade_finder") {
-    return "Find balanced player deals projected to improve both starting lineups.";
+    return "Turn your league’s real rosters into balanced trade ideas designed to make both starting lineups better.";
   }
   return "Bring your league to life with personalized content, smarter insights, and more reasons to stay engaged all season long.";
 };
