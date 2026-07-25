@@ -8,6 +8,11 @@ import Card from "../ui/card/Card.vue";
 import { mapWithConcurrency } from "@/lib/async";
 import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 import { loadDemoProjections } from "@/data/demo/loaders";
+import {
+  getEligiblePositionsForSlot,
+  getOptimalProjectedLineup,
+  getStartingRosterSlots,
+} from "@/lib/lineup";
 
 const store = useStore();
 const loading = ref(false);
@@ -136,12 +141,29 @@ const formattedData = computed(() => {
   ) {
     return demoProjectionData.value;
   }
-  const topPositions: string[] = ["RB", "WR"];
-  const rosterPositions = new Set(
+  const startingSlots = getStartingRosterSlots(
     store.currentLeague.rosterPositions
   );
-  const otherPositions = ["QB", "TE", "K", "DEF"].filter((position) =>
-    rosterPositions.has(position)
+  const preferredPositionOrder = [
+    "RB",
+    "WR",
+    "QB",
+    "TE",
+    "K",
+    "DEF",
+    "DL",
+    "LB",
+    "DB",
+  ];
+  const getPositionOrder = (position: string) => {
+    const index = preferredPositionOrder.indexOf(position);
+    return index === -1 ? preferredPositionOrder.length : index;
+  };
+  const positionGroups = [
+    ...new Set(startingSlots.flatMap(getEligiblePositionsForSlot)),
+  ].sort(
+    (a, b) =>
+      getPositionOrder(a) - getPositionOrder(b) || a.localeCompare(b)
   );
 
   const nameMapping = new Map(
@@ -174,64 +196,20 @@ const formattedData = computed(() => {
   const result = mappedData.map(
     (roster) => {
       const filteredData = roster.data ? roster.data : [];
-
-      const groupedAndSortedTopPositions = topPositions.reduce(
-        (acc: Record<string, ProjectionByPosition[]>, position) => {
-          const sortedByProjection = filteredData
-            .filter((item) => item.position === position)
-            .sort((a, b) => b.projection - a.projection);
-
-          acc[position] = sortedByProjection.slice(0, 3);
-
-          return acc;
-        },
-        {}
+      const optimalLineup = getOptimalProjectedLineup(
+        filteredData,
+        store.currentLeague.rosterPositions
       );
-
-      const highestOtherPositions = otherPositions.reduce(
-        (acc: ProjectionByPosition[], position) => {
-          const highest = filteredData
-            .filter((item) => item.position === position)
-            .sort((a, b) => b.projection - a.projection)[0];
-
-          if (highest) {
-            acc.push(highest);
-          } else {
-            acc.push({ position: position, projection: 0 });
-          }
-
-          return acc;
-        },
-        []
-      );
-
-      // Total top 3 RBs and WRs
-      let rbTotal = 0;
-      let wrTotal = 0;
-      (groupedAndSortedTopPositions["RB"] ?? []).forEach(
-        (player) => {
-          rbTotal += player.projection;
-        }
-      );
-
-      (groupedAndSortedTopPositions["WR"] ?? []).forEach(
-        (player) => {
-          wrTotal += player.projection;
-        }
-      );
-
-      const topProjections = [
-        { position: "RB", projection: Math.round(rbTotal) },
-        { position: "WR", projection: Math.round(wrTotal) },
-      ];
-
-      const combined = [...topProjections, ...highestOtherPositions];
+      const combined = positionGroups.map((position) => ({
+        position,
+        projection: optimalLineup.positionTotals[position] ?? 0,
+      }));
 
       return {
         name: roster.name,
         username: roster.username,
-        data: [...combined],
-        total: combined.reduce((acc, obj) => acc + obj.projection, 0),
+        data: combined,
+        total: optimalLineup.total,
       };
     }
   );
@@ -239,57 +217,22 @@ const formattedData = computed(() => {
 });
 
 const seriesData = computed(() => {
-  let rb: number[] = [];
-  let wr: number[] = [];
-  let qb: number[] = [];
-  let te: number[] = [];
-  let def: number[] = [];
-  let k: number[] = [];
-
-  formattedData.value.forEach((roster) => {
-    roster.data.forEach((player) => {
-      if (player.position === "RB") {
-        rb.push(player.projection);
-      } else if (player.position === "WR") {
-        wr.push(player.projection);
-      } else if (player.position === "QB") {
-        qb.push(player.projection);
-      } else if (player.position === "TE") {
-        te.push(player.projection);
-      } else if (player.position === "DEF") {
-        def.push(player.projection);
-      } else if (player.position === "K") {
-        k.push(player.projection);
-      }
-    });
-  });
-
-  return [
-    {
-      name: "RB",
-      data: rb,
-    },
-    {
-      name: "WR",
-      data: wr,
-    },
-    {
-      name: "QB",
-      data: qb,
-    },
-    {
-      name: "TE",
-      data: te,
-    },
-    {
-      name: "K",
-      data: k,
-    },
-    {
-      name: "DEF",
-      data: def,
-    },
+  const positions = [
+    ...new Set(
+      formattedData.value.flatMap((roster) =>
+        roster.data.map((player) => player.position)
+      )
+    ),
   ];
+
+  return positions.map((position) => ({
+    name: position,
+    data: formattedData.value.map(
+      (roster) =>
+        roster.data.find((player) => player.position === position)
+          ?.projection ?? 0
+    ),
+  }));
 });
 
 watch([() => store.darkMode, () => store.showUsernames], () => {

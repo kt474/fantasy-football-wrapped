@@ -7,6 +7,7 @@ import { DraftPick, Player } from "../../types/apiTypes";
 import { getLeagueKey, useStore } from "../../store/store";
 import { Card, CardTitle, CardHeader } from "../ui/card";
 import { loadDemoCurrentTrends } from "@/data/demo/loaders";
+import { isSuperflexLeague } from "@/lib/lineup";
 
 const store = useStore();
 const props = defineProps<{
@@ -119,17 +120,14 @@ const getPreseasonData = async () => {
     }
 
     const first3Rounds = draftPicks.slice(0, 3 * currentLeague.rosters.length);
-    const qbs = currentLeague.rosterPositions.reduce(
-      (sum, item) => sum + (item === "QB" || item === "SUPER_FLEX" ? 1 : 0),
-      0
-    );
+    const superflex = isSuperflexLeague(currentLeague.rosterPositions);
     const promises = first3Rounds.map(async (pick) => {
       const projections = await getDraftProjections(
         pick.playerId,
         currentLeague.season,
         currentLeague.scoringType,
         currentLeague.seasonType,
-        true ? qbs >= 2 : false
+        superflex
       );
       if (seasonState === "dynasty") {
         return {

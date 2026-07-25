@@ -7,6 +7,10 @@ import type {
 } from "@/types/types";
 import { getOrdinalSuffix } from "@/lib/format";
 import { getManagerDisplayName } from "@/lib/manager";
+import {
+  getEligiblePositionsForSlot,
+  getStartingRosterSlots,
+} from "@/lib/lineup";
 
 export type WeeklyReportPlayer = Omit<Player, "name"> & {
   name?: string | null;
@@ -363,35 +367,18 @@ const getStandingsForWeek = (
       return rankMap;
     }, new Map<number, number>());
 
-const getEligiblePositions = (slot: string) => {
-  const normalizedSlot = slot.toUpperCase();
-  const positionGroups: Record<string, string[]> = {
-    FLEX: ["RB", "WR", "TE"],
-    "RB/WR/TE": ["RB", "WR", "TE"],
-    REC_FLEX: ["WR", "TE"],
-    "WR/TE": ["WR", "TE"],
-    WRRB_FLEX: ["RB", "WR"],
-    "RB/WR": ["RB", "WR"],
-    SUPER_FLEX: ["QB", "RB", "WR", "TE"],
-    OP: ["QB", "RB", "WR", "TE"],
-    "D/ST": ["DEF"],
-    DST: ["DEF"],
-    DEF: ["DEF"],
-  };
-  return positionGroups[normalizedSlot] ?? [normalizedSlot];
-};
-
 const canFillSlot = (player: PremiumLineupPlayer, slot: string) =>
-  getEligiblePositions(slot).includes(player.position.toUpperCase());
+  getEligiblePositionsForSlot(slot).includes(player.position.toUpperCase());
 
 const getOptimalPoints = (
   players: PremiumLineupPlayer[],
   lineupSlots: string[]
 ) => {
-  const slots = lineupSlots
-    .filter((slot) => slot.toUpperCase() !== "BN")
+  const slots = getStartingRosterSlots(lineupSlots)
     .sort(
-      (a, b) => getEligiblePositions(a).length - getEligiblePositions(b).length
+      (a, b) =>
+        getEligiblePositionsForSlot(a).length -
+        getEligiblePositionsForSlot(b).length
     );
   const memo = new Map<string, number>();
   const usedPlayers = Array(players.length).fill(false);

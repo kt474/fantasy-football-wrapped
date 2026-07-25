@@ -1,7 +1,7 @@
 import {
   canPlayerFillLineupSlot,
   getStartingRosterSlots,
-} from "../start_sit/startSitLoader";
+} from "@/lib/lineup";
 
 export type SimulationTeam = {
   index: number;

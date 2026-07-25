@@ -17,6 +17,7 @@ import {
   type TradeValuationMode,
 } from "@/lib/tradeFinder";
 import { mapWithConcurrency } from "@/lib/async";
+import { isSuperflexLeague } from "@/lib/lineup";
 import type { Player } from "@/types/apiTypes";
 import type { LeagueInfoType, TableDataType } from "@/types/types";
 
@@ -327,15 +328,7 @@ export const loadTradeBuilderRosters = async (options: {
   const playerIds = [...new Set(request.rosters.flatMap((r) => r.playerIds))];
   const playerMap = await getPlayersByIdsMap(playerIds);
   const dynasty = isDynastyLeague(options.league);
-  const normalizedRosterPositions = options.league.rosterPositions.map(
-    (position) => position.toUpperCase()
-  );
-  const superflex =
-    normalizedRosterPositions.filter((position) => position === "QB").length >
-      1 ||
-    normalizedRosterPositions.some((position) =>
-      ["SUPER_FLEX", "OP"].includes(position)
-    );
+  const superflex = isSuperflexLeague(options.league.rosterPositions);
   const idpPositions = new Set(["DB", "DL", "LB", "CB", "DE", "DT", "NT", "S"]);
   const basicRankingEntries = await mapWithConcurrency(
     playerIds,

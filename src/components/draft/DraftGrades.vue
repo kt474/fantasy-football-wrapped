@@ -19,6 +19,7 @@ import {
   loadDemoLeague,
   type DemoLeagueFixtures,
 } from "@/data/demo/loaders";
+import { isSuperflexLeague } from "@/lib/lineup";
 const store = useStore();
 
 type DraftProjectionEntry = PickObj & {
@@ -69,10 +70,7 @@ const loadDemoData = async () => {
 
 const getProjections = async () => {
   const currentLeague = store.currentLeague;
-  const qbs = currentLeague.rosterPositions.reduce(
-    (sum, item) => sum + (item === "QB" || item === "SUPER_FLEX" ? 1 : 0),
-    0
-  );
+  const superflex = isSuperflexLeague(currentLeague.rosterPositions);
   const result = await Promise.all(
     props.draftData.map(async (pick) => {
       const projections = await getDraftProjections(
@@ -80,8 +78,8 @@ const getProjections = async () => {
         currentLeague.season,
         currentLeague.scoringType,
         currentLeague.seasonType,
-        true ? qbs >= 2 : false,
-        true ? props.scoringType === "idp" : false
+        superflex,
+        props.scoringType === "idp"
       );
       const projectedPoints = projections["projectedPoints"] ?? 0;
       const adp = projections["adp"] ?? pick["pickNumber"];

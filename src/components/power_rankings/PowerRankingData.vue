@@ -9,6 +9,7 @@ import {
   TableDataType,
   PowerRankingEntry,
 } from "../../types/types";
+import { getOptimalProjectedLineup } from "@/lib/lineup";
 import PowerRankingCard from "./PowerRankingCard.vue";
 import SectionCard from "../layout/SectionCard.vue";
 const store = useStore();
@@ -20,10 +21,6 @@ const props = defineProps<{
 }>();
 
 const preseasonRank = computed(() => {
-  type Position = "QB" | "WR" | "TE" | "RB";
-  const positions: Position[] = ["QB", "WR", "TE", "RB"];
-  type Top2Sums = Record<Position, number>;
-
   const currentLeague = store.currentLeague;
   if (currentLeague?.rosters) {
     const projectionsAreLoaded = currentLeague.rosters.every(
@@ -36,25 +33,15 @@ const preseasonRank = computed(() => {
 
     const results = currentLeague.rosters.map((roster: RosterType) => {
       const projections = roster.projections!;
-      const sumTop2: Top2Sums = positions.reduce<Top2Sums>(
-        (acc, pos) => {
-          const filtered = projections.filter((item) => item.position === pos);
-          const sorted = filtered.sort((a, b) => b.projection - a.projection);
-          // For QB/TE, take only the top 1; for RB/WR, take top 3
-          const count = pos === "QB" || pos === "TE" ? 1 : 3;
-          const sum = sorted
-            .slice(0, count)
-            .reduce((s, item) => s + item.projection, 0);
-          acc[pos] = sum;
-          return acc;
-        },
-        { QB: 0, WR: 0, TE: 0, RB: 0 }
+      const optimalLineup = getOptimalProjectedLineup(
+        projections,
+        currentLeague.rosterPositions
       );
-      // Sum all positions for this roster
-      const totalSum = Object.values(sumTop2).reduce((a, b) => a + b, 0);
       return {
         rosterId: roster.rosterId,
-        preseasonScore: totalSum / 10,
+        preseasonScore:
+          optimalLineup.total /
+          Math.max(1, optimalLineup.startingSlots.length),
       };
     });
     return results;

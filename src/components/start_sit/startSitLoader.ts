@@ -1,6 +1,15 @@
-export const START_SIT_CONCURRENCY = 6;
+import {
+  canPlayerFillLineupSlot,
+  getStartingRosterSlots,
+} from "@/lib/lineup";
 
-const NON_STARTING_SLOTS = new Set(["BN", "BENCH", "IR", "TAXI", "RESERVE"]);
+export {
+  canPlayerFillLineupSlot,
+  getEligiblePositionsForSlot,
+  getStartingRosterSlots,
+} from "@/lib/lineup";
+
+export const START_SIT_CONCURRENCY = 6;
 
 export type OrderedRosterPlayerEntry = {
   playerId: string;
@@ -33,38 +42,6 @@ type StartSitWeekInfo = {
   currentWeek?: number;
   lastScoredWeek?: number;
   status?: string;
-};
-
-export const getStartingRosterSlots = (rosterPositions: string[] = []) =>
-  rosterPositions.filter(
-    (position) => !NON_STARTING_SLOTS.has(position.toUpperCase())
-  );
-
-export const getEligiblePositionsForSlot = (slot: string) => {
-  const normalizedSlot = slot.toUpperCase();
-  const positionGroups: Record<string, string[]> = {
-    FLEX: ["RB", "WR", "TE"],
-    "RB/WR/TE": ["RB", "WR", "TE"],
-    REC_FLEX: ["WR", "TE"],
-    "WR/TE": ["WR", "TE"],
-    WRRB_FLEX: ["RB", "WR"],
-    "RB/WR": ["RB", "WR"],
-    SUPER_FLEX: ["QB", "RB", "WR", "TE"],
-    OP: ["QB", "RB", "WR", "TE"],
-  };
-
-  return positionGroups[normalizedSlot] ?? [normalizedSlot];
-};
-
-export const canPlayerFillLineupSlot = (
-  playerPosition: string | undefined,
-  slot: string | undefined
-) => {
-  if (!playerPosition || !slot) return false;
-
-  return getEligiblePositionsForSlot(slot).includes(
-    playerPosition.toUpperCase()
-  );
 };
 
 const getCandidateScore = (player: StartSitInsightCandidate) => {

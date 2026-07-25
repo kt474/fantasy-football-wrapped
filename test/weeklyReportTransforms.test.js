@@ -573,6 +573,39 @@ describe("weekly report transforms", () => {
     });
   });
 
+  test("uses a second quarterback when an ESPN OP slot is available", () => {
+    const result = buildPremiumReportPrompt({
+      tableData: [
+        team({
+          rosterId: 1,
+          name: "Superflex Team",
+          username: "superflex",
+          points: 40,
+          matchup: 1,
+          starterPoints: [30, 10],
+          benchPoints: [25],
+        }),
+      ],
+      playerNames: [[
+        player("Starting QB", "qb1", "BUF", "QB"),
+        player("Starting OP", "qb2", "DAL", "QB"),
+      ]],
+      benchPlayerNames: [[player("Bench QB", "qb3", "WAS", "QB")]],
+      weekIndex: 0,
+      showUsernames: true,
+      isPlayoffs: false,
+      losersBracketIds: [],
+      winnersBracketIds: [],
+      rosterPositions: ["QB", "OP", "BN"],
+    });
+
+    expect(result[0].teams[0]).toMatchObject({
+      optimalPoints: 55,
+      pointsLeftOnBench: 15,
+      lineupEfficiency: 0.727,
+    });
+  });
+
   test("builds weekly awards from matchup and lineup context", () => {
     const awardTableData = [
       team({
