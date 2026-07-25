@@ -380,20 +380,41 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
           aria-label="League trade value rankings"
           tabindex="0"
         >
-          <table class="w-full min-w-[66rem] text-sm">
-            <thead class="text-xs text-left bg-muted text-muted-foreground">
+          <table class="w-full min-w-[60rem] table-fixed text-sm">
+            <colgroup v-if="valuationMode === 'dynasty'">
+              <col class="w-[7%]" />
+              <col class="w-[24%]" />
+              <col class="w-[10%]" />
+              <col class="w-[12%]" />
+              <col class="w-[15%]" />
+              <col class="w-[12%]" />
+              <col class="w-[12%]" />
+              <col class="w-[8%]" />
+            </colgroup>
+            <colgroup v-else>
+              <col class="w-[7%]" />
+              <col class="w-[29%]" />
+              <col class="w-[11%]" />
+              <col class="w-[17%]" />
+              <col class="w-[14%]" />
+              <col class="w-[14%]" />
+              <col class="w-[8%]" />
+            </colgroup>
+            <thead
+              class="text-xs whitespace-nowrap bg-muted text-muted-foreground"
+            >
               <tr>
-                <th class="px-4 py-3 font-medium">OVR</th>
-                <th class="px-4 py-3 font-medium">Player</th>
-                <th class="px-4 py-3 font-medium">POS rank</th>
+                <th class="px-4 py-3 font-medium text-center">OVR</th>
+                <th class="px-4 py-3 font-medium text-left">Player</th>
+                <th class="px-4 py-3 font-medium text-center">POS rank</th>
                 <th
                   v-if="valuationMode === 'dynasty'"
-                  class="px-4 py-3 font-medium text-right"
+                  class="px-4 py-3 font-medium text-center"
                 >
                   Dynasty ADP
                 </th>
-                <th class="px-4 py-3 font-medium text-right">Trade value</th>
-                <th class="px-4 py-3 font-medium text-right">
+                <th class="px-4 py-3 font-medium text-center">Trade value</th>
+                <th class="px-4 py-3 font-medium text-center">
                   {{
                     valuationMode === "dynasty"
                       ? "Projected pts"
@@ -402,13 +423,8 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                         : "ROS pts"
                   }}
                 </th>
-                <th class="px-4 py-3 font-medium text-right">Replacement</th>
-                <th class="px-4 py-3 font-medium text-right">VORP</th>
-                <th
-                  class="sticky right-0 z-10 px-4 py-3 font-medium text-right bg-muted"
-                >
-                  <span class="sr-only">Actions</span>
-                </th>
+                <th class="px-4 py-3 font-medium text-center">Replacement</th>
+                <th class="px-4 py-3 font-medium text-center">VORP</th>
               </tr>
             </thead>
             <tbody>
@@ -417,7 +433,9 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                 :key="player.playerId"
               >
                 <tr class="border-t border-border bg-background">
-                  <td class="px-4 py-3 font-semibold">
+                  <td
+                    class="px-4 py-3 font-semibold text-center tabular-nums"
+                  >
                     #{{ player.overallRank }}
                   </td>
                   <td class="px-4 py-3">
@@ -438,18 +456,30 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                         <p class="font-medium">
                           {{ player.name || `${player.team} Defense` }}
                         </p>
-                        <p class="text-xs text-muted-foreground">
-                          {{ player.position }} · {{ player.team }}
-                        </p>
+                        <div
+                          class="flex items-center gap-1 text-xs text-muted-foreground"
+                        >
+                          <span>{{ player.position }} · {{ player.team }}</span>
+                          <span aria-hidden="true">·</span>
+                          <button
+                            type="button"
+                            class="px-0.5 py-2 -my-2 font-medium rounded-sm text-foreground/70 underline-offset-2 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            @click="buildTrade(player)"
+                          >
+                            Build trade
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td class="px-4 py-3 font-medium">
+                  <td
+                    class="px-4 py-3 font-medium text-center tabular-nums"
+                  >
                     {{ player.position }}{{ player.positionRank }}
                   </td>
                   <td
                     v-if="valuationMode === 'dynasty'"
-                    class="px-4 py-3 text-right text-muted-foreground"
+                    class="px-4 py-3 text-center tabular-nums text-muted-foreground"
                   >
                     {{
                       player.dynastyAdp
@@ -457,8 +487,8 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                         : "—"
                     }}
                   </td>
-                  <td class="px-4 py-3 text-right">
-                    <div class="flex items-center justify-end gap-2">
+                  <td class="px-4 py-3 text-center tabular-nums">
+                    <div class="flex items-center justify-center gap-2">
                       <Badge :variant="valueTier(player.tradeValue).variant">
                         {{ valueTier(player.tradeValue).label }}
                       </Badge>
@@ -468,7 +498,7 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                             type="button"
                             variant="ghost"
                             size="xs"
-                            class="px-1 font-semibold underline decoration-dotted decoration-muted-foreground/70 underline-offset-4 tabular-nums hover:decoration-foreground"
+                            class="justify-center w-12 px-0 font-semibold underline decoration-dotted decoration-muted-foreground/70 underline-offset-4 tabular-nums hover:decoration-foreground"
                             :aria-label="`Explain ${player.name || `${player.team} Defense`}'s trade value`"
                             :aria-expanded="
                               expandedPlayerId === player.playerId
@@ -476,9 +506,7 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                             :aria-controls="`player-value-explanation-${player.playerId}`"
                             @click="toggleValueExplanation(player.playerId)"
                           >
-                            <span class="min-w-10">
-                              {{ formatNumber(player.tradeValue, 1) }}
-                            </span>
+                            {{ formatNumber(player.tradeValue, 1) }}
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent side="top">
@@ -487,24 +515,18 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                       </Tooltip>
                     </div>
                   </td>
-                  <td class="px-4 py-3 text-right">
+                  <td class="px-4 py-3 text-center tabular-nums">
                     {{ formatNumber(player.projectedPoints) }}
                   </td>
-                  <td class="px-4 py-3 text-right text-muted-foreground">
+                  <td
+                    class="px-4 py-3 text-center tabular-nums text-muted-foreground"
+                  >
                     {{ formatNumber(player.replacementPoints) }}
                   </td>
-                  <td class="px-4 py-3 font-medium text-right">
+                  <td
+                    class="px-4 py-3 font-medium text-center tabular-nums"
+                  >
                     {{ formatNumber(player.vorp) }}
-                  </td>
-                  <td class="sticky right-0 px-4 py-3 text-right bg-background">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      @click="buildTrade(player)"
-                    >
-                      Build trade
-                    </Button>
                   </td>
                 </tr>
                 <tr
@@ -512,7 +534,7 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                   class="border-t border-border bg-muted/20"
                 >
                   <td
-                    :colspan="valuationMode === 'dynasty' ? 9 : 8"
+                    :colspan="valuationMode === 'dynasty' ? 8 : 7"
                     class="px-4 py-3"
                   >
                     <p

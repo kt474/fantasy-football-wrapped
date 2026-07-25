@@ -289,7 +289,8 @@ const leagueTypeLabel = (type: string | null) => {
   >
     <div class="max-w-3xl">
       <p class="text-sm text-muted-foreground sm:text-base">
-        Search any player to see real, anonymized trades from ffwrapped leagues.
+        Search any player to see real, anonymized trades from thousands of
+        ffwrapped leagues.
       </p>
     </div>
 
@@ -604,7 +605,12 @@ const leagueTypeLabel = (type: string | null) => {
     </div>
 
     <div v-if="hasMore" class="flex justify-center">
-      <Button class="mt-2" :disabled="loadingTrades" @click="fetchTrades(true)">
+      <Button
+        class="mt-2"
+        :disabled="loadingTrades"
+        @click="fetchTrades(true)"
+        variant="outline"
+      >
         {{ loadingTrades ? "Loading…" : "Load more trades" }}
       </Button>
     </div>

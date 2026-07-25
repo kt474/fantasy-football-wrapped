@@ -298,7 +298,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
               ? "full season performance"
               : "rest of season projections"
         }}
-        and your league format.
+        and league format.
       </p>
       <div class="shrink-0">
         <label class="block mb-1 text-xs font-medium text-muted-foreground">
@@ -411,10 +411,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
     </div>
 
     <section v-else aria-labelledby="trade-finder-results">
-      <div class="flex items-baseline justify-between gap-3 mb-3">
-        <h3 id="trade-finder-results" class="text-sm font-semibold">
-          Recommended trades
-        </h3>
+      <div class="flex items-baseline justify-end gap-3 mb-2">
         <p class="text-xs text-muted-foreground">
           Showing {{ visibleSuggestions.length }} of {{ suggestions.length }}
         </p>
@@ -423,7 +420,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
         <article
           v-for="suggestion in visibleSuggestions"
           :key="suggestion.id"
-          class="flex flex-col overflow-hidden transition-shadow border rounded-lg shadow-sm bg-card border-border hover:shadow-md"
+          class="flex flex-col overflow-hidden border rounded-lg shadow-sm bg-card border-border"
         >
           <header
             class="flex items-start justify-between gap-4 p-4 border-b border-border"
@@ -437,7 +434,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
               <div>
                 <dt class="sr-only">Fairness</dt>
                 <dd
-                  class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary"
+                  class="inline-flex px-2 py-1 text-xs font-medium border rounded-lg border-success/15 bg-success/5 text-foreground dark:border-success/20 dark:bg-success/10"
                 >
                   ~{{ formatValueMatch(suggestion.fairnessPercent) }} match
                 </dd>
@@ -449,15 +446,23 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
           </header>
 
           <div class="flex flex-col flex-1 p-4">
-            <div class="grid grid-cols-2 gap-3">
-              <div class="p-3 border rounded-md border-border/70 bg-muted/20">
-                <div class="flex items-baseline justify-between gap-2">
-                  <p class="text-xs font-medium text-muted-foreground">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div
+                class="min-w-0 p-3 border rounded-md border-border/70 bg-muted/20"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <p
+                    class="flex-1 min-w-0 text-xs font-medium truncate text-muted-foreground"
+                  >
                     {{ suggestion.teamAName }} sends
                   </p>
-                  <p class="px-1.5 py-0.5 text-xs rounded bg-background/80">
-                    {{ formatValue(suggestion.teamAValue) }}
-                  </p>
+                  <dl
+                    class="inline-flex items-center gap-1.5 px-2 py-1 border rounded-md shrink-0 border-success/15 bg-success/5 text-foreground dark:border-success/20 dark:bg-success/10"
+                  >
+                    <dd class="text-xs font-semibold leading-none">
+                      {{ formatValue(suggestion.teamAValue) }}
+                    </dd>
+                  </dl>
                 </div>
                 <ul class="mt-2 space-y-2">
                   <li
@@ -493,14 +498,22 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
                 </ul>
               </div>
 
-              <div class="p-3 border rounded-md border-border/70 bg-muted/20">
-                <div class="flex items-baseline justify-between gap-2">
-                  <p class="text-xs font-medium text-muted-foreground">
+              <div
+                class="min-w-0 p-3 border rounded-md border-border/70 bg-muted/20"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <p
+                    class="flex-1 min-w-0 text-xs font-medium truncate text-muted-foreground"
+                  >
                     {{ suggestion.teamBName }} sends
                   </p>
-                  <p class="px-1.5 py-0.5 text-xs rounded bg-background/80">
-                    {{ formatValue(suggestion.teamBValue) }}
-                  </p>
+                  <dl
+                    class="inline-flex items-center gap-1.5 px-2 py-1 border rounded-md shrink-0 border-success/15 bg-success/5 text-foreground dark:border-success/20 dark:bg-success/10"
+                  >
+                    <dd class="text-xs font-semibold leading-none">
+                      {{ formatValue(suggestion.teamBValue) }}
+                    </dd>
+                  </dl>
                 </div>
                 <ul class="mt-2 space-y-2">
                   <li
@@ -584,6 +597,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
               <Button
                 type="button"
                 size="sm"
+                variant="secondary"
                 class="px-4"
                 @click="emit('openSuggestion', suggestion)"
               >
