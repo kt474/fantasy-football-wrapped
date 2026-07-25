@@ -25,24 +25,31 @@ import Label from "../ui/label/Label.vue";
 import { Skeleton } from "../ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
-  canPlayerFillLineupSlot,
+  buildStartSitInsights,
   getOrderedRosterPlayerEntries,
   getRecentStartSitWeekLabel,
   getStartingRosterSlots,
   getStartSitWeek,
+  type StartSitInsight,
   START_SIT_CONCURRENCY,
 } from "./startSitLoader";
+import {
+  getTradeValueWeek,
+  loadLeaguePlayerValues,
+} from "@/lib/leagueTradeValues";
+import type { TradeFinderPlayer } from "@/lib/tradeFinder";
 import PlayerNewsFeed from "./PlayerNewsFeed.vue";
 import { mapWithConcurrency } from "@/lib/async";
-import {
-  buildRosterNews,
-  type NewsPost,
-} from "./playerNews";
+import { buildRosterNews, type NewsPost } from "./playerNews";
 import {
   loadDemoLeague,
   loadDemoStartSit,
   type DemoLeagueFixtures,
 } from "@/data/demo/loaders";
+import {
+  getLeagueAnalyticsProperties,
+  trackPremiumFunnelEvent,
+} from "@/lib/analytics";
 
 type StartSitPlayer = {
   name?: string;
@@ -63,13 +70,14 @@ type StartSitRoster = {
   players: StartSitPlayer[];
 };
 
-type StartSitRecommendation = {
-  id: string;
+type StartSitPlayerValue = Pick<
+  TradeFinderPlayer,
+  "playerId" | "tradeValue" | "positionRank"
+>;
+
+type StartSitRecommendation = StartSitInsight & {
   start: StartSitPlayer;
   sit: StartSitPlayer;
-  projectionGap: number;
-  recentGap: number;
-  scoreGap: number;
 };
 
 const data = ref<NewsPost[]>([]);
@@ -85,6 +93,11 @@ let loadRequestId = 0;
 const demoUsers = shallowRef<DemoLeagueFixtures["fakeUsers"]>([]);
 const demoRosters = shallowRef<StartSitRoster[]>([]);
 const demoPosts = shallowRef<NewsPost[]>([]);
+const demoValues = shallowRef<StartSitPlayerValue[]>([]);
+const playerValues = shallowRef<Map<string, StartSitPlayerValue>>(new Map());
+const valuesLoading = ref(false);
+const valueAccess = ref<"preview" | "premium" | null>(null);
+let valueLoadRequestId = 0;
 const props = defineProps<{
   tableData: TableDataType[];
 }>();
@@ -97,6 +110,7 @@ const loadDemoData = async () => {
   demoUsers.value = league.fakeUsers;
   demoRosters.value = startSit.fakeStartSit as StartSitRoster[];
   demoPosts.value = startSit.fakePosts;
+  demoValues.value = startSit.fakeStartSitValues as StartSitPlayerValue[];
 };
 
 const toggle = (id: string) => {
@@ -108,7 +122,7 @@ const numberValues = (arr: Array<number | string | undefined>) =>
     .map((item) => Number(item))
     .filter((item) => Number.isFinite(item) && item !== 999);
 
-const getNumericAverage = (arr: Array<number | string | undefined>) => {
+const getAverage = (arr: Array<number | string | undefined>) => {
   const numbers = numberValues(arr);
   if (numbers.length === 0) return 0;
 
@@ -116,11 +130,14 @@ const getNumericAverage = (arr: Array<number | string | undefined>) => {
   return Math.round((sum * 100) / numbers.length) / 100;
 };
 
-const getNumericMin = (arr: Array<number | string | undefined>) => {
+const getMax = (arr: Array<number | string | undefined>) => {
   const numbers = numberValues(arr);
-  if (numbers.length === 0) return 0;
+  return numbers.length > 0 ? max(numbers) : 0;
+};
 
-  return min(numbers) ?? 0;
+const getMin = (arr: Array<number | string | undefined>) => {
+  const numbers = numberValues(arr);
+  return numbers.length > 0 ? (min(numbers) ?? 0) : 0;
 };
 
 const getProjectionValue = (player: StartSitPlayer) => {
@@ -145,53 +162,33 @@ const getRecentWeekLabel = (index: number) => {
   return getRecentStartSitWeekLabel(currentLeague, Number(index));
 };
 
-const RECOMMENDATION_LIMIT = 5;
-const CLOSE_RECOMMENDATION_GAP = -0.75;
-
 const formatSignedNumber = (value: number) =>
   `${value >= 0 ? "+" : ""}${value.toFixed(1)}`;
 
 const getBadgePaletteClass = (tier: number) => {
-  if (tier === 1)
-    return "performance-excellent";
-  if (tier === 2)
-    return "performance-good";
-  if (tier === 3)
-    return "performance-average";
-  if (tier === 4)
-    return "performance-poor";
+  if (tier === 1) return "performance-excellent";
+  if (tier === 2) return "performance-good";
+  if (tier === 3) return "performance-average";
+  if (tier === 4) return "performance-poor";
   return "performance-bad";
 };
 
-const getProjectionGapClass = (value: number) => {
-  if (value >= 3) return getBadgePaletteClass(1);
-  if (value >= 1.5) return getBadgePaletteClass(2);
-  if (value >= 0) return getBadgePaletteClass(3);
-  if (value >= CLOSE_RECOMMENDATION_GAP) return getBadgePaletteClass(4);
-  return getBadgePaletteClass(5);
-};
-
-const getStartScore = (player: StartSitPlayer) => {
-  const projection = getProjectionValue(player);
-  const recentAverage = getNumericAverage(player.stats.points);
-  const floor = getNumericMin(player.stats.points);
-  const rankAverage = getNumericAverage(player.stats.ranks);
-  const rankBonus = rankAverage > 0 ? Math.max(0, 48 - rankAverage) / 12 : 0;
-
-  return projection * 0.55 + recentAverage * 0.3 + floor * 0.1 + rankBonus;
-};
-
-const canComparePlayers = (
-  benchPlayer: StartSitPlayer,
-  starter: StartSitPlayer
+const getConfidenceClass = (
+  confidence: StartSitRecommendation["confidence"]
 ) => {
-  if (!benchPlayer.position || !starter.position) return false;
+  if (confidence === "Strong start") return getBadgePaletteClass(1);
+  if (confidence === "Start") return getBadgePaletteClass(2);
+  return getBadgePaletteClass(3);
+};
 
-  if (starter.rosterSlot) {
-    return canPlayerFillLineupSlot(benchPlayer.position, starter.rosterSlot);
-  }
+const getPlayerValue = (player: StartSitPlayer) =>
+  playerValues.value.get(player.player_id);
 
-  return benchPlayer.position === starter.position;
+const getPositionRankLabel = (player: StartSitPlayer) => {
+  const rank = getPlayerValue(player)?.positionRank;
+  return player.position && typeof rank === "number" && rank > 0
+    ? `${player.position}${rank}`
+    : "N/A";
 };
 
 const activeStarterCount = computed(() => {
@@ -209,64 +206,81 @@ const activeStarterCount = computed(() => {
 const startSitRecommendations = computed<StartSitRecommendation[]>(() => {
   if (!currentRoster.value) return [];
 
-  const starters = currentRoster.value.players.slice(
-    0,
+  const playersById = new Map(
+    currentRoster.value.players.map((player) => [player.player_id, player])
+  );
+  const insights = buildStartSitInsights(
+    currentRoster.value.players.map((player) => ({
+      id: player.player_id,
+      position: player.position,
+      rosterSlot: player.rosterSlot,
+      projection: getProjectionValue(player),
+      recentAverage: getAverage(player.stats.points),
+      recentFloor: getMin(player.stats.points),
+      averageRank: getAverage(player.stats.ranks),
+      tradeValue: getPlayerValue(player)?.tradeValue,
+    })),
     activeStarterCount.value
   );
-  const bench = currentRoster.value.players.slice(activeStarterCount.value);
-  const usedStarterIds = new Set<string>();
-  const usedBenchIds = new Set<string>();
 
-  const recommendations = bench
-    .flatMap((benchPlayer) => {
-      const benchProjection = getProjectionValue(benchPlayer);
-      if (benchProjection <= 0) return [];
+  return insights.flatMap((insight) => {
+    const start = playersById.get(insight.startId);
+    const sit = playersById.get(insight.sitId);
+    return start && sit ? [{ ...insight, start, sit }] : [];
+  });
+});
 
-      return starters
-        .filter((starter) => canComparePlayers(benchPlayer, starter))
-        .map((starter) => {
-          const projectionGap = benchProjection - getProjectionValue(starter);
-          const recentGap =
-            getNumericAverage(benchPlayer.stats.points) -
-            getNumericAverage(starter.stats.points);
-          const scoreGap = getStartScore(benchPlayer) - getStartScore(starter);
+const hasCurrentRosterValues = computed(
+  () =>
+    currentRoster.value?.players.some((player) =>
+      playerValues.value.has(player.player_id)
+    ) ?? false
+);
 
-          return {
-            id: `${benchPlayer.player_id}-${starter.player_id}`,
-            start: benchPlayer,
-            sit: starter,
-            projectionGap,
-            recentGap,
-            scoreGap,
-          } satisfies StartSitRecommendation;
-        });
-    })
-    .sort((a, b) => b.scoreGap - a.scoreGap)
-    .filter((recommendation) => {
-      if (
-        usedStarterIds.has(recommendation.sit.player_id) ||
-        usedBenchIds.has(recommendation.start.player_id)
-      ) {
-        return false;
-      }
-
-      usedStarterIds.add(recommendation.sit.player_id);
-      usedBenchIds.add(recommendation.start.player_id);
-      return true;
-    });
-
-  const actionableRecommendations = recommendations.filter(
-    (recommendation) =>
-      recommendation.projectionGap >= CLOSE_RECOMMENDATION_GAP ||
-      recommendation.scoreGap >= CLOSE_RECOMMENDATION_GAP
+const lineupSummaryMetrics = computed(() => {
+  const starterProjection =
+    currentRoster.value?.players
+      .slice(0, activeStarterCount.value)
+      .reduce((total, player) => total + getProjectionValue(player), 0) ?? 0;
+  const bestEdge = Math.max(
+    0,
+    ...startSitRecommendations.value.map(({ projectionGap }) => projectionGap)
   );
 
-  if (actionableRecommendations.length > 0) {
-    return actionableRecommendations.slice(0, RECOMMENDATION_LIMIT);
-  }
-
-  return recommendations.slice(0, RECOMMENDATION_LIMIT);
+  return [
+    { label: "Starter projection", value: starterProjection.toFixed(1) },
+    { label: "Calls", value: String(startSitRecommendations.value.length) },
+    {
+      label: "Best edge",
+      value: bestEdge > 0 ? `+${bestEdge.toFixed(1)}` : "—",
+    },
+  ];
 });
+
+const getRecommendationReason = (recommendation: StartSitRecommendation) => {
+  if (recommendation.valueGap === null) {
+    return "Weekly projection and recent form create the edge.";
+  }
+  if (recommendation.projectionGap >= 0.75 && recommendation.valueGap >= 6) {
+    return "The weekly projection and league adjusted player value agree.";
+  }
+  if (recommendation.projectionGap >= 0.75 && recommendation.valueGap <= -6) {
+    return `${getPlayerLabel(recommendation.sit)} still holds the stronger league adjusted value, so treat this as a matchup play.`;
+  }
+  if (recommendation.valueGap >= 6) {
+    return "The weekly call is close; Premium's league adjusted player value breaks the tie.";
+  }
+  return "Projection, recent form, and league adjusted value point to a narrow edge.";
+};
+
+const trackValuesUpgradeClick = () => {
+  trackPremiumFunnelEvent("premium_cta_clicked", {
+    feature: "start_sit",
+    cta: "add_player_value_context",
+    source: "start_sit_lineup_check",
+    ...getLeagueAnalyticsProperties(store.currentLeague),
+  });
+};
 
 const rosterNews = computed(() =>
   buildRosterNews(
@@ -312,6 +326,65 @@ const rosterHeading = computed(() => {
 });
 
 const currentManager = ref(managers.value[0]);
+
+const loadStartSitValues = async () => {
+  const requestId = ++valueLoadRequestId;
+  valuesLoading.value = true;
+  playerValues.value = new Map();
+  valueAccess.value = null;
+
+  try {
+    if (store.leagueIds.length === 0) {
+      if (demoValues.value.length === 0) {
+        await loadDemoData();
+      }
+      if (requestId === valueLoadRequestId) {
+        playerValues.value = new Map(
+          demoValues.value.map((player) => [player.playerId, player])
+        );
+        valueAccess.value = "premium";
+      }
+      return;
+    }
+
+    const league = store.currentLeague;
+    if (!league) {
+      playerValues.value = new Map();
+      valueAccess.value = null;
+      return;
+    }
+
+    const result = await loadLeaguePlayerValues({
+      league,
+      tableData: props.tableData,
+      selectedWeek: getTradeValueWeek(league),
+      showUsernames: store.showUsernames,
+      dynastyPerspective: "balanced",
+    });
+    if (requestId === valueLoadRequestId) {
+      valueAccess.value = result.access;
+      playerValues.value =
+        result.access === "premium"
+          ? new Map(
+              result.rankings.map(({ playerId, tradeValue, positionRank }) => [
+                playerId,
+                { playerId, tradeValue, positionRank },
+              ])
+            )
+          : new Map();
+    }
+  } catch (error) {
+    console.warn("Unable to add player values to Start/Sit:", error);
+    if (requestId === valueLoadRequestId) {
+      playerValues.value = new Map();
+      valueAccess.value = null;
+    }
+  } finally {
+    if (requestId === valueLoadRequestId) {
+      valuesLoading.value = false;
+    }
+  }
+};
 
 const getPlayerDirectory = async (leagueKey: string, playerIds: string[]) => {
   const missingPlayerIds = playerIds.filter(
@@ -486,46 +559,12 @@ const getValueColor = (value: number | string) => {
   return getBadgePaletteClass(5);
 };
 
-function getAverage(arr: Array<number | string | undefined>) {
-  const numbers = numberValues(arr);
-
-  if (numbers.length === 0) {
-    return 0;
-  }
-
-  const sum = numbers.reduce(
-    (accumulator, currentValue) => accumulator + currentValue,
-    0
-  );
-  return Math.round((sum * 100) / numbers.length) / 100;
-}
-
-function getMax(arr: Array<number | string | undefined>) {
-  const numbers = numberValues(arr);
-
-  if (numbers.length === 0) {
-    return 0;
-  }
-
-  return max(numbers);
-}
-
-function getMin(arr: Array<number | string | undefined>) {
-  const numbers = numberValues(arr);
-
-  if (numbers.length === 0) {
-    return 0;
-  }
-
-  return min(numbers);
-}
-
 onMounted(async () => {
   if (store.leagueIds.length === 0) {
     await loadDemoData();
     currentManager.value = managers.value[0];
   }
-  await loadSelectedRoster();
+  await Promise.all([loadSelectedRoster(), loadStartSitValues()]);
 });
 
 watch(
@@ -543,6 +582,16 @@ watch(
     await loadSelectedRoster();
   }
 );
+
+watch(
+  () => [
+    store.currentLeagueId,
+    store.currentLeague?.lastUpdated,
+    store.showUsernames,
+  ],
+  loadStartSitValues,
+  { flush: "post" }
+);
 </script>
 <template>
   <Card class="p-4 mb-4 md:p-6">
@@ -550,7 +599,7 @@ watch(
       <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
         <p class="text-2xl font-semibold tracking-tight">Start/Sit</p>
         <TabsList>
-          <TabsTrigger value="roster">Roster</TabsTrigger>
+          <TabsTrigger value="roster">Lineup</TabsTrigger>
           <TabsTrigger value="news">News</TabsTrigger>
         </TabsList>
       </div>
@@ -644,513 +693,623 @@ watch(
         </div>
       </div>
       <TabsContent v-else value="roster">
-        <div
-          v-if="currentRoster"
-          class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(19rem,24rem)]"
-        >
-          <aside class="xl:sticky xl:top-4 xl:col-start-2">
-            <div class="mb-3">
-              <h2 class="text-2xl font-semibold">Player comparisons</h2>
-            </div>
-            <div v-if="startSitRecommendations.length > 0" class="grid gap-3">
-              <Card
-                v-for="recommendation in startSitRecommendations"
-                :key="recommendation.id"
-                class="overflow-hidden shadow-sm"
-              >
-                <div
-                  class="flex items-start justify-between gap-3 px-4 py-3 bg-muted/20"
-                >
-                  <div class="min-w-0">
-                    <p class="mt-1 font-semibold truncate">
-                      {{ getPlayerLabel(recommendation.start) }}
-                    </p>
-                    <p class="mt-1 text-sm truncate">
-                      over {{ getPlayerLabel(recommendation.sit) }}
-                    </p>
-                  </div>
-                  <div class="text-right shrink-0">
-                    <p
-                      class="inline-flex items-center justify-center px-2 py-1 text-sm font-semibold rounded-md min-w-14 tabular-nums"
-                      :class="
-                        getProjectionGapClass(recommendation.projectionGap)
-                      "
-                    >
-                      {{ formatSignedNumber(recommendation.projectionGap) }}
-                    </p>
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-px border-t bg-border/60">
-                  <div class="min-w-0 px-4 py-3 bg-card">
-                    <p class="text-xs font-semibold truncate">
-                      {{ getPlayerLabel(recommendation.start) }}
-                    </p>
-                    <p class="mt-0.5 text-xs truncate text-muted-foreground">
-                      {{ getPlayerMatchupLabel(recommendation.start) }}
-                    </p>
-                    <div class="grid grid-cols-2 gap-3 mt-2">
-                      <div>
-                        <p class="text-xs font-medium text-muted-foreground">
-                          Proj
-                        </p>
-                        <p class="font-semibold tabular-nums">
-                          {{
-                            getProjectionValue(recommendation.start).toFixed(1)
-                          }}
-                        </p>
-                      </div>
-                      <div>
-                        <p class="text-xs font-medium text-muted-foreground">
-                          Avg
-                        </p>
-                        <p class="font-semibold tabular-nums">
-                          {{ getAverage(recommendation.start.stats.points) }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="min-w-0 px-4 py-3 bg-card">
-                    <p class="text-xs font-semibold truncate">
-                      {{ getPlayerLabel(recommendation.sit) }}
-                    </p>
-                    <p class="mt-0.5 text-xs truncate text-muted-foreground">
-                      {{ getPlayerMatchupLabel(recommendation.sit) }}
-                    </p>
-                    <div class="grid grid-cols-2 gap-3 mt-2">
-                      <div>
-                        <p class="text-xs font-medium text-muted-foreground">
-                          Proj
-                        </p>
-                        <p class="font-semibold tabular-nums">
-                          {{
-                            getProjectionValue(recommendation.sit).toFixed(1)
-                          }}
-                        </p>
-                      </div>
-                      <div>
-                        <p class="text-xs font-medium text-muted-foreground">
-                          Avg
-                        </p>
-                        <p class="font-semibold tabular-nums">
-                          {{ getAverage(recommendation.sit.stats.points) }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-            <Card v-else class="p-4">
-              <p class="font-medium">No comparable players found.</p>
-            </Card>
-          </aside>
-          <div class="w-full min-w-0 xl:col-start-1 xl:row-start-1">
-            <div class="mb-3">
-              <h2 class="text-2xl font-semibold">
-                {{ rosterHeading }}
-              </h2>
-            </div>
-            <div
-              v-for="(player, index) in currentRoster.players"
-              :key="player.player_id"
-              class="shadow-sm"
-            >
-              <div v-if="index === activeStarterCount" class="w-full mt-5 mb-3">
-                <p
-                  class="text-xs font-semibold uppercase text-muted-foreground"
-                >
-                  Bench
+        <div v-if="currentRoster">
+          <div
+            class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,25rem)]"
+          >
+            <aside class="xl:sticky xl:top-4 xl:col-start-2">
+              <div class="mb-3">
+                <h2 class="text-2xl font-semibold">Player Comparisons</h2>
+                <p class="mt-1 text-sm text-muted-foreground">
+                  Only eligible, actionable swaps appear here.
                 </p>
               </div>
-              <Card class="mb-3 overflow-hidden md:flex-nowrap">
-                <div class="flex w-full gap-3 p-4">
-                  <Badge
-                    variant="outline"
-                    class="justify-center hidden w-10 mt-3 rounded-md h-7 sm:inline-flex"
-                  >
-                    {{ player.position }}
-                  </Badge>
-                  <img
-                    v-if="player.position !== 'DEF'"
-                    alt="Player image"
-                    class="object-cover border rounded-full size-12 bg-muted sm:size-14"
-                    :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
-                  />
-                  <img
-                    v-else
-                    alt="Defense image"
-                    class="h-12 border rounded-full bg-muted sm:h-14"
-                    :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
-                  />
+              <div v-if="startSitRecommendations.length > 0" class="grid gap-3">
+                <Card
+                  v-for="recommendation in startSitRecommendations"
+                  :key="recommendation.id"
+                  class="overflow-hidden shadow-sm"
+                >
                   <div
-                    class="flex justify-between w-full min-w-0 gap-3"
+                    class="flex items-start justify-between gap-3 px-4 py-3 bg-muted/20"
                   >
                     <div class="min-w-0">
-                      <p class="font-semibold truncate">
-                        {{ player.name ? player.name : player.team }}
+                      <p
+                        class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-md"
+                        :class="getConfidenceClass(recommendation.confidence)"
+                      >
+                        {{ recommendation.confidence }}
                       </p>
-                      <p class="mt-1 text-sm text-muted-foreground">
+                      <p class="mt-2 font-semibold truncate">
+                        {{ getPlayerLabel(recommendation.start) }}
+                      </p>
+                      <p class="mt-0.5 text-sm truncate text-muted-foreground">
+                        Start over {{ getPlayerLabel(recommendation.sit) }}
+                      </p>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <p class="text-lg font-semibold tabular-nums">
+                        {{ formatSignedNumber(recommendation.projectionGap) }}
+                      </p>
+                      <p class="text-xs text-muted-foreground">projected pts</p>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-px border-t bg-border/60">
+                    <div
+                      v-for="player in [
+                        recommendation.start,
+                        recommendation.sit,
+                      ]"
+                      :key="player.player_id"
+                      class="min-w-0 px-4 py-3 bg-card"
+                    >
+                      <p class="text-xs font-semibold truncate">
+                        {{ getPlayerLabel(player) }}
+                      </p>
+                      <p class="mt-0.5 text-xs truncate text-muted-foreground">
                         {{ getPlayerMatchupLabel(player) }}
                       </p>
-                    </div>
-                    <div
-                      class="flex items-start gap-2 sm:gap-4 shrink-0"
-                    >
-                      <div v-if="player.projection?.stats" class="text-right">
-                        <p class="text-xs font-medium text-muted-foreground">
-                          Projected
-                        </p>
-                        <p class="text-xl font-semibold tabular-nums">
-                          {{ player.projection?.stats }}
-                        </p>
+                      <div
+                        class="grid gap-3 mt-2"
+                        :class="
+                          getPlayerValue(player) ? 'grid-cols-3' : 'grid-cols-2'
+                        "
+                      >
+                        <div>
+                          <p class="text-xs font-medium text-muted-foreground">
+                            Proj
+                          </p>
+                          <p class="font-semibold tabular-nums">
+                            {{ getProjectionValue(player).toFixed(1) }}
+                          </p>
+                        </div>
+                        <div>
+                          <p class="text-xs font-medium text-muted-foreground">
+                            Avg
+                          </p>
+                          <p class="font-semibold tabular-nums">
+                            {{ getAverage(player.stats.points) }}
+                          </p>
+                        </div>
+                        <div v-if="getPlayerValue(player)">
+                          <p class="text-xs font-medium text-muted-foreground">
+                            Value
+                          </p>
+                          <p class="font-semibold tabular-nums">
+                            {{ getPlayerValue(player)?.tradeValue }}
+                          </p>
+                          <p class="text-[10px] text-muted-foreground">
+                            {{ getPositionRankLabel(player) }}
+                          </p>
+                        </div>
                       </div>
-                      <Button
-                        @click="toggle(player.player_id)"
-                        :aria-label="`${
-                          expanded[player.player_id] ? 'Hide' : 'Show'
-                        } recent performance details for ${
-                          player.name || player.team
-                        }`"
-                        :aria-expanded="Boolean(expanded[player.player_id])"
-                        variant="outline"
-                        size="icon"
-                        class="mt-1 border size-8"
-                      >
-                        <ChevronUp
-                          v-if="expanded[player.player_id]"
-                          class="size-4"
-                        />
-                        <ChevronDown v-else class="size-4" />
-                      </Button>
                     </div>
                   </div>
-                </div>
-                <div class="px-4 py-3 border-t bg-muted/20">
-                  <div class="grid grid-cols-4 gap-3 sm:grid-cols-5">
-                    <p class="hidden text-xs font-semibold uppercase sm:block">
-                      Recent
-                    </p>
-                    <div class="text-center">
-                      <p class="text-xs font-medium text-muted-foreground">
-                        Avg Pts
-                      </p>
-                      <p class="text-lg font-semibold tabular-nums">
-                        {{ getAverage(player.stats.points) }}
-                      </p>
-                    </div>
-                    <div class="text-center">
-                      <p class="text-xs font-medium text-muted-foreground">
-                        High
-                      </p>
-                      <p class="text-lg font-semibold tabular-nums">
-                        {{ getMax(player.stats.points) }}
-                      </p>
-                    </div>
-                    <div class="text-center">
-                      <p class="text-xs font-medium text-muted-foreground">
-                        Low
-                      </p>
-                      <p class="text-lg font-semibold tabular-nums">
-                        {{ getMin(player.stats.points) }}
-                      </p>
-                    </div>
-                    <div
-                      v-if="
-                        player.position !== 'K' && player.position !== 'DEF'
-                      "
-                      class="text-center"
-                    >
-                      <p class="text-xs font-medium text-muted-foreground">
-                        Avg Rank
-                      </p>
-                      <p
-                        v-if="getAverage(player.stats.ranks) !== 0"
-                        class="mt-1 inline-flex min-w-10 items-center justify-center rounded-md px-2 py-0.5 text-sm font-semibold tabular-nums"
-                        :class="[getValueColor(getAverage(player.stats.ranks))]"
-                      >
-                        {{ getAverage(player.stats.ranks) }}
-                      </p>
-                      <p
-                        v-else
-                        class="mt-0.5 text-sm font-semibold sm:text-base"
-                      >
-                        N/A
-                      </p>
-                    </div>
-                  </div>
+                  <p
+                    class="px-4 py-3 text-xs leading-5 border-t text-muted-foreground bg-muted/15"
+                  >
+                    {{ getRecommendationReason(recommendation) }}
+                  </p>
+                </Card>
+              </div>
+              <Card v-else class="p-4">
+                <p class="font-medium">Your lineup looks right.</p>
+                <p class="mt-1 text-sm leading-6 text-muted-foreground">
+                  No eligible bench player has enough of an edge to recommend a
+                  change.
+                </p>
+              </Card>
+              <section class="p-4 mt-4 border rounded-lg bg-muted/15">
+                <div class="flex items-start justify-between gap-3">
+                  <p class="text-sm font-semibold">Lineup check summary</p>
+                  <Badge
+                    v-if="valuesLoading"
+                    variant="outline"
+                    class="w-fit shrink-0"
+                  >
+                    Adding values…
+                  </Badge>
+                  <Badge
+                    v-else-if="hasCurrentRosterValues"
+                    variant="outline"
+                    class="w-fit shrink-0"
+                  >
+                    Premium context applied
+                  </Badge>
                 </div>
                 <div
-                  v-show="expanded[player.player_id]"
-                  class="p-4 border-t bg-background"
+                  class="grid grid-cols-3 gap-px mt-3 overflow-hidden border rounded-md bg-border"
                 >
-                  <div>
-                    <div class="flex gap-2 pb-1 overflow-x-auto">
-                      <div
-                        v-for="(score, index) in player.stats?.points"
-                        :key="`${player.player_id}-${index}`"
-                        class="flex-1 p-3 text-center border rounded-md min-w-24 bg-muted/10"
-                      >
-                        <p class="text-xs text-muted-foreground text-nowrap">
-                          {{ getRecentWeekLabel(index) }}
+                  <div
+                    v-for="metric in lineupSummaryMetrics"
+                    :key="metric.label"
+                    class="p-3 bg-card"
+                  >
+                    <p class="text-[11px] font-medium text-muted-foreground">
+                      {{ metric.label }}
+                    </p>
+                    <p class="mt-1 text-lg font-semibold tabular-nums">
+                      {{ metric.value }}
+                    </p>
+                  </div>
+                </div>
+                <p class="mt-3 text-xs leading-5 text-muted-foreground">
+                  <template v-if="hasCurrentRosterValues">
+                    Weekly calls combine projections, recent form, and Premium's
+                    league adjusted player values.
+                  </template>
+                  <template v-else>
+                    Weekly calls use projections and recent form. Premium adds
+                    league adjusted player value to settle close decisions.
+                  </template>
+                </p>
+                <router-link
+                  v-if="valueAccess === 'preview' && !valuesLoading"
+                  :to="{
+                    path: '/account',
+                    query: {
+                      ...$route.query,
+                      intent: 'player_values',
+                      upgrade_source: 'start_sit_lineup_check',
+                    },
+                  }"
+                  class="inline-flex items-center mt-3 text-xs font-semibold text-primary hover:underline"
+                  @click="trackValuesUpgradeClick"
+                >
+                  Add Premium context
+                </router-link>
+              </section>
+            </aside>
+            <div class="w-full min-w-0 xl:col-start-1 xl:row-start-1">
+              <div class="mb-3">
+                <h2 class="text-2xl font-semibold">
+                  {{ rosterHeading }}
+                </h2>
+              </div>
+              <div
+                v-for="(player, index) in currentRoster.players"
+                :key="player.player_id"
+                class="shadow-sm"
+              >
+                <div
+                  v-if="index === activeStarterCount"
+                  class="w-full mt-5 mb-3"
+                >
+                  <p
+                    class="text-xs font-semibold uppercase text-muted-foreground"
+                  >
+                    Bench
+                  </p>
+                </div>
+                <Card class="mb-3 overflow-hidden md:flex-nowrap">
+                  <div class="flex w-full gap-3 p-4">
+                    <Badge
+                      variant="outline"
+                      class="justify-center hidden w-10 mt-3 rounded-md h-7 sm:inline-flex"
+                    >
+                      {{ player.position }}
+                    </Badge>
+                    <img
+                      v-if="player.position !== 'DEF'"
+                      alt="Player image"
+                      class="object-cover border rounded-full size-12 bg-muted sm:size-14"
+                      :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.player_id}.jpg`"
+                    />
+                    <img
+                      v-else
+                      alt="Defense image"
+                      class="h-12 border rounded-full bg-muted sm:h-14"
+                      :src="`https://sleepercdn.com/images/team_logos/nfl/${player.player_id.toLowerCase()}.png`"
+                    />
+                    <div class="flex justify-between w-full min-w-0 gap-3">
+                      <div class="min-w-0">
+                        <p class="font-semibold truncate">
+                          {{ player.name ? player.name : player.team }}
                         </p>
-                        <p class="my-1 font-semibold tabular-nums">
-                          {{ score }}
+                        <p class="mt-1 text-sm text-muted-foreground">
+                          {{ getPlayerMatchupLabel(player) }}
+                        </p>
+                        <div
+                          v-if="getPlayerValue(player)"
+                          class="flex flex-wrap gap-1.5 mt-2"
+                        >
+                          <Badge
+                            variant="outline"
+                            class="h-5 px-1.5 text-[10px]"
+                          >
+                            Value {{ getPlayerValue(player)?.tradeValue }}
+                          </Badge>
+                          <Badge
+                            variant="outline"
+                            class="h-5 px-1.5 text-[10px]"
+                          >
+                            {{ getPositionRankLabel(player) }}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div class="flex items-start gap-2 sm:gap-4 shrink-0">
+                        <div v-if="player.projection?.stats" class="text-right">
+                          <p class="text-xs font-medium text-muted-foreground">
+                            Projected
+                          </p>
+                          <p class="text-xl font-semibold tabular-nums">
+                            {{ player.projection?.stats }}
+                          </p>
+                        </div>
+                        <Button
+                          @click="toggle(player.player_id)"
+                          :aria-label="`${
+                            expanded[player.player_id] ? 'Hide' : 'Show'
+                          } recent performance details for ${
+                            player.name || player.team
+                          }`"
+                          :aria-expanded="Boolean(expanded[player.player_id])"
+                          variant="outline"
+                          size="icon"
+                          class="mt-1 border size-8"
+                        >
+                          <ChevronUp
+                            v-if="expanded[player.player_id]"
+                            class="size-4"
+                          />
+                          <ChevronDown v-else class="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="px-4 py-3 border-t bg-muted/20">
+                    <div class="grid grid-cols-4 gap-3 sm:grid-cols-5">
+                      <p
+                        class="hidden text-xs font-semibold uppercase sm:block"
+                      >
+                        Recent
+                      </p>
+                      <div class="text-center">
+                        <p class="text-xs font-medium text-muted-foreground">
+                          Avg Pts
+                        </p>
+                        <p class="text-lg font-semibold tabular-nums">
+                          {{ getAverage(player.stats.points) }}
+                        </p>
+                      </div>
+                      <div class="text-center">
+                        <p class="text-xs font-medium text-muted-foreground">
+                          High
+                        </p>
+                        <p class="text-lg font-semibold tabular-nums">
+                          {{ getMax(player.stats.points) }}
+                        </p>
+                      </div>
+                      <div class="text-center">
+                        <p class="text-xs font-medium text-muted-foreground">
+                          Low
+                        </p>
+                        <p class="text-lg font-semibold tabular-nums">
+                          {{ getMin(player.stats.points) }}
+                        </p>
+                      </div>
+                      <div
+                        v-if="
+                          player.position !== 'K' && player.position !== 'DEF'
+                        "
+                        class="text-center"
+                      >
+                        <p class="text-xs font-medium text-muted-foreground">
+                          Avg Rank
                         </p>
                         <p
-                          v-if="
-                            player.stats?.ranks[index] !== 999 &&
-                            score !== 'DNP'
-                          "
+                          v-if="getAverage(player.stats.ranks) !== 0"
+                          class="mt-1 inline-flex min-w-10 items-center justify-center rounded-md px-2 py-0.5 text-sm font-semibold tabular-nums"
                           :class="[
-                            player.stats?.ranks[index]
-                              ? getValueColor(player.stats?.ranks[index])
-                              : '',
+                            getValueColor(getAverage(player.stats.ranks)),
                           ]"
-                          class="mt-1.5 inline-flex items-center justify-center rounded-md px-2 py-0.5 text-xs font-semibold text-nowrap"
                         >
-                          <span class="hidden sm:inline">Rank:</span>
-                          {{ player.stats?.ranks[index] }}
+                          {{ getAverage(player.stats.ranks) }}
                         </p>
-
-                        <div
-                          class="mt-2 text-xs"
-                          v-if="player.position === 'QB' && score !== 'DNP'"
+                        <p
+                          v-else
+                          class="mt-0.5 text-sm font-semibold sm:text-base"
                         >
-                          <p class="">
-                            <span class="text-muted-foreground">Pass Yd: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["pass_yd"]
-                            }}</span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">Pass Td: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["pass_td"] ?? 0
-                            }}</span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">Rush Yd: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rush_yd"]
-                            }}</span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">Rush Td: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rush_td"]
-                                ? player.stats?.stats[index]["rush_td"]
-                                : 0
-                            }}</span>
-                          </p>
-                        </div>
+                          N/A
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    v-show="expanded[player.player_id]"
+                    class="p-4 border-t bg-background"
+                  >
+                    <div>
+                      <div class="flex gap-2 pb-1 overflow-x-auto">
                         <div
-                          class="mt-2 text-xs"
-                          v-if="player.position === 'RB' && score !== 'DNP'"
+                          v-for="(score, index) in player.stats?.points"
+                          :key="`${player.player_id}-${index}`"
+                          class="flex-1 p-3 text-center border rounded-md min-w-24 bg-muted/10"
                         >
-                          <p>
-                            <span class="text-muted-foreground"
-                              >Rush Att:
-                            </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rush_att"]
-                            }}</span>
+                          <p class="text-xs text-muted-foreground text-nowrap">
+                            {{ getRecentWeekLabel(index) }}
                           </p>
-                          <p>
-                            <span class="text-muted-foreground">Rush Yd: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rush_yd"]
-                            }}</span>
+                          <p class="my-1 font-semibold tabular-nums">
+                            {{ score }}
                           </p>
-                          <p>
-                            <span class="text-muted-foreground">Rush Td: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rush_td"]
-                                ? player.stats?.stats[index]["rush_td"]
-                                : 0
-                            }}</span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">Rec: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rec"]
-                                ? player.stats?.stats[index]["rec"]
-                                : 0
-                            }}</span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">Rec Yd: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rec_yd"]
-                                ? player.stats?.stats[index]["rec_yd"]
-                                : 0
-                            }}</span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground"> Snaps: </span>
-                            <span class="font-semibold"
-                              >{{
-                                player.stats?.stats[index]?.["team_snaps"]
-                                  ? (
-                                      (Number(
-                                        player.stats?.stats[index]?.["snaps"] ??
-                                          0
-                                      ) /
-                                        Number(
-                                          player.stats?.stats[index]?.[
-                                            "team_snaps"
-                                          ] ?? 1
-                                        )) *
-                                      100
-                                    ).toFixed(0)
-                                  : 0
-                              }}%</span
-                            >
-                          </p>
-                        </div>
-                        <div
-                          class="mt-2 text-xs"
-                          v-if="
-                            (player.position === 'WR' ||
-                              player.position === 'TE') &&
-                            score !== 'DNP'
-                          "
-                        >
-                          <p>
-                            <span class="text-muted-foreground">Rec: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rec"]
-                            }}</span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">Rec Yd: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rec_yd"]
-                            }}</span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">Rec Td: </span>
-                            <span class="font-semibold">{{
-                              player.stats?.stats[index]["rec_td"]
-                                ? player.stats?.stats[index]["rec_td"]
-                                : 0
-                            }}</span>
+                          <p
+                            v-if="
+                              player.stats?.ranks[index] !== 999 &&
+                              score !== 'DNP'
+                            "
+                            :class="[
+                              player.stats?.ranks[index]
+                                ? getValueColor(player.stats?.ranks[index])
+                                : '',
+                            ]"
+                            class="mt-1.5 inline-flex items-center justify-center rounded-md px-2 py-0.5 text-xs font-semibold text-nowrap"
+                          >
+                            <span class="hidden sm:inline">Rank:</span>
+                            {{ player.stats?.ranks[index] }}
                           </p>
 
-                          <p>
-                            <span class="text-muted-foreground">Snaps: </span>
-                            <span class="font-semibold"
-                              >{{
-                                player.stats?.stats[index]?.["team_snaps"]
-                                  ? (
-                                      (Number(
-                                        player.stats?.stats[index]?.["snaps"] ??
-                                          0
-                                      ) /
-                                        Number(
+                          <div
+                            class="mt-2 text-xs"
+                            v-if="player.position === 'QB' && score !== 'DNP'"
+                          >
+                            <p class="">
+                              <span class="text-muted-foreground"
+                                >Pass Yd:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["pass_yd"]
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Pass Td:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["pass_td"] ?? 0
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Rush Yd:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rush_yd"]
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Rush Td:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rush_td"]
+                                  ? player.stats?.stats[index]["rush_td"]
+                                  : 0
+                              }}</span>
+                            </p>
+                          </div>
+                          <div
+                            class="mt-2 text-xs"
+                            v-if="player.position === 'RB' && score !== 'DNP'"
+                          >
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Rush Att:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rush_att"]
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Rush Yd:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rush_yd"]
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Rush Td:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rush_td"]
+                                  ? player.stats?.stats[index]["rush_td"]
+                                  : 0
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground">Rec: </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rec"]
+                                  ? player.stats?.stats[index]["rec"]
+                                  : 0
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Rec Yd:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rec_yd"]
+                                  ? player.stats?.stats[index]["rec_yd"]
+                                  : 0
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground">
+                                Snaps:
+                              </span>
+                              <span class="font-semibold"
+                                >{{
+                                  player.stats?.stats[index]?.["team_snaps"]
+                                    ? (
+                                        (Number(
                                           player.stats?.stats[index]?.[
-                                            "team_snaps"
-                                          ] ?? 1
-                                        )) *
-                                      100
-                                    ).toFixed(0)
+                                            "snaps"
+                                          ] ?? 0
+                                        ) /
+                                          Number(
+                                            player.stats?.stats[index]?.[
+                                              "team_snaps"
+                                            ] ?? 1
+                                          )) *
+                                        100
+                                      ).toFixed(0)
+                                    : 0
+                                }}%</span
+                              >
+                            </p>
+                          </div>
+                          <div
+                            class="mt-2 text-xs"
+                            v-if="
+                              (player.position === 'WR' ||
+                                player.position === 'TE') &&
+                              score !== 'DNP'
+                            "
+                          >
+                            <p>
+                              <span class="text-muted-foreground">Rec: </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rec"]
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Rec Yd:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rec_yd"]
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Rec Td:
+                              </span>
+                              <span class="font-semibold">{{
+                                player.stats?.stats[index]["rec_td"]
+                                  ? player.stats?.stats[index]["rec_td"]
                                   : 0
-                              }}%</span
-                            >
-                          </p>
-                        </div>
-                        <div
-                          class="mt-2 text-xs"
-                          v-if="player.position === 'K' && score !== 'DNP'"
-                        >
-                          <p>
-                            <span class="text-muted-foreground">FG: </span>
-                            <span class="font-semibold"
-                              >{{
-                                player.stats?.stats[index]["fgm"]
-                                  ? player.stats?.stats[index]["fgm"]
-                                  : 0
-                              }}
-                              /
-                              {{
-                                player.stats?.stats[index]["fga"]
-                                  ? player.stats?.stats[index]["fga"]
-                                  : 0
-                              }}</span
-                            >
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">XP: </span>
-                            <span class="font-semibold"
-                              >{{
-                                player.stats?.stats[index]["xpm"]
-                                  ? player.stats?.stats[index]["xpm"]
-                                  : 0
-                              }}
-                              /
-                              {{
-                                player.stats?.stats[index]["xpa"]
-                                  ? player.stats?.stats[index]["xpa"]
-                                  : 0
-                              }}</span
-                            >
-                          </p>
-                        </div>
-                        <div
-                          class="mt-2 text-xs"
-                          v-if="player.position === 'DEF' && score !== 'DNP'"
-                        >
-                          <p>
-                            <span class="text-muted-foreground"
-                              >Pts Allow:
-                            </span>
-                            <span class="font-semibold"
-                              >{{ player.stats?.stats[index]["pts_allow"] }}
-                            </span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground"
-                              >Yds Allow:
-                            </span>
-                            <span class="font-semibold"
-                              >{{ player.stats?.stats[index]["yds_allow"] }}
-                            </span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">Sack: </span>
-                            <span class="font-semibold"
-                              >{{
-                                player.stats?.stats[index]["sack"]
-                                  ? player.stats?.stats[index]["sack"]
-                                  : 0
-                              }}
-                            </span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">Int: </span>
-                            <span class="font-semibold"
-                              >{{
-                                player.stats?.stats[index]["int"]
-                                  ? player.stats?.stats[index]["int"]
-                                  : 0
-                              }}
-                            </span>
-                          </p>
-                          <p>
-                            <span class="text-muted-foreground">FF: </span>
-                            <span class="font-semibold"
-                              >{{
-                                player.stats?.stats[index]["ff"]
-                                  ? player.stats?.stats[index]["ff"]
-                                  : 0
-                              }}
-                            </span>
-                          </p>
+                              }}</span>
+                            </p>
+
+                            <p>
+                              <span class="text-muted-foreground">Snaps: </span>
+                              <span class="font-semibold"
+                                >{{
+                                  player.stats?.stats[index]?.["team_snaps"]
+                                    ? (
+                                        (Number(
+                                          player.stats?.stats[index]?.[
+                                            "snaps"
+                                          ] ?? 0
+                                        ) /
+                                          Number(
+                                            player.stats?.stats[index]?.[
+                                              "team_snaps"
+                                            ] ?? 1
+                                          )) *
+                                        100
+                                      ).toFixed(0)
+                                    : 0
+                                }}%</span
+                              >
+                            </p>
+                          </div>
+                          <div
+                            class="mt-2 text-xs"
+                            v-if="player.position === 'K' && score !== 'DNP'"
+                          >
+                            <p>
+                              <span class="text-muted-foreground">FG: </span>
+                              <span class="font-semibold"
+                                >{{
+                                  player.stats?.stats[index]["fgm"]
+                                    ? player.stats?.stats[index]["fgm"]
+                                    : 0
+                                }}
+                                /
+                                {{
+                                  player.stats?.stats[index]["fga"]
+                                    ? player.stats?.stats[index]["fga"]
+                                    : 0
+                                }}</span
+                              >
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground">XP: </span>
+                              <span class="font-semibold"
+                                >{{
+                                  player.stats?.stats[index]["xpm"]
+                                    ? player.stats?.stats[index]["xpm"]
+                                    : 0
+                                }}
+                                /
+                                {{
+                                  player.stats?.stats[index]["xpa"]
+                                    ? player.stats?.stats[index]["xpa"]
+                                    : 0
+                                }}</span
+                              >
+                            </p>
+                          </div>
+                          <div
+                            class="mt-2 text-xs"
+                            v-if="player.position === 'DEF' && score !== 'DNP'"
+                          >
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Pts Allow:
+                              </span>
+                              <span class="font-semibold"
+                                >{{ player.stats?.stats[index]["pts_allow"] }}
+                              </span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground"
+                                >Yds Allow:
+                              </span>
+                              <span class="font-semibold"
+                                >{{ player.stats?.stats[index]["yds_allow"] }}
+                              </span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground">Sack: </span>
+                              <span class="font-semibold"
+                                >{{
+                                  player.stats?.stats[index]["sack"]
+                                    ? player.stats?.stats[index]["sack"]
+                                    : 0
+                                }}
+                              </span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground">Int: </span>
+                              <span class="font-semibold"
+                                >{{
+                                  player.stats?.stats[index]["int"]
+                                    ? player.stats?.stats[index]["int"]
+                                    : 0
+                                }}
+                              </span>
+                            </p>
+                            <p>
+                              <span class="text-muted-foreground">FF: </span>
+                              <span class="font-semibold"
+                                >{{
+                                  player.stats?.stats[index]["ff"]
+                                    ? player.stats?.stats[index]["ff"]
+                                    : 0
+                                }}
+                              </span>
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             </div>
           </div>
         </div>

@@ -124,6 +124,7 @@ export const fakeStartSit = [
         player_id: "421",
         name: "Matthew Stafford",
         team: "LAR",
+        rosterSlot: "QB",
         projection: { stats: 19.55, opponent: "SF", away: true },
         stats: {
           points: [26.84, "DNP", 27.38, 9.34, 25.56, 27.4, 14.84],
@@ -264,6 +265,7 @@ export const fakeStartSit = [
         player_id: "4035",
         name: "Alvin Kamara",
         team: "NO",
+        rosterSlot: "RB",
         projection: { stats: 9.8, opponent: "CAR", away: true },
         stats: {
           points: [0.2, 5.5, 4.4, 10.1, 7.5, 9.2, 6.1],
@@ -424,6 +426,7 @@ export const fakeStartSit = [
         player_id: "12534",
         name: "Kyle Monangai",
         team: "CHI",
+        rosterSlot: "RB",
         projection: { stats: 8.47, opponent: "NYG", away: false },
         stats: {
           points: [21.3, 2.4, 16.4, 4.9, "DNP", 1.8, 2.5],
@@ -564,6 +567,7 @@ export const fakeStartSit = [
         player_id: "7569",
         name: "Nico Collins",
         team: "HOU",
+        rosterSlot: "WR",
         projection: { stats: 13.12, opponent: "JAX", away: false },
         stats: {
           points: [11, "DNP", 4.7, "DNP", 14, 9.9, 18.4],
@@ -684,6 +688,7 @@ export const fakeStartSit = [
         player_id: "8112",
         name: "Drake London",
         team: "ATL",
+        rosterSlot: "BN",
         projection: { stats: 13.61, opponent: "IND", away: true },
         stats: {
           points: [34.3, "DNP", 6.2, 26.8, "DNP", 21, 8],
@@ -804,6 +809,7 @@ export const fakeStartSit = [
         player_id: "1339",
         name: "Zach Ertz",
         team: "WAS",
+        rosterSlot: "BN",
         projection: { stats: 8.05, opponent: "DET", away: false },
         stats: {
           points: [6.6, 3.6, 11.2, 13.3, "0", 5.1, 5.3],
@@ -961,4 +967,13 @@ export const fakeStartSit = [
       },
     ],
   },
+];
+
+export const fakeStartSitValues = [
+  { playerId: "421", tradeValue: 43, positionRank: 12 },
+  { playerId: "4035", tradeValue: 54, positionRank: 16 },
+  { playerId: "12534", tradeValue: 36, positionRank: 31 },
+  { playerId: "7569", tradeValue: 82, positionRank: 5 },
+  { playerId: "8112", tradeValue: 88, positionRank: 3 },
+  { playerId: "1339", tradeValue: 29, positionRank: 17 },
 ];

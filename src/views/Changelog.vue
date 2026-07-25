@@ -11,6 +11,17 @@ const badgeVariant = (type: string): BadgeVariants["variant"] => {
 // this should eventually be moved to the server side
 const data = [
   {
+    date: "7/24/26",
+    content: [
+      {
+        type: "Update",
+        text: [
+          "Start/Sit now highlights only actionable lineup swaps with projected upside and confidence. Weekly projections and recent form remain available to everyone, while Premium adds league adjusted player value and positional ranks to settle close decisions.",
+        ],
+      },
+    ],
+  },
+  {
     date: "7/23/26",
     content: [
       {

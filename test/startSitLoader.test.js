@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import {
+  buildStartSitInsights,
   canPlayerFillLineupSlot,
   getOrderedRosterPlayerEntries,
   getOrderedRosterPlayerIds,
@@ -8,6 +9,18 @@ import {
   getStartSitWeek,
 } from "../src/components/start_sit/startSitLoader.ts";
 import { mapWithConcurrency } from "../src/lib/async.ts";
+
+const candidate = (overrides = {}) => ({
+  id: "player",
+  position: "WR",
+  rosterSlot: "BN",
+  projection: 10,
+  recentAverage: 10,
+  recentFloor: 5,
+  averageRank: 24,
+  tradeValue: 50,
+  ...overrides,
+});
 
 describe("Start/Sit loader", () => {
   test("orders the selected roster with starters first", () => {
@@ -48,6 +61,100 @@ describe("Start/Sit loader", () => {
     expect(canPlayerFillLineupSlot("QB", "SUPER_FLEX")).toBe(true);
     expect(canPlayerFillLineupSlot("QB", "FLEX")).toBe(false);
     expect(canPlayerFillLineupSlot("WR", "RB")).toBe(false);
+  });
+
+  test("only returns actionable lineup changes", () => {
+    const players = [
+      candidate({
+        id: "starter",
+        rosterSlot: "WR",
+        projection: 14,
+        recentAverage: 13,
+        recentFloor: 8,
+        averageRank: 18,
+        tradeValue: 60,
+      }),
+      candidate({
+        id: "worse-bench",
+        projection: 11,
+        averageRank: 34,
+        tradeValue: 45,
+      }),
+    ];
+
+    expect(buildStartSitInsights(players, 1)).toEqual([]);
+  });
+
+  test("uses league value as a tiebreaker without overriding a bad matchup", () => {
+    const starter = candidate({
+      id: "starter",
+      position: "RB",
+      rosterSlot: "FLEX",
+      projection: 13,
+      recentAverage: 12,
+      recentFloor: 8,
+      averageRank: 22,
+    });
+    const closeHighValueBench = candidate({
+      id: "close-bench",
+      projection: 12.7,
+      recentAverage: 12,
+      recentFloor: 8,
+      averageRank: 20,
+      tradeValue: 62,
+    });
+    const badMatchupBench = candidate({
+      ...closeHighValueBench,
+      id: "bad-matchup-bench",
+      projection: 9,
+      tradeValue: 80,
+    });
+
+    expect(
+      buildStartSitInsights([starter, closeHighValueBench], 1)
+    ).toMatchObject([
+      {
+        startId: "close-bench",
+        sitId: "starter",
+        valueGap: 12,
+        confidence: "Start",
+      },
+    ]);
+    expect(
+      buildStartSitInsights([starter, badMatchupBench], 1)
+    ).toEqual([]);
+  });
+
+  test("labels an aligned weekly edge as a strong start", () => {
+    const insights = buildStartSitInsights(
+      [
+        candidate({
+          id: "starter",
+          rosterSlot: "WR",
+          projection: 11,
+          recentFloor: 6,
+          averageRank: 31,
+          tradeValue: 48,
+        }),
+        candidate({
+          id: "bench",
+          projection: 15,
+          recentAverage: 14,
+          recentFloor: 9,
+          averageRank: 16,
+          tradeValue: 64,
+        }),
+      ],
+      1
+    );
+
+    expect(insights[0]).toMatchObject({
+      startId: "bench",
+      projectionGap: 4,
+      recentGap: 4,
+      valueGap: 16,
+      confidence: "Strong start",
+    });
   });
 
   test("uses the latest available starter week safely", () => {
