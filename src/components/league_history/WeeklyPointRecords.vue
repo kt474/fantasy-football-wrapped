@@ -1,59 +1,36 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useStore } from "../../store/store";
+
+import {
+  getWeeklyPointRecords,
+  type HistoricalManagerRow,
+} from "@/lib/leagueHistory";
+import { useStore } from "@/store/store";
+
 import Card from "../ui/card/Card.vue";
 
-const store = useStore();
-
-interface PointSeasonEntry {
-  season: string;
-  points: number[];
-}
-
-interface LeagueHistoryRow {
-  name: string;
-  username: string;
-  pointSeason: PointSeasonEntry[];
-}
-
-interface PointDetail {
-  week: number;
-  name: string;
-  username: string;
-  season: string;
-  point: number;
-}
-
 const props = defineProps<{
-  tableData: LeagueHistoryRow[];
+  tableData: Pick<
+    HistoricalManagerRow,
+    "name" | "username" | "pointSeason"
+  >[];
+  mode: "highest" | "lowest";
 }>();
 
-const mostPoints = computed(() => {
-  const allPointsWithDetails: PointDetail[] = props.tableData.flatMap((obj) =>
-    obj.pointSeason.flatMap((seasonObj) =>
-      seasonObj.points.map(
-        (point: number, index: number): PointDetail => ({
-          week: index + 1,
-          name: obj.name,
-          username: obj.username,
-          season: seasonObj.season,
-          point,
-        })
-      )
-    )
-  );
-
-  const sortedPointsWithDetails = allPointsWithDetails.sort(
-    (a, b) => b.point - a.point
-  );
-
-  return sortedPointsWithDetails.slice(0, 10);
-});
+const store = useStore();
+const records = computed(() =>
+  getWeeklyPointRecords(props.tableData, props.mode)
+);
+const title = computed(
+  () =>
+    `All Time Weekly ${props.mode === "highest" ? "High" : "Low"} Score`
+);
 </script>
+
 <template>
   <Card class="relative w-full overflow-x-auto md:max-w-2xl lg:max-w-3xl">
     <p class="w-full pt-2 text-lg font-semibold text-center bg-muted/50">
-      All Time Weekly High Score
+      {{ title }}
     </p>
     <table class="w-full text-sm text-left rtl:text-right">
       <thead class="text-xs uppercase bg-muted/50">
@@ -71,7 +48,7 @@ const mostPoints = computed(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in mostPoints" :key="index" class="border-b">
+        <tr v-for="(item, index) in records" :key="index" class="border-b">
           <th
             scope="row"
             class="px-4 font-medium truncate sm:px-6 max-w-36 sm:max-w-56 whitespace-nowrap"

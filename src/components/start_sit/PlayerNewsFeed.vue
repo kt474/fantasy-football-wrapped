@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { AlertTriangle } from "lucide-vue-next";
 import Card from "../ui/card/Card.vue";
 import { Skeleton } from "../ui/skeleton";
+import { formatRelativeTime } from "@/lib/format";
 import PlayerNewsCard from "./PlayerNewsCard.vue";
 import type { NewsPost, RosterNewsItem } from "./playerNews";
 
@@ -31,16 +32,6 @@ const getPostUrl = (post: NewsPost) => {
     : undefined;
 };
 
-const formatDate = (dateStr?: string) => {
-  const time = Date.parse(dateStr || "");
-  if (!Number.isFinite(time)) return "";
-
-  const minutes = Math.floor(Math.max(0, Date.now() - time) / 60_000);
-  if (minutes < 1) return "Now";
-  if (minutes < 60) return `${minutes}m ago`;
-  if (minutes < 1_440) return `${Math.floor(minutes / 60)}h ago`;
-  return new Date(time).toLocaleDateString();
-};
 </script>
 
 <template>
@@ -113,7 +104,7 @@ const formatDate = (dateStr?: string) => {
               </div>
             </div>
             <time class="text-xs shrink-0 text-muted-foreground">
-              {{ formatDate(post.record?.createdAt) }}
+              {{ formatRelativeTime(post.record?.createdAt) }}
             </time>
           </div>
           <a

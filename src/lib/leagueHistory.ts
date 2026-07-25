@@ -26,6 +26,49 @@ export interface HistoricalManagerRow {
   seasons: string[];
 }
 
+export type WeeklyPointRecord = {
+  week: number;
+  name: string;
+  username: string;
+  season: string;
+  point: number;
+};
+
+type WeeklyPointRecordRow = Pick<
+  HistoricalManagerRow,
+  "name" | "username" | "pointSeason"
+>;
+
+export const getWeeklyPointRecords = (
+  rows: readonly WeeklyPointRecordRow[],
+  mode: "highest" | "lowest",
+  limit = 10
+): WeeklyPointRecord[] => {
+  const records = rows.flatMap((row) =>
+    row.pointSeason.flatMap(({ season, points }) =>
+      points.map((point, index) => ({
+        week: index + 1,
+        name: row.name,
+        username: row.username,
+        season,
+        point,
+      }))
+    )
+  );
+  const eligibleRecords =
+    mode === "lowest"
+      ? records.filter(({ point }) => point !== 0)
+      : records;
+
+  return eligibleRecords
+    .sort((left, right) =>
+      mode === "highest"
+        ? right.point - left.point
+        : left.point - right.point
+    )
+    .slice(0, limit);
+};
+
 const hasFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
 

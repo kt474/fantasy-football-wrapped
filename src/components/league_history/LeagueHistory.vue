@@ -6,8 +6,7 @@ import { inputLeague } from "../../api/api.ts";
 import { LeagueInfoType, TableDataType } from "../../types/types.ts";
 import AllMatchups from "./AllMatchups.vue";
 import AllTimeRecords from "./AllTimeRecords.vue";
-import MostPoints from "./MostPoints.vue";
-import FewestPoints from "./FewestPoints.vue";
+import WeeklyPointRecords from "./WeeklyPointRecords.vue";
 import CloseMatchups from "./CloseMatchups.vue";
 import SeasonFinishHistory from "./SeasonFinishHistory.vue";
 import ScrollableTableCard from "../layout/ScrollableTableCard.vue";
@@ -713,9 +712,10 @@ watch(
       v-if="!isLoading && visibleDetailSections >= 4"
       class="flex flex-wrap mt-4 md:flex-nowrap"
     >
-      <MostPoints :tableData="dataAllYears" />
-      <FewestPoints
+      <WeeklyPointRecords :tableData="dataAllYears" mode="highest" />
+      <WeeklyPointRecords
         :tableData="dataAllYears"
+        mode="lowest"
         class="mt-4 ml-0 md:mt-0 md:ml-4"
       />
     </div>

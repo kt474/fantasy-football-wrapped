@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { hasLeagueSeasonData } from "../src/lib/leagueHistory.ts";
+import {
+  getWeeklyPointRecords,
+  hasLeagueSeasonData,
+} from "../src/lib/leagueHistory.ts";
 
 const baseLeague = {
   leagueId: "12345",
@@ -11,6 +14,28 @@ const baseLeague = {
 };
 
 describe("league history helpers", () => {
+  test("ranks weekly high and low scores from one shared transform", () => {
+    const rows = [
+      {
+        name: "Team One",
+        username: "one",
+        pointSeason: [{ season: "2025", points: [120, 0, 95] }],
+      },
+      {
+        name: "Team Two",
+        username: "two",
+        pointSeason: [{ season: "2025", points: [80, 140] }],
+      },
+    ];
+
+    expect(
+      getWeeklyPointRecords(rows, "highest", 2).map(({ point }) => point)
+    ).toEqual([140, 120]);
+    expect(
+      getWeeklyPointRecords(rows, "lowest", 2).map(({ point }) => point)
+    ).toEqual([80, 95]);
+  });
+
   test("rejects historical league seasons with no real season data", () => {
     expect(hasLeagueSeasonData(baseLeague)).toBe(false);
   });

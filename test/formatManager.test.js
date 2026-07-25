@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 
-import { formatOrdinal, getOrdinalSuffix } from "../src/lib/format.ts";
+import {
+  formatOrdinal,
+  formatRelativeTime,
+  getOrdinalSuffix,
+} from "../src/lib/format.ts";
 import { getManagerDisplayName } from "../src/lib/manager.ts";
 
 describe("shared formatting", () => {
@@ -19,6 +23,27 @@ describe("shared formatting", () => {
 
   test("exposes the suffix independently", () => {
     expect(getOrdinalSuffix(22)).toBe("nd");
+  });
+
+  test("formats recent timestamps consistently", () => {
+    const now = Date.parse("2026-07-25T12:00:00Z");
+
+    expect(
+      formatRelativeTime("2026-07-25T11:59:45Z", { now })
+    ).toBe("Now");
+    expect(
+      formatRelativeTime("2026-07-25T11:42:00Z", { now })
+    ).toBe("18m ago");
+    expect(
+      formatRelativeTime("2026-07-25T08:00:00Z", { now })
+    ).toBe("4h ago");
+  });
+
+  test("uses the requested fallback for invalid timestamps", () => {
+    expect(formatRelativeTime(undefined)).toBe("");
+    expect(
+      formatRelativeTime("not-a-date", { fallback: "Recently" })
+    ).toBe("Recently");
   });
 });
 

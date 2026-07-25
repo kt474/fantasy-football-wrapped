@@ -2,26 +2,13 @@
 import { ExternalLink } from "lucide-vue-next";
 import { Badge } from "../ui/badge";
 import Card from "../ui/card/Card.vue";
+import { formatRelativeTime } from "@/lib/format";
 import type { RosterNewsItem } from "./playerNews";
 import { normalizeNewsText } from "./playerNews";
 
 defineProps<{
   item: RosterNewsItem;
 }>();
-
-const formatDate = (dateStr: string) => {
-  const time = Date.parse(dateStr);
-  if (!Number.isFinite(time)) return "Recently";
-
-  const diff = Math.max(0, Date.now() - time);
-  const minutes = Math.floor(diff / 60_000);
-  const hours = Math.floor(diff / 3_600_000);
-
-  if (minutes < 1) return "Now";
-  if (hours < 1) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return new Date(time).toLocaleDateString();
-};
 
 const showPostText = (item: RosterNewsItem) => {
   const postText = item.post.record?.text || "";
@@ -45,7 +32,7 @@ const showPostText = (item: RosterNewsItem) => {
           {{ item.player.name || item.player.team || "Unknown player" }}
         </span>
         <span class="ml-auto text-xs text-muted-foreground">
-          {{ formatDate(item.publishedAt) }}
+          {{ formatRelativeTime(item.publishedAt, { fallback: "Recently" }) }}
         </span>
       </div>
 
