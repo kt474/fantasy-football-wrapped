@@ -1516,7 +1516,7 @@ watch(
             <CardTitle
               >Unlock {{ premiumTitle }} for all your leagues</CardTitle
             >
-            <CardDescription>
+            <CardDescription class="max-w-md">
               {{ premiumDescription }}
             </CardDescription>
           </CardHeader>
