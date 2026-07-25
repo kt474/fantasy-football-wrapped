@@ -5,7 +5,7 @@ import { computed, ref, watch } from "vue";
 import type { ManagerArchetype } from "@/lib/narratives";
 import {
   getLeagueAnalyticsProperties,
-  trackPremiumFunnelEvent,
+  trackPremiumJourneyStep,
 } from "@/lib/analytics";
 import { useStore } from "@/store/store";
 import Card from "@/components/ui/card/Card.vue";
@@ -89,7 +89,7 @@ const showPremiumSubscriptionCta = computed(
 );
 
 const trackPremiumSubscriptionClick = () => {
-  trackPremiumFunnelEvent("premium_cta_clicked", {
+  trackPremiumJourneyStep("premium_cta_clicked", {
     cta: "unlock_draft_room_scouting",
     feature: "draft_room",
     source: "draft_room_locked_preview",

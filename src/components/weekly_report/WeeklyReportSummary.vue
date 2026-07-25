@@ -31,9 +31,13 @@ import {
 import Separator from "../ui/separator/Separator.vue";
 import PremiumReportContent from "./PremiumReportContent.vue";
 import type { PremiumReport } from "@/types/types";
-import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
+import {
+  trackEvent,
+  trackPremiumJourneyStep,
+} from "@/lib/analytics";
 import { scrollAppToTop } from "@/lib/appScroll";
 import { premiumReportPreview } from "@/lib/premiumReportSample";
+import { usePaywallViewTracking } from "@/composables/usePaywallViewTracking";
 
 const props = defineProps<{
   tier: string;
@@ -146,11 +150,8 @@ const imageActionDisabled = computed(
 
 const copyActionDisabled = computed(() => !canUseCurrentReport.value);
 
-const trackedPremiumPaywallView = ref(false);
+const premiumPaywallElement = ref<HTMLElement | null>(null);
 const videoDialogOpen = ref(false);
-const shouldTrackPremiumPaywallView = computed(
-  () => props.tier === "Premium" && !canGeneratePremium.value
-);
 
 const videoDownloadUrl = computed(() => {
   if (!props.videoUrl) return "";
@@ -169,37 +170,28 @@ watch(
   }
 );
 
-watch(
-  shouldTrackPremiumPaywallView,
-  (shouldTrack) => {
-    if (!shouldTrack || trackedPremiumPaywallView.value) {
-      return;
-    }
-
-    trackedPremiumPaywallView.value = true;
-    trackEvent("Paywall Viewed", {
-      feature: "premium_report",
-      source: "weekly_report",
-    });
-    trackPremiumFunnelEvent("paywall_viewed", {
-      feature: "premium_report",
-      source: "weekly_report",
-      has_league: props.hasLeagues,
-      authenticated: authStore.isAuthenticated,
-      is_premium: subscriptionStore.isPremium,
-    });
-  },
-  { immediate: true }
-);
+usePaywallViewTracking(premiumPaywallElement, () => {
+  trackEvent("Paywall Viewed", {
+    feature: "premium_report",
+    source: "weekly_report",
+  });
+  trackPremiumJourneyStep("paywall_viewed", {
+    feature: "premium_report",
+    source: "weekly_report",
+    has_league: props.hasLeagues,
+    is_authenticated: authStore.isAuthenticated,
+    is_premium: subscriptionStore.isPremium,
+  });
+});
 
 const updateTier = (value: string) => {
   emit("update:tier", value);
   if (value === "Premium") {
-    trackPremiumFunnelEvent("premium_tab_selected", {
+    trackPremiumJourneyStep("premium_tab_selected", {
       feature: "premium_report",
       source: "weekly_report",
       has_league: props.hasLeagues,
-      authenticated: authStore.isAuthenticated,
+      is_authenticated: authStore.isAuthenticated,
       is_premium: subscriptionStore.isPremium,
     });
   }
@@ -218,12 +210,12 @@ const handleGeneratePremium = () => {
 };
 
 const trackPremiumCtaClick = (cta: string) => {
-  trackPremiumFunnelEvent("premium_cta_clicked", {
+  trackPremiumJourneyStep("premium_cta_clicked", {
     cta,
     feature: "premium_report",
     source: "weekly_report",
     has_league: props.hasLeagues,
-    authenticated: authStore.isAuthenticated,
+    is_authenticated: authStore.isAuthenticated,
   });
   store.currentTab = "";
 };
@@ -418,7 +410,7 @@ const trackVideoDownload = () => {
           <p v-else-if="canGeneratePremium" class="max-w-3xl">
             Choose a commentary style and generate your premium weekly report.
           </p>
-          <div v-else class="max-w-4xl">
+          <div ref="premiumPaywallElement" v-else class="max-w-4xl">
             <div class="mb-4">
               <p class="max-w-3xl">
                 Premium weekly reports turn each week into a shareable league

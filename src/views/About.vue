@@ -3,7 +3,7 @@ import { getLeagueCount } from "@/api/api";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Separator from "@/components/ui/separator/Separator.vue";
-import { trackPremiumFunnelEvent } from "@/lib/analytics";
+import { trackPremiumJourneyStep } from "@/lib/analytics";
 import PageContainer from "@/components/layout/PageContainer.vue";
 import PageHeader from "@/components/layout/PageHeader.vue";
 import SectionHeader from "@/components/layout/SectionHeader.vue";
@@ -74,12 +74,15 @@ onMounted(async () => {
           <router-link
             :to="{
               path: '/account',
-              query: $route.query,
+              query: {
+                ...$route.query,
+                upgrade_source: 'about',
+              },
               state: { scrollToPricing: true },
             }"
             class="font-medium cursor-pointer text-primary hover:underline"
             @click="
-              trackPremiumFunnelEvent('premium_cta_clicked', {
+              trackPremiumJourneyStep('premium_cta_clicked', {
                 cta: 'about_premium_tier',
                 source: 'about',
                 feature: 'premium',

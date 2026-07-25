@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { ref } from "vue";
 
 import { Button } from "@/components/ui/button";
 import DraftRoomSample from "@/components/league_narratives/DraftRoomSample.vue";
 import {
   getLeagueAnalyticsProperties,
-  trackPremiumFunnelEvent,
+  trackPremiumJourneyStep,
 } from "@/lib/analytics";
 import { useStore } from "@/store/store";
+import { usePaywallViewTracking } from "@/composables/usePaywallViewTracking";
 
 const store = useStore();
+const paywallElement = ref<HTMLElement | null>(null);
 const auctionSampleAllocations = [
   { position: "RB", amount: "$76" },
   { position: "WR", amount: "$72" },
@@ -30,12 +32,12 @@ const analyticsProperties = () => ({
   ...getLeagueAnalyticsProperties(store.currentLeague),
 });
 
-onMounted(() => {
-  trackPremiumFunnelEvent("paywall_viewed", analyticsProperties());
+usePaywallViewTracking(paywallElement, () => {
+  trackPremiumJourneyStep("paywall_viewed", analyticsProperties());
 });
 
 const trackUnlockClick = () => {
-  trackPremiumFunnelEvent("premium_cta_clicked", {
+  trackPremiumJourneyStep("premium_cta_clicked", {
     ...analyticsProperties(),
     cta: "unlock_draft_room_scouting",
   });
@@ -71,6 +73,7 @@ const trackUnlockClick = () => {
     <DraftRoomSample v-else />
 
     <div
+      ref="paywallElement"
       class="flex flex-col gap-3 pt-4 mt-4 border-t sm:flex-row sm:items-center sm:justify-between"
     >
       <Button as-child class="shrink-0" size="lg">

@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
 import Checkbox from "@/components/ui/checkbox/Checkbox.vue";
 import { authenticatedFetch } from "@/lib/authFetch";
-import { trackEvent, trackPremiumFunnelEvent } from "@/lib/analytics";
+import {
+  trackEvent,
+  trackPremiumJourneyStep,
+} from "@/lib/analytics";
 import { loadSavedLeagues } from "@/lib/leagueStorage";
 import { scrollAppToTop } from "@/lib/appScroll";
 import { customizableLeagueFeatures } from "@/lib/features";
@@ -60,6 +63,7 @@ import {
   isPremiumUpgradeIntent,
   normalizePremiumUpgradeIntent,
 } from "@/lib/premiumUpgradeIntent";
+import { usePaywallViewTracking } from "@/composables/usePaywallViewTracking";
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
@@ -81,9 +85,9 @@ const portalLoading = ref(false);
 const notificationPreferencesLoading = ref(false);
 const notificationPreferencesSaving = ref(false);
 const weeklyReportEmailsEnabled = ref(false);
-const trackedAccountPaywallView = ref(false);
 const authenticationSection = ref<HTMLElement | null>(null);
 const pricingSection = ref<HTMLElement | null>(null);
+const pricingPaywall = ref<HTMLElement | null>(null);
 const selectedCheckoutPlan = ref<CheckoutPlan | null>(null);
 const displayedCheckoutPlan = ref<CheckoutPlan>("annual");
 const lastAutoScrolledUpgradeRoute = ref("");
@@ -349,9 +353,9 @@ const displayedPlanDetails = computed(() =>
 );
 
 const trackPremiumExampleClick = (example: string) => {
-  trackPremiumFunnelEvent("premium_example_clicked", {
+  trackPremiumJourneyStep("premium_example_clicked", {
     source: "account_faq",
-    ...getFunnelAnalytics(),
+    feature: upgradeIntent.value,
     example,
   });
 };
@@ -386,9 +390,9 @@ const getPlanAnalytics = (plan: CheckoutPlan) =>
 
 watch(displayedCheckoutPlan, (plan, previousPlan) => {
   if (plan === previousPlan) return;
-  trackPremiumFunnelEvent("pricing_plan_changed", {
+  trackPremiumJourneyStep("pricing_plan_changed", {
     source: "account",
-    ...getFunnelAnalytics(),
+    feature: upgradeIntent.value,
     previous_plan: previousPlan,
     ...getPlanAnalytics(plan),
   });
@@ -614,16 +618,17 @@ const beginAuthenticatedCheckout = async (
 
   trackEvent("Checkout Started", { plan, source: "account" });
   if (resumedAfterAuth) {
-    trackPremiumFunnelEvent("checkout_resumed", {
+    trackPremiumJourneyStep("checkout_resumed", {
       source: "account",
-      ...getFunnelAnalytics(),
+      feature: upgradeIntent.value,
       ...getPlanAnalytics(plan),
     });
   }
-  trackPremiumFunnelEvent("checkout_started", {
+  trackPremiumJourneyStep("checkout_started", {
     source: "account",
-    ...getFunnelAnalytics(),
+    feature: upgradeIntent.value,
     resumed_after_auth: resumedAfterAuth,
+    is_authenticated: true,
     ...getPlanAnalytics(plan),
   });
   checkoutLoadingPlan.value = plan;
@@ -648,19 +653,21 @@ const beginAuthenticatedCheckout = async (
       throw new Error("Blocked unsafe redirect URL");
     }
     trackEvent("Checkout Redirected", { plan, source: "account" });
-    trackPremiumFunnelEvent("checkout_redirected", {
+    trackPremiumJourneyStep("checkout_redirected", {
       source: "account",
-      ...getFunnelAnalytics(),
+      feature: upgradeIntent.value,
+      is_authenticated: true,
       ...getPlanAnalytics(plan),
     });
     window.location.assign(payload.url);
   } catch (error: unknown) {
     checkoutLoadingPlan.value = null;
     trackEvent("Checkout Failed", { plan, reason: "request_failed" });
-    trackPremiumFunnelEvent("checkout_failed", {
+    trackPremiumJourneyStep("checkout_failed", {
       source: "account",
-      ...getFunnelAnalytics(),
+      feature: upgradeIntent.value,
       reason: "request_failed",
+      is_authenticated: true,
       ...getPlanAnalytics(plan),
     });
     toast.error(getErrorMessage(error, "Unable to start checkout"));
@@ -669,8 +676,9 @@ const beginAuthenticatedCheckout = async (
 
 const startCheckout = async (plan: CheckoutPlan) => {
   const planAnalytics = getPlanAnalytics(plan);
+  const funnelAnalytics = getFunnelAnalytics();
   savePremiumCheckoutAttribution({
-    funnelId: premiumFunnelId,
+    funnelId: String(funnelAnalytics.funnel_id),
     funnelSource: upgradeSource.value,
     feature: upgradeIntent.value,
     plan,
@@ -679,21 +687,20 @@ const startCheckout = async (plan: CheckoutPlan) => {
     bestValue: planAnalytics.best_value,
   });
 
-  trackPremiumFunnelEvent("plan_selected", {
+  trackPremiumJourneyStep("plan_selected", {
     source: "account",
-    ...getFunnelAnalytics(),
-    authenticated: authStore.isAuthenticated,
+    feature: upgradeIntent.value,
+    is_authenticated: authStore.isAuthenticated,
     ...planAnalytics,
   });
 
   if (!authStore.isAuthenticated) {
     selectedCheckoutPlan.value = plan;
     savePendingCheckout(plan);
-    trackEvent("Checkout Failed", { plan, reason: "signed_out" });
-    trackPremiumFunnelEvent("checkout_blocked", {
-      source: "account",
-      ...getFunnelAnalytics(),
-      reason: "signed_out",
+    trackPremiumJourneyStep("auth_required", {
+      source: upgradeSource.value,
+      feature: upgradeIntent.value,
+      is_authenticated: false,
       ...planAnalytics,
     });
     await guideToAuthentication(plan);
@@ -752,20 +759,27 @@ const handleCheckoutQuery = async () => {
     postPurchaseActivation.value = getPostPurchaseActivation(
       checkoutAttribution?.feature ?? upgradeIntent.value
     );
-    trackEvent("Checkout Succeeded", { source: "stripe", status: "success" });
-    trackPremiumFunnelEvent("checkout_succeeded", {
-      source: "stripe",
-      status: "success",
+    trackEvent("Checkout Returned", { source: "stripe", status: "success" });
+    trackPremiumJourneyStep("checkout_returned", {
       ...getCheckoutReturnAnalytics(),
+      source:
+        checkoutAttribution?.funnelSource ??
+        upgradeSource.value,
+      feature: checkoutAttribution?.feature ?? upgradeIntent.value,
+      status: "success",
     });
     toast.success("Checkout completed. Refreshing subscription status...");
     await subscriptionStore.fetchSubscriptionStatus({ showErrorToast: true });
   } else if (checkoutState === "canceled") {
     trackEvent("Checkout Canceled", { source: "stripe", status: "canceled" });
-    trackPremiumFunnelEvent("checkout_canceled", {
-      source: "stripe",
-      status: "canceled",
+    const checkoutAttribution = readPremiumCheckoutAttribution();
+    trackPremiumJourneyStep("checkout_canceled", {
       ...getCheckoutReturnAnalytics(),
+      source:
+        checkoutAttribution?.funnelSource ??
+        upgradeSource.value,
+      feature: checkoutAttribution?.feature ?? upgradeIntent.value,
+      status: "canceled",
     });
     toast.error("Checkout canceled.");
   }
@@ -783,9 +797,9 @@ const openPostPurchaseDestination = async () => {
   const activation = postPurchaseActivation.value;
   if (!activation) return;
 
-  trackPremiumFunnelEvent("post_purchase_activation_clicked", {
+  trackPremiumJourneyStep("post_purchase_feature_opened", {
     source: "account_checkout_success",
-    ...getFunnelAnalytics(),
+    feature: upgradeIntent.value,
     destination_tab: activation.destinationTab,
     cta: activation.actionLabel,
   });
@@ -842,35 +856,18 @@ onMounted(async () => {
   await handleCheckoutQuery();
 });
 
-watch(
-  () => ({
-    isPremium: subscriptionStore.isPremium,
-    initialized: subscriptionStore.initialized,
-    loading: subscriptionStore.loading,
-    recovery: showPasswordRecoveryForm.value,
-  }),
-  ({ isPremium, initialized, loading, recovery }) => {
-    if (
-      trackedAccountPaywallView.value ||
-      !initialized ||
-      loading ||
-      isPremium ||
-      recovery
-    ) {
-      return;
-    }
-
-    trackedAccountPaywallView.value = true;
-    trackEvent("Paywall Viewed", { source: "account", feature: "premium" });
-    trackPremiumFunnelEvent("paywall_viewed", {
-      source: "account",
-      ...getFunnelAnalytics(),
-      authenticated: authStore.isAuthenticated,
-      is_premium: isPremium,
-    });
-  },
-  { immediate: true }
-);
+usePaywallViewTracking(pricingPaywall, () => {
+  trackEvent("Paywall Viewed", {
+    source: upgradeSource.value,
+    feature: upgradeIntent.value,
+  });
+  trackPremiumJourneyStep("paywall_viewed", {
+    source: upgradeSource.value,
+    feature: upgradeIntent.value,
+    is_authenticated: authStore.isAuthenticated,
+    is_premium: subscriptionStore.isPremium,
+  });
+});
 
 watch(
   () => ({
@@ -948,6 +945,12 @@ watch(
     const pendingPlan = consumePendingCheckout();
     if (!pendingPlan) return;
 
+    trackPremiumJourneyStep("auth_completed", {
+      feature: upgradeIntent.value,
+      source: upgradeSource.value,
+      is_authenticated: true,
+      ...getPlanAnalytics(pendingPlan),
+    });
     await beginAuthenticatedCheckout(pendingPlan, true);
   },
   { immediate: true }
@@ -1459,7 +1462,7 @@ watch(
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div class="max-w-sm">
+            <div ref="pricingPaywall" class="max-w-sm">
               <Tabs v-model="displayedCheckoutPlan" class="w-full">
                 <TabsList class="grid w-full h-10 grid-cols-2 rounded-control">
                   <TabsTrigger value="annual" class="gap-1.5 rounded-sm">

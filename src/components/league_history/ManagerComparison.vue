@@ -17,7 +17,7 @@ import {
 } from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { useSubscriptionStore } from "@/store/subscription";
-import { trackPremiumFunnelEvent } from "@/lib/analytics";
+import { trackPremiumJourneyStep } from "@/lib/analytics";
 import { renderMarkdown } from "@/lib/markdown";
 import { getChartTheme, getChartTooltipTheme } from "@/lib/chartTheme";
 import { getRivalryReportPairKey } from "@/lib/rivalryReport";
@@ -964,7 +964,7 @@ const chartOptions = ref({
                   },
                 }"
                 @click="
-                  trackPremiumFunnelEvent('premium_cta_clicked', {
+                  trackPremiumJourneyStep('premium_cta_clicked', {
                     cta: 'unlock_rivalry_reports',
                     feature: 'rivalry_report',
                     source: 'manager_comparison',

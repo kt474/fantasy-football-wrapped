@@ -3,7 +3,7 @@ import DraftRoomSample from "@/components/league_narratives/DraftRoomSample.vue"
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { trackPremiumFunnelEvent } from "@/lib/analytics";
+import { trackPremiumJourneyStep } from "@/lib/analytics";
 
 const premiumRoute = {
   path: "/account",
@@ -14,12 +14,13 @@ const premiumRoute = {
 };
 
 const trackUnlockClick = () => {
-  trackPremiumFunnelEvent("premium_cta_clicked", {
+  trackPremiumJourneyStep("premium_cta_clicked", {
     cta: "explore_premium",
     feature: "draft_room",
     source: "draft_room_example",
   });
 };
+
 </script>
 
 <template>

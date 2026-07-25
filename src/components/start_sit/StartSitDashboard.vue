@@ -48,7 +48,7 @@ import {
 } from "@/data/demo/loaders";
 import {
   getLeagueAnalyticsProperties,
-  trackPremiumFunnelEvent,
+  trackPremiumJourneyStep,
 } from "@/lib/analytics";
 
 type StartSitPlayer = {
@@ -274,7 +274,7 @@ const getRecommendationReason = (recommendation: StartSitRecommendation) => {
 };
 
 const trackValuesUpgradeClick = () => {
-  trackPremiumFunnelEvent("premium_cta_clicked", {
+  trackPremiumJourneyStep("premium_cta_clicked", {
     feature: "start_sit",
     cta: "add_player_value_context",
     source: "start_sit_lineup_check",

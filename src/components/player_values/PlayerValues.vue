@@ -16,8 +16,9 @@ import TradeRankings from "@/components/trade_lab/TradeRankings.vue";
 import { loadDemoTradeValues } from "@/data/demo/loaders";
 import {
   getLeagueAnalyticsProperties,
-  trackPremiumFunnelEvent,
+  trackPremiumJourneyStep,
 } from "@/lib/analytics";
+import { usePaywallViewTracking } from "@/composables/usePaywallViewTracking";
 
 const props = defineProps<{
   tableData: TableDataType[];
@@ -31,7 +32,7 @@ const loading = ref(false);
 const errorMessage = ref("");
 const access = ref<"preview" | "premium">("preview");
 const totalPlayers = ref(0);
-const trackedPreviewPaywall = ref(false);
+const paywallElement = ref<HTMLElement | null>(null);
 const dynastyPerspective = useDynastyTradePerspective();
 const activeLeague = computed(() => store.currentLeague);
 const isDemoLeague = computed(
@@ -153,25 +154,12 @@ watch(
   { flush: "post" }
 );
 
-watch(
-  [access, visiblePlayerCount, totalPlayers],
-  ([currentAccess, visibleCount, currentTotal]) => {
-    if (
-      trackedPreviewPaywall.value ||
-      currentAccess !== "preview" ||
-      visibleCount <= 0 ||
-      currentTotal <= visibleCount
-    ) {
-      return;
-    }
-
-    trackedPreviewPaywall.value = true;
-    trackPremiumFunnelEvent("paywall_viewed", previewAnalyticsProperties());
-  }
-);
+usePaywallViewTracking(paywallElement, () => {
+  trackPremiumJourneyStep("paywall_viewed", previewAnalyticsProperties());
+});
 
 const trackPreviewUpgradeClick = () => {
-  trackPremiumFunnelEvent("premium_cta_clicked", {
+  trackPremiumJourneyStep("premium_cta_clicked", {
     ...previewAnalyticsProperties(),
     cta: "unlock_complete_player_values",
   });
@@ -206,6 +194,7 @@ onMounted(fetchPlayerValues);
       </Button>
     </div>
     <div
+      ref="paywallElement"
       v-if="
         !loading &&
         access === 'preview' &&

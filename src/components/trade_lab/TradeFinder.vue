@@ -22,8 +22,9 @@ import {
 } from "@/lib/tradeFinder";
 import {
   getLeagueAnalyticsProperties,
-  trackPremiumFunnelEvent,
+  trackPremiumJourneyStep,
 } from "@/lib/analytics";
+import { usePaywallViewTracking } from "@/composables/usePaywallViewTracking";
 import { useStore } from "@/store/store";
 
 const props = defineProps<{
@@ -46,7 +47,7 @@ const finderLoading = ref(false);
 const accessError = ref("");
 const finderError = ref("");
 const finderRetryNonce = ref(0);
-const trackedFinderPaywall = ref(false);
+const paywallElement = ref<HTMLElement | null>(null);
 const visibleSuggestionCount = ref(4);
 const SUGGESTION_PAGE_SIZE = 4;
 let finderRequestId = 0;
@@ -152,15 +153,12 @@ const finderAnalyticsProperties = () => ({
   ...getLeagueAnalyticsProperties(store.currentLeague),
 });
 
-watch(accessError, (error) => {
-  if (!error || trackedFinderPaywall.value) return;
-
-  trackedFinderPaywall.value = true;
-  trackPremiumFunnelEvent("paywall_viewed", finderAnalyticsProperties());
+usePaywallViewTracking(paywallElement, () => {
+  trackPremiumJourneyStep("paywall_viewed", finderAnalyticsProperties());
 });
 
 const trackFinderUpgradeClick = () => {
-  trackPremiumFunnelEvent("premium_cta_clicked", {
+  trackPremiumJourneyStep("premium_cta_clicked", {
     ...finderAnalyticsProperties(),
     cta: "unlock_trade_finder_results",
   });
@@ -356,6 +354,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
     </div>
 
     <div
+      ref="paywallElement"
       v-else-if="accessError"
       class="flex min-h-[60vh] flex-col items-center justify-center px-5 py-10 text-center border rounded-lg bg-muted/20 border-border"
     >

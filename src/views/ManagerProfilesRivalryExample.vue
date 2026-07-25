@@ -5,7 +5,7 @@ import PublicPageShell from "@/components/seo/PublicPageShell.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { trackPremiumFunnelEvent } from "@/lib/analytics";
+import { trackPremiumJourneyStep } from "@/lib/analytics";
 
 const manager = {
   initials: "S",
@@ -39,7 +39,7 @@ const rivalryRoute = {
 };
 
 const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
-  trackPremiumFunnelEvent("premium_cta_clicked", {
+  trackPremiumJourneyStep("premium_cta_clicked", {
     cta:
       feature === "manager_profiles"
         ? "unlock_manager_profiles"
@@ -48,6 +48,7 @@ const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
     source: "manager_profiles_rivalry_example",
   });
 };
+
 </script>
 
 <template>

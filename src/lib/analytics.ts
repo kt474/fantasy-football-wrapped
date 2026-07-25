@@ -1,4 +1,7 @@
 import type { LeagueInfoType } from "@/types/types";
+import { getActivePinia } from "pinia";
+import { useAuthStore } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription";
 
 type AnalyticsValue = string | number | boolean;
 export type AnalyticsProperties = Record<
@@ -95,6 +98,30 @@ export const trackPremiumFunnelEvent = (
   trackEvent("Premium Funnel Step", {
     step,
     path: typeof window === "undefined" ? undefined : window.location.pathname,
+    ...properties,
+  });
+};
+
+type PremiumJourneyStepProperties = AnalyticsProperties & {
+  feature: string;
+  source: string;
+};
+
+export const trackPremiumJourneyStep = (
+  step: string,
+  { feature, source, ...properties }: PremiumJourneyStepProperties
+) => {
+  const pinia = getActivePinia();
+  const authStore = pinia ? useAuthStore(pinia) : null;
+  const subscriptionStore = pinia ? useSubscriptionStore(pinia) : null;
+
+  trackPremiumFunnelEvent(step, {
+    schema_version: 2,
+    feature,
+    source,
+    is_authenticated: authStore?.isAuthenticated ?? false,
+    is_premium: subscriptionStore?.isPremium ?? false,
+    plan_type: subscriptionStore?.planType ?? "none",
     ...properties,
   });
 };

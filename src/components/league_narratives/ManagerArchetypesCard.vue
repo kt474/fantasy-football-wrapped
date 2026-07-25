@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   getLeagueAnalyticsProperties,
   trackEvent,
-  trackPremiumFunnelEvent,
+  trackPremiumJourneyStep,
 } from "@/lib/analytics";
 
 const store = useStore();
@@ -472,7 +472,7 @@ watch(
                 },
               }"
               @click="
-                trackPremiumFunnelEvent('premium_cta_clicked', {
+                trackPremiumJourneyStep('premium_cta_clicked', {
                   cta: 'unlock_all_manager_profiles',
                   feature: 'manager_profiles',
                   source: 'manager_profiles',
