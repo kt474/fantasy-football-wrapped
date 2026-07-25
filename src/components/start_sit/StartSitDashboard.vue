@@ -35,30 +35,14 @@ import {
 import PlayerNewsFeed from "./PlayerNewsFeed.vue";
 import { mapWithConcurrency } from "@/lib/async";
 import {
+  buildRosterNews,
+  type NewsPost,
+} from "./playerNews";
+import {
   loadDemoLeague,
   loadDemoStartSit,
   type DemoLeagueFixtures,
 } from "@/data/demo/loaders";
-
-type NewsPost = {
-  author: {
-    avatar: string;
-    displayName: string;
-    handle: string;
-  };
-  record: {
-    createdAt: string;
-    text: string;
-  };
-  embed?: {
-    external?: {
-      uri: string;
-      thumb?: string;
-      title: string;
-      description: string;
-    };
-  };
-};
 
 type StartSitPlayer = {
   name?: string;
@@ -91,6 +75,8 @@ type StartSitRecommendation = {
 const data = ref<NewsPost[]>([]);
 const currentRoster = ref<StartSitRoster | null>(null);
 const loading = ref<boolean>(false);
+const newsLoading = ref<boolean>(false);
+const newsError = ref<string | null>(null);
 const expanded = ref<Record<string, boolean>>({});
 const store = useStore();
 const playerDirectoryCache = new Map<string, Player>();
@@ -282,6 +268,18 @@ const startSitRecommendations = computed<StartSitRecommendation[]>(() => {
   return recommendations.slice(0, RECOMMENDATION_LIMIT);
 });
 
+const rosterNews = computed(() =>
+  buildRosterNews(
+    data.value,
+    (currentRoster.value?.players ?? []).map((player, index) => ({
+      ...player,
+      rosterSlot:
+        player.rosterSlot ??
+        (index < activeStarterCount.value ? "STARTER" : "BN"),
+    }))
+  )
+);
+
 const managers = computed(() => {
   if (store.leagueInfo.length > 0) {
     return props.tableData.map((user) => {
@@ -378,6 +376,20 @@ const loadPlayer = (
   return playerPromise;
 };
 
+const loadRosterNews = async (requestId: number, playerNames: string[]) => {
+  data.value = [];
+  newsError.value = null;
+  newsLoading.value = true;
+  const result = await getPlayerNews(playerNames);
+  if (requestId !== loadRequestId) return;
+
+  data.value = result.items
+    .map((item) => item.post as NewsPost | undefined)
+    .filter((post): post is NewsPost => Boolean(post));
+  newsError.value = result.error;
+  newsLoading.value = false;
+};
+
 const loadSelectedRoster = async () => {
   const requestId = ++loadRequestId;
   loading.value = true;
@@ -393,6 +405,8 @@ const loadSelectedRoster = async () => {
           (roster) => roster.id === currentManager.value?.rosterId
         ) ?? null;
       data.value = demoPosts.value;
+      newsError.value = null;
+      newsLoading.value = false;
       return;
     }
 
@@ -401,6 +415,7 @@ const loadSelectedRoster = async () => {
     if (!currentLeague || !selectedManager) {
       currentRoster.value = null;
       data.value = [];
+      newsLoading.value = false;
       return;
     }
 
@@ -410,6 +425,7 @@ const loadSelectedRoster = async () => {
     if (!selectedTeam) {
       currentRoster.value = null;
       data.value = [];
+      newsLoading.value = false;
       return;
     }
 
@@ -423,6 +439,12 @@ const loadSelectedRoster = async () => {
     );
     const playerIds = playerEntries.map((entry) => entry.playerId);
     const playerLookupMap = await getPlayerDirectory(leagueKey, playerIds);
+    const playerNames = playerEntries.flatMap((entry) => {
+      const name = playerLookupMap.get(entry.playerId)?.name;
+      return name ? [name] : [];
+    });
+    void loadRosterNews(requestId, playerNames);
+
     const players = await mapWithConcurrency(
       playerEntries,
       START_SIT_CONCURRENCY,
@@ -437,9 +459,6 @@ const loadSelectedRoster = async () => {
           currentLeague.scoringType
         )
     );
-    const playerNews = await getPlayerNews(
-      players.flatMap((player) => (player.name ? [player.name] : []))
-    );
 
     if (requestId !== loadRequestId) {
       return;
@@ -449,9 +468,6 @@ const loadSelectedRoster = async () => {
       id: selectedManager.rosterId,
       players,
     };
-    data.value = playerNews
-      .map((post) => post.post as NewsPost)
-      .filter(Boolean);
   } finally {
     if (requestId === loadRequestId) {
       loading.value = false;
@@ -1140,7 +1156,13 @@ watch(
         </div>
       </TabsContent>
       <TabsContent v-if="!loading" value="news">
-        <PlayerNewsFeed v-if="currentRoster" :posts="data" />
+        <PlayerNewsFeed
+          v-if="currentRoster"
+          :news="rosterNews"
+          :posts="data"
+          :loading="newsLoading"
+          :error="newsError"
+        />
       </TabsContent>
     </Tabs>
   </Card>

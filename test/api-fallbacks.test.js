@@ -47,15 +47,18 @@ describe("API fallback behavior", () => {
     expect(result).toEqual({ league_id_count: 0 });
   });
 
-  test("getPlayerNews returns empty list on non-ok response", async () => {
+  test("getPlayerNews returns an error result on non-ok response", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockFetchResponse(500, {})));
 
     const result = await getPlayerNews(["Patrick Mahomes"]);
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({
+      items: [],
+      error: "Unable to load roster news right now.",
+    });
   });
 
-  test("getPlayerNews returns empty list on invalid JSON", async () => {
+  test("getPlayerNews returns an error result on invalid JSON", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -69,7 +72,23 @@ describe("API fallback behavior", () => {
 
     const result = await getPlayerNews([]);
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({
+      items: [],
+      error: "Unable to load roster news right now.",
+    });
+  });
+
+  test("getPlayerNews safely encodes roster names in the query", async () => {
+    vi.stubEnv("VITE_PLAYER_NEWS", "https://news.example/feed");
+    const fetchMock = vi.fn().mockResolvedValue(mockFetchResponse(200, []));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getPlayerNews(["A.J. Brown", "Ja'Marr Chase"]);
+
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      "https://news.example/feed?keywords=A.J.+Brown%2CJa%27Marr+Chase"
+    );
+    expect(result).toEqual({ items: [], error: null });
   });
 
   test("getPlayerIdsByNameTeamMap preserves input order with nulls on non-ok response", async () => {

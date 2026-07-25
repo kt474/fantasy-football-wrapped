@@ -321,21 +321,48 @@ export const getLatestWeeklyRecapVideo = async (
   );
 };
 
+export type PlayerNewsResult = {
+  items: Record<string, unknown>[];
+  error: string | null;
+};
+
 export const getPlayerNews = async (
   playerNames: string[]
-): Promise<Record<string, unknown>[]> => {
-  let url = import.meta.env.VITE_PLAYER_NEWS;
-
-  if (playerNames && playerNames.length > 0) {
-    url += `?keywords=${playerNames.join(",")}`;
+): Promise<PlayerNewsResult> => {
+  const configuredUrl = import.meta.env.VITE_PLAYER_NEWS;
+  if (!configuredUrl) {
+    return {
+      items: [],
+      error: "Player news is not configured.",
+    };
   }
+
   try {
-    const response = await fetch(url);
+    const origin =
+      typeof window === "undefined"
+        ? "http://localhost"
+        : window.location.origin;
+    const endpoint = new URL(configuredUrl, origin);
+    if (playerNames.length > 0) {
+      endpoint.searchParams.set("keywords", playerNames.join(","));
+    }
+
+    const response = await fetch(endpoint);
     assertOk(response, "Player news request");
-    return await parseJson<Record<string, unknown>[]>(response, "Player news");
+    const items = await parseJson<Record<string, unknown>[]>(
+      response,
+      "Player news"
+    );
+    return {
+      items: Array.isArray(items) ? items : [],
+      error: null,
+    };
   } catch (error) {
     console.error("Error fetching player news:", error);
-    return [];
+    return {
+      items: [],
+      error: "Unable to load roster news right now.",
+    };
   }
 };
 

@@ -1,105 +1,169 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { AlertTriangle } from "lucide-vue-next";
 import Card from "../ui/card/Card.vue";
+import { Skeleton } from "../ui/skeleton";
+import PlayerNewsCard from "./PlayerNewsCard.vue";
+import type { NewsPost, RosterNewsItem } from "./playerNews";
 
-type NewsPost = {
-  author: {
-    avatar: string;
-    displayName: string;
-    handle: string;
-  };
-  record: {
-    createdAt: string;
-    text: string;
-  };
-  embed?: {
-    external?: {
-      uri: string;
-      thumb?: string;
-      title: string;
-      description: string;
-    };
-  };
-};
-
-defineProps<{
+const props = defineProps<{
+  news: RosterNewsItem[];
   posts: NewsPost[];
+  loading: boolean;
+  error: string | null;
 }>();
 
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const hours = Math.floor(diff / (1000 * 60 * 60));
+const latestPosts = computed(() =>
+  [...props.posts]
+    .sort(
+      (a, b) =>
+        Date.parse(b.record?.createdAt || "") -
+        Date.parse(a.record?.createdAt || "")
+    )
+    .slice(0, 10)
+);
+const showLatestNews = computed(
+  () =>
+    !props.loading &&
+    !props.error &&
+    props.news.length === 0 &&
+    latestPosts.value.length > 0
+);
 
-  if (hours < 1) return `${Math.floor(diff / (1000 * 60))}m`;
-  if (hours < 24) return `${hours}h`;
-  return date.toLocaleDateString();
+const getPostUrl = (post: NewsPost) => {
+  if (post.embed?.external?.uri) return post.embed.external.uri;
+  const recordKey = post.uri?.split("/").pop();
+  return post.author?.handle && recordKey
+    ? `https://bsky.app/profile/${post.author.handle}/post/${recordKey}`
+    : undefined;
+};
+
+const formatDate = (dateStr?: string) => {
+  const time = Date.parse(dateStr || "");
+  if (!Number.isFinite(time)) return "";
+
+  const minutes = Math.floor(Math.max(0, Date.now() - time) / 60_000);
+  if (minutes < 1) return "Now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1_440) return `${Math.floor(minutes / 60)}h ago`;
+  return new Date(time).toLocaleDateString();
 };
 </script>
 
 <template>
-  <section>
+  <section class="max-w-3xl">
     <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
       <div>
-        <h2 class="text-2xl font-semibold">Roster News</h2>
+        <h2 class="text-2xl font-semibold">
+          {{ showLatestNews ? "Latest Fantasy News" : "Roster News" }}
+        </h2>
+        <p class="mt-1 text-sm text-muted-foreground">
+          {{
+            showLatestNews
+              ? "The newest updates from fantasy football news accounts."
+              : "Recent updates mentioning players on this roster."
+          }}
+        </p>
       </div>
     </div>
-    <div v-if="posts.length > 0" class="grid max-w-2xl gap-3">
-      <Card
-        v-for="post in posts"
-        :key="post.record.createdAt"
-        class="p-4 overflow-hidden shadow-sm"
-      >
-        <div class="flex items-center gap-3 mb-3">
-          <img
-            :src="post.author.avatar"
-            :alt="post.author.displayName"
-            class="object-cover rounded-full size-10"
-          />
-          <div class="flex-1 min-w-0">
-            <div class="font-medium truncate">
-              {{ post.author.displayName }}
-            </div>
-            <div class="text-sm truncate text-muted-foreground">
-              @{{ post.author.handle }}
-            </div>
-          </div>
-          <div class="text-sm text-muted-foreground">
-            {{ formatDate(post.record.createdAt) }}
-          </div>
+
+    <div v-if="loading" class="grid gap-3" aria-busy="true" aria-live="polite">
+      <span class="sr-only">Loading roster news...</span>
+      <Card v-for="index in 3" :key="index" class="p-4">
+        <div class="flex gap-2">
+          <Skeleton class="w-20 h-5 bg-muted dark:bg-muted/70" />
+          <Skeleton class="w-16 h-5 bg-muted dark:bg-muted/70" />
         </div>
-        <div
-          class="mb-3 text-sm leading-relaxed whitespace-pre-wrap overflow-x-clip"
-        >
-          {{ post.record.text }}
-        </div>
-        <a
-          v-if="post.embed?.external"
-          :href="post.embed.external.uri"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="block overflow-hidden no-underline transition-colors border rounded-lg bg-muted/20 hover:bg-muted/40"
-        >
-          <img
-            v-if="post.embed.external.thumb"
-            :src="post.embed.external.thumb"
-            :alt="post.embed.external.title"
-            class="object-cover w-full h-36"
-          />
-          <div class="p-3">
-            <div class="mb-1 font-semibold">
-              {{ post.embed.external.title }}
-            </div>
-            <div class="text-sm text-muted-foreground line-clamp-2">
-              {{ post.embed.external.description }}
-            </div>
-          </div>
-        </a>
+        <Skeleton class="w-4/5 h-5 mt-4 bg-muted dark:bg-muted/70" />
+        <Skeleton class="w-full h-4 mt-3 bg-muted dark:bg-muted/70" />
+        <Skeleton class="w-3/5 h-4 mt-2 bg-muted dark:bg-muted/70" />
       </Card>
     </div>
+
+    <Card v-else-if="error" class="p-4 border-warning/40">
+      <div class="flex items-start gap-3">
+        <AlertTriangle class="mt-0.5 text-warning size-5 shrink-0" />
+        <div>
+          <p class="font-medium">Roster news is temporarily unavailable.</p>
+          <p class="mt-1 text-sm text-muted-foreground">{{ error }}</p>
+        </div>
+      </div>
+    </Card>
+
+    <div v-else-if="news.length > 0" class="grid gap-3">
+      <PlayerNewsCard v-for="item in news" :key="item.id" :item="item" />
+    </div>
+
+    <section v-else-if="latestPosts.length > 0">
+      <div class="grid gap-3">
+        <Card
+          v-for="post in latestPosts"
+          :key="post.uri || post.cid || post.record?.createdAt"
+          class="p-4 transition-colors hover:border-foreground/20 hover:bg-muted/20"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center min-w-0 gap-2">
+              <img
+                v-if="post.author?.avatar"
+                :src="post.author.avatar"
+                :alt="post.author.displayName || 'News source'"
+                class="object-cover rounded-full size-8"
+              />
+              <div class="min-w-0">
+                <p class="text-sm font-medium truncate">
+                  {{
+                    post.author?.displayName ||
+                    post.author?.handle ||
+                    "Fantasy news"
+                  }}
+                </p>
+                <p
+                  v-if="post.author?.handle"
+                  class="text-xs truncate text-muted-foreground"
+                >
+                  @{{ post.author.handle }}
+                </p>
+              </div>
+            </div>
+            <time class="text-xs shrink-0 text-muted-foreground">
+              {{ formatDate(post.record?.createdAt) }}
+            </time>
+          </div>
+          <a
+            v-if="getPostUrl(post)"
+            :href="getPostUrl(post)"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-start justify-between gap-4 mt-3 font-semibold leading-snug hover:underline"
+          >
+            <span>
+              {{ post.embed?.external?.title || post.record?.text }}
+            </span>
+            <img
+              v-if="post.embed?.external?.thumb"
+              :src="post.embed.external.thumb"
+              :alt="post.embed.external.title || 'Article thumbnail'"
+              class="object-cover w-20 h-16 border rounded-md shrink-0 bg-muted"
+            />
+          </a>
+          <div v-else class="flex items-start justify-between gap-4 mt-3">
+            <p class="font-semibold leading-snug">
+              {{ post.embed?.external?.title || post.record?.text }}
+            </p>
+            <img
+              v-if="post.embed?.external?.thumb"
+              :src="post.embed.external.thumb"
+              :alt="post.embed.external.title || 'Article thumbnail'"
+              class="object-cover w-20 h-16 border rounded-md shrink-0 bg-muted"
+            />
+          </div>
+        </Card>
+      </div>
+    </section>
+
     <Card v-else class="p-4">
       <p class="font-medium">No recent roster news found.</p>
-      <p class="text-sm text-muted-foreground">
+      <p class="mt-1 text-sm text-muted-foreground">
         Check back closer to kickoff for player updates.
       </p>
     </Card>
