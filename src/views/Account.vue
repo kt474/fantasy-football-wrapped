@@ -60,6 +60,7 @@ import {
 } from "@/lib/postPurchaseActivation";
 import {
   getPremiumUpgradeDescription,
+  getPremiumUpgradeTitle,
   isPremiumUpgradeIntent,
   normalizePremiumUpgradeIntent,
 } from "@/lib/premiumUpgradeIntent";
@@ -70,7 +71,7 @@ const subscriptionStore = useSubscriptionStore();
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
-const showLogin = ref(true);
+const showSignUp = ref(false);
 const signInEmail = ref("");
 const signInPassword = ref("");
 const signUpEmail = ref("");
@@ -92,6 +93,7 @@ const selectedCheckoutPlan = ref<CheckoutPlan | null>(null);
 const displayedCheckoutPlan = ref<CheckoutPlan>("annual");
 const lastAutoScrolledUpgradeRoute = ref("");
 const postPurchaseActivation = ref<PostPurchaseActivation | null>(null);
+const activationChecking = ref(false);
 
 const getFeatureSettingId = (feature: string) =>
   `feature-${feature.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
@@ -175,6 +177,9 @@ const getCheckoutReturnAnalytics = () => {
 
 const premiumDescription = computed(() =>
   getPremiumUpgradeDescription(upgradeIntent.value)
+);
+const premiumTitle = computed(() =>
+  getPremiumUpgradeTitle(upgradeIntent.value)
 );
 
 const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").replace(
@@ -327,11 +332,9 @@ const accountSummaryContainerClass = computed(() => {
 const getCheckoutButtonText = (plan: CheckoutPlan) => {
   if (checkoutLoadingPlan.value === plan) return "Redirecting...";
   if (!authStore.isAuthenticated) {
-    return "Sign in to continue";
+    return "Create account or sign in";
   }
-  return displayedCheckoutPlan.value === "annual"
-    ? "Subscribe annually"
-    : "Subscribe monthly";
+  return `Unlock ${premiumTitle.value}`;
 };
 
 const displayedPlanDetails = computed(() =>
@@ -751,9 +754,28 @@ const openBillingPortal = async () => {
   }
 };
 
+const clearCheckoutReturn = async () => {
+  clearPremiumCheckoutAttribution();
+  const newQuery = { ...route.query };
+  delete newQuery.checkout;
+  delete newQuery.session_id;
+  await router.replace({ path: route.path, query: newQuery });
+};
+
+const refreshPremiumActivation = async (showErrorToast = false) => {
+  activationChecking.value = true;
+  await subscriptionStore.fetchSubscriptionStatus({ showErrorToast });
+  activationChecking.value = false;
+
+  if (subscriptionStore.isPremium) {
+    await clearCheckoutReturn();
+    return true;
+  }
+  return false;
+};
+
 const handleCheckoutQuery = async () => {
   const checkoutState = route.query.checkout;
-
   if (checkoutState === "success") {
     const checkoutAttribution = readPremiumCheckoutAttribution();
     postPurchaseActivation.value = getPostPurchaseActivation(
@@ -768,11 +790,22 @@ const handleCheckoutQuery = async () => {
       feature: checkoutAttribution?.feature ?? upgradeIntent.value,
       status: "success",
     });
-    toast.success("Checkout completed. Refreshing subscription status...");
-    await subscriptionStore.fetchSubscriptionStatus({ showErrorToast: true });
+    toast.info("Payment received. Activating Premium...");
+    if (!(await refreshPremiumActivation())) {
+      await new Promise((resolve) => window.setTimeout(resolve, 1500));
+      await refreshPremiumActivation(true);
+    }
+    if (subscriptionStore.isPremium) {
+      toast.success("Premium is active.");
+    } else {
+      toast.info("Premium is still activating. Check again in a moment.");
+    }
   } else if (checkoutState === "canceled") {
-    trackEvent("Checkout Canceled", { source: "stripe", status: "canceled" });
     const checkoutAttribution = readPremiumCheckoutAttribution();
+    if (checkoutAttribution) {
+      displayedCheckoutPlan.value = checkoutAttribution.plan;
+    }
+    trackEvent("Checkout Canceled", { source: "stripe", status: "canceled" });
     trackPremiumJourneyStep("checkout_canceled", {
       ...getCheckoutReturnAnalytics(),
       source:
@@ -781,15 +814,8 @@ const handleCheckoutQuery = async () => {
       feature: checkoutAttribution?.feature ?? upgradeIntent.value,
       status: "canceled",
     });
-    toast.error("Checkout canceled.");
-  }
-
-  if (checkoutState) {
-    clearPremiumCheckoutAttribution();
-    const newQuery = { ...route.query };
-    delete newQuery.checkout;
-    delete newQuery.session_id;
-    router.replace({ path: route.path, query: newQuery });
+    toast.info("Checkout canceled. Your plan selection is still here.");
+    await clearCheckoutReturn();
   }
 };
 
@@ -951,6 +977,7 @@ watch(
       is_authenticated: true,
       ...getPlanAnalytics(pendingPlan),
     });
+    toast.info("Signed in. Opening secure checkout...");
     await beginAuthenticatedCheckout(pendingPlan, true);
   },
   { immediate: true }
@@ -1019,6 +1046,13 @@ watch(
         tabindex="-1"
         class="order-1 scroll-mt-4"
       >
+        <p
+          v-if="selectedCheckoutPlan"
+          class="max-w-sm p-3 mb-3 text-sm border rounded-card"
+        >
+          {{ selectedCheckoutPlan === "annual" ? "Annual" : "Monthly" }} plan
+          selected. Checkout will continue after authentication.
+        </p>
         <Card v-if="showSignUpOtpForm" class="max-w-sm">
           <CardHeader>
             <CardTitle>Verify your email</CardTitle>
@@ -1064,7 +1098,7 @@ watch(
             </FieldGroup>
           </CardContent>
         </Card>
-        <Card v-else-if="showLogin" class="max-w-sm">
+        <Card v-else-if="showSignUp" class="max-w-sm">
           <CardHeader>
             <CardTitle> Create an account </CardTitle>
             <CardDescription>
@@ -1149,7 +1183,7 @@ watch(
                     <button
                       type="button"
                       class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      @click="showLogin = !showLogin"
+                      @click="showSignUp = !showSignUp"
                     >
                       Sign in
                     </button>
@@ -1234,7 +1268,7 @@ watch(
                   <button
                     type="button"
                     class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    @click="showLogin = !showLogin"
+                    @click="showSignUp = !showSignUp"
                   >
                     Sign up
                   </button>
@@ -1245,35 +1279,66 @@ watch(
         </Card>
       </div>
       <div
-        v-else-if="authStore.isAuthenticated"
+        v-else-if="
+          authStore.isAuthenticated &&
+          (!isUpgradeFlow ||
+            postPurchaseActivation ||
+            subscriptionStore.isPremium)
+        "
         :class="['order-1', accountSummaryContainerClass]"
       >
         <Card
           v-if="postPurchaseActivation"
           role="status"
-          class="mb-4 overflow-hidden border-success/30 bg-success/10"
+          :class="[
+            'mb-4 overflow-hidden',
+            subscriptionStore.isPremium
+              ? 'border-success/30 bg-success/10'
+              : 'border-warning/30 bg-warning/10',
+          ]"
         >
           <CardContent
             class="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between"
           >
             <div class="flex min-w-0 gap-3">
               <CircleCheck
+                v-if="subscriptionStore.isPremium"
                 class="mt-0.5 size-5 shrink-0 text-success"
                 aria-hidden="true"
               />
               <div>
-                <p class="font-semibold">{{ postPurchaseActivation.title }}</p>
+                <p class="font-semibold">
+                  {{
+                    subscriptionStore.isPremium
+                      ? postPurchaseActivation.title
+                      : "Activating Premium"
+                  }}
+                </p>
                 <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  {{ postPurchaseActivation.description }}
+                  {{
+                    subscriptionStore.isPremium
+                      ? postPurchaseActivation.description
+                      : "Your payment returned successfully. We’re confirming access now."
+                  }}
                 </p>
               </div>
             </div>
             <Button
+              v-if="subscriptionStore.isPremium"
               class="w-full shrink-0 sm:w-auto"
               @click="openPostPurchaseDestination"
             >
               {{ postPurchaseActivation.actionLabel }}
               <ArrowRight class="size-4" aria-hidden="true" />
+            </Button>
+            <Button
+              v-else
+              class="w-full shrink-0 sm:w-auto"
+              variant="outline"
+              :disabled="activationChecking"
+              @click="refreshPremiumActivation(true)"
+            >
+              {{ activationChecking ? "Checking..." : "Check activation" }}
             </Button>
           </CardContent>
         </Card>
@@ -1441,6 +1506,7 @@ watch(
         v-if="
           !subscriptionStore.isPremium &&
           !subscriptionStore.loading &&
+          !postPurchaseActivation &&
           !showPasswordRecoveryForm
         "
         ref="pricingSection"
@@ -1456,7 +1522,7 @@ watch(
       >
         <Card class="min-w-0 overflow-hidden">
           <CardHeader>
-            <CardTitle>Unlock Premium for all your leagues</CardTitle>
+            <CardTitle>Unlock {{ premiumTitle }} for all your leagues</CardTitle>
             <CardDescription>
               {{ premiumDescription }}
             </CardDescription>
@@ -1516,7 +1582,13 @@ watch(
             <Separator class="my-7" />
 
             <div>
-              <p class="mb-4 text-sm font-medium">Everything included:</p>
+              <p class="mb-4 text-sm font-medium">
+                {{
+                  isUpgradeFlow
+                    ? "Also included with Premium:"
+                    : "Everything included:"
+                }}
+              </p>
               <ul
                 class="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2 sm:gap-x-6"
               >

@@ -19,4 +19,9 @@ describe("Premium upgrade intents", () => {
     expect(isPremiumUpgradeIntent("unknown")).toBe(false);
     expect(normalizePremiumUpgradeIntent("unknown")).toBe("premium");
   });
+
+  test("provides intent-specific purchase titles", () => {
+    expect(getPremiumUpgradeTitle("draft_room")).toBe("Draft Room");
+    expect(getPremiumUpgradeTitle("premium")).toBe("Premium");
+  });
 });

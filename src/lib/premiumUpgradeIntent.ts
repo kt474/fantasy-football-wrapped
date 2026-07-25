@@ -12,6 +12,15 @@ export type PremiumUpgradeIntent =
   | "premium";
 
 const upgradeIntentSet = new Set<string>(premiumUpgradeIntents);
+const upgradeTitles: Record<PremiumUpgradeIntent, string> = {
+  premium: "Premium",
+  premium_report: "Premium Reports",
+  manager_profiles: "Manager Profiles",
+  rivalry_report: "Rivalry Reports",
+  draft_room: "Draft Room",
+  player_values: "Player Values",
+  trade_finder: "Trade Finder",
+};
 
 export const isPremiumUpgradeIntent = (
   value: unknown
@@ -21,6 +30,9 @@ export const isPremiumUpgradeIntent = (
 export const normalizePremiumUpgradeIntent = (
   value: unknown
 ): PremiumUpgradeIntent => (isPremiumUpgradeIntent(value) ? value : "premium");
+
+export const getPremiumUpgradeTitle = (intent: PremiumUpgradeIntent) =>
+  upgradeTitles[intent];
 
 export const getPremiumUpgradeDescription = (
   intent: PremiumUpgradeIntent
