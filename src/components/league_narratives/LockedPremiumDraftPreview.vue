@@ -63,14 +63,6 @@ const trackUnlockClick = () => {
 
 <template>
   <div>
-    <div v-if="historySummary.managers" class="p-4 mb-4 border rounded-card">
-      <p class="text-xs font-medium uppercase">Personalized for your league</p>
-      <p class="mt-1 font-semibold">
-        {{ historySummary.managers }} managers ·
-        {{ historySummary.drafts }} tracked drafts
-      </p>
-    </div>
-
     <div v-if="isAuction" class="p-4 border rounded-card sm:p-5">
       <div class="flex items-start justify-between gap-3">
         <div>
@@ -98,8 +90,17 @@ const trackUnlockClick = () => {
 
     <div
       ref="paywallElement"
-      class="flex flex-col gap-3 pt-4 mt-4 border-t sm:flex-row sm:items-center sm:justify-between"
+      class="flex flex-col gap-4 p-4 mt-4 border rounded-card bg-muted/30 sm:flex-row sm:items-center sm:justify-between sm:p-5"
     >
+      <div v-if="historySummary.managers">
+        <p class="text-xs font-medium uppercase text-muted-foreground">
+          Your league data is ready
+        </p>
+        <p class="mt-1 font-semibold">
+          {{ historySummary.managers }} managers ·
+          {{ historySummary.drafts }} tracked drafts
+        </p>
+      </div>
       <Button as-child class="shrink-0" size="lg">
         <router-link
           :to="{
