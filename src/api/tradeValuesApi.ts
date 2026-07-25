@@ -2,6 +2,7 @@ import { authenticatedFetch } from "@/lib/authFetch";
 import { assertOk, parseJson } from "@/lib/http";
 import type {
   DynastyPerspective,
+  TradeFinderPick,
   TradeFinderPlayer,
   TradeSuggestion,
 } from "@/lib/tradeFinder";
@@ -22,11 +23,13 @@ export type TradeValueRequestPayload = {
     id: number;
     managerName: string;
     playerIds: string[];
+    draftPicks?: TradeFinderPick[];
   }>;
   selectedWeek: number;
   remainingWeeks: number;
   dynastyPerspective: DynastyPerspective;
   finderForRosterId?: number | null;
+  finderAssetFilter?: "all" | "draft-picks";
 };
 
 type TradeValueResponseMetadata = {

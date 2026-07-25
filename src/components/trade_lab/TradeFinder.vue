@@ -42,6 +42,7 @@ const emit = defineEmits<{
 
 const store = useStore();
 const selectedRosterId = ref<number | null>(null);
+const assetFilter = ref<"all" | "draft-picks">("all");
 const suggestions = ref<TradeSuggestion[]>([]);
 const finderLoading = ref(false);
 const accessError = ref("");
@@ -84,12 +85,16 @@ const visibleSuggestions = computed(() =>
 const remainingSuggestionCount = computed(() =>
   Math.max(0, suggestions.value.length - visibleSuggestions.value.length)
 );
+const matchesAssetFilter = (suggestion: TradeSuggestion) =>
+  assetFilter.value === "all" ||
+  Boolean(suggestion.teamAPicks?.length || suggestion.teamBPicks?.length);
 
 watch(
   [
     selectedRosterId,
     () => props.request,
     () => props.demoSuggestionsByRoster,
+    assetFilter,
     finderRetryNonce,
   ],
   async ([rosterId, request, demoSuggestionsByRoster]) => {
@@ -102,7 +107,9 @@ watch(
       return;
     }
     if (demoSuggestionsByRoster) {
-      suggestions.value = demoSuggestionsByRoster[rosterId] ?? [];
+      suggestions.value = (demoSuggestionsByRoster[rosterId] ?? []).filter(
+        matchesAssetFilter
+      );
       visibleSuggestionCount.value = SUGGESTION_PAGE_SIZE;
       finderLoading.value = false;
       accessError.value = "";
@@ -124,9 +131,12 @@ watch(
       const response = await getTradeSuggestions({
         ...request,
         finderForRosterId: rosterId,
+        finderAssetFilter: assetFilter.value,
       });
       if (currentRequestId === finderRequestId) {
-        suggestions.value = response.suggestions ?? [];
+        suggestions.value = (response.suggestions ?? []).filter(
+          matchesAssetFilter
+        );
       }
     } catch (error) {
       if (currentRequestId !== finderRequestId) return;
@@ -180,9 +190,16 @@ const formatGain = (value: number) =>
 const formatValue = (value: number) =>
   Number.isFinite(value) ? Math.round(value).toString() : "—";
 const formatValueMatch = (value: number) =>
-  `${Math.min(100, Math.max(0, Math.round(value / 5) * 5))}%`;
-const formatPlayerNames = (players: TradeSuggestion["teamASends"]) =>
-  players.map((player) => player.name).join(" + ");
+  `${Math.min(100, Math.max(0, value)).toFixed(1)}%`;
+const formatPick = (pick: NonNullable<TradeSuggestion["teamAPicks"]>[number]) =>
+  `${pick.season} Round ${pick.round}`;
+const formatAssets = (
+  players: TradeSuggestion["teamASends"],
+  picks: NonNullable<TradeSuggestion["teamAPicks"]> = []
+) =>
+  [...players.map((player) => player.name), ...picks.map(formatPick)].join(
+    " + "
+  );
 const formatIncomingPlayers = (players: TradeSuggestion["teamASends"]) =>
   players.map((player) => `${player.name} (${player.position})`).join(" and ");
 const improvementBasis = computed(() =>
@@ -203,11 +220,13 @@ const describeTeamImpact = ({
   receivingRosterId,
   receives,
   sends,
+  picks = [],
   gain,
 }: {
   receivingRosterId: number;
   receives: TradeSuggestion["teamASends"];
   sends: TradeSuggestion["teamASends"];
+  picks?: NonNullable<TradeSuggestion["teamAPicks"]>;
   gain: number;
 }) => {
   const starterIds = new Set(
@@ -239,27 +258,32 @@ const describeTeamImpact = ({
       ? `${receives[0].name} moves into the model's best starting lineup`
       : "the incoming package creates a stronger starting lineup combination";
 
-  return `adds ${formatIncomingPlayers(receives)}. ${lineupChange}, creating ${describeGain(gain)} in ${improvementBasis.value}.`;
+  const pickContext = picks.length
+    ? ` The ${picks.map(formatPick).join(" and ")} pick${picks.length === 1 ? " also closes" : "s also close"} the long-term value gap.`
+    : "";
+  return `adds ${formatIncomingPlayers(receives)}. ${lineupChange}, creating ${describeGain(gain)} in ${improvementBasis.value}.${pickContext}`;
 };
 
 const buildTradeText = (suggestion: TradeSuggestion) =>
   [
-    `${suggestion.teamAName} sends ${formatPlayerNames(suggestion.teamASends)} to ${suggestion.teamBName}.`,
-    `${suggestion.teamBName} sends ${formatPlayerNames(suggestion.teamBSends)} to ${suggestion.teamAName}.`,
+    `${suggestion.teamAName} sends ${formatAssets(suggestion.teamASends, suggestion.teamAPicks)} to ${suggestion.teamBName}.`,
+    `${suggestion.teamBName} sends ${formatAssets(suggestion.teamBSends, suggestion.teamBPicks)} to ${suggestion.teamAName}.`,
     "",
     `${suggestion.teamAName} ${describeTeamImpact({
       receivingRosterId: suggestion.teamAId,
       receives: suggestion.teamBSends,
       sends: suggestion.teamASends,
+      picks: suggestion.teamBPicks,
       gain: suggestion.teamAGainPerWeek,
     })}`,
     `${suggestion.teamBName} ${describeTeamImpact({
       receivingRosterId: suggestion.teamBId,
       receives: suggestion.teamASends,
       sends: suggestion.teamBSends,
+      picks: suggestion.teamAPicks,
       gain: suggestion.teamBGainPerWeek,
     })}`,
-    `About a ${formatValueMatch(suggestion.fairnessPercent)} league adjusted value match.`,
+    `Estimated league-adjusted value match: ${formatValueMatch(suggestion.fairnessPercent)}.`,
     "",
     "Created with Fantasy Football Wrapped — https://ffwrapped.com",
   ].join("\n");
@@ -300,26 +324,42 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
         }}
         and league format.
       </p>
-      <div class="shrink-0">
-        <label class="block mb-1 text-xs font-medium text-muted-foreground">
-          Manager
-        </label>
-        <Select v-model="selectedRosterModel">
-          <SelectTrigger class="w-full sm:w-52">
-            <SelectValue placeholder="Select a manager">
-              {{ selectedRosterName || "Select a manager" }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="roster in rosters"
-              :key="roster.id"
-              :value="String(roster.id)"
-            >
-              {{ roster.managerName }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+      <div class="flex flex-wrap gap-2 shrink-0">
+        <div>
+          <label class="block mb-1 text-xs font-medium text-muted-foreground">
+            Trade assets
+          </label>
+          <Select v-model="assetFilter">
+            <SelectTrigger class="w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All trades</SelectItem>
+              <SelectItem value="draft-picks">Includes draft picks</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label class="block mb-1 text-xs font-medium text-muted-foreground">
+            Manager
+          </label>
+          <Select v-model="selectedRosterModel">
+            <SelectTrigger class="w-full sm:w-52">
+              <SelectValue placeholder="Select a manager">
+                {{ selectedRosterName || "Select a manager" }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="roster in rosters"
+                :key="roster.id"
+                :value="String(roster.id)"
+              >
+                {{ roster.managerName }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
 
@@ -404,8 +444,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
         This finder only shows reasonably balanced deals where both projected
         starting lineups improve.
         <template v-if="valuationMode === 'dynasty'">
-          Dynasty Beta currently suggests player-only deals; owned picks can be
-          added in the builder.
+          The finder may use one owned pick to balance a player deal.
         </template>
       </p>
     </div>
@@ -436,7 +475,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
                 <dd
                   class="inline-flex px-2 py-1 text-xs font-medium border rounded-lg border-success/15 bg-success/5 text-foreground dark:border-success/20 dark:bg-success/10"
                 >
-                  ~{{ formatValueMatch(suggestion.fairnessPercent) }} match
+                  {{ formatValueMatch(suggestion.fairnessPercent) }} match
                 </dd>
               </div>
               <div class="mt-0.5">
@@ -495,6 +534,13 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
                       </p>
                     </div>
                   </li>
+                  <li
+                    v-for="pick in suggestion.teamAPicks ?? []"
+                    :key="pick.id"
+                    class="flex items-center gap-2 text-sm font-medium"
+                  >
+                    {{ formatPick(pick) }}
+                  </li>
                 </ul>
               </div>
 
@@ -546,6 +592,13 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
                       </p>
                     </div>
                   </li>
+                  <li
+                    v-for="pick in suggestion.teamBPicks ?? []"
+                    :key="pick.id"
+                    class="flex items-center gap-2 text-sm font-medium"
+                  >
+                    {{ formatPick(pick) }}
+                  </li>
                 </ul>
               </div>
             </div>
@@ -564,6 +617,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
                       receivingRosterId: suggestion.teamAId,
                       receives: suggestion.teamBSends,
                       sends: suggestion.teamASends,
+                      picks: suggestion.teamBPicks,
                       gain: suggestion.teamAGainPerWeek,
                     })
                   }}
@@ -577,6 +631,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
                       receivingRosterId: suggestion.teamBId,
                       receives: suggestion.teamASends,
                       sends: suggestion.teamBSends,
+                      picks: suggestion.teamAPicks,
                       gain: suggestion.teamBGainPerWeek,
                     })
                   }}

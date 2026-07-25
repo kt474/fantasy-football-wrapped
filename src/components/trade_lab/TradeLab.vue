@@ -276,6 +276,7 @@ const fetchPlayers = async () => {
   const currentRequestId = ++rosterRequestId;
   demoSuggestionsByRoster.value = undefined;
   demoStarterPlayerIdsByRoster.value = {};
+  tradeValueRequest.value = null;
 
   if (isDemoLeague.value) {
     loading.value = true;
@@ -320,7 +321,6 @@ const fetchPlayers = async () => {
       showUsernames: store.showUsernames,
       dynastyPerspective: "balanced",
     });
-    tradeValueRequest.value = request;
     const nextRosters = await loadTradeBuilderRosters({
       league: currentLeague,
       tableData: props.tableData,
@@ -337,6 +337,15 @@ const fetchPlayers = async () => {
     });
     if (currentRequestId !== rosterRequestId) return;
     dynastyPickAssets.value = nextDraftPicks;
+    tradeValueRequest.value = {
+      ...request,
+      rosters: request.rosters.map((roster) => ({
+        ...roster,
+        draftPicks: nextDraftPicks
+          .filter((pick) => pick.ownerRosterId === roster.id)
+          .map(({ id, season, round }) => ({ id, season, round })),
+      })),
+    };
     void getPlayerValues(request)
       .then((values) => {
         if (currentRequestId !== rosterRequestId) return;
@@ -763,6 +772,10 @@ const openTradeSuggestion = (suggestion: TradeSuggestion) => {
   resetTrade();
   teamASends.value = suggestion.teamASends.map((player) => player.playerId);
   teamBSends.value = suggestion.teamBSends.map((player) => player.playerId);
+  const resolvePick = (pick: TradeDraftPickAsset) =>
+    dynastyPickAssets.value.find((asset) => asset.id === pick.id) ?? pick;
+  teamAPicks.value = (suggestion.teamAPicks ?? []).map(resolvePick);
+  teamBPicks.value = (suggestion.teamBPicks ?? []).map(resolvePick);
   activeMode.value = "builder";
 };
 

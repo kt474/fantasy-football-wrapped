@@ -70,7 +70,9 @@ describe("trade value backend client", () => {
   });
 
   test("accepts Finder-only responses without a rankings payload", async () => {
-    vi.spyOn(authFetchModule, "authenticatedFetch").mockResolvedValue(
+    const fetchMock = vi
+      .spyOn(authFetchModule, "authenticatedFetch")
+      .mockResolvedValue(
       response(200, {
         access: "premium",
         previewLimit: 10,
@@ -82,9 +84,13 @@ describe("trade value backend client", () => {
     const result = await getTradeSuggestions({
       ...request,
       finderForRosterId: 1,
+      finderAssetFilter: "draft-picks",
     });
     expect(result.suggestions).toEqual([]);
     expect(result).not.toHaveProperty("rankings");
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).finderAssetFilter).toBe(
+      "draft-picks"
+    );
   });
 
   test("sends only selected assets to the free quote endpoint", async () => {

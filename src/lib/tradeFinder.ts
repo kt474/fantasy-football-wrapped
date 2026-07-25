@@ -25,15 +25,23 @@ export type TradeFinderRoster = {
   players: TradeFinderPlayer[];
 };
 
+export type TradeFinderPick = {
+  id: string;
+  season: number;
+  round: number;
+};
+
 export type TradeSuggestion = {
   id: string;
-  tradeType: "1-for-1" | "2-for-1";
+  tradeType: "1-for-1" | "2-for-1" | "multi-asset";
   teamAId: number;
   teamAName: string;
   teamBId: number;
   teamBName: string;
   teamASends: TradeFinderPlayer[];
   teamBSends: TradeFinderPlayer[];
+  teamAPicks?: TradeFinderPick[];
+  teamBPicks?: TradeFinderPick[];
   teamAValue: number;
   teamBValue: number;
   teamAGain: number;
