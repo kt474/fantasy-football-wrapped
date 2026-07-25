@@ -58,10 +58,7 @@ watch(query, (value, _previousValue, onCleanup) => {
   playerSearchError.value = "";
 
   const normalizedQuery = value.trim();
-  if (
-    selectedPlayer.value &&
-    normalizedQuery !== selectedPlayer.value.name
-  ) {
+  if (selectedPlayer.value && normalizedQuery !== selectedPlayer.value.name) {
     selectedPlayer.value = null;
     trades.value = [];
     totalTrades.value = 0;
@@ -340,16 +337,10 @@ const leagueTypeLabel = (type: string | null) => {
           </button>
         </div>
       </div>
-      <p
-        v-if="loadingPlayerSearch"
-        class="mt-2 text-xs text-muted-foreground"
-      >
+      <p v-if="loadingPlayerSearch" class="mt-2 text-xs text-muted-foreground">
         Searching players…
       </p>
-      <p
-        v-else-if="playerSearchError"
-        class="mt-2 text-xs text-destructive"
-      >
+      <p v-else-if="playerSearchError" class="mt-2 text-xs text-destructive">
         {{ playerSearchError }}
       </p>
     </div>
@@ -358,12 +349,12 @@ const leagueTypeLabel = (type: string | null) => {
       v-if="!selectedPlayer"
       class="flex min-h-[calc(100vh-25rem)] items-center justify-center"
     >
-      <Card class="w-full max-w-xl">
+      <Card class="w-full max-w-xl sm:mt-16">
         <CardContent class="p-6">
           <h3 class="text-xl font-semibold">What is a player worth?</h3>
           <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
-            Search above to see the actual trade packages ffwrapped leagues have
-            exchanged for a player.
+            Search above to see the actual trade packages thousands of ffwrapped
+            leagues have exchanged for a player.
           </p>
 
           <div class="p-4 mt-4 border rounded-lg bg-muted/30">

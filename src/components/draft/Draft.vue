@@ -393,9 +393,7 @@ const getValueColor = (value: number) => {
         <div>
           <p class="max-w-3xl mb-2 text-sm text-muted-foreground sm:text-base">
             Draft grades are calculated using each player's draft pick position,
-            ADP, and projections from Sleeper. Please remember that fantasy
-            football projections are rarely accurate, so these grades should
-            just be viewed as a fun reference for preseason expectations.
+            ADP, and projections from Sleeper.
           </p>
           <div v-if="data.length === 0">
             <Separator class="h-px mt-1 mb-4" />

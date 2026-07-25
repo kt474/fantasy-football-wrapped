@@ -22,13 +22,6 @@ const latestPosts = computed(() =>
     )
     .slice(0, 10)
 );
-const showLatestNews = computed(
-  () =>
-    !props.loading &&
-    !props.error &&
-    props.news.length === 0 &&
-    latestPosts.value.length > 0
-);
 
 const getPostUrl = (post: NewsPost) => {
   if (post.embed?.external?.uri) return post.embed.external.uri;

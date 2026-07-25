@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { Search } from "lucide-vue-next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type {
   DynastyPerspective,
   TradeFinderPlayer,
@@ -208,9 +215,10 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
 </script>
 
 <template>
-  <div class="mt-4 space-y-4">
+  <TooltipProvider :delay-duration="300">
+    <div class="mt-4 space-y-4">
     <div
-      class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between"
+      class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between"
     >
       <div class="max-w-3xl">
         <p class="text-sm text-muted-foreground sm:text-base">
@@ -220,45 +228,50 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
               : "League specific rankings for rostered players. Trade value is derived from value over the starter level replacement player at each position."
           }}
         </p>
-        <p
-          class="hidden mt-4 -mb-3 text-xs font-medium text-muted-foreground lg:block"
-        >
-          {{ valueContext }}
-        </p>
       </div>
 
+      <p class="-mb-3 text-xs font-medium text-muted-foreground lg:text-right">
+        {{ valueContext }}
+      </p>
+    </div>
+
+    <div class="min-w-0 p-3 border rounded-lg border-border">
       <div
-        class="grid w-full grid-cols-2 gap-2 sm:w-auto"
+        class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2"
         :class="
           valuationMode === 'dynasty'
-            ? 'sm:grid-cols-[14rem_12rem_9rem_9rem]'
-            : 'sm:grid-cols-[14rem_12rem_9rem]'
+            ? 'xl:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]'
+            : 'lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,1fr))]'
         "
       >
-        <div class="col-span-2 sm:col-span-1">
+        <div class="min-w-0">
           <label
             for="player-value-search"
             class="block mb-1 text-xs font-medium text-muted-foreground"
           >
             Player
           </label>
-          <Input
-            id="player-value-search"
-            v-model="playerSearch"
-            type="search"
-            placeholder="Search players"
-          />
+          <div class="relative min-w-0">
+            <Search
+              class="absolute -translate-y-1/2 pointer-events-none left-3 top-1/2 size-4 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <Input
+              id="player-value-search"
+              v-model="playerSearch"
+              type="search"
+              placeholder="Search players"
+              class="min-w-0 pl-9"
+            />
+          </div>
         </div>
-        <div
-          :class="{
-            'col-span-2 sm:col-span-1': valuationMode === 'dynasty',
-          }"
-        >
+
+        <div class="min-w-0">
           <label class="block mb-1 text-xs font-medium text-muted-foreground">
             Manager
           </label>
           <Select v-model="selectedManagerId">
-            <SelectTrigger class="w-full" aria-label="Filter by manager">
+            <SelectTrigger class="min-w-0" aria-label="Filter by manager">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -273,12 +286,20 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
             </SelectContent>
           </Select>
         </div>
-        <div v-if="valuationMode === 'dynasty'">
-          <label class="block mb-1 text-xs font-medium text-muted-foreground">
+
+        <div v-if="valuationMode === 'dynasty'" class="min-w-0">
+          <label
+            for="dynasty-team-direction"
+            class="block mb-1 text-xs font-medium text-muted-foreground"
+          >
             Team direction
           </label>
           <Select v-model="dynastyPerspective">
-            <SelectTrigger class="w-full" aria-label="Dynasty team direction">
+            <SelectTrigger
+              id="dynasty-team-direction"
+              class="min-w-0"
+              aria-label="Dynasty team direction"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -288,12 +309,13 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
             </SelectContent>
           </Select>
         </div>
-        <div>
+
+        <div class="min-w-0">
           <label class="block mb-1 text-xs font-medium text-muted-foreground">
             Position
           </label>
           <Select v-model="selectedPosition">
-            <SelectTrigger class="w-full" aria-label="Filter by position">
+            <SelectTrigger class="min-w-0" aria-label="Filter by position">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -311,13 +333,9 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
       </div>
     </div>
 
-    <p class="text-xs font-medium text-muted-foreground lg:hidden">
-      {{ valueContext }}
-    </p>
-
     <div
       v-if="loading"
-      class="max-lg:!mt-1 overflow-hidden border rounded-lg border-border"
+      class="max-lg:!mt-4 overflow-hidden border rounded-lg border-border"
       aria-busy="true"
       aria-live="polite"
     >
@@ -336,7 +354,7 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
 
     <div
       v-else-if="players.length === 0"
-      class="max-lg:!mt-1 px-5 py-10 text-center border border-dashed rounded-lg border-border"
+      class="max-lg:!mt-4 px-5 py-10 text-center border border-dashed rounded-lg border-border"
     >
       <p class="font-medium">No player values available</p>
       <p class="mt-1 text-sm text-muted-foreground">
@@ -346,7 +364,7 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
 
     <div
       v-else-if="filteredPlayers.length === 0"
-      class="max-lg:!mt-1 px-5 py-10 text-center border border-dashed rounded-lg border-border"
+      class="max-lg:!mt-4 px-5 py-10 text-center border border-dashed rounded-lg border-border"
     >
       <p class="font-medium">No matching players</p>
       <p class="mt-1 text-sm text-muted-foreground">
@@ -354,7 +372,7 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
       </p>
     </div>
 
-    <div v-else class="max-lg:!mt-1 space-y-3">
+    <div v-else class="max-lg:!mt-4 space-y-3">
       <div class="overflow-hidden border rounded-lg border-border">
         <div
           class="overflow-x-auto"
@@ -441,22 +459,32 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                   </td>
                   <td class="px-4 py-3 text-right">
                     <div class="flex items-center justify-end gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="xs"
-                        :aria-expanded="expandedPlayerId === player.playerId"
-                        :aria-controls="`player-value-explanation-${player.playerId}`"
-                        @click="toggleValueExplanation(player.playerId)"
-                      >
-                        Why?
-                      </Button>
                       <Badge :variant="valueTier(player.tradeValue).variant">
                         {{ valueTier(player.tradeValue).label }}
                       </Badge>
-                      <span class="font-semibold min-w-10">
-                        {{ formatNumber(player.tradeValue, 1) }}
-                      </span>
+                      <Tooltip>
+                        <TooltipTrigger as-child>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="xs"
+                            class="px-1 font-semibold underline decoration-dotted decoration-muted-foreground/70 underline-offset-4 tabular-nums hover:decoration-foreground"
+                            :aria-label="`Explain ${player.name || `${player.team} Defense`}'s trade value`"
+                            :aria-expanded="
+                              expandedPlayerId === player.playerId
+                            "
+                            :aria-controls="`player-value-explanation-${player.playerId}`"
+                            @click="toggleValueExplanation(player.playerId)"
+                          >
+                            <span class="min-w-10">
+                              {{ formatNumber(player.tradeValue, 1) }}
+                            </span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          Explain this value
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </td>
                   <td class="px-4 py-3 text-right">
@@ -468,9 +496,7 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
                   <td class="px-4 py-3 font-medium text-right">
                     {{ formatNumber(player.vorp) }}
                   </td>
-                  <td
-                    class="sticky right-0 px-4 py-3 text-right bg-background"
-                  >
+                  <td class="sticky right-0 px-4 py-3 text-right bg-background">
                     <Button
                       type="button"
                       variant="outline"
@@ -579,5 +605,6 @@ const getValueExplanation = (player: TradeFinderPlayer) => {
         </p>
       </div>
     </div>
-  </div>
+    </div>
+  </TooltipProvider>
 </template>
