@@ -95,11 +95,3 @@ const mostPoints = computed(() => {
     </table>
   </Card>
 </template>
-<style scoped>
-.light-custom-bg-color {
-  background-color: hsl(var(--muted));
-}
-.dark-custom-bg-color {
-  background-color: hsl(var(--muted-foreground));
-}
-</style>

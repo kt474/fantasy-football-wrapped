@@ -817,16 +817,3 @@ const getTeamName = (tableDataItem: TableDataType) => {
     </div>
   </div>
 </template>
-<style scoped>
-@media (min-width: 1280px) {
-  .custom-height {
-    height: 39.1rem;
-  }
-}
-.light-custom-bg-color {
-  background-color: hsl(var(--muted));
-}
-.dark-custom-bg-color {
-  background-color: hsl(var(--muted-foreground));
-}
-</style>

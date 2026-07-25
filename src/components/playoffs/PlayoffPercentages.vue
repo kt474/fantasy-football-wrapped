@@ -412,7 +412,7 @@ const tableData = computed(() => {
     <div
       v-else
       role="status"
-      class="p-4 border border-border rounded-lg bg-card shadow-sm animate-pulse md:p-6 custom-height"
+      class="p-4 border border-border rounded-lg bg-card shadow-sm animate-pulse md:p-6"
     >
       <p class="flex justify-center -mb-6 text-xl font-semibold">
         Loading projection data...
@@ -465,11 +465,3 @@ const tableData = computed(() => {
     </div>
   </Card>
 </template>
-<style scoped>
-.light-custom-bg-color {
-  background-color: hsl(var(--muted));
-}
-.dark-custom-bg-color {
-  background-color: hsl(var(--muted-foreground));
-}
-</style>

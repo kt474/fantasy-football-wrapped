@@ -259,11 +259,3 @@ const getTeamName = (tableDataItem: TableDataType) => {
     </TooltipProvider>
   </ScrollableTableCard>
 </template>
-<style scoped>
-.light-custom-bg-color {
-  background-color: hsl(var(--muted));
-}
-.dark-custom-bg-color {
-  background-color: hsl(var(--muted-foreground));
-}
-</style>

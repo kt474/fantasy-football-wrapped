@@ -152,9 +152,6 @@ const listPadding = computed(() => {
     min-width: 19rem;
   }
 }
-.custom-padding {
-  padding-right: 2rem !important;
-}
 .list-padding {
   padding: 0.2rem 0 0.2rem 0;
 }

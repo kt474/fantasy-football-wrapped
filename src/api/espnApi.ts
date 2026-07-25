@@ -1364,19 +1364,6 @@ export const getScoreboardData = async (
   );
 };
 
-export const getPlayoffMatchups = async (
-  season: string,
-  league_id: string,
-  auth?: EspnAuth,
-  signal?: AbortSignal
-) => {
-  return fetchEspnJson(
-    `${ESPN_BASE_URL}/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${league_id}?view=mMatchupScore`,
-    auth,
-    signal
-  );
-};
-
 export const getWaivers = async (
   season: string,
   league_id: string,
