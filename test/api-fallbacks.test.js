@@ -21,6 +21,7 @@ const mockFetchResponse = (status, data, overrides = {}) =>
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe("API fallback behavior", () => {
@@ -109,6 +110,28 @@ describe("API fallback behavior", () => {
     expect(result).toEqual({
       text: "Unable to generate report. Please try again later.",
     });
+  });
+
+  test("generateSummary aborts stalled requests and returns timeout guidance", async () => {
+    vi.useFakeTimers();
+    let requestSignal;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url, options) => {
+        requestSignal = options.signal;
+        return new Promise(() => {});
+      })
+    );
+
+    const request = generateSummary([], {});
+    const result = expect(request).resolves.toEqual({
+      text: "Unable to generate report. Please try again later.",
+    });
+
+    await vi.advanceTimersByTimeAsync(60_000);
+    await result;
+    expect(requestSignal).toBeInstanceOf(AbortSignal);
+    expect(requestSignal.aborted).toBe(true);
   });
 
   test("generateReport returns fallback text on server errors", async () => {

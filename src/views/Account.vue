@@ -1007,31 +1007,52 @@ watch(
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <FieldGroup>
-              <Field>
-                <FieldLabel for="new-password"> New password </FieldLabel>
-                <Input
-                  v-model="recoveryPassword"
-                  type="password"
-                  placeholder="New password"
-                  autocomplete="new-password"
-                />
-              </Field>
-              <Field>
-                <FieldLabel for="confirm-password">
-                  Confirm password
-                </FieldLabel>
-                <Input
-                  v-model="recoveryPasswordConfirm"
-                  type="password"
-                  placeholder="Confirm password"
-                  autocomplete="new-password"
-                />
-              </Field>
-              <Field>
-                <Button @click="resetPassword"> Update Password </Button>
-              </Field>
-            </FieldGroup>
+            <form
+              :aria-busy="authStore.loading"
+              @submit.prevent="resetPassword"
+            >
+              <FieldGroup>
+                <Field>
+                  <FieldLabel for="recovery-password">
+                    New password
+                  </FieldLabel>
+                  <Input
+                    id="recovery-password"
+                    v-model="recoveryPassword"
+                    name="new-password"
+                    type="password"
+                    placeholder="New password"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel for="recovery-password-confirm">
+                    Confirm password
+                  </FieldLabel>
+                  <Input
+                    id="recovery-password-confirm"
+                    v-model="recoveryPasswordConfirm"
+                    name="confirm-password"
+                    type="password"
+                    placeholder="Confirm password"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                  />
+                </Field>
+                <Field>
+                  <Button type="submit" :disabled="authStore.loading">
+                    {{
+                      authStore.loading
+                        ? "Updating password..."
+                        : "Update Password"
+                    }}
+                  </Button>
+                </Field>
+              </FieldGroup>
+            </form>
           </CardContent>
         </Card>
       </div>
@@ -1056,41 +1077,52 @@ watch(
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <FieldGroup>
-              <Field>
-                <FieldLabel for="verification-code">
-                  Verification code
-                </FieldLabel>
-                <Input
-                  v-model="signUpOtpCode"
-                  type="text"
-                  placeholder="123456"
-                  autocomplete="one-time-code"
-                />
-              </Field>
-              <Field>
-                <Button :disabled="authStore.loading" @click="verifySignUpOtp">
-                  Verify code
-                </Button>
-                <Button
-                  variant="outline"
-                  :disabled="authStore.loading"
-                  @click="resendSignUpOtp"
-                >
-                  Resend code
-                </Button>
-              </Field>
-              <FieldDescription class="text-center">
-                Wrong email?
-                <button
-                  type="button"
-                  class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  @click="resetSignUpOtpForm"
-                >
-                  Use a different email
-                </button>
-              </FieldDescription>
-            </FieldGroup>
+            <form
+              :aria-busy="authStore.loading"
+              @submit.prevent="verifySignUpOtp"
+            >
+              <FieldGroup>
+                <Field>
+                  <FieldLabel for="signup-verification-code">
+                    Verification code
+                  </FieldLabel>
+                  <Input
+                    id="signup-verification-code"
+                    v-model="signUpOtpCode"
+                    name="verification-code"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="123456"
+                    autocomplete="one-time-code"
+                    required
+                  />
+                </Field>
+                <Field>
+                  <Button type="submit" :disabled="authStore.loading">
+                    {{ authStore.loading ? "Verifying..." : "Verify code" }}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    :disabled="authStore.loading"
+                    @click="resendSignUpOtp"
+                  >
+                    Resend code
+                  </Button>
+                </Field>
+                <FieldDescription class="text-center">
+                  Wrong email?
+                  <button
+                    type="button"
+                    class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    :disabled="authStore.loading"
+                    @click="resetSignUpOtpForm"
+                  >
+                    Use a different email
+                  </button>
+                </FieldDescription>
+              </FieldGroup>
+            </form>
           </CardContent>
         </Card>
         <Card v-else-if="showSignUp" class="max-w-sm">
@@ -1101,23 +1133,31 @@ watch(
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <FieldGroup>
+            <form :aria-busy="authStore.loading" @submit.prevent="signUp">
+              <FieldGroup>
               <Field>
-                <FieldLabel for="email"> Email </FieldLabel>
+                <FieldLabel for="signup-email"> Email </FieldLabel>
                 <Input
+                  id="signup-email"
                   v-model="signUpEmail"
+                  name="email"
                   type="email"
                   placeholder="Email"
                   autocomplete="email"
+                  required
                 />
               </Field>
               <Field>
-                <FieldLabel for="password"> Password </FieldLabel>
+                <FieldLabel for="signup-password"> Password </FieldLabel>
                 <Input
+                  id="signup-password"
                   v-model="signUpPassword"
+                  name="password"
                   type="password"
                   placeholder="Password"
                   autocomplete="new-password"
+                  minlength="6"
+                  required
                 />
               </Field>
               <div class="flex items-start w-full gap-3">
@@ -1140,9 +1180,14 @@ watch(
               </div>
               <FieldGroup>
                 <Field>
-                  <Button @click="signUp"> Create Account </Button>
+                  <Button type="submit" :disabled="authStore.loading">
+                    {{
+                      authStore.loading ? "Creating account..." : "Create Account"
+                    }}
+                  </Button>
                   <FieldSeparator class="my-2">Or continue with</FieldSeparator>
                   <Button
+                    type="button"
                     variant="outline"
                     :disabled="authStore.loading"
                     @click="signInWithGoogle"
@@ -1177,7 +1222,8 @@ watch(
                     Already have an account?
                     <button
                       type="button"
-                      class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                      :disabled="authStore.loading"
                       @click="showSignUp = !showSignUp"
                     >
                       Sign in
@@ -1185,7 +1231,8 @@ watch(
                   </FieldDescription>
                 </Field>
               </FieldGroup>
-            </FieldGroup>
+              </FieldGroup>
+            </form>
           </CardContent>
         </Card>
         <Card v-else class="max-w-sm">
@@ -1196,38 +1243,49 @@ watch(
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <FieldGroup>
-              <Field>
-                <FieldLabel for="email"> Email </FieldLabel>
-                <Input
-                  v-model="signInEmail"
-                  type="email"
-                  placeholder="Email"
-                  autocomplete="email"
-                />
-              </Field>
-              <Field>
-                <div class="flex items-center">
-                  <FieldLabel for="password"> Password </FieldLabel>
-                  <button
-                    type="button"
-                    class="inline-block ml-auto text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    @click="sendPasswordResetEmail"
-                  >
-                    Forgot your password?
-                  </button>
-                </div>
-                <Input
-                  v-model="signInPassword"
-                  type="password"
-                  placeholder="Password"
-                  autocomplete="current-password"
-                />
-              </Field>
-              <Field>
-                <Button @click="signIn"> Login </Button>
+            <form :aria-busy="authStore.loading" @submit.prevent="signIn">
+              <FieldGroup>
+                <Field>
+                  <FieldLabel for="signin-email"> Email </FieldLabel>
+                  <Input
+                    id="signin-email"
+                    v-model="signInEmail"
+                    name="email"
+                    type="email"
+                    placeholder="Email"
+                    autocomplete="email"
+                    required
+                  />
+                </Field>
+                <Field>
+                  <div class="flex items-center">
+                    <FieldLabel for="signin-password"> Password </FieldLabel>
+                    <button
+                      type="button"
+                      class="inline-block ml-auto text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                      :disabled="authStore.loading"
+                      @click="sendPasswordResetEmail"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
+                  <Input
+                    id="signin-password"
+                    v-model="signInPassword"
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required
+                  />
+                </Field>
+                <Field>
+                  <Button type="submit" :disabled="authStore.loading">
+                    {{ authStore.loading ? "Logging in..." : "Login" }}
+                  </Button>
                 <FieldSeparator class="my-2">Or continue with</FieldSeparator>
                 <Button
+                  type="button"
                   variant="outline"
                   :disabled="authStore.loading"
                   @click="signInWithGoogle"
@@ -1262,14 +1320,16 @@ watch(
                   Don't have an account?
                   <button
                     type="button"
-                    class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    :disabled="authStore.loading"
                     @click="showSignUp = !showSignUp"
                   >
                     Sign up
                   </button>
                 </FieldDescription>
-              </Field>
-            </FieldGroup>
+                </Field>
+              </FieldGroup>
+            </form>
           </CardContent>
         </Card>
       </div>

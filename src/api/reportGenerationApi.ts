@@ -1,7 +1,7 @@
-import { authenticatedFetch } from "@/lib/authFetch";
 import { assertOk, parseJson } from "@/lib/http";
 import { normalizePremiumReport } from "@/lib/premiumReport";
 import type { PremiumReport } from "@/types/types";
+import { fetchAiReport } from "./aiRequest";
 
 export const generateTrends = async (
   data: Record<string, unknown>[],
@@ -9,7 +9,7 @@ export const generateTrends = async (
   bulletCount: number,
   leagueState: string = "in_season"
 ): Promise<{ bulletPoints: string[] }> => {
-  const response = await fetch(import.meta.env.VITE_TRENDS_RECAP, {
+  const response = await fetchAiReport(import.meta.env.VITE_TRENDS_RECAP, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export const generateSummary = async (
   metadata: Record<string, unknown>
 ): Promise<Record<string, string>> => {
   try {
-    const response = await fetch(import.meta.env.VITE_LEAGUE_RECAP, {
+    const response = await fetchAiReport(import.meta.env.VITE_LEAGUE_RECAP, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export const generateReport = async (
   season: string
 ): Promise<Record<string, string>> => {
   try {
-    const response = await fetch(import.meta.env.VITE_WEEKLY_REPORT, {
+    const response = await fetchAiReport(import.meta.env.VITE_WEEKLY_REPORT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -103,7 +103,7 @@ export const generatePremiumReport = async (
   style: string
 ): Promise<{ report?: PremiumReport; text?: string }> => {
   try {
-    const response = await authenticatedFetch(
+    const response = await fetchAiReport(
       import.meta.env.VITE_PREMIUM_WEEKLY_REPORT,
       {
         method: "POST",
@@ -117,7 +117,8 @@ export const generatePremiumReport = async (
           },
           commentaryStyle: style,
         }),
-      }
+      },
+      true
     );
     if (response.status === 401) {
       throw new Error("Please sign in to use premium reports.");
@@ -153,7 +154,7 @@ export const generatePreview = async (
   prompt: Record<string, unknown>
 ): Promise<Record<string, string>> => {
   try {
-    const response = await fetch(import.meta.env.VITE_WEEKLY_PREVIEW, {
+    const response = await fetchAiReport(import.meta.env.VITE_WEEKLY_PREVIEW, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

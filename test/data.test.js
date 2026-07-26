@@ -485,6 +485,27 @@ describe("Sleeper API data transforms", () => {
     });
   });
 
+  test("generatePremiumReport aborts stalled authenticated requests", async () => {
+    vi.useFakeTimers();
+    let requestSignal;
+    vi.spyOn(authFetchModule, "authenticatedFetch").mockImplementation(
+      (_url, options) => {
+        requestSignal = options.signal;
+        return new Promise(() => {});
+      }
+    );
+
+    const request = generatePremiumReport([], {}, "normal");
+    const result = expect(request).resolves.toEqual({
+      text: "Unable to generate premium report right now. Please try again later.",
+    });
+
+    await vi.advanceTimersByTimeAsync(60_000);
+    await result;
+    expect(requestSignal).toBeInstanceOf(AbortSignal);
+    expect(requestSignal.aborted).toBe(true);
+  });
+
   test("getData composes league, matchup, transactions, and avatar URL data", async () => {
     const fetchMock = vi.fn(async (url) => {
       const rawUrl = String(url);
