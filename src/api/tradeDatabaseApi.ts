@@ -1,5 +1,9 @@
 import { getBackendApiUrl } from "@/lib/backendApi";
 import { assertOk, parseJson } from "@/lib/http";
+import {
+  runWithRequestTimeout,
+  type RequestOptions,
+} from "@/lib/request";
 
 export type TradeDatabaseAsset = {
   type: "player" | "draft_pick" | "faab";
@@ -46,7 +50,8 @@ export const getPlayerTradeDatabase = async (
   playerId: string,
   offset = 0,
   limit = 20,
-  filters: TradeDatabaseFilters = {}
+  filters: TradeDatabaseFilters = {},
+  options: RequestOptions = {}
 ): Promise<TradeDatabaseResponse> => {
   const origin =
     typeof window === "undefined" ? "http://localhost" : window.location.origin;
@@ -64,7 +69,10 @@ export const getPlayerTradeDatabase = async (
     endpoint.searchParams.set("week", String(filters.week));
   }
 
-  const response = await fetch(endpoint);
+  const response = await runWithRequestTimeout(
+    (signal) => fetch(endpoint, { signal }),
+    options
+  );
   assertOk(response, "Trade database request");
   return await parseJson<TradeDatabaseResponse>(
     response,

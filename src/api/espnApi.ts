@@ -11,7 +11,10 @@ import type {
   RosterType,
   UserType,
 } from "@/types/types";
-import { getPlayerIdLookupMap, getPlayerIdsByNameTeamMap } from "@/api/api";
+import {
+  getPlayerIdLookupMap,
+  getPlayerIdsByNameTeamMap,
+} from "@/api/playerApi";
 import {
   getPlayerLookupKey,
   type PlayerNameTeamLookup,

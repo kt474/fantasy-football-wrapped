@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { getSharedReport, sharePremiumReport } from "../src/api/api.ts";
 import * as authFetchModule from "../src/lib/authFetch.ts";
+import { RequestTimeoutError } from "../src/lib/request.ts";
 
 const report = {
   frontPage: {
@@ -41,6 +42,7 @@ const mockResponse = (status, data) => ({
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe("shared report API", () => {
@@ -111,5 +113,30 @@ describe("shared report API", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockResponse(404, {})));
 
     await expect(getSharedReport("b".repeat(32))).resolves.toBeNull();
+  });
+
+  test("times out a stalled report publish", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(authFetchModule, "authenticatedFetch").mockImplementation(
+      () => new Promise(() => {})
+    );
+
+    const request = sharePremiumReport(
+      {
+        leagueId: "123456789",
+        platform: "sleeper",
+        leagueName: "Test League",
+        season: "2026",
+        week: 1,
+        report,
+      },
+      { timeoutMs: 25 }
+    );
+    const rejection = expect(request).rejects.toBeInstanceOf(
+      RequestTimeoutError
+    );
+
+    await vi.advanceTimersByTimeAsync(25);
+    await rejection;
   });
 });

@@ -1,4 +1,4 @@
-import { getPlayersByIdsMap } from "@/api/api";
+import { getPlayersByIdsMap } from "@/api/playerApi";
 import {
   getDraftProjections,
   getStats,

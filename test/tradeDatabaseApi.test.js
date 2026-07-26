@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { getPlayerTradeDatabase } from "../src/api/api.ts";
+import { RequestTimeoutError } from "../src/lib/request.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe("trade database API", () => {
@@ -38,5 +40,20 @@ describe("trade database API", () => {
     expect(requestedUrl.searchParams.get("leagueType")).toBe("Dynasty");
     expect(requestedUrl.searchParams.get("leagueSize")).toBe("12");
     expect(requestedUrl.searchParams.get("week")).toBe("6");
+  });
+
+  test("times out a stalled trade search", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+
+    const request = getPlayerTradeDatabase("6794", 0, 20, {}, {
+      timeoutMs: 25,
+    });
+    const rejection = expect(request).rejects.toBeInstanceOf(
+      RequestTimeoutError
+    );
+
+    await vi.advanceTimersByTimeAsync(25);
+    await rejection;
   });
 });

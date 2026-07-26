@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   getStats: vi.fn(),
 }));
 
-vi.mock("../src/api/api.ts", () => ({
+vi.mock("../src/api/playerApi.ts", () => ({
   getPlayerIdLookupMap: mocks.getPlayerIdLookupMap,
   getPlayerIdsByNameTeamMap: mocks.getPlayerIdsByNameTeamMap,
 }));

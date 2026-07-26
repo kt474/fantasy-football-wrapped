@@ -121,7 +121,9 @@ const loadPlayerNames = async (results: TradeDatabaseResult[]) => {
     { length: Math.ceil(missingIds.length / 50) },
     (_, index) => missingIds.slice(index * 50, index * 50 + 50)
   );
-  const maps = await Promise.all(chunks.map(getPlayersByIdsMap));
+  const maps = await Promise.all(
+    chunks.map((chunk) => getPlayersByIdsMap(chunk))
+  );
   const nextLookup = new Map(playerLookup.value);
   maps.forEach((map) =>
     map.forEach((player, id) => nextLookup.set(id, player))

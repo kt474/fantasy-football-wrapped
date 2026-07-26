@@ -11,6 +11,7 @@ import {
   getWeeklyRecapVideo,
   startWeeklyRecapVideo,
 } from "../src/api/api.ts";
+import { RequestTimeoutError } from "../src/lib/request.ts";
 
 const job = {
   jobId: "job-123",
@@ -29,6 +30,7 @@ const response = (status, body) => ({
 
 afterEach(() => {
   authenticatedFetch.mockReset();
+  vi.useRealTimers();
 });
 
 describe("weekly recap video job API", () => {
@@ -79,5 +81,18 @@ describe("weekly recap video job API", () => {
     await expect(
       getLatestWeeklyRecapVideo("league-1", "2025", 7, "a".repeat(64))
     ).resolves.toBeNull();
+  });
+
+  test("times out a stalled video request", async () => {
+    vi.useFakeTimers();
+    authenticatedFetch.mockImplementation(() => new Promise(() => {}));
+
+    const request = getWeeklyRecapVideo("job-123", { timeoutMs: 25 });
+    const rejection = expect(request).rejects.toBeInstanceOf(
+      RequestTimeoutError
+    );
+
+    await vi.advanceTimersByTimeAsync(25);
+    await rejection;
   });
 });

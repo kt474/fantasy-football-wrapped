@@ -16,7 +16,10 @@ import {
   getUsers,
 } from "../src/api/sleeperApi.ts";
 import * as authFetchModule from "../src/lib/authFetch.ts";
-import { RequestTimeoutError } from "../src/lib/request.ts";
+import {
+  DEFAULT_REQUEST_TIMEOUT_MS,
+  RequestTimeoutError,
+} from "../src/lib/request.ts";
 
 const mockFetchResponse = (status, data, overrides = {}) =>
   Promise.resolve({
@@ -29,6 +32,7 @@ const mockFetchResponse = (status, data, overrides = {}) =>
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe("Sleeper API data transforms", () => {
@@ -313,6 +317,19 @@ describe("Sleeper API data transforms", () => {
     expect(fetchMock.mock.calls[0][0]).toContain(
       "query=justin%20jefferson&limit=8"
     );
+  });
+
+  test("times out a stalled player search", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+
+    const request = searchPlayers("chase", 8);
+    const rejection = expect(request).rejects.toBeInstanceOf(
+      RequestTimeoutError
+    );
+
+    await vi.advanceTimersByTimeAsync(DEFAULT_REQUEST_TIMEOUT_MS);
+    await rejection;
   });
 
   test("returns player ids by requested name and team in order", async () => {

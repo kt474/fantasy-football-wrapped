@@ -1,10 +1,9 @@
 import { authenticatedFetch } from "@/lib/authFetch";
 import {
+  DEFAULT_REQUEST_TIMEOUT_MS,
   runWithRequestTimeout,
   type RequestOptions,
 } from "@/lib/request";
-
-const BACKEND_REQUEST_TIMEOUT_MS = 20_000;
 
 export const getBackendBaseUrl = () =>
   (import.meta.env.VITE_BACKEND_URL ?? "").replace(/\/$/, "");
@@ -19,7 +18,7 @@ export const authenticatedBackendFetch = (
   path: string,
   {
     signal,
-    timeoutMs = BACKEND_REQUEST_TIMEOUT_MS,
+    timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
     ...init
   }: AuthenticatedBackendFetchOptions = {}
 ) =>

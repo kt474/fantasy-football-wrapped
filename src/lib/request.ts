@@ -1,4 +1,5 @@
-export const LEAGUE_LOAD_TIMEOUT_MS = 20_000;
+export const DEFAULT_REQUEST_TIMEOUT_MS = 20_000;
+export const LEAGUE_LOAD_TIMEOUT_MS = DEFAULT_REQUEST_TIMEOUT_MS;
 export const ESPN_LEAGUE_LOAD_TIMEOUT_MS = 45_000;
 export const REQUEST_ATTEMPT_TIMEOUT_MS = 8_000;
 
@@ -39,7 +40,7 @@ export const throwIfRequestAborted = (signal?: AbortSignal) => {
 
 export const runWithRequestTimeout = async <T>(
   operation: (signal: AbortSignal) => Promise<T>,
-  { signal, timeoutMs = LEAGUE_LOAD_TIMEOUT_MS }: RequestOptions = {}
+  { signal, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS }: RequestOptions = {}
 ): Promise<T> => {
   if (signal?.aborted) throw getAbortError(signal);
 
