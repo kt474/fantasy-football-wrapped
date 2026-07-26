@@ -1274,12 +1274,7 @@ watch(
         </Card>
       </div>
       <div
-        v-else-if="
-          authStore.isAuthenticated &&
-          (!isUpgradeFlow ||
-            postPurchaseActivation ||
-            subscriptionStore.isPremium)
-        "
+        v-else-if="authStore.isAuthenticated"
         :class="['order-1', accountSummaryContainerClass]"
       >
         <Card
