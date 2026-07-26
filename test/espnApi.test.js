@@ -42,17 +42,29 @@ const createStorageMock = () => {
 };
 
 describe("ESPN credential storage", () => {
-  test("removes saved credentials from local storage", () => {
+  test("removes only the selected league credentials from local storage", () => {
     vi.stubGlobal("localStorage", createStorageMock());
     const key = getEspnAuthStorageKey("2026", "12345");
+    const otherLeagueKey = getEspnAuthStorageKey("2026", "67890");
     localStorage.setItem(
       key,
       JSON.stringify({ swid: "{abc}", espnS2: "secret" })
     );
+    localStorage.setItem(
+      otherLeagueKey,
+      JSON.stringify({ swid: "{def}", espnS2: "other-secret" })
+    );
+    localStorage.setItem("12345", "legacy league data");
+    localStorage.setItem("league-history:espn:67890:2026", "history data");
 
     removeSavedEspnAuth("2026", "12345");
 
     expect(localStorage.getItem(key)).toBeNull();
+    expect(localStorage.getItem(otherLeagueKey)).not.toBeNull();
+    expect(localStorage.getItem("12345")).toBe("legacy league data");
+    expect(localStorage.getItem("league-history:espn:67890:2026")).toBe(
+      "history data"
+    );
   });
 });
 

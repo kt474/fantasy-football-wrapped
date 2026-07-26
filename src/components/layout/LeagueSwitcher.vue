@@ -90,22 +90,6 @@ const leagueMetadata = computed(() => {
 const selectLeague = (leagueId: string) => {
   store.updateCurrentLeagueId(leagueId);
 };
-const removeHistoryLeagues = () => {
-  const numberStartRegex = /^[0-9]/;
-  const keysToRemove = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (
-      key &&
-      (numberStartRegex.test(key) || key.startsWith("league-history"))
-    ) {
-      keysToRemove.push(key);
-    }
-  }
-  for (const key of keysToRemove) {
-    localStorage.removeItem(key);
-  }
-};
 
 const removeLeague = () => {
   if (currentLeague.value) {
@@ -113,14 +97,8 @@ const removeLeague = () => {
     store.updateLoadingLeague("");
     const removedLeagueId = currentLeagueId.value;
     const removedLeague = currentLeague.value;
-    removeHistoryLeagues();
     if (removedLeague.platform === "espn") {
       removeSavedEspnAuth(removedLeague.season, removedLeague.leagueId);
-    }
-    if (removedLeague.previousLeagues) {
-      removedLeague.previousLeagues.forEach((league: LeagueInfoType) => {
-        localStorage.removeItem(league.leagueId);
-      });
     }
     store.$patch((state) => {
       state.leagueInfo = state.leagueInfo.filter(
