@@ -866,7 +866,26 @@ describe("weekly report transforms", () => {
   test("builds the versioned Remotion payload from report facts", () => {
     const report = {
       frontPage: { headline: "Headline", subheadline: "Sub", lead: "Lead" },
-      matchupReports: [],
+      matchupReports: [
+        {
+          matchupNumber: 1,
+          bracket: "regular",
+          headline: "Alpha wins",
+          recap: "Alpha beat Beta.",
+          teams: [
+            {
+              teamName: "Alpha Team",
+              avatarUrl: "https://assets.example.com/alpha.png",
+              record: "5-2",
+            },
+            {
+              teamName: "Beta Team",
+              avatarUrl: "https://assets.example.com/beta.png",
+              record: "3-4",
+            },
+          ],
+        },
+      ],
       teamOfTheWeek: {
         teamName: "Alpha Team",
         pointsScored: 101,
@@ -888,8 +907,16 @@ describe("weekly report transforms", () => {
             },
             rankBeforeWeek: 3,
             rankAfterWeek: 1,
+            recordAfterWeek: "5-2",
           },
-          { name: "Beta Team", pointsScored: 89, bestBenchSwap: null },
+          {
+            name: "Beta Team",
+            pointsScored: 89,
+            bestBenchSwap: null,
+            rankBeforeWeek: 5,
+            rankAfterWeek: 5,
+            recordAfterWeek: "3-4",
+          },
         ],
       },
     ];
@@ -900,10 +927,22 @@ describe("weekly report transforms", () => {
       matchups,
       topTeams: [{ name: "Alpha Team", points: 101, avatar: "not-a-url" }],
       topPlayers: [
-        { name: "Top Player", user: "Alpha Team", points: 25, position: "WR" },
+        {
+          name: "Top Player",
+          user: "Alpha Team",
+          points: 25,
+          player_id: "p1",
+          position: "WR",
+        },
       ],
       benchPlayers: [
-        { name: "Bench Star", user: "Alpha Team", points: 20, position: "RB" },
+        {
+          name: "Bench Star",
+          user: "Alpha Team",
+          points: 20,
+          player_id: "p2",
+          position: "RB",
+        },
       ],
     });
 
@@ -912,14 +951,46 @@ describe("weekly report transforms", () => {
       matchupNumber: 1,
       margin: 12,
       bracket: "regular",
+      teams: [
+        {
+          name: "Alpha Team",
+          avatarUrl: "https://assets.example.com/alpha.png",
+          managerName: "Alpha Team",
+          record: "5-2",
+          rank: 1,
+        },
+        {
+          name: "Beta Team",
+          avatarUrl: "https://assets.example.com/beta.png",
+          managerName: "Beta Team",
+          record: "3-4",
+          rank: 5,
+        },
+      ],
     });
-    expect(result.facts.topTeams[0].avatarUrl).toBeUndefined();
+    expect(result.facts.topTeams[0].avatarUrl).toBe(
+      "https://assets.example.com/alpha.png"
+    );
+    expect(result.facts.topPlayers[0]).toMatchObject({
+      managerName: "Alpha Team",
+      imageUrl: "https://sleepercdn.com/content/nfl/players/thumb/p1.jpg",
+    });
     expect(result.facts.benchPain[0]).toMatchObject({
+      managerName: "Alpha Team",
+      imageUrl: "https://sleepercdn.com/content/nfl/players/thumb/p2.jpg",
       startedPlayerName: "Starter",
       pointsLost: 15,
     });
     expect(result.facts.standingsMoves).toEqual([
-      { teamName: "Alpha Team", from: 3, to: 1 },
+      {
+        teamName: "Alpha Team",
+        from: 3,
+        to: 1,
+        avatarUrl: "https://assets.example.com/alpha.png",
+        managerName: "Alpha Team",
+        record: "5-2",
+        rank: 1,
+      },
     ]);
   });
 });

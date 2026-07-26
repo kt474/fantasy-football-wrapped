@@ -300,7 +300,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
 </script>
 
 <template>
-  <div class="mt-4 space-y-4">
+  <div class="mt-3 space-y-4">
     <div
       class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
     >

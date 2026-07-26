@@ -189,17 +189,39 @@ export type WeeklyRecapVideoProps = {
     matchups: Array<{
       matchupNumber: number;
       teams: [
-        { name: string; score: number; avatarUrl?: string },
-        { name: string; score: number; avatarUrl?: string },
+        {
+          name: string;
+          score: number;
+          avatarUrl?: string;
+          managerName?: string;
+          record?: string;
+          rank?: number;
+        },
+        {
+          name: string;
+          score: number;
+          avatarUrl?: string;
+          managerName?: string;
+          record?: string;
+          rank?: number;
+        },
       ];
       margin: number;
       bracket: "regular" | "winners" | "losers" | "unknown";
     }>;
-    topTeams: Array<{ name: string; score: number; avatarUrl?: string }>;
+    topTeams: Array<{
+      name: string;
+      score: number;
+      avatarUrl?: string;
+      managerName?: string;
+      record?: string;
+      rank?: number;
+    }>;
     topPlayers: Array<{
       name: string;
       points: number;
       teamName: string;
+      managerName?: string;
       position?: string;
       imageUrl?: string;
     }>;
@@ -207,6 +229,7 @@ export type WeeklyRecapVideoProps = {
       playerName: string;
       points: number;
       teamName: string;
+      managerName?: string;
       startedPlayerName?: string;
       pointsLost?: number;
       imageUrl?: string;
@@ -215,6 +238,10 @@ export type WeeklyRecapVideoProps = {
       teamName: string;
       from: number;
       to: number;
+      avatarUrl?: string;
+      managerName?: string;
+      record?: string;
+      rank?: number;
     }>;
   };
   branding: {

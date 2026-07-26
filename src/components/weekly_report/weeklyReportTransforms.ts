@@ -1481,6 +1481,7 @@ type VideoPlayerInput = {
   name: string;
   user: string;
   points: number;
+  player_id?: string;
   position?: string;
 };
 
@@ -1495,6 +1496,18 @@ const optionalHttpUrl = (value?: string) => {
     return undefined;
   }
 };
+
+const getSleeperPlayerImageUrl = (playerId?: string) =>
+  playerId && /^[A-Za-z0-9_-]+$/.test(playerId)
+    ? `https://sleepercdn.com/content/nfl/players/thumb/${playerId}.jpg`
+    : undefined;
+
+const normalizeVideoIdentityName = (value: string) =>
+  value
+    .trim()
+    .toLocaleLowerCase()
+    .replace(/[‘’]/g, "'")
+    .replace(/\s+/g, " ");
 
 const getVideoBracket = (
   matchup: PremiumReportMatchup
@@ -1521,6 +1534,68 @@ export const buildWeeklyRecapVideoProps = ({
   topPlayers: VideoPlayerInput[];
   benchPlayers: VideoPlayerInput[];
 }): WeeklyRecapVideoProps => {
+  type VideoTeamIdentity = {
+    avatarUrl?: string;
+    managerName?: string;
+    record?: string;
+    rank?: number;
+  };
+  const identities = new Map<string, VideoTeamIdentity>();
+  const mergeIdentity = (teamName: string, identity: VideoTeamIdentity) => {
+    const key = normalizeVideoIdentityName(teamName);
+    const current = identities.get(key) ?? {};
+    identities.set(key, {
+      ...current,
+      ...(identity.avatarUrl ? { avatarUrl: identity.avatarUrl } : {}),
+      ...(identity.managerName
+        ? { managerName: identity.managerName }
+        : {}),
+      ...(identity.record ? { record: identity.record } : {}),
+      ...(identity.rank ? { rank: identity.rank } : {}),
+    });
+  };
+
+  report.matchupReports.forEach((matchup) => {
+    matchup.teams?.forEach((team) => {
+      mergeIdentity(team.teamName, {
+        avatarUrl: optionalHttpUrl(team.avatarUrl),
+        managerName: team.teamName,
+        record: team.record,
+      });
+    });
+  });
+  mergeIdentity(report.teamOfTheWeek.teamName, {
+    avatarUrl: optionalHttpUrl(report.teamOfTheWeek.avatarUrl),
+    managerName: report.teamOfTheWeek.teamName,
+  });
+  report.weeklyLowlights.entries.forEach((entry) => {
+    mergeIdentity(entry.teamName, {
+      avatarUrl: optionalHttpUrl(entry.avatarUrl),
+      managerName: entry.teamName,
+    });
+  });
+  topTeams.forEach((team) => {
+    mergeIdentity(team.name, {
+      avatarUrl: optionalHttpUrl(team.avatar),
+      managerName: team.name,
+    });
+  });
+  matchups.forEach((matchup) => {
+    matchup.teams.forEach((team) => {
+      mergeIdentity(team.name, {
+        managerName: team.name,
+        ...("recordAfterWeek" in team
+          ? { record: team.recordAfterWeek }
+          : {}),
+        ...("rankAfterWeek" in team && team.rankAfterWeek > 0
+          ? { rank: team.rankAfterWeek }
+          : {}),
+      });
+    });
+  });
+  const getIdentity = (teamName: string) =>
+    identities.get(normalizeVideoIdentityName(teamName)) ?? {};
+
   const benchDecisions = new Map<
     string,
     { startedPlayerName: string; pointsLost: number }
@@ -1552,6 +1627,7 @@ export const buildWeeklyRecapVideoProps = ({
           teamName: team.name,
           from: team.rankBeforeWeek,
           to: team.rankAfterWeek,
+          ...getIdentity(team.name),
         });
       }
     });
@@ -1561,6 +1637,7 @@ export const buildWeeklyRecapVideoProps = ({
     const teams = matchup.teams.slice(0, 2).map((team) => ({
       name: team.name,
       score: team.pointsScored,
+      ...getIdentity(team.name),
     }));
     if (teams.length !== 2) return [];
 
@@ -1584,15 +1661,17 @@ export const buildWeeklyRecapVideoProps = ({
       topTeams: topTeams.slice(0, 5).map((team) => ({
         name: team.name,
         score: team.points,
-        ...(optionalHttpUrl(team.avatar)
-          ? { avatarUrl: optionalHttpUrl(team.avatar) }
-          : {}),
+        ...getIdentity(team.name),
       })),
       topPlayers: topPlayers.slice(0, 5).map((player) => ({
         name: player.name,
         points: player.points,
         teamName: player.user,
+        managerName: player.user,
         ...(player.position ? { position: player.position } : {}),
+        ...(getSleeperPlayerImageUrl(player.player_id)
+          ? { imageUrl: getSleeperPlayerImageUrl(player.player_id) }
+          : {}),
       })),
       benchPain: benchPlayers.slice(0, 5).map((player) => {
         const decision = benchDecisions.get(`${player.user}:${player.name}`);
@@ -1600,6 +1679,10 @@ export const buildWeeklyRecapVideoProps = ({
           playerName: player.name,
           points: player.points,
           teamName: player.user,
+          managerName: player.user,
+          ...(getSleeperPlayerImageUrl(player.player_id)
+            ? { imageUrl: getSleeperPlayerImageUrl(player.player_id) }
+            : {}),
           ...(decision ?? {}),
         };
       }),
