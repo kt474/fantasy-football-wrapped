@@ -69,7 +69,8 @@ export const generateReport = async (
   metadata: Record<string, unknown>,
   leagueId: string,
   currentWeek: number,
-  season: string
+  season: string,
+  platform: "sleeper" | "espn"
 ): Promise<Record<string, string>> => {
   try {
     const response = await fetchAiReport(import.meta.env.VITE_WEEKLY_REPORT, {
@@ -83,6 +84,7 @@ export const generateReport = async (
           matchups: prompt,
         },
         leagueId: leagueId,
+        platform: platform,
         currentWeek: currentWeek,
         season: season,
       }),

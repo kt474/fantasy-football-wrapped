@@ -144,6 +144,23 @@ describe("API fallback behavior", () => {
     });
   });
 
+  test("generateReport includes platform in the weekly report cache identity", async () => {
+    vi.stubEnv("VITE_WEEKLY_REPORT", "https://backend.example/api/generateReport");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(mockFetchResponse(200, { text: "Weekly recap" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await generateReport([], {}, "league-123", 7, "2026", "espn");
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+      leagueId: "league-123",
+      platform: "espn",
+      currentWeek: 7,
+      season: "2026",
+    });
+  });
+
   test("generatePreview returns fallback text on server errors", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockFetchResponse(500, {})));
 

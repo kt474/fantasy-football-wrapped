@@ -376,7 +376,8 @@ const getReport = async () => {
       leagueMetadata,
       currentLeague.leagueId,
       currentWeek.value,
-      currentLeague.season
+      currentLeague.season,
+      currentLeague.platform === "espn" ? "espn" : "sleeper"
     );
     rawWeeklyReport.value = response.text;
     trackEvent("Weekly Report Generated", {
