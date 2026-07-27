@@ -391,7 +391,7 @@ const chartOptions = ref({
     <div
       v-else
       role="status"
-      class="p-4 border border-border rounded-lg bg-card shadow-sm animate-pulse md:p-6 custom-height"
+      class="p-4 border border-border rounded-lg bg-card shadow-xs animate-pulse md:p-6 custom-height"
     >
       <p class="flex justify-center mb-4 text-xl font-semibold sm:-mb-6">
         Loading projection data...

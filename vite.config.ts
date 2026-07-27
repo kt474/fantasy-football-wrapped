@@ -1,5 +1,5 @@
 import path from "node:path";
-import { defineConfig } from "vite";
+import { configDefaults, defineConfig } from "vitest/config";
 import vueDevTools from "vite-plugin-vue-devtools";
 import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
@@ -63,5 +63,8 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  test: {
+    exclude: [...configDefaults.exclude, "e2e/**"],
   },
 }));

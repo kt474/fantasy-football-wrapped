@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import premiumReportExampleJson from "@/data/premiumReportExample.json";
 import type { SharedReportResponse } from "@/api/api";
-import { ArrowLeft, Check, FileText, ShieldCheck } from "lucide-vue-next";
+import { ArrowLeft, Check, FileText, ShieldCheck } from "@lucide/vue";
 
 const premiumReportExample = premiumReportExampleJson as SharedReportResponse;
 

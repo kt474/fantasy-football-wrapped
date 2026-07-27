@@ -6,7 +6,7 @@ import {
   ExternalLink,
   LoaderCircle,
   Share2,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { Button } from "@/components/ui/button";
 import Checkbox from "@/components/ui/checkbox/Checkbox.vue";
 import {

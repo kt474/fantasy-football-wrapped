@@ -21,14 +21,14 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
     v-bind="forwarded"
     :class="
       cn(
-        'group peer relative inline-flex h-11 w-12 shrink-0 cursor-pointer items-center rounded-md bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
+        'group peer relative inline-flex h-11 w-12 shrink-0 cursor-pointer items-center rounded-md bg-transparent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
         props.class
       )
     "
   >
     <span
       aria-hidden="true"
-      class="pointer-events-none absolute left-1/2 top-1/2 h-7 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-input shadow-sm transition-colors group-data-[state=checked]:bg-primary sm:h-5 sm:w-9"
+      class="pointer-events-none absolute left-1/2 top-1/2 h-7 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-input shadow-xs transition-colors group-data-[state=checked]:bg-primary sm:h-5 sm:w-9"
     />
     <SwitchThumb
       :class="

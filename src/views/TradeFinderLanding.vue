@@ -3,7 +3,7 @@ import PublicPageShell from "@/components/seo/PublicPageShell.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Handshake, ScanSearch, TrendingUp } from "lucide-vue-next";
+import { Check, Handshake, ScanSearch, TrendingUp } from "@lucide/vue";
 
 const features = [
   {

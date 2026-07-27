@@ -296,7 +296,7 @@ watch(
               />
               <svg
                 v-else
-                class="flex-shrink-0 w-8 h-8"
+                class="shrink-0 w-8 h-8"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -338,7 +338,7 @@ watch(
               />
               <svg
                 v-else
-                class="flex-shrink-0 w-8 h-8"
+                class="shrink-0 w-8 h-8"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -533,7 +533,7 @@ watch(
       <div
         v-for="x in 3"
         role="status"
-        class="max-w-sm p-4 mt-4 mr-4 border rounded-lg shadow-sm border-border bg-card animate-pulse"
+        class="max-w-sm p-4 mt-4 mr-4 border rounded-lg shadow-xs border-border bg-card animate-pulse"
       >
         <div class="flex items-center mb-4">
           <svg

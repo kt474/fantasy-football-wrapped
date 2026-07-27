@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { Search } from "lucide-vue-next";
+import { Search } from "@lucide/vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -452,7 +452,7 @@ const getValueExplanation = (player: TradeFinderPlayer) =>
                             <span aria-hidden="true">·</span>
                             <button
                               type="button"
-                              class="px-0.5 py-2 -my-2 font-medium rounded-sm text-foreground/70 underline-offset-2 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              class="px-0.5 py-2 -my-2 font-medium rounded-xs text-foreground/70 underline-offset-2 transition-colors hover:text-foreground hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                               @click="buildTrade(player)"
                             >
                               Build trade

@@ -63,7 +63,7 @@ const handleSubmit = async () => {
       <div class="space-y-3">
         <Tabs default-value="Sleeper" v-model="activeTab">
           <TabsList
-            class="h-10 p-1 border rounded-md shadow-sm border-input bg-popover"
+            class="h-10 p-1 border rounded-md shadow-xs border-input bg-popover"
           >
             <TabsTrigger
               value="Sleeper"

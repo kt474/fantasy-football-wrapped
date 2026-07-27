@@ -936,7 +936,7 @@ const chartOptions = ref({
       </div>
       <div v-else class="mt-3 max-w-[86ch]">
         <p
-          class="mb-4 max-w-[60ch] text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7"
+          class="mb-4 max-w-[60ch] text-sm leading-6 text-muted-foreground sm:text-base"
         >
           Premium rivalry reports turn the manager comparison into a
           personalized short story about the selected managers' history, style,

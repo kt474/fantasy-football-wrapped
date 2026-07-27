@@ -11,7 +11,7 @@ import {
   Scale,
   Swords,
   Trophy,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 const sampleManagers = [
   {

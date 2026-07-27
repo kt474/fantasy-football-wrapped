@@ -367,7 +367,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       <button
                         type="button"
                         @click="tableOrder = 'wins'"
-                        class="flex min-h-11 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                        class="flex min-h-11 items-center text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Record
                         <div>
@@ -405,7 +405,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       <button
                         type="button"
                         @click="tableOrder = 'points'"
-                        class="flex min-h-11 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                        class="flex min-h-11 items-center text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Points
                         <div>
@@ -445,7 +445,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       <button
                         type="button"
                         @click="tableOrder = 'pointsAgainst'"
-                        class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                        class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Points Against
                         <div>
@@ -485,7 +485,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       <button
                         type="button"
                         @click="tableOrder = 'recordAgainstAll'"
-                        class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                        class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         Record vs. All
                         <div>
@@ -525,7 +525,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                       <button
                         type="button"
                         @click="tableOrder = 'medianRecord'"
-                        class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                        class="flex min-h-11 w-20 items-center text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                       >
                         {{ medianScoring ? "H2H Record" : "Median Record" }}
                         <div>

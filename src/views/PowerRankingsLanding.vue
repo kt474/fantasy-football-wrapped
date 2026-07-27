@@ -10,7 +10,7 @@ import {
   Grid3X3,
   ListOrdered,
   TrendingUp,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 const sampleRankings = [
   { rank: 1, team: "Breece's Puffs", score: 82.4, move: "+2", width: 100 },

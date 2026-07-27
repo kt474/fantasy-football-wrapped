@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Swords } from "lucide-vue-next";
+import { Swords } from "@lucide/vue";
 
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
 import { Badge } from "@/components/ui/badge";

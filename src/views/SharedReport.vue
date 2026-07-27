@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { ArrowLeft, CalendarDays, MoonStar, Sun } from "lucide-vue-next";
+import { ArrowLeft, CalendarDays, MoonStar, Sun } from "@lucide/vue";
 import { getSharedReport, type SharedReportResponse } from "@/api/api";
 import PremiumReportContent from "@/components/weekly_report/PremiumReportContent.vue";
 import SharedReportHighlights from "@/components/weekly_report/SharedReportHighlights.vue";
@@ -126,7 +126,7 @@ watch(() => route.params.token, loadReport);
 <template>
   <div class="container w-11/12 max-w-5xl py-8 mx-auto sm:py-12">
     <div class="flex items-center justify-between mb-6">
-      <Button as-child class="shadow-sm">
+      <Button as-child class="shadow-xs">
         <a href="/" @click="trackSharedReportCta('explore')">
           <ArrowLeft class="mr-2 size-4" />
           Try ffwrapped

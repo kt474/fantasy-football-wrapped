@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { ArrowLeftRight, ArrowRight, Search } from "lucide-vue-next";
+import { ArrowLeftRight, ArrowRight, Search } from "@lucide/vue";
 import {
   getPlayerTradeDatabase,
   getPlayersByIdsMap,

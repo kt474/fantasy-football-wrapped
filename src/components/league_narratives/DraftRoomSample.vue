@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDown, LockKeyhole } from "lucide-vue-next";
+import { ChevronDown, LockKeyhole } from "@lucide/vue";
 
 import { Badge } from "@/components/ui/badge";
 import Card from "@/components/ui/card/Card.vue";

@@ -9,7 +9,7 @@ import {
   FolderClock,
   NotebookPen,
   Trophy,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 type ToolSummary = {
   title: string;

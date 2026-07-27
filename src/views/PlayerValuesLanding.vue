@@ -3,7 +3,7 @@ import PublicPageShell from "@/components/seo/PublicPageShell.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ListOrdered, RefreshCw, SlidersHorizontal } from "lucide-vue-next";
+import { ListOrdered, RefreshCw, SlidersHorizontal } from "@lucide/vue";
 
 const rankings = [
   {

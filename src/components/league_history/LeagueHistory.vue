@@ -322,7 +322,7 @@ watch(
                     <button
                       type="button"
                       @click="tableOrder = 'wins'"
-                      class="flex w-24 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      class="flex w-24 items-center text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Compiled Record
                       <div>
@@ -360,7 +360,7 @@ watch(
                     <button
                       type="button"
                       @click="tableOrder = 'points'"
-                      class="flex w-28 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      class="flex w-28 items-center text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Points per game
                       <div>
@@ -400,7 +400,7 @@ watch(
                     <button
                       type="button"
                       @click="tableOrder = 'expectedWins'"
-                      class="flex w-28 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      class="flex w-28 items-center text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Wins above expected
                       <div>
@@ -441,7 +441,7 @@ watch(
                     <button
                       type="button"
                       @click="tableOrder = 'managerEfficiency'"
-                      class="flex w-28 items-center text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      class="flex w-28 items-center text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Manager Efficiency
                       <div>
@@ -604,7 +604,7 @@ watch(
                     <button
                       type="button"
                       :aria-label="`Open ${season} league`"
-                      class="flex underline text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      class="flex underline text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                       @click="addNewLeague(season)"
                     >
                       {{ season }}

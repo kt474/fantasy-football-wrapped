@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { Copy } from "lucide-vue-next";
+import { Copy } from "@lucide/vue";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -459,7 +459,7 @@ const copySuggestion = async (suggestion: TradeSuggestion) => {
         <article
           v-for="suggestion in visibleSuggestions"
           :key="suggestion.id"
-          class="flex flex-col overflow-hidden border rounded-lg shadow-sm bg-card border-border"
+          class="flex flex-col overflow-hidden border rounded-lg shadow-xs bg-card border-border"
         >
           <header
             class="flex items-start justify-between gap-4 p-4 border-b border-border"

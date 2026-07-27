@@ -134,7 +134,7 @@ const espnS2Model = computed({
     <div v-else class="space-y-2">
       <div class="grid gap-2 sm:grid-cols-[10rem_6rem_minmax(0,1fr)]">
         <div
-          class="grid grid-cols-2 p-1 text-sm border rounded-md shadow-sm min-h-9 border-input bg-popover"
+          class="grid grid-cols-2 p-1 text-sm border rounded-md shadow-xs min-h-9 border-input bg-popover"
           role="radiogroup"
           aria-label="ESPN league privacy"
         >

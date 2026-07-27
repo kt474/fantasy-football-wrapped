@@ -12,7 +12,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Sun, MoonStar } from "lucide-vue-next";
+import { Sun, MoonStar } from "@lucide/vue";
 import { Button } from "@/components/ui/button";
 import "vue-sonner/style.css";
 import { Toaster } from "@/components/ui/sonner";

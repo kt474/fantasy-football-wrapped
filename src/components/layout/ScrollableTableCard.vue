@@ -64,7 +64,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect());
       :tabindex="canScrollLeft || canScrollRight ? 0 : undefined"
       :class="
         cn(
-          'w-full overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+          'w-full overflow-x-auto focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
           contentClass,
         )
       "

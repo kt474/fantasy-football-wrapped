@@ -7,7 +7,7 @@ import { getLeagueKey, useStore } from "../../store/store";
 import Card from "../ui/card/Card.vue";
 import Separator from "../ui/separator/Separator.vue";
 import { toast } from "vue-sonner";
-import { Copy } from "lucide-vue-next";
+import { Copy } from "@lucide/vue";
 import { Button } from "../ui/button/index.ts";
 import { renderMarkdown } from "@/lib/markdown";
 

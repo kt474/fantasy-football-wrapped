@@ -3,7 +3,7 @@ import PublicPageShell from "@/components/seo/PublicPageShell.vue";
 import VideoRecapPreview from "@/components/weekly_report/VideoRecapPreview.vue";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
-import { ArrowRight } from "lucide-vue-next";
+import { ArrowRight } from "@lucide/vue";
 
 const trackCreateRecap = () => {
   trackEvent("Video Recap CTA Clicked", { source: "video_example_page" });

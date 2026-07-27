@@ -6,7 +6,7 @@ import { getData, inputLeague } from "../../api/api";
 import { seasonType } from "../../types/apiTypes";
 import { Button } from "../ui/button";
 import Card from "../ui/card/Card.vue";
-import { Check } from "lucide-vue-next";
+import { Check } from "@lucide/vue";
 import { toast } from "vue-sonner";
 import { loadUserLeagues } from "./userLeagueLoader";
 import { getLeagueAnalyticsProperties, trackEvent } from "@/lib/analytics";

@@ -35,7 +35,7 @@ import {
   FlaskConical,
   IdCard,
   ListOrdered,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { Separator } from "../ui/separator";
 import { useStore } from "../../store/store";
 import { useRoute, useRouter } from "vue-router";

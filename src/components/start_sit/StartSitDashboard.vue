@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, shallowRef, watch } from "vue";
-import { ChevronDown, ChevronUp } from "lucide-vue-next";
+import { ChevronDown, ChevronUp } from "@lucide/vue";
 import { getLeagueKey, useStore } from "../../store/store";
 import { getPlayerNews, getPlayersByIdsMap } from "../../api/api";
 import {
@@ -689,7 +689,7 @@ watch(
                 <Card
                   v-for="recommendation in startSitRecommendations"
                   :key="recommendation.id"
-                  class="overflow-hidden shadow-sm"
+                  class="overflow-hidden shadow-xs"
                 >
                   <div
                     class="flex items-start justify-between gap-3 px-4 py-3 bg-muted/20"
@@ -851,7 +851,7 @@ watch(
               <div
                 v-for="(player, index) in currentRoster.players"
                 :key="player.player_id"
-                class="shadow-sm"
+                class="shadow-xs"
               >
                 <div
                   v-if="index === activeStarterCount"

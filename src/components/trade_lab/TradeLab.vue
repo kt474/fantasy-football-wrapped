@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { LockKeyhole, X } from "lucide-vue-next";
+import { LockKeyhole, X } from "@lucide/vue";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import TradeDatabase from "./TradeDatabase.vue";

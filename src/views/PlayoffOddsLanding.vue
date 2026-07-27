@@ -9,7 +9,7 @@ import {
   Dices,
   Route,
   ShieldCheck,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 const sampleOdds = [
   { team: "Breece's Puffs", record: "8–3", odds: 96, seed: "1.8 avg" },

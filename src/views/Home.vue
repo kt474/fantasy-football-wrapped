@@ -340,7 +340,7 @@ const checkSystemTheme = () => {
       v-if="storageUnavailable"
       class="container mx-auto flex min-h-[60vh] items-center justify-center px-4"
     >
-      <div class="max-w-lg rounded-lg border bg-card p-6 text-center shadow-sm">
+      <div class="max-w-lg rounded-lg border bg-card p-6 text-center shadow-xs">
         <h1 class="text-xl font-semibold">Saved leagues are unavailable</h1>
         <p class="mt-2 text-sm text-muted-foreground">
           We could not safely read your saved league data, so league changes

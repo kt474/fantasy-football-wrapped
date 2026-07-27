@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { LoaderCircle } from "lucide-vue-next";
+import { LoaderCircle } from "@lucide/vue";
 import { toast } from "vue-sonner";
 
 import { getData, inputLeague } from "@/api/api";

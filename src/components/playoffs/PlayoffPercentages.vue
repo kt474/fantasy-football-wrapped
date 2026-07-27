@@ -287,7 +287,7 @@ const tableData = computed(() => {
   >
     <button
       type="button"
-      class="flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      class="flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-lg font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       :class="`${showData ? 'rounded-t-lg' : 'rounded-lg'}`"
       :aria-expanded="showData"
       aria-controls="playoff-odds-table"
@@ -412,7 +412,7 @@ const tableData = computed(() => {
     <div
       v-else
       role="status"
-      class="p-4 border border-border rounded-lg bg-card shadow-sm animate-pulse md:p-6"
+      class="p-4 border border-border rounded-lg bg-card shadow-xs animate-pulse md:p-6"
     >
       <p class="flex justify-center -mb-6 text-xl font-semibold">
         Loading projection data...

@@ -2,7 +2,7 @@
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Check, ClipboardList, Gauge, Scale } from "lucide-vue-next";
+import { BarChart3, Check, ClipboardList, Gauge, Scale } from "@lucide/vue";
 
 const samplePicks = [
   { pick: "2.06", position: "WR", grade: "A", note: "11 picks after ADP" },

@@ -8,7 +8,7 @@ import {
   LoaderCircle,
   Play,
   Share2,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { renderMarkdown } from "@/lib/markdown";
 import { useAuthStore } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
@@ -248,7 +248,7 @@ const trackVideoDownload = () => {
         <div
           :class="
             tier === 'Premium'
-              ? 'col-span-2 row-start-3 grid grid-flow-col auto-cols-8 justify-self-start gap-2 sm:col-auto sm:row-auto sm:ml-auto sm:flex sm:justify-self-auto'
+              ? 'col-span-2 row-start-3 grid grid-flow-col auto-cols-max justify-self-start gap-2 sm:col-auto sm:row-auto sm:ml-auto sm:flex sm:justify-self-auto'
               : 'col-start-2 row-start-1 ml-auto flex gap-2 sm:col-auto sm:row-auto'
           "
         >

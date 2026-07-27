@@ -242,11 +242,7 @@ const chartOptions = ref({
       columnWidth: "75%",
     },
   },
-  colors: [
-    "hsl(var(--chart-1))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-3))",
-  ],
+  colors: ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))"],
   dataLabels: {
     enabled: false,
   },

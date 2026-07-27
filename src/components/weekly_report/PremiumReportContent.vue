@@ -45,7 +45,7 @@ defineProps<{
         <Card
           v-for="matchup in report.matchupReports"
           :key="`${matchup.bracket}-${matchup.matchupNumber}`"
-          class="shadow-sm"
+          class="shadow-xs"
         >
           <CardHeader class="pb-3">
             <div
@@ -157,7 +157,7 @@ defineProps<{
         <Card
           v-for="entry in report.weeklyLowlights.entries"
           :key="`${entry.teamName}-${entry.category}`"
-          class="shadow-sm"
+          class="shadow-xs"
         >
           <CardHeader class="p-4 pb-3">
             <div class="flex items-center min-w-0 gap-3">

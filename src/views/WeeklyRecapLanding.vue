@@ -25,7 +25,7 @@ import {
   Database,
   MessageSquareText,
   ScanSearch,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 const reportAnatomy = [
   {

@@ -804,7 +804,7 @@ watch(
 <template>
   <div>
     <div
-      class="flex justify-center gap-1.5 z-40 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-sm px-3 rounded-t-lg py-2 my-4 -mb-6 relative opacity-20"
+      class="flex justify-center gap-1.5 z-40 bg-neutral-100 dark:bg-neutral-900 backdrop-blur-xs px-3 rounded-t-lg py-2 my-4 -mb-6 relative opacity-20"
     >
       <button
         v-for="(_, index) in totalSlides"
@@ -921,7 +921,7 @@ watch(
         <div class="w-full space-y-2 sm:space-y-4">
           <div
             v-for="(pick, index) in bestPicks?.slice(0, 5)"
-            class="flex items-center gap-1 p-4 sm:gap-4 bg-white/10 rounded-xl backdrop-blur-sm"
+            class="flex items-center gap-1 p-4 sm:gap-4 bg-white/10 rounded-xl backdrop-blur-xs"
           >
             <p
               class="text-2xl font-bold text-indigo-400 opacity-50 sm:text-3xl"
@@ -1347,7 +1347,7 @@ watch(
         <div class="w-full space-y-4">
           <div
             v-for="(move, index) in bestPickups"
-            class="flex items-center gap-2 p-3 sm:p-4 sm:gap-4 bg-white/10 rounded-xl backdrop-blur-sm"
+            class="flex items-center gap-2 p-3 sm:p-4 sm:gap-4 bg-white/10 rounded-xl backdrop-blur-xs"
           >
             <div
               class="text-2xl font-bold text-teal-500 opacity-50 sm:text-3xl"
@@ -2434,7 +2434,7 @@ watch(
               @click="share"
               aria-label="Button share"
               type="submit"
-              class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center"
+              class="text-gray-50 mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-hidden focus:ring-blue-300 font-medium rounded-lg text-sm w-auto px-5 py-2.5 text-center"
             >
               Share
             </button>

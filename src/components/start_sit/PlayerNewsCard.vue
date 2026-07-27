@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ExternalLink } from "lucide-vue-next";
+import { ExternalLink } from "@lucide/vue";
 import { Badge } from "../ui/badge";
 import Card from "../ui/card/Card.vue";
 import { formatRelativeTime } from "@/lib/format";
@@ -21,7 +21,7 @@ const showPostText = (item: RosterNewsItem) => {
 </script>
 
 <template>
-  <Card class="overflow-hidden shadow-sm">
+  <Card class="overflow-hidden shadow-xs">
     <div class="p-4">
       <div class="flex flex-wrap items-center gap-2">
         <Badge variant="secondary">{{ item.label }}</Badge>

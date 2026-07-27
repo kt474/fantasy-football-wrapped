@@ -11,7 +11,7 @@ import {
   Newspaper,
   ShieldCheck,
   Trophy,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 const importedData = [
   "League settings and scoring format",
@@ -171,7 +171,7 @@ const espnAnalysisRoute = {
               class="inline-flex p-1 text-sm border rounded-control bg-muted/30"
             >
               <span
-                class="px-4 py-1.5 rounded-sm bg-background shadow-sm font-medium"
+                class="px-4 py-1.5 rounded-xs bg-background shadow-xs font-medium"
                 >Public</span
               >
               <span class="px-4 py-1.5 text-muted-foreground">Private</span>

@@ -297,7 +297,7 @@ watch(
           <SelectValue />
         </SelectTrigger>
         <SelectContent
-          class="w-[--reka-select-trigger-width] max-w-[calc(100vw-2rem)]"
+          class="w-(--reka-select-trigger-width) max-w-[calc(100vw-2rem)]"
         >
           <SelectItem
             v-for="manager in managers"

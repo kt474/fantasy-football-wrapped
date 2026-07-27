@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LockKeyhole } from "lucide-vue-next";
+import { LockKeyhole } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 
 import type { ManagerArchetype } from "@/lib/narratives";
@@ -125,8 +125,8 @@ watch(
           </template>
           <template v-else>
             Once this league has at least one completed imported draft,
-            ffwrapped can identify positional runs and manager tendencies.
-            Check back after the draft is complete.
+            ffwrapped can identify positional runs and manager tendencies. Check
+            back after the draft is complete.
           </template>
         </p>
       </div>
@@ -138,9 +138,7 @@ watch(
       >
         <div class="min-w-0">
           <h2 class="heading-section">{{ activeTitle }}</h2>
-          <p
-            class="max-w-2xl mt-4 text-sm leading-relaxed sm:text-base text-muted-foreground"
-          >
+          <p class="max-w-2xl mt-4 text-sm sm:text-base text-muted-foreground">
             {{ activeDescription }}
             <template v-if="showPremiumSubscriptionCta">
               Available with a
@@ -153,7 +151,7 @@ watch(
                     upgrade_source: 'draft_room_locked_preview',
                   },
                 }"
-                class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                class="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                 @click="trackPremiumSubscriptionClick"
               >
                 Premium subscription</router-link
@@ -202,9 +200,7 @@ watch(
           </p>
         </div>
         <PremiumAuctionDraftFeatures
-          v-else-if="
-            activeView === 'draft-room' && isPremium && isAuction
-          "
+          v-else-if="activeView === 'draft-room' && isPremium && isAuction"
           :archetypes="draftRoomManagers"
           :auction-budget="auctionBudget"
           embedded

@@ -7,7 +7,7 @@ import {
   RefreshCcw,
   Share,
   EllipsisVertical,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { capitalize } from "@/lib/collection";
 
 import { Button } from "@/components/ui/button";

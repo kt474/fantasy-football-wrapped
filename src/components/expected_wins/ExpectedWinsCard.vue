@@ -97,7 +97,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                   <button
                     type="button"
                     @click="tableOrder = 'randomScheduleWins'"
-                    class="flex min-h-11 w-24 items-center bg-transparent text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-0"
+                    class="flex min-h-11 w-24 items-center bg-transparent text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-0"
                   >
                     Expected Wins
                     <div>
@@ -138,7 +138,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                   <button
                     type="button"
                     @click="tableOrder = 'winsDifference'"
-                    class="flex min-h-11 w-28 items-center bg-transparent text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-0"
+                    class="flex min-h-11 w-28 items-center bg-transparent text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-0"
                   >
                     Wins above Expected
                     <div>
@@ -178,7 +178,7 @@ const getTeamName = (tableDataItem: TableDataType) => {
                   <button
                     type="button"
                     @click="tableOrder = 'probability'"
-                    class="flex min-h-11 w-28 items-center bg-transparent text-left uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-0"
+                    class="flex min-h-11 w-28 items-center bg-transparent text-left uppercase focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-0"
                   >
                     Probability
                     <div>

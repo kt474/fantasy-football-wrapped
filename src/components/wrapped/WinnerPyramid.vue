@@ -83,7 +83,7 @@ const getRotation = (name: string) => {
           </div>
 
           <div
-            class="mt-1 px-1.5 py-0.5 bg-black/40 backdrop-blur-md rounded-md border border-white/10 shadow-sm max-w-[80px] sm:max-w-[100px]"
+            class="mt-1 px-1.5 py-0.5 bg-black/40 backdrop-blur-md rounded-md border border-white/10 shadow-xs max-w-[80px] sm:max-w-[100px]"
           >
             <p
               class="text-[10px] sm:text-xs text-white font-medium truncate text-center"

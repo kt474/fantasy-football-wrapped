@@ -84,7 +84,7 @@ const listPadding = computed(() => {
                   <button
                     type="button"
                     @click="tableOrder = 'points'"
-                    class="flex items-center w-20 text-left uppercase min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                    class="flex items-center w-20 text-left uppercase min-h-11 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                   >
                     Total Points
                     <div>
@@ -124,7 +124,7 @@ const listPadding = computed(() => {
                   <button
                     type="button"
                     @click="tableOrder = 'potentialPoints'"
-                    class="flex items-center w-24 text-left uppercase min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                    class="flex items-center w-24 text-left uppercase min-h-11 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                   >
                     Potential Points
                     <div>
@@ -162,7 +162,7 @@ const listPadding = computed(() => {
                   <button
                     type="button"
                     @click="tableOrder = 'efficiency'"
-                    class="flex items-center w-24 text-left uppercase min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+                    class="flex items-center w-24 text-left uppercase min-h-11 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
                   >
                     Efficiency
                     <div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { AlertTriangle } from "lucide-vue-next";
+import { AlertTriangle } from "@lucide/vue";
 import Card from "../ui/card/Card.vue";
 import { Skeleton } from "../ui/skeleton";
 import { formatRelativeTime } from "@/lib/format";
