@@ -134,25 +134,6 @@ export const inputLeague = async (
   }
 };
 
-export const newUserAlert = async (email: string): Promise<void> => {
-  try {
-    const response = await fetch(import.meta.env.VITE_ACCOUNT_ALERT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: {
-          email: email,
-        },
-      }),
-    });
-    assertOk(response, "New user alert");
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
 export const getLeagueDataWeekCount = ({
   status,
   currentWeek,

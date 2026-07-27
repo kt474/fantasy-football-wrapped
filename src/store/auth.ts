@@ -2,7 +2,6 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
-import { newUserAlert } from "@/api/api";
 import { authenticatedBackendFetch } from "@/lib/backendApi";
 
 export const WEEKLY_REPORT_EMAILS_METADATA_KEY = "weekly_report_emails_enabled";
@@ -131,7 +130,6 @@ export const useAuthStore = defineStore("auth", () => {
         },
       });
       if (error) throw error;
-      await newUserAlert(email);
     } finally {
       loading.value = false;
     }
@@ -188,8 +186,6 @@ export const useAuthStore = defineStore("auth", () => {
         },
       });
       if (error) throw error;
-      await newUserAlert("google");
-      // I know this will have false positives, it's good to have alerts anyway
     } finally {
       loading.value = false;
     }

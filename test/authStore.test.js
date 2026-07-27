@@ -4,7 +4,6 @@ import { createPinia, setActivePinia } from "pinia";
 const mocks = vi.hoisted(() => ({
   signUp: vi.fn(),
   signInWithOAuth: vi.fn(),
-  newUserAlert: vi.fn(),
   getSession: vi.fn(),
   exchangeCodeForSession: vi.fn(),
   onAuthStateChange: vi.fn(),
@@ -23,17 +22,12 @@ vi.mock("../src/lib/supabase.ts", () => ({
   }),
 }));
 
-vi.mock("../src/api/api.ts", () => ({
-  newUserAlert: mocks.newUserAlert,
-}));
-
 import { useAuthStore } from "../src/store/auth.ts";
 
 beforeEach(() => {
   setActivePinia(createPinia());
   mocks.signUp.mockReset();
   mocks.signInWithOAuth.mockReset();
-  mocks.newUserAlert.mockReset();
   mocks.getSession.mockReset();
   mocks.exchangeCodeForSession.mockReset();
   mocks.onAuthStateChange.mockReset();
@@ -77,10 +71,9 @@ describe("auth store initialization", () => {
   });
 });
 
-describe("auth store signup alerts", () => {
-  test("alerts only after a successful email signup", async () => {
+describe("auth store signup", () => {
+  test("submits a successful email signup", async () => {
     mocks.signUp.mockResolvedValue({ error: null });
-    mocks.newUserAlert.mockResolvedValue(undefined);
     const store = useAuthStore();
 
     await store.signUpWithPassword("new@example.com", "password");
@@ -96,14 +89,11 @@ describe("auth store signup alerts", () => {
         },
       },
     });
-    expect(mocks.newUserAlert).toHaveBeenCalledOnce();
-    expect(mocks.newUserAlert).toHaveBeenCalledWith("new@example.com");
     expect(store.loading).toBe(false);
   });
 
   test("passes weekly report email opt-in during email signup", async () => {
     mocks.signUp.mockResolvedValue({ error: null });
-    mocks.newUserAlert.mockResolvedValue(undefined);
     const store = useAuthStore();
 
     await store.signUpWithPassword("new@example.com", "password", true);
@@ -120,7 +110,7 @@ describe("auth store signup alerts", () => {
     );
   });
 
-  test("does not alert when email signup fails", async () => {
+  test("propagates an email signup failure", async () => {
     const signupError = new Error("Email already registered");
     mocks.signUp.mockResolvedValue({ error: signupError });
     const store = useAuthStore();
@@ -129,7 +119,6 @@ describe("auth store signup alerts", () => {
       store.signUpWithPassword("existing@example.com", "password")
     ).rejects.toThrow("Email already registered");
 
-    expect(mocks.newUserAlert).not.toHaveBeenCalled();
     expect(store.loading).toBe(false);
   });
 });
