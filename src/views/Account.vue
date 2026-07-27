@@ -510,7 +510,10 @@ const signInWithGoogle = async () => {
   try {
     trackEvent("Signup Started", { method: "google", source: "account" });
     const redirectUrl = new URL(route.fullPath, window.location.origin);
-    await authStore.signInWithGoogle(redirectUrl.toString());
+    await authStore.signInWithGoogle(
+      redirectUrl.toString(),
+      showSignUp.value ? signUpWeeklyReportEmailsEnabled.value : undefined
+    );
   } catch (error: unknown) {
     trackEvent("Signup Failed", { method: "google", source: "account" });
     toast.error(
@@ -958,27 +961,30 @@ watch(
   }),
   async ({ initialized, authenticated, recovery }) => {
     if (!initialized || !authenticated || recovery) return;
+
+    try {
+      await authStore.applyPendingGoogleAuthPreference();
+    } catch (error) {
+      console.error("Unable to apply Google signup preferences:", error);
+      toast.error(
+        "Unable to save your email preference. You can update it later."
+      );
+    }
+
     if (checkoutLoadingPlan.value !== null) return;
-
     const pendingPlan = consumePendingCheckout();
-    if (!pendingPlan) return;
+    if (pendingPlan) {
+      trackPremiumJourneyStep("auth_completed", {
+        feature: upgradeIntent.value,
+        source: upgradeSource.value,
+        is_authenticated: true,
+        ...getPlanAnalytics(pendingPlan),
+      });
+      toast.info("Signed in. Opening secure checkout...");
+      await beginAuthenticatedCheckout(pendingPlan, true);
+      return;
+    }
 
-    trackPremiumJourneyStep("auth_completed", {
-      feature: upgradeIntent.value,
-      source: upgradeSource.value,
-      is_authenticated: true,
-      ...getPlanAnalytics(pendingPlan),
-    });
-    toast.info("Signed in. Opening secure checkout...");
-    await beginAuthenticatedCheckout(pendingPlan, true);
-  },
-  { immediate: true }
-);
-
-watch(
-  () => authStore.isAuthenticated,
-  async (isAuthenticated) => {
-    if (!isAuthenticated) return;
     notificationPreferencesLoading.value = true;
     try {
       await authStore.fetchWeeklyReportEmailsPreference();

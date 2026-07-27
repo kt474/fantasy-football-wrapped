@@ -5,9 +5,15 @@ import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 import { authenticatedBackendFetch } from "@/lib/backendApi";
 
 export const WEEKLY_REPORT_EMAILS_METADATA_KEY = "weekly_report_emails_enabled";
+const PENDING_GOOGLE_AUTH_PREFERENCE_KEY =
+  "pending-google-auth-weekly-report-emails";
 
 type NotificationPreferencesResponse = {
   weekly_report_emails_enabled?: boolean;
+};
+
+const clearPendingGoogleAuthPreference = () => {
+  globalThis.sessionStorage.removeItem(PENDING_GOOGLE_AUTH_PREFERENCE_KEY);
 };
 
 export const useAuthStore = defineStore("auth", () => {
@@ -94,6 +100,7 @@ export const useAuthStore = defineStore("auth", () => {
     if (!isSupabaseConfigured()) {
       throw new Error("Supabase auth is not configured.");
     }
+    clearPendingGoogleAuthPreference();
     loading.value = true;
     try {
       const supabase = getSupabaseClient();
@@ -115,6 +122,7 @@ export const useAuthStore = defineStore("auth", () => {
     if (!isSupabaseConfigured()) {
       throw new Error("Supabase auth is not configured.");
     }
+    clearPendingGoogleAuthPreference();
     loading.value = true;
     try {
       const supabase = getSupabaseClient();
@@ -172,13 +180,23 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
-  const signInWithGoogle = async (redirectTo?: string) => {
+  const signInWithGoogle = async (
+    redirectTo?: string,
+    shouldEmailWeeklyReports?: boolean
+  ) => {
     if (!isSupabaseConfigured()) {
       throw new Error("Supabase auth is not configured.");
     }
     loading.value = true;
     try {
       const supabase = getSupabaseClient();
+      clearPendingGoogleAuthPreference();
+      if (shouldEmailWeeklyReports !== undefined) {
+        globalThis.sessionStorage.setItem(
+          PENDING_GOOGLE_AUTH_PREFERENCE_KEY,
+          String(shouldEmailWeeklyReports)
+        );
+      }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -186,6 +204,9 @@ export const useAuthStore = defineStore("auth", () => {
         },
       });
       if (error) throw error;
+    } catch (error) {
+      clearPendingGoogleAuthPreference();
+      throw error;
     } finally {
       loading.value = false;
     }
@@ -241,9 +262,27 @@ export const useAuthStore = defineStore("auth", () => {
         (await response.json()) as NotificationPreferencesResponse;
       weeklyReportEmailsPreference.value =
         payload.weekly_report_emails_enabled ?? enabled;
+      clearPendingGoogleAuthPreference();
     } finally {
       loading.value = false;
     }
+  };
+
+  const applyPendingGoogleAuthPreference = async () => {
+    if (!isAuthenticated.value) return;
+
+    const pendingPreference = globalThis.sessionStorage.getItem(
+      PENDING_GOOGLE_AUTH_PREFERENCE_KEY
+    );
+    if (
+      pendingPreference !== "true" &&
+      pendingPreference !== "false"
+    ) {
+      clearPendingGoogleAuthPreference();
+      return;
+    }
+
+    await updateWeeklyReportEmailsPreference(pendingPreference === "true");
   };
 
   const fetchWeeklyReportEmailsPreference = async () => {
@@ -299,6 +338,7 @@ export const useAuthStore = defineStore("auth", () => {
     sendPasswordResetEmail,
     updatePassword,
     updateWeeklyReportEmailsPreference,
+    applyPendingGoogleAuthPreference,
     fetchWeeklyReportEmailsPreference,
     clearPasswordRecovery,
     signOut,
