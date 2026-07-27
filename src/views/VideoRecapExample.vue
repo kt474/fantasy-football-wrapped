@@ -20,7 +20,7 @@ const trackCreateRecap = () => {
           Weekly Video Recap Example
         </h1>
         <p class="mt-3 leading-7 text-muted-foreground">
-          A 25-second sample built from league storylines, matchup scores, and
+          A 40 second sample built from league storylines, matchup scores, and
           team performances.
         </p>
       </header>

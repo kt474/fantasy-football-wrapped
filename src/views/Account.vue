@@ -1766,7 +1766,7 @@ watch(
                         class="font-medium text-primary hover:underline"
                         @click="trackPremiumExampleClick('video_recap')"
                       >
-                        Watch a 25-second video recap
+                        Watch a 40 second video recap
                       </RouterLink>
                       <RouterLink
                         to="/fantasy-football-draft-room-example"

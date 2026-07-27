@@ -20,9 +20,9 @@ const trackPlay = () => {
     controls
     playsinline
     preload="metadata"
-    poster="/video/ffwrapped-video-recap-poster.png"
+    poster="/video/ffwrapped-video-recap-poster-week-11-v2.jpg"
     aria-label="Play the ffwrapped Week 11 fantasy football video recap example"
-    class="block w-full bg-slate-950 aspect-[9/16]"
+    class="block w-full bg-slate-950 aspect-9/16"
     @play="trackPlay"
   >
     <source

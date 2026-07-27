@@ -212,8 +212,8 @@ const routes = [
     meta: {
       title: "Fantasy Football Video Recap Example | ffwrapped",
       description:
-        "Watch a 25-second fantasy football video recap example with league storylines, matchup scores, and team-by-team results.",
-      image: `${siteUrl}/video/ffwrapped-video-recap-poster.png`,
+        "Watch a 40-second fantasy football video recap example with league storylines, matchup scores, and team-by-team results.",
+      image: `${siteUrl}/video/ffwrapped-video-recap-poster-week-11-v2.jpg`,
       standalone: true,
     },
   },

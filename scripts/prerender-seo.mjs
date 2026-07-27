@@ -572,31 +572,32 @@ const pages = [
     path: "fantasy-football-video-recap-example",
     title: "Fantasy Football Video Recap Example | ffwrapped",
     description:
-      "Watch a 25-second fantasy football video recap example with league storylines, matchup scores, and team-by-team results.",
+      "Watch a 40 second fantasy football video recap example with league storylines, matchup scores, and team-by-team results.",
     heading: "Weekly Video Recap Example",
     introduction:
-      "A 25-second sample built from league storylines, matchup scores, and team performances.",
+      "A 40 second sample built from league storylines, matchup scores, and team performances.",
     video: {
       src: "/video/ffwrapped-marketing-demo-week-11.mp4",
-      poster: "/video/ffwrapped-video-recap-poster.png",
+      poster: "/video/ffwrapped-video-recap-poster-week-11-v2.jpg",
       label: "Play the ffwrapped Week 11 fantasy football video recap example",
       disclaimer:
         "Sample league and team names are fictional. Video created with ffwrapped Premium for product demonstration.",
       ctaHref: "/",
       ctaLabel: "Create your own recap",
     },
-    ogImage: "https://ffwrapped.com/video/ffwrapped-video-recap-poster.png",
+    ogImage:
+      "https://ffwrapped.com/video/ffwrapped-video-recap-poster-week-11-v2.jpg",
     ogVideo: "https://ffwrapped.com/video/ffwrapped-marketing-demo-week-11.mp4",
     structuredData: {
       "@context": "https://schema.org",
       "@type": "VideoObject",
       name: "Fantasy football Week 11 video recap example",
       description:
-        "A 25-second ffwrapped Premium fantasy football video recap example with league storylines, matchup scores, and team results.",
+        "A 40-second ffwrapped Premium fantasy football video recap example with league storylines, matchup scores, and team results.",
       thumbnailUrl:
-        "https://ffwrapped.com/video/ffwrapped-video-recap-poster.png",
-      uploadDate: "2026-07-19",
-      duration: "PT25S",
+        "https://ffwrapped.com/video/ffwrapped-video-recap-poster-week-11-v2.jpg",
+      uploadDate: "2026-07-27",
+      duration: "PT40S",
       contentUrl:
         "https://ffwrapped.com/video/ffwrapped-marketing-demo-week-11.mp4",
       embedUrl: "https://ffwrapped.com/fantasy-football-video-recap-example",
