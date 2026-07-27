@@ -9,7 +9,7 @@ import PageHeader from "@/components/layout/PageHeader.vue";
 import SectionHeader from "@/components/layout/SectionHeader.vue";
 
 const route = useRoute();
-const leagueCount = ref(13752); // initial load current unique league count value 7/22/26
+const leagueCount = ref(13933); // initial load current unique league count value 7/26/26
 
 onMounted(async () => {
   const leagueId = route.query.leagueId;

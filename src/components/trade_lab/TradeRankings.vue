@@ -12,12 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type {
   DynastyPerspective,
   TradeFinderPlayer,
@@ -207,8 +201,7 @@ const getValueExplanation = (player: TradeFinderPlayer) =>
 </script>
 
 <template>
-  <TooltipProvider :delay-duration="300">
-    <div class="mt-4 space-y-4">
+  <div class="mt-4 space-y-4">
       <div
         class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between"
       >
@@ -486,27 +479,20 @@ const getValueExplanation = (player: TradeFinderPlayer) =>
                         <Badge :variant="valueTier(player.tradeValue).variant">
                           {{ valueTier(player.tradeValue).label }}
                         </Badge>
-                        <Tooltip>
-                          <TooltipTrigger as-child>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="xs"
-                              class="justify-center w-12 px-0 font-semibold underline decoration-dotted decoration-muted-foreground/70 underline-offset-4 tabular-nums hover:decoration-foreground"
-                              :aria-label="`Explain ${player.name || `${player.team} Defense`}'s trade value`"
-                              :aria-expanded="
-                                expandedPlayerId === player.playerId
-                              "
-                              :aria-controls="`player-value-explanation-${player.playerId}`"
-                              @click="toggleValueExplanation(player.playerId)"
-                            >
-                              {{ formatNumber(player.tradeValue, 1) }}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">
-                            Explain this value
-                          </TooltipContent>
-                        </Tooltip>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="xs"
+                          class="justify-center w-12 px-0 font-semibold underline decoration-dotted decoration-muted-foreground/70 underline-offset-4 tabular-nums hover:decoration-foreground"
+                          :aria-label="`Explain ${player.name || `${player.team} Defense`}'s trade value`"
+                          :aria-expanded="
+                            expandedPlayerId === player.playerId
+                          "
+                          :aria-controls="`player-value-explanation-${player.playerId}`"
+                          @click="toggleValueExplanation(player.playerId)"
+                        >
+                          {{ formatNumber(player.tradeValue, 1) }}
+                        </Button>
                       </div>
                     </td>
                     <td class="px-4 py-3 text-center tabular-nums">
@@ -619,6 +605,5 @@ const getValueExplanation = (player: TradeFinderPlayer) =>
           </p>
         </div>
       </div>
-    </div>
-  </TooltipProvider>
+  </div>
 </template>
