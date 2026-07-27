@@ -263,11 +263,10 @@ const toolSummaries: ToolSummary[] = [
             Explore your league from every angle
           </h2>
           <p
-            data-nosnippet
-            class="max-w-xl mx-auto mt-4 leading-7 sm:text-lg text-muted-foreground"
+            class="max-w-2xl mx-auto mt-4 leading-7 sm:text-lg text-muted-foreground"
           >
-            Try the demo league or enter your own, then dig into the numbers,
-            decisions, and outcomes behind every season.
+            Find out who is actually dominant, who is getting lucky, and which
+            teams are closer to a title than their record suggests.
           </p>
         </div>
 

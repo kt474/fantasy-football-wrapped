@@ -14,11 +14,24 @@ const pages = [
     heading: "All your fantasy football league insights in one place",
     introduction:
       "Analyze your Sleeper or ESPN league with power rankings, roster insights, playoff odds, draft grades, weekly recaps, and league history. Free to start with no login required.",
+    sectionHeading: "Explore your league from every angle",
     sections: [
-      "Power rankings and roster insights",
-      "Weekly reports and matchup previews",
-      "Playoff odds and expected wins",
-      "Draft grades, trades, and league history",
+      {
+        title: "Rank every fantasy football team",
+        body: "Compare records with expected wins, scoring, projections, power rankings, and roster strength.",
+      },
+      {
+        title: "Analyze every roster",
+        body: "Find positional strengths, weaknesses, player-value gaps, and trade opportunities across the league.",
+      },
+      {
+        title: "Explain the standings",
+        body: "Identify schedule luck, misleading records, playoff outlooks, and teams positioned to improve.",
+      },
+      {
+        title: "Follow the whole season",
+        body: "Turn weekly matchups, draft grades, trades, and league history into analysis worth sharing.",
+      },
     ],
   },
   {
