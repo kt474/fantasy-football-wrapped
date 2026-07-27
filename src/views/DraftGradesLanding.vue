@@ -100,6 +100,11 @@ const faqs = [
       "Individual pick grades compare pick number with average draft position. The team grade combines ADP value and projected points from a manager’s first 13 selections, then compares that score with the rest of the draft room.",
   },
   {
+    question: "Can ffwrapped grade my fantasy football team?",
+    answer:
+      "Yes. After a supported Sleeper or ESPN draft is complete, ffwrapped grades the individual picks and the drafted team relative to the rest of that league’s draft room.",
+  },
+  {
     question: "Does a high draft grade predict the league winner?",
     answer:
       "No. Draft grades evaluate information available around draft cost and projections. Injuries, waivers, trades, lineup choices, and projection error can change the season dramatically.",
@@ -133,11 +138,11 @@ const analysisRoute = {
         class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,1.04fr)_minmax(380px,0.96fr)] lg:items-center"
       >
         <div>
-          <Badge variant="secondary">Sleeper and ESPN draft analysis</Badge>
+          <Badge variant="secondary">Sleeper and ESPN draft grader</Badge>
           <h1
             class="max-w-3xl mt-5 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl"
           >
-            Fantasy football draft grades with the picks behind the score
+            A fantasy football draft grader with the picks behind the score
           </h1>
           <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
             Grade a completed fantasy football draft using pick position, ADP,

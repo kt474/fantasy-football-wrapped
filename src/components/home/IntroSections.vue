@@ -136,8 +136,9 @@ const toolSummaries: ToolSummary[] = [
     icon: NotebookPen,
   },
   {
-    title: "Roster management",
-    description: "See which managers are making the smartest waiver moves.",
+    title: "Roster and player values",
+    description:
+      "Compare roster strength and rank every rostered player using league specific context.",
     icon: Move3D,
   },
   {
@@ -147,9 +148,9 @@ const toolSummaries: ToolSummary[] = [
     icon: Trophy,
   },
   {
-    title: "Player Values and trade tools",
+    title: "Trade Finder",
     description:
-      "Rank every rostered player, compare packages, and discover deals projected to help both teams.",
+      "Compare packages and discover deals projected to improve both teams.",
     icon: FlaskConical,
   },
   {
@@ -202,7 +203,7 @@ const toolSummaries: ToolSummary[] = [
 
         <div
           ref="testimonialDeck"
-          class="testimonial-deck relative mt-12 mx-auto h-[330px] w-full max-w-xl"
+          class="testimonial-deck relative mt-12 mx-auto h-82.5 w-full max-w-xl"
         >
           <Card
             v-for="(testimonial, index) in testimonials"

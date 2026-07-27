@@ -64,14 +64,14 @@ const {
       aria-hidden="true"
       :class="[
         'absolute hidden -translate-x-1/2 rounded-full -top-28 left-1/2 size-96 blur-3xl md:block',
-        isDark ? 'bg-sky-500/[0.03]' : 'bg-sky-500/12',
+        isDark ? 'bg-sky-500/3' : 'bg-sky-500/12',
       ]"
     />
     <div
       aria-hidden="true"
       :class="[
         'absolute hidden rounded-full -bottom-24 -left-10 size-80 blur-3xl md:block',
-        isDark ? 'bg-blue-500/[0.02]' : 'bg-blue-500/10',
+        isDark ? 'bg-blue-500/2' : 'bg-blue-500/10',
       ]"
     />
 
@@ -80,7 +80,7 @@ const {
     >
       <div class="w-full mx-auto max-w-7xl">
         <div
-          class="grid items-center gap-8 min-[1240px]:grid-cols-2 min-[1240px]:gap-10 min-[1240px]:-translate-y-2"
+          class="grid items-center gap-8 min-[1240px]:grid-cols-[3fr_2fr] min-[1240px]:gap-10 min-[1240px]:-translate-y-2"
         >
           <div
             class="w-full max-w-2xl mx-auto text-left animate-rise min-[1240px]:mx-0"
@@ -96,7 +96,7 @@ const {
             >
               All your
               <span
-                class="text-transparent bg-gradient-to-r from-sky-500 to-blue-500 bg-clip-text"
+                class="text-transparent bg-linear-to-r from-sky-500 to-blue-500 bg-clip-text"
               >
                 fantasy football
               </span>
@@ -104,8 +104,8 @@ const {
             </h1>
 
             <h2 class="max-w-lg mt-5 text-lg text-muted-foreground lg:text-xl">
-              Analyze your league with power rankings, roster insights, custom
-              weekly reports, playoff odds, and much more.
+              Analyze your Sleeper or ESPN league with power rankings, roster
+              insights, weekly recaps, playoff odds, and more.
             </h2>
             <Card class="p-4 mt-8">
               <div class="mb-4 text-left">
@@ -169,7 +169,7 @@ const {
           <div
             v-if="showDesktopShowcase"
             aria-hidden="true"
-            class="relative h-[480px] overflow-hidden"
+            class="relative overflow-hidden h-120"
           >
             <div
               class="absolute inset-0 z-20 pointer-events-none showcase-fade"

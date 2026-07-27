@@ -8,12 +8,12 @@ const premiumReportExample = JSON.parse(
 const pages = [
   {
     path: "",
-    title: "Fantasy Football League Insights | ffwrapped",
+    title: "Fantasy Football Team & League Analyzer | ffwrapped",
     description:
-      "Analyze your fantasy football league with interactive charts, power rankings, roster insights, custom weekly reports, and more.",
+      "Analyze your Sleeper or ESPN fantasy football league with power rankings, roster insights, playoff odds, draft grades, weekly recaps, and more.",
     heading: "All your fantasy football league insights in one place",
     introduction:
-      "Analyze your Sleeper or ESPN league with power rankings, roster insights, custom weekly reports, playoff odds, draft grades, and league history.",
+      "Analyze your Sleeper or ESPN league with power rankings, roster insights, playoff odds, draft grades, weekly recaps, and league history. Free to start with no login required.",
     sections: [
       "Power rankings and roster insights",
       "Weekly reports and matchup previews",
@@ -128,6 +128,10 @@ const pages = [
         body: "Review completed draft grades, roster projections, lineup decisions, trades, and waiver activity using the data attached to the league.",
       },
       {
+        title: "Sleeper dynasty team and roster analysis",
+        body: "Evaluate dynasty rosters with projections, positional strength, player values, trades, manager history, and league context that goes beyond a single-week lineup.",
+      },
+      {
         title: "League history",
         body: "Follow linked Sleeper seasons to compare final placements, head-to-head records, scoring milestones, and manager trends over time.",
       },
@@ -197,10 +201,10 @@ const pages = [
   },
   {
     path: "fantasy-football-draft-grades",
-    title: "Fantasy Football Draft Grades for Sleeper & ESPN | ffwrapped",
+    title: "Fantasy Football Draft Grader for Sleeper & ESPN | ffwrapped",
     description:
-      "Grade a completed fantasy football draft, then use league history for manager tendencies, positional plans, and Premium draft-room scouting.",
-    heading: "Fantasy football draft grades with the picks behind the score",
+      "Grade your completed Sleeper or ESPN fantasy football draft with pick-by-pick grades, team scores, ADP comparisons, projections, and a full draft recap.",
+    heading: "A fantasy football draft grader with the picks behind the score",
     introduction:
       "Grade a completed fantasy football draft using pick position, ADP, projections, and the performance of the entire draft room.",
     sections: [
@@ -235,6 +239,11 @@ const pages = [
         question: "What goes into a fantasy football draft grade?",
         answer:
           "Individual grades compare pick number with average draft position. Team grades combine ADP value and projected points, then compare the result with the rest of the draft room.",
+      },
+      {
+        question: "Can ffwrapped grade my fantasy football team?",
+        answer:
+          "Yes. After a supported Sleeper or ESPN draft is complete, ffwrapped grades the individual picks and the drafted team relative to the rest of that league’s draft room.",
       },
       {
         question: "When are draft grades available?",

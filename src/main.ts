@@ -44,9 +44,9 @@ const NotFound = () => import("./views/404.vue");
 
 const siteUrl = "https://ffwrapped.com";
 const defaultMeta = {
-  title: "Fantasy Football League Insights | ffwrapped",
+  title: "Fantasy Football Team & League Analyzer | ffwrapped",
   description:
-    "Analyze your fantasy football league with power rankings, roster insights, custom weekly reports, playoff odds, and much more.",
+    "Analyze your Sleeper or ESPN fantasy football league with power rankings, roster insights, playoff odds, draft grades, weekly recaps, and more.",
 };
 
 const routes = [
@@ -88,6 +88,10 @@ const routes = [
             body: "Review draft grades, roster strengths, transactions, waiver activity, and trades without assembling data by hand.",
           },
           {
+            title: "Sleeper dynasty team and roster analysis",
+            body: "Evaluate dynasty rosters with projections, positional strength, player values, trades, manager history, and league context that goes beyond a single-week lineup.",
+          },
+          {
             title: "League history",
             body: "Follow seasons across a Sleeper league chain to compare managers, head-to-head records, finishes, scoring records, and long term tendencies.",
           },
@@ -119,9 +123,9 @@ const routes = [
     path: "/fantasy-football-draft-grades",
     component: DraftGradesLanding,
     meta: {
-      title: "Fantasy Football Draft Grades for Sleeper & ESPN | ffwrapped",
+      title: "Fantasy Football Draft Grader for Sleeper & ESPN | ffwrapped",
       description:
-        "Grade a completed fantasy football draft, then use league history for manager tendencies, positional plans, and Premium draft-room scouting.",
+        "Grade your completed Sleeper or ESPN fantasy football draft with pick-by-pick grades, team scores, ADP comparisons, projections, and a full draft recap.",
       standalone: true,
     },
   },
