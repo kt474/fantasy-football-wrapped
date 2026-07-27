@@ -24,6 +24,10 @@ import type {
   TradeFinderRoster,
   TradeValuationMode,
 } from "@/lib/tradeFinder";
+import {
+  buildTradeValueExplanation,
+  getTradeValueTierLabel,
+} from "@/lib/tradeValueExplanation";
 
 const props = defineProps<{
   rosters: TradeFinderRoster[];
@@ -164,11 +168,11 @@ watch(players, () => {
 });
 
 const valueTier = (value: number) => {
-  if (value >= 80) return { label: "Elite", variant: "success" as const };
-  if (value >= 60) return { label: "High", variant: "info" as const };
-  if (value >= 35) return { label: "Starter", variant: "secondary" as const };
-  if (value > 0) return { label: "Depth", variant: "outline" as const };
-  return { label: "Replacement", variant: "outline" as const };
+  const label = getTradeValueTierLabel(value);
+  if (label === "Elite") return { label, variant: "success" as const };
+  if (label === "High") return { label, variant: "info" as const };
+  if (label === "Starter") return { label, variant: "secondary" as const };
+  return { label, variant: "outline" as const };
 };
 
 const valueScaleTiers = [
@@ -193,440 +197,428 @@ const toggleValueExplanation = (playerId: string) => {
     expandedPlayerId.value === playerId ? null : playerId;
 };
 
-const getValueExplanation = (player: TradeFinderPlayer) => {
-  const playerName = player.name || `${player.team} Defense`;
-  const productionContext =
-    player.vorp > 0
-      ? `projects ${formatNumber(player.vorp)} points above the ${player.position} replacement baseline`
-      : `projects near the ${player.position} replacement baseline`;
-  const rankContext = `${player.position}${player.positionRank} and #${player.overallRank} overall`;
-
-  if (props.valuationMode === "dynasty") {
-    const marketContext = player.dynastyAdp
-      ? `Dynasty market ADP ${formatNumber(player.dynastyAdp)} is also included`
-      : "Long-term dynasty market value is also included";
-    return `${playerName} ${productionContext}, ranking ${rankContext}. ${marketContext} using the ${dynastyPerspective.value} team direction.`;
-  }
-
-  const tierLabel = valueTier(player.tradeValue).label.toLowerCase();
-  const tierArticle = tierLabel === "elite" ? "an" : "a";
-  return `${playerName} ${productionContext}, ranking ${rankContext}. That league-specific production and positional scarcity produce ${tierArticle} ${tierLabel} trade value of ${formatNumber(player.tradeValue)}.`;
-};
+const getValueExplanation = (player: TradeFinderPlayer) =>
+  buildTradeValueExplanation({
+    player,
+    players: players.value,
+    valuationMode: props.valuationMode,
+    dynastyPerspective: dynastyPerspective.value,
+  });
 </script>
 
 <template>
   <TooltipProvider :delay-duration="300">
     <div class="mt-4 space-y-4">
-    <div
-      class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between"
-    >
-      <div class="max-w-3xl">
-        <p class="text-sm text-muted-foreground sm:text-base">
-          {{
-            valuationMode === "dynasty"
-              ? "Long term rankings that blend dynasty market ADP with league specific projected production, starting lineup requirements, and your selected team direction."
-              : "League specific rankings for rostered players. Trade value is derived from value over the starter level replacement player at each position."
-          }}
+      <div
+        class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between"
+      >
+        <div class="max-w-3xl">
+          <p class="text-sm text-muted-foreground sm:text-base">
+            {{
+              valuationMode === "dynasty"
+                ? "Long term rankings that blend dynasty market ADP with league specific projected production, starting lineup requirements, and your selected team direction."
+                : "League specific rankings for rostered players. Trade value is derived from value over the starter level replacement player at each position."
+            }}
+          </p>
+        </div>
+
+        <p
+          class="-mb-3 text-xs font-medium text-muted-foreground lg:text-right"
+        >
+          {{ valueContext }}
         </p>
       </div>
 
-      <p class="-mb-3 text-xs font-medium text-muted-foreground lg:text-right">
-        {{ valueContext }}
-      </p>
-    </div>
+      <div class="min-w-0 p-3 border rounded-lg border-border">
+        <div
+          class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2"
+          :class="
+            valuationMode === 'dynasty'
+              ? 'xl:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]'
+              : 'lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,1fr))]'
+          "
+        >
+          <div class="min-w-0">
+            <label
+              for="player-value-search"
+              class="block mb-1 text-xs font-medium text-muted-foreground"
+            >
+              Player
+            </label>
+            <div class="relative min-w-0">
+              <Search
+                class="absolute -translate-y-1/2 pointer-events-none left-3 top-1/2 size-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="player-value-search"
+                v-model="playerSearch"
+                type="search"
+                placeholder="Search players"
+                class="min-w-0 pl-9"
+              />
+            </div>
+          </div>
 
-    <div class="min-w-0 p-3 border rounded-lg border-border">
-      <div
-        class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2"
-        :class="
-          valuationMode === 'dynasty'
-            ? 'xl:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]'
-            : 'lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,1fr))]'
-        "
-      >
-        <div class="min-w-0">
-          <label
-            for="player-value-search"
-            class="block mb-1 text-xs font-medium text-muted-foreground"
-          >
-            Player
-          </label>
-          <div class="relative min-w-0">
-            <Search
-              class="absolute -translate-y-1/2 pointer-events-none left-3 top-1/2 size-4 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              id="player-value-search"
-              v-model="playerSearch"
-              type="search"
-              placeholder="Search players"
-              class="min-w-0 pl-9"
-            />
+          <div class="min-w-0">
+            <label class="block mb-1 text-xs font-medium text-muted-foreground">
+              Manager
+            </label>
+            <Select v-model="selectedManagerId">
+              <SelectTrigger class="min-w-0" aria-label="Filter by manager">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All managers</SelectItem>
+                <SelectItem
+                  v-for="roster in rosters"
+                  :key="roster.id"
+                  :value="String(roster.id)"
+                >
+                  {{ roster.managerName }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div v-if="valuationMode === 'dynasty'" class="min-w-0">
+            <label
+              for="dynasty-team-direction"
+              class="block mb-1 text-xs font-medium text-muted-foreground"
+            >
+              Team direction
+            </label>
+            <Select v-model="dynastyPerspective">
+              <SelectTrigger
+                id="dynasty-team-direction"
+                class="min-w-0"
+                aria-label="Dynasty team direction"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="balanced">Balanced</SelectItem>
+                <SelectItem value="contender">Contender</SelectItem>
+                <SelectItem value="rebuilder">Rebuilder</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div class="min-w-0">
+            <label class="block mb-1 text-xs font-medium text-muted-foreground">
+              Position
+            </label>
+            <Select v-model="selectedPosition">
+              <SelectTrigger class="min-w-0" aria-label="Filter by position">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All positions</SelectItem>
+                <SelectItem
+                  v-for="position in positions"
+                  :key="position"
+                  :value="position"
+                >
+                  {{ position }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
-
-        <div class="min-w-0">
-          <label class="block mb-1 text-xs font-medium text-muted-foreground">
-            Manager
-          </label>
-          <Select v-model="selectedManagerId">
-            <SelectTrigger class="min-w-0" aria-label="Filter by manager">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All managers</SelectItem>
-              <SelectItem
-                v-for="roster in rosters"
-                :key="roster.id"
-                :value="String(roster.id)"
-              >
-                {{ roster.managerName }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div v-if="valuationMode === 'dynasty'" class="min-w-0">
-          <label
-            for="dynasty-team-direction"
-            class="block mb-1 text-xs font-medium text-muted-foreground"
-          >
-            Team direction
-          </label>
-          <Select v-model="dynastyPerspective">
-            <SelectTrigger
-              id="dynasty-team-direction"
-              class="min-w-0"
-              aria-label="Dynasty team direction"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="balanced">Balanced</SelectItem>
-              <SelectItem value="contender">Contender</SelectItem>
-              <SelectItem value="rebuilder">Rebuilder</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div class="min-w-0">
-          <label class="block mb-1 text-xs font-medium text-muted-foreground">
-            Position
-          </label>
-          <Select v-model="selectedPosition">
-            <SelectTrigger class="min-w-0" aria-label="Filter by position">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All positions</SelectItem>
-              <SelectItem
-                v-for="position in positions"
-                :key="position"
-                :value="position"
-              >
-                {{ position }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
-    </div>
 
-    <div
-      v-if="loading"
-      class="max-lg:!mt-4 overflow-hidden border rounded-lg border-border"
-      aria-busy="true"
-      aria-live="polite"
-    >
-      <span class="sr-only">Loading trade rankings...</span>
       <div
-        v-for="index in PAGE_SIZE"
-        :key="index"
-        class="grid grid-cols-[3rem_minmax(10rem,1fr)_5rem_6rem] items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"
+        v-if="loading"
+        class="max-lg:!mt-4 overflow-hidden border rounded-lg border-border"
+        aria-busy="true"
+        aria-live="polite"
       >
-        <Skeleton class="w-8 h-5 bg-muted dark:bg-muted/70" />
-        <Skeleton class="w-40 h-8 bg-muted dark:bg-muted/70" />
-        <Skeleton class="w-12 h-5 bg-muted dark:bg-muted/70" />
-        <Skeleton class="w-16 h-6 bg-muted dark:bg-muted/70" />
-      </div>
-    </div>
-
-    <div
-      v-else-if="players.length === 0"
-      class="max-lg:!mt-4 px-5 py-10 text-center border border-dashed rounded-lg border-border"
-    >
-      <p class="font-medium">No player values available</p>
-      <p class="mt-1 text-sm text-muted-foreground">
-        Rankings will populate when this league has roster and valuation data.
-      </p>
-    </div>
-
-    <div
-      v-else-if="filteredPlayers.length === 0"
-      class="max-lg:!mt-4 px-5 py-10 text-center border border-dashed rounded-lg border-border"
-    >
-      <p class="font-medium">No matching players</p>
-      <p class="mt-1 text-sm text-muted-foreground">
-        Try another player, manager, or position.
-      </p>
-    </div>
-
-    <div v-else class="max-lg:!mt-4 space-y-3">
-      <div class="overflow-hidden border rounded-lg border-border">
+        <span class="sr-only">Loading trade rankings...</span>
         <div
-          class="overflow-x-auto"
-          role="region"
-          aria-label="League trade value rankings"
-          tabindex="0"
+          v-for="index in PAGE_SIZE"
+          :key="index"
+          class="grid grid-cols-[3rem_minmax(10rem,1fr)_5rem_6rem] items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"
         >
-          <table class="w-full min-w-[60rem] table-fixed text-sm">
-            <colgroup v-if="valuationMode === 'dynasty'">
-              <col class="w-[7%]" />
-              <col class="w-[24%]" />
-              <col class="w-[10%]" />
-              <col class="w-[12%]" />
-              <col class="w-[15%]" />
-              <col class="w-[12%]" />
-              <col class="w-[12%]" />
-              <col class="w-[8%]" />
-            </colgroup>
-            <colgroup v-else>
-              <col class="w-[7%]" />
-              <col class="w-[29%]" />
-              <col class="w-[11%]" />
-              <col class="w-[17%]" />
-              <col class="w-[14%]" />
-              <col class="w-[14%]" />
-              <col class="w-[8%]" />
-            </colgroup>
-            <thead
-              class="text-xs whitespace-nowrap bg-muted text-muted-foreground"
-            >
-              <tr>
-                <th class="px-4 py-3 font-medium text-center">OVR</th>
-                <th class="px-4 py-3 font-medium text-left">Player</th>
-                <th class="px-4 py-3 font-medium text-center">POS rank</th>
-                <th
-                  v-if="valuationMode === 'dynasty'"
-                  class="px-4 py-3 font-medium text-center"
-                >
-                  Dynasty ADP
-                </th>
-                <th class="px-4 py-3 font-medium text-center">Trade value</th>
-                <th class="px-4 py-3 font-medium text-center">
-                  {{
-                    valuationMode === "dynasty"
-                      ? "Projected pts"
-                      : valuationMode === "season results"
-                        ? "Season pts"
-                        : "ROS pts"
-                  }}
-                </th>
-                <th class="px-4 py-3 font-medium text-center">Replacement</th>
-                <th class="px-4 py-3 font-medium text-center">VORP</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template
-                v-for="player in paginatedPlayers"
-                :key="player.playerId"
+          <Skeleton class="w-8 h-5 bg-muted dark:bg-muted/70" />
+          <Skeleton class="w-40 h-8 bg-muted dark:bg-muted/70" />
+          <Skeleton class="w-12 h-5 bg-muted dark:bg-muted/70" />
+          <Skeleton class="w-16 h-6 bg-muted dark:bg-muted/70" />
+        </div>
+      </div>
+
+      <div
+        v-else-if="players.length === 0"
+        class="max-lg:!mt-4 px-5 py-10 text-center border border-dashed rounded-lg border-border"
+      >
+        <p class="font-medium">No player values available</p>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Rankings will populate when this league has roster and valuation data.
+        </p>
+      </div>
+
+      <div
+        v-else-if="filteredPlayers.length === 0"
+        class="max-lg:!mt-4 px-5 py-10 text-center border border-dashed rounded-lg border-border"
+      >
+        <p class="font-medium">No matching players</p>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Try another player, manager, or position.
+        </p>
+      </div>
+
+      <div v-else class="max-lg:!mt-4 space-y-3">
+        <div class="overflow-hidden border rounded-lg border-border">
+          <div
+            class="overflow-x-auto"
+            role="region"
+            aria-label="League trade value rankings"
+            tabindex="0"
+          >
+            <table class="w-full min-w-[60rem] table-fixed text-sm">
+              <colgroup v-if="valuationMode === 'dynasty'">
+                <col class="w-[7%]" />
+                <col class="w-[24%]" />
+                <col class="w-[10%]" />
+                <col class="w-[12%]" />
+                <col class="w-[15%]" />
+                <col class="w-[12%]" />
+                <col class="w-[12%]" />
+                <col class="w-[8%]" />
+              </colgroup>
+              <colgroup v-else>
+                <col class="w-[7%]" />
+                <col class="w-[29%]" />
+                <col class="w-[11%]" />
+                <col class="w-[17%]" />
+                <col class="w-[14%]" />
+                <col class="w-[14%]" />
+                <col class="w-[8%]" />
+              </colgroup>
+              <thead
+                class="text-xs whitespace-nowrap bg-muted text-muted-foreground"
               >
-                <tr class="border-t border-border bg-background">
-                  <td
-                    class="px-4 py-3 font-semibold text-center tabular-nums"
+                <tr>
+                  <th class="px-4 py-3 font-medium text-center">OVR</th>
+                  <th class="px-4 py-3 font-medium text-left">Player</th>
+                  <th class="px-4 py-3 font-medium text-center">POS rank</th>
+                  <th
+                    v-if="valuationMode === 'dynasty'"
+                    class="px-4 py-3 font-medium text-center"
                   >
-                    #{{ player.overallRank }}
-                  </td>
-                  <td class="px-4 py-3">
-                    <div class="flex items-center gap-3">
-                      <img
-                        v-if="player.position !== 'DEF'"
-                        class="object-cover rounded-full size-9"
-                        :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.playerId}.jpg`"
-                        alt=""
-                      />
-                      <img
-                        v-else
-                        class="object-contain rounded-full size-9"
-                        :src="`https://sleepercdn.com/images/team_logos/nfl/${player.playerId.toLowerCase()}.png`"
-                        alt=""
-                      />
-                      <div>
-                        <p class="font-medium">
-                          {{ player.name || `${player.team} Defense` }}
-                        </p>
-                        <div
-                          class="flex items-center gap-1 text-xs text-muted-foreground"
-                        >
-                          <span>{{ player.position }} · {{ player.team }}</span>
-                          <span aria-hidden="true">·</span>
-                          <button
-                            type="button"
-                            class="px-0.5 py-2 -my-2 font-medium rounded-sm text-foreground/70 underline-offset-2 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            @click="buildTrade(player)"
+                    Dynasty ADP
+                  </th>
+                  <th class="px-4 py-3 font-medium text-center">Trade value</th>
+                  <th class="px-4 py-3 font-medium text-center">
+                    {{
+                      valuationMode === "dynasty"
+                        ? "Projected pts"
+                        : valuationMode === "season results"
+                          ? "Season pts"
+                          : "ROS pts"
+                    }}
+                  </th>
+                  <th class="px-4 py-3 font-medium text-center">Replacement</th>
+                  <th class="px-4 py-3 font-medium text-center">VORP</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template
+                  v-for="player in paginatedPlayers"
+                  :key="player.playerId"
+                >
+                  <tr class="border-t border-border bg-background">
+                    <td
+                      class="px-4 py-3 font-semibold text-center tabular-nums"
+                    >
+                      #{{ player.overallRank }}
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-3">
+                        <img
+                          v-if="player.position !== 'DEF'"
+                          class="object-cover rounded-full size-9"
+                          :src="`https://sleepercdn.com/content/nfl/players/thumb/${player.playerId}.jpg`"
+                          alt=""
+                        />
+                        <img
+                          v-else
+                          class="object-contain rounded-full size-9"
+                          :src="`https://sleepercdn.com/images/team_logos/nfl/${player.playerId.toLowerCase()}.png`"
+                          alt=""
+                        />
+                        <div>
+                          <p class="font-medium">
+                            {{ player.name || `${player.team} Defense` }}
+                          </p>
+                          <div
+                            class="flex items-center gap-1 text-xs text-muted-foreground"
                           >
-                            Build trade
-                          </button>
+                            <span
+                              >{{ player.position }} · {{ player.team }}</span
+                            >
+                            <span aria-hidden="true">·</span>
+                            <button
+                              type="button"
+                              class="px-0.5 py-2 -my-2 font-medium rounded-sm text-foreground/70 underline-offset-2 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              @click="buildTrade(player)"
+                            >
+                              Build trade
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td
-                    class="px-4 py-3 font-medium text-center tabular-nums"
-                  >
-                    {{ player.position }}{{ player.positionRank }}
-                  </td>
-                  <td
-                    v-if="valuationMode === 'dynasty'"
-                    class="px-4 py-3 text-center tabular-nums text-muted-foreground"
-                  >
-                    {{
-                      player.dynastyAdp
-                        ? formatNumber(player.dynastyAdp, 1)
-                        : "—"
-                    }}
-                  </td>
-                  <td class="px-4 py-3 text-center tabular-nums">
-                    <div class="flex items-center justify-center gap-2">
-                      <Badge :variant="valueTier(player.tradeValue).variant">
-                        {{ valueTier(player.tradeValue).label }}
-                      </Badge>
-                      <Tooltip>
-                        <TooltipTrigger as-child>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="xs"
-                            class="justify-center w-12 px-0 font-semibold underline decoration-dotted decoration-muted-foreground/70 underline-offset-4 tabular-nums hover:decoration-foreground"
-                            :aria-label="`Explain ${player.name || `${player.team} Defense`}'s trade value`"
-                            :aria-expanded="
-                              expandedPlayerId === player.playerId
-                            "
-                            :aria-controls="`player-value-explanation-${player.playerId}`"
-                            @click="toggleValueExplanation(player.playerId)"
-                          >
-                            {{ formatNumber(player.tradeValue, 1) }}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top">
-                          Explain this value
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </td>
-                  <td class="px-4 py-3 text-center tabular-nums">
-                    {{ formatNumber(player.projectedPoints) }}
-                  </td>
-                  <td
-                    class="px-4 py-3 text-center tabular-nums text-muted-foreground"
-                  >
-                    {{ formatNumber(player.replacementPoints) }}
-                  </td>
-                  <td
-                    class="px-4 py-3 font-medium text-center tabular-nums"
-                  >
-                    {{ formatNumber(player.vorp) }}
-                  </td>
-                </tr>
-                <tr
-                  v-if="expandedPlayerId === player.playerId"
-                  class="border-t border-border bg-muted/20"
-                >
-                  <td
-                    :colspan="valuationMode === 'dynasty' ? 8 : 7"
-                    class="px-4 py-3"
-                  >
-                    <p
-                      :id="`player-value-explanation-${player.playerId}`"
-                      class="max-w-4xl text-xs leading-relaxed text-muted-foreground sm:text-sm"
+                    </td>
+                    <td class="px-4 py-3 font-medium text-center tabular-nums">
+                      {{ player.position }}{{ player.positionRank }}
+                    </td>
+                    <td
+                      v-if="valuationMode === 'dynasty'"
+                      class="px-4 py-3 text-center tabular-nums text-muted-foreground"
                     >
-                      <span class="font-medium text-foreground"
-                        >Why this value:</span
+                      {{
+                        player.dynastyAdp
+                          ? formatNumber(player.dynastyAdp, 1)
+                          : "—"
+                      }}
+                    </td>
+                    <td class="px-4 py-3 text-center tabular-nums">
+                      <div class="flex items-center justify-center gap-2">
+                        <Badge :variant="valueTier(player.tradeValue).variant">
+                          {{ valueTier(player.tradeValue).label }}
+                        </Badge>
+                        <Tooltip>
+                          <TooltipTrigger as-child>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="xs"
+                              class="justify-center w-12 px-0 font-semibold underline decoration-dotted decoration-muted-foreground/70 underline-offset-4 tabular-nums hover:decoration-foreground"
+                              :aria-label="`Explain ${player.name || `${player.team} Defense`}'s trade value`"
+                              :aria-expanded="
+                                expandedPlayerId === player.playerId
+                              "
+                              :aria-controls="`player-value-explanation-${player.playerId}`"
+                              @click="toggleValueExplanation(player.playerId)"
+                            >
+                              {{ formatNumber(player.tradeValue, 1) }}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            Explain this value
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-center tabular-nums">
+                      {{ formatNumber(player.projectedPoints) }}
+                    </td>
+                    <td
+                      class="px-4 py-3 text-center tabular-nums text-muted-foreground"
+                    >
+                      {{ formatNumber(player.replacementPoints) }}
+                    </td>
+                    <td class="px-4 py-3 font-medium text-center tabular-nums">
+                      {{ formatNumber(player.vorp) }}
+                    </td>
+                  </tr>
+                  <tr
+                    v-if="expandedPlayerId === player.playerId"
+                    class="border-t border-border bg-muted/20"
+                  >
+                    <td
+                      :colspan="valuationMode === 'dynasty' ? 8 : 7"
+                      class="px-4 py-3"
+                    >
+                      <p
+                        :id="`player-value-explanation-${player.playerId}`"
+                        class="max-w-4xl text-xs leading-relaxed text-muted-foreground sm:text-sm"
                       >
-                      {{ getValueExplanation(player) }}
-                    </p>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
+                        <span class="font-medium text-foreground"
+                          >Why this value:</span
+                        >
+                        {{ getValueExplanation(player) }}
+                      </p>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div
+            v-if="access !== 'preview'"
+            class="flex flex-col gap-3 px-4 py-3 text-xs border-t border-border sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p class="text-muted-foreground">
+              Showing {{ pageStart }}–{{ pageEnd }} of
+              {{ filteredPlayers.length }} rostered players
+            </p>
+            <nav
+              v-if="pageCount > 1"
+              class="flex items-center gap-2"
+              aria-label="Player rankings pagination"
+            >
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                :disabled="currentPage === 1"
+                @click="currentPage -= 1"
+              >
+                Previous
+              </Button>
+              <span class="px-1 tabular-nums text-muted-foreground">
+                Page {{ currentPage }} of {{ pageCount }}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                :disabled="currentPage === pageCount"
+                @click="currentPage += 1"
+              >
+                Next
+              </Button>
+            </nav>
+          </div>
         </div>
-        <div
-          v-if="access !== 'preview'"
-          class="flex flex-col gap-3 px-4 py-3 text-xs border-t border-border sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p class="text-muted-foreground">
-            Showing {{ pageStart }}–{{ pageEnd }} of
-            {{ filteredPlayers.length }} rostered players
+        <div class="px-4 py-3 border rounded-lg border-border bg-muted/20">
+          <p class="text-xs leading-relaxed text-muted-foreground">
+            <span class="font-medium text-foreground"
+              >How to read trade value:</span
+            >
+            This is a league relative comparison score, not projected fantasy
+            points or a universal player price. Higher means more valuable
+            within this league.
           </p>
-          <nav
-            v-if="pageCount > 1"
-            class="flex items-center gap-2"
-            aria-label="Player rankings pagination"
+          <div
+            class="flex flex-wrap gap-1.5 mt-2"
+            aria-label="Trade value tier scale"
           >
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              :disabled="currentPage === 1"
-              @click="currentPage -= 1"
+            <Badge
+              v-for="tier in valueScaleTiers"
+              :key="tier.label"
+              :variant="tier.variant"
             >
-              Previous
-            </Button>
-            <span class="px-1 tabular-nums text-muted-foreground">
-              Page {{ currentPage }} of {{ pageCount }}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              :disabled="currentPage === pageCount"
-              @click="currentPage += 1"
-            >
-              Next
-            </Button>
-          </nav>
+              {{ tier.label }} {{ tier.range }}
+            </Badge>
+          </div>
+          <p
+            v-if="valuationMode !== 'dynasty'"
+            class="mt-2 text-xs leading-relaxed text-muted-foreground"
+          >
+            Redraft values measure projected points above a league specific
+            positional baseline. League size, scoring, starting lineup
+            requirements, and positional scarcity influence the result.
+            Completed seasons use full season results instead of projections.
+          </p>
+          <p class="mt-2 text-xs leading-relaxed text-muted-foreground" v-else>
+            Dynasty values blend long term market ADP with league specific
+            projected production. League size, scoring, starting lineup
+            requirements, positional scarcity, tight end premiums, and your
+            selected team direction influence the result.
+          </p>
         </div>
       </div>
-      <div class="px-4 py-3 border rounded-lg border-border bg-muted/20">
-        <p class="text-xs leading-relaxed text-muted-foreground">
-          <span class="font-medium text-foreground"
-            >How to read trade value:</span
-          >
-          This is a league relative comparison score, not projected fantasy
-          points or a universal player price. Higher means more valuable within
-          this league.
-        </p>
-        <div
-          class="flex flex-wrap gap-1.5 mt-2"
-          aria-label="Trade value tier scale"
-        >
-          <Badge
-            v-for="tier in valueScaleTiers"
-            :key="tier.label"
-            :variant="tier.variant"
-          >
-            {{ tier.label }} {{ tier.range }}
-          </Badge>
-        </div>
-        <p
-          v-if="valuationMode !== 'dynasty'"
-          class="mt-2 text-xs leading-relaxed text-muted-foreground"
-        >
-          Redraft values measure projected points above a league specific
-          positional baseline. League size, scoring, starting lineup
-          requirements, and positional scarcity influence the result. Completed
-          seasons use full season results instead of projections.
-        </p>
-        <p class="mt-2 text-xs leading-relaxed text-muted-foreground" v-else>
-          Dynasty values blend long term market ADP with league specific
-          projected production. League size, scoring, starting lineup
-          requirements, positional scarcity, tight end premiums, and your
-          selected team direction influence the result.
-        </p>
-      </div>
-    </div>
     </div>
   </TooltipProvider>
 </template>
