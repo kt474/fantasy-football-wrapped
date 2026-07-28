@@ -101,6 +101,22 @@ export const inputUsername = async (
   }
 };
 
+const getLeagueSourceTag = (): string | undefined => {
+  try {
+    const storageKey = "ffwrapped-league-source";
+    const existingTag = sessionStorage.getItem(storageKey);
+    if (existingTag && /^[A-Z0-9]{6}$/.test(existingTag)) {
+      return existingTag;
+    }
+
+    const sourceTag = crypto.randomUUID().slice(0, 6).toUpperCase();
+    sessionStorage.setItem(storageKey, sourceTag);
+    return sourceTag;
+  } catch {
+    return undefined;
+  }
+};
+
 export const inputLeague = async (
   leagueId: string,
   name: string,
@@ -123,6 +139,7 @@ export const inputLeague = async (
           type: type,
           year: year,
           platform: platform,
+          source_tag: getLeagueSourceTag(),
         },
       }),
       retries: 0,

@@ -7,6 +7,7 @@ import {
   getLeagueCount,
   getPlayerIdsByNameTeamMap,
   getPlayerNews,
+  inputLeague,
   resolvePlayerIdLookupEndpoint,
 } from "../src/api/api.ts";
 
@@ -25,6 +26,31 @@ afterEach(() => {
 });
 
 describe("API fallback behavior", () => {
+  test("reuses one anonymous source tag for league submissions in a session", async () => {
+    vi.stubEnv("VITE_LEAGUE_URL", "https://backend.example.com/api/addEntry");
+    const storedValues = new Map();
+    vi.stubGlobal("sessionStorage", {
+      getItem: (key) => storedValues.get(key) ?? null,
+      setItem: (key, value) => storedValues.set(key, value),
+    });
+    vi.stubGlobal("crypto", {
+      randomUUID: vi.fn(() => "k7p4mx00-0000-0000-0000-000000000000"),
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(mockFetchResponse(200, { message: "ok" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await inputLeague("123", "League One", 12, "Dynasty", "2026", "sleeper");
+    await inputLeague("456", "League Two", 10, "Redraft", "2026", "sleeper");
+
+    const sourceTags = fetchMock.mock.calls.map(
+      ([, options]) => JSON.parse(options.body).data.source_tag
+    );
+    expect(sourceTags).toEqual(["K7P4MX", "K7P4MX"]);
+    expect(crypto.randomUUID).toHaveBeenCalledOnce();
+  });
+
   test("uses the dedicated player ID lookup endpoint when configured", () => {
     expect(
       resolvePlayerIdLookupEndpoint(
