@@ -5,7 +5,10 @@ import {
   analyzeDraftRoom,
   type AuctionDraftRoomResponse,
 } from "@/api/draftRoomApi";
-import { AUCTION_PLAN_POSITIONS } from "@/lib/auctionNarratives";
+import {
+  AUCTION_PLAN_POSITIONS,
+  getAuctionTendencySummary,
+} from "@/lib/auctionNarratives";
 import type { ManagerArchetype } from "@/lib/narratives";
 import { Badge } from "@/components/ui/badge";
 import Card from "@/components/ui/card/Card.vue";
@@ -39,6 +42,49 @@ let analysisTimer: ReturnType<typeof setTimeout> | null = null;
 
 const budgetPlan = computed(() => analysis.value?.budgetPlan ?? null);
 const roomBenchmarks = computed(() => analysis.value?.roomBenchmarks ?? []);
+const positionCompetition = computed(() => {
+  const managerRows = props.archetypes.flatMap((manager) => {
+    const summary = getAuctionTendencySummary(manager.auctionHistory ?? []);
+    return summary ? [{ manager, summary }] : [];
+  });
+
+  return AUCTION_PLAN_POSITIONS.map((position) => {
+    const benchmark = roomBenchmarks.value.find(
+      (item) => item.position === position
+    );
+    if (!benchmark) return null;
+
+    return {
+      position,
+      roomAverage: benchmark.averageShare,
+      managers: managerRows
+        .map(({ manager, summary }) => ({
+          userId: manager.userId,
+          name: manager.displayName,
+          share: summary.positionSpendShares[position] ?? 0,
+          difference:
+            (summary.positionSpendShares[position] ?? 0) -
+            benchmark.averageShare,
+        }))
+        .filter((manager) => manager.share > 0)
+        .sort((left, right) => right.share - left.share)
+        .slice(0, 3),
+    };
+  }).filter(
+    (
+      group
+    ): group is {
+      position: (typeof AUCTION_PLAN_POSITIONS)[number];
+      roomAverage: number;
+      managers: Array<{
+        userId: string;
+        name: string;
+        share: number;
+        difference: number;
+      }>;
+    } => Boolean(group?.managers.length)
+  );
+});
 const priceBandGroups = computed(() => {
   const priceBands = analysis.value?.priceBands ?? [];
   return AUCTION_PLAN_POSITIONS.map((position) => ({
@@ -122,6 +168,13 @@ onBeforeUnmount(() => {
 });
 
 const formatPercent = (value: number) => `${Math.round(value * 100)}%`;
+const formatPointDifference = (value: number) => {
+  const points = Math.round(value * 100);
+  if (points === 0) return "At room average";
+  return `${points > 0 ? "+" : "−"}${Math.abs(points)} pts vs room`;
+};
+const competitionBarWidth = (share: number) =>
+  `${Math.min(100, Math.round(share * 200))}%`;
 const benchmarkFor = (position: string) =>
   roomBenchmarks.value.find((benchmark) => benchmark.position === position);
 const formatRoomDifference = (position: string, amount: number) => {
@@ -191,9 +244,60 @@ const formatRoomDifference = (position: string, amount: number) => {
             <p class="text-xs text-muted-foreground">
               {{ formatPercent(benchmark.averageShare) }} room average
             </p>
-            <p class="pt-2 mt-2 text-xs border-t text-muted-foreground">
-              Likely spenders: {{ benchmark.likelySpenders.join(", ") }}
-            </p>
+          </div>
+        </div>
+      </Card>
+
+      <Card
+        v-if="positionCompetition.length"
+        class="p-4 shadow-none sm:p-5"
+        :class="{ 'opacity-60': analysisLoading }"
+        :aria-busy="analysisLoading"
+      >
+        <h3 class="heading-card">Position Competition</h3>
+        <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+          Managers who historically commit the largest share of their auction
+          budget to each position.
+        </p>
+
+        <div class="grid gap-3 mt-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            v-for="group in positionCompetition"
+            :key="group.position"
+            class="p-3 border rounded-card bg-surface-subtle"
+          >
+            <div class="flex items-baseline justify-between gap-3">
+              <p class="text-sm font-medium">{{ group.position }}</p>
+              <p class="text-xs text-muted-foreground">
+                {{ formatPercent(group.roomAverage) }} room avg
+              </p>
+            </div>
+
+            <div class="mt-3 space-y-3">
+              <div
+                v-for="manager in group.managers"
+                :key="manager.userId"
+              >
+                <div class="flex items-center justify-between gap-2 text-xs">
+                  <span class="font-medium truncate">{{ manager.name }}</span>
+                  <span class="tabular-nums text-muted-foreground">
+                    {{ formatPercent(manager.share) }}
+                  </span>
+                </div>
+                <div
+                  class="h-1.5 mt-1.5 overflow-hidden rounded-full bg-secondary"
+                  aria-hidden="true"
+                >
+                  <div
+                    class="h-full rounded-full bg-primary"
+                    :style="{ width: competitionBarWidth(manager.share) }"
+                  />
+                </div>
+                <p class="mt-1 text-[10px] text-muted-foreground">
+                  {{ formatPointDifference(manager.difference) }}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </Card>
