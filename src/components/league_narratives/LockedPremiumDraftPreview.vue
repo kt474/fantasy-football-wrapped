@@ -39,6 +39,26 @@ const historySummary = computed(() => {
   };
 });
 
+const previewCopy = computed(() =>
+  props.isAuction
+    ? {
+        historyLabel:
+          historySummary.value.drafts === 1 ? "past auction" : "past auctions",
+        description: `See how ${historySummary.value.managers} ${
+          historySummary.value.managers === 1
+            ? "manager spends"
+            : "managers spend"
+        } and build a budget around the way your league actually bids.`,
+      }
+    : {
+        historyLabel:
+          historySummary.value.drafts === 1 ? "past draft" : "past drafts",
+        description: `Scout patterns across ${historySummary.value.managers} ${
+          historySummary.value.managers === 1 ? "manager" : "managers"
+        } and plan around the way your league actually drafts.`,
+      }
+);
+
 const analyticsProperties = () => ({
   feature: "draft_room",
   source: "draft_room_locked_preview",
@@ -92,13 +112,14 @@ const trackUnlockClick = () => {
       ref="paywallElement"
       class="flex flex-col gap-4 p-4 mt-4 border rounded-card bg-muted/30 sm:flex-row sm:items-center sm:justify-between sm:p-5"
     >
-      <div v-if="historySummary.managers">
-        <p class="text-xs font-medium uppercase text-muted-foreground">
-          Your league data is ready
+      <div v-if="historySummary.managers" class="max-w-2xl">
+        <p class="font-semibold">
+          See what the {{ historySummary.drafts.toLocaleString() }}
+          {{ previewCopy.historyLabel }}
+          {{ historySummary.drafts === 1 ? "reveals" : "reveal" }}
         </p>
-        <p class="mt-1 font-semibold">
-          {{ historySummary.managers }} managers ·
-          {{ historySummary.drafts }} tracked drafts
+        <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+          {{ previewCopy.description }}
         </p>
       </div>
       <Button as-child class="shrink-0" size="lg">
