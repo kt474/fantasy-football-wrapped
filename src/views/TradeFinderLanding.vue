@@ -89,7 +89,7 @@ const faqs = [
   {
     question: "Does Trade Finder support dynasty leagues?",
     answer:
-      "Yes. Dynasty mode blends longer-term market context with league-specific projected production, positional needs, lineup requirements, and the selected team direction. Eligible draft picks may also help balance a dynasty package.",
+      "Yes. Dynasty mode blends longer-term market context with league specific projected production, positional needs, lineup requirements, and the selected team direction. Eligible draft picks may also help balance a dynasty package.",
   },
   {
     question: "Are suggested trades guaranteed to be accepted?",
@@ -104,7 +104,7 @@ const faqs = [
   {
     question: "Is Trade Finder a Premium feature?",
     answer:
-      "Yes. You can connect and explore a league for free, including a preview of league-specific Player Values. Premium unlocks Trade Finder’s league-wide suggestion search and the complete Player Values experience.",
+      "Yes. You can connect and explore a league for free, including a preview of league specific Player Values. Premium unlocks Trade Finder’s league-wide suggestion search and the complete Player Values experience.",
   },
 ];
 
@@ -122,7 +122,7 @@ const analyzeRoute = {
   <PublicPageShell>
     <section class="border-b">
       <div
-        class="grid items-center gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.72fr)_minmax(600px,1.28fr)]"
+        class="grid items-center gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,0.72fr)_minmax(600px,1.28fr)]"
       >
         <div>
           <Badge variant="secondary">Premium trade tool</Badge>
@@ -218,7 +218,9 @@ const analyzeRoute = {
               both projected lineups.
             </p>
 
-            <div class="mt-8 overflow-hidden border divide-y rounded-card bg-background">
+            <div
+              class="mt-8 overflow-hidden border divide-y rounded-card bg-background"
+            >
               <article
                 v-for="signal in evaluationSignals"
                 :key="signal.label"
@@ -299,7 +301,9 @@ const analyzeRoute = {
             <div
               class="flex flex-col gap-4 px-5 py-4 border-t bg-muted/15 sm:flex-row sm:items-center sm:justify-between"
             >
-              <p class="inline-flex items-center gap-2 text-xs text-muted-foreground">
+              <p
+                class="inline-flex items-center gap-2 text-xs text-muted-foreground"
+              >
                 <ListChecks :size="15" class="text-primary" />
                 Recalculates as the package changes
               </p>
@@ -319,18 +323,22 @@ const analyzeRoute = {
         class="grid gap-8 p-7 overflow-hidden border rounded-feature bg-card sm:p-9 lg:grid-cols-[1fr_auto] lg:items-center"
       >
         <div class="max-w-3xl">
-          <div class="inline-flex items-center gap-2 text-sm font-medium text-primary">
+          <div
+            class="inline-flex items-center gap-2 text-sm font-medium text-primary"
+          >
             <Sparkles :size="17" /> Premium discovery tool
           </div>
           <h2 class="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
             Connect the league for free. Upgrade when you want the full search.
           </h2>
           <p class="mt-3 leading-7 text-muted-foreground">
-            Free league analysis includes a preview of league-specific Player
+            Free league analysis includes a preview of league specific Player
             Values. Premium unlocks the complete rankings and Trade Finder’s
             league-wide suggestion search.
           </p>
-          <div class="flex flex-wrap gap-x-5 gap-y-2 mt-5 text-sm text-muted-foreground">
+          <div
+            class="flex flex-wrap mt-5 text-sm gap-x-5 gap-y-2 text-muted-foreground"
+          >
             <span class="inline-flex items-center gap-1.5"
               ><Check :size="14" /> Sleeper and ESPN</span
             >
@@ -380,7 +388,7 @@ const analyzeRoute = {
 
     <section class="max-w-6xl px-5 pb-4 mx-auto">
       <div
-        class="relative flex flex-col items-start gap-6 p-7 overflow-hidden border rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9"
+        class="relative flex flex-col items-start gap-6 overflow-hidden border p-7 rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9"
       >
         <div
           aria-hidden="true"

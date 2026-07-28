@@ -91,17 +91,17 @@ const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
       <section class="relative overflow-hidden border-b">
         <div
           aria-hidden="true"
-          class="absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-primary/5 to-transparent"
+          class="absolute inset-x-0 top-0 h-72 bg-linear-to-b from-primary/5 to-transparent"
         ></div>
         <div
-          class="relative grid max-w-7xl gap-12 px-5 py-16 mx-auto sm:py-24 lg:grid-cols-[minmax(0,0.82fr)_minmax(500px,1.18fr)] lg:items-center"
+          class="relative grid max-w-6xl gap-12 px-5 py-16 mx-auto sm:py-24 lg:grid-cols-[minmax(0,0.82fr)_minmax(500px,1.18fr)] lg:items-center"
         >
           <div>
             <Badge variant="secondary">Premium league history</Badge>
             <h1
               class="max-w-3xl mt-5 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl"
             >
-              Manager profiles built from the résumé behind the record
+              Manager profiles built from the resume behind the record
             </h1>
             <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
               Turn seasons of results, lineup decisions, draft habits, trades,
@@ -122,11 +122,8 @@ const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
               </Button>
             </div>
             <div
-              class="flex flex-wrap gap-x-5 gap-y-2 mt-6 text-sm text-muted-foreground"
+              class="flex flex-wrap mt-6 text-sm gap-x-5 gap-y-2 text-muted-foreground"
             >
-              <span class="inline-flex items-center gap-1.5">
-                <BadgeCheck :size="15" /> League-relative badges
-              </span>
               <span class="inline-flex items-center gap-1.5">
                 <BadgeCheck :size="15" /> Sleeper and ESPN
               </span>
@@ -139,18 +136,22 @@ const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
 
       <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
         <div class="max-w-3xl">
-          <p class="text-sm font-medium text-primary">The evidence underneath</p>
+          <p class="text-sm font-medium text-primary">
+            The evidence underneath
+          </p>
           <h2 class="mt-2 text-3xl font-semibold tracking-tight">
             A point of view you can check against the league
           </h2>
           <p class="mt-4 leading-7 text-muted-foreground">
-            The description is the final layer. League history is normalized
-            and calculated first, so every profile stays attached to the
-            manager’s real performance.
+            The description is the final layer. League history is normalized and
+            calculated first, so every profile stays attached to the manager’s
+            real performance.
           </p>
         </div>
 
-        <div class="grid gap-px mt-10 overflow-hidden border rounded-card bg-border md:grid-cols-3">
+        <div
+          class="grid gap-px mt-10 overflow-hidden border rounded-card bg-border md:grid-cols-3"
+        >
           <article
             v-for="item in evidence"
             :key="item.title"
@@ -167,7 +168,7 @@ const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
 
       <section id="rivalry-report" class="border-y bg-muted/30 scroll-mt-20">
         <div
-          class="grid max-w-7xl gap-12 px-5 py-16 mx-auto sm:py-20 lg:grid-cols-[minmax(0,0.72fr)_minmax(520px,1.28fr)] lg:items-center"
+          class="grid max-w-6xl gap-12 px-5 py-16 mx-auto sm:py-20 lg:grid-cols-[minmax(0,0.72fr)_minmax(520px,1.28fr)] lg:items-center"
         >
           <div>
             <p class="text-sm font-medium text-primary">Rivalry reports</p>
@@ -199,7 +200,9 @@ const trackUnlockClick = (feature: "manager_profiles" | "rivalry_report") => {
       </section>
 
       <section class="max-w-4xl px-5 py-16 mx-auto sm:py-20">
-        <p class="text-sm font-medium text-primary">Frequently asked questions</p>
+        <p class="text-sm font-medium text-primary">
+          Frequently asked questions
+        </p>
         <h2 class="mt-2 text-3xl font-semibold tracking-tight">
           Manager profile and rivalry questions
         </h2>

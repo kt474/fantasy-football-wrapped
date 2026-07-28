@@ -42,7 +42,7 @@ const analysisViews = [
   {
     number: "03",
     title: "Roster and draft review",
-    question: "Where did a team build—or lose—its edge?",
+    question: "Where did a team build or lose its edge?",
     description:
       "Connect draft value, current roster strength, lineup decisions, trades, and waiver activity instead of judging each move in isolation.",
     signal: "Draft grades · projections · trades · waivers",
@@ -112,10 +112,10 @@ const sleeperAnalysisRoute = {
     <section class="relative overflow-hidden border-b">
       <div
         aria-hidden="true"
-        class="hero-grid absolute inset-0 opacity-40"
+        class="absolute inset-0 hero-grid opacity-40"
       ></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.82fr)_minmax(500px,1.18fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,0.82fr)_minmax(500px,1.18fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">{{ page.eyebrow }}</Badge>
@@ -140,13 +140,13 @@ const sleeperAnalysisRoute = {
             </Button>
           </div>
           <div
-            class="flex flex-wrap gap-x-5 gap-y-2 mt-6 text-sm text-muted-foreground"
+            class="flex flex-wrap mt-6 text-sm gap-x-5 gap-y-2 text-muted-foreground"
           >
             <span class="inline-flex items-center gap-1.5"
               ><Check :size="14" /> No spreadsheet setup</span
             >
             <span class="inline-flex items-center gap-1.5"
-              ><Check :size="14" /> Current and linked seasons</span
+              ><Check :size="14" /> Current and past seasons</span
             >
             <span class="inline-flex items-center gap-1.5"
               ><Check :size="14" /> Free to explore</span
@@ -158,7 +158,7 @@ const sleeperAnalysisRoute = {
       </div>
     </section>
 
-    <section class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
       <div class="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">
         <div class="lg:sticky lg:top-24 lg:self-start">
           <p class="text-sm font-medium text-primary">
@@ -228,14 +228,14 @@ const sleeperAnalysisRoute = {
             <p class="text-sm font-medium text-primary">3 seasons</p>
           </div>
           <div class="relative mt-6 ml-2 border-l">
-            <div class="relative pb-7 pl-6">
+            <div class="relative pl-6 pb-7">
               <span
                 class="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-background"
               ></span>
               <p class="text-xs text-muted-foreground">2025 · Current</p>
               <p class="mt-1 font-medium">6–5 · Projected playoff seed #4</p>
             </div>
-            <div class="relative pb-7 pl-6">
+            <div class="relative pl-6 pb-7">
               <span
                 class="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-muted-foreground ring-4 ring-background"
               ></span>
@@ -256,7 +256,7 @@ const sleeperAnalysisRoute = {
       </div>
     </section>
 
-    <section class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
       <div class="max-w-2xl">
         <p class="text-sm font-medium text-primary">A lightweight workflow</p>
         <h2 class="mt-2 text-3xl font-semibold tracking-tight">
@@ -295,9 +295,9 @@ const sleeperAnalysisRoute = {
       </dl>
     </section>
 
-    <section class="px-5 pb-4 mx-auto max-w-6xl">
+    <section class="max-w-6xl px-5 pb-4 mx-auto">
       <div
-        class="relative flex flex-col items-start gap-6 p-7 overflow-hidden border rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9"
+        class="relative flex flex-col items-start gap-6 overflow-hidden border p-7 rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9"
       >
         <div
           aria-hidden="true"

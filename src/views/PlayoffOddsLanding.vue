@@ -88,14 +88,14 @@ const faqs = [
     <section class="relative overflow-hidden border-b">
       <div aria-hidden="true" class="absolute inset-0 odds-glow"></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">Fantasy football season forecast</Badge>
           <h1
             class="max-w-3xl mt-5 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl"
           >
-            Fantasy football playoff odds calculated from your real league
+            Fantasy football playoff odds calculated for your league
           </h1>
           <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
             Simulate the remaining schedule 5,000 times to estimate playoff

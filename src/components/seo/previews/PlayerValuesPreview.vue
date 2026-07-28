@@ -33,7 +33,7 @@ const getTier = (value: number) =>
 
     <div class="p-4">
       <p class="text-xs leading-5 text-muted-foreground">
-        League-specific rankings based on value over the starter-level
+        League specific rankings based on value over the starter-level
         replacement player at each position.
       </p>
 
@@ -45,11 +45,15 @@ const getTier = (value: number) =>
           <span class="text-xs text-muted-foreground">Search players</span>
         </div>
         <div class="px-3 py-2 border rounded-md bg-background">
-          <span class="block text-[0.62rem] text-muted-foreground">Manager</span>
+          <span class="block text-[0.62rem] text-muted-foreground"
+            >Manager</span
+          >
           <span class="text-xs font-medium">All managers</span>
         </div>
         <div class="px-3 py-2 border rounded-md bg-background">
-          <span class="block text-[0.62rem] text-muted-foreground">Position</span>
+          <span class="block text-[0.62rem] text-muted-foreground"
+            >Position</span
+          >
           <span class="text-xs font-medium">All positions</span>
         </div>
       </div>

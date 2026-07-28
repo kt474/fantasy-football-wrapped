@@ -5,20 +5,35 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   BarChart3,
+  CalendarRange,
   Check,
-  Database,
   History,
   LockKeyhole,
   Newspaper,
   ShieldCheck,
+  SlidersHorizontal,
+  Swords,
   Trophy,
+  UsersRound,
 } from "@lucide/vue";
 
 const importedData = [
-  "League settings and scoring format",
-  "Managers, rosters, and draft results",
-  "Completed matchups and standings",
-  "Season schedule and available history",
+  {
+    icon: SlidersHorizontal,
+    label: "League settings and scoring format",
+  },
+  {
+    icon: UsersRound,
+    label: "Managers, rosters, and draft results",
+  },
+  {
+    icon: Swords,
+    label: "Completed matchups and standings",
+  },
+  {
+    icon: CalendarRange,
+    label: "Season schedule and available history",
+  },
 ];
 
 const calculatedViews = [
@@ -103,22 +118,22 @@ const espnAnalysisRoute = {
     <section class="relative overflow-hidden border-b">
       <div
         aria-hidden="true"
-        class="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-primary/5 to-transparent"
+        class="absolute inset-x-0 top-0 h-64 bg-lienar-to-b from-primary/5 to-transparent"
       ></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.82fr)_minmax(500px,1.18fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,0.82fr)_minmax(500px,1.18fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">ESPN fantasy football tools</Badge>
           <h1
             class="max-w-3xl mt-5 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl"
           >
-            An ESPN fantasy football league analyzer built for the whole season
+            A complete ESPN fantasy football league analyzer
           </h1>
           <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
             Import a public or private ESPN league, then explore power rankings,
-            expected wins, playoff forecasts, draft results, weekly recaps, and
-            manager trends in one place.
+            playoff forecasts, draft results, weekly recaps, and manager trends
+            in one place.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
             <Button as-child size="lg"
@@ -137,9 +152,6 @@ const espnAnalysisRoute = {
           >
             <span class="inline-flex items-center gap-1.5"
               ><Check :size="14" /> Public and private leagues</span
-            >
-            <span class="inline-flex items-center gap-1.5"
-              ><Check :size="14" /> Season-aware import</span
             >
             <span class="inline-flex items-center gap-1.5"
               ><Check :size="14" /> No spreadsheet setup</span
@@ -166,15 +178,19 @@ const espnAnalysisRoute = {
         <ul class="border-t mt-7">
           <li
             v-for="item in importedData"
-            :key="item"
+            :key="item.label"
             class="flex items-center gap-3 py-4 text-sm border-b"
           >
-            <Database :size="15" class="text-primary shrink-0" /> {{ item }}
+            <component
+              :is="item.icon"
+              :size="15"
+              class="text-primary shrink-0"
+            />
+            {{ item.label }}
           </li>
         </ul>
       </div>
       <div>
-        <p class="text-sm font-medium text-primary">Calculated by ffwrapped</p>
         <h2 class="mt-2 text-3xl font-semibold tracking-tight">
           Add the context ESPN leaves between screens
         </h2>

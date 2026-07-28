@@ -51,7 +51,7 @@ const recordCards = [
     icon: Scale,
     label: "Closest matchup",
     value: "0.14 pts",
-    note: "Lamario Kart over Waiver Weather",
+    note: "Lamario Kart over Laporta Potty",
   },
   {
     icon: History,
@@ -88,9 +88,9 @@ const faqs = [
 <template>
   <PublicPageShell>
     <section class="relative overflow-hidden border-b">
-      <div aria-hidden="true" class="history-lines absolute inset-0"></div>
+      <div aria-hidden="true" class="absolute inset-0 history-lines"></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary"
@@ -117,7 +117,7 @@ const faqs = [
             >
           </div>
           <div
-            class="flex flex-wrap gap-x-5 gap-y-2 mt-6 text-sm text-muted-foreground"
+            class="flex flex-wrap mt-6 text-sm gap-x-5 gap-y-2 text-muted-foreground"
           >
             <span class="inline-flex items-center gap-1.5"
               ><Check :size="14" /> All-time standings</span
@@ -178,7 +178,7 @@ const faqs = [
     </section>
 
     <section class="border-y bg-muted/30">
-      <div class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+      <div class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
         <div class="max-w-3xl">
           <p class="text-sm font-medium text-primary">The league ledger</p>
           <h2 class="mt-2 text-3xl font-semibold tracking-tight">
@@ -246,7 +246,7 @@ const faqs = [
             class="flex items-center gap-4"
           >
             <span
-              class="flex items-center justify-center w-7 h-7 text-xs font-medium rounded-full"
+              class="flex items-center justify-center text-xs font-medium rounded-full w-7 h-7"
               :class="
                 index === 0
                   ? 'bg-primary text-primary-foreground'
@@ -281,9 +281,9 @@ const faqs = [
       </dl>
     </section>
 
-    <section class="px-5 pb-4 mx-auto max-w-6xl">
+    <section class="max-w-6xl px-5 pb-4 mx-auto">
       <div
-        class="relative flex flex-col items-start gap-6 p-7 overflow-hidden border rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9"
+        class="relative flex flex-col items-start gap-6 overflow-hidden border p-7 rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9"
       >
         <div
           aria-hidden="true"
@@ -306,7 +306,7 @@ const faqs = [
             as-child
             size="lg"
             variant="outline"
-            class="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+            class="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground hover:text-primary"
             ><RouterLink
               to="/fantasy-football-manager-profiles-rivalry-report-example"
               >View profiles &amp; rivalry example</RouterLink

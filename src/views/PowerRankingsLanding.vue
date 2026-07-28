@@ -86,9 +86,9 @@ const faqs = [
 <template>
   <PublicPageShell>
     <section class="relative overflow-hidden border-b">
-      <div aria-hidden="true" class="ranking-field absolute inset-0"></div>
+      <div aria-hidden="true" class="absolute inset-0 ranking-field"></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">Sleeper and ESPN league rankings</Badge>
@@ -98,8 +98,8 @@ const faqs = [
             Fantasy football power rankings with a score you can explain
           </h1>
           <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
-            Rank every team using scoring, consistency, and results—then follow
-            the order week by week and inspect the roster strengths behind each
+            Rank every team using scoring, consistency, and results. Follow the
+            order week by week and inspect the roster strengths behind each
             move.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
@@ -113,7 +113,7 @@ const faqs = [
             >
           </div>
           <div
-            class="flex flex-wrap gap-x-5 gap-y-2 mt-6 text-sm text-muted-foreground"
+            class="flex flex-wrap mt-6 text-sm gap-x-5 gap-y-2 text-muted-foreground"
           >
             <span class="inline-flex items-center gap-1.5"
               ><Check :size="14" /> Weekly ranking history</span
@@ -131,7 +131,7 @@ const faqs = [
       </div>
     </section>
 
-    <section class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+    <section class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
       <div class="grid gap-10 lg:grid-cols-[0.68fr_1.32fr]">
         <div class="lg:sticky lg:top-24 lg:self-start">
           <p class="text-sm font-medium text-primary">Ranking methodology</p>
@@ -174,7 +174,7 @@ const faqs = [
     </section>
 
     <section class="border-y bg-muted/30">
-      <div class="px-5 py-16 mx-auto max-w-6xl sm:py-20">
+      <div class="max-w-6xl px-5 py-16 mx-auto sm:py-20">
         <div class="max-w-3xl">
           <p class="text-sm font-medium text-primary">Read beneath the rank</p>
           <h2 class="mt-2 text-3xl font-semibold tracking-tight">
@@ -229,7 +229,7 @@ const faqs = [
           </div>
           <BarChart3 :size="20" class="text-primary" />
         </div>
-        <div class="grid grid-cols-6 gap-2 mt-8 items-end h-36">
+        <div class="grid items-end grid-cols-6 gap-2 mt-8 h-36">
           <div
             v-for="(height, index) in [38, 46, 55, 52, 71, 88]"
             :key="index"
@@ -266,9 +266,9 @@ const faqs = [
       </dl>
     </section>
 
-    <section class="px-5 pb-4 mx-auto max-w-6xl">
+    <section class="max-w-6xl px-5 pb-4 mx-auto">
       <div
-        class="relative flex flex-col items-start gap-6 p-7 overflow-hidden border rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9"
+        class="relative flex flex-col items-start gap-6 overflow-hidden border p-7 rounded-feature bg-primary text-primary-foreground sm:flex-row sm:items-center sm:justify-between sm:p-9"
       >
         <div
           aria-hidden="true"

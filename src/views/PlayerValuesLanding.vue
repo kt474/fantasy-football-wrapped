@@ -39,7 +39,7 @@ const analyzeRoute = {
   <PublicPageShell>
     <section class="border-b">
       <div
-        class="grid items-center gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.78fr)_minmax(560px,1.22fr)]"
+        class="grid items-center gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,0.78fr)_minmax(560px,1.22fr)]"
       >
         <div>
           <Badge variant="secondary">League adjusted rankings</Badge>

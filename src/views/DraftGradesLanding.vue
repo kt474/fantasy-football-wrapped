@@ -125,19 +125,18 @@ const analysisRoute = {
         class="absolute inset-0 draft-grid opacity-35"
       ></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">Sleeper and ESPN draft grader</Badge>
           <h1
             class="max-w-3xl mt-5 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl"
           >
-            A fantasy football draft grader with the picks behind the score
+            Grade every pick. See who really won your fantasy football draft
           </h1>
           <p class="max-w-2xl mt-5 text-lg leading-8 text-muted-foreground">
             Grade a completed fantasy football draft using pick position, ADP,
-            projections, and the performance of the entire draft room—not a
-            mystery score with no explanation.
+            projections, and the performance of the entire draft room.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
             <Button as-child size="lg"
@@ -159,9 +158,6 @@ const analysisRoute = {
             >
             <span class="inline-flex items-center gap-1.5"
               ><Check :size="14" /> Individual and team grades</span
-            >
-            <span class="inline-flex items-center gap-1.5"
-              ><Check :size="14" /> Free league analysis</span
             >
           </div>
         </div>

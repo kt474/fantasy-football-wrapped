@@ -126,7 +126,7 @@ const pages = [
       "Analyze any Sleeper fantasy football league with power rankings, playoff odds, weekly recaps, draft grades, roster insights, and league history.",
     heading: "A complete Sleeper fantasy football league analyzer",
     introduction:
-      "Turn your Sleeper league data into power rankings, expected wins, playoff odds, draft grades, matchup recaps, manager profiles, and shareable season stories.",
+      "Turn your Sleeper league data into power rankings, playoff odds, draft grades, matchup recaps, manager profiles, and shareable season stories.",
     sections: [
       {
         title: "Power rankings and expected wins",
@@ -172,10 +172,9 @@ const pages = [
     title: "ESPN Fantasy Football League Analyzer | ffwrapped",
     description:
       "Analyze an ESPN fantasy football league with power rankings, expected wins, playoff forecasts, draft results, weekly recaps, and manager trends.",
-    heading:
-      "An ESPN fantasy football league analyzer built for the whole season",
+    heading: "A complete ESPN fantasy football league analyzer",
     introduction:
-      "Import a public or private ESPN league, then explore power rankings, expected wins, playoff forecasts, draft results, weekly recaps, and manager trends in one place.",
+      "Import a public or private ESPN league, then explore power rankings, playoff forecasts, draft results, weekly recaps, and manager trends in one place.",
     sections: [
       {
         title: "Public and private ESPN league import",
@@ -217,7 +216,7 @@ const pages = [
     title: "Fantasy Football Draft Grader for Sleeper & ESPN | ffwrapped",
     description:
       "Grade your completed Sleeper or ESPN fantasy football draft with pick-by-pick grades, team scores, ADP comparisons, projections, and a full draft recap.",
-    heading: "A fantasy football draft grader with the picks behind the score",
+    heading: "Grade every pick. See who really won your fantasy football draft",
     introduction:
       "Grade a completed fantasy football draft using pick position, ADP, projections, and the performance of the entire draft room.",
     sections: [
@@ -332,7 +331,7 @@ const pages = [
     title: "Fantasy Football Playoff Odds Calculator | ffwrapped",
     description:
       "Simulate your fantasy football season 5,000 times to estimate playoff odds, projected wins, seed ranges, and schedule scenarios.",
-    heading: "Fantasy football playoff odds calculated from your real league",
+    heading: "Fantasy football playoff odds calculated for your league",
     introduction:
       "Simulate the remaining schedule 5,000 times to estimate playoff probability, projected wins, likely seed, and the range of finishes still open to every team.",
     sections: [

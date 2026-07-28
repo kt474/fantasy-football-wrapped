@@ -67,7 +67,7 @@ const routes = [
         eyebrow: "Sleeper league tools",
         heading: "A complete Sleeper fantasy football league analyzer",
         introduction:
-          "Turn your Sleeper league data into power rankings, expected wins, playoff odds, draft grades, matchup recaps, manager profiles, and shareable season stories.",
+          "Turn your Sleeper league data into power rankings, playoff odds, draft grades, matchup recaps, manager profiles, and shareable season stories.",
         benefits: [
           "Import by league ID or username",
           "Explore weekly and all-time trends",

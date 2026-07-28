@@ -209,7 +209,7 @@ const faqs = [
             </Button>
           </div>
           <p class="mt-5 text-sm text-muted-foreground">
-            13,000+ leagues added · Free Standard reports · No spreadsheet setup
+            50,000+ reports generated · Free Standard reports
           </p>
         </div>
 
