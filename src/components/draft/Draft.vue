@@ -70,7 +70,18 @@ const loadDemoData = async () => {
 const sortedData = computed(() => {
   if (sortOrder.value === "Draft Order") {
     return data.value;
-  } else if (sortOrder.value === "Highest Score") {
+  }
+  if (sortOrder.value === "Highest Winning Bid") {
+    return [...data.value].sort(
+      (a, b) => Number(b.amount ?? 0) - Number(a.amount ?? 0)
+    );
+  }
+  if (sortOrder.value === "Lowest Winning Bid") {
+    return [...data.value].sort(
+      (a, b) => Number(a.amount ?? 0) - Number(b.amount ?? 0)
+    );
+  }
+  if (sortOrder.value === "Highest Score") {
     return [...data.value].sort(
       (a, b) => Number(b.pickRank) - Number(a.pickRank)
     );
@@ -79,6 +90,13 @@ const sortedData = computed(() => {
     (a, b) => Number(a.pickRank) - Number(b.pickRank)
   );
 });
+
+const isAuctionBidSort = computed(
+  () =>
+    draftType.value === "auction" &&
+    (sortOrder.value === "Highest Winning Bid" ||
+      sortOrder.value === "Lowest Winning Bid")
+);
 
 const getDraftOrder = async () => {
   const currentLeague = store.currentLeague;
@@ -140,6 +158,10 @@ const snakeDraftFormat = computed(() => {
   return true;
 });
 
+watch(draftType, () => {
+  sortOrder.value = "Draft Order";
+});
+
 const getEspnDraftOrderFromPicks = (league: LeagueInfoType) => {
   const rosterPickOrder = Array.from(
     new Set((league.draftPicks ?? []).map((pick) => pick.rosterId))
@@ -164,8 +186,7 @@ const setLeagueDraftState = (league: LeagueInfoType) => {
   roundReversal.value = league.draftMetadata?.roundReversal ?? 0;
   draftType.value =
     league.draftMetadata?.draftType ??
-    (league.platform === "espn" &&
-    data.value.some((pick) => Number(pick.amount ?? 0) > 0)
+    (data.value.some((pick) => Number(pick.amount ?? 0) > 0)
       ? "auction"
       : "snake");
 };
@@ -357,9 +378,15 @@ const getValueColor = (value: number) => {
       <TabsContent value="Recap">
         <div>
           <p class="max-w-3xl mb-2 text-sm text-muted-foreground sm:text-base">
-            Draft pick scores are calculated based on each player's current
-            positional rank compared to where they were drafted. The sum of
-            these scores is listed by each manager's name.
+            <template v-if="draftType === 'auction'">
+              Each player's winning bid is shown under the manager who drafted
+              them.
+            </template>
+            <template v-else>
+              Draft pick scores are calculated based on each player's current
+              positional rank compared to where they were drafted. The sum of
+              these scores is listed by each manager's name.
+            </template>
             <template v-if="showManagerProfilesLink">
               Review historical draft tendencies in the
               <button
@@ -372,18 +399,33 @@ const getValueColor = (value: number) => {
               tab.
             </template>
           </p>
-          <div v-if="snakeDraftFormat" class="max-w-sm mb-4">
-            <Label for="sort-order" class="block text-sm mb-0.5"
-              >Sort Picks</Label
-            >
+          <div
+            v-if="snakeDraftFormat || draftType === 'auction'"
+            class="max-w-sm mb-4"
+          >
+            <Label for="sort-order" class="block text-sm mb-0.5">
+              {{ draftType === "auction" ? "Sort Players" : "Sort Picks" }}
+            </Label>
             <Select id="sort-order" v-model="sortOrder">
               <SelectTrigger if="sort-order" class="w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Draft Order"> Draft Order </SelectItem>
-                <SelectItem value="Highest Score"> Highest Score </SelectItem>
-                <SelectItem value="Lowest Score"> Lowest Score </SelectItem>
+                <SelectItem value="Draft Order">
+                  {{ draftType === "auction" ? "Auction Order" : "Draft Order" }}
+                </SelectItem>
+                <template v-if="draftType === 'auction'">
+                  <SelectItem value="Highest Winning Bid">
+                    Highest Winning Bid
+                  </SelectItem>
+                  <SelectItem value="Lowest Winning Bid">
+                    Lowest Winning Bid
+                  </SelectItem>
+                </template>
+                <template v-else>
+                  <SelectItem value="Highest Score"> Highest Score </SelectItem>
+                  <SelectItem value="Lowest Score"> Lowest Score </SelectItem>
+                </template>
               </SelectContent>
             </Select>
           </div>
@@ -408,6 +450,7 @@ const getValueColor = (value: number) => {
         <Separator class="h-px mt-1 mb-4" />
         <div v-if="!loading" class="overflow-x-auto">
           <div
+            v-if="!isAuctionBidSort"
             class="grid gap-0.5 mb-2"
             :style="{
               'grid-template-columns': `repeat(${draftSize}, minmax(100px, 1fr))`,
@@ -418,7 +461,10 @@ const getValueColor = (value: number) => {
               v-for="team in draftOrder"
               class="flex flex-wrap items-center justify-center"
             >
-              <p v-if="team" class="mr-1.5 font-semibold">
+              <p
+                v-if="team && draftType !== 'auction'"
+                class="mr-1.5 font-semibold"
+              >
                 {{ teamRanks[team.id] ? teamRanks[team.id].toFixed(1) : "0.0" }}
               </p>
               <img
@@ -461,7 +507,7 @@ const getValueColor = (value: number) => {
             }"
           >
             <div
-              v-if="snakeDraftFormat"
+              v-if="snakeDraftFormat || isAuctionBidSort"
               v-for="pick in sortedData"
               class="block h-20 p-2.5 rounded-md shadow-xs"
               :class="[
@@ -474,7 +520,7 @@ const getValueColor = (value: number) => {
               </p>
               <p>{{ `${pick.position} - ${pick.team}` }}</p>
               <div class="flex justify-between text-sm">
-                <p>
+                <p v-if="draftType !== 'auction'">
                   {{
                     `${pick.round}.${getRoundPick(pick.draftSlot, pick.round)}`
                   }}
@@ -483,13 +529,15 @@ const getValueColor = (value: number) => {
                   class="font-medium me-2 px-2 py-0.5 rounded-full custom-margin"
                   :class="[getValueColor(parseFloat(pick.pickRank))]"
                 >
-                  {{ pick.pickRank }}
+                  {{
+                    draftType === "auction" ? `$${pick.amount}` : pick.pickRank
+                  }}
                 </span>
               </div>
             </div>
-            <!-- auction or dynasy linear drafts  -->
+            <!-- auction order or dynasty linear drafts -->
             <div v-else v-for="team in draftOrder">
-              <div v-for="pick in data">
+              <div v-for="pick in sortedData">
                 <div
                   v-if="team.id === pick.userId"
                   class="block h-20 p-2.5 mb-0.5 text-gray-900 rounded-md shadow-xs dark:shadow-gray-800 dark:text-gray-200"
@@ -503,7 +551,7 @@ const getValueColor = (value: number) => {
                   </p>
                   <p>{{ `${pick.position} - ${pick.team}` }}</p>
                   <div class="flex justify-between text-sm">
-                    <p>
+                    <p v-if="draftType !== 'auction'">
                       {{
                         `${pick.round}.${getRoundPick(
                           pick.draftSlot,
@@ -512,6 +560,14 @@ const getValueColor = (value: number) => {
                       }}
                     </p>
                     <span
+                      v-if="draftType === 'auction'"
+                      class="font-medium me-2 px-2 py-0.5 rounded-full custom-margin"
+                      :class="[getValueColor(parseFloat(pick.pickRank))]"
+                    >
+                      ${{ pick.amount }}
+                    </span>
+                    <span
+                      v-else
                       class="font-medium me-2 px-2 py-0.5 rounded-full custom-margin"
                       :class="[getValueColor(parseFloat(pick.pickRank))]"
                     >
