@@ -309,6 +309,7 @@ export interface DraftGrades {
   picks: PickObj[];
   zScore: number;
   grade: string;
+  mode?: "standard" | "auction";
 }
 
 export interface PickObj {
@@ -316,4 +317,7 @@ export interface PickObj {
   adp: number;
   projectedPoints: number;
   draftValue: number;
+  expectedAuctionValue?: number;
+  auctionSurplus?: number;
+  auctionGrade?: string;
 }

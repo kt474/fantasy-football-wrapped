@@ -20,6 +20,7 @@ import {
   type DemoLeagueFixtures,
 } from "@/data/demo/loaders";
 import { isSuperflexLeague } from "@/lib/lineup";
+import { calculateExpectedAuctionValues } from "@/lib/auctionDraftGrades";
 const store = useStore();
 
 type DraftProjectionEntry = PickObj & {
@@ -30,6 +31,7 @@ type DraftGradeSummary = {
   picks: DraftProjectionEntry[];
   zScore: number;
   grade: string;
+  mode?: "standard" | "auction";
 };
 
 const projectionData = ref<DraftGradeSummary[]>([]);
@@ -38,6 +40,15 @@ const props = defineProps<{
   draftData: DraftPick[];
   scoringType: string;
 }>();
+
+const isAuction = computed(
+  () =>
+    store.currentLeague?.draftMetadata?.draftType === "auction" ||
+    props.draftData.some((pick) => Number(pick.amount ?? 0) > 0)
+);
+const gradeMode = computed(() =>
+  isAuction.value ? ("auction" as const) : ("standard" as const)
+);
 
 const managers = computed(() => {
   const currentLeague = store.currentLeague;
@@ -71,7 +82,7 @@ const loadDemoData = async () => {
 const getProjections = async () => {
   const currentLeague = store.currentLeague;
   const superflex = isSuperflexLeague(currentLeague.rosterPositions);
-  const result = await Promise.all(
+  const result: DraftProjectionEntry[] = await Promise.all(
     props.draftData.map(async (pick) => {
       const projections = await getDraftProjections(
         pick.playerId,
@@ -82,15 +93,48 @@ const getProjections = async () => {
         props.scoringType === "idp"
       );
       const projectedPoints = projections["projectedPoints"] ?? 0;
-      const adp = projections["adp"] ?? pick["pickNumber"];
+      const adp =
+        projections["adp"] ?? (isAuction.value ? 999 : pick["pickNumber"]);
       return {
         draftPick: pick,
         adp,
         projectedPoints,
-        draftValue: projectedPoints / 10 + (pick["pickNumber"] - adp),
+        draftValue: isAuction.value
+          ? 0
+          : projectedPoints / 10 + (pick["pickNumber"] - adp),
       };
     })
   );
+
+  if (isAuction.value) {
+    const auctionValues = calculateExpectedAuctionValues(
+      result.map((pick) => ({
+        key: `${pick.draftPick.playerId}:${pick.draftPick.pickNumber}`,
+        adp: pick.adp === 999 ? null : pick.adp,
+        projectedPoints: pick.projectedPoints,
+        bid: Number(pick.draftPick.amount ?? 0),
+        draftOrder: pick.draftPick.pickNumber,
+      }))
+    );
+    const surpluses = [...auctionValues.values()].map(
+      (value) => value.surplus
+    );
+    const surplusMean = mean(surpluses);
+    const surplusStd = standardDeviation(surpluses);
+
+    result.forEach((pick) => {
+      const value = auctionValues.get(
+        `${pick.draftPick.playerId}:${pick.draftPick.pickNumber}`
+      );
+      const surplus = value?.surplus ?? 0;
+      pick.expectedAuctionValue = value?.expectedValue ?? 0;
+      pick.auctionSurplus = surplus;
+      pick.auctionGrade = zScoreToGrade(
+        surplusStd > 0 ? (surplus - surplusMean) / surplusStd : 0
+      );
+      pick.draftValue = surplus;
+    });
+  }
 
   const grouped = result.reduce<Record<number, DraftProjectionEntry[]>>(
     (acc, obj) => {
@@ -104,12 +148,12 @@ const getProjections = async () => {
     {}
   );
 
-  let totalDraftScores: DraftGradeSummary[] = [];
+  const totalDraftScores: DraftGradeSummary[] = [];
   Object.values(grouped).forEach((group) => {
     let sum = 0;
-    let picks: DraftProjectionEntry[] = [];
+    const picks: DraftProjectionEntry[] = [];
     group.forEach((pick, index: number) => {
-      if (index < 13) {
+      if (isAuction.value || index < 13) {
         sum += pick.draftValue ?? 0;
       }
       picks.push(pick);
@@ -119,6 +163,7 @@ const getProjections = async () => {
       picks: picks,
       zScore: 0,
       grade: "F",
+      mode: gradeMode.value,
     });
   });
 
@@ -128,8 +173,9 @@ const getProjections = async () => {
   );
 
   totalDraftScores.forEach((user) => {
-    user.zScore = (user.totalScore - meanScore) / stdScore;
-    user.grade = zScoreToGrade((user.totalScore - meanScore) / stdScore);
+    user.zScore =
+      stdScore > 0 ? (user.totalScore - meanScore) / stdScore : 0;
+    user.grade = zScoreToGrade(user.zScore);
   });
 
   projectionData.value = totalDraftScores;
@@ -195,6 +241,12 @@ const pickToGrade = (pickNumber: number, adp: number, round: number) => {
   }
 };
 
+const formatDollarDelta = (value?: number) => {
+  const amount = Number(value ?? 0);
+  if (amount === 0) return "$0";
+  return `${amount > 0 ? "+" : "-"}$${Math.abs(amount)}`;
+};
+
 const getBgColor = (position: string) => {
   if (position === "RB") {
     return "bg-sky-300 dark:bg-sky-800";
@@ -214,15 +266,17 @@ const getBgColor = (position: string) => {
 };
 
 onMounted(async () => {
-  if (
-    store.leagueInfo.length > 0 &&
-    store.currentLeague &&
-    !store.currentLeague.draftGrades
-  ) {
-    await getProjections();
+  if (store.leagueInfo.length > 0 && store.currentLeague) {
+    const cachedGrades = store.currentLeague.draftGrades as
+      | DraftGradeSummary[]
+      | undefined;
+    if (!cachedGrades?.length || cachedGrades[0]?.mode !== gradeMode.value) {
+      await getProjections();
+    } else {
+      projectionData.value = cachedGrades;
+    }
   } else if (store.currentLeague) {
-    projectionData.value =
-      store.currentLeague.draftGrades ?? [];
+    projectionData.value = store.currentLeague.draftGrades ?? [];
   } else if (store.leagueInfo.length === 0) {
     await loadDemoData();
   }
@@ -235,16 +289,18 @@ watch(
       await loadDemoData();
       return;
     }
-    if (
-      store.currentLeague &&
-      !store.currentLeague.draftGrades
-    ) {
-      projectionData.value = [];
-      await getProjections();
+    if (store.currentLeague) {
+      const cachedGrades = store.currentLeague.draftGrades as
+        | DraftGradeSummary[]
+        | undefined;
+      if (!cachedGrades?.length || cachedGrades[0]?.mode !== gradeMode.value) {
+        projectionData.value = [];
+        await getProjections();
+      } else {
+        projectionData.value = cachedGrades;
+      }
     }
     currentManager.value = managers.value[0];
-    projectionData.value =
-      store.currentLeague.draftGrades ?? [];
   }
 );
 </script>
@@ -300,7 +356,23 @@ watch(
                   {{ pick.draftPick.firstName }} {{ pick.draftPick.lastName }}
                 </p>
                 <p>{{ pick.draftPick.position }} - {{ pick.draftPick.team }}</p>
-                <p>
+                <p v-if="isAuction">
+                  Paid:
+                  <span class="font-semibold"
+                    >${{ pick.draftPick.amount ?? 0 }}</span
+                  >
+                  Expected:
+                  <span class="font-semibold"
+                    >${{ pick.expectedAuctionValue ?? 0 }}</span
+                  >
+                </p>
+                <p v-if="isAuction">
+                  Value:
+                  <span class="font-semibold">
+                    {{ formatDollarDelta(pick.auctionSurplus) }}
+                  </span>
+                </p>
+                <p v-else>
                   Pick:
                   <span class="font-semibold">{{
                     pick.draftPick.pickNumber
@@ -311,11 +383,13 @@ watch(
             </div>
             <p class="w-6 mt-5 mr-1 text-lg font-medium">
               {{
-                pickToGrade(
-                  pick.draftPick.pickNumber,
-                  pick.adp,
-                  pick.draftPick.round
-                )
+                isAuction
+                  ? pick.auctionGrade
+                  : pickToGrade(
+                      pick.draftPick.pickNumber,
+                      pick.adp,
+                      pick.draftPick.round
+                    )
               }}
             </p>
           </div>

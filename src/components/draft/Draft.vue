@@ -6,6 +6,7 @@ import { getLeagueKey, useStore } from "../../store/store";
 import DraftGrades from "./DraftGrades.vue";
 import { DraftPick } from "../../types/apiTypes.ts";
 import SectionCard from "../layout/SectionCard.vue";
+import ManagerAvatar from "../shared/ManagerAvatar.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -90,13 +91,6 @@ const sortedData = computed(() => {
     (a, b) => Number(a.pickRank) - Number(b.pickRank)
   );
 });
-
-const isAuctionBidSort = computed(
-  () =>
-    draftType.value === "auction" &&
-    (sortOrder.value === "Highest Winning Bid" ||
-      sortOrder.value === "Lowest Winning Bid")
-);
 
 const getDraftOrder = async () => {
   const currentLeague = store.currentLeague;
@@ -312,6 +306,11 @@ const getTeamName = (userId: string) => {
   };
 };
 
+const getManagerDisplayName = (userId: string) => {
+  const manager = getTeamName(userId);
+  return store.showUsernames ? manager.username : manager.name;
+};
+
 const getBgColor = (position: string) => {
   if (position === "RB") {
     return "bg-sky-300 dark:bg-sky-800";
@@ -379,8 +378,8 @@ const getValueColor = (value: number) => {
         <div>
           <p class="max-w-3xl mb-2 text-sm text-muted-foreground sm:text-base">
             <template v-if="draftType === 'auction'">
-              Each player's winning bid is shown under the manager who drafted
-              them.
+              Each player's winning bid and manager are shown on the player
+              card.
             </template>
             <template v-else>
               Draft pick scores are calculated based on each player's current
@@ -434,8 +433,14 @@ const getValueColor = (value: number) => {
       <TabsContent value="Grades">
         <div>
           <p class="max-w-3xl mb-2 text-sm text-muted-foreground sm:text-base">
-            Draft grades are calculated using each player's draft pick position,
-            ADP, and projections from Sleeper.
+            <template v-if="draftType === 'auction'">
+              Auction grades compare each winning bid with an expected price
+              based on Sleeper ADP and this league's actual bid distribution.
+            </template>
+            <template v-else>
+              Draft grades are calculated using each player's draft pick
+              position, ADP, and projections from Sleeper.
+            </template>
           </p>
           <div v-if="data.length === 0">
             <Separator class="h-px mt-1 mb-4" />
@@ -450,7 +455,7 @@ const getValueColor = (value: number) => {
         <Separator class="h-px mt-1 mb-4" />
         <div v-if="!loading" class="overflow-x-auto">
           <div
-            v-if="!isAuctionBidSort"
+            v-if="draftType !== 'auction'"
             class="grid gap-0.5 mb-2"
             :style="{
               'grid-template-columns': `repeat(${draftSize}, minmax(100px, 1fr))`,
@@ -502,19 +507,39 @@ const getValueColor = (value: number) => {
           <div
             class="grid gap-0.5 text-sm min-h-96"
             :style="{
-              'grid-template-columns': `repeat(${draftSize}, minmax(100px, 1fr))`,
+              'grid-template-columns': `repeat(${draftSize}, minmax(${
+                draftType === 'auction' ? '145px' : '100px'
+              }, 1fr))`,
               'min-width': '100px',
             }"
           >
             <div
-              v-if="snakeDraftFormat || isAuctionBidSort"
+              v-if="snakeDraftFormat || draftType === 'auction'"
               v-for="pick in sortedData"
-              class="block h-20 p-2.5 rounded-md shadow-xs"
+              :key="pick.pickNumber"
+              class="block rounded-md shadow-xs"
               :class="[
                 getBgColor(pick.position),
                 pick.keeper ? 'border-destructive border-t-4' : '',
+                draftType === 'auction' ? 'h-28 p-2' : 'h-20 p-2.5',
               ]"
             >
+              <div
+                v-if="draftType === 'auction'"
+                class="flex min-w-0 items-center gap-1.5 pb-1 mb-1 border-b border-black/10 dark:border-white/15 [&>img]:size-6 [&>svg]:size-6"
+              >
+                <ManagerAvatar
+                  class="shrink-0"
+                  :src="getTeamName(pick.userId).avatarImg"
+                  :alt="`${getManagerDisplayName(pick.userId)} avatar`"
+                />
+                <p
+                  class="min-w-0 text-xs font-semibold truncate"
+                  :title="getManagerDisplayName(pick.userId)"
+                >
+                  {{ getManagerDisplayName(pick.userId) }}
+                </p>
+              </div>
               <p class="font-semibold truncate">
                 {{ `${pick.firstName.charAt(0)}. ${pick.lastName}` }}
               </p>
