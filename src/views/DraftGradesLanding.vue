@@ -1,19 +1,9 @@
 <script setup lang="ts">
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
+import DraftGradesPreview from "@/components/seo/previews/DraftGradesPreview.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Check, ClipboardList, Gauge, Scale } from "@lucide/vue";
-
-const samplePicks = [
-  { pick: "2.06", position: "WR", grade: "A", note: "11 picks after ADP" },
-  {
-    pick: "4.06",
-    position: "RB",
-    grade: "B+",
-    note: "Slight value versus ADP",
-  },
-  { pick: "7.07", position: "QB", grade: "A-", note: "Taken later than ADP" },
-];
+import { Check, ClipboardList, Gauge, Scale } from "@lucide/vue";
 
 const gradeViews = [
   {
@@ -135,7 +125,7 @@ const analysisRoute = {
         class="absolute inset-0 draft-grid opacity-35"
       ></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,1.04fr)_minmax(380px,0.96fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">Sleeper and ESPN draft grader</Badge>
@@ -176,62 +166,7 @@ const analysisRoute = {
           </div>
         </div>
 
-        <div
-          class="overflow-hidden border shadow-xl rounded-card bg-card shadow-black/10"
-        >
-          <div
-            class="flex items-center justify-between gap-4 px-5 py-4 border-b"
-          >
-            <div>
-              <p
-                class="text-xs font-medium tracking-wide uppercase text-muted-foreground"
-              >
-                Sample draft report
-              </p>
-              <h2 class="mt-1 font-semibold">12-team PPR · Snake draft</h2>
-            </div>
-            <div class="text-right">
-              <p class="text-xs text-muted-foreground">Team grade</p>
-              <p class="mt-1 text-3xl font-semibold text-primary">A-</p>
-            </div>
-          </div>
-          <div
-            class="px-5 py-3 text-xs font-medium border-b bg-muted/30 text-muted-foreground"
-          >
-            Highest-value selections
-          </div>
-          <ol>
-            <li
-              v-for="pick in samplePicks"
-              :key="pick.pick"
-              class="grid grid-cols-[3.5rem_1fr_auto] items-center gap-3 px-5 py-4 border-b last:border-b-0"
-            >
-              <span class="text-sm font-medium tabular-nums">{{
-                pick.pick
-              }}</span>
-              <div>
-                <p class="text-sm font-semibold">
-                  {{ pick.position }} selection
-                </p>
-                <p class="mt-1 text-xs text-muted-foreground">
-                  {{ pick.note }}
-                </p>
-              </div>
-              <span
-                class="flex items-center justify-center font-semibold rounded-full w-9 h-9 bg-primary/10 text-primary"
-                >{{ pick.grade }}</span
-              >
-            </li>
-          </ol>
-          <div
-            class="flex items-center justify-between gap-4 px-5 py-4 border-t bg-muted/30"
-          >
-            <span class="inline-flex items-center gap-2 text-sm font-medium"
-              ><BarChart3 :size="16" class="text-primary" /> League rank</span
-            >
-            <span class="text-sm text-muted-foreground">2nd of 12 teams</span>
-          </div>
-        </div>
+        <DraftGradesPreview />
       </div>
     </section>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
+import LeagueAnalyzerPreview from "@/components/seo/previews/LeagueAnalyzerPreview.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -105,7 +106,7 @@ const espnAnalysisRoute = {
         class="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-primary/5 to-transparent"
       ></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,1.04fr)_minmax(380px,0.96fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.82fr)_minmax(500px,1.18fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">ESPN fantasy football tools</Badge>
@@ -146,69 +147,7 @@ const espnAnalysisRoute = {
           </div>
         </div>
 
-        <div
-          class="overflow-hidden border shadow-xl rounded-card bg-card shadow-black/10"
-        >
-          <div
-            class="flex items-center justify-between gap-4 px-5 py-4 border-b"
-          >
-            <div class="flex items-center gap-3">
-              <img
-                src="/espnlogo.webp"
-                width="28"
-                height="28"
-                alt="ESPN logo"
-              />
-              <div>
-                <p class="text-xs text-muted-foreground">Connect league</p>
-                <h2 class="font-semibold">ESPN Fantasy Football</h2>
-              </div>
-            </div>
-            <Badge variant="outline" class="font-normal">2026 season</Badge>
-          </div>
-          <div class="p-5">
-            <div
-              class="inline-flex p-1 text-sm border rounded-control bg-muted/30"
-            >
-              <span
-                class="px-4 py-1.5 rounded-xs bg-background shadow-xs font-medium"
-                >Public</span
-              >
-              <span class="px-4 py-1.5 text-muted-foreground">Private</span>
-            </div>
-            <div class="flex gap-2 mt-4">
-              <div
-                class="flex-1 px-3 py-2 text-sm border rounded-control text-muted-foreground"
-              >
-                League ID
-              </div>
-              <div
-                class="px-3 py-2 text-sm border rounded-control text-muted-foreground"
-              >
-                Season
-              </div>
-            </div>
-            <div
-              class="flex items-center justify-center h-10 mt-3 text-sm font-medium rounded-control bg-primary text-primary-foreground"
-            >
-              Load ESPN league
-            </div>
-          </div>
-          <div class="grid grid-cols-3 border-t divide-x bg-muted/30">
-            <div class="p-4 text-center">
-              <p class="text-lg font-semibold">12</p>
-              <p class="mt-1 text-xs text-muted-foreground">Teams</p>
-            </div>
-            <div class="p-4 text-center">
-              <p class="text-lg font-semibold">PPR</p>
-              <p class="mt-1 text-xs text-muted-foreground">Scoring</p>
-            </div>
-            <div class="p-4 text-center">
-              <p class="text-lg font-semibold">14</p>
-              <p class="mt-1 text-xs text-muted-foreground">Weeks</p>
-            </div>
-          </div>
-        </div>
+        <LeagueAnalyzerPreview platform="espn" />
       </div>
     </section>
 

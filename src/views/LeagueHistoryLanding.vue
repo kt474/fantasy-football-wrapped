@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
+import LeagueHistoryPreview from "@/components/seo/previews/LeagueHistoryPreview.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  BookOpen,
   Check,
   Crown,
   History,
@@ -12,41 +12,6 @@ import {
   Swords,
   Trophy,
 } from "@lucide/vue";
-
-const sampleManagers = [
-  {
-    rank: 1,
-    name: "Breece's Puffs",
-    record: "46–22",
-    ppg: "128.6",
-    luck: "+1.4",
-    seasons: 5,
-  },
-  {
-    rank: 2,
-    name: "Lamario Kart",
-    record: "41–27",
-    ppg: "126.9",
-    luck: "–0.8",
-    seasons: 5,
-  },
-  {
-    rank: 3,
-    name: "Waiver Weather",
-    record: "36–32",
-    ppg: "122.4",
-    luck: "+2.1",
-    seasons: 4,
-  },
-  {
-    rank: 4,
-    name: "Monday Regret",
-    record: "31–37",
-    ppg: "119.8",
-    luck: "–1.9",
-    seasons: 5,
-  },
-];
 
 const archiveViews = [
   {
@@ -125,7 +90,7 @@ const faqs = [
     <section class="relative overflow-hidden border-b">
       <div aria-hidden="true" class="history-lines absolute inset-0"></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,0.98fr)_minmax(420px,1.02fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary"
@@ -166,69 +131,7 @@ const faqs = [
           </div>
         </div>
 
-        <div
-          class="overflow-hidden border shadow-xl rounded-card bg-card shadow-black/10"
-        >
-          <div
-            class="flex items-center justify-between gap-4 px-5 py-4 border-b"
-          >
-            <div>
-              <p
-                class="text-xs font-medium tracking-wide uppercase text-muted-foreground"
-              >
-                Sample record book
-              </p>
-              <h2 class="mt-1 font-semibold">All-time league standings</h2>
-            </div>
-            <Badge variant="outline" class="font-normal">2019–2024</Badge>
-          </div>
-          <div
-            class="grid grid-cols-[1fr_auto_auto] gap-4 px-5 py-2.5 text-xs font-medium border-b bg-muted/30 text-muted-foreground sm:grid-cols-[1fr_auto_auto_auto]"
-          >
-            <span>Manager</span><span>Record</span><span>PPG</span
-            ><span class="hidden sm:block">WAE</span>
-          </div>
-          <ol>
-            <li
-              v-for="manager in sampleManagers"
-              :key="manager.name"
-              class="grid grid-cols-[1fr_auto_auto] items-center gap-4 px-5 py-3.5 border-b last:border-b-0 sm:grid-cols-[1fr_auto_auto_auto]"
-            >
-              <div class="min-w-0">
-                <p class="text-sm font-medium truncate">
-                  <span class="mr-2 text-muted-foreground"
-                    >{{ manager.rank }}.</span
-                  >{{ manager.name }}
-                </p>
-                <p class="mt-1 text-xs text-muted-foreground">
-                  {{ manager.seasons }} seasons
-                </p>
-              </div>
-              <span class="text-sm font-semibold tabular-nums">{{
-                manager.record
-              }}</span>
-              <span
-                class="text-xs text-right text-muted-foreground tabular-nums"
-                >{{ manager.ppg }}</span
-              >
-              <span
-                class="hidden w-10 text-xs text-right tabular-nums sm:block"
-                :class="
-                  manager.luck.startsWith('+')
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
-                "
-                >{{ manager.luck }}</span
-              >
-            </li>
-          </ol>
-          <div
-            class="flex items-center gap-2 px-5 py-4 text-xs border-t bg-muted/30 text-muted-foreground"
-          >
-            <BookOpen :size="15" class="text-primary" /> Sample data · WAE means
-            wins above expected.
-          </div>
-        </div>
+        <LeagueHistoryPreview />
       </div>
     </section>
 

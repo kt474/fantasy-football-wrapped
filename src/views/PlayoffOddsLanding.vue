@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
+import PlayoffOddsPreview from "@/components/seo/previews/PlayoffOddsPreview.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,13 +11,6 @@ import {
   Route,
   ShieldCheck,
 } from "@lucide/vue";
-
-const sampleOdds = [
-  { team: "Breece's Puffs", record: "8–3", odds: 96, seed: "1.8 avg" },
-  { team: "Lamario Kart", record: "7–4", odds: 78, seed: "3.4 avg" },
-  { team: "Waiver Weather", record: "5–6", odds: 41, seed: "5.9 avg" },
-  { team: "Monday Regret", record: "4–7", odds: 12, seed: "8.1 avg" },
-];
 
 const forecastStages = [
   {
@@ -94,7 +88,7 @@ const faqs = [
     <section class="relative overflow-hidden border-b">
       <div aria-hidden="true" class="absolute inset-0 odds-glow"></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,1.02fr)_minmax(400px,0.98fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">Fantasy football season forecast</Badge>
@@ -133,54 +127,7 @@ const faqs = [
           </div>
         </div>
 
-        <div
-          class="overflow-hidden border shadow-xl rounded-card bg-card shadow-black/10"
-        >
-          <div
-            class="flex items-center justify-between gap-4 px-5 py-4 border-b"
-          >
-            <div>
-              <p
-                class="text-xs font-medium tracking-wide uppercase text-muted-foreground"
-              >
-                Sample playoff race
-              </p>
-              <h2 class="mt-1 font-semibold">Week 11 · Six playoff teams</h2>
-            </div>
-            <Badge variant="outline" class="font-normal"
-              >5,000 simulations</Badge
-            >
-          </div>
-          <div
-            class="grid grid-cols-[1fr_auto_auto] gap-4 px-5 py-2.5 text-xs font-medium border-b bg-muted/30 text-muted-foreground"
-          >
-            <span>Team</span><span>Odds</span><span>Seed</span>
-          </div>
-          <div
-            v-for="row in sampleOdds"
-            :key="row.team"
-            class="grid grid-cols-[1fr_auto_auto] items-center gap-4 px-5 py-3.5 border-b last:border-b-0"
-          >
-            <div>
-              <p class="text-sm font-medium">{{ row.team }}</p>
-              <p class="mt-1 text-xs text-muted-foreground">{{ row.record }}</p>
-            </div>
-            <div class="w-24">
-              <p class="text-sm font-semibold text-right tabular-nums">
-                {{ row.odds }}%
-              </p>
-              <div class="h-1.5 mt-2 overflow-hidden rounded-full bg-muted">
-                <div
-                  class="h-full rounded-full bg-primary"
-                  :style="{ width: `${row.odds}%` }"
-                ></div>
-              </div>
-            </div>
-            <p class="text-xs text-right text-muted-foreground tabular-nums">
-              {{ row.seed }}
-            </p>
-          </div>
-        </div>
+        <PlayoffOddsPreview />
       </div>
     </section>
 

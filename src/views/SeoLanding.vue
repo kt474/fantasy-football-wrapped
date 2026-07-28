@@ -2,16 +2,15 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
+import LeagueAnalyzerPreview from "@/components/seo/previews/LeagueAnalyzerPreview.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowUpRight,
   CalendarRange,
   Check,
   History,
   ScanLine,
-  Trophy,
 } from "@lucide/vue";
 
 type LandingPage = {
@@ -22,18 +21,6 @@ type LandingPage = {
 
 const route = useRoute();
 const page = computed(() => route.meta.landingPage as LandingPage);
-
-const leaguePulse = [
-  {
-    label: "Power rank",
-    value: "#2",
-    note: "Up 3 this week",
-    tone: "text-primary",
-  },
-  { label: "Expected wins", value: "7.4", note: "5–6 actual record" },
-  { label: "Playoff odds", value: "78%", note: "14% top-seed odds" },
-  { label: "Scoring rank", value: "3rd", note: "1,462.8 season points" },
-];
 
 const analysisViews = [
   {
@@ -128,7 +115,7 @@ const sleeperAnalysisRoute = {
         class="hero-grid absolute inset-0 opacity-40"
       ></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.82fr)_minmax(500px,1.18fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">{{ page.eyebrow }}</Badge>
@@ -167,63 +154,7 @@ const sleeperAnalysisRoute = {
           </div>
         </div>
 
-        <Card
-          class="overflow-hidden shadow-xl shadow-black/10 bg-card/95 backdrop-blur"
-        >
-          <CardContent class="p-0">
-            <div
-              class="flex items-center justify-between gap-4 px-5 py-4 border-b"
-            >
-              <div>
-                <p
-                  class="text-xs font-medium tracking-wide uppercase text-muted-foreground"
-                >
-                  Sample league pulse
-                </p>
-                <h2 class="mt-1 font-semibold">Fourth &amp; Goal · Week 11</h2>
-              </div>
-              <Badge variant="outline" class="gap-1.5 font-normal">
-                <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
-                Synced
-              </Badge>
-            </div>
-            <dl class="grid grid-cols-2">
-              <div
-                v-for="(metric, index) in leaguePulse"
-                :key="metric.label"
-                class="p-5"
-                :class="[
-                  index < 2 ? 'border-b' : '',
-                  index % 2 === 1 ? 'border-l' : '',
-                ]"
-              >
-                <dt class="text-xs text-muted-foreground">
-                  {{ metric.label }}
-                </dt>
-                <dd
-                  class="mt-2 text-2xl font-semibold tracking-tight tabular-nums"
-                  :class="metric.tone"
-                >
-                  {{ metric.value }}
-                </dd>
-                <p class="mt-1 text-xs text-muted-foreground">
-                  {{ metric.note }}
-                </p>
-              </div>
-            </dl>
-            <div class="px-5 py-4 border-t bg-muted/30">
-              <div class="flex items-center justify-between gap-3 text-sm">
-                <span class="inline-flex items-center gap-2 font-medium"
-                  ><Trophy :size="15" class="text-primary" /> Biggest
-                  mover</span
-                >
-                <span class="text-muted-foreground"
-                  >Breece's Puffs · +18 pts</span
-                >
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <LeagueAnalyzerPreview platform="sleeper" />
       </div>
     </section>
 

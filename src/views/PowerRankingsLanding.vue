@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
+import PowerRankingsPreview from "@/components/seo/previews/PowerRankingsPreview.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Activity,
   BarChart3,
   Calculator,
   Check,
@@ -11,13 +11,6 @@ import {
   ListOrdered,
   TrendingUp,
 } from "@lucide/vue";
-
-const sampleRankings = [
-  { rank: 1, team: "Breece's Puffs", score: 82.4, move: "+2", width: 100 },
-  { rank: 2, team: "Lamario Kart", score: 79.1, move: "–1", width: 88 },
-  { rank: 3, team: "Waiver Weather", score: 74.6, move: "+1", width: 72 },
-  { rank: 4, team: "Monday Regret", score: 69.8, move: "–1", width: 56 },
-];
 
 const formulaInputs = [
   {
@@ -95,7 +88,7 @@ const faqs = [
     <section class="relative overflow-hidden border-b">
       <div aria-hidden="true" class="ranking-field absolute inset-0"></div>
       <div
-        class="relative grid gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[minmax(0,1.02fr)_minmax(400px,0.98fr)] lg:items-center"
+        class="relative grid gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(600px,1.25fr)] lg:items-center"
       >
         <div>
           <Badge variant="secondary">Sleeper and ESPN league rankings</Badge>
@@ -134,58 +127,7 @@ const faqs = [
           </div>
         </div>
 
-        <div
-          class="overflow-hidden border shadow-xl rounded-card bg-card shadow-black/10"
-        >
-          <div
-            class="flex items-center justify-between gap-4 px-5 py-4 border-b"
-          >
-            <div>
-              <p
-                class="text-xs font-medium tracking-wide uppercase text-muted-foreground"
-              >
-                Sample league
-              </p>
-              <h2 class="mt-1 font-semibold">Power rankings · Week 8</h2>
-            </div>
-            <Badge variant="outline" class="font-normal">Updated weekly</Badge>
-          </div>
-          <ol>
-            <li
-              v-for="team in sampleRankings"
-              :key="team.team"
-              class="grid grid-cols-[1.75rem_minmax(0,1fr)_auto] items-center gap-3 px-5 py-4 border-b last:border-b-0"
-            >
-              <span class="text-sm font-semibold tabular-nums">{{
-                team.rank
-              }}</span>
-              <div class="min-w-0">
-                <div class="flex items-center justify-between gap-3">
-                  <p class="text-sm font-medium truncate">{{ team.team }}</p>
-                  <span class="text-xs text-muted-foreground tabular-nums">{{
-                    team.move
-                  }}</span>
-                </div>
-                <div class="h-1.5 mt-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    class="h-full rounded-full bg-primary"
-                    :style="{ width: `${team.width}%` }"
-                  ></div>
-                </div>
-              </div>
-              <span
-                class="w-12 text-sm font-semibold text-right tabular-nums"
-                >{{ team.score }}</span
-              >
-            </li>
-          </ol>
-          <div
-            class="flex items-center gap-2 px-5 py-4 text-xs border-t bg-muted/30 text-muted-foreground"
-          >
-            <Activity :size="15" class="text-primary" /> Scoring performance
-            carries more weight than record alone.
-          </div>
-        </div>
+        <PowerRankingsPreview />
       </div>
     </section>
 

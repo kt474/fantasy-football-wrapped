@@ -1,44 +1,9 @@
 <script setup lang="ts">
 import PublicPageShell from "@/components/seo/PublicPageShell.vue";
+import PlayerValuesPreview from "@/components/seo/previews/PlayerValuesPreview.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ListOrdered, RefreshCw, SlidersHorizontal } from "@lucide/vue";
-
-const rankings = [
-  {
-    rank: 1,
-    initials: "JC",
-    player: "Ja’Marr Chase",
-    detail: "WR · CIN",
-    value: "92.4",
-    tier: "Elite",
-  },
-  {
-    rank: 2,
-    initials: "BR",
-    player: "Bijan Robinson",
-    detail: "RB · ATL",
-    value: "87.1",
-    tier: "Elite",
-  },
-  {
-    rank: 3,
-    initials: "JA",
-    player: "Josh Allen",
-    detail: "QB · BUF",
-    value: "78.6",
-    tier: "High",
-  },
-  {
-    rank: 4,
-    initials: "BB",
-    player: "Brock Bowers",
-    detail: "TE · LV",
-    value: "65.2",
-    tier: "High",
-  },
-];
 
 const features = [
   {
@@ -74,7 +39,7 @@ const analyzeRoute = {
   <PublicPageShell>
     <section class="border-b">
       <div
-        class="grid items-center gap-12 px-5 py-16 mx-auto max-w-6xl sm:py-24 lg:grid-cols-[1.05fr_0.95fr]"
+        class="grid items-center gap-12 px-5 py-16 mx-auto max-w-7xl sm:py-24 lg:grid-cols-[minmax(0,0.78fr)_minmax(560px,1.22fr)]"
       >
         <div>
           <Badge variant="secondary">League adjusted rankings</Badge>
@@ -99,43 +64,7 @@ const analyzeRoute = {
           </div>
         </div>
 
-        <Card class="overflow-hidden shadow-lg">
-          <CardContent class="p-0">
-            <div class="flex items-center justify-between px-5 py-4 border-b">
-              <div>
-                <p class="text-xs text-muted-foreground">Sample league</p>
-                <h2 class="mt-1 font-semibold">Player value rankings</h2>
-                <p class="mt-1 text-xs text-muted-foreground">
-                  12-team PPR · Example values
-                </p>
-              </div>
-              <Badge variant="outline">All positions</Badge>
-            </div>
-            <div
-              v-for="player in rankings"
-              :key="player.rank"
-              class="grid grid-cols-[2rem_2.5rem_1fr_auto] items-center gap-3 px-5 py-4 border-b last:border-b-0"
-            >
-              <p class="font-semibold">#{{ player.rank }}</p>
-              <span
-                class="inline-flex items-center justify-center text-xs font-semibold rounded-full size-9 bg-muted text-muted-foreground"
-                aria-hidden="true"
-              >
-                {{ player.initials }}
-              </span>
-              <div>
-                <p class="font-medium">{{ player.player }}</p>
-                <p class="mt-1 text-xs text-muted-foreground">
-                  {{ player.detail }}
-                </p>
-              </div>
-              <div class="text-right">
-                <p class="font-semibold tabular-nums">{{ player.value }}</p>
-                <p class="mt-1 text-xs text-primary">{{ player.tier }}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <PlayerValuesPreview />
       </div>
     </section>
 
