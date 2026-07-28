@@ -80,7 +80,7 @@ const {
     >
       <div class="w-full mx-auto max-w-7xl">
         <div
-          class="grid items-center gap-8 min-[1240px]:grid-cols-[3fr_2fr] min-[1240px]:gap-10 min-[1240px]:-translate-y-2"
+          class="grid items-center gap-8 min-[1240px]:grid-cols-[2fr_2fr] min-[1240px]:gap-10 min-[1240px]:-translate-y-2"
         >
           <div
             class="w-full max-w-2xl mx-auto text-left animate-rise min-[1240px]:mx-0"
