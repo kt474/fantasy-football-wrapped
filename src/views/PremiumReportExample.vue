@@ -4,16 +4,23 @@ import PremiumReportContent from "@/components/weekly_report/PremiumReportConten
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import premiumReportExampleJson from "@/data/premiumReportExample.json";
+import { premiumReportPreview } from "@/lib/premiumReportSample";
 import type { SharedReportResponse } from "@/api/api";
 import { ArrowLeft, Check, FileText, ShieldCheck } from "@lucide/vue";
 
-const premiumReportExample = premiumReportExampleJson as SharedReportResponse;
+const premiumReportExample: SharedReportResponse = {
+  platform: "sleeper",
+  leagueName: "Sample League",
+  season: "2025",
+  week: 11,
+  createdAt: "2025-11-18T12:00:00.000Z",
+  report: premiumReportPreview,
+};
 
 const reportOutline = [
   {
     label: "Front page",
-    detail: "Championship headline and week-wide lead",
+    detail: "Week-wide headline and lead",
   },
   {
     label: "Matchup reports",
@@ -33,7 +40,7 @@ const reportNotes = [
   {
     term: "Preserved for the example",
     description:
-      "The report structure, team names, scores, headlines, matchup analysis, Team of the Week, and weekly lowlights appear as generated.",
+      "The report structure, avatar icons, team names, scores, headlines, matchup analysis, Team of the Week, and weekly lowlights appear as generated.",
   },
   {
     term: "Removed before publishing",
@@ -63,10 +70,10 @@ const reportNotes = [
             <div class="max-w-4xl mt-7">
               <Badge variant="secondary">Premium report example</Badge>
               <h1 class="mt-5 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl">
-                Fantasy football weekly recap example: championship week
+                Fantasy football weekly recap example: Week 11
               </h1>
               <p class="max-w-3xl mt-5 text-lg leading-8 text-muted-foreground">
-                A complete anonymized sample Premium report for a Sleeper league, including every Week 17 matchup and the championship story that connected them.
+                A complete sample Premium report for a Sleeper league, including all six Week 11 matchup scores and the stories that connected them.
               </p>
             </div>
           </div>
@@ -93,9 +100,9 @@ const reportNotes = [
           <div class="flex items-start gap-3">
             <ShieldCheck :size="20" class="mt-0.5 text-primary shrink-0" />
             <div>
-              <h2 class="text-sm font-semibold">Anonymized published example</h2>
+              <h2 class="text-sm font-semibold">Published sample report</h2>
               <p class="max-w-2xl mt-1 text-sm leading-6 text-muted-foreground">
-                Report copy and team names are preserved; the source league identifier is not. Statistics were normalized and calculated before writing.
+                Team names, avatar icons, matchup scores, and report copy are included; the source league identifier is not. Statistics were normalized and calculated before writing.
               </p>
             </div>
           </div>
@@ -105,7 +112,7 @@ const reportNotes = [
         </div>
       </section>
 
-      <section class="grid gap-8 px-5 py-12 mx-auto max-w-6xl sm:py-16 lg:grid-cols-[13.5rem_minmax(0,1fr)]">
+      <section class="grid gap-8 px-5 py-12 mx-auto max-w-6xl sm:py-16 lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-6">
         <aside class="lg:sticky lg:top-24 lg:self-start" aria-label="Report contents">
           <div class="flex items-center gap-2">
             <FileText :size="16" class="text-primary" />

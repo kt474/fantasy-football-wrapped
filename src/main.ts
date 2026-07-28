@@ -205,7 +205,7 @@ const routes = [
     meta: {
       title: "Fantasy Football Weekly Recap Example | ffwrapped",
       description:
-        "Read a complete fantasy football weekly recap example with championship analysis, matchup summaries, Team of the Week, and weekly lowlights.",
+        "Read a complete Week 11 fantasy football recap example with matchup scores, avatar icons, matchup analysis, Team of the Week, and weekly lowlights.",
       ogType: "article",
       standalone: true,
     },

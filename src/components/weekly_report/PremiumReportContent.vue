@@ -63,7 +63,7 @@ defineProps<{
                   size="xs"
                 />
                 <span class="flex-1 min-w-0 text-sm">
-                  <span class="block leading-tight break-words">
+                  <span class="block leading-tight">
                     {{ team.teamName }}
                   </span>
                   <span

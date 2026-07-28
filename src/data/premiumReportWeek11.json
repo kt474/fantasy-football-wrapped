@@ -1,0 +1,155 @@
+{
+  "frontPage": {
+    "lead": "Week 11 in Sample League belonged to chaos with a purpose. **Lamario Kart** went from background noise to headline act, hanging the top score on **LaPorta Party** and reminding the league that late-season spoilers are just playoff teams with worse timing. Up top, **Allen the Family** kept acting like the penthouse suite is permanent, while **Dak to the Future** barged onto the playoff cutoff and shoved **Hurts So Good** the wrong way. Meanwhile, **Bijan Mustard** kept its five-loss slide alive, which is an ambitious interpretation of momentum.",
+    "headline": "Week 11 Turned the Playhouse Upside Down",
+    "subheadline": "The cellar caught fire, the contenders tripped over their own shoelaces, and the playoff line got a whole lot meaner."
+  },
+  "teamOfTheWeek": {
+    "analysis": "Team of the Week goes to Lamario Kart not just for the raw total, but for the timing. A 4-7 team usually spends November writing apology notes to its draft board, yet this one punched upward, beat a much higher-ranked opponent, and climbed out of dead last. That is the dangerous profile now: not a contender yet, but absolutely a standings vandal. In a week full of respectable wins, Lamario Kart produced the one result everyone else actually had to feel.",
+    "headline": "Lamario Kart finally played like the problem nobody wanted to schedule",
+    "teamName": "Lamario Kart",
+    "avatarUrl": "https://sleepercdn.com/avatars/thumbs/15d7cf259bc30eab8f6120f45f652fb6",
+    "pointsScored": 136.9
+  },
+  "matchupReports": [
+    {
+      "recap": "This was less a matchup than a public reminder that first place is not renting, it owns. Allen the Family rolled to a fourth straight win behind Josh Allen’s monster day, and once James Cook piled on, Game of Jones was left staring at a week that landed miles below its usual standard. The result mattered because the league leader kept stacking authority while the second-place side looked suddenly mortal at exactly the wrong time.",
+      "teams": [
+        {
+          "record": "9 - 2",
+          "teamName": "Allen the Family",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/15d7cf259bc30eab8f6120f45f652fb6",
+          "pointsScored": 128.72
+        },
+        {
+          "record": "7 - 4",
+          "teamName": "Game of Jones",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/e7af4deab0289b4f5505646424895246",
+          "pointsScored": 67.44
+        }
+      ],
+      "bracket": "regular",
+      "headline": "Allen the Family stayed ruthless while Game of Jones forgot how scoring works",
+      "matchupNumber": 1
+    },
+    {
+      "recap": "Breece Lightning did not exactly paint a masterpiece, but it did enough to edge out Bijan Mustard in the week’s skinniest finish. Trey McBride provided the steadiest pulse, while Bijan Robinson did his best to drag Bijan Mustard to safety alone. The stakes were obvious: Breece Lightning stayed in the playoff chase at 6-5, and Bijan Mustard extended its losing streak to five, which is the fantasy equivalent of repeatedly walking into the same rake.",
+      "teams": [
+        {
+          "record": "6 - 5",
+          "teamName": "Breece Lightning",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/8eb8f8bf999945d523f2c4033f70473e",
+          "pointsScored": 101.18
+        },
+        {
+          "record": "4 - 7",
+          "teamName": "Bijan Mustard",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/4f4090e5e9c3941414db40a871e3e909",
+          "pointsScored": 99.84
+        }
+      ],
+      "bracket": "regular",
+      "headline": "Breece Lightning survived itself and sent Bijan Mustard deeper into the mud",
+      "matchupNumber": 2
+    },
+    {
+      "recap": "A week after getting flattened, Dak to the Future answered with exactly the kind of swing that changes a season. Christian McCaffrey and Dak Prescott powered one of the league’s best totals, turning a fringe hopeful into the team sitting on the playoff cutoff. For Hurts So Good, the loss hurt twice: it dropped the score column and the standings, falling from sixth to eighth when holding serve would have been far more useful.",
+      "teams": [
+        {
+          "record": "6 - 5",
+          "teamName": "Dak to the Future",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/f0edbf4278f53f9425db175073df6584",
+          "pointsScored": 124.56
+        },
+        {
+          "record": "5 - 6",
+          "teamName": "Hurts So Good",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/b319fdf8b7b5b0359d3c78622ba4d70c",
+          "pointsScored": 92.38
+        }
+      ],
+      "bracket": "regular",
+      "headline": "Dak to the Future crashed the cutoff line and shoved Hurts So Good aside",
+      "matchupNumber": 3
+    },
+    {
+      "recap": "Olave Garden did not need fireworks, just competence and a little help from Kittle Corn’s messier choices. George Pickens and Travis Kelce supplied the useful punch, while Kittle Corn took a kick from LAC Defense finishing at negative points. That combination flipped the standings near the top, pushing Olave Garden up to third and nudging Kittle Corn down a rung. In a crowded race, that is the kind of shuffle that stops feeling temporary very quickly.",
+      "teams": [
+        {
+          "record": "7 - 4",
+          "teamName": "Olave Garden",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/b3338675f635c2c1f42b469621d38ec6",
+          "pointsScored": 112.48
+        },
+        {
+          "record": "6 - 5",
+          "teamName": "Kittle Corn",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/82aec8e811b839b8ec25d7b458afd57b",
+          "pointsScored": 88.76
+        }
+      ],
+      "bracket": "regular",
+      "headline": "Olave Garden clipped a contender while Kittle Corn tripped over a dud",
+      "matchupNumber": 4
+    },
+    {
+      "recap": "This was the loudest upset on the board and the best kind of fantasy insult: a last-place team walking in and stealing the scene from a top-five club. Sean Tucker’s 33-point eruption gave Lamario Kart a turbo boost, and PIT Defense added the kind of total that makes opponents mutter at the app. LaPorta Party did not even play badly, with TreVeyon Henderson producing a huge outing, which only made the loss sting more as the standings tightened around it.",
+      "teams": [
+        {
+          "record": "4 - 7",
+          "teamName": "Lamario Kart",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/15d7cf259bc30eab8f6120f45f652fb6",
+          "pointsScored": 136.9
+        },
+        {
+          "record": "7 - 4",
+          "teamName": "LaPorta Party",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/e7af4deab0289b4f5505646424895246",
+          "pointsScored": 119.62
+        }
+      ],
+      "bracket": "regular",
+      "headline": "Lamario Kart dropped the week’s hammer on LaPorta Party",
+      "matchupNumber": 5
+    },
+    {
+      "recap": "Saquondo followed last week’s loss with a tidy correction, beating Mahomes Alone and climbing another spot in the process. Kenny Gainwell led the way, Derrick Henry supplied the dependable thump, and the lineup waste stayed minimal, which is always refreshing in a league where some managers treat benches like museum exhibits. For Mahomes Alone, the loss kept the team planted at the bottom; for Saquondo, it kept faint postseason hopes breathing.",
+      "teams": [
+        {
+          "record": "4 - 7",
+          "teamName": "Saquondo",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/8eb8f8bf999945d523f2c4033f70473e",
+          "pointsScored": 108.34
+        },
+        {
+          "record": "1 - 10",
+          "teamName": "Mahomes Alone",
+          "avatarUrl": "https://sleepercdn.com/avatars/thumbs/f0edbf4278f53f9425db175073df6584",
+          "pointsScored": 84.26
+        }
+      ],
+      "bracket": "regular",
+      "headline": "Saquondo bounced back cleanly and kept the ladder moving",
+      "matchupNumber": 6
+    }
+  ],
+  "weeklyLowlights": {
+    "entries": [
+      {
+        "analysis": "The league average sat near 100, and Game of Jones responded with 67.44, a total that looked like it was assembled during a power outage. This was not a narrow miss or a tough break. It was a full dive away from the team’s usual scoring level, and it turned what could have been a statement week for a contender into an open invitation for everyone else to laugh nervously and move closer.",
+        "category": "weekly_low",
+        "headline": "Game of Jones posted the week’s saddest number",
+        "teamName": "Game of Jones",
+        "avatarUrl": "https://sleepercdn.com/avatars/thumbs/e7af4deab0289b4f5505646424895246"
+      },
+      {
+        "analysis": "A win usually hides the fingerprints, but not this time. Breece Lightning left 35.7 points on the bench and posted a shaky 73.2 percent lineup efficiency, with Tetairoa McMillan’s big day watching from the sideline like a disgruntled intern. To be fair, no single swap would have changed the result. Still, this was the fantasy version of passing the test after circling several answers at random.",
+        "category": "lineup_efficiency",
+        "headline": "Breece Lightning won, but the lineup still needed adult supervision",
+        "teamName": "Breece Lightning",
+        "avatarUrl": "https://sleepercdn.com/avatars/thumbs/8eb8f8bf999945d523f2c4033f70473e"
+      }
+    ],
+    "headline": "The Weekly Lowlights: bad scores, worse vibes"
+  }
+}

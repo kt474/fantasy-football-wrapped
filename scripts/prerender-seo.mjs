@@ -1,9 +1,11 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const premiumReportExample = JSON.parse(
-  await readFile(resolve("src/data/premiumReportExample.json"), "utf8")
-);
+const premiumReportExample = {
+  report: JSON.parse(
+    await readFile(resolve("src/data/premiumReportWeek11.json"), "utf8")
+  ),
+};
 
 const pages = [
   {
@@ -539,10 +541,10 @@ const pages = [
     path: "fantasy-football-weekly-recap-example",
     title: "Fantasy Football Weekly Recap Example | ffwrapped",
     description:
-      "Read a complete fantasy football weekly recap example with championship analysis, matchup summaries, Team of the Week, and weekly lowlights.",
-    heading: "Fantasy football weekly recap example: championship week",
+      "Read a complete Week 11 fantasy football recap example with matchup scores, avatar icons, matchup analysis, Team of the Week, and weekly lowlights.",
+    heading: "Fantasy football weekly recap example: Week 11",
     introduction:
-      "A complete AI-written Premium report from an anonymized Sleeper league, including every Week 17 matchup, the championship story, Team of the Week, and weekly lowlights.",
+      "A complete AI-written Premium report for a sample Sleeper league, including all six Week 11 matchup scores, Team of the Week, and weekly lowlights.",
     sectionHeading: "Full sample Premium report",
     ctaHref: "/fantasy-football-weekly-recap",
     ctaLabel: "Learn how fantasy football weekly recaps work",
@@ -568,11 +570,11 @@ const pages = [
     structuredData: {
       "@context": "https://schema.org",
       "@type": "Article",
-      headline: "Fantasy football weekly recap example: championship week",
+      headline: "Fantasy football weekly recap example: Week 11",
       description:
-        "A complete AI-written fantasy football Premium report with championship analysis, four matchup recaps, Team of the Week, and weekly lowlights.",
-      datePublished: "2026-07-05",
-      dateModified: "2026-07-14",
+        "A complete AI-written fantasy football Premium report with six matchup scores and recaps, avatar icons, Team of the Week, and weekly lowlights.",
+      datePublished: "2026-07-28",
+      dateModified: "2026-07-28",
       mainEntityOfPage:
         "https://ffwrapped.com/fantasy-football-weekly-recap-example",
       author: {
