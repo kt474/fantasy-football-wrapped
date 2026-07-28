@@ -48,6 +48,18 @@ const activeTab = ref("Recap");
 const showManagerProfilesLink = computed(() =>
   store.isLeagueFeatureVisible("Manager Profiles")
 );
+const isReturningSleeperDynasty = computed(() => {
+  const league = store.currentLeague;
+  return Boolean(
+    league &&
+      league.platform !== "espn" &&
+      league.seasonType === "Dynasty" &&
+      league.previousLeagueId
+  );
+});
+const showManagerOnPickCard = computed(
+  () => draftType.value === "auction" || isReturningSleeperDynasty.value
+);
 
 const openManagerProfiles = () => {
   if (!showManagerProfilesLink.value) return;
@@ -330,6 +342,9 @@ const getBgColor = (position: string) => {
 };
 
 const getRoundPick = (draftSlot: number, round: number) => {
+  if (draftType.value === "linear") {
+    return draftSlot;
+  }
   if (roundReversal.value === 3) {
     if (round <= 2) {
       return round % 2 === 0
@@ -381,6 +396,11 @@ const getValueColor = (value: number) => {
               Each player's winning bid and manager are shown on the player
               card.
             </template>
+            <template v-else-if="isReturningSleeperDynasty">
+              Each player card shows the manager who made the pick. Draft pick
+              scores are calculated based on each player's current positional
+              rank compared to where they were drafted.
+            </template>
             <template v-else>
               Draft pick scores are calculated based on each player's current
               positional rank compared to where they were drafted. The sum of
@@ -399,7 +419,7 @@ const getValueColor = (value: number) => {
             </template>
           </p>
           <div
-            v-if="snakeDraftFormat || draftType === 'auction'"
+            v-if="snakeDraftFormat || showManagerOnPickCard"
             class="max-w-sm mb-4"
           >
             <Label for="sort-order" class="block text-sm mb-0.5">
@@ -455,7 +475,7 @@ const getValueColor = (value: number) => {
         <Separator class="h-px mt-1 mb-4" />
         <div v-if="!loading" class="overflow-x-auto">
           <div
-            v-if="draftType !== 'auction'"
+            v-if="!showManagerOnPickCard"
             class="grid gap-0.5 mb-2"
             :style="{
               'grid-template-columns': `repeat(${draftSize}, minmax(100px, 1fr))`,
@@ -508,24 +528,24 @@ const getValueColor = (value: number) => {
             class="grid gap-0.5 text-sm min-h-96"
             :style="{
               'grid-template-columns': `repeat(${draftSize}, minmax(${
-                draftType === 'auction' ? '145px' : '100px'
+                showManagerOnPickCard ? '145px' : '100px'
               }, 1fr))`,
               'min-width': '100px',
             }"
           >
             <div
-              v-if="snakeDraftFormat || draftType === 'auction'"
+              v-if="snakeDraftFormat || showManagerOnPickCard"
               v-for="pick in sortedData"
               :key="pick.pickNumber"
               class="block rounded-md shadow-xs"
               :class="[
                 getBgColor(pick.position),
                 pick.keeper ? 'border-destructive border-t-4' : '',
-                draftType === 'auction' ? 'h-28 p-2' : 'h-20 p-2.5',
+                showManagerOnPickCard ? 'h-28 p-2' : 'h-20 p-2.5',
               ]"
             >
               <div
-                v-if="draftType === 'auction'"
+                v-if="showManagerOnPickCard"
                 class="flex min-w-0 items-center gap-1.5 pb-1 mb-1 border-b border-black/10 dark:border-white/15 [&>img]:size-6 [&>svg]:size-6"
               >
                 <ManagerAvatar
