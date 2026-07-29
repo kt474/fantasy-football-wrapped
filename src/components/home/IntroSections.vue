@@ -183,7 +183,7 @@ const toolSummaries: ToolSummary[] = [
 
           <div class="grid max-w-lg grid-cols-3 mt-6 divide-x divide-border">
             <div class="pr-5">
-              <p class="text-xl font-semibold sm:text-2xl">13,000+</p>
+              <p class="text-xl font-semibold sm:text-2xl">14,000+</p>
               <p class="mt-1 text-xs text-muted-foreground">
                 Unique leagues entered
               </p>

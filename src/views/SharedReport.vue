@@ -238,15 +238,12 @@ watch(() => route.params.token, loadReport);
                 Explore
                 <span class="font-semibold">{{ sharedReport.leagueName }}</span>
                 power rankings, playoff odds, roster insights, and more. Join
-                13,000+ fantasy leagues using ffwrapped.
+                14,000+ fantasy leagues using ffwrapped.
               </template>
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <Button
-              v-if="canExploreSharedLeague"
-              @click="exploreLeague"
-            >
+            <Button v-if="canExploreSharedLeague" @click="exploreLeague">
               View League Analysis
             </Button>
             <Button
